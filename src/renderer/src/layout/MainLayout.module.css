@@ -1,8 +1,14 @@
 .shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--lanpm-bg);
+}
+
+.barSlot {
+  flex-shrink: 0;
 }
 
 .main {
@@ -11,4 +17,19 @@
   padding: 20px 24px 12px;
   min-height: 0;
   background: var(--lanpm-bg);
+}
+
+/** 聊天页：主区域不滚动，由消息列表内部滚动；输入框贴底 */
+.mainChat {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 0;
+  min-height: 0;
+}
+
+.mainChat > * {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
 }

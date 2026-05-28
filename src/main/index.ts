@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, shell } from 'electron'
+import { app, BrowserWindow, Menu, shell, dialog } from 'electron'
 import { join } from 'path'
 import { initChatService, shutdownChatService } from './chat/chatService'
 import { registerChatIpc } from './ipc/chat'
@@ -7,6 +7,21 @@ import { initNetworkStub, shutdownNetworkStub } from './network/stub'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 
 const isDev = !app.isPackaged
+
+/** Linux 无可用 GPU/Vulkan 时 Electron 会直接 FATAL 退出；开发环境禁用硬件加速 */
+if (process.platform === 'linux') {
+  app.disableHardwareAcceleration()
+  app.commandLine.appendSwitch('disable-gpu')
+  app.commandLine.appendSwitch('disable-gpu-sandbox')
+}
+
+function startupErrorMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err)
+  if (msg.includes('NODE_MODULE_VERSION') || msg.includes('better_sqlite3')) {
+    return `${msg}\n\n请在本项目根目录执行：\nnpm run rebuild:native\n\n（勿单独 npm rebuild better-sqlite3，那会按系统 Node 编译，Electron 无法加载）`
+  }
+  return msg
+}
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -45,18 +60,23 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  // 移除应用级菜单（macOS 菜单栏 / Win·Linux 默认菜单模板）
-  Menu.setApplicationMenu(null)
+  try {
+    Menu.setApplicationMenu(null)
 
-  initDatabase()
-  initNetworkStub(getDatabase())
-  initChatService(getDatabase())
-  registerIdentityIpc()
-  registerChatIpc()
-  if (!app.isPackaged) {
-    console.info('[lanpm] SQLite ready at', getDatabasePath())
+    initDatabase()
+    initNetworkStub(getDatabase())
+    initChatService(getDatabase())
+    registerIdentityIpc()
+    registerChatIpc()
+    if (!app.isPackaged) {
+      console.info('[lanpm] SQLite ready at', getDatabasePath())
+    }
+    createWindow()
+  } catch (err) {
+    console.error('[lanpm] startup failed:', err)
+    dialog.showErrorBox('LanPM 启动失败', startupErrorMessage(err))
+    app.quit()
   }
-  createWindow()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

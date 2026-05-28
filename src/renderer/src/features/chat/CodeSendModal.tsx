@@ -45,7 +45,7 @@ export default function CodeSendModal({
       cancelText="取消"
       confirmLoading={sending}
       width={640}
-      destroyOnClose
+      destroyOnHidden
     >
       <div style={{ marginBottom: 8 }}>
         <span style={{ marginRight: 8 }}>语言</span>

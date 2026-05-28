@@ -1,21 +1,24 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 200px;
+  flex: 1;
+  min-height: 0;
   height: 100%;
+  width: 100%;
 }
 
 .chatTitle {
   flex-shrink: 0;
-  margin: 0 !important;
+  margin: 0 0 8px !important;
 }
 
 .chatBody {
   flex: 1;
   min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .path {

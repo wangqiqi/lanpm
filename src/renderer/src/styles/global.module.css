@@ -3,6 +3,7 @@
 :global(#root) {
   margin: 0;
   height: 100%;
+  overflow: hidden;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -64,4 +65,10 @@
 :global(body) {
   background: var(--lanpm-bg);
   color: var(--lanpm-text);
+}
+
+:global(body.lanpm-composer-resize),
+:global(body.lanpm-composer-resize *) {
+  cursor: ns-resize !important;
+  user-select: none !important;
 }

@@ -15,14 +15,21 @@ export default function MainLayout(): React.ReactElement {
   }, [groupId, setActiveGroupId])
 
   const showBottomNav = /^\/g\/[^/]+\//.test(location.pathname)
+  const isChatView = /\/g\/[^/]+\/chat$/.test(location.pathname)
 
   return (
     <div className={styles.shell}>
-      <TopBar />
-      <main className={styles.main}>
+      <div className={styles.barSlot}>
+        <TopBar />
+      </div>
+      <main className={`${styles.main} ${isChatView ? styles.mainChat : ''}`}>
         <Outlet />
       </main>
-      {showBottomNav && <BottomNav />}
+      {showBottomNav && (
+        <div className={styles.barSlot}>
+          <BottomNav />
+        </div>
+      )}
     </div>
   )
 }
