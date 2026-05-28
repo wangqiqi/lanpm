@@ -19,9 +19,9 @@
 
 ### M0-A 工程骨架
 
-- [ ] `M0-01` [P0] 初始化 Electron + React18 + TypeScript 工程（DoD：`npm run dev` 可启动）
-- [ ] `M0-02` [P0] 建立目录：`src/main` / `src/preload` / `src/renderer`（DoD：目录与基础入口文件齐全）
-- [ ] `M0-03` [P1] 配置 lint/format/tsconfig 基线（DoD：`npm run lint` 通过）
+- [x] `M0-01` [P0] 初始化 Electron + React18 + TypeScript 工程（DoD：`npm run dev` 可启动）
+- [x] `M0-02` [P0] 建立目录：`src/main` / `src/preload` / `src/renderer`（DoD：目录与基础入口文件齐全）
+- [x] `M0-03` [P1] 配置 lint/format/tsconfig 基线（DoD：`npm run lint` 通过）
 
 ### M0-B 本地存储与身份
 
@@ -139,8 +139,8 @@
 
 ## 当前周冲刺（实时更新）
 
-- [-] `M0-01` 初始化 Electron + React18 + TypeScript 工程
-- [ ] `M0-04` SQLite 初始化脚本与建表
+- [x] `M0-01` 初始化 Electron + React18 + TypeScript 工程
+- [-] `M0-04` SQLite 初始化脚本与建表
 - [ ] `M0-06` 首次配置向导 UI
 - [ ] `M0-09` NetworkStub 双实例互通
 - [x] `M1-04` UI 组件库已拍板（Ant Design 5.x + CSS Modules + Zustand）

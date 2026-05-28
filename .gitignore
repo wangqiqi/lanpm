@@ -21,10 +21,12 @@ npm-debug.log*
 tmp/
 temp/
 
-# Dependencies (future)
+# Dependencies
 node_modules/
 dist/
 build/
+out/
+*.tsbuildinfo
 
 # Archive (local only unless explicitly committed)
 # archive/

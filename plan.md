@@ -221,9 +221,10 @@
 - 完成文档深化（`docs/05` UI 约定、`docs/06` 测试手册、SQLite 初稿、Yjs 粒度拍板）。
 - 锁定前端 UI 栈：Ant Design + CSS Modules + Zustand + `gantt-task-react`；文档 v0.3.4 收口。
 - 完成文档全量 Review 与一致性修复（v0.3.5，见 `archive/20260528_190000_文档全量Review报告.md`）。
+- 完成 M0-A 工程骨架：`electron-vite` + React 18 + Ant Design 5 + Zustand（v0.4.0-m0）。
 
 ### 9.2 待执行（按优先级）
-- [ ] 建立 `src/` 工程骨架（M0）
+- [x] 建立 `src/` 工程骨架（M0）
 - [ ] 实现首次配置与身份持久化（M0）
 - [ ] 搭建主界面框架与 5 视图路由（M1）
 - [ ] 实现聊天消息链路与回执（M2）

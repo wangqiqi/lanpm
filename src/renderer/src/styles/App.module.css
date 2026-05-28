@@ -1,0 +1,37 @@
+.shell {
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding-inline: 24px;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+}
+
+.title {
+  margin: 0 !important;
+  color: inherit !important;
+}
+
+.content {
+  padding: 24px;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  gap: 8px;
+  text-align: center;
+}
+
+.meta {
+  margin-top: 8px;
+}
+
+.footer {
+  text-align: center;
+}

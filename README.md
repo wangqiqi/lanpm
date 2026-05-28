@@ -5,8 +5,18 @@
 ## 当前状态
 
 - 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
-- 代码：M0 尚未开始（无 `src/` 工程目录）
+- 代码：`v0.4.0-m0` — Electron 脚手架已就绪（M0-A 完成；向导 / SQLite / NetworkStub 进行中）
 - 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
+
+## 本地开发
+
+```bash
+npm install
+npm run dev      # 启动 Electron 开发模式
+npm run lint     # ESLint
+npm run typecheck
+npm run build    # 生产构建
+```
 
 ## 文档（开发必读）
 

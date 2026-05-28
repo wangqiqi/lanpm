@@ -1,0 +1,40 @@
+{
+  "name": "lanpm",
+  "version": "0.4.0-m0",
+  "description": "分布式局域网协作客户端 — Electron",
+  "private": true,
+  "type": "module",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "antd": "^5.26.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.0",
+    "zustand": "^4.5.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@types/node": "^22.15.30",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.5.2",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "eslint": "^9.28.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.2.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.1",
+    "vite": "^5.4.19"
+  }
+}

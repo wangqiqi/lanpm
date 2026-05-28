@@ -1,0 +1,19 @@
+appId: com.lanpm.app
+productName: LanPM
+directories:
+  buildResources: resources
+  output: dist
+files:
+  - '!**/.vscode/*'
+  - '!docs/**'
+  - '!archive/**'
+  - '!**/*.md'
+win:
+  target:
+    - nsis
+mac:
+  target:
+    - dmg
+linux:
+  target:
+    - AppImage

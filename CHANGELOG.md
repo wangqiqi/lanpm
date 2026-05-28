@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.4.0-m0] - 2026-05-28
+
+### Added
+- Electron + electron-vite 工程：`package.json`、`electron.vite.config.ts`、`electron-builder.yml`
+- 分层目录：`src/main`、`src/preload`、`src/renderer`（含 `crypto` / `network` / `storage` 占位）
+- 渲染进程：React 18 + TypeScript + Ant Design 5 + Zustand 占位页（`App.tsx`、`appStore`）
+- ESLint 9 + TypeScript 双项目配置（`tsconfig.node.json` / `tsconfig.web.json`）
+- `tests/`、`resources/` 占位目录
+
+### Changed
+- `.gitignore`：忽略 `out/`、`*.tsbuildinfo`
+- `README.md`：代码基线进入 M0 脚手架阶段
+- `plan.md` / `todo.md`：M0-A 工程骨架任务标记完成
+
+### Tag
+- `v0.4.0-m0-electron-scaffold` — M0 工程初始化（脚手架）
+
 ## [0.3.5] - 2026-05-28
 
 ### Added
