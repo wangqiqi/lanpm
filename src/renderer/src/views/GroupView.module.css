@@ -25,3 +25,21 @@
 .path {
   margin-top: 4px;
 }
+
+.viewTitle {
+  flex-shrink: 0;
+  margin: 0 0 8px !important;
+}
+
+.taskView {
+  min-height: 0;
+}
+
+.taskBody {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

@@ -1,0 +1,40 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.treeWrap {
+  flex: 1;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--lanpm-surface-solid, #fff);
+  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+}
+
+.nodeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.nodeTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.nodeProgress {
+  width: 120px;
+  flex-shrink: 0;
+}

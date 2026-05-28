@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { listGroupMembers, listGroupMessages, sendCodeMessage, sendTextMessage } from '../chat/chatService'
+import { markMessagesRead } from '../chat/readReceiptService'
 import { getDatabase } from '../storage'
 import { CHAT_IPC } from '../../shared/chat/channels'
 
@@ -34,4 +35,14 @@ export function registerChatIpc(): void {
       return sendCodeMessage(getDatabase(), groupId, code, languageHint, theme)
     }
   )
+
+  ipcMain.handle(CHAT_IPC.markRead, (_event, groupId: string, msgIds: string[]) => {
+    if (typeof groupId !== 'string' || !groupId) {
+      throw new Error('groupId required')
+    }
+    if (!Array.isArray(msgIds)) {
+      throw new Error('msgIds required')
+    }
+    return markMessagesRead(getDatabase(), groupId, msgIds)
+  })
 }

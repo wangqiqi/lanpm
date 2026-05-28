@@ -80,6 +80,13 @@ export function messageExists(db: Database, msgId: string): boolean {
   return row !== undefined
 }
 
+export function getMessageById(db: Database, msgId: string): ChatMessage | null {
+  const row = db.prepare('SELECT * FROM messages WHERE msg_id = ?').get(msgId) as
+    | MessageRow
+    | undefined
+  return row ? rowToMessage(row) : null
+}
+
 export function updateDeliveryStatus(
   db: Database,
   msgId: string,

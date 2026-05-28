@@ -4,6 +4,8 @@ import { useEffect } from 'react'
 import type { AppView } from '@shared/navigation/types'
 import { formatDmTitle, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
 import ChatView from '@renderer/features/chat/ChatView'
+import BoardView from '@renderer/features/board/BoardView'
+import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -52,6 +54,32 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
         </Title>
         <div className={styles.chatBody}>
           <ChatView />
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'board') {
+    return (
+      <div className={`${styles.root} ${styles.taskView}`}>
+        <Title level={4} className={styles.viewTitle}>
+          {VIEW_LABELS.board}
+        </Title>
+        <div className={styles.taskBody}>
+          <BoardView />
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'tree') {
+    return (
+      <div className={`${styles.root} ${styles.taskView}`}>
+        <Title level={4} className={styles.viewTitle}>
+          {VIEW_LABELS.tree}
+        </Title>
+        <div className={styles.taskBody}>
+          <TaskTreeView />
         </div>
       </div>
     )

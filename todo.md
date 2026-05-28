@@ -62,24 +62,24 @@
 
 ### M2-B 回执与成员状态
 
-- [ ] `M2-05` [P0] 成员在线态（🟢🟡⚪）聚合展示
-- [ ] `M2-06` [P0] 已读回执：按 `userId` 聚合（任一设备已读即已读）
-- [ ] `M2-07` [P0] `/task` 快捷创建任务入口（与 `docs/03` §16.3 P0 一致）
+- [x] `M2-05` [P0] 成员在线态（🟢🟡⚪）聚合展示（DoD：`aggregateUserPresence` + 心跳 + `MemberList` 三态；`npm run verify:presence`）
+- [x] `M2-06` [P0] 已读回执：按 `userId` 聚合（DoD：`readReceiptService` + `useMarkRead` + ✅✅ 状态）
+- [x] `M2-07` [P0] `/task` 快捷创建任务入口（DoD：`parseTaskCommand` + `TaskCreateModal` + `createTaskFromChat`）
 
 ### M2-C 联调验收
 
-- [ ] `M2-08` [P0] 单机双实例联调（按 `docs/06` §1 全通过）
+- [x] `M2-08` [P0] 单机双实例联调（DoD：`npm run verify:m2-integration` 自动化冒烟；手验见 `docs/06` §1 双 `--user-data-dir`）
 
 ---
 
 ## M3 看板 + 任务树（Day 8-10）
 
-- [ ] `M3-01` [P0] 任务模型与仓储（CRUD，含 `status/priority/assignee`）
-- [ ] `M3-02` [P0] 看板四列与拖拽（UI: TODO/IN PROGRESS/DONE/OTHER；存储: `todo`/`doing`/`done`/`other`；`@dnd-kit/core`）
-- [ ] `M3-03` [P0] `OTHER` 原因强校验
-- [ ] `M3-04` [P0] 任务树父子结构、展开折叠
-- [ ] `M3-05` [P0] 父任务进度聚合计算
-- [ ] `M3-06` [P1] `/task` 从聊天落到看板卡片闭环
+- [x] `M3-01` [P0] 任务模型与仓储（DoD：`taskRepository` + `taskService` + `task:*` IPC）
+- [x] `M3-02` [P0] 看板四列与拖拽（DoD：`BoardView` + `@dnd-kit/core`；`npm run verify:m3`）
+- [x] `M3-03` [P0] `OTHER` 原因强校验（DoD：`OtherReasonModal` + `validateOtherReason`）
+- [x] `M3-04` [P0] 任务树父子结构、展开折叠（DoD：`TaskTreeView`）
+- [x] `M3-05` [P0] 父任务进度聚合计算（DoD：`applyAggregatedProgress`）
+- [x] `M3-06` [P1] `/task` 从聊天落到看板卡片闭环（DoD：`createTaskFromChat` + `task_ref` 消息）
 
 ---
 
@@ -148,3 +148,8 @@
 - [x] `M2-01` 文本消息收发（`verify:chat`）
 - [x] `M2-02` 代码消息 + 语法高亮（highlight.js）
 - [x] `M2-03` @提及 + 桌面通知
+- [x] `M2-04` 私聊入口与会话切换
+- [x] `M2-05` 成员在线态聚合
+- [x] `M2-06` 已读回执
+- [x] `M2-07` /task 快捷创建
+- [x] `M3-01`~`M3-06` 看板 + 任务树

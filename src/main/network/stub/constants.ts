@@ -7,6 +7,9 @@ export const STUB_PEER_TTL_MS = 15_000
 /** docs/04 §6.3 — discovery refresh interval */
 export const STUB_DISCOVERY_INTERVAL_MS = 3_000
 
+/** docs/04 §6.3 — heartbeat interval */
+export const STUB_HEARTBEAT_INTERVAL_MS = 5_000
+
 /** Stub bus directory (shared across instances on same host) */
 export const STUB_BUS_DIR = join(tmpdir(), 'lanpm-stub')
 

@@ -9,17 +9,23 @@ import {
   unlinkSync,
   writeFileSync
 } from 'fs'
-import type { DiscoveryPayload, NetworkTransport, SyncEnvelope } from '../../../shared/network'
+import type { DiscoveryPayload, HeartbeatPayload, NetworkTransport, SyncEnvelope } from '../../../shared/network'
 import {
   STUB_BUS_DIR,
   STUB_BUS_FILE,
   STUB_DISCOVERY_INTERVAL_MS,
+  STUB_HEARTBEAT_INTERVAL_MS,
   STUB_LISTEN_PORT,
   STUB_PEERS_DIR
 } from './constants.ts'
 import { MessageDedup } from './dedup.ts'
 import { LamportClock } from './lamport.ts'
 import { readPeerRecords, refreshLanUserIds } from './peerRegistry.ts'
+import {
+  touchDiscoveryPeer,
+  touchLocalDevice,
+  touchRemoteHeartbeat
+} from '../../presence/presenceRegistry.ts'
 
 interface BusRecord {
   envelope: SyncEnvelope
@@ -48,6 +54,8 @@ export class NetworkStub implements NetworkTransport {
   private busFd: number | null = null
   private pollTimer: ReturnType<typeof setInterval> | null = null
   private discoveryTimer: ReturnType<typeof setInterval> | null = null
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null
+  private localPresence: 'online' | 'away' = 'online'
   private started = false
 
   constructor(options: NetworkStubOptions) {
@@ -71,7 +79,9 @@ export class NetworkStub implements NetworkTransport {
     this.busOffset = statSync(STUB_BUS_FILE).size
 
     this.writePeerRecord()
+    this.publishHeartbeat()
     this.discoveryTimer = setInterval(() => this.writePeerRecord(), STUB_DISCOVERY_INTERVAL_MS)
+    this.heartbeatTimer = setInterval(() => this.publishHeartbeat(), STUB_HEARTBEAT_INTERVAL_MS)
     this.pollTimer = setInterval(() => this.pollBus(), 200)
   }
 
@@ -79,8 +89,10 @@ export class NetworkStub implements NetworkTransport {
     if (!this.started) return
     this.started = false
     if (this.discoveryTimer) clearInterval(this.discoveryTimer)
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer)
     if (this.pollTimer) clearInterval(this.pollTimer)
     this.discoveryTimer = null
+    this.heartbeatTimer = null
     this.pollTimer = null
     if (this.busFd !== null) {
       closeSync(this.busFd)
@@ -109,7 +121,31 @@ export class NetworkStub implements NetworkTransport {
     }
     writeFileSync(this.peerFilePath, JSON.stringify(payload), 'utf8')
     const peers = readPeerRecords(this.deviceId)
+    for (const peer of peers) {
+      touchDiscoveryPeer(peer)
+    }
     refreshLanUserIds(peers)
+  }
+
+  private publishHeartbeat(): void {
+    touchLocalDevice(this.userId, this.deviceId, this.localPresence)
+    const payload: HeartbeatPayload = {
+      userId: this.userId,
+      deviceId: this.deviceId,
+      presence: this.localPresence
+    }
+    const envelope: SyncEnvelope = {
+      version: 1,
+      type: 'heartbeat',
+      msgId: `hb_${this.deviceId}_${Date.now()}`,
+      senderUserId: this.userId,
+      senderDeviceId: this.deviceId,
+      ts: new Date().toISOString(),
+      payload,
+      nonce: '',
+      authTag: ''
+    }
+    void this.publish(envelope)
   }
 
   private pollBus(): void {
@@ -142,6 +178,13 @@ export class NetworkStub implements NetworkTransport {
   }
 
   private deliver(envelope: SyncEnvelope): void {
+    if (envelope.type === 'heartbeat') {
+      if (envelope.senderDeviceId !== this.deviceId) {
+        touchRemoteHeartbeat(envelope.payload as HeartbeatPayload)
+      }
+      return
+    }
+
     if (envelope.senderDeviceId === this.deviceId) return
     if (!this.dedup.remember(envelope.senderDeviceId, envelope.msgId)) return
 

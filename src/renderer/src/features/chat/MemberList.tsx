@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { List, Typography } from 'antd'
 import { MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
 import { isDmGroupId } from '@shared/chat/dmSession'
+import { presenceEmoji, presenceLabel } from '@shared/presence'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useDmStore } from '@renderer/stores/dmStore'
@@ -11,6 +12,8 @@ import { groupViewPath } from '@renderer/routes/paths'
 import styles from './chat.module.css'
 
 const { Text } = Typography
+
+const PRESENCE_POLL_MS = 3_000
 
 interface MemberListProps {
   groupId: string
@@ -27,20 +30,18 @@ export default function MemberList({
   const navigate = useNavigate()
   const isDm = isDmGroupId(groupId)
 
-  useEffect(() => {
-    let cancelled = false
+  const refreshMembers = useCallback(() => {
     void getLanpmApi()
       .chat.listMembers(groupId)
-      .then((list) => {
-        if (!cancelled) setMembers(list)
-      })
-      .catch(() => {
-        if (!cancelled) setMembers([])
-      })
-    return () => {
-      cancelled = true
-    }
+      .then(setMembers)
+      .catch(() => setMembers([]))
   }, [groupId])
+
+  useEffect(() => {
+    refreshMembers()
+    const timer = window.setInterval(refreshMembers, PRESENCE_POLL_MS)
+    return () => window.clearInterval(timer)
+  }, [refreshMembers])
 
   const startDm = (member: GroupMemberView): void => {
     if (!currentUserId || member.userId === currentUserId) return
@@ -48,6 +49,8 @@ export default function MemberList({
     const dmGroupId = openSession(member.userId, member.displayName, currentUserId, originGroupId)
     navigate(groupViewPath(dmGroupId, 'chat'))
   }
+
+  const onlineCount = members.filter((m) => m.presence === 'online').length
 
   return (
     <aside className={styles.memberList}>
@@ -60,6 +63,7 @@ export default function MemberList({
         locale={{ emptyText: '暂无成员' }}
         renderItem={(member) => {
           const isSelf = member.userId === currentUserId
+          const presence = member.presence ?? 'offline'
           return (
             <List.Item className={styles.memberItem}>
               <div className={styles.memberRow}>
@@ -67,9 +71,11 @@ export default function MemberList({
                   type="button"
                   className={styles.memberBtn}
                   onClick={() => onInsertMention(member.displayName)}
-                  title={`@${member.displayName}`}
+                  title={`@${member.displayName} · ${presenceLabel(presence)}`}
                 >
-                  <span className={styles.memberDot}>🟢</span>
+                  <span className={styles.memberDot} aria-hidden>
+                    {presenceEmoji(presence)}
+                  </span>
                   <span className={styles.memberName}>
                     {member.displayName}
                     {isSelf ? '（我）' : ''}
@@ -90,6 +96,11 @@ export default function MemberList({
           )
         }}
       />
+      {members.length > 0 && (
+        <Text type="secondary" className={styles.memberStats}>
+          在线 {onlineCount}/{members.length}
+        </Text>
+      )}
     </aside>
   )
 }

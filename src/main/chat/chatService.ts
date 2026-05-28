@@ -1,14 +1,14 @@
 import { randomUUID } from 'crypto'
-import { BrowserWindow } from 'electron'
 import type { Database } from 'better-sqlite3'
 import type { ChatMessage, ChatPayload, MessageContent, MessageType } from '../../shared/chat/types'
-import { CHAT_PUSH_CHANNEL } from '../../shared/chat/channels'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
 import { parseMentions } from '../../shared/chat/mentions'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
 import { listGroupMembers } from './memberService'
 import { notifyIfMentioned } from './notificationService'
+import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
+import { broadcastMessage } from './chatBroadcast'
 import { getNetworkTransport } from '../network/stub'
 import {
   getMaxLamportTs,
@@ -19,12 +19,6 @@ import {
 } from '../storage/repositories/messageRepository'
 
 const subscribedGroups = new Map<string, () => void>()
-
-function broadcastMessage(message: ChatMessage): void {
-  for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.send(CHAT_PUSH_CHANNEL, message)
-  }
-}
 
 function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   if (envelope.type !== 'chat' || !envelope.groupId) return
@@ -63,9 +57,11 @@ export function initChatService(db: Database): void {
   for (const groupId of ['demo-project', 'demo-function', 'demo-anonymous']) {
     ensureSubscribed(db, transport, groupId)
   }
+  initReadReceiptService(db)
 }
 
 export function shutdownChatService(): void {
+  shutdownReadReceiptService()
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
 }
@@ -76,7 +72,7 @@ export function listGroupMessages(db: Database, groupId: string): ChatMessage[] 
   return listMessagesByGroup(db, groupId)
 }
 
-async function publishChatMessage(
+export async function publishChatMessage(
   db: Database,
   groupId: string,
   type: MessageType,

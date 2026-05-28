@@ -1,5 +1,8 @@
+import { Button } from 'antd'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
+import { groupViewPath } from '@renderer/routes/paths'
 import { useUiStore } from '@renderer/stores/uiStore'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import MentionText from '@renderer/features/chat/MentionText'
@@ -21,6 +24,8 @@ export default function MessageBubble({
   formatTime
 }: MessageBubbleProps): React.ReactElement {
   const theme = useUiStore((s) => s.theme)
+  const navigate = useNavigate()
+  const { groupId } = useParams<{ groupId: string }>()
   const isCode = message.content.kind === 'code'
 
   return (
@@ -48,9 +53,20 @@ export default function MessageBubble({
         />
       )}
 
-      {message.content.kind !== 'text' && message.content.kind !== 'code' && (
-        <div>[{message.type}]</div>
+      {message.content.kind === 'task_ref' && groupId && (
+        <Button
+          type="link"
+          size="small"
+          style={{ padding: 0, height: 'auto' }}
+          onClick={() => navigate(groupViewPath(groupId, 'board'))}
+        >
+          📋 任务：{message.content.title}
+        </Button>
       )}
+
+      {message.content.kind !== 'text' &&
+        message.content.kind !== 'code' &&
+        message.content.kind !== 'task_ref' && <div>[{message.type}]</div>}
 
       {own && (
         <div className={styles.status}>

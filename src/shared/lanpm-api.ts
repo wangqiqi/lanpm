@@ -1,6 +1,12 @@
 import type { ChatMessage } from './chat/types'
 import type { GroupMemberView } from './chat/members'
 import type { SetupInput, SetupStatus } from './identity'
+import type {
+  CreateTaskInput,
+  MoveTaskInput,
+  Task,
+  UpdateTaskInput
+} from './task/types'
 
 export interface LanpmApi {
   platform: NodeJS.Platform | 'browser'
@@ -25,6 +31,18 @@ export interface LanpmApi {
       theme?: 'light' | 'dark'
     ) => Promise<ChatMessage>
     listMembers: (groupId: string) => Promise<GroupMemberView[]>
+    markRead: (groupId: string, msgIds: string[]) => Promise<void>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
+  }
+  task: {
+    listTasks: (groupId: string) => Promise<Task[]>
+    createTask: (input: CreateTaskInput) => Promise<Task>
+    updateTask: (input: UpdateTaskInput) => Promise<Task>
+    moveTask: (input: MoveTaskInput) => Promise<Task>
+    createFromChat: (
+      groupId: string,
+      title: string
+    ) => Promise<{ task: Task; message: ChatMessage }>
+    onTasksChanged: (handler: (groupId: string) => void) => () => void
   }
 }

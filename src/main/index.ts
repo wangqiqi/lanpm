@@ -4,6 +4,7 @@ import { join } from 'path'
 import { initChatService, shutdownChatService } from './chat/chatService'
 import { registerChatIpc } from './ipc/chat'
 import { registerIdentityIpc } from './ipc/identity'
+import { registerTaskIpc } from './ipc/task'
 import { initNetworkStub, shutdownNetworkStub } from './network/stub'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 
@@ -86,6 +87,7 @@ app.whenReady().then(() => {
     initChatService(getDatabase())
     registerIdentityIpc()
     registerChatIpc()
+    registerTaskIpc()
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
     }

@@ -1,7 +1,9 @@
 import type { Database } from 'better-sqlite3'
 import type { GroupMemberView } from '../../shared/chat/members'
+import type { UserPresence } from '../../shared/network/types'
 import { isDmGroupId, parseDmGroupId } from '../../shared/chat/dmSession'
 import { getSetupStatus } from '../identity/setup'
+import { getAggregatedUserPresence } from '../presence/presenceRegistry'
 import { getNetworkTransport } from '../network/stub'
 
 /** M5 前占位成员，便于 @提及联调 */
@@ -9,6 +11,18 @@ const STUB_MEMBERS: GroupMemberView[] = [
   { userId: 'demo-alice', displayName: 'Alice', mentionKeys: ['alice'] },
   { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] }
 ]
+
+function resolvePresence(userId: string, localUserId?: string): UserPresence {
+  if (localUserId && userId === localUserId) return 'online'
+  return getAggregatedUserPresence(userId)
+}
+
+function withPresence(members: GroupMemberView[], localUserId?: string): GroupMemberView[] {
+  return members.map((m) => ({
+    ...m,
+    presence: resolvePresence(m.userId, localUserId)
+  }))
+}
 
 async function collectAllMembers(db: Database): Promise<Map<string, GroupMemberView>> {
   const status = getSetupStatus(db)
@@ -45,6 +59,8 @@ async function collectAllMembers(db: Database): Promise<Map<string, GroupMemberV
 }
 
 export async function listGroupMembers(db: Database, groupId: string): Promise<GroupMemberView[]> {
+  const status = getSetupStatus(db)
+  const localUserId = status.configured && status.user ? status.user.userId : undefined
   const members = await collectAllMembers(db)
 
   if (isDmGroupId(groupId)) {
@@ -60,8 +76,12 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
         result.push({ userId, displayName: userId, mentionKeys: [userId] })
       }
     }
-    return result.sort((a, b) => a.displayName.localeCompare(b.displayName))
+    return withPresence(result, localUserId).sort((a, b) =>
+      a.displayName.localeCompare(b.displayName)
+    )
   }
 
-  return [...members.values()].sort((a, b) => a.displayName.localeCompare(b.displayName))
+  return withPresence([...members.values()], localUserId).sort((a, b) =>
+    a.displayName.localeCompare(b.displayName)
+  )
 }

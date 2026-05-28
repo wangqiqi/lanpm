@@ -3,6 +3,7 @@ import type { NetworkTransport } from '../../../shared/network'
 import { initChatService } from '../../chat/chatService'
 import { getSetupStatus } from '../../identity/setup'
 import { NetworkStub } from './NetworkStub'
+import { resetPresenceRegistry } from '../../presence/presenceRegistry'
 
 let transport: NetworkStub | null = null
 let anonymousTransport: NetworkStub | null = null
@@ -60,6 +61,7 @@ export function shutdownNetworkStub(): void {
   transport = null
   anonymousTransport?.stop()
   anonymousTransport = null
+  resetPresenceRegistry()
 }
 
 export { getKnownLanUserIds } from './peerRegistry'

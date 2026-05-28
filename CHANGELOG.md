@@ -2,6 +2,28 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.7.0-m3] - 2026-05-28
+
+### Added
+- M2-05 成员在线态：`aggregateUserPresence` 多设备聚合；`presenceRegistry` + 5s 心跳；`MemberList` 🟢🟡⚪
+- M2-06 已读回执：按 `userId` 聚合；`readReceiptService` + `useMarkRead`；消息 ✅✅ 状态
+- M2-07 `/task` 快捷创建：`parseTaskCommand` + `TaskCreateModal` + `createTaskFromChat`
+- M3-01 任务模型与仓储：`taskRepository` / `taskService` + `task:*` IPC
+- M3-02 看板四列拖拽：`BoardView` + `@dnd-kit/core`（TODO/IN PROGRESS/DONE/OTHER）
+- M3-03 `OTHER` 列原因强校验：`OtherReasonModal` + `validateOtherReason`
+- M3-04 任务树：`TaskTreeView` 父子结构、展开折叠
+- M3-05 父任务进度聚合：`aggregateChildProgress` / `applyAggregatedProgress`
+- M3-06 聊天创建任务闭环：`task_ref` 消息 + 看板/树视图接入 `GroupView`
+- M2-08 Stub 联调验收：`npm run verify:read-receipt` + `verify:m2-integration`（chat/已读/task 闭环）
+- `npm run verify:presence` / `verify:m3`；`verify:m2` 串联 read-receipt + m2-integration
+
+### Changed
+- `chatBroadcast` 抽取广播逻辑；NetworkStub 支持 presence / read_receipt 同步
+- 浏览器预览 Stub：任务、已读回执、在线态三态演示
+
+### Tag
+- `v0.7.0-m3` — M2-B 回执/在线态 + M3 看板与任务树
+
 ## [0.6.4-m2] - 2026-05-28
 
 ### Added

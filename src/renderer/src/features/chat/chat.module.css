@@ -94,6 +94,14 @@
   padding-left: 4px;
 }
 
+.memberStats {
+  display: block;
+  font-size: 11px;
+  padding: 8px 4px 12px;
+  border-top: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.06));
+  margin-top: 4px;
+}
+
 .memberItem {
   padding: 4px 0 !important;
   border: none !important;
@@ -390,6 +398,11 @@
   font-size: 11px;
   padding: 0 0 4px 2px;
   color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+}
+
+.taskRef {
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .inputTextarea {
