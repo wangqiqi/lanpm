@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Avatar, Button, Card, Form, Input, Space, Typography, message } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 import type { SetupStatus } from '@shared/identity'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { fileToDataUrl, randomAvatarDataUrl } from './avatar'
 import styles from './SetupWizard.module.css'
 
@@ -48,7 +49,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
   const onFinish = async (values: FormValues): Promise<void> => {
     setSubmitting(true)
     try {
-      const status = await window.lanpm.identity.completeSetup({
+      const status = await getLanpmApi().identity.completeSetup({
         baseName: values.baseName.trim(),
         deviceName: values.deviceName.trim(),
         department: values.department?.trim() || undefined,
@@ -65,7 +66,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
 
   return (
     <div className={styles.wrap}>
-      <Card className={styles.card} bordered={false}>
+      <Card className={styles.card} variant="borderless">
         <Title level={3} style={{ marginTop: 0, textAlign: 'center' }}>
           欢迎使用 LanPM
         </Title>

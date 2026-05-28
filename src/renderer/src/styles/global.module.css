@@ -16,3 +16,15 @@
 :global(*) {
   box-sizing: border-box;
 }
+
+:global(html[data-theme='light']) {
+  --lanpm-nav-bg: #ffffff;
+  --lanpm-bar-border: rgba(5, 5, 5, 0.06);
+  --lanpm-hover-bg: rgba(0, 0, 0, 0.04);
+}
+
+:global(html[data-theme='dark']) {
+  --lanpm-nav-bg: #141414;
+  --lanpm-bar-border: rgba(255, 255, 255, 0.12);
+  --lanpm-hover-bg: rgba(255, 255, 255, 0.08);
+}

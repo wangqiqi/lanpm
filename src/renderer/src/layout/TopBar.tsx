@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Avatar,
   Button,
@@ -16,28 +16,36 @@ import {
   SunOutlined,
   UserOutlined
 } from '@ant-design/icons'
+import { useI18n } from '@renderer/i18n/useI18n'
+import type { MessageKey } from '@renderer/i18n/messages'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
-import type { AppView } from '@shared/navigation/types'
+import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
 import styles from './TopBar.module.css'
 
 const { Text } = Typography
 
-const GROUP_TYPE_TAG: Record<string, string> = {
-  project: '项目',
-  function: '职能',
-  anonymous: '匿名'
+const GROUP_TYPE_KEYS: Record<GroupType, MessageKey> = {
+  project: 'groupType.project',
+  function: 'groupType.function',
+  anonymous: 'groupType.anonymous'
 }
+
+const VIEW_PATH_RE = /^\/g\/[^/]+\/(\w+)/
 
 export default function TopBar(): React.ReactElement {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { t } = useI18n()
   const groups = useNavigationStore((s) => s.groups)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
   const user = useIdentityStore((s) => s.user)
+  const device = useIdentityStore((s) => s.device)
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
   const locale = useUiStore((s) => s.locale)
@@ -47,12 +55,9 @@ export default function TopBar(): React.ReactElement {
     navigate(groupViewPath(activeGroupId, 'chat'))
   }
 
-  const getGroupType = useNavigationStore((s) => s.getGroupType)
-
   const handleGroupChange = (groupId: string): void => {
     setActiveGroupId(groupId)
-    const viewMatch = window.location.pathname.match(/\/g\/[^/]+\/(\w+)/)
-    const raw = viewMatch?.[1]
+    const raw = VIEW_PATH_RE.exec(location.pathname)?.[1]
     const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'files']
     let view: AppView = views.includes(raw as AppView) ? (raw as AppView) : 'chat'
     const type = getGroupType(groupId)
@@ -63,17 +68,20 @@ export default function TopBar(): React.ReactElement {
   }
 
   const userMenu: MenuProps['items'] = [
-    { key: 'profile', label: '个人设置（占位）', disabled: true },
-    { key: 'device', label: `设备：${useIdentityStore.getState().device?.deviceName ?? '—'}` },
+    { key: 'profile', label: t('topbar.profile'), disabled: true },
+    {
+      key: 'device',
+      label: `${t('topbar.device')}：${device?.deviceName ?? '—'}`
+    },
     { type: 'divider' },
-    { key: 'api', label: 'API Key（M5）', disabled: true }
+    { key: 'api', label: t('topbar.apiKey'), disabled: true }
   ]
 
   return (
     <header className={styles.bar}>
       <Space size="middle" align="center">
         <button type="button" className={styles.logo} onClick={handleLogoClick}>
-          LanPM
+          {t('topbar.logo')}
         </button>
         <Select
           className={styles.projectSelect}
@@ -85,7 +93,7 @@ export default function TopBar(): React.ReactElement {
               <span>
                 {g.name}{' '}
                 <Text type="secondary" className={styles.groupType}>
-                  {GROUP_TYPE_TAG[g.type]}
+                  {t(GROUP_TYPE_KEYS[g.type])}
                 </Text>
               </span>
             )
@@ -96,20 +104,20 @@ export default function TopBar(): React.ReactElement {
           icon={<DashboardOutlined />}
           onClick={() => navigate(cockpitPath())}
         >
-          驾驶舱
+          {t('topbar.cockpit')}
         </Button>
       </Space>
 
       <Space size="middle" align="center">
         <Input.Search
           className={styles.search}
-          placeholder="搜索任务、消息…"
+          placeholder={t('topbar.searchPlaceholder')}
           allowClear
           disabled
         />
         <Button
           type="text"
-          aria-label="切换主题"
+          aria-label={t('topbar.toggleTheme')}
           icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
           onClick={toggleTheme}
         />
@@ -126,7 +134,7 @@ export default function TopBar(): React.ReactElement {
         <Dropdown menu={{ items: userMenu }} trigger={['click']}>
           <button type="button" className={styles.userBtn}>
             <Avatar size="small" icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
-            <span className={styles.userName}>{user?.displayName ?? '用户'}</span>
+            <span className={styles.userName}>{user?.displayName ?? t('topbar.userFallback')}</span>
           </button>
         </Dropdown>
       </Space>

@@ -8,6 +8,8 @@ import {
   BarChartOutlined,
   FolderOutlined
 } from '@ant-design/icons'
+import { useI18n } from '@renderer/i18n/useI18n'
+import type { MessageKey } from '@renderer/i18n/messages'
 import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -22,24 +24,25 @@ const VIEW_ICONS: Record<AppView, React.ReactNode> = {
   files: <FolderOutlined />
 }
 
-const VIEW_LABELS: Record<AppView, string> = {
-  chat: '聊天',
-  board: '看板',
-  tree: '任务树',
-  gantt: '甘特图',
-  files: '文件'
+const NAV_LABEL_KEYS: Record<AppView, MessageKey> = {
+  chat: 'nav.chat',
+  board: 'nav.board',
+  tree: 'nav.tree',
+  gantt: 'nav.gantt',
+  files: 'nav.files'
 }
 
-function disabledHint(type: GroupType): string {
-  if (type === 'anonymous') return '匿名群仅支持聊天'
-  if (type === 'function') return '职能群仅支持聊天与文件'
-  return '仅项目群组支持'
+const DISABLED_HINT_KEYS: Record<GroupType, MessageKey> = {
+  project: 'nav.disabled.project',
+  function: 'nav.disabled.function',
+  anonymous: 'nav.disabled.anonymous'
 }
 
 export default function BottomNav(): React.ReactElement {
   const navigate = useNavigate()
   const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()
+  const { t } = useI18n()
   const getGroupType = useNavigationStore((s) => s.getGroupType)
 
   const activeView = useMemo((): AppView | null => {
@@ -70,7 +73,7 @@ export default function BottomNav(): React.ReactElement {
             }}
           >
             <span className={styles.icon}>{VIEW_ICONS[tab.view]}</span>
-            <span className={styles.label}>{VIEW_LABELS[tab.view]}</span>
+            <span className={styles.label}>{t(NAV_LABEL_KEYS[tab.view])}</span>
           </button>
         )
         return allowed ? (
@@ -78,7 +81,7 @@ export default function BottomNav(): React.ReactElement {
             {btn}
           </span>
         ) : (
-          <Tooltip key={tab.view} title={disabledHint(groupType)}>
+          <Tooltip key={tab.view} title={t(DISABLED_HINT_KEYS[groupType])}>
             <span className={styles.tabWrap}>{btn}</span>
           </Tooltip>
         )

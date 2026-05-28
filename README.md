@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
-- 代码：`v0.5.1-m1` — M0 完成 + M1 五视图路由与群组 Tab 规则；下一步 M1-02 顶部栏
+- 代码：`v0.5.2-m1` — M0 完成 + M1 主框架（五视图路由、顶栏、主题、i18n）；下一步 M2 聊天主链路
 - 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
 
 ## 本地开发

@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.5.2-m1] - 2026-05-28
+
+### Added
+- `TopBar`：项目切换、驾驶舱、全局搜索占位、主题/语言、用户下拉（对齐 `docs/05` §4）
+- i18n：`src/renderer/src/i18n/messages.ts` + `useI18n`（`zh-CN` / `en-US`）
+- `npm run verify:topbar`、`verify:m1`（routes + topbar smoke）
+
+### Changed
+- 开发：Vite 浏览器预览时 `installLanpmBridge` + `browserLanpmStub`（localStorage 身份桩）
+- `ThemeProvider`：同步 `html[data-theme]` 与 Ant Design 暗色算法；`localStorage.theme` 持久化
+- `TopBar`：群组切换使用 `useLocation`（修复 HashRouter 下 `window.location` 无效）
+- `BottomNav` / 顶栏文案接入 i18n
+- `todo.md` / `plan.md`：M1-02、M1-05、M1-06 标记完成
+
+### Tag
+- `v0.5.2-m1-topbar` — M1 顶部栏、主题与 i18n 基线
+
 ## [0.5.1-m1] - 2026-05-28
 
 ### Added

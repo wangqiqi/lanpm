@@ -40,14 +40,14 @@
 ### M1-A 路由与框架
 
 - [x] `M1-01` [P0] 实现 5 视图路由：聊天/看板/任务树/甘特/文件（dep: M0-01）（DoD：`HashRouter` + `/g/:groupId/:view`；`npm run verify:routes`；`npm run dev` 底部 Tab 切换五视图）
-- [ ] `M1-02` [P0] 顶部栏：项目切换/驾驶舱/搜索/主题/语言/用户面板
+- [x] `M1-02` [P0] 顶部栏：项目切换/驾驶舱/搜索/主题/语言/用户面板（DoD：`TopBar` + `layout/MainLayout`；`npm run verify:topbar`；HashRouter 下 `useLocation` 切群保留视图）
 - [x] `M1-03` [P0] 群组类型 Tab 规则（项目全开、职能部分、匿名仅聊天）（DoD：`tabRules.ts` + `BottomNav` 置灰；`verify:routes`；占位群组下拉可验三种类型）
 
 ### M1-B UI 基础设施
 
 - [x] `M1-04` [P0] 选型并锁定 UI 组件库（Ant Design 5.x + CSS Modules + Zustand）（DoD：见 `docs/05` §8）
-- [ ] `M1-05` [P1] 主题持久化（`localStorage.theme`）与暗黑模式
-- [ ] `M1-06` [P1] i18n 基础框架（`zh-CN/en-US`）
+- [x] `M1-05` [P1] 主题持久化（`localStorage.theme`）与暗黑模式（DoD：`uiStore` + `ThemeProvider` + `html[data-theme]`；`verify:topbar` 键名校验）
+- [x] `M1-06` [P1] i18n 基础框架（`zh-CN/en-US`）（DoD：`src/renderer/src/i18n/messages.ts` + `useI18n`；顶栏/底栏文案切换）
 
 ---
 
@@ -144,3 +144,4 @@
 - [x] `M1-01` 五视图路由 + 底部导航（`verify:routes`）
 - [x] `M1-03` 群组类型 Tab 规则（占位三群组）
 - [x] `M1-04` UI 组件库已拍板（Ant Design 5.x + CSS Modules + Zustand）
+- [x] `M1-02`~`M1-06` 顶部栏 + 主题 + i18n（`verify:m1`）

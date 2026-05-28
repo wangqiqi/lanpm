@@ -1,7 +1,7 @@
 import type { SetupInput, SetupStatus } from './identity'
 
 export interface LanpmApi {
-  platform: NodeJS.Platform
+  platform: NodeJS.Platform | 'browser'
   versions: {
     node: string
     chrome: string
