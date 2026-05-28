@@ -62,3 +62,13 @@ export function getFirstUser(db: Database): UserProfile | null {
     .get() as UserRow | undefined
   return row ? rowToProfile(row) : null
 }
+
+export function userIdExists(db: Database, userId: string): boolean {
+  const row = db.prepare('SELECT 1 FROM users WHERE user_id = ?').get(userId)
+  return row !== undefined
+}
+
+export function baseNameExists(db: Database, baseName: string): boolean {
+  const row = db.prepare('SELECT 1 FROM users WHERE base_name = ?').get(baseName)
+  return row !== undefined
+}

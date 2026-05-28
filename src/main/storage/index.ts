@@ -6,4 +6,11 @@ export {
   getDevicesByUserId,
   upsertDevice
 } from './repositories/deviceRepository'
-export { getFirstUser, getUserById, upsertUser } from './repositories/userRepository'
+export {
+  baseNameExists,
+  getFirstUser,
+  getUserById,
+  upsertUser,
+  userIdExists
+} from './repositories/userRepository'
+export { deleteMeta, getMeta, setMeta } from './repositories/syncMetaRepository'

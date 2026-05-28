@@ -1,13 +1,6 @@
-import { contextBridge } from 'electron'
-
-export interface LanpmApi {
-  platform: NodeJS.Platform
-  versions: {
-    node: string
-    chrome: string
-    electron: string
-  }
-}
+import { contextBridge, ipcRenderer } from 'electron'
+import type { SetupInput } from '../shared/identity'
+import type { LanpmApi } from '../shared/lanpm-api'
 
 const api: LanpmApi = {
   platform: process.platform,
@@ -15,7 +8,13 @@ const api: LanpmApi = {
     node: process.versions.node,
     chrome: process.versions.chrome,
     electron: process.versions.electron
+  },
+  identity: {
+    getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),
+    completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input)
   }
 }
 
 contextBridge.exposeInMainWorld('lanpm', api)
+
+export type { LanpmApi }

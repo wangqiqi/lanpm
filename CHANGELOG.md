@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.4.2-m0] - 2026-05-28
+
+### Added
+- 首次配置向导 `SetupWizard`：用户名、设备名、部门、头像（随机/上传）
+- 身份 IPC：`identity:getStatus` / `identity:completeSetup`（preload `lanpm.identity`）
+- 本机身份：`sync_meta.local_device_id` + `users`/`devices` 写入；未配置时强制向导
+- 用户 ID 本地分配：`idGen.allocateUserId`（含 `-yymm` 后缀，M0-07 局域网校验待补）
+
+### Changed
+- `App.tsx`：按配置状态切换向导 / 主壳
+- `todo.md` / `plan.md`：M0-06 标记完成
+
 ## [0.4.1-m0] - 2026-05-28
 
 ### Added

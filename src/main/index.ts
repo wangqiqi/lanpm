@@ -1,5 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
+import { registerIdentityIpc } from './ipc/identity'
 import { closeDatabase, getDatabasePath, initDatabase } from './storage'
 
 const isDev = !app.isPackaged
@@ -37,6 +38,7 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   initDatabase()
+  registerIdentityIpc()
   if (!app.isPackaged) {
     console.info('[lanpm] SQLite ready at', getDatabasePath())
   }
