@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LanPM · 苹果风</title>
+  <style>
+    :root {
+      --blue: #007AFF;
+      --blue-light: rgba(0, 122, 255, 0.12);
+      --green: #34C759;
+      --green-light: rgba(52, 199, 89, 0.12);
+      --orange: #FF9500;
+      --orange-light: rgba(255, 149, 0, 0.12);
+      --red: #FF3B30;
+      --purple: #AF52DE;
+      --gray: #8E8E93;
+      --gray-light: #F2F2F7;
+      --bg: #F5F5F7;
+      --card: #FFFFFF;
+      --text: #1D1D1F;
+      --text-secondary: #86868B;
+      --border: rgba(0, 0, 0, 0.08);
+      --radius: 10px;
+      --radius-lg: 14px;
+      --topbar-h: 48px;
+      --bottomnav-h: 52px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      height: var(--topbar-h);
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+      z-index: 200;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .project-switcher {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .project-trigger {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: none;
+      background: var(--gray-light);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      max-width: 160px;
+      transition: background 0.15s;
+    }
+
+    .project-trigger:hover { background: rgba(0, 0, 0, 0.06); }
+    .project-trigger svg { flex-shrink: 0; color: var(--text-secondary); }
+
+    .project-trigger-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .project-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 220px;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 0.5px solid var(--border);
+      padding: 6px;
+      display: none;
+      z-index: 300;
+    }
+
+    .project-dropdown.open { display: block; }
+
+    .project-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+
+    .project-option:hover { background: var(--gray-light); }
+    .project-option.active { background: var(--blue-light); color: var(--blue); }
+    .project-option-meta { font-size: 11px; color: var(--text-secondary); }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 360px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 7px 12px 7px 32px;
+      border: none;
+      background: var(--gray-light);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: box-shadow 0.15s, background 0.15s;
+    }
+
+    .search-input:focus {
+      background: var(--card);
+      box-shadow: 0 0 0 3px var(--blue-light);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 0.5px solid var(--border);
+      max-height: 280px;
+      overflow-y: auto;
+      display: none;
+      z-index: 300;
+    }
+
+    .search-results.open { display: block; }
+
+    .search-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 13px;
+    }
+
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: var(--gray-light); }
+    .search-item-type { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+    .search-empty { padding: 16px; text-align: center; color: var(--text-secondary); font-size: 13px; }
+
+    .topbar-spacer { flex: 1; }
+
+    .nav-tabs { display: flex; gap: 2px; }
+
+    .nav-tab {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .nav-tab:hover { background: rgba(0, 0, 0, 0.04); }
+    .nav-tab.active { background: var(--blue-light); color: var(--blue); }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px 4px 4px;
+      background: var(--gray-light);
+      border-radius: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-name { font-size: 12px; font-weight: 600; }
+    .role-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .role-super { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; }
+    .role-leader { background: rgba(175, 82, 222, 0.15); color: var(--purple); }
+    .role-admin { background: var(--blue-light); color: var(--blue); }
+    .role-member { background: var(--gray-light); color: var(--gray); }
+
+    /* Main */
+    .main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .main-view { display: none; flex: 1; min-height: 0; flex-direction: column; }
+    .main-view.active { display: flex; }
+
+    /* Fullscreen workspace views */
+    .workspace {
+      flex: 1;
+      min-height: 0;
+      display: none;
+      flex-direction: column;
+      background: var(--card);
+    }
+
+    .workspace.active { display: flex; }
+
+    .workspace-toolbar {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .workspace-title { font-size: 15px; font-weight: 600; }
+    .workspace-meta { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+    .workspace-body {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Chat */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      display: flex;
+      gap: 8px;
+      max-width: 72%;
+    }
+
+    .message.own { align-self: flex-end; flex-direction: row-reverse; }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .message-name { font-size: 12px; font-weight: 600; }
+    .message-time { font-size: 11px; color: var(--text-secondary); }
+    .message-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+
+    .message-bubble {
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--gray-light);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .message.own .message-bubble { background: var(--blue); color: white; }
+
+    .system-msg {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 4px 12px;
+      background: var(--gray-light);
+      border-radius: 12px;
+      align-self: center;
+    }
+
+    .task-card-msg {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      min-width: 240px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .task-card-msg:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+      border-color: var(--blue);
+    }
+
+    .task-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .task-card-title { font-weight: 600; font-size: 14px; flex: 1; }
+
+    .task-card-status {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .status-todo { background: var(--gray-light); color: #48484A; }
+    .status-doing { background: var(--orange-light); color: var(--orange); }
+    .status-done { background: var(--green-light); color: var(--green); }
+
+    .task-card-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 12px; }
+
+    .mention {
+      color: var(--blue);
+      background: var(--blue-light);
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+
+    .chat-input-area {
+      flex-shrink: 0;
+      padding: 10px 16px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      border-top: 0.5px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: var(--gray-light);
+      border-radius: 18px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      max-height: 100px;
+    }
+
+    .input-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: var(--gray-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      flex-shrink: 0;
+    }
+
+    .input-btn.send { background: var(--blue); color: white; }
+
+    /* Kanban fullscreen */
+    .kanban-board {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: 12px;
+      padding: 12px 16px 16px;
+      overflow-x: auto;
+    }
+
+    .kanban-col {
+      flex: 1;
+      min-width: 220px;
+      max-width: 320px;
+      background: var(--gray-light);
+      border-radius: var(--radius-lg);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .kanban-col.drag-over { background: var(--blue-light); outline: 2px dashed var(--blue); }
+
+    .kanban-col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+
+    .kanban-col-title { font-size: 13px; font-weight: 600; }
+
+    .kanban-col-count {
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--card);
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+    }
+
+    .kanban-tasks {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 60px;
+    }
+
+    .kanban-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      cursor: grab;
+      box-shadow: var(--shadow-sm);
+      border: 0.5px solid transparent;
+      transition: box-shadow 0.15s, opacity 0.15s;
+    }
+
+    .kanban-card:hover { box-shadow: var(--shadow); }
+    .kanban-card.dragging { opacity: 0.5; cursor: grabbing; }
+
+    .kanban-card-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+
+    .kanban-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .priority-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .priority-high { background: var(--red); }
+    .priority-medium { background: var(--orange); }
+    .priority-low { background: var(--green); }
+
+    .mini-avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      font-size: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 4px;
+    }
+
+    /* Task tree */
+    .task-tree-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--gray-light);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .tree-item:hover { background: rgba(0, 0, 0, 0.06); }
+    .tree-title { font-size: 13px; font-weight: 500; flex: 1; }
+    .tree-meta { font-size: 11px; color: var(--text-secondary); }
+
+    .progress-bar {
+      width: 80px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; }
+
+    /* Gantt */
+    .gantt-view {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px;
+      overflow: hidden;
+    }
+
+    .gantt-container {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .gantt-labels {
+      width: 140px;
+      flex-shrink: 0;
+      border-right: 0.5px solid var(--border);
+      overflow-y: auto;
+    }
+
+    .gantt-label {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 12px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .gantt-label.header {
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: var(--gray-light);
+    }
+
+    .gantt-timeline { flex: 1; overflow: auto; }
+
+    .gantt-header {
+      display: flex;
+      position: sticky;
+      top: 0;
+      background: var(--gray-light);
+      z-index: 1;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .gantt-day {
+      width: 48px;
+      flex-shrink: 0;
+      text-align: center;
+      font-size: 10px;
+      padding: 8px 0;
+      color: var(--text-secondary);
+    }
+
+    .gantt-day.weekend { background: rgba(0, 0, 0, 0.02); }
+
+    .gantt-row {
+      position: relative;
+      height: 36px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .gantt-bar {
+      position: absolute;
+      top: 6px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gantt-bar.todo { background: var(--blue); }
+    .gantt-bar.doing { background: var(--orange); }
+    .gantt-bar.done { background: var(--green); }
+
+    /* Bottom nav */
+    .bottom-nav {
+      height: var(--bottomnav-h);
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      justify-content: center;
+      padding: 0 16px;
+      gap: 4px;
+    }
+
+    .view-tab {
+      flex: 1;
+      max-width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 500;
+      border-radius: 10px;
+      transition: all 0.15s;
+    }
+
+    .view-tab svg { width: 22px; height: 22px; }
+    .view-tab:hover { background: rgba(0, 0, 0, 0.04); }
+    .view-tab.active { color: var(--blue); background: var(--blue-light); }
+
+    /* Leader view */
+    .leader-shell { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+
+    .leader-subnav {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      background: var(--card);
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .leader-nav {
+      display: flex;
+      gap: 4px;
+      background: var(--gray-light);
+      padding: 3px;
+      border-radius: 10px;
+    }
+
+    .leader-nav-item {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .leader-nav-item.active {
+      background: var(--card);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .leader-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card-title { font-size: 12px; color: var(--text-secondary); }
+    .stat-card-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+
+    .data-table {
+      width: 100%;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td { padding: 10px 12px; text-align: left; font-size: 13px; }
+    .data-table th {
+      background: var(--gray-light);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .data-table tr:hover td { background: rgba(0, 0, 0, 0.02); cursor: pointer; }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { filter: brightness(0.95); }
+    .btn-secondary { background: var(--gray-light); color: var(--text); }
+    .create-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      background: var(--blue);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .modal-overlay.show { opacity: 1; visibility: visible; }
+
+    .modal {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      width: 420px;
+      max-height: 85vh;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transform: scale(0.96);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.show .modal { transform: scale(1); }
+
+    .modal-header {
+      padding: 14px 16px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 700; }
+
+    .close-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: var(--gray-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body { padding: 16px; overflow-y: auto; max-height: 50vh; }
+    .modal-footer {
+      padding: 12px 16px;
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-light);
+    }
+
+    .org-chart, .audit-log {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .org-level { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 8px 0; }
+
+    .org-node {
+      padding: 12px 16px;
+      background: var(--gray-light);
+      border-radius: 10px;
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .org-node.super {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: white;
+    }
+
+    .audit-item {
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 13px;
+    }
+
+    .audit-time { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+    .hidden { display: none !important; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 3px; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { animation: fadeIn 0.25s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-icon">L</div>
+        LanPM
+      </div>
+
+      <div class="project-switcher" id="projectSwitcher">
+        <button type="button" class="project-trigger" id="projectTrigger" onclick="toggleProjectDropdown(event)">
+          <span class="project-trigger-name" id="currentProjectName">APP开发</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="project-dropdown" id="projectDropdown"></div>
+      </div>
+
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" class="search-input" id="globalSearch" placeholder="搜索任务、成员、消息…" autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="nav-tabs">
+        <button type="button" class="nav-tab active" data-main="project" onclick="switchMainView('project')">项目</button>
+        <button type="button" class="nav-tab" data-main="leader" id="leaderTab" onclick="switchMainView('leader')">领导驾驶舱</button>
+      </div>
+
+      <div class="user-pill" onclick="showProfile()">
+        <div class="user-avatar" id="currentUserAvatar">张</div>
+        <span class="user-name" id="currentUserName">张三</span>
+        <span class="role-badge role-super" id="roleBadge">超级领导</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Project: fullscreen workspace -->
+      <div class="main-view active" id="projectMain">
+        <section class="workspace active" id="viewChat" data-view="chat">
+          <div class="workspace-toolbar">
+            <div>
+              <div class="workspace-title" id="chatProjectTitle">APP开发</div>
+              <div class="workspace-meta" id="chatProjectMeta">移动应用迭代 · 5 人</div>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="shareProject()">分享</button>
+          </div>
+          <div class="workspace-body">
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+              <textarea class="chat-input" id="chatInput" rows="1" placeholder="消息… @create 任务标题"></textarea>
+              <button type="button" class="input-btn send" onclick="sendMessage()" aria-label="发送">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="workspace" id="viewKanban" data-view="kanban">
+          <div class="workspace-toolbar">
+            <div>
+              <div class="workspace-title">看板</div>
+              <div class="workspace-meta">拖拽卡片切换状态 · 待办 / 进行中 / 已完成</div>
+            </div>
+            <button type="button" class="create-btn" onclick="showCreateTaskModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              新建
+            </button>
+          </div>
+          <div class="workspace-body">
+            <div class="kanban-board" id="kanbanBoard"></div>
+          </div>
+        </section>
+
+        <section class="workspace" id="viewTree" data-view="tree">
+          <div class="workspace-toolbar">
+            <div>
+              <div class="workspace-title">任务树</div>
+              <div class="workspace-meta">层级与进度一览</div>
+            </div>
+          </div>
+          <div class="workspace-body task-tree-view" id="taskTreeView"></div>
+        </section>
+
+        <section class="workspace" id="viewGantt" data-view="gantt">
+          <div class="workspace-toolbar">
+            <div>
+              <div class="workspace-title">甘特图</div>
+              <div class="workspace-meta">时间线视图</div>
+            </div>
+          </div>
+          <div class="workspace-body gantt-view" id="ganttView"></div>
+        </section>
+      </div>
+
+      <!-- Leader cockpit -->
+      <div class="main-view" id="leaderMain">
+        <div class="leader-shell">
+          <div class="leader-subnav">
+            <div class="leader-nav">
+              <button type="button" class="leader-nav-item active" onclick="switchLeaderTab('dashboard')">驾驶舱</button>
+              <button type="button" class="leader-nav-item" onclick="switchLeaderTab('projects')">所有项目</button>
+              <button type="button" class="leader-nav-item" onclick="switchLeaderTab('org')">组织架构</button>
+              <button type="button" class="leader-nav-item" onclick="switchLeaderTab('audit')">审计</button>
+              <button type="button" class="leader-nav-item" onclick="switchLeaderTab('manage')">领导管理</button>
+            </div>
+            <button type="button" class="create-btn" onclick="exportReport()">导出报表</button>
+          </div>
+          <div class="leader-content" id="leaderContent"></div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav" id="bottomNav">
+      <button type="button" class="view-tab active" data-view="chat" onclick="switchWorkspace('chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        聊天
+      </button>
+      <button type="button" class="view-tab" data-view="kanban" onclick="switchWorkspace('kanban')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
+          <rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+        </svg>
+        看板
+      </button>
+      <button type="button" class="view-tab" data-view="tree" onclick="switchWorkspace('tree')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        任务树
+      </button>
+      <button type="button" class="view-tab" data-view="gantt" onclick="switchWorkspace('gantt')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="6" x2="14" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="18" x2="12" y2="18"/>
+        </svg>
+        甘特图
+      </button>
+    </nav>
+  </div>
+
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">任务详情</span>
+        <button type="button" class="close-btn" onclick="closeTaskModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">标题</label>
+          <input type="text" class="form-input" id="taskTitle">
+        </div>
+        <div class="form-group">
+          <label class="form-label">描述</label>
+          <textarea class="form-input" id="taskDesc" rows="2"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">状态</label>
+            <select class="form-select" id="taskStatus">
+              <option value="todo">待办</option>
+              <option value="doing">进行中</option>
+              <option value="done">已完成</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">优先级</label>
+            <select class="form-select" id="taskPriority">
+              <option value="low">低</option>
+              <option value="medium">中</option>
+              <option value="high">高</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">负责人</label>
+          <select class="form-select" id="taskAssignee"></select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">开始</label>
+            <input type="date" class="form-input" id="taskStartDate">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">截止</label>
+            <input type="date" class="form-input" id="taskDueDate">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="deleteTask()">删除</button>
+        <button type="button" class="btn btn-primary" onclick="saveTask()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="createTaskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">新建任务</span>
+        <button type="button" class="close-btn" onclick="closeCreateTaskModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">标题</label>
+          <input type="text" class="form-input" id="newTaskTitle" placeholder="任务标题">
+        </div>
+        <div class="form-group">
+          <label class="form-label">负责人</label>
+          <select class="form-select" id="newTaskAssignee"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCreateTaskModal()">取消</button>
+        <button type="button" class="btn btn-primary" onclick="createTask()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = {
+      currentUser: { id: 1, name: '张三', role: 'super_leader', department: '技术部', title: '技术总监' },
+      currentProject: 1,
+      currentWorkspace: 'chat',
+      currentMain: 'project',
+      currentLeaderTab: 'dashboard',
+      currentTaskId: null,
+      searchQuery: '',
+      projects: {
+        1: {
+          id: 1,
+          name: 'APP开发',
+          description: '移动应用迭代开发项目',
+          members: [
+            { id: 1, name: '张三', role: 'super_leader', department: '技术部', title: '技术总监', online: true },
+            { id: 2, name: '李四', role: 'leader', department: '产品部', title: '产品经理', online: true },
+            { id: 3, name: '王五', role: 'admin', department: '设计部', title: '设计主管', online: true },
+            { id: 4, name: '赵六', role: 'member', department: '技术部', title: '前端工程师', online: true },
+            { id: 5, name: '钱七', role: 'member', department: '技术部', title: '后端工程师', online: false }
+          ],
+          messages: [
+            { id: 1, type: 'system', text: '📢 超级领导 张三 创建了项目「APP开发」', time: '09:00' },
+            { id: 2, type: 'text', sender: '李四', content: '大家好，这个项目主要是开发移动应用 2.0', time: '09:01', avatar: '李' },
+            { id: 3, type: 'text', sender: '王五', content: '收到！负责 UI 设计 @赵六', time: '09:02', avatar: '王' },
+            { id: 4, type: 'task_card', sender: '李四', taskId: 'task_001', time: '09:05', avatar: '李' },
+            { id: 5, type: 'system', text: '👔 李四 将「设计数据库」改为进行中', time: '10:30' }
+          ],
+          tasks: [
+            { id: 'task_001', title: '设计数据库', status: 'doing', assignee: '李四', priority: 'high', startDate: '2026-05-20', dueDate: '2026-05-28' },
+            { id: 'task_002', title: '后端 API 开发', status: 'todo', assignee: '钱七', priority: 'high', startDate: '2026-05-25', dueDate: '2026-06-05' },
+            { id: 'task_003', title: 'UI 设计稿', status: 'done', assignee: '王五', priority: 'medium', startDate: '2026-05-18', dueDate: '2026-05-25' },
+            { id: 'task_004', title: '登录功能', status: 'done', assignee: '赵六', priority: 'high', startDate: '2026-05-15', dueDate: '2026-05-22' },
+            { id: 'task_005', title: '首页开发', status: 'doing', assignee: '王五', priority: 'medium', startDate: '2026-05-22', dueDate: '2026-05-30' },
+            { id: 'task_006', title: '用户中心', status: 'todo', assignee: '赵六', priority: 'low', startDate: '2026-05-28', dueDate: '2026-06-10' },
+            { id: 'task_007', title: '支付模块', status: 'todo', assignee: '', priority: 'high', startDate: '2026-06-01', dueDate: '2026-06-15' }
+          ]
+        },
+        2: {
+          id: 2,
+          name: '官网重构',
+          description: '企业官网全新改版',
+          members: [
+            { id: 3, name: '王五', role: 'admin', department: '设计部', title: '设计主管', online: true }
+          ],
+          messages: [
+            { id: 1, type: 'system', text: '📢 项目「官网重构」已创建', time: '08:00' }
+          ],
+          tasks: [
+            { id: 'task_p1', title: '需求分析', status: 'done', assignee: '王五', priority: 'high', startDate: '2026-05-01', dueDate: '2026-05-10' },
+            { id: 'task_p2', title: '原型设计', status: 'doing', assignee: '王五', priority: 'high', startDate: '2026-05-10', dueDate: '2026-05-20' }
+          ]
+        }
+      },
+      allMembers: [
+        { id: 1, name: '张三', role: 'super_leader', department: '技术部', online: true },
+        { id: 2, name: '李四', role: 'leader', department: '产品部', online: true },
+        { id: 3, name: '王五', role: 'admin', department: '设计部', online: true },
+        { id: 4, name: '赵六', role: 'member', department: '技术部', online: true },
+        { id: 5, name: '钱七', role: 'member', department: '技术部', online: false }
+      ],
+      auditLogs: [
+        { time: '2026-05-26 14:00', actor: '张三', action: '任命', target: '李四', from: '成员', to: '领导', icon: '👑' },
+        { time: '2026-05-25 09:00', actor: '张三', action: '创建项目', target: 'APP开发', icon: '📁' }
+      ]
+    };
+
+    const STATUS_LABELS = { todo: '待办', doing: '进行中', done: '已完成' };
+    let dragTaskId = null;
+
+    function getProject() {
+      return data.projects[data.currentProject];
+    }
+
+    function init() {
+      updateUserInfo();
+      updateRoleUI();
+      renderProjectDropdown();
+      updateProjectHeader();
+      renderChat();
+      renderKanban();
+      renderTaskTree();
+      renderGantt();
+      renderLeaderDashboard();
+      setupSearch();
+      setupChatInput();
+      document.addEventListener('click', closeDropdowns);
+    }
+
+    function closeDropdowns(e) {
+      if (!document.getElementById('projectSwitcher').contains(e.target)) {
+        document.getElementById('projectDropdown').classList.remove('open');
+      }
+      if (!e.target.closest('.search-wrap')) {
+        document.getElementById('searchResults').classList.remove('open');
+      }
+    }
+
+    function updateUserInfo() {
+      const u = data.currentUser;
+      document.getElementById('currentUserAvatar').textContent = u.name[0];
+      document.getElementById('currentUserName').textContent = u.name;
+      const labels = { super_leader: '超级领导', leader: '领导', admin: '管理员', member: '成员' };
+      const badge = document.getElementById('roleBadge');
+      badge.textContent = labels[u.role];
+      badge.className = 'role-badge role-' + (u.role === 'super_leader' ? 'super' : u.role === 'leader' ? 'leader' : u.role === 'admin' ? 'admin' : 'member');
+    }
+
+    function updateRoleUI() {
+      const show = ['super_leader', 'leader'].includes(data.currentUser.role);
+      document.getElementById('leaderTab').style.display = show ? '' : 'none';
+    }
+
+    function renderProjectDropdown() {
+      const dd = document.getElementById('projectDropdown');
+      dd.innerHTML = Object.values(data.projects).map(p => {
+        const n = p.tasks.length;
+        const done = p.tasks.filter(t => t.status === 'done').length;
+        return `
+          <div class="project-option ${p.id === data.currentProject ? 'active' : ''}" onclick="selectProject(${p.id})">
+            <div>
+              <div>${p.name}</div>
+              <div class="project-option-meta">${p.description}</div>
+            </div>
+            <span class="project-option-meta">${done}/${n}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleProjectDropdown(e) {
+      e.stopPropagation();
+      document.getElementById('projectDropdown').classList.toggle('open');
+    }
+
+    function selectProject(id) {
+      data.currentProject = id;
+      document.getElementById('projectDropdown').classList.remove('open');
+      document.getElementById('currentProjectName').textContent = getProject().name;
+      renderProjectDropdown();
+      updateProjectHeader();
+      renderChat();
+      renderKanban();
+      renderTaskTree();
+      renderGantt();
+      updateAssigneeDropdowns();
+      if (data.searchQuery) runSearch(data.searchQuery);
+    }
+
+    function updateProjectHeader() {
+      const p = getProject();
+      document.getElementById('currentProjectName').textContent = p.name;
+      document.getElementById('chatProjectTitle').textContent = p.name;
+      document.getElementById('chatProjectMeta').textContent = `${p.description} · ${p.members.length} 人`;
+      updateAssigneeDropdowns();
+    }
+
+    function switchMainView(main) {
+      data.currentMain = main;
+      document.querySelectorAll('.nav-tab[data-main]').forEach(t => {
+        t.classList.toggle('active', t.dataset.main === main);
+      });
+      document.getElementById('projectMain').classList.toggle('active', main === 'project');
+      document.getElementById('leaderMain').classList.toggle('active', main === 'leader');
+      document.getElementById('bottomNav').classList.toggle('hidden', main !== 'project');
+      if (main === 'leader') renderLeaderDashboard();
+    }
+
+    function switchWorkspace(view) {
+      data.currentWorkspace = view;
+      document.querySelectorAll('.view-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.view === view);
+      });
+      document.querySelectorAll('.workspace').forEach(w => {
+        w.classList.toggle('active', w.dataset.view === view);
+      });
+    }
+
+    function switchLeaderTab(tab) {
+      data.currentLeaderTab = tab;
+      const items = document.querySelectorAll('.leader-nav-item');
+      const keys = ['dashboard', 'projects', 'org', 'audit', 'manage'];
+      items.forEach((el, i) => el.classList.toggle('active', keys[i] === tab));
+      renderLeaderDashboard();
+    }
+
+  function fuzzyMatch(text, query) {
+      if (!query) return true;
+      const t = text.toLowerCase();
+      const q = query.toLowerCase().trim();
+      let ti = 0;
+      for (let qi = 0; qi < q.length; qi++) {
+        const found = t.indexOf(q[qi], ti);
+        if (found === -1) return false;
+        ti = found + 1;
+      }
+      return true;
+    }
+
+    function setupSearch() {
+      const input = document.getElementById('globalSearch');
+      input.addEventListener('input', () => {
+        data.searchQuery = input.value.trim();
+        runSearch(data.searchQuery);
+      });
+      input.addEventListener('focus', () => {
+        if (data.searchQuery) runSearch(data.searchQuery);
+      });
+    }
+
+    function runSearch(query) {
+      const box = document.getElementById('searchResults');
+      if (!query) {
+        box.classList.remove('open');
+        box.innerHTML = '';
+        return;
+      }
+      const results = [];
+      const p = getProject();
+      p.tasks.forEach(t => {
+        if (fuzzyMatch(t.title + (t.assignee || ''), query)) {
+          results.push({ type: '任务', label: t.title, sub: STATUS_LABELS[t.status], action: () => { openTaskDetail(t.id); switchWorkspace('kanban'); } });
+        }
+      });
+      p.members.forEach(m => {
+        if (fuzzyMatch(m.name + m.department + m.title, query)) {
+          results.push({ type: '成员', label: m.name, sub: m.title, action: () => switchWorkspace('chat') });
+        }
+      });
+      p.messages.forEach(m => {
+        const text = m.text || m.content || '';
+        if (fuzzyMatch(text, query)) {
+          results.push({ type: '消息', label: text.slice(0, 40), sub: m.time || '', action: () => switchWorkspace('chat') });
+        }
+      });
+      Object.values(data.projects).forEach(proj => {
+        if (proj.id !== data.currentProject && fuzzyMatch(proj.name + proj.description, query)) {
+          results.push({ type: '项目', label: proj.name, sub: proj.description, action: () => selectProject(proj.id) });
+        }
+      });
+
+      if (!results.length) {
+        box.innerHTML = '<div class="search-empty">无匹配结果</div>';
+      } else {
+        box.innerHTML = results.slice(0, 12).map((r, i) => `
+          <div class="search-item" data-idx="${i}">
+            <div>${r.label}</div>
+            <div class="search-item-type">${r.type} · ${r.sub}</div>
+          </div>
+        `).join('');
+        box.querySelectorAll('.search-item').forEach((el, i) => {
+          el.addEventListener('click', () => {
+            results[i].action();
+            box.classList.remove('open');
+            document.getElementById('globalSearch').blur();
+          });
+        });
+      }
+      box.classList.add('open');
+    }
+
+    function formatContent(content) {
+      return content
+        .replace(/@(\w+)/g, '<span class="mention">@$1</span>')
+        .replace(/@create\s+(.+)/gi, '<span style="color:var(--green);font-weight:600">@create</span> $1');
+    }
+
+    function renderChat() {
+      const el = document.getElementById('chatMessages');
+      const p = getProject();
+      el.innerHTML = p.messages.map(msg => {
+        if (msg.type === 'system') {
+          return `<div class="system-msg fade-in">${msg.text}</div>`;
+        }
+        if (msg.type === 'task_card') {
+          const task = p.tasks.find(t => t.id === msg.taskId);
+          if (!task) return '';
+          return `
+            <div class="message fade-in">
+              <div class="message-avatar">${msg.avatar}</div>
+              <div>
+                <div class="message-header">
+                  <span class="message-name">${msg.sender}</span>
+                  <span class="message-time">${msg.time}</span>
+                </div>
+                <div class="task-card-msg" onclick="openTaskDetail('${task.id}')">
+                  <div class="task-card-header">
+                    <span>📋</span>
+                    <span class="task-card-title">${task.title}</span>
+                    <span class="task-card-status status-${task.status}">${STATUS_LABELS[task.status]}</span>
+                  </div>
+                  <div class="task-card-meta">
+                    <span>${task.assignee || '未指派'}</span>
+                    <span>${task.dueDate || '—'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+        const own = msg.sender === data.currentUser.name;
+        return `
+          <div class="message fade-in ${own ? 'own' : ''}">
+            <div class="message-avatar">${msg.avatar}</div>
+            <div>
+              <div class="message-header">
+                <span class="message-name">${msg.sender}</span>
+                <span class="message-time">${msg.time}</span>
+              </div>
+              <div class="message-bubble">${formatContent(msg.content)}</div>
+            </div>
+          </div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function renderKanban() {
+      const board = document.getElementById('kanbanBoard');
+      const tasks = getProject().tasks;
+      const cols = [
+        { key: 'todo', title: '待办' },
+        { key: 'doing', title: '进行中' },
+        { key: 'done', title: '已完成' }
+      ];
+
+      board.innerHTML = cols.map(col => {
+        const list = tasks.filter(t => t.status === col.key);
+        return `
+          <div class="kanban-col" data-status="${col.key}"
+            ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop(event,'${col.key}')">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">${col.title}</span>
+              <span class="kanban-col-count">${list.length}</span>
+            </div>
+            <div class="kanban-tasks">
+              ${list.map(t => kanbanCardHtml(t)).join('')}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function kanbanCardHtml(task) {
+      return `
+        <div class="kanban-card" draggable="true" data-task-id="${task.id}"
+          ondragstart="onCardDragStart(event,'${task.id}')" ondragend="onCardDragEnd(event)"
+          onclick="openTaskDetail('${task.id}')">
+          <div class="kanban-card-title">${task.title}</div>
+          <div class="kanban-card-footer">
+            <span>
+              <span class="priority-dot priority-${task.priority}"></span>
+              ${task.assignee ? `<span class="mini-avatar">${task.assignee[0]}</span>${task.assignee}` : '未指派'}
+            </span>
+            <span>${task.dueDate ? task.dueDate.slice(5) : ''}</span>
+          </div>
+        </div>`;
+    }
+
+    function onCardDragStart(e, taskId) {
+      dragTaskId = taskId;
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', taskId);
+    }
+
+    function onCardDragEnd(e) {
+      e.target.classList.remove('dragging');
+      document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+      dragTaskId = null;
+    }
+
+    function onColDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function onColDragLeave(e) {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        e.currentTarget.classList.remove('drag-over');
+      }
+    }
+
+    function onColDrop(e, newStatus) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const id = dragTaskId || e.dataTransfer.getData('text/plain');
+      if (!id) return;
+      const task = getProject().tasks.find(t => t.id === id);
+      if (task && task.status !== newStatus) {
+        updateTaskStatus(id, newStatus);
+      }
+    }
+
+    function renderTaskTree() {
+      const el = document.getElementById('taskTreeView');
+      const tasks = getProject().tasks;
+      el.innerHTML = tasks.map(t => {
+        const pct = t.status === 'done' ? 100 : t.status === 'doing' ? 50 : 0;
+        return `
+          <div class="tree-item fade-in" onclick="openTaskDetail('${t.id}')">
+            <div style="flex:1">
+              <div class="tree-title">${t.title}</div>
+              <div class="tree-meta">${STATUS_LABELS[t.status]} · ${t.assignee || '未指派'}</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderGantt() {
+      const el = document.getElementById('ganttView');
+      const tasks = getProject().tasks.slice(0, 8);
+      const days = [];
+      const today = new Date();
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() + i);
+        days.push(d);
+      }
+
+      const dayW = 48;
+      el.innerHTML = `
+        <div class="gantt-container">
+          <div class="gantt-labels">
+            <div class="gantt-label header">任务</div>
+            ${tasks.map(t => `<div class="gantt-label">${t.title}</div>`).join('')}
+          </div>
+          <div class="gantt-timeline">
+            <div class="gantt-header">
+              ${days.map(d => `
+                <div class="gantt-day ${d.getDay() === 0 || d.getDay() === 6 ? 'weekend' : ''}">
+                  ${d.getMonth() + 1}/${d.getDate()}
+                </div>`).join('')}
+            </div>
+            ${tasks.map((t, idx) => {
+              const left = (idx % 5) * dayW + 8;
+              const width = (2 + (t.title.length % 3)) * dayW;
+              return `
+                <div class="gantt-row" style="width:${days.length * dayW}px">
+                  <div class="gantt-bar ${t.status}" style="left:${left}px;width:${width}px"
+                    onclick="openTaskDetail('${t.id}')">${t.title}</div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+
+    function updateTaskStatus(taskId, newStatus) {
+      const p = getProject();
+      const task = p.tasks.find(t => t.id === taskId);
+      if (!task) return;
+      task.status = newStatus;
+      const now = new Date();
+      const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+      p.messages.push({
+        id: Date.now(),
+        type: 'system',
+        text: `👔 ${data.currentUser.name} 将「${task.title}」改为${STATUS_LABELS[newStatus]}`,
+        time
+      });
+      renderChat();
+      renderKanban();
+      renderTaskTree();
+      renderGantt();
+      renderProjectDropdown();
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const content = input.value.trim();
+      if (!content) return;
+      const p = getProject();
+      const now = new Date();
+      const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const createMatch = content.match(/@create\s+(.+)/i);
+      if (createMatch) {
+        const title = createMatch[1].trim();
+        const id = `task_${Date.now()}`;
+        p.tasks.push({ id, title, status: 'todo', assignee: '', priority: 'medium', startDate: '', dueDate: '' });
+        p.messages.push({ id: Date.now(), type: 'task_card', sender: data.currentUser.name, taskId: id, time, avatar: data.currentUser.name[0] });
+        p.messages.push({ id: Date.now() + 1, type: 'system', text: `📋 ${data.currentUser.name} 创建了「${title}」`, time });
+      } else {
+        p.messages.push({ id: Date.now(), type: 'text', sender: data.currentUser.name, content, time, avatar: data.currentUser.name[0] });
+      }
+      input.value = '';
+      input.style.height = 'auto';
+      renderChat();
+      renderKanban();
+      renderTaskTree();
+      renderGantt();
+      renderProjectDropdown();
+    }
+
+    function setupChatInput() {
+      const input = document.getElementById('chatInput');
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+      });
+      input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+      });
+    }
+
+    function updateAssigneeDropdowns() {
+      const members = getProject().members;
+      ['taskAssignee', 'newTaskAssignee'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = '<option value="">未指派</option>' + members.map(m =>
+          `<option value="${m.name}">${m.name}</option>`).join('');
+      });
+    }
+
+    function openTaskDetail(taskId) {
+      data.currentTaskId = taskId;
+      const task = getProject().tasks.find(t => t.id === taskId);
+      if (!task) return;
+      document.getElementById('taskTitle').value = task.title;
+      document.getElementById('taskDesc').value = task.description || '';
+      document.getElementById('taskStatus').value = task.status;
+      document.getElementById('taskPriority').value = task.priority;
+      document.getElementById('taskAssignee').value = task.assignee || '';
+      document.getElementById('taskStartDate').value = task.startDate || '';
+      document.getElementById('taskDueDate').value = task.dueDate || '';
+      document.getElementById('taskModal').classList.add('show');
+    }
+
+    function closeTaskModal() { document.getElementById('taskModal').classList.remove('show'); }
+
+    function saveTask() {
+      const task = getProject().tasks.find(t => t.id === data.currentTaskId);
+      if (!task) return;
+      const old = task.status;
+      task.title = document.getElementById('taskTitle').value;
+      task.description = document.getElementById('taskDesc').value;
+      const ns = document.getElementById('taskStatus').value;
+      task.priority = document.getElementById('taskPriority').value;
+      task.assignee = document.getElementById('taskAssignee').value;
+      task.startDate = document.getElementById('taskStartDate').value;
+      task.dueDate = document.getElementById('taskDueDate').value;
+      if (old !== ns) updateTaskStatus(task.id, ns);
+      else {
+        task.status = ns;
+        closeTaskModal();
+        renderKanban();
+        renderTaskTree();
+        renderGantt();
+        renderChat();
+      }
+      closeTaskModal();
+    }
+
+    function deleteTask() {
+      const p = getProject();
+      const i = p.tasks.findIndex(t => t.id === data.currentTaskId);
+      if (i > -1) p.tasks.splice(i, 1);
+      closeTaskModal();
+      renderKanban();
+      renderTaskTree();
+      renderGantt();
+      renderProjectDropdown();
+    }
+
+    function showCreateTaskModal() {
+      document.getElementById('newTaskTitle').value = '';
+      document.getElementById('createTaskModal').classList.add('show');
+      switchWorkspace('kanban');
+    }
+
+    function closeCreateTaskModal() { document.getElementById('createTaskModal').classList.remove('show'); }
+
+    function createTask() {
+      const title = document.getElementById('newTaskTitle').value.trim();
+      if (!title) return;
+      const p = getProject();
+      const id = `task_${Date.now()}`;
+      const assignee = document.getElementById('newTaskAssignee').value;
+      p.tasks.push({ id, title, status: 'todo', assignee, priority: 'medium', startDate: '', dueDate: '' });
+      const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      p.messages.push({ id: Date.now(), type: 'task_card', sender: data.currentUser.name, taskId: id, time, avatar: data.currentUser.name[0] });
+      closeCreateTaskModal();
+      renderKanban();
+      renderTaskTree();
+      renderGantt();
+      renderChat();
+      renderProjectDropdown();
+    }
+
+    function renderLeaderDashboard() {
+      const el = document.getElementById('leaderContent');
+      const tab = data.currentLeaderTab;
+      if (tab === 'dashboard') {
+        const all = Object.values(data.projects).flatMap(p => p.tasks);
+        const done = all.filter(t => t.status === 'done').length;
+        el.innerHTML = `
+          <div class="dashboard-grid">
+            <div class="stat-card"><div class="stat-card-title">项目</div><div class="stat-card-value">${Object.keys(data.projects).length}</div></div>
+            <div class="stat-card"><div class="stat-card-title">任务</div><div class="stat-card-value">${all.length}</div></div>
+            <div class="stat-card"><div class="stat-card-title">已完成</div><div class="stat-card-value" style="color:var(--green)">${done}</div></div>
+            <div class="stat-card"><div class="stat-card-title">成员</div><div class="stat-card-value">${data.allMembers.length}</div></div>
+          </div>`;
+      } else if (tab === 'projects') {
+        el.innerHTML = `<div class="data-table"><table><thead><tr><th>项目</th><th>任务</th><th>完成</th></tr></thead><tbody>
+          ${Object.values(data.projects).map(p => {
+            const d = p.tasks.filter(t => t.status === 'done').length;
+            return `<tr onclick="switchMainView('project');selectProject(${p.id})"><td><strong>${p.name}</strong></td><td>${p.tasks.length}</td><td>${d}</td></tr>`;
+          }).join('')}
+        </tbody></table></div>`;
+      } else if (tab === 'org') {
+        el.innerHTML = `<div class="org-chart">${data.allMembers.map(m =>
+          `<div class="org-node ${m.role === 'super_leader' ? 'super' : ''}"><strong>${m.name}</strong><div style="font-size:11px;margin-top:4px">${m.department}</div></div>`
+        ).join('')}</div>`;
+      } else if (tab === 'audit') {
+        el.innerHTML = `<div class="audit-log">${data.auditLogs.map(l =>
+          `<div class="audit-item">${l.icon} <strong>${l.actor}</strong> ${l.action} ${l.target || ''}<div class="audit-time">${l.time}</div></div>`
+        ).join('')}</div>`;
+      } else {
+        el.innerHTML = data.currentUser.role === 'super_leader'
+          ? '<p style="padding:20px">领导管理（演示）— 与 index.html 相同能力可后续接入。</p>'
+          : '<p style="padding:20px;text-align:center">仅超级领导可访问</p>';
+      }
+    }
+
+    function showProfile() {
+      alert(`用户：${data.currentUser.name}\n部门：${data.currentUser.department}`);
+    }
+
+    function shareProject() {
+      alert(`已复制「${getProject().name}」局域网邀请链接（演示）`);
+    }
+
+    function exportReport() {
+      alert('导出报表（演示）');
+    }
+
+    init();
+  </script>
+</body>
+</html>
