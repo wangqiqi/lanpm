@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Menu, shell, dialog } from 'electron'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { initChatService, shutdownChatService } from './chat/chatService'
 import { registerChatIpc } from './ipc/chat'
@@ -23,6 +24,14 @@ function startupErrorMessage(err: unknown): string {
   return msg
 }
 
+function resolvePreloadPath(): string {
+  const candidates = [
+    join(__dirname, '../preload/index.js'),
+    join(__dirname, '../preload/index.mjs')
+  ]
+  return candidates.find((p) => existsSync(p)) ?? candidates[0]!
+}
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1440,
@@ -34,7 +43,7 @@ function createWindow(): void {
     /** Linux/Windows：不显示 File/Edit/View 等原生菜单栏（应用内 TopBar 已承担导航） */
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: resolvePreloadPath(),
       contextIsolation: true,
       nodeIntegration: false
     }
@@ -45,6 +54,14 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  mainWindow.webContents.on('did-fail-load', (_event, code, desc, url) => {
+    console.error('[lanpm] renderer load failed:', code, desc, url)
+  })
+
+  mainWindow.webContents.on('preload-error', (_event, preloadPath, err) => {
+    console.error('[lanpm] preload failed:', preloadPath, err)
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
