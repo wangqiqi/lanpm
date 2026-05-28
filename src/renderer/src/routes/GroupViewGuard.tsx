@@ -19,7 +19,7 @@ export default function GroupViewGuard({
   }
 
   const type = getGroupType(groupId)
-  if (!isViewAllowedForGroup(type, view)) {
+  if (!isViewAllowedForGroup(type, view, groupId)) {
     return (
       <Navigate to={groupViewPath(groupId, defaultViewForGroup(type))} replace />
     )

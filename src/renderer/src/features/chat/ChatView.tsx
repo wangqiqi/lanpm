@@ -7,6 +7,7 @@ import { useChatStore } from '@renderer/stores/chatStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import CodeSendModal from '@renderer/features/chat/CodeSendModal'
+import DmSessionBar from '@renderer/features/chat/DmSessionBar'
 import MemberList from '@renderer/features/chat/MemberList'
 import MentionSuggest from '@renderer/features/chat/MentionSuggest'
 import MessageBubble from '@renderer/features/chat/MessageBubble'
@@ -161,7 +162,10 @@ export default function ChatView(): React.ReactElement {
 
   return (
     <div className={styles.chatLayout}>
-      <MemberList groupId={gid} onInsertMention={insertMention} />
+      <div className={styles.sidebar}>
+        <DmSessionBar activeGroupId={gid} />
+        <MemberList groupId={gid} onInsertMention={insertMention} />
+      </div>
 
       <div className={styles.root} ref={rootRef}>
         <div className={styles.messages} ref={listRef}>

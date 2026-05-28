@@ -1,8 +1,12 @@
 import { Typography } from 'antd'
 import { useParams } from 'react-router-dom'
+import { useEffect } from 'react'
 import type { AppView } from '@shared/navigation/types'
+import { formatDmTitle, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
 import ChatView from '@renderer/features/chat/ChatView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { useDmStore } from '@renderer/stores/dmStore'
+import { useIdentityStore } from '@renderer/stores/identityStore'
 import styles from './GroupView.module.css'
 
 const { Title, Text } = Typography
@@ -18,12 +22,33 @@ const VIEW_LABELS: Record<AppView, string> = {
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
+  const getGroupLabel = useNavigationStore((s) => s.getGroupLabel)
+  const getPeerDisplayName = useDmStore((s) => s.getPeerDisplayName)
+  const touchSession = useDmStore((s) => s.touchSession)
+  const localUserId = useIdentityStore((s) => s.user?.userId)
+
+  useEffect(() => {
+    if (groupId && isDmGroupId(groupId)) {
+      touchSession(groupId)
+    }
+  }, [groupId, touchSession])
+
+  const chatTitle = (() => {
+    if (!groupId) return '—'
+    if (isDmGroupId(groupId) && localUserId) {
+      const peerId = getDmPeerUserId(groupId, localUserId)
+      if (peerId) {
+        return formatDmTitle(getPeerDisplayName(groupId, peerId))
+      }
+    }
+    return group?.name ?? getGroupLabel(groupId)
+  })()
 
   if (view === 'chat') {
     return (
       <div className={styles.root}>
         <Title level={4} className={styles.chatTitle}>
-          {group?.name ?? groupId}
+          {chatTitle}
         </Title>
         <div className={styles.chatBody}>
           <ChatView />

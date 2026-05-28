@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
 import { List, Typography } from 'antd'
+import { MessageOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
+import { isDmGroupId } from '@shared/chat/dmSession'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useDmStore } from '@renderer/stores/dmStore'
+import { groupViewPath } from '@renderer/routes/paths'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -18,6 +23,9 @@ export default function MemberList({
 }: MemberListProps): React.ReactElement {
   const [members, setMembers] = useState<GroupMemberView[]>([])
   const currentUserId = useIdentityStore((s) => s.user?.userId)
+  const openSession = useDmStore((s) => s.openSession)
+  const navigate = useNavigate()
+  const isDm = isDmGroupId(groupId)
 
   useEffect(() => {
     let cancelled = false
@@ -34,31 +42,53 @@ export default function MemberList({
     }
   }, [groupId])
 
+  const startDm = (member: GroupMemberView): void => {
+    if (!currentUserId || member.userId === currentUserId) return
+    const originGroupId = isDm ? useDmStore.getState().lastOriginGroupId : groupId
+    const dmGroupId = openSession(member.userId, member.displayName, currentUserId, originGroupId)
+    navigate(groupViewPath(dmGroupId, 'chat'))
+  }
+
   return (
     <aside className={styles.memberList}>
       <Text type="secondary" className={styles.memberTitle}>
-        成员
+        {isDm ? '私聊对象' : '成员'}
       </Text>
       <List
         size="small"
         dataSource={members}
         locale={{ emptyText: '暂无成员' }}
-        renderItem={(member) => (
-          <List.Item className={styles.memberItem}>
-            <button
-              type="button"
-              className={styles.memberBtn}
-              onClick={() => onInsertMention(member.displayName)}
-              title={`@${member.displayName}`}
-            >
-              <span className={styles.memberDot}>🟢</span>
-              <span className={styles.memberName}>
-                {member.displayName}
-                {member.userId === currentUserId ? '（我）' : ''}
-              </span>
-            </button>
-          </List.Item>
-        )}
+        renderItem={(member) => {
+          const isSelf = member.userId === currentUserId
+          return (
+            <List.Item className={styles.memberItem}>
+              <div className={styles.memberRow}>
+                <button
+                  type="button"
+                  className={styles.memberBtn}
+                  onClick={() => onInsertMention(member.displayName)}
+                  title={`@${member.displayName}`}
+                >
+                  <span className={styles.memberDot}>🟢</span>
+                  <span className={styles.memberName}>
+                    {member.displayName}
+                    {isSelf ? '（我）' : ''}
+                  </span>
+                </button>
+                {!isSelf && !isDm && (
+                  <button
+                    type="button"
+                    className={styles.dmBtn}
+                    title="发起私聊"
+                    onClick={() => startDm(member)}
+                  >
+                    <MessageOutlined />
+                  </button>
+                )}
+              </div>
+            </List.Item>
+          )
+        }}
       />
     </aside>
   )

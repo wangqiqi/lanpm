@@ -2,6 +2,7 @@ import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
 import { parseMentions } from '@shared/chat/mentions'
 import { detectLanguage } from '@shared/chat/detectLanguage'
+import { isDmGroupId, parseDmGroupId } from '@shared/chat/dmSession'
 import type { SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
 
@@ -40,7 +41,7 @@ const STUB_MEMBERS: GroupMemberView[] = [
   { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] }
 ]
 
-function listStubMembers(): GroupMemberView[] {
+function listStubMembers(groupId?: string): GroupMemberView[] {
   const status = readStatus()
   const members = [...STUB_MEMBERS]
   if (status.configured && status.user) {
@@ -50,6 +51,18 @@ function listStubMembers(): GroupMemberView[] {
       mentionKeys: [status.user.baseName, status.user.userId]
     })
   }
+
+  if (groupId && isDmGroupId(groupId)) {
+    const pair = parseDmGroupId(groupId)
+    if (!pair) return []
+    const [userA, userB] = pair
+    const byId = new Map(members.map((m) => [m.userId, m]))
+    return [userA, userB].map(
+      (userId) =>
+        byId.get(userId) ?? { userId, displayName: userId, mentionKeys: [userId] }
+    )
+  }
+
   return members
 }
 
@@ -171,7 +184,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         for (const fn of chatListeners) fn(msg)
         return msg
       },
-      listMembers: async () => listStubMembers(),
+      listMembers: async (groupId) => listStubMembers(groupId),
       onMessage: (handler) => {
         chatListeners.add(handler)
         return () => chatListeners.delete(handler)

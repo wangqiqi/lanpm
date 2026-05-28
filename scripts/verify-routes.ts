@@ -25,6 +25,16 @@ for (const [type, view, expected] of cases) {
   }
 }
 
+const dmId = 'dm:demo-alice__demo-bob'
+for (const view of views) {
+  const expected = view === 'chat'
+  const got = isViewAllowedForGroup('anonymous', view, dmId)
+  if (got !== expected) {
+    console.error(`FAIL dm/${view}: expected ${expected}, got ${got}`)
+    failed++
+  }
+}
+
 const paths = views.map((v) => `/g/demo-project/${v}`)
 console.log('tabRules:', cases.length, 'cases OK')
 console.log('view paths:', paths.join(', '))

@@ -2,6 +2,17 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.6.4-m2] - 2026-05-28
+
+### Added
+- M2-04 私聊：`buildDmGroupId` 确定性会话 ID；`dmStore` 会话列表（localStorage）
+- `MemberList` 私聊入口；`DmSessionBar` 会话切换与返回群聊
+- DM 群组仅允许 `chat` 视图；`memberService` / 浏览器 stub 仅返回双方成员
+- `npm run verify:dm`；`verify:m2` 串联 mentions + dm + chat
+
+### Tag
+- `v0.6.4-m2-dm` — M2 私聊入口与会话切换
+
 ## [0.6.3-m2] - 2026-05-28
 
 ### Added

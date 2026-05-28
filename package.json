@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "0.6.3-m2",
+  "version": "0.6.4-m2",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -20,7 +20,8 @@
     "verify:m1": "npm run verify:routes && npm run verify:topbar",
     "verify:chat": "node --experimental-strip-types scripts/verify-chat.ts",
     "verify:mentions": "node --experimental-strip-types scripts/verify-mentions.ts",
-    "verify:m2": "npm run verify:mentions && npm run verify:chat",
+    "verify:dm": "node --experimental-strip-types scripts/verify-dm.ts",
+    "verify:m2": "npm run verify:mentions && npm run verify:dm && npm run verify:chat",
     "rebuild:native": "electron-builder install-app-deps",
     "postinstall": "electron-builder install-app-deps"
   },

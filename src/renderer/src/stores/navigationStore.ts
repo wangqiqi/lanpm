@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { GroupType, NavGroup } from '@shared/navigation/types'
+import { isDmGroupId } from '@shared/chat/dmSession'
 
 /** M5 前占位群组，用于路由与 Tab 规则联调 */
 const STUB_GROUPS: NavGroup[] = [
@@ -14,6 +15,7 @@ interface NavigationState {
   setActiveGroupId: (groupId: string) => void
   getActiveGroup: () => NavGroup | undefined
   getGroupType: (groupId: string) => GroupType
+  getGroupLabel: (groupId: string) => string
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({
@@ -25,7 +27,12 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
     return groups.find((g) => g.groupId === activeGroupId)
   },
   getGroupType: (groupId) => {
+    if (isDmGroupId(groupId)) return 'anonymous'
     const g = get().groups.find((x) => x.groupId === groupId)
     return g?.type ?? 'project'
+  },
+  getGroupLabel: (groupId) => {
+    const g = get().groups.find((x) => x.groupId === groupId)
+    return g?.name ?? groupId
   }
 }))

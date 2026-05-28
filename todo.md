@@ -58,7 +58,7 @@
 - [x] `M2-01` [P0] 文本消息发送/接收（dep: M0-09）（DoD：`chatService` + `ChatView` + `npm run verify:chat`；NetworkStub 双实例可收发）
 - [x] `M2-02` [P0] 代码消息（语言识别 + 高亮）（DoD：`sendCodeMessage` + `CodeBlock`(highlight.js) + `npm run verify:chat`）
 - [x] `M2-03` [P0] @提及与桌面通知（DoD：`parseMentions` + `MemberList` + Electron `Notification`；`verify:chat` 含 @Bob 断言）
-- [ ] `M2-04` [P0] 私聊入口与会话切换
+- [x] `M2-04` [P0] 私聊入口与会话切换（DoD：`buildDmGroupId` + `MemberList` 私聊按钮 + `DmSessionBar` + DM 仅 chat Tab；`npm run verify:dm`）
 
 ### M2-B 回执与成员状态
 

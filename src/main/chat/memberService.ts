@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { GroupMemberView } from '../../shared/chat/members'
+import { isDmGroupId, parseDmGroupId } from '../../shared/chat/dmSession'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network/stub'
 
@@ -9,9 +10,8 @@ const STUB_MEMBERS: GroupMemberView[] = [
   { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] }
 ]
 
-export async function listGroupMembers(_db: Database, groupId: string): Promise<GroupMemberView[]> {
-  void groupId // M5 前成员与群组无关，占位参数保留 API
-  const status = getSetupStatus(_db)
+async function collectAllMembers(db: Database): Promise<Map<string, GroupMemberView>> {
+  const status = getSetupStatus(db)
   const members = new Map<string, GroupMemberView>()
 
   for (const stub of STUB_MEMBERS) {
@@ -39,6 +39,28 @@ export async function listGroupMembers(_db: Database, groupId: string): Promise<
         })
       }
     }
+  }
+
+  return members
+}
+
+export async function listGroupMembers(db: Database, groupId: string): Promise<GroupMemberView[]> {
+  const members = await collectAllMembers(db)
+
+  if (isDmGroupId(groupId)) {
+    const pair = parseDmGroupId(groupId)
+    if (!pair) return []
+    const [userA, userB] = pair
+    const result: GroupMemberView[] = []
+    for (const userId of [userA, userB]) {
+      const found = members.get(userId)
+      if (found) {
+        result.push(found)
+      } else {
+        result.push({ userId, displayName: userId, mentionKeys: [userId] })
+      }
+    }
+    return result.sort((a, b) => a.displayName.localeCompare(b.displayName))
   }
 
   return [...members.values()].sort((a, b) => a.displayName.localeCompare(b.displayName))
