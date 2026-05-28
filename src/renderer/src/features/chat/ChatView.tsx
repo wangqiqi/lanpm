@@ -8,6 +8,7 @@ import { parseTaskCommand } from '@shared/chat/taskCommand'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import CodeSendModal from '@renderer/features/chat/CodeSendModal'
 import DmSessionBar from '@renderer/features/chat/DmSessionBar'
@@ -54,6 +55,7 @@ export default function ChatView(): React.ReactElement {
   const upsertMessage = useChatStore((s) => s.upsertMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
   const listRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
@@ -68,7 +70,9 @@ export default function ChatView(): React.ReactElement {
   useMentionNotifications(gid)
   useMarkRead(gid, messages, currentUserId)
 
-  const taskAllowed = gid && !isDmGroupId(gid) && gid !== 'demo-anonymous' && gid !== 'demo-function'
+  const groupType = gid ? getGroupType(gid) : 'project'
+  const taskAllowed = gid && !isDmGroupId(gid) && groupType === 'project'
+  const codeAllowed = gid && !isDmGroupId(gid) && groupType !== 'anonymous'
 
   useEffect(() => {
     if (!gid) return
@@ -270,9 +274,11 @@ export default function ChatView(): React.ReactElement {
                   任务
                 </Button>
               )}
-              <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
-                代码
-              </Button>
+              {codeAllowed && (
+                <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
+                  代码
+                </Button>
+              )}
               <Button type="primary" onClick={() => void handleSend()}>
                 发送
               </Button>

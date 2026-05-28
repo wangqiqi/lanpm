@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Spin, Typography } from 'antd'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
 import SetupWizard from '@renderer/features/setup/SetupWizard'
 import AppRouter from '@renderer/app/AppRouter'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -12,6 +13,13 @@ export default function App(): React.ReactElement {
   const configured = useIdentityStore((s) => s.configured)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const setHydrated = useIdentityStore((s) => s.setHydrated)
+  const loadGroups = useNavigationStore((s) => s.loadGroups)
+
+  useEffect(() => {
+    if (!configured) return
+    const unsub = getLanpmApi().group.onListChanged(() => void loadGroups())
+    return unsub
+  }, [configured, loadGroups])
 
   useEffect(() => {
     let cancelled = false
@@ -21,6 +29,7 @@ export default function App(): React.ReactElement {
         .then((status) => {
           if (!cancelled) {
             setFromStatus(status.configured, status.user, status.device)
+            if (status.configured) void loadGroups()
           }
         })
         .catch(() => {
@@ -32,10 +41,11 @@ export default function App(): React.ReactElement {
     return () => {
       cancelled = true
     }
-  }, [setFromStatus, setHydrated])
+  }, [setFromStatus, setHydrated, loadGroups])
 
   const handleSetupComplete = (status: SetupStatus): void => {
     setFromStatus(status.configured, status.user, status.device)
+    void loadGroups()
   }
 
   if (!hydrated) {

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Modal, Radio, Select, Space, Spin, Tag, Typography, message } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
 import { useParams } from 'react-router-dom'
@@ -9,6 +9,7 @@ import { tasksToGanttBars, ganttDatesToYmd } from '@shared/task/ganttAdapter'
 import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { exportElementToPdf, exportElementToPng } from './ganttExport'
 import styles from './gantt.module.css'
 
 const { Text } = Typography
@@ -40,6 +41,8 @@ export default function GanttView(): React.ReactElement {
   const [fromId, setFromId] = useState<string>()
   const [toId, setToId] = useState<string>()
   const [depType, setDepType] = useState<TaskDependencyType>('FS')
+  const [exporting, setExporting] = useState(false)
+  const chartRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!gid) return
@@ -105,6 +108,26 @@ export default function GanttView(): React.ReactElement {
     }
   }
 
+  const exportChart = async (format: 'png' | 'pdf'): Promise<void> => {
+    const el = chartRef.current
+    if (!el) return
+    setExporting(true)
+    try {
+      const stamp = new Date().toISOString().slice(0, 10)
+      const base = `gantt-${gid || 'group'}-${stamp}`
+      if (format === 'png') {
+        await exportElementToPng(el, `${base}.png`)
+      } else {
+        await exportElementToPdf(el, `${base}.pdf`)
+      }
+      message.success(format === 'png' ? 'PNG 已导出' : 'PDF 已导出')
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '导出失败')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className={styles.root}>
       <div className={styles.toolbar}>
@@ -117,6 +140,22 @@ export default function GanttView(): React.ReactElement {
         <Space wrap>
           <Button icon={<PlusOutlined />} onClick={() => setDepOpen(true)}>
             添加依赖
+          </Button>
+          <Button
+            icon={<DownloadOutlined />}
+            loading={exporting}
+            disabled={ganttTasks.length === 0}
+            onClick={() => void exportChart('png')}
+          >
+            导出 PNG
+          </Button>
+          <Button
+            icon={<FilePdfOutlined />}
+            loading={exporting}
+            disabled={ganttTasks.length === 0}
+            onClick={() => void exportChart('pdf')}
+          >
+            导出 PDF
           </Button>
           <Text type="secondary" className={styles.hint}>
             拖拽任务条调整起止时间 · 非 FS 依赖存储后在列表展示
@@ -131,7 +170,7 @@ export default function GanttView(): React.ReactElement {
           暂无任务，请先在「看板」创建任务并设置时间
         </Text>
       ) : (
-        <div className={styles.chartWrap}>
+        <div className={styles.chartWrap} ref={chartRef}>
           <Gantt
             tasks={ganttTasks}
             viewMode={viewMode}

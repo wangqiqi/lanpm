@@ -2,6 +2,31 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.9.0-m5] - 2026-05-28
+
+### Added
+- M5-01 群组：`groupRepository` / `groupService`；三类群组创建与 SQLite 持久化；TopBar 创建/切换
+- M5-02 匿名群：内存会话消息、仅文本、退出清历史；`assertGroupAllows*` 按 DB 类型校验
+- M5-03~04 驾驶舱：`CockpitView` 指标卡、项目进度、部门完成率
+- M5-05 API Key：`aiConfigService`（`safeStorage` / AES-GCM 回退）+ 配置弹窗
+- M5-06 AI：周报/月报/项目评估（脱敏字段）；可选外部 OpenAI 兼容 API
+- `group:*` / `cockpit:*` IPC；`npm run verify:m5`
+
+### Tag
+- `v0.9.0-m5-groups-cockpit` — M5 群组与驾驶舱
+
+## [0.8.1-m4] - 2026-05-28
+
+### Added
+- M4-04 甘特导出：`GanttView` 工具栏「导出 PNG / PDF」；`html2canvas` + `jspdf`
+- M4-08 书签：`bookmarkService` + Netscape HTML 解析/导出（`shared/file/bookmarks.ts`）
+- 书签 IPC：`file:addBookmark` / `file:importBookmarks` / `file:exportBookmarks`
+- `FilesView`：书签分类、手动添加、HTML 导入/导出、链接预览
+- `verify:m4` 扩展书签 parse/export 断言
+
+### Tag
+- `v0.8.1-m4-gantt-export-bookmarks` — M4 P1 甘特导出与书签
+
 ## [0.8.0-m4] - 2026-05-28
 
 ### Added

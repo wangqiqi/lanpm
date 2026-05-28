@@ -1,0 +1,29 @@
+import { createECDH, createHash, randomBytes } from 'crypto'
+
+const CURVE = 'prime256v1'
+
+export interface DhKeyPair {
+  publicKey: Buffer
+  privateKey: Buffer
+}
+
+export function generateDhKeyPair(): DhKeyPair {
+  const ecdh = createECDH(CURVE)
+  ecdh.generateKeys()
+  return { publicKey: ecdh.getPublicKey(), privateKey: ecdh.getPrivateKey() }
+}
+
+export function deriveSharedSecret(privateKey: Buffer, peerPublicKey: Buffer): Buffer {
+  const ecdh = createECDH(CURVE)
+  ecdh.setPrivateKey(privateKey)
+  return ecdh.computeSecret(peerPublicKey)
+}
+
+export function deriveAesKey(sharedSecret: Buffer, salt?: Buffer): Buffer {
+  const s = salt ?? Buffer.alloc(0)
+  return createHash('sha256').update(Buffer.concat([Buffer.from('lanpm-aes-v1'), sharedSecret, s])).digest()
+}
+
+export function randomNonce(bytes = 12): Buffer {
+  return randomBytes(bytes)
+}

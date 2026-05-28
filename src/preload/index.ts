@@ -5,6 +5,7 @@ import type { LanpmApi } from '../shared/lanpm-api'
 import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
+import { GROUP_PUSH_CHANNEL } from '../shared/group/channels'
 
 const api: LanpmApi = {
   platform: process.platform,
@@ -58,6 +59,10 @@ const api: LanpmApi = {
     upload: (groupId, filePath) => ipcRenderer.invoke('file:upload', groupId, filePath),
     getPreviewUrl: (fileId) => ipcRenderer.invoke('file:getPreviewUrl', fileId),
     listTransfers: (groupId) => ipcRenderer.invoke('file:listTransfers', groupId),
+    addBookmark: (groupId, url, title) =>
+      ipcRenderer.invoke('file:addBookmark', groupId, url, title),
+    importBookmarks: (groupId) => ipcRenderer.invoke('file:importBookmarks', groupId),
+    exportBookmarks: (groupId) => ipcRenderer.invoke('file:exportBookmarks', groupId),
     onTransfersChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)
@@ -65,6 +70,25 @@ const api: LanpmApi = {
       ipcRenderer.on(FILE_TRANSFER_PUSH_CHANNEL, listener)
       return () => ipcRenderer.removeListener(FILE_TRANSFER_PUSH_CHANNEL, listener)
     }
+  },
+  group: {
+    list: () => ipcRenderer.invoke('group:list'),
+    create: (input) => ipcRenderer.invoke('group:create', input),
+    enterAnonymous: (groupId) => ipcRenderer.invoke('group:enterAnonymous', groupId),
+    leaveAnonymous: (groupId) => ipcRenderer.invoke('group:leaveAnonymous', groupId),
+    onListChanged: (handler) => {
+      const listener = () => handler()
+      ipcRenderer.on(GROUP_PUSH_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(GROUP_PUSH_CHANNEL, listener)
+    }
+  },
+  cockpit: {
+    getDashboard: () => ipcRenderer.invoke('cockpit:getDashboard'),
+    generateWeeklyReport: () => ipcRenderer.invoke('cockpit:generateWeeklyReport'),
+    generateMonthlyReport: () => ipcRenderer.invoke('cockpit:generateMonthlyReport'),
+    evaluateProjects: () => ipcRenderer.invoke('cockpit:evaluateProjects'),
+    getAiConfig: () => ipcRenderer.invoke('cockpit:getAiConfig'),
+    saveAiConfig: (input) => ipcRenderer.invoke('cockpit:saveAiConfig', input)
   }
 }
 

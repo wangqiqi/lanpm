@@ -9,6 +9,9 @@ interface FileState {
   loadFiles: (groupId: string, category?: FileCategory) => Promise<void>
   loadTransfers: (groupId: string) => Promise<void>
   upload: (groupId: string) => Promise<FileMeta | null>
+  addBookmark: (groupId: string, url: string, title: string) => Promise<FileMeta>
+  importBookmarks: (groupId: string) => Promise<FileMeta[]>
+  exportBookmarks: (groupId: string) => Promise<string | null>
 }
 
 export const useFileStore = create<FileState>((set) => ({
@@ -38,5 +41,11 @@ export const useFileStore = create<FileState>((set) => ({
       set((s) => ({ filesByGroup: { ...s.filesByGroup, [groupId]: files } }))
     }
     return meta
-  }
+  },
+
+  addBookmark: async (groupId, url, title) => getLanpmApi().file.addBookmark(groupId, url, title),
+
+  importBookmarks: async (groupId) => getLanpmApi().file.importBookmarks(groupId),
+
+  exportBookmarks: async (groupId) => getLanpmApi().file.exportBookmarks(groupId)
 }))

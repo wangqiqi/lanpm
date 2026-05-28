@@ -9,6 +9,13 @@ import type {
   UpdateTaskInput
 } from './task/types'
 import type { TaskDependency, UpsertDependencyInput } from './task/dependency'
+import type { CreateGroupInput, GroupRecord } from './group/types'
+import type {
+  AiConfigInput,
+  AiConfigView,
+  AiReportResult,
+  CockpitDashboard
+} from './cockpit/types'
 
 export interface LanpmApi {
   platform: NodeJS.Platform | 'browser'
@@ -55,6 +62,28 @@ export interface LanpmApi {
     upload: (groupId: string, filePath?: string) => Promise<import('./file/types').FileMeta | null>
     getPreviewUrl: (fileId: string) => Promise<string | null>
     listTransfers: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
+    addBookmark: (
+      groupId: string,
+      url: string,
+      title: string
+    ) => Promise<import('./file/types').FileMeta>
+    importBookmarks: (groupId: string) => Promise<import('./file/types').FileMeta[]>
+    exportBookmarks: (groupId: string) => Promise<string | null>
     onTransfersChanged: (handler: (groupId: string) => void) => () => void
+  }
+  group: {
+    list: () => Promise<GroupRecord[]>
+    create: (input: CreateGroupInput) => Promise<GroupRecord>
+    enterAnonymous: (groupId: string) => Promise<void>
+    leaveAnonymous: (groupId: string) => Promise<void>
+    onListChanged: (handler: () => void) => () => void
+  }
+  cockpit: {
+    getDashboard: () => Promise<CockpitDashboard>
+    generateWeeklyReport: () => Promise<AiReportResult>
+    generateMonthlyReport: () => Promise<AiReportResult>
+    evaluateProjects: () => Promise<AiReportResult>
+    getAiConfig: () => Promise<AiConfigView | null>
+    saveAiConfig: (input: AiConfigInput) => Promise<AiConfigView>
   }
 }

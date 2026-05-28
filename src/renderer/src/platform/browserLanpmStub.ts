@@ -444,7 +444,90 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       getPreviewUrl: async () => null,
       listTransfers: async () => [],
+      addBookmark: async (groupId, url, title) => ({
+        fileId: `stub_${Date.now()}`,
+        groupId,
+        name: title || url,
+        ext: 'url',
+        category: 'bookmark' as const,
+        size: 0,
+        uploadedBy: 'stub',
+        uploadedAt: new Date().toISOString(),
+        sha256: '',
+        storagePath: '',
+        previewStatus: 'ready' as const,
+        isBookmark: true,
+        bookmarkUrl: url,
+        bookmarkTitle: title || url,
+        updatedAt: new Date().toISOString()
+      }),
+      importBookmarks: async () => [],
+      exportBookmarks: async () => {
+        throw new Error('浏览器预览请使用 Electron 客户端导出书签')
+      },
       onTransfersChanged: () => () => undefined
+    },
+    group: {
+      list: async () => [
+        { groupId: 'demo-project', name: '示例项目', type: 'project' as const, createdBy: 'stub', createdAt: '', autoDiscover: true },
+        { groupId: 'demo-function', name: '示例职能群', type: 'function' as const, createdBy: 'stub', createdAt: '', autoDiscover: true },
+        { groupId: 'demo-anonymous', name: '示例匿名群', type: 'anonymous' as const, createdBy: 'stub', createdAt: '', autoDiscover: true }
+      ],
+      create: async (input) => ({
+        groupId: `stub_${Date.now()}`,
+        type: input.type,
+        name: input.name,
+        createdBy: 'stub',
+        createdAt: new Date().toISOString(),
+        autoDiscover: input.autoDiscover ?? true
+      }),
+      enterAnonymous: async () => undefined,
+      leaveAnonymous: async () => undefined,
+      onListChanged: () => () => undefined
+    },
+    cockpit: {
+      getDashboard: async () => ({
+        summary: { totalProjects: 1, inProgressCount: 2, delayedCount: 0 },
+        projects: [
+          {
+            groupId: 'demo-project',
+            name: '示例项目',
+            progressPercent: 50,
+            status: 'normal' as const,
+            inProgressCount: 2,
+            delayedCount: 0,
+            totalTasks: 4
+          }
+        ],
+        departments: [{ department: '研发部', completionPercent: 75, taskCount: 4 }]
+      }),
+      generateWeeklyReport: async () => ({
+        format: 'markdown' as const,
+        content: '# Stub 周报',
+        generatedAt: new Date().toISOString(),
+        usedExternalAi: false
+      }),
+      generateMonthlyReport: async () => ({
+        format: 'markdown' as const,
+        content: '# Stub 月报',
+        generatedAt: new Date().toISOString(),
+        usedExternalAi: false
+      }),
+      evaluateProjects: async () => ({
+        format: 'markdown' as const,
+        content: '# Stub 评估',
+        generatedAt: new Date().toISOString(),
+        usedExternalAi: false
+      }),
+      getAiConfig: async () => null,
+      saveAiConfig: async (input) => ({
+        provider: input.provider,
+        baseUrl: input.baseUrl,
+        model: input.model,
+        enabled: input.enabled,
+        dataPolicy: 'desensitized-only' as const,
+        hasApiKey: true
+      })
     }
   }
 }

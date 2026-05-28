@@ -1,0 +1,66 @@
+export type ProjectHealth = 'normal' | 'risk' | 'delayed'
+
+export interface CockpitSummary {
+  totalProjects: number
+  inProgressCount: number
+  delayedCount: number
+}
+
+export interface ProjectDashboardItem {
+  groupId: string
+  name: string
+  progressPercent: number
+  status: ProjectHealth
+  inProgressCount: number
+  delayedCount: number
+  totalTasks: number
+}
+
+export interface DepartmentStats {
+  department: string
+  completionPercent: number
+  taskCount: number
+}
+
+export interface CockpitDashboard {
+  summary: CockpitSummary
+  projects: ProjectDashboardItem[]
+  departments: DepartmentStats[]
+}
+
+export type AiProvider = 'openai' | 'anthropic' | 'custom'
+
+export interface AiConfigView {
+  provider: AiProvider
+  baseUrl: string
+  model: string
+  enabled: boolean
+  dataPolicy: 'desensitized-only'
+  hasApiKey: boolean
+}
+
+export interface AiConfigInput {
+  provider: AiProvider
+  apiKey?: string
+  baseUrl: string
+  model: string
+  enabled: boolean
+}
+
+export interface AiTaskAuditPayload {
+  taskId: string
+  title: string
+  status: string
+  progressPercent: number
+  priority: string
+  startDate?: string
+  endDate?: string
+  descriptionSummary?: string
+}
+
+export interface AiReportResult {
+  format: 'markdown'
+  content: string
+  generatedAt: string
+  usedExternalAi: boolean
+}

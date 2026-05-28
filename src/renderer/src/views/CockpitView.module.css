@@ -1,6 +1,79 @@
 .root {
+  padding: 16px 20px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow: auto;
+  height: 100%;
+}
+
+.header {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0 !important;
+}
+
+.metrics {
+  margin-bottom: 16px;
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.projectRow {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.06));
+}
+
+.projectRow:last-child {
+  border-bottom: none;
+}
+
+.projectHead {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  min-height: 200px;
+  margin-bottom: 6px;
+}
+
+.projectMeta {
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
+
+.deptRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.deptRow:last-child {
+  margin-bottom: 0;
+}
+
+.reportPre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.5;
+  max-height: 360px;
+  overflow: auto;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--lanpm-bg, rgba(0, 0, 0, 0.02));
+}
+
+.spinner {
+  display: block;
+  margin: 48px auto;
 }

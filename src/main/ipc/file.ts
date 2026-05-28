@@ -2,6 +2,11 @@ import { ipcMain } from 'electron'
 import type { FileCategory } from '../../shared/file/types'
 import { FILE_IPC } from '../../shared/file/channels'
 import {
+  createBookmark,
+  exportGroupBookmarks,
+  pickAndImportBookmarks
+} from '../file/bookmarkService'
+import {
   listGroupFiles,
   listGroupTransfers,
   pickAndUploadFile,
@@ -32,5 +37,24 @@ export function registerFileIpc(): void {
   ipcMain.handle(FILE_IPC.listTransfers, (_event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
     return listGroupTransfers(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(
+    FILE_IPC.addBookmark,
+    (_event, groupId: string, url: string, title: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof url !== 'string' || !url) throw new Error('url required')
+      return createBookmark(getDatabase(), groupId, url, title ?? '')
+    }
+  )
+
+  ipcMain.handle(FILE_IPC.importBookmarks, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return pickAndImportBookmarks(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(FILE_IPC.exportBookmarks, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return exportGroupBookmarks(getDatabase(), groupId)
   })
 }

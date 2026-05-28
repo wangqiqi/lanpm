@@ -1,0 +1,104 @@
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto'
+import { safeStorage } from 'electron'
+import type { Database } from 'better-sqlite3'
+import type { AiConfigInput, AiConfigView, AiProvider } from '../../shared/cockpit/types'
+
+interface AiConfigRow {
+  provider: string
+  api_key_enc: string
+  base_url: string
+  model: string
+  enabled: number
+  data_policy: string
+}
+
+const DEV_FALLBACK_SECRET = createHash('sha256').update('lanpm-dev-ai-key').digest()
+
+function encryptApiKey(plain: string): string {
+  if (safeStorage.isEncryptionAvailable()) {
+    return `safe:${safeStorage.encryptString(plain).toString('base64')}`
+  }
+  const iv = randomBytes(12)
+  const cipher = createCipheriv('aes-256-gcm', DEV_FALLBACK_SECRET, iv)
+  const enc = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
+  const tag = cipher.getAuthTag()
+  return `dev:${Buffer.concat([iv, tag, enc]).toString('base64')}`
+}
+
+function decryptApiKey(stored: string): string {
+  if (stored.startsWith('safe:')) {
+    const buf = Buffer.from(stored.slice(5), 'base64')
+    return safeStorage.decryptString(buf)
+  }
+  if (stored.startsWith('dev:')) {
+    const buf = Buffer.from(stored.slice(4), 'base64')
+    const iv = buf.subarray(0, 12)
+    const tag = buf.subarray(12, 28)
+    const data = buf.subarray(28)
+    const decipher = createDecipheriv('aes-256-gcm', DEV_FALLBACK_SECRET, iv)
+    decipher.setAuthTag(tag)
+    return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8')
+  }
+  throw new Error('无法解密 API Key')
+}
+
+function rowToView(row: AiConfigRow): AiConfigView {
+  return {
+    provider: row.provider as AiProvider,
+    baseUrl: row.base_url,
+    model: row.model,
+    enabled: row.enabled === 1,
+    dataPolicy: 'desensitized-only',
+    hasApiKey: Boolean(row.api_key_enc)
+  }
+}
+
+export function getAiConfig(db: Database): AiConfigView | null {
+  const row = db.prepare(`SELECT * FROM ai_config WHERE id = 1`).get() as AiConfigRow | undefined
+  return row ? rowToView(row) : null
+}
+
+export function saveAiConfig(db: Database, input: AiConfigInput): AiConfigView {
+  const existing = db.prepare(`SELECT api_key_enc FROM ai_config WHERE id = 1`).get() as
+    | { api_key_enc: string }
+    | undefined
+
+  let apiKeyEnc = existing?.api_key_enc ?? ''
+  if (input.apiKey?.trim()) {
+    apiKeyEnc = encryptApiKey(input.apiKey.trim())
+  }
+  if (!apiKeyEnc) {
+    throw new Error('请填写 API Key')
+  }
+
+  db.prepare(
+    `INSERT INTO ai_config (id, provider, api_key_enc, base_url, model, enabled, data_policy)
+     VALUES (1, @provider, @apiKeyEnc, @baseUrl, @model, @enabled, 'desensitized-only')
+     ON CONFLICT(id) DO UPDATE SET
+       provider = excluded.provider,
+       api_key_enc = excluded.api_key_enc,
+       base_url = excluded.base_url,
+       model = excluded.model,
+       enabled = excluded.enabled`
+  ).run({
+    provider: input.provider,
+    apiKeyEnc,
+    baseUrl: input.baseUrl.trim(),
+    model: input.model.trim(),
+    enabled: input.enabled ? 1 : 0
+  })
+
+  return getAiConfig(db)!
+}
+
+export function getDecryptedApiKey(db: Database): string | null {
+  const row = db.prepare(`SELECT api_key_enc FROM ai_config WHERE id = 1`).get() as
+    | { api_key_enc: string }
+    | undefined
+  if (!row?.api_key_enc) return null
+  try {
+    return decryptApiKey(row.api_key_enc)
+  } catch {
+    return null
+  }
+}

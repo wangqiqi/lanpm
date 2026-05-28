@@ -91,25 +91,25 @@
 - [x] `M4-01` [P0] 日/周/月切换（DoD：ViewMode Day/Week/Month 工具栏）
 - [x] `M4-02` [P0] 任务条拖拽改起止时间（DoD：`onDateChange` → `task:updateSchedule`）
 - [x] `M4-03` [P0] 依赖关系（FS/SS/FF/SF）与里程碑标识（DoD：依赖弹窗 + 双击切换 milestone）
-- [ ] `M4-04` [P1] 甘特导出 PNG/PDF
+- [x] `M4-04` [P1] 甘特导出 PNG/PDF（DoD：`GanttView` 工具栏 + `html2canvas`/`jspdf`）
 
 ### M4-B 文件模块
 
 - [x] `M4-05` [P0] 文件列表/筛选/详情（DoD：`FilesView` + 分类 Segmented + 预览区）
 - [x] `M4-06` [P0] LibreOffice 本地预览链路（DoD：`previewService` soffice → PDF；图片/文本内联）
 - [x] `M4-07` [P0] 分片传输 + 断点续传 + 并发队列（<=3）（DoD：`runChunkedUpload` + 传输队列 UI）
-- [ ] `M4-08` [P1] 书签导入导出
+- [x] `M4-08` [P1] 书签导入导出（DoD：`bookmarkService` + Netscape HTML 解析 + `FilesView` 导入/导出/手动添加）
 
 ---
 
 ## M5 群组 + 驾驶舱（Day 14-15）
 
-- [ ] `M5-01` [P0] 三类群组创建与切换（project/function/anonymous）
-- [ ] `M5-02` [P0] 匿名群限制策略（仅文本，无历史/无文件）
-- [ ] `M5-03` [P0] 驾驶舱指标卡（项目总数/进行中/延期）
-- [ ] `M5-04` [P0] 项目进度列表与部门完成率
-- [ ] `M5-05` [P0] API-Key 配置与本地加密存储
-- [ ] `M5-06` [P0] AI 手动审核/评估/周报触发（仅脱敏字段）
+- [x] `M5-01` [P0] 三类群组创建与切换（DoD：`groupService` + SQLite + TopBar 创建/下拉切换）
+- [x] `M5-02` [P0] 匿名群限制策略（仅文本，无历史/无文件）（DoD：`anonymousChatStore` + guards + Tab 规则）
+- [x] `M5-03` [P0] 驾驶舱指标卡（项目总数/进行中/延期）（DoD：`CockpitView` + `cockpitService`）
+- [x] `M5-04` [P0] 项目进度列表与部门完成率（DoD：项目 Progress + 部门完成率条）
+- [x] `M5-05` [P0] API-Key 配置与本地加密存储（DoD：`aiConfigService` safeStorage/AES + 配置弹窗）
+- [x] `M5-06` [P0] AI 手动审核/评估/周报触发（仅脱敏字段）（DoD：周报/月报/评估 + 可选外部 AI）
 
 ---
 
@@ -153,4 +153,5 @@
 - [x] `M2-06` 已读回执
 - [x] `M2-07` /task 快捷创建
 - [x] `M3-01`~`M3-06` 看板 + 任务树
-- [x] `M4-00`~`M4-03` 甘特图 + `M4-05`~`M4-07` 文件模块（`verify:m4`）
+- [x] `M4-00`~`M4-08` 甘特图 + 文件 + 书签（`verify:m4`）
+- [x] `M5-01`~`M5-06` 群组 + 驾驶舱（`verify:m5`）

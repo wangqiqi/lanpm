@@ -7,6 +7,8 @@ import { applyAggregatedProgress } from '../../shared/task/progress'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '../../shared/task/types'
 import type { TaskDependency, UpsertDependencyInput } from '../../shared/task/dependency'
 import { validateOtherReason } from '../../shared/task/validation'
+import { assertGroupAllowsTasks } from '../../shared/group/guards'
+import { resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import {
   buildTaskFromInput,
@@ -23,10 +25,9 @@ import {
 } from '../storage/repositories/taskDependencyRepository'
 import { publishChatMessage } from '../chat/chatService'
 
-function assertTaskWritable(groupId: string): void {
+function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throw new Error('私聊不支持任务')
-  if (groupId === 'demo-anonymous') throw new Error('匿名群不支持任务')
-  if (groupId === 'demo-function') throw new Error('职能群不支持看板任务')
+  assertGroupAllowsTasks(resolveGroupType(db, groupId))
 }
 
 function broadcastTasksChanged(groupId: string): void {
@@ -52,7 +53,7 @@ export function listGroupTasks(db: Database, groupId: string): Task[] {
 }
 
 export function createGroupTask(db: Database, input: CreateTaskInput): Task {
-  assertTaskWritable(input.groupId)
+  assertTaskWritable(db, input.groupId)
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) {
     throw new Error('请先完成身份配置')
@@ -75,7 +76,7 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
 export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
   const existing = getTaskById(db, input.taskId)
   if (!existing) throw new Error('任务不存在')
-  assertTaskWritable(existing.groupId)
+  assertTaskWritable(db, existing.groupId)
 
   const nextStatus = input.status ?? existing.status
   const nextReason =
@@ -97,7 +98,7 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
 export function moveGroupTask(db: Database, input: MoveTaskInput): Task {
   const existing = getTaskById(db, input.taskId)
   if (!existing) throw new Error('任务不存在')
-  assertTaskWritable(existing.groupId)
+  assertTaskWritable(db, existing.groupId)
 
   const reasonErr = validateOtherReason(input.status, input.otherReason ?? existing.otherReason)
   if (reasonErr) throw new Error(reasonErr)
@@ -135,7 +136,7 @@ export async function createTaskFromChat(
 export function updateTaskSchedule(db: Database, input: GanttScheduleInput): Task {
   const existing = getTaskById(db, input.taskId)
   if (!existing) throw new Error('任务不存在')
-  assertTaskWritable(existing.groupId)
+  assertTaskWritable(db, existing.groupId)
   return updateGroupTask(db, {
     taskId: input.taskId,
     startDate: input.startDate,
@@ -144,7 +145,7 @@ export function updateTaskSchedule(db: Database, input: GanttScheduleInput): Tas
 }
 
 export function upsertTaskDependency(db: Database, input: UpsertDependencyInput): TaskDependency {
-  assertTaskWritable(input.groupId)
+  assertTaskWritable(db, input.groupId)
   const from = getTaskById(db, input.fromTaskId)
   const to = getTaskById(db, input.toTaskId)
   if (!from || !to || from.groupId !== input.groupId || to.groupId !== input.groupId) {
@@ -161,7 +162,7 @@ export function deleteTaskDependency(
   fromTaskId: string,
   toTaskId: string
 ): boolean {
-  assertTaskWritable(groupId)
+  assertTaskWritable(db, groupId)
   const ok = removeDependency(db, fromTaskId, toTaskId)
   if (ok) broadcastTasksChanged(groupId)
   return ok

@@ -21,6 +21,7 @@ import {
   updateTransferProgress
 } from '../storage/repositories/fileTransferRepository'
 import { generatePreview } from './previewService.ts'
+import { assertFileWritable } from './fileServiceHelpers'
 
 function filesRootDir(): string {
   const dir = join(app.getPath('userData'), 'files')
@@ -32,11 +33,6 @@ function broadcastTransfers(groupId: string): void {
   for (const win of BrowserWindow.getAllWindows()) {
     win.webContents.send(FILE_TRANSFER_PUSH_CHANNEL, groupId)
   }
-}
-
-function assertFileWritable(groupId: string): void {
-  if (groupId.startsWith('dm:')) throw new Error('私聊不支持文件')
-  if (groupId === 'demo-anonymous') throw new Error('匿名群不支持文件')
 }
 
 export function listGroupFiles(
@@ -100,7 +96,7 @@ export async function uploadFileFromPath(
   groupId: string,
   sourcePath: string
 ): Promise<FileMeta> {
-  assertFileWritable(groupId)
+  assertFileWritable(db, groupId)
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
     throw new Error('请先完成身份配置')

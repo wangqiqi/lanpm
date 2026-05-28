@@ -76,3 +76,12 @@
 .rowSelected :global(.ant-table-cell) {
   background: rgba(22, 119, 255, 0.08) !important;
 }
+
+.bookmarkPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  word-break: break-all;
+}

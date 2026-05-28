@@ -11,6 +11,7 @@ import FilesView from '@renderer/features/files/FilesView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import styles from './GroupView.module.css'
 
 const { Title, Text } = Typography
@@ -27,6 +28,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
   const getGroupLabel = useNavigationStore((s) => s.getGroupLabel)
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
   const getPeerDisplayName = useDmStore((s) => s.getPeerDisplayName)
   const touchSession = useDmStore((s) => s.touchSession)
   const localUserId = useIdentityStore((s) => s.user?.userId)
@@ -36,6 +38,15 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
       touchSession(groupId)
     }
   }, [groupId, touchSession])
+
+  useEffect(() => {
+    if (!groupId || isDmGroupId(groupId)) return
+    if (getGroupType(groupId) !== 'anonymous') return
+    void getLanpmApi().group.enterAnonymous(groupId)
+    return () => {
+      void getLanpmApi().group.leaveAnonymous(groupId)
+    }
+  }, [groupId, getGroupType])
 
   const chatTitle = (() => {
     if (!groupId) return '—'

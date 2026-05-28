@@ -1,10 +1,11 @@
 /**
- * M4 gantt adapter + file category smoke.
+ * M4 gantt adapter + file category + bookmark smoke.
  * Run: npm run verify:m4
  */
 import assert from 'node:assert/strict'
 import { tasksToGanttBars, defaultScheduleForTask, ganttDatesToYmd } from '../src/shared/task/ganttAdapter.ts'
 import { inferCategory } from '../src/shared/file/types.ts'
+import { exportBookmarkHtml, parseBookmarkHtml } from '../src/shared/file/bookmarks.ts'
 import type { Task } from '../src/shared/task/types.ts'
 
 const task: Task = {
@@ -39,5 +40,17 @@ assert.equal(dates.startDate, dates.endDate)
 
 assert.equal(inferCategory('png'), 'image')
 assert.equal(inferCategory('docx'), 'document')
+
+const sampleHtml = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<DT><A HREF="https://a.example.com">Alpha</A>
+<DT><A HREF="https://b.example.com">Beta</A>`
+const parsed = parseBookmarkHtml(sampleHtml)
+assert.equal(parsed.length, 2)
+assert.equal(parsed[0]?.url, 'https://a.example.com')
+assert.equal(parsed[1]?.title, 'Beta')
+
+const exported = exportBookmarkHtml(parsed, 'Test')
+assert.match(exported, /https:\/\/a\.example\.com/)
+assert.match(exported, /Alpha/)
 
 console.log('verify-m4: ok')

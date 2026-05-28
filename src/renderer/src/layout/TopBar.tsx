@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import {
   Avatar,
   Button,
@@ -13,6 +14,7 @@ import {
   DashboardOutlined,
   GlobalOutlined,
   MoonOutlined,
+  PlusOutlined,
   SunOutlined,
   UserOutlined
 } from '@ant-design/icons'
@@ -21,9 +23,12 @@ import type { MessageKey } from '@renderer/i18n/messages'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
+import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
+import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
 
 const { Text } = Typography
@@ -43,7 +48,9 @@ export default function TopBar(): React.ReactElement {
   const groups = useNavigationStore((s) => s.groups)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
+  const createGroup = useNavigationStore((s) => s.createGroup)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const [createOpen, setCreateOpen] = useState(false)
   const user = useIdentityStore((s) => s.user)
   const device = useIdentityStore((s) => s.device)
   const theme = useUiStore((s) => s.theme)
@@ -56,12 +63,17 @@ export default function TopBar(): React.ReactElement {
   }
 
   const handleGroupChange = (groupId: string): void => {
+    const prevType = getGroupType(activeGroupId)
+    if (prevType === 'anonymous' && activeGroupId !== groupId) {
+      void getLanpmApi().group.leaveAnonymous(activeGroupId)
+    }
+
     setActiveGroupId(groupId)
     const raw = VIEW_PATH_RE.exec(location.pathname)?.[1]
     const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'files']
     let view: AppView = views.includes(raw as AppView) ? (raw as AppView) : 'chat'
     const type = getGroupType(groupId)
-    if (!isViewAllowedForGroup(type, view)) {
+    if (!isViewAllowedForGroup(type, view, groupId)) {
       view = defaultViewForGroup(type)
     }
     navigate(groupViewPath(groupId, view))
@@ -74,14 +86,19 @@ export default function TopBar(): React.ReactElement {
       label: `${t('topbar.device')}：${device?.deviceName ?? '—'}`
     },
     { type: 'divider' },
-    { key: 'api', label: t('topbar.apiKey'), disabled: true }
+    {
+      key: 'api',
+      label: t('topbar.apiKey'),
+      onClick: () => navigate(cockpitPath())
+    }
   ]
 
   return (
     <header className={styles.bar}>
       <Space size="middle" align="center">
         <button type="button" className={styles.logo} onClick={handleLogoClick}>
-          {t('topbar.logo')}
+          <img src={logoUrl} alt="" className={styles.logoMark} width={24} height={24} />
+          <span>{t('topbar.logo')}</span>
         </button>
         <Select
           className={styles.projectSelect}
@@ -99,6 +116,9 @@ export default function TopBar(): React.ReactElement {
             )
           }))}
         />
+        <Button type="text" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+          创建群组
+        </Button>
         <Button
           type="text"
           icon={<DashboardOutlined />}
@@ -138,6 +158,14 @@ export default function TopBar(): React.ReactElement {
           </button>
         </Dropdown>
       </Space>
+      <CreateGroupModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreate={async (input) => {
+          const nav = await createGroup(input)
+          navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
+        }}
+      />
     </header>
   )
 }

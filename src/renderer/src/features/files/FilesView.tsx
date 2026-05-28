@@ -2,15 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Image,
+  Input,
   List,
+  Modal,
   Progress,
   Segmented,
+  Space,
   Spin,
   Table,
   Typography,
   message
 } from 'antd'
-import { UploadOutlined } from '@ant-design/icons'
+import { BookOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
 import { useFileStore } from '@renderer/stores/fileStore'
@@ -25,6 +28,7 @@ const CATEGORIES: { label: string; value: FileCategory | 'all' }[] = [
   { label: '图片', value: 'image' },
   { label: '视频', value: 'video' },
   { label: '代码', value: 'code' },
+  { label: '书签', value: 'bookmark' },
   { label: '其他', value: 'other' }
 ]
 
@@ -43,10 +47,17 @@ export default function FilesView(): React.ReactElement {
   const loadFiles = useFileStore((s) => s.loadFiles)
   const loadTransfers = useFileStore((s) => s.loadTransfers)
   const upload = useFileStore((s) => s.upload)
+  const addBookmark = useFileStore((s) => s.addBookmark)
+  const importBookmarks = useFileStore((s) => s.importBookmarks)
+  const exportBookmarks = useFileStore((s) => s.exportBookmarks)
 
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
   const [selected, setSelected] = useState<FileMeta | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [bookmarkOpen, setBookmarkOpen] = useState(false)
+  const [bookmarkUrl, setBookmarkUrl] = useState('')
+  const [bookmarkTitle, setBookmarkTitle] = useState('')
+  const [bookmarkSaving, setBookmarkSaving] = useState(false)
 
   useEffect(() => {
     if (!gid) return
@@ -66,11 +77,59 @@ export default function FilesView(): React.ReactElement {
       setPreviewUrl(null)
       return
     }
+    if (selected.isBookmark) {
+      setPreviewUrl(null)
+      return
+    }
     void getLanpmApi()
       .file.getPreviewUrl(selected.fileId)
       .then(setPreviewUrl)
       .catch(() => setPreviewUrl(null))
   }, [selected])
+
+  const saveBookmark = async (): Promise<void> => {
+    if (!gid) return
+    setBookmarkSaving(true)
+    try {
+      await addBookmark(gid, bookmarkUrl.trim(), bookmarkTitle.trim())
+      message.success('书签已添加')
+      setBookmarkOpen(false)
+      setBookmarkUrl('')
+      setBookmarkTitle('')
+      setCategory('bookmark')
+      void loadFiles(gid, 'bookmark')
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '添加书签失败')
+    } finally {
+      setBookmarkSaving(false)
+    }
+  }
+
+  const handleImportBookmarks = async (): Promise<void> => {
+    if (!gid) return
+    try {
+      const imported = await importBookmarks(gid)
+      if (imported.length === 0) {
+        message.info('未导入书签')
+        return
+      }
+      message.success(`已导入 ${imported.length} 个书签`)
+      setCategory('bookmark')
+      void loadFiles(gid, 'bookmark')
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '导入失败')
+    }
+  }
+
+  const handleExportBookmarks = async (): Promise<void> => {
+    if (!gid) return
+    try {
+      const path = await exportBookmarks(gid)
+      if (path) message.success(`已导出至 ${path}`)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '导出失败')
+    }
+  }
 
   const activeTransfers = useMemo(
     () => transfers.filter((t) => t.status === 'queued' || t.status === 'transferring'),
@@ -80,13 +139,13 @@ export default function FilesView(): React.ReactElement {
   const columns = [
     { title: '名称', dataIndex: 'name', key: 'name', ellipsis: true },
     { title: '类型', dataIndex: 'category', key: 'category', width: 80 },
-    { title: '大小', key: 'size', width: 90, render: (_: unknown, r: FileMeta) => formatSize(r.size) },
+    { title: '大小', key: 'size', width: 90, render: (_: unknown, r: FileMeta) => (r.isBookmark ? '—' : formatSize(r.size)) },
     {
       title: '预览',
       key: 'preview',
       width: 90,
       render: (_: unknown, r: FileMeta) =>
-        r.previewStatus === 'ready' ? '就绪' : r.previewStatus === 'converting' ? '转换中' : r.previewStatus === 'failed' ? '失败' : '—'
+        r.isBookmark ? '链接' : r.previewStatus === 'ready' ? '就绪' : r.previewStatus === 'converting' ? '转换中' : r.previewStatus === 'failed' ? '失败' : '—'
     }
   ]
 
@@ -98,17 +157,28 @@ export default function FilesView(): React.ReactElement {
           value={category}
           onChange={(v) => setCategory(v as FileCategory | 'all')}
         />
-        <Button
-          type="primary"
-          icon={<UploadOutlined />}
-          onClick={() =>
-            void upload(gid).catch((err: unknown) =>
-              message.error(err instanceof Error ? err.message : '上传失败')
-            )
-          }
-        >
-          上传文件
-        </Button>
+        <Space wrap>
+          <Button
+            type="primary"
+            icon={<UploadOutlined />}
+            onClick={() =>
+              void upload(gid).catch((err: unknown) =>
+                message.error(err instanceof Error ? err.message : '上传失败')
+              )
+            }
+          >
+            上传文件
+          </Button>
+          <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
+            添加书签
+          </Button>
+          <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
+            导入书签
+          </Button>
+          <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
+            导出书签
+          </Button>
+        </Space>
       </div>
 
       {activeTransfers.length > 0 && (
@@ -156,6 +226,14 @@ export default function FilesView(): React.ReactElement {
         <aside className={styles.previewPane}>
           {!selected ? (
             <Text type="secondary">选择文件查看预览</Text>
+          ) : selected.isBookmark ? (
+            <div className={styles.bookmarkPreview}>
+              <BookOutlined style={{ fontSize: 32, marginBottom: 12 }} />
+              <Text strong>{selected.bookmarkTitle ?? selected.name}</Text>
+              <a href={selected.bookmarkUrl} target="_blank" rel="noreferrer">
+                {selected.bookmarkUrl}
+              </a>
+            </div>
           ) : selected.previewStatus === 'converting' ? (
             <Text>本地转换中…（LibreOffice）</Text>
           ) : selected.previewStatus === 'failed' ? (
@@ -171,6 +249,36 @@ export default function FilesView(): React.ReactElement {
           )}
         </aside>
       </div>
+
+      <Modal
+        title="添加书签"
+        open={bookmarkOpen}
+        onCancel={() => setBookmarkOpen(false)}
+        onOk={() => void saveBookmark()}
+        confirmLoading={bookmarkSaving}
+        destroyOnHidden
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+          <div>
+            <Text type="secondary">URL</Text>
+            <Input
+              placeholder="https://example.com"
+              value={bookmarkUrl}
+              onChange={(e) => setBookmarkUrl(e.target.value)}
+              style={{ marginTop: 4 }}
+            />
+          </div>
+          <div>
+            <Text type="secondary">标题（可选）</Text>
+            <Input
+              placeholder="书签标题"
+              value={bookmarkTitle}
+              onChange={(e) => setBookmarkTitle(e.target.value)}
+              style={{ marginTop: 4 }}
+            />
+          </div>
+        </Space>
+      </Modal>
     </div>
   )
 }

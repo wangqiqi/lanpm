@@ -4,7 +4,10 @@ export const FILE_IPC = {
   list: 'file:list',
   upload: 'file:upload',
   getPreviewUrl: 'file:getPreviewUrl',
-  listTransfers: 'file:listTransfers'
+  listTransfers: 'file:listTransfers',
+  addBookmark: 'file:addBookmark',
+  importBookmarks: 'file:importBookmarks',
+  exportBookmarks: 'file:exportBookmarks'
 } as const
 
 export const FILE_CHUNK_SIZE = 256 * 1024

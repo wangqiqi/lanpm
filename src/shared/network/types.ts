@@ -34,6 +34,8 @@ export interface DiscoveryPayload {
   displayName: string
   listenPort: number
   capabilities: string[]
+  /** UDP 发现来源 IP（M6 真网 P2P 建链） */
+  host?: string
 }
 
 export type UserPresence = 'online' | 'away' | 'offline'

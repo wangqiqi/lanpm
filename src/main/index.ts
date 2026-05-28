@@ -6,8 +6,11 @@ import { registerChatIpc } from './ipc/chat'
 import { registerIdentityIpc } from './ipc/identity'
 import { registerTaskIpc } from './ipc/task'
 import { registerFileIpc } from './ipc/file'
+import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
+import { ensureSeedGroups } from './group/groupService'
 import { initNetworkStub, shutdownNetworkStub } from './network/stub'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
+import { resolveAppIconPath } from './appIcon'
 
 const isDev = !app.isPackaged
 
@@ -36,6 +39,7 @@ function resolvePreloadPath(): string {
 }
 
 function createWindow(): void {
+  const iconPath = resolveAppIconPath()
   const mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -43,6 +47,7 @@ function createWindow(): void {
     minHeight: 720,
     show: false,
     title: 'LanPM',
+    ...(iconPath ? { icon: iconPath } : {}),
     /** Linux/Windows：不显示 File/Edit/View 等原生菜单栏（应用内 TopBar 已承担导航） */
     autoHideMenuBar: true,
     webPreferences: {
@@ -84,12 +89,15 @@ app.whenReady().then(() => {
     Menu.setApplicationMenu(null)
 
     initDatabase()
+    ensureSeedGroups(getDatabase())
     initNetworkStub(getDatabase())
     initChatService(getDatabase())
     registerIdentityIpc()
     registerChatIpc()
     registerTaskIpc()
     registerFileIpc()
+    registerGroupIpc()
+    registerCockpitIpc()
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
     }

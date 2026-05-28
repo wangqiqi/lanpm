@@ -11,6 +11,9 @@
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: none;
   background: transparent;
   font-size: 17px;
@@ -19,6 +22,15 @@
   cursor: pointer;
   padding: 0 4px;
   color: var(--lanpm-text);
+}
+
+.logoMark {
+  flex-shrink: 0;
+  display: block;
+}
+
+:global(html[data-theme='dark']) .logoMark {
+  filter: brightness(1.15) saturate(1.1);
 }
 
 .logo:hover {

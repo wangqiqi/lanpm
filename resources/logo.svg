@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- LanPM mark for TopBar / small UI (transparent, brand blue) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <g fill="#0071e3">
+    <rect x="10" y="12" width="9" height="28" rx="4.5"/>
+    <rect x="10" y="36" width="28" height="9" rx="4.5"/>
+    <circle cx="42" cy="40.5" r="3.5"/>
+    <circle cx="50" cy="40.5" r="3.5"/>
+    <path
+      d="M22 14h12a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-4l-4 3v-3h-1a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4z"
+      fill-rule="evenodd"
+    />
+    <rect x="46" y="22" width="5" height="24" rx="1.5" opacity="1"/>
+    <rect x="53" y="26" width="5" height="20" rx="1.5" opacity="0.9"/>
+  </g>
+</svg>
