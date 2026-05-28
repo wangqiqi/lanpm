@@ -1,0 +1,56 @@
+import { create } from 'zustand'
+import type { ChatMessage } from '@shared/chat/types'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+
+interface ChatState {
+  messagesByGroup: Record<string, ChatMessage[]>
+  loading: Record<string, boolean>
+  loadMessages: (groupId: string) => Promise<void>
+  sendText: (groupId: string, text: string) => Promise<void>
+  upsertMessage: (message: ChatMessage) => void
+}
+
+function sortMessages(list: ChatMessage[]): ChatMessage[] {
+  return [...list].sort((a, b) => a.lamportTs - b.lamportTs || a.createdAt.localeCompare(b.createdAt))
+}
+
+function mergeMessage(list: ChatMessage[], message: ChatMessage): ChatMessage[] {
+  const idx = list.findIndex((m) => m.msgId === message.msgId)
+  if (idx >= 0) {
+    const next = [...list]
+    next[idx] = message
+    return sortMessages(next)
+  }
+  return sortMessages([...list, message])
+}
+
+export const useChatStore = create<ChatState>((set, get) => ({
+  messagesByGroup: {},
+  loading: {},
+  loadMessages: async (groupId) => {
+    set((s) => ({ loading: { ...s.loading, [groupId]: true } }))
+    try {
+      const messages = await getLanpmApi().chat.listMessages(groupId)
+      set((s) => ({
+        messagesByGroup: { ...s.messagesByGroup, [groupId]: sortMessages(messages) }
+      }))
+    } finally {
+      set((s) => ({ loading: { ...s.loading, [groupId]: false } }))
+    }
+  },
+  sendText: async (groupId, text) => {
+    const message = await getLanpmApi().chat.sendText(groupId, text)
+    get().upsertMessage(message)
+  },
+  upsertMessage: (message) => {
+    set((s) => {
+      const prev = s.messagesByGroup[message.groupId] ?? []
+      return {
+        messagesByGroup: {
+          ...s.messagesByGroup,
+          [message.groupId]: mergeMessage(prev, message)
+        }
+      }
+    })
+  }
+}))

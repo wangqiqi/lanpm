@@ -1,6 +1,7 @@
 import { Typography } from 'antd'
 import { useParams } from 'react-router-dom'
 import type { AppView } from '@shared/navigation/types'
+import ChatView from '@renderer/features/chat/ChatView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import styles from './GroupView.module.css'
 
@@ -17,6 +18,19 @@ const VIEW_LABELS: Record<AppView, string> = {
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
+
+  if (view === 'chat') {
+    return (
+      <div className={styles.root}>
+        <Title level={4} className={styles.chatTitle}>
+          {group?.name ?? groupId}
+        </Title>
+        <div className={styles.chatBody}>
+          <ChatView />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.root}>

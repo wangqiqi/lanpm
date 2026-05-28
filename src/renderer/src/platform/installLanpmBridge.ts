@@ -1,9 +1,20 @@
 import type { LanpmApi } from '@shared/lanpm-api'
 import { createBrowserLanpmStub } from '@renderer/platform/browserLanpmStub'
 
+function isElectronRenderer(): boolean {
+  return typeof navigator !== 'undefined' && /\bElectron\b/i.test(navigator.userAgent)
+}
+
 /** 在 Electron preload 未注入时（如浏览器打开 :5173）安装开发桩 */
 export function installLanpmBridge(): void {
   if (typeof window === 'undefined' || window.lanpm) return
+
+  if (isElectronRenderer()) {
+    console.error(
+      '[lanpm] Electron 窗口未注入 preload，无法读取本机主机名。请检查主进程 preload 路径。'
+    )
+    return
+  }
 
   if (import.meta.env.DEV) {
     window.lanpm = createBrowserLanpmStub()

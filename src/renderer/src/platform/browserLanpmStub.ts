@@ -1,7 +1,36 @@
+import type { ChatMessage } from '@shared/chat/types'
 import type { SetupInput, SetupStatus } from '@shared/identity'
+import { resolveDeviceName } from '@shared/identity/deviceName'
+
+const BROWSER_PREVIEW_DEVICE = '开发预览'
 import type { LanpmApi } from '@shared/lanpm-api'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
+const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
+
+function readChatMessages(groupId: string): ChatMessage[] {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+    if (!raw) return []
+    const all = JSON.parse(raw) as Record<string, ChatMessage[]>
+    return all[groupId] ?? []
+  } catch {
+    return []
+  }
+}
+
+function writeChatMessages(groupId: string, messages: ChatMessage[]): void {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+    const all = raw ? (JSON.parse(raw) as Record<string, ChatMessage[]>) : {}
+    all[groupId] = messages
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(all))
+  } catch {
+    /* ignore */
+  }
+}
+
+const chatListeners = new Set<(message: ChatMessage) => void>()
 
 function readStatus(): SetupStatus {
   try {
@@ -20,6 +49,10 @@ function writeStatus(status: SetupStatus): void {
 }
 
 /** 浏览器直连 Vite 时的身份 API 桩（无 Electron preload） */
+function previewDeviceName(): string {
+  return resolveDeviceName('', BROWSER_PREVIEW_DEVICE)
+}
+
 export function createBrowserLanpmStub(): LanpmApi {
   return {
     platform: 'browser',
@@ -28,9 +61,20 @@ export function createBrowserLanpmStub(): LanpmApi {
       chrome: 'dev',
       electron: 'dev'
     },
+    getSuggestedDeviceName: previewDeviceName,
     identity: {
-      getSetupStatus: async () => readStatus(),
+      getSetupStatus: async () => {
+        const status = readStatus()
+        if (!status.configured) {
+          return {
+            ...status,
+            suggestedDeviceName: previewDeviceName()
+          }
+        }
+        return status
+      },
       completeSetup: async (input: SetupInput) => {
+        const deviceName = previewDeviceName()
         const suffix = new Date().toISOString().slice(2, 4) + String(new Date().getMonth() + 1).padStart(2, '0')
         const userId = `${input.baseName}-${suffix}`
         const status: SetupStatus = {
@@ -45,11 +89,42 @@ export function createBrowserLanpmStub(): LanpmApi {
           },
           device: {
             deviceId: `dev-${crypto.randomUUID().slice(0, 8)}`,
-            deviceName: input.deviceName
+            deviceName
           }
         }
         writeStatus(status)
         return status
+      }
+    },
+    chat: {
+      listMessages: async (groupId) => readChatMessages(groupId),
+      sendText: async (groupId, text) => {
+        const status = readStatus()
+        if (!status.configured || !status.user || !status.device) {
+          throw new Error('请先完成身份配置')
+        }
+        const trimmed = text.trim()
+        if (!trimmed) throw new Error('消息不能为空')
+        const prev = readChatMessages(groupId)
+        const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+        const msg: ChatMessage = {
+          msgId: `msg_${crypto.randomUUID()}`,
+          groupId,
+          senderUserId: status.user.userId,
+          senderDeviceId: status.device.deviceId,
+          type: 'text',
+          content: { kind: 'text', text: trimmed },
+          lamportTs,
+          createdAt: new Date().toISOString(),
+          deliveryStatus: 'sent'
+        }
+        writeChatMessages(groupId, [...prev, msg])
+        for (const fn of chatListeners) fn(msg)
+        return msg
+      },
+      onMessage: (handler) => {
+        chatListeners.add(handler)
+        return () => chatListeners.delete(handler)
       }
     }
   }

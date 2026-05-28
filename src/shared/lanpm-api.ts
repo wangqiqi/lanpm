@@ -1,3 +1,4 @@
+import type { ChatMessage } from './chat/types'
 import type { SetupInput, SetupStatus } from './identity'
 
 export interface LanpmApi {
@@ -7,8 +8,15 @@ export interface LanpmApi {
     chrome: string
     electron: string
   }
+  /** 本机设备名（Electron：os.hostname()；浏览器预览：占位） */
+  getSuggestedDeviceName: () => string
   identity: {
     getSetupStatus: () => Promise<SetupStatus>
     completeSetup: (input: SetupInput) => Promise<SetupStatus>
+  }
+  chat: {
+    listMessages: (groupId: string) => Promise<ChatMessage[]>
+    sendText: (groupId: string, text: string) => Promise<ChatMessage>
+    onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
 }

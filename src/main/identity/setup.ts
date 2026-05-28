@@ -1,4 +1,7 @@
 import type { Database } from 'better-sqlite3'
+import { hostname } from 'node:os'
+import { resolveDeviceName } from '../../shared/identity/deviceName'
+import type { SetupInput, SetupStatus } from '../../shared/identity'
 import {
   getDeviceById,
   getUserById,
@@ -12,17 +15,10 @@ import { allocateUserIdWithLanCheck } from './suffixValidation'
 
 export const LOCAL_DEVICE_ID_KEY = 'local_device_id'
 
-export interface SetupInput {
-  baseName: string
-  deviceName: string
-  department?: string
-  avatarUrl?: string
-}
+export type { SetupInput, SetupStatus }
 
-export interface SetupStatus {
-  configured: boolean
-  user?: UserProfile
-  device?: LocalDevice
+export function getSuggestedDeviceName(): string {
+  return resolveDeviceName(hostname())
 }
 
 export function getLocalDeviceId(db: Database): string | null {
@@ -31,25 +27,28 @@ export function getLocalDeviceId(db: Database): string | null {
 
 export function getSetupStatus(db: Database): SetupStatus {
   const deviceId = getLocalDeviceId(db)
-  if (!deviceId) return { configured: false }
+  if (!deviceId) {
+    return { configured: false, suggestedDeviceName: getSuggestedDeviceName() }
+  }
 
   const device = getDeviceById(db, deviceId)
-  if (!device) return { configured: false }
+  if (!device) {
+    return { configured: false, suggestedDeviceName: getSuggestedDeviceName() }
+  }
 
   const user = getUserById(db, device.userId)
-  if (!user) return { configured: false }
+  if (!user) {
+    return { configured: false, suggestedDeviceName: getSuggestedDeviceName() }
+  }
 
   return { configured: true, user, device }
 }
 
 export function completeSetup(db: Database, input: SetupInput): SetupStatus {
   const baseName = input.baseName.trim()
-  const deviceName = input.deviceName.trim()
+  const deviceName = getSuggestedDeviceName()
   if (baseName.length < 2 || baseName.length > 20) {
     throw new Error('用户名须为 2–20 个字符')
-  }
-  if (deviceName.length < 1 || deviceName.length > 30) {
-    throw new Error('设备名称须为 1–30 个字符')
   }
 
   const { userId, suffix, displayName } = allocateUserIdWithLanCheck(db, baseName)

@@ -1,12 +1,10 @@
-import { useState } from 'react'
-import { Avatar, Button, Card, Form, Input, Space, Typography, message } from 'antd'
-import { UploadOutlined } from '@ant-design/icons'
+import { useEffect, useState } from 'react'
+import { Avatar, Button, Form, Input, Upload, message, type UploadProps } from 'antd'
+import { ReloadOutlined, UploadOutlined } from '@ant-design/icons'
 import type { SetupStatus } from '@shared/identity'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { fileToDataUrl, randomAvatarDataUrl } from './avatar'
 import styles from './SetupWizard.module.css'
-
-const { Title, Text } = Typography
 
 interface SetupWizardProps {
   onComplete: (status: SetupStatus) => void
@@ -14,7 +12,6 @@ interface SetupWizardProps {
 
 interface FormValues {
   baseName: string
-  deviceName: string
   department?: string
 }
 
@@ -22,28 +19,53 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
   const [form] = Form.useForm<FormValues>()
   const [avatarUrl, setAvatarUrl] = useState(() => randomAvatarDataUrl('LP'))
   const [submitting, setSubmitting] = useState(false)
+  const [deviceName, setDeviceName] = useState('')
 
   const baseName = Form.useWatch('baseName', form) ?? ''
+
+  useEffect(() => {
+    let cancelled = false
+    try {
+      const api = getLanpmApi()
+      const fromHost = api.getSuggestedDeviceName()
+      if (!cancelled && fromHost) setDeviceName(fromHost)
+    } catch {
+      /* preload / 桩未就绪 */
+    }
+    void getLanpmApi()
+      .identity.getSetupStatus()
+      .then((status) => {
+        if (!cancelled && status.suggestedDeviceName) {
+          setDeviceName(status.suggestedDeviceName)
+        }
+      })
+      .catch(() => {
+        /* 展示占位即可 */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleRandomAvatar = (): void => {
     setAvatarUrl(randomAvatarDataUrl(baseName || 'LP'))
   }
 
-  const handleUpload = async (file: File): Promise<boolean> => {
+  const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
     if (!file.type.startsWith('image/')) {
       message.error('请选择图片文件')
-      return false
+      return Upload.LIST_IGNORE
     }
     if (file.size > 512 * 1024) {
       message.error('头像图片不超过 512KB')
-      return false
+      return Upload.LIST_IGNORE
     }
     try {
       setAvatarUrl(await fileToDataUrl(file))
     } catch {
       message.error('读取图片失败')
     }
-    return false
+    return Upload.LIST_IGNORE
   }
 
   const onFinish = async (values: FormValues): Promise<void> => {
@@ -51,7 +73,6 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     try {
       const status = await getLanpmApi().identity.completeSetup({
         baseName: values.baseName.trim(),
-        deviceName: values.deviceName.trim(),
         department: values.department?.trim() || undefined,
         avatarUrl
       })
@@ -66,81 +87,92 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
 
   return (
     <div className={styles.wrap}>
-      <Card className={styles.card} variant="borderless">
-        <Title level={3} style={{ marginTop: 0, textAlign: 'center' }}>
-          欢迎使用 LanPM
-        </Title>
-        <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginBottom: 24 }}>
-          完成首次配置后即可使用
-        </Text>
+      <div className={styles.sheet}>
+        <header className={styles.hero}>
+          <div className={styles.appIcon} aria-hidden>
+            L
+          </div>
+          <h1 className={styles.title}>欢迎使用 LanPM</h1>
+          <p className={styles.subtitle}>设置本机身份，加入局域网协作</p>
+        </header>
+
+        <section className={styles.avatarBlock}>
+          <Avatar src={avatarUrl} size={88} className={styles.avatar} />
+          <div className={styles.avatarLinks}>
+            <button type="button" className={styles.linkBtn} onClick={handleRandomAvatar}>
+              <ReloadOutlined />
+              随机头像
+            </button>
+            <Upload accept="image/*" showUploadList={false} beforeUpload={beforeUpload}>
+              <button type="button" className={styles.linkBtn}>
+                <UploadOutlined />
+                上传照片
+              </button>
+            </Upload>
+          </div>
+        </section>
 
         <Form<FormValues>
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={{ deviceName: '' }}
-          requiredMark="optional"
+          requiredMark={false}
+          className={styles.form}
         >
-          <Form.Item
-            label="用户名"
-            name="baseName"
-            rules={[
-              { required: true, message: '请输入用户名' },
-              { min: 2, max: 20, message: '用户名为 2–20 个字符' }
-            ]}
-          >
-            <Input placeholder="如：张三" maxLength={20} showCount />
-          </Form.Item>
-
-          <Form.Item
-            label="设备名称"
-            name="deviceName"
-            rules={[
-              { required: true, message: '请输入设备名称' },
-              { max: 30, message: '设备名称不超过 30 个字符' }
-            ]}
-          >
-            <Input placeholder="如：办公本" maxLength={30} showCount />
-          </Form.Item>
-
-          <Form.Item label="部门（可选）" name="department">
-            <Input placeholder="如：研发部" maxLength={50} />
-          </Form.Item>
-
-          <Form.Item label="头像（可选）">
-            <div className={styles.avatarRow}>
-              <Avatar src={avatarUrl} size={72} className={styles.avatarPreview} />
-              <Space direction="vertical" size="small">
-                <Button onClick={handleRandomAvatar}>随机生成</Button>
-                <Button icon={<UploadOutlined />}>
-                  <label style={{ cursor: 'pointer' }}>
-                    上传图片
-                    <input
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) void handleUpload(file)
-                        e.target.value = ''
-                      }}
-                    />
-                  </label>
-                </Button>
-              </Space>
+          <section className={styles.group} aria-label="基本信息">
+            <Form.Item
+              name="baseName"
+              className={styles.rowItem}
+              rules={[
+                { required: true, message: '请输入用户名' },
+                { min: 2, max: 20, message: '2–20 个字符' }
+              ]}
+            >
+              <div className={styles.row}>
+                <span className={styles.rowLabel}>用户名</span>
+                <Input
+                  variant="borderless"
+                  className={styles.rowInput}
+                  placeholder="必填"
+                  maxLength={20}
+                />
+              </div>
+            </Form.Item>
+            <div className={styles.divider} role="separator" />
+            <div className={styles.row} aria-live="polite">
+              <span className={styles.rowLabel}>设备名称</span>
+              <span className={styles.rowValue}>{deviceName || '识别中…'}</span>
             </div>
-            <Text type="secondary" className={styles.hint}>
-              若局域网内已有同名用户，将自动添加 -yymm 后缀以保证唯一
-            </Text>
-          </Form.Item>
+            <div className={styles.divider} role="separator" />
+            <Form.Item name="department" className={styles.rowItem}>
+              <div className={styles.row}>
+                <span className={styles.rowLabel}>部门</span>
+                <Input
+                  variant="borderless"
+                  className={styles.rowInput}
+                  placeholder="选填"
+                  maxLength={50}
+                />
+              </div>
+            </Form.Item>
+          </section>
 
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block size="large" loading={submitting}>
-              完成
-            </Button>
-          </Form.Item>
+          <p className={styles.footnote}>
+            设备名称根据本机系统自动识别，用于区分你的多台电脑。若局域网内已有同名用户，将自动添加
+            -yymm 后缀以保证唯一。
+          </p>
+
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            loading={submitting}
+            className={styles.submitBtn}
+          >
+            继续
+          </Button>
         </Form>
-      </Card>
+      </div>
     </div>
   )
 }

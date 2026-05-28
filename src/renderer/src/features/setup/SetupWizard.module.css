@@ -3,27 +3,178 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: linear-gradient(160deg, #f0f5ff 0%, #fafafa 45%);
+  padding: 48px 24px 56px;
+  background: var(--lanpm-bg);
 }
 
-.card {
+.sheet {
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
 }
 
-.avatarRow {
+/* —— Hero（类似 macOS 首次设置） —— */
+.hero {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.appIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--lanpm-accent);
+  box-shadow: var(--lanpm-shadow);
+  letter-spacing: -0.03em;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--lanpm-text);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--lanpm-text-secondary);
+  font-weight: 400;
+}
+
+/* —— 头像区（居中，类似 Apple ID） —— */
+.avatarBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.avatarLinks {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: 4px;
 }
 
-.avatarPreview {
-  border: 2px solid rgba(5, 5, 5, 0.06);
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lanpm-accent);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
 
-.hint {
-  display: block;
-  margin-top: 4px;
+.linkBtn:hover {
+  background: var(--lanpm-hover-bg);
+}
+
+/* —— iOS 风格分组列表 —— */
+.group {
+  background: var(--lanpm-surface-group);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 0.5px var(--lanpm-separator),
+    var(--lanpm-shadow);
+  margin-bottom: 12px;
+}
+
+.rowItem {
+  margin-bottom: 0 !important;
+}
+
+.rowItem :global(.ant-form-item-explain-error) {
+  padding: 0 16px 10px;
+  font-size: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.rowLabel {
+  flex: 0 0 72px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--lanpm-text);
+}
+
+.rowInput {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 15px !important;
+  padding: 10px 0 !important;
+  color: var(--lanpm-text) !important;
+}
+
+.rowInput::placeholder {
+  color: var(--lanpm-text-tertiary);
+  text-align: right;
+}
+
+.rowValue {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 15px;
+  color: var(--lanpm-text-secondary);
+}
+
+.divider {
+  height: 0.5px;
+  margin-left: 16px;
+  background: var(--lanpm-separator);
+}
+
+.footnote {
+  margin: 0 0 20px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--lanpm-text-secondary);
+  text-align: center;
+}
+
+.submitBtn {
+  height: 50px !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  border: none !important;
+  background: var(--lanpm-accent) !important;
+  box-shadow: none !important;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--lanpm-accent-hover) !important;
+}
+
+.form :global(.ant-btn-primary:active) {
+  transform: scale(0.98);
 }

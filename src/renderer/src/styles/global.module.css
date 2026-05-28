@@ -6,25 +6,62 @@
   font-family:
     -apple-system,
     BlinkMacSystemFont,
+    'SF Pro Text',
+    'SF Pro Display',
     'Segoe UI',
     Roboto,
     'Helvetica Neue',
     Arial,
     sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :global(*) {
   box-sizing: border-box;
 }
 
+/* Apple HIG 风格令牌 — 亮色 */
 :global(html[data-theme='light']) {
-  --lanpm-nav-bg: #ffffff;
-  --lanpm-bar-border: rgba(5, 5, 5, 0.06);
-  --lanpm-hover-bg: rgba(0, 0, 0, 0.04);
+  --lanpm-bg: #f5f5f7;
+  --lanpm-surface: rgba(255, 255, 255, 0.78);
+  --lanpm-surface-solid: #ffffff;
+  --lanpm-surface-group: #ffffff;
+  --lanpm-text: #1d1d1f;
+  --lanpm-text-secondary: #86868b;
+  --lanpm-text-tertiary: #aeaeb2;
+  --lanpm-accent: #0071e3;
+  --lanpm-accent-hover: #0077ed;
+  --lanpm-separator: rgba(60, 60, 67, 0.18);
+  --lanpm-nav-bg: rgba(255, 255, 255, 0.72);
+  --lanpm-bar-border: rgba(60, 60, 67, 0.12);
+  --lanpm-hover-bg: rgba(60, 60, 67, 0.06);
+  --lanpm-fill-secondary: rgba(120, 120, 128, 0.12);
+  --lanpm-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  --lanpm-blur: saturate(180%) blur(20px);
 }
 
+/* 暗色 */
 :global(html[data-theme='dark']) {
-  --lanpm-nav-bg: #141414;
-  --lanpm-bar-border: rgba(255, 255, 255, 0.12);
+  --lanpm-bg: #000000;
+  --lanpm-surface: rgba(28, 28, 30, 0.78);
+  --lanpm-surface-solid: #1c1c1e;
+  --lanpm-surface-group: #1c1c1e;
+  --lanpm-text: #f5f5f7;
+  --lanpm-text-secondary: #98989d;
+  --lanpm-text-tertiary: #636366;
+  --lanpm-accent: #0a84ff;
+  --lanpm-accent-hover: #409cff;
+  --lanpm-separator: rgba(84, 84, 88, 0.65);
+  --lanpm-nav-bg: rgba(28, 28, 30, 0.72);
+  --lanpm-bar-border: rgba(84, 84, 88, 0.36);
   --lanpm-hover-bg: rgba(255, 255, 255, 0.08);
+  --lanpm-fill-secondary: rgba(120, 120, 128, 0.24);
+  --lanpm-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+  --lanpm-blur: saturate(180%) blur(20px);
+}
+
+:global(body) {
+  background: var(--lanpm-bg);
+  color: var(--lanpm-text);
 }

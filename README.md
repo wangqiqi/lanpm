@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
-- 代码：`v0.5.2-m1` — M0 完成 + M1 主框架（五视图路由、顶栏、主题、i18n）；下一步 M2 聊天主链路
+- 代码：`v0.6.0-m2` — M0/M1 完成 + M2-01 文本聊天（Stub 联调）；下一步 M2 代码块/回执/双实例验收
 - 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
 
 ## 本地开发

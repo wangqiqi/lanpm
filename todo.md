@@ -27,7 +27,7 @@
 
 - [x] `M0-04` [P0] 建 SQLite 初始化脚本（按 `docs/04` §11 DDL）（DoD：首次启动自动建库建表；证据：`npm run verify:storage`；`app.whenReady` → `initDatabase()` → `{userData}/lanpm.db`）
 - [x] `M0-05` [P0] 实现 `users/devices` 读写仓储（DoD：可写入并读回 `userId/deviceId`；证据：`userRepository`/`deviceRepository` + `verify:storage` 往返）
-- [x] `M0-06` [P0] 首次配置向导 UI（用户名/设备名/部门/头像）（DoD：未配置时强制进入向导；证据：`SetupWizard` + `identity:*` IPC；`sync_meta.local_device_id` 持久化）
+- [x] `M0-06` [P0] 首次配置向导 UI（用户名/部门/头像；设备名自动 hostname）（DoD：未配置时强制进入向导；`getSuggestedDeviceName` + `completeSetup` 无主填设备名；`sync_meta.local_device_id` 持久化）
 - [x] `M0-07` [P0] 后缀规则：自动 `-yymm` + 手动唯一性校验（DoD：`npm run verify:suffix`；`allocateUserIdWithLanCheck` 本机 DB + LAN peer 集）
 - [x] `M0-08` [P0] 定义传输接口 `NetworkTransport`（DoD：`src/shared/network/types.ts` 对齐 `docs/04` §6.4）
 - [x] `M0-09` [P0] 实现 `NetworkStub.publish/subscribe/discoverPeers`（DoD：`npm run verify:network-stub`；`$TMP/lanpm-stub` 文件总线双实例）
@@ -55,7 +55,7 @@
 
 ### M2-A 消息能力
 
-- [ ] `M2-01` [P0] 文本消息发送/接收（dep: M0-09）
+- [x] `M2-01` [P0] 文本消息发送/接收（dep: M0-09）（DoD：`chatService` + `ChatView` + `npm run verify:chat`；NetworkStub 双实例可收发）
 - [ ] `M2-02` [P0] 代码消息（语言识别 + 高亮）
 - [ ] `M2-03` [P0] @提及与桌面通知
 - [ ] `M2-04` [P0] 私聊入口与会话切换
@@ -145,3 +145,4 @@
 - [x] `M1-03` 群组类型 Tab 规则（占位三群组）
 - [x] `M1-04` UI 组件库已拍板（Ant Design 5.x + CSS Modules + Zustand）
 - [x] `M1-02`~`M1-06` 顶部栏 + 主题 + i18n（`verify:m1`）
+- [x] `M2-01` 文本消息收发（`verify:chat`）

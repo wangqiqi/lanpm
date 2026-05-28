@@ -1,5 +1,7 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, Menu, shell } from 'electron'
 import { join } from 'path'
+import { initChatService, shutdownChatService } from './chat/chatService'
+import { registerChatIpc } from './ipc/chat'
 import { registerIdentityIpc } from './ipc/identity'
 import { initNetworkStub, shutdownNetworkStub } from './network/stub'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
@@ -14,12 +16,17 @@ function createWindow(): void {
     minHeight: 720,
     show: false,
     title: 'LanPM',
+    /** Linux/Windows：不显示 File/Edit/View 等原生菜单栏（应用内 TopBar 已承担导航） */
+    autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false
     }
   })
+
+  mainWindow.setMenu(null)
+  mainWindow.setMenuBarVisibility(false)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -38,9 +45,14 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  // 移除应用级菜单（macOS 菜单栏 / Win·Linux 默认菜单模板）
+  Menu.setApplicationMenu(null)
+
   initDatabase()
   initNetworkStub(getDatabase())
+  initChatService(getDatabase())
   registerIdentityIpc()
+  registerChatIpc()
   if (!app.isPackaged) {
     console.info('[lanpm] SQLite ready at', getDatabasePath())
   }
@@ -56,6 +68,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  shutdownChatService()
   shutdownNetworkStub()
   closeDatabase()
 })

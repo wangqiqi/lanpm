@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { NetworkTransport } from '../../../shared/network'
+import { initChatService } from '../../chat/chatService'
 import { getSetupStatus } from '../../identity/setup'
 import { NetworkStub } from './NetworkStub'
 
@@ -47,6 +48,7 @@ export function refreshNetworkStubIdentity(db: Database): void {
   }
 
   transport = buildStub(status.device.deviceId, status.user.userId, status.user.displayName)
+  initChatService(db)
 }
 
 export function getNetworkTransport(): NetworkTransport | null {

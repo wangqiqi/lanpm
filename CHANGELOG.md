@@ -2,6 +2,26 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.6.0-m2] - 2026-05-28
+
+### Added
+- M2-01 文本消息：`chatService`（NetworkStub 收发 + SQLite 持久化）、`chat:*` IPC
+- `ChatView`：消息列表、输入框、Ctrl+Enter 发送、投递状态（⏳/✅）
+- `src/shared/chat/types.ts`：`ChatMessage` / `ChatPayload`（对齐 `docs/04` §3.3）
+- `npm run verify:chat`、`verify:m2`（Stub 双实例 + SQLite 冒烟）
+- `getSuggestedDeviceName()` + `deviceName.ts`（preload：`os.hostname()`）
+
+### Changed
+- 首次配置：仅手填用户名；设备名自动识别本机主机名（修复浏览器 `platform` 误显 `Linux`）
+- 桌面端：移除 File/Edit/View 等传统菜单栏（`Menu.setApplicationMenu(null)` + 窗口 `setMenu(null)`）
+- `SetupWizard`：iOS 风格分组表单；主题 CSS 变量贯通顶栏/底栏/向导
+- `GroupView`：聊天视图接入 `ChatView`（替换占位）
+- `browserLanpmStub`：Electron 不覆盖 preload；补齐 `chat` 开发桩
+- `todo.md` / `plan.md`：M2-01 完成；M0-06 设备名规则更新
+
+### Tag
+- `v0.6.0-m2` — M2 文本聊天 + 配置向导与桌面体验
+
 ## [0.5.2-m1] - 2026-05-28
 
 ### Added
