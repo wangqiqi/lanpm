@@ -77,8 +77,32 @@
 
 .cardTitle {
   font-size: 14px;
-  margin-bottom: 6px;
   word-break: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.cardDelete {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--lanpm-text-tertiary, rgba(0, 0, 0, 0.35));
+  cursor: pointer;
+  line-height: 1;
+}
+
+.cardDelete:hover {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.08);
 }
 
 .cardMeta {

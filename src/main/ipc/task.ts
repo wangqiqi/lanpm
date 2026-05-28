@@ -5,6 +5,7 @@ import { TASK_IPC } from '../../shared/task/channels'
 import {
   createGroupTask,
   createTaskFromChat,
+  deleteGroupTask,
   deleteTaskDependency,
   listGroupTasks,
   moveGroupTask,
@@ -55,4 +56,9 @@ export function registerTaskIpc(): void {
       return deleteTaskDependency(getDatabase(), groupId, fromTaskId, toTaskId)
     }
   )
+
+  ipcMain.handle(TASK_IPC.deleteTask, (_event, taskId: string) => {
+    if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
+    return deleteGroupTask(getDatabase(), taskId)
+  })
 }

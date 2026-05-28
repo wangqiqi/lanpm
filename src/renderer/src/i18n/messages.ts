@@ -4,6 +4,10 @@ export type MessageKey =
   | 'topbar.logo'
   | 'topbar.cockpit'
   | 'topbar.searchPlaceholder'
+  | 'search.kindTask'
+  | 'search.kindMessage'
+  | 'search.loading'
+  | 'search.empty'
   | 'topbar.toggleTheme'
   | 'topbar.userFallback'
   | 'topbar.profile'
@@ -25,6 +29,10 @@ const zhCN: Record<MessageKey, string> = {
   'topbar.logo': 'LanPM',
   'topbar.cockpit': '驾驶舱',
   'topbar.searchPlaceholder': '搜索任务、消息…',
+  'search.kindTask': '任务',
+  'search.kindMessage': '消息',
+  'search.loading': '搜索中…',
+  'search.empty': '无匹配结果',
   'topbar.toggleTheme': '切换主题',
   'topbar.userFallback': '用户',
   'topbar.profile': '个人设置（占位）',
@@ -47,6 +55,10 @@ const enUS: Record<MessageKey, string> = {
   'topbar.logo': 'LanPM',
   'topbar.cockpit': 'Cockpit',
   'topbar.searchPlaceholder': 'Search tasks, messages…',
+  'search.kindTask': 'Task',
+  'search.kindMessage': 'Message',
+  'search.loading': 'Searching…',
+  'search.empty': 'No results',
   'topbar.toggleTheme': 'Toggle theme',
   'topbar.userFallback': 'User',
   'topbar.profile': 'Profile (placeholder)',

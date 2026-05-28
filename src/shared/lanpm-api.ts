@@ -55,7 +55,11 @@ export interface LanpmApi {
     updateSchedule: (input: GanttScheduleInput) => Promise<Task>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
+    deleteTask: (taskId: string) => Promise<boolean>
     onTasksChanged: (handler: (groupId: string) => void) => () => void
+  }
+  search: {
+    query: (query: string) => Promise<import('./search/types').GlobalSearchResult>
   }
   file: {
     listFiles: (groupId: string, category?: string) => Promise<import('./file/types').FileMeta[]>

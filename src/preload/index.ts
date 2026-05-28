@@ -46,6 +46,7 @@ const api: LanpmApi = {
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>
       ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),
+    deleteTask: (taskId) => ipcRenderer.invoke('task:deleteTask', taskId),
     onTasksChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)
@@ -89,6 +90,9 @@ const api: LanpmApi = {
     evaluateProjects: () => ipcRenderer.invoke('cockpit:evaluateProjects'),
     getAiConfig: () => ipcRenderer.invoke('cockpit:getAiConfig'),
     saveAiConfig: (input) => ipcRenderer.invoke('cockpit:saveAiConfig', input)
+  },
+  search: {
+    query: (query) => ipcRenderer.invoke('search:query', query)
   }
 }
 

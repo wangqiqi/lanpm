@@ -16,6 +16,7 @@ import {
   getTaskById,
   insertTask,
   listTasksByGroup,
+  softDeleteTask,
   updateTaskRow
 } from '../storage/repositories/taskRepository'
 import {
@@ -154,6 +155,15 @@ export function upsertTaskDependency(db: Database, input: UpsertDependencyInput)
   const dep = upsertDependency(db, input)
   broadcastTasksChanged(input.groupId)
   return dep
+}
+
+export function deleteGroupTask(db: Database, taskId: string): boolean {
+  const existing = getTaskById(db, taskId)
+  if (!existing) return false
+  assertTaskWritable(db, existing.groupId)
+  const ok = softDeleteTask(db, taskId)
+  if (ok) broadcastTasksChanged(existing.groupId)
+  return ok
 }
 
 export function deleteTaskDependency(

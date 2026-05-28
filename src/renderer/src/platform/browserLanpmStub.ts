@@ -432,6 +432,18 @@ export function createBrowserLanpmStub(): LanpmApi {
         throw new Error('浏览器预览暂不支持甘特依赖')
       },
       removeDependency: async () => false,
+      deleteTask: async (taskId) => {
+        const all = readAllTasks()
+        for (const [groupId, list] of Object.entries(all)) {
+          if (!list.some((t) => t.taskId === taskId)) continue
+          writeGroupTasks(
+            groupId,
+            list.filter((t) => t.taskId !== taskId)
+          )
+          return true
+        }
+        return false
+      },
       onTasksChanged: (handler) => {
         taskListeners.add(handler)
         return () => taskListeners.delete(handler)
@@ -528,6 +540,59 @@ export function createBrowserLanpmStub(): LanpmApi {
         dataPolicy: 'desensitized-only' as const,
         hasApiKey: true
       })
+    },
+    search: {
+      query: async (query) => {
+        const q = query.trim()
+        const lower = q.toLowerCase()
+        if (!lower) return { query: q, hits: [] }
+        const groupNames: Record<string, string> = {
+          'demo-project': '示例项目',
+          'demo-function': '示例职能群',
+          'demo-anonymous': '示例匿名群'
+        }
+        const hits: import('@shared/search/types').GlobalSearchHit[] = []
+        for (const [groupId, tasks] of Object.entries(readAllTasks())) {
+          for (const t of tasks) {
+            if (t.title.toLowerCase().includes(lower)) {
+              hits.push({
+                kind: 'task',
+                groupId,
+                taskId: t.taskId,
+                title: t.title,
+                groupName: groupNames[groupId] ?? groupId
+              })
+            }
+          }
+        }
+        try {
+          const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+          const store = raw ? (JSON.parse(raw) as Record<string, import('@shared/chat/types').ChatMessage[]>) : {}
+          for (const [groupId, msgs] of Object.entries(store)) {
+            for (const m of msgs) {
+              const text =
+                m.content.kind === 'text'
+                  ? m.content.text
+                  : m.content.kind === 'code'
+                    ? m.content.code
+                    : m.content.kind === 'task_ref'
+                      ? m.content.title
+                      : ''
+              if (!text.toLowerCase().includes(lower)) continue
+              hits.push({
+                kind: 'message',
+                groupId,
+                msgId: m.msgId,
+                snippet: text.slice(0, 60),
+                groupName: groupNames[groupId] ?? groupId
+              })
+            }
+          }
+        } catch {
+          /* ignore */
+        }
+        return { query: q, hits: hits.slice(0, 16) }
+      }
     }
   }
 }

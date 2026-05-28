@@ -1,4 +1,5 @@
-import { Tag } from 'antd'
+import { Popconfirm, Tag } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task, TaskPriority } from '@shared/task/types'
@@ -12,9 +13,10 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
 
 interface KanbanCardProps {
   task: Task
+  onDelete?: (taskId: string) => void
 }
 
-export default function KanbanCard({ task }: KanbanCardProps): React.ReactElement {
+export default function KanbanCard({ task, onDelete }: KanbanCardProps): React.ReactElement {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.taskId,
     data: { task }
@@ -32,7 +34,32 @@ export default function KanbanCard({ task }: KanbanCardProps): React.ReactElemen
       {...listeners}
       {...attributes}
     >
-      <div className={styles.cardTitle}>{task.title}</div>
+      <div className={styles.cardHeader}>
+        <div className={styles.cardTitle}>{task.title}</div>
+        {onDelete && (
+          <Popconfirm
+            title="删除此任务？"
+            description="软删除，甘特与树视图将同步移除。"
+            okText="删除"
+            cancelText="取消"
+            onConfirm={(e) => {
+              e?.stopPropagation()
+              onDelete(task.taskId)
+            }}
+            onCancel={(e) => e?.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={styles.cardDelete}
+              aria-label="删除任务"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DeleteOutlined />
+            </button>
+          </Popconfirm>
+        )}
+      </div>
       <div className={styles.cardMeta}>
         <Tag color={PRIORITY_COLOR[task.priority]}>{task.priority}</Tag>
         {task.assigneeUserId && <span>@{task.assigneeUserId}</span>}

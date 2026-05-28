@@ -17,6 +17,7 @@ function mustExist(rel: string): void {
 const checks: { section: string; path: string }[] = [
   { section: '16.1 首次配置', path: 'src/renderer/src/features/setup/SetupWizard.tsx' },
   { section: '16.2 主框架', path: 'src/renderer/src/layout/TopBar.tsx' },
+  { section: '16.2 全局搜索', path: 'src/main/search/searchService.ts' },
   { section: '16.2 五视图', path: 'src/renderer/src/layout/BottomNav.tsx' },
   { section: '16.3 聊天', path: 'src/renderer/src/features/chat/ChatView.tsx' },
   { section: '16.4 看板', path: 'src/renderer/src/features/board/BoardView.tsx' },

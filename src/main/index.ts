@@ -7,6 +7,7 @@ import { registerIdentityIpc } from './ipc/identity'
 import { registerTaskIpc } from './ipc/task'
 import { registerFileIpc } from './ipc/file'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
+import { registerSearchIpc } from './ipc/search'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork, refreshNetworkIdentity } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
@@ -98,6 +99,7 @@ app.whenReady().then(() => {
     registerFileIpc()
     registerGroupIpc()
     registerCockpitIpc()
+    registerSearchIpc()
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
     }

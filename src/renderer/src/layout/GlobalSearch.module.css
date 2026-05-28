@@ -1,0 +1,52 @@
+.root {
+  width: 220px;
+}
+
+.root :global(.ant-select-selector) {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.input {
+  width: 100%;
+  height: 32px;
+  padding: 4px 11px;
+  border: none;
+  border-radius: 8px;
+  background: var(--lanpm-fill-secondary);
+  color: var(--lanpm-text);
+  font-size: 14px;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--lanpm-text-tertiary);
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.optionIcon {
+  margin-top: 3px;
+  color: var(--lanpm-accent);
+}
+
+.optionBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.optionTitle {
+  display: block;
+  max-width: 280px;
+}
+
+.optionMeta {
+  font-size: 11px;
+}

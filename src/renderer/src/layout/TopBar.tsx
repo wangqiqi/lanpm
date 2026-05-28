@@ -4,7 +4,6 @@ import {
   Avatar,
   Button,
   Dropdown,
-  Input,
   Select,
   Space,
   Typography,
@@ -28,6 +27,7 @@ import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/t
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
+import GlobalSearch from '@renderer/layout/GlobalSearch'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
 
@@ -129,12 +129,7 @@ export default function TopBar(): React.ReactElement {
       </Space>
 
       <Space size="middle" align="center">
-        <Input.Search
-          className={styles.search}
-          placeholder={t('topbar.searchPlaceholder')}
-          allowClear
-          disabled
-        />
+        <GlobalSearch />
         <Button
           type="text"
           aria-label={t('topbar.toggleTheme')}

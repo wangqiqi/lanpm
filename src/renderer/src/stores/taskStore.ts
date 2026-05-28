@@ -12,6 +12,7 @@ interface TaskState {
   updateSchedule: (input: GanttScheduleInput) => Promise<Task>
   upsertDependency: (input: UpsertDependencyInput) => Promise<void>
   moveTask: (input: MoveTaskInput) => Promise<Task>
+  deleteTask: (taskId: string) => Promise<boolean>
   createFromChat: (groupId: string, title: string) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
   setTasks: (groupId: string, tasks: Task[]) => void
 }
@@ -75,6 +76,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     )
     if (groupId) await get().loadTasks(groupId)
     return task
+  },
+
+  deleteTask: async (taskId) => {
+    const existing = get().tasksByGroup
+    const groupId = Object.keys(existing).find((gid) =>
+      existing[gid]?.some((t) => t.taskId === taskId)
+    )
+    const ok = await getLanpmApi().task.deleteTask(taskId)
+    if (ok && groupId) await get().loadTasks(groupId)
+    return ok
   },
 
   createFromChat: async (groupId, title) => {

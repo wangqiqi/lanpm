@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.2] - 2026-05-28
+
+### Added
+- **品牌图标**：标准聊天气泡 + 内置 Wi‑Fi（双弧）+ 橙色 TODO 热点圆心；`npm run build:icons` 从 SVG 生成 PNG/ICO
+- **顶栏全局搜索**：`search:query` IPC、`searchRepository`（SQLite FTS）、`GlobalSearch` 组件；`npm run verify:search`
+- **看板删除任务**：`task:deleteTask` 软删除 + `KanbanCard` Popconfirm
+
+### Changed
+- `resources/icon.svg` / `logo.svg`：与 `--lanpm-accent` 蓝白主色 + `#ff9f0a` 任务点缀一致；Wi‑Fi 区域 scale 0.50
+- `docs/08`：RC 后迭代项移除「全局搜索 / 看板删除」占位说明
+- `todo.md` 精简；M0–M7 执行清单归档至 `archive/20260528_234920_M7完成_todo执行清单归档.md`
+
+### Tag
+- `v1.0.0-rc.2` — RC2 品牌图标 + 全局搜索 + 看板删任务
+
 ## [1.0.0-rc.1] - 2026-05-28
 
 ### Added

@@ -26,12 +26,14 @@ function KanbanColumn({
   status,
   tasks,
   isOver,
-  invalid
+  invalid,
+  onDeleteTask
 }: {
   status: TaskStatus
   tasks: Task[]
   isOver: boolean
   invalid: boolean
+  onDeleteTask?: (taskId: string) => void
 }): React.ReactElement {
   const { setNodeRef } = useDroppable({ id: status })
 
@@ -46,7 +48,7 @@ function KanbanColumn({
       </div>
       <div className={styles.columnBody}>
         {tasks.map((task) => (
-          <KanbanCard key={task.taskId} task={task} />
+          <KanbanCard key={task.taskId} task={task} onDelete={onDeleteTask} />
         ))}
       </div>
     </div>
@@ -62,6 +64,7 @@ export default function BoardView(): React.ReactElement {
   const loadTasks = useTaskStore((s) => s.loadTasks)
   const createTask = useTaskStore((s) => s.createTask)
   const moveTask = useTaskStore((s) => s.moveTask)
+  const deleteTask = useTaskStore((s) => s.deleteTask)
 
   const [createOpen, setCreateOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -149,6 +152,19 @@ export default function BoardView(): React.ReactElement {
     void finishMove(taskId, targetStatus)
   }
 
+  const handleDelete = useCallback(
+    async (taskId: string) => {
+      try {
+        const ok = await deleteTask(taskId)
+        if (ok) message.success('任务已删除')
+        else message.warning('任务不存在')
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : '删除失败')
+      }
+    },
+    [deleteTask]
+  )
+
   const handleCreate = async (): Promise<void> => {
     const title = newTitle.trim()
     if (!title || !gid) return
@@ -190,6 +206,7 @@ export default function BoardView(): React.ReactElement {
                 tasks={tasksByColumn[status]}
                 isOver={overColumn === status}
                 invalid={false}
+                onDeleteTask={(id) => void handleDelete(id)}
               />
             ))}
           </div>
