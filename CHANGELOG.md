@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.3.2] - 2026-05-28
+
+### Added
+- 新增 `docs/00_文档导航.md`：文档索引、P0 追溯矩阵、已拍板决策摘要
+
+### Changed
+- 修复 `docs/01`：统一 Office 预览为 LibreOffice 本地链路，更新文档页眉
+- 修复 `docs/02`：React 状态管理表述、CRDT 术语补全、更新页眉
+- 修复 `docs/03`：补充 P0/P1 边界表、扩充验收项（私聊、`/task`、搜索、甘特依赖、文件续传、AI 手动触发、NFR）
+- 修复 `docs/04`：补充 NetworkStub/M6 切换说明与文档索引
+- 修复 `plan.md`：M2/M6 排期自洽（Stub 联调 → 真实网络）、维护规则纳入 `docs/01~04`
+- 重写 `README.md`：对齐 Electron v2.0 文档体系与当前仓库状态
+
+### Tag
+- `v0.3.2-docs-consistency-fix` — 文档自洽性与完整性修复
+
 ## [0.3.1] - 2026-05-28
 
 ### Added
