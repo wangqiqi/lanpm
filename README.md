@@ -8,9 +8,9 @@
 
 ```bash
 # 任选其一
-xdg-open index.html    # Linux
-open index.html        # macOS
-start index.html       # Windows
+xdg-open docs/index.html    # Linux
+open docs/index.html        # macOS
+start docs/index.html       # Windows
 ```
 
 或使用本地静态服务（推荐，避免部分 API 受 file:// 限制）：
@@ -24,7 +24,8 @@ python3 -m http.server 8080
 
 | 文件 | 说明 |
 |------|------|
-| `index.html` | 当前主原型（HTML + CSS + JS 单文件） |
+| `docs/index.html` | 当前主原型（HTML + CSS + JS 单文件） |
+| `docs/index2.html` | 原型迭代页面 |
 | `plan.md` | 重构与功能扩展计划 |
 | `CHANGELOG.md` | 版本与变更记录 |
 

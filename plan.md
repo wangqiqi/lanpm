@@ -1,6 +1,6 @@
 # LanPM 苹果风格重构计划
 
-> **仓库**：已初始化 Git（基线 tag `v0.1.0-prototype`）。以 `index.html` 为原型起点扩展需求。
+> **仓库**：已初始化 Git（基线 tag `v0.1.0-prototype`）。以 `docs/index.html` 为原型起点扩展需求。
 
 ## 目标
 将 LanPM 优化为苹果风格，部分界面更紧凑，底部面板分为4种全屏视角。
@@ -35,7 +35,7 @@
 - 优化动画过渡效果
 
 ## 文件变更
-- `index.html` - 重构主文件
+- `docs/index.html` - 重构主文件
 
 ## 执行步骤
 1. 重构 HTML 结构
