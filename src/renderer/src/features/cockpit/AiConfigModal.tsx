@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Form, Input, Modal, Select, Switch } from 'antd'
 import type { AiConfigInput, AiConfigView, AiProvider } from '@shared/cockpit/types'
-
-const PROVIDERS: { label: string; value: AiProvider; baseUrl: string; model: string }[] = [
-  { label: 'OpenAI', value: 'openai', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
-  {
-    label: 'Anthropic',
-    value: 'anthropic',
-    baseUrl: 'https://api.anthropic.com/v1',
-    model: 'claude-3-5-sonnet-latest'
-  },
-  { label: '自定义', value: 'custom', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' }
-]
+import {
+  AI_PROVIDER_PRESETS,
+  defaultAiProviderPreset,
+  getAiProviderPreset
+} from '@shared/cockpit/aiProviders'
 
 interface AiConfigModalProps {
   open: boolean
@@ -28,17 +22,25 @@ export default function AiConfigModal({
 }: AiConfigModalProps): React.ReactElement {
   const [form] = Form.useForm<AiConfigInput & { apiKey?: string }>()
   const [saving, setSaving] = useState(false)
+  const [provider, setProvider] = useState<AiProvider>(defaultAiProviderPreset().value)
 
   useEffect(() => {
     if (!open) return
+    const fallback = defaultAiProviderPreset()
+    const preset = config ? getAiProviderPreset(config.provider) : fallback
+    const initialProvider = config?.provider ?? fallback.value
+    setProvider(initialProvider)
     form.setFieldsValue({
-      provider: config?.provider ?? 'openai',
-      baseUrl: config?.baseUrl ?? PROVIDERS[0].baseUrl,
-      model: config?.model ?? PROVIDERS[0].model,
+      provider: initialProvider,
+      baseUrl: config?.baseUrl ?? preset?.baseUrl ?? fallback.baseUrl,
+      model: config?.model ?? preset?.model ?? fallback.model,
       enabled: config?.enabled ?? false,
       apiKey: ''
     })
   }, [open, config, form])
+
+  const apiKeyPlaceholder =
+    getAiProviderPreset(provider)?.apiKeyPlaceholder ?? 'sk-...'
 
   const submit = async (): Promise<void> => {
     const values = await form.validateFields()
@@ -70,9 +72,10 @@ export default function AiConfigModal({
       <Form form={form} layout="vertical">
         <Form.Item name="provider" label="服务商" rules={[{ required: true }]}>
           <Select
-            options={PROVIDERS.map((p) => ({ label: p.label, value: p.value }))}
+            options={AI_PROVIDER_PRESETS.map((p) => ({ label: p.label, value: p.value }))}
             onChange={(v: AiProvider) => {
-              const preset = PROVIDERS.find((p) => p.value === v)
+              setProvider(v)
+              const preset = getAiProviderPreset(v)
               if (preset) form.setFieldsValue({ baseUrl: preset.baseUrl, model: preset.model })
             }}
           />
@@ -88,7 +91,7 @@ export default function AiConfigModal({
           label={config?.hasApiKey ? 'API Key（留空则保留原密钥）' : 'API Key'}
           rules={config?.hasApiKey ? [] : [{ required: true, message: '请填写 API Key' }]}
         >
-          <Input.Password placeholder="sk-..." autoComplete="off" />
+          <Input.Password placeholder={apiKeyPlaceholder} autoComplete="off" />
         </Form.Item>
         <Form.Item name="enabled" label="启用外部 AI" valuePropName="checked">
           <Switch />

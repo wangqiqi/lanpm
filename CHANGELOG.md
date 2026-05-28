@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.3] - 2026-05-28
+
+### Added
+- **驾驶舱 AI 服务商预设**：DeepSeek（默认）、通义千问、智谱 GLM、Moonshot、OpenAI、Anthropic、自定义；`src/shared/cockpit/aiProviders.ts`
+- **视觉一致性整改计划**：`plan.md` §12 + `todo.md` V-01~V-14（全页面审计任务清单）
+
+### Changed
+- `plan.md`：M0–M7 逐阶段详情归档至 `archive/20260528_235810_M0-M7完成_plan逐阶段执行计划归档.md`；现行计划聚焦 RC→1.0、v1.1 backlog 与视觉补丁
+- `AiConfigModal`：按服务商切换 baseUrl/model，API Key 占位随厂商变化
+- `verify:search`：覆盖 AI 预设与默认 DeepSeek 断言
+
+### Tag
+- `v1.0.0-rc.3` — plan 归档 + 国内 AI 预设 + 视觉整改计划
+
 ## [1.0.0-rc.2] - 2026-05-28
 
 ### Added

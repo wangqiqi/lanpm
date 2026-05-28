@@ -28,7 +28,14 @@ export interface CockpitDashboard {
   departments: DepartmentStats[]
 }
 
-export type AiProvider = 'openai' | 'anthropic' | 'custom'
+export type AiProvider =
+  | 'deepseek'
+  | 'qwen'
+  | 'zhipu'
+  | 'moonshot'
+  | 'openai'
+  | 'anthropic'
+  | 'custom'
 
 export interface AiConfigView {
   provider: AiProvider
