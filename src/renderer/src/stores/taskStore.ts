@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import type { CreateTaskInput, MoveTaskInput, Task, UpdateTaskInput } from '@shared/task/types'
+import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '@shared/task/types'
+import type { UpsertDependencyInput } from '@shared/task/dependency'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
 interface TaskState {
@@ -8,6 +9,8 @@ interface TaskState {
   loadTasks: (groupId: string) => Promise<void>
   createTask: (input: CreateTaskInput) => Promise<Task>
   updateTask: (input: UpdateTaskInput) => Promise<Task>
+  updateSchedule: (input: GanttScheduleInput) => Promise<Task>
+  upsertDependency: (input: UpsertDependencyInput) => Promise<void>
   moveTask: (input: MoveTaskInput) => Promise<Task>
   createFromChat: (groupId: string, title: string) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
   setTasks: (groupId: string, tasks: Task[]) => void
@@ -47,6 +50,21 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     )
     if (groupId) await get().loadTasks(groupId)
     return task
+  },
+
+  updateSchedule: async (input) => {
+    const task = await getLanpmApi().task.updateSchedule(input)
+    const existing = get().tasksByGroup
+    const groupId = Object.keys(existing).find((gid) =>
+      existing[gid]?.some((t) => t.taskId === input.taskId)
+    )
+    if (groupId) await get().loadTasks(groupId)
+    return task
+  },
+
+  upsertDependency: async (input) => {
+    await getLanpmApi().task.upsertDependency(input)
+    await get().loadTasks(input.groupId)
   },
 
   moveTask: async (input) => {

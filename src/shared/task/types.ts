@@ -1,3 +1,5 @@
+import type { TaskDependency } from './dependency'
+
 export type TaskStatus = 'todo' | 'doing' | 'done' | 'other'
 
 export type TaskPriority = 'low' | 'medium' | 'high'
@@ -21,6 +23,8 @@ export interface Task {
   createdAt: string
   updatedAt: string
   deletedAt?: string
+  /** 甘特依赖边（listTasks 时填充） */
+  dependencies?: TaskDependency[]
 }
 
 export interface CreateTaskInput {
@@ -44,6 +48,15 @@ export interface UpdateTaskInput {
   progressPercent?: number
   parentTaskId?: string | null
   sortOrder?: number
+  startDate?: string | null
+  endDate?: string | null
+  milestone?: boolean
+}
+
+export interface GanttScheduleInput {
+  taskId: string
+  startDate: string
+  endDate: string
 }
 
 export interface MoveTaskInput {

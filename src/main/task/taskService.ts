@@ -4,7 +4,8 @@ import type { Database } from 'better-sqlite3'
 import type { ChatMessage } from '../../shared/chat/types'
 import { TASK_PUSH_CHANNEL } from '../../shared/task/channels'
 import { applyAggregatedProgress } from '../../shared/task/progress'
-import type { CreateTaskInput, MoveTaskInput, Task, UpdateTaskInput } from '../../shared/task/types'
+import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '../../shared/task/types'
+import type { TaskDependency, UpsertDependencyInput } from '../../shared/task/dependency'
 import { validateOtherReason } from '../../shared/task/validation'
 import { getSetupStatus } from '../identity/setup'
 import {
@@ -15,6 +16,11 @@ import {
   listTasksByGroup,
   updateTaskRow
 } from '../storage/repositories/taskRepository'
+import {
+  listDependenciesByGroup,
+  removeDependency,
+  upsertDependency
+} from '../storage/repositories/taskDependencyRepository'
 import { publishChatMessage } from '../chat/chatService'
 
 function assertTaskWritable(groupId: string): void {
@@ -31,7 +37,18 @@ function broadcastTasksChanged(groupId: string): void {
 
 export function listGroupTasks(db: Database, groupId: string): Task[] {
   const raw = listTasksByGroup(db, groupId)
-  return applyAggregatedProgress(raw)
+  const deps = listDependenciesByGroup(db, groupId)
+  const depsByTarget = new Map<string, TaskDependency[]>()
+  for (const dep of deps) {
+    const list = depsByTarget.get(dep.toTaskId) ?? []
+    list.push(dep)
+    depsByTarget.set(dep.toTaskId, list)
+  }
+  const enriched = raw.map((t) => ({
+    ...t,
+    dependencies: depsByTarget.get(t.taskId) ?? []
+  }))
+  return applyAggregatedProgress(enriched)
 }
 
 export function createGroupTask(db: Database, input: CreateTaskInput): Task {
@@ -113,4 +130,39 @@ export async function createTaskFromChat(
     title: task.title
   })
   return { task, message }
+}
+
+export function updateTaskSchedule(db: Database, input: GanttScheduleInput): Task {
+  const existing = getTaskById(db, input.taskId)
+  if (!existing) throw new Error('任务不存在')
+  assertTaskWritable(existing.groupId)
+  return updateGroupTask(db, {
+    taskId: input.taskId,
+    startDate: input.startDate,
+    endDate: input.endDate
+  })
+}
+
+export function upsertTaskDependency(db: Database, input: UpsertDependencyInput): TaskDependency {
+  assertTaskWritable(input.groupId)
+  const from = getTaskById(db, input.fromTaskId)
+  const to = getTaskById(db, input.toTaskId)
+  if (!from || !to || from.groupId !== input.groupId || to.groupId !== input.groupId) {
+    throw new Error('依赖任务不存在或不属于该群组')
+  }
+  const dep = upsertDependency(db, input)
+  broadcastTasksChanged(input.groupId)
+  return dep
+}
+
+export function deleteTaskDependency(
+  db: Database,
+  groupId: string,
+  fromTaskId: string,
+  toTaskId: string
+): boolean {
+  assertTaskWritable(groupId)
+  const ok = removeDependency(db, fromTaskId, toTaskId)
+  if (ok) broadcastTasksChanged(groupId)
+  return ok
 }

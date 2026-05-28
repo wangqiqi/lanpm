@@ -1,12 +1,16 @@
 import { ipcMain } from 'electron'
-import type { CreateTaskInput, MoveTaskInput, UpdateTaskInput } from '../../shared/task/types'
+import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, UpdateTaskInput } from '../../shared/task/types'
+import type { UpsertDependencyInput } from '../../shared/task/dependency'
 import { TASK_IPC } from '../../shared/task/channels'
 import {
   createGroupTask,
   createTaskFromChat,
+  deleteTaskDependency,
   listGroupTasks,
   moveGroupTask,
-  updateGroupTask
+  updateGroupTask,
+  updateTaskSchedule,
+  upsertTaskDependency
 } from '../task/taskService'
 import { getDatabase } from '../storage'
 
@@ -34,6 +38,21 @@ export function registerTaskIpc(): void {
       if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
       if (typeof title !== 'string') throw new Error('title required')
       return createTaskFromChat(getDatabase(), groupId, title)
+    }
+  )
+
+  ipcMain.handle(TASK_IPC.updateSchedule, (_event, input: GanttScheduleInput) => {
+    return updateTaskSchedule(getDatabase(), input)
+  })
+
+  ipcMain.handle(TASK_IPC.upsertDependency, (_event, input: UpsertDependencyInput) => {
+    return upsertTaskDependency(getDatabase(), input)
+  })
+
+  ipcMain.handle(
+    TASK_IPC.removeDependency,
+    (_event, groupId: string, fromTaskId: string, toTaskId: string) => {
+      return deleteTaskDependency(getDatabase(), groupId, fromTaskId, toTaskId)
     }
   )
 }

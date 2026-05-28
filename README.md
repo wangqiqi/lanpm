@@ -38,6 +38,7 @@ npm run verify:routes  # M1 Tab 规则 smoke（无 UI）
 | [docs/04_数据模型与协议草案.md](./docs/04_数据模型与协议草案.md) | 实体、协议、SQLite（v0.2 基线） |
 | [docs/05_交互与UI约定.md](./docs/05_交互与UI约定.md) | 布局、主题、组件约定 |
 | [docs/06_测试与联调手册.md](./docs/06_测试与联调手册.md) | Stub/真网/性能测试 |
+| [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md) | M3 看板/任务树实现与 IPC |
 | [plan.md](./plan.md) | 执行计划（M0–M7） |
 
 ## 技术选型（已拍板）

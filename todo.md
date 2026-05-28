@@ -87,17 +87,17 @@
 
 ### M4-A 甘特图
 
-- [ ] `M4-00` [P0] 集成 `gantt-task-react` 与任务数据源（dep: M3-01）（DoD：见 `docs/05` §6.3）
-- [ ] `M4-01` [P0] 日/周/月切换
-- [ ] `M4-02` [P0] 任务条拖拽改起止时间
-- [ ] `M4-03` [P0] 依赖关系（FS/SS/FF/SF）与里程碑标识
+- [x] `M4-00` [P0] 集成 `gantt-task-react` 与任务数据源（DoD：`GanttView` + `tasksToGanttBars` + `task_dependencies`）
+- [x] `M4-01` [P0] 日/周/月切换（DoD：ViewMode Day/Week/Month 工具栏）
+- [x] `M4-02` [P0] 任务条拖拽改起止时间（DoD：`onDateChange` → `task:updateSchedule`）
+- [x] `M4-03` [P0] 依赖关系（FS/SS/FF/SF）与里程碑标识（DoD：依赖弹窗 + 双击切换 milestone）
 - [ ] `M4-04` [P1] 甘特导出 PNG/PDF
 
 ### M4-B 文件模块
 
-- [ ] `M4-05` [P0] 文件列表/筛选/详情
-- [ ] `M4-06` [P0] LibreOffice 本地预览链路
-- [ ] `M4-07` [P0] 分片传输 + 断点续传 + 并发队列（<=3）
+- [x] `M4-05` [P0] 文件列表/筛选/详情（DoD：`FilesView` + 分类 Segmented + 预览区）
+- [x] `M4-06` [P0] LibreOffice 本地预览链路（DoD：`previewService` soffice → PDF；图片/文本内联）
+- [x] `M4-07` [P0] 分片传输 + 断点续传 + 并发队列（<=3）（DoD：`runChunkedUpload` + 传输队列 UI）
 - [ ] `M4-08` [P1] 书签导入导出
 
 ---
@@ -153,3 +153,4 @@
 - [x] `M2-06` 已读回执
 - [x] `M2-07` /task 快捷创建
 - [x] `M3-01`~`M3-06` 看板 + 任务树
+- [x] `M4-00`~`M4-03` 甘特图 + `M4-05`~`M4-07` 文件模块（`verify:m4`）

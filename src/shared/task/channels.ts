@@ -6,5 +6,8 @@ export const TASK_IPC = {
   createTask: 'task:createTask',
   updateTask: 'task:updateTask',
   moveTask: 'task:moveTask',
-  createFromChat: 'task:createFromChat'
+  createFromChat: 'task:createFromChat',
+  updateSchedule: 'task:updateSchedule',
+  upsertDependency: 'task:upsertDependency',
+  removeDependency: 'task:removeDependency'
 } as const

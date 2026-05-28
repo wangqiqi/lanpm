@@ -1,0 +1,78 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  gap: 12px;
+}
+
+.toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.transferList {
+  flex-shrink: 0;
+  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+.transferRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 36%);
+  gap: 12px;
+}
+
+.listPane,
+.previewPane {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--lanpm-surface-solid, #fff);
+}
+
+.previewPane {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.previewImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.previewFrame {
+  flex: 1;
+  min-height: 320px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background: var(--lanpm-bg);
+}
+
+.spinner {
+  margin: 24px auto;
+  display: block;
+}
+
+.rowSelected :global(.ant-table-cell) {
+  background: rgba(22, 119, 255, 0.08) !important;
+}

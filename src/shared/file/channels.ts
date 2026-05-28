@@ -1,0 +1,11 @@
+export const FILE_TRANSFER_PUSH_CHANNEL = 'file:transfersChanged'
+
+export const FILE_IPC = {
+  list: 'file:list',
+  upload: 'file:upload',
+  getPreviewUrl: 'file:getPreviewUrl',
+  listTransfers: 'file:listTransfers'
+} as const
+
+export const FILE_CHUNK_SIZE = 256 * 1024
+export const FILE_MAX_CONCURRENT = 3

@@ -115,6 +115,19 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
         ? undefined
         : input.parentTaskId ?? existing.parentTaskId,
     sortOrder: input.sortOrder ?? existing.sortOrder,
+    startDate:
+      input.startDate === null
+        ? undefined
+        : input.startDate !== undefined
+          ? input.startDate
+          : existing.startDate,
+    endDate:
+      input.endDate === null
+        ? undefined
+        : input.endDate !== undefined
+          ? input.endDate
+          : existing.endDate,
+    milestone: input.milestone ?? existing.milestone,
     updatedAt: new Date().toISOString()
   }
   writeGroupTasks(groupId, tasks)
@@ -408,10 +421,30 @@ export function createBrowserLanpmStub(): LanpmApi {
         for (const fn of chatListeners) fn(msg)
         return { task, message: msg }
       },
+      updateSchedule: async (input) =>
+        stubUpdateTask({
+          taskId: input.taskId,
+          startDate: input.startDate,
+          endDate: input.endDate
+        }),
+      upsertDependency: async (input) => {
+        void input
+        throw new Error('浏览器预览暂不支持甘特依赖')
+      },
+      removeDependency: async () => false,
       onTasksChanged: (handler) => {
         taskListeners.add(handler)
         return () => taskListeners.delete(handler)
       }
+    },
+    file: {
+      listFiles: async () => [],
+      upload: async () => {
+        throw new Error('浏览器预览请使用 Electron 客户端上传文件')
+      },
+      getPreviewUrl: async () => null,
+      listTransfers: async () => [],
+      onTransfersChanged: () => () => undefined
     }
   }
 }

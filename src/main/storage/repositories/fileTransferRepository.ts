@@ -1,0 +1,120 @@
+import type { Database } from 'better-sqlite3'
+import type { FileTransferStatus, FileTransferView } from '../../../shared/file/types'
+
+interface TransferRow {
+  transfer_id: string
+  file_id: string
+  group_id: string
+  direction: string
+  status: string
+  total_bytes: number
+  transferred_bytes: number
+  started_at: string
+  finished_at: string | null
+  error_message: string | null
+}
+
+export function insertTransfer(
+  db: Database,
+  row: {
+    transferId: string
+    fileId: string
+    groupId: string
+    direction: 'upload' | 'download'
+    fromDeviceId: string
+    toDeviceId: string
+    status: FileTransferStatus
+    totalBytes: number
+    transferredBytes: number
+    chunkSize: number
+    checksum: string
+    startedAt: string
+    finishedAt?: string
+    errorMessage?: string
+  }
+): void {
+  db.prepare(
+    `INSERT INTO file_transfers (
+      transfer_id, file_id, group_id, direction, from_device_id, to_device_id,
+      status, total_bytes, transferred_bytes, chunk_size, checksum,
+      started_at, finished_at, error_message
+    ) VALUES (
+      @transferId, @fileId, @groupId, @direction, @fromDeviceId, @toDeviceId,
+      @status, @totalBytes, @transferredBytes, @chunkSize, @checksum,
+      @startedAt, @finishedAt, @errorMessage
+    )`
+  ).run({
+    transferId: row.transferId,
+    fileId: row.fileId,
+    groupId: row.groupId,
+    direction: row.direction,
+    fromDeviceId: row.fromDeviceId,
+    toDeviceId: row.toDeviceId,
+    status: row.status,
+    totalBytes: row.totalBytes,
+    transferredBytes: row.transferredBytes,
+    chunkSize: row.chunkSize,
+    checksum: row.checksum,
+    startedAt: row.startedAt,
+    finishedAt: row.finishedAt ?? null,
+    errorMessage: row.errorMessage ?? null
+  })
+}
+
+export function updateTransferProgress(
+  db: Database,
+  transferId: string,
+  transferredBytes: number,
+  status: FileTransferStatus
+): void {
+  db.prepare(
+    `UPDATE file_transfers SET transferred_bytes = ?, status = ? WHERE transfer_id = ?`
+  ).run(transferredBytes, status, transferId)
+}
+
+export function finishTransfer(
+  db: Database,
+  transferId: string,
+  status: FileTransferStatus,
+  errorMessage?: string
+): void {
+  db.prepare(
+    `UPDATE file_transfers SET status = ?, finished_at = ?, error_message = ? WHERE transfer_id = ?`
+  ).run(status, new Date().toISOString(), errorMessage ?? null, transferId)
+}
+
+export function listTransfersByGroup(db: Database, groupId: string): FileTransferView[] {
+  const rows = db
+    .prepare(
+      `SELECT t.*, f.name AS file_name FROM file_transfers t
+       LEFT JOIN files f ON f.file_id = t.file_id
+       WHERE t.group_id = ?
+       ORDER BY t.started_at DESC
+       LIMIT 50`
+    )
+    .all(groupId) as (TransferRow & { file_name?: string })[]
+
+  return rows.map((r) => ({
+    transferId: r.transfer_id,
+    fileId: r.file_id,
+    groupId: r.group_id,
+    direction: r.direction as 'upload' | 'download',
+    status: r.status as FileTransferStatus,
+    totalBytes: r.total_bytes,
+    transferredBytes: r.transferred_bytes,
+    fileName: r.file_name ?? r.file_id,
+    startedAt: r.started_at,
+    finishedAt: r.finished_at ?? undefined,
+    errorMessage: r.error_message ?? undefined
+  }))
+}
+
+export function countActiveTransfers(db: Database): number {
+  const row = db
+    .prepare(
+      `SELECT COUNT(*) AS c FROM file_transfers
+       WHERE status IN ('queued', 'transferring')`
+    )
+    .get() as { c: number }
+  return row.c
+}

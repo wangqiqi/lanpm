@@ -1,0 +1,109 @@
+import type { Database } from 'better-sqlite3'
+import type { FileCategory, FileMeta, FilePreviewStatus } from '../../../shared/file/types'
+
+interface FileRow {
+  file_id: string
+  group_id: string
+  name: string
+  ext: string
+  category: string
+  size: number
+  mime_type: string | null
+  uploaded_by: string
+  uploaded_at: string
+  sha256: string
+  storage_path: string
+  preview_status: string
+  preview_path: string | null
+  is_bookmark: number
+  bookmark_url: string | null
+  bookmark_title: string | null
+  updated_at: string
+}
+
+function rowToMeta(row: FileRow): FileMeta {
+  return {
+    fileId: row.file_id,
+    groupId: row.group_id,
+    name: row.name,
+    ext: row.ext,
+    category: row.category as FileCategory,
+    size: row.size,
+    mimeType: row.mime_type ?? undefined,
+    uploadedBy: row.uploaded_by,
+    uploadedAt: row.uploaded_at,
+    sha256: row.sha256,
+    storagePath: row.storage_path,
+    previewStatus: row.preview_status as FilePreviewStatus,
+    previewPath: row.preview_path ?? undefined,
+    isBookmark: row.is_bookmark === 1,
+    bookmarkUrl: row.bookmark_url ?? undefined,
+    bookmarkTitle: row.bookmark_title ?? undefined,
+    updatedAt: row.updated_at
+  }
+}
+
+export function insertFile(db: Database, meta: FileMeta): void {
+  db.prepare(
+    `INSERT INTO files (
+      file_id, group_id, name, ext, category, size, mime_type,
+      uploaded_by, uploaded_at, sha256, storage_path,
+      preview_status, preview_path, is_bookmark, bookmark_url, bookmark_title,
+      updated_at
+    ) VALUES (
+      @fileId, @groupId, @name, @ext, @category, @size, @mimeType,
+      @uploadedBy, @uploadedAt, @sha256, @storagePath,
+      @previewStatus, @previewPath, @isBookmark, @bookmarkUrl, @bookmarkTitle,
+      @updatedAt
+    )`
+  ).run({
+    fileId: meta.fileId,
+    groupId: meta.groupId,
+    name: meta.name,
+    ext: meta.ext,
+    category: meta.category,
+    size: meta.size,
+    mimeType: meta.mimeType ?? null,
+    uploadedBy: meta.uploadedBy,
+    uploadedAt: meta.uploadedAt,
+    sha256: meta.sha256,
+    storagePath: meta.storagePath,
+    previewStatus: meta.previewStatus,
+    previewPath: meta.previewPath ?? null,
+    isBookmark: meta.isBookmark ? 1 : 0,
+    bookmarkUrl: meta.bookmarkUrl ?? null,
+    bookmarkTitle: meta.bookmarkTitle ?? null,
+    updatedAt: meta.updatedAt
+  })
+}
+
+export function updateFilePreview(
+  db: Database,
+  fileId: string,
+  previewStatus: FilePreviewStatus,
+  previewPath?: string
+): void {
+  db.prepare(
+    `UPDATE files SET preview_status = ?, preview_path = ?, updated_at = ? WHERE file_id = ?`
+  ).run(previewStatus, previewPath ?? null, new Date().toISOString(), fileId)
+}
+
+export function listFilesByGroup(
+  db: Database,
+  groupId: string,
+  category?: FileCategory
+): FileMeta[] {
+  const rows = category
+    ? (db
+        .prepare(`SELECT * FROM files WHERE group_id = ? AND category = ? ORDER BY uploaded_at DESC`)
+        .all(groupId, category) as FileRow[])
+    : (db
+        .prepare(`SELECT * FROM files WHERE group_id = ? ORDER BY uploaded_at DESC`)
+        .all(groupId) as FileRow[])
+  return rows.map(rowToMeta)
+}
+
+export function getFileById(db: Database, fileId: string): FileMeta | null {
+  const row = db.prepare(`SELECT * FROM files WHERE file_id = ?`).get(fileId) as FileRow | undefined
+  return row ? rowToMeta(row) : null
+}

@@ -6,6 +6,8 @@ import { formatDmTitle, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSess
 import ChatView from '@renderer/features/chat/ChatView'
 import BoardView from '@renderer/features/board/BoardView'
 import TaskTreeView from '@renderer/features/tree/TaskTreeView'
+import GanttView from '@renderer/features/gantt/GanttView'
+import FilesView from '@renderer/features/files/FilesView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -80,6 +82,32 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
         </Title>
         <div className={styles.taskBody}>
           <TaskTreeView />
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'gantt') {
+    return (
+      <div className={`${styles.root} ${styles.taskView}`}>
+        <Title level={4} className={styles.viewTitle}>
+          {VIEW_LABELS.gantt}
+        </Title>
+        <div className={styles.taskBody}>
+          <GanttView />
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'files') {
+    return (
+      <div className={`${styles.root} ${styles.taskView}`}>
+        <Title level={4} className={styles.viewTitle}>
+          {VIEW_LABELS.files}
+        </Title>
+        <div className={styles.taskBody}>
+          <FilesView />
         </div>
       </div>
     )

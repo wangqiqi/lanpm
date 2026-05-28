@@ -3,10 +3,12 @@ import type { GroupMemberView } from './chat/members'
 import type { SetupInput, SetupStatus } from './identity'
 import type {
   CreateTaskInput,
+  GanttScheduleInput,
   MoveTaskInput,
   Task,
   UpdateTaskInput
 } from './task/types'
+import type { TaskDependency, UpsertDependencyInput } from './task/dependency'
 
 export interface LanpmApi {
   platform: NodeJS.Platform | 'browser'
@@ -43,6 +45,16 @@ export interface LanpmApi {
       groupId: string,
       title: string
     ) => Promise<{ task: Task; message: ChatMessage }>
+    updateSchedule: (input: GanttScheduleInput) => Promise<Task>
+    upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
+    removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     onTasksChanged: (handler: (groupId: string) => void) => () => void
+  }
+  file: {
+    listFiles: (groupId: string, category?: string) => Promise<import('./file/types').FileMeta[]>
+    upload: (groupId: string, filePath?: string) => Promise<import('./file/types').FileMeta | null>
+    getPreviewUrl: (fileId: string) => Promise<string | null>
+    listTransfers: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
+    onTransfersChanged: (handler: (groupId: string) => void) => () => void
   }
 }

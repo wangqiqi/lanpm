@@ -2,7 +2,24 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.8.0-m4] - 2026-05-28
+
+### Added
+- M4 甘特图：`gantt-task-react` + `GanttView`（日/周/月、拖拽排期、里程碑双击）
+- 任务依赖：`task_dependencies` 仓储 + `task:upsertDependency`；FS 依赖渲染甘特连线
+- M4 文件：`FilesView` 列表/分类筛选/预览区；`file:*` IPC
+- LibreOffice 预览：`soffice --headless` 转 PDF；图片/文本/PDF 内联预览
+- 分片上传 Stub：256KB 分片、并发 ≤3、传输队列 Progress
+- `npm run verify:m4`
+
+### Tag
+- `v0.8.0-m4-gantt-files` — M4 甘特图与文件模块（P0）
+
 ## [0.7.0-m3] - 2026-05-28
+
+### Docs
+- 新增 [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md)（架构、IPC、交互、限制、M4 衔接）
+- 反哺 `docs/00`~`06`、`plan.md`：M3 实现映射、验收证据、联调步骤 §2
 
 ### Added
 - M2-05 成员在线态：`aggregateUserPresence` 多设备聚合；`presenceRegistry` + 5s 心跳；`MemberList` 🟢🟡⚪

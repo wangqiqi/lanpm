@@ -137,6 +137,19 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
           ? input.parentTaskId
           : existing.parentTaskId,
     sortOrder: input.sortOrder ?? existing.sortOrder,
+    startDate:
+      input.startDate === null
+        ? undefined
+        : input.startDate !== undefined
+          ? input.startDate
+          : existing.startDate,
+    endDate:
+      input.endDate === null
+        ? undefined
+        : input.endDate !== undefined
+          ? input.endDate
+          : existing.endDate,
+    milestone: input.milestone ?? existing.milestone,
     updatedAt: new Date().toISOString()
   }
 
@@ -161,6 +174,9 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       progress_percent = @progressPercent,
       parent_task_id = @parentTaskId,
       sort_order = @sortOrder,
+      start_date = @startDate,
+      end_date = @endDate,
+      milestone = @milestone,
       updated_at = @updatedAt
      WHERE task_id = @taskId`
   ).run({
@@ -174,6 +190,9 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
     progressPercent: next.progressPercent,
     parentTaskId: next.parentTaskId ?? null,
     sortOrder: next.sortOrder,
+    startDate: next.startDate ?? null,
+    endDate: next.endDate ?? null,
+    milestone: next.milestone ? 1 : 0,
     updatedAt: next.updatedAt
   })
 

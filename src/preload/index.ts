@@ -4,6 +4,7 @@ import type { SetupInput } from '../shared/identity'
 import type { LanpmApi } from '../shared/lanpm-api'
 import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { TASK_PUSH_CHANNEL } from '../shared/task/channels'
+import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
 
 const api: LanpmApi = {
   platform: process.platform,
@@ -40,12 +41,29 @@ const api: LanpmApi = {
     moveTask: (input) => ipcRenderer.invoke('task:moveTask', input),
     createFromChat: (groupId, title) =>
       ipcRenderer.invoke('task:createFromChat', groupId, title),
+    updateSchedule: (input) => ipcRenderer.invoke('task:updateSchedule', input),
+    upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
+    removeDependency: (groupId, fromTaskId, toTaskId) =>
+      ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),
     onTasksChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)
       }
       ipcRenderer.on(TASK_PUSH_CHANNEL, listener)
       return () => ipcRenderer.removeListener(TASK_PUSH_CHANNEL, listener)
+    }
+  },
+  file: {
+    listFiles: (groupId, category) => ipcRenderer.invoke('file:list', groupId, category),
+    upload: (groupId, filePath) => ipcRenderer.invoke('file:upload', groupId, filePath),
+    getPreviewUrl: (fileId) => ipcRenderer.invoke('file:getPreviewUrl', fileId),
+    listTransfers: (groupId) => ipcRenderer.invoke('file:listTransfers', groupId),
+    onTransfersChanged: (handler) => {
+      const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
+        handler(groupId)
+      }
+      ipcRenderer.on(FILE_TRANSFER_PUSH_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(FILE_TRANSFER_PUSH_CHANNEL, listener)
     }
   }
 }
