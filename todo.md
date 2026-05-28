@@ -25,8 +25,8 @@
 
 ### M0-B 本地存储与身份
 
-- [ ] `M0-04` [P0] 建 SQLite 初始化脚本（按 `docs/04` §11 DDL）（DoD：首次启动自动建库建表）
-- [ ] `M0-05` [P0] 实现 `users/devices` 读写仓储（DoD：可写入并读回 `userId/deviceId`）
+- [x] `M0-04` [P0] 建 SQLite 初始化脚本（按 `docs/04` §11 DDL）（DoD：首次启动自动建库建表；证据：`npm run verify:storage`；`app.whenReady` → `initDatabase()` → `{userData}/lanpm.db`）
+- [x] `M0-05` [P0] 实现 `users/devices` 读写仓储（DoD：可写入并读回 `userId/deviceId`；证据：`userRepository`/`deviceRepository` + `verify:storage` 往返）
 - [ ] `M0-06` [P0] 首次配置向导 UI（用户名/设备名/部门/头像）（DoD：未配置时强制进入向导）
 - [ ] `M0-07` [P0] 后缀规则：自动 `-yymm` + 手动唯一性校验（DoD：冲突用例通过）
 
@@ -140,7 +140,8 @@
 ## 当前周冲刺（实时更新）
 
 - [x] `M0-01` 初始化 Electron + React18 + TypeScript 工程
-- [-] `M0-04` SQLite 初始化脚本与建表
+- [x] `M0-04` SQLite 初始化脚本与建表
+- [x] `M0-05` users/devices 读写仓储
 - [ ] `M0-06` 首次配置向导 UI
 - [ ] `M0-09` NetworkStub 双实例互通
 - [x] `M1-04` UI 组件库已拍板（Ant Design 5.x + CSS Modules + Zustand）

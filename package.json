@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "0.4.0-m0",
+  "version": "0.4.1-m0",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -10,11 +10,14 @@
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json"
+    "typecheck": "tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json",
+    "verify:storage": "node scripts/verify-storage.mjs",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
     "antd": "^5.26.0",
+    "better-sqlite3": "^11.10.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.0",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.30",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",

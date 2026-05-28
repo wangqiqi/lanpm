@@ -3,6 +3,8 @@ productName: LanPM
 directories:
   buildResources: resources
   output: dist
+asarUnpack:
+  - '**/node_modules/better-sqlite3/**'
 files:
   - '!**/.vscode/*'
   - '!docs/**'

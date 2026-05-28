@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.4.1-m0] - 2026-05-28
+
+### Added
+- 主进程 SQLite：`better-sqlite3` + `src/main/storage/schema.sql`（对齐 `docs/04` §11，12 张表）
+- `initDatabase()`：首次启动在 `{userData}/lanpm.db` 自动建库建表（`user_version=1`）
+- `users` / `devices` 仓储：`userRepository`、`deviceRepository`（upsert + 按 ID 查询）
+- `npm run verify:storage`：无 UI 校验 DDL 与 users/devices 往返
+
+### Changed
+- `src/main/index.ts`：启动时初始化 SQLite，退出时 `closeDatabase()`
+- `electron.vite.config.ts`：构建时复制 `schema.sql` 至 `out/main`
+- `electron-builder.yml`：`asarUnpack` 包含 `better-sqlite3` 原生模块
+- `todo.md` / `plan.md`：M0-04、M0-05 标记完成
+
+### Tag
+- `v0.4.1-m0-sqlite-storage` — M0-B 本地存储与 users/devices 仓储
+
 ## [0.4.0-m0] - 2026-05-28
 
 ### Added

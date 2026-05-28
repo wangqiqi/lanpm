@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
-- 代码：`v0.4.0-m0` — Electron 脚手架已就绪（M0-A 完成；向导 / SQLite / NetworkStub 进行中）
+- 代码：`v0.4.1-m0` — Electron 脚手架 + SQLite 建表与 users/devices 仓储（M0-04/05 完成；向导 / NetworkStub 待做）
 - 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
 
 ## 本地开发
