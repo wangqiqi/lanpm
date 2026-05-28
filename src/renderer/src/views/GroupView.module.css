@@ -7,11 +7,6 @@
   width: 100%;
 }
 
-.chatTitle {
-  flex-shrink: 0;
-  margin: 0 0 8px !important;
-}
-
 .chatBody {
   flex: 1;
   min-height: 0;
@@ -20,15 +15,6 @@
   flex-direction: column;
   width: 100%;
   overflow: hidden;
-}
-
-.path {
-  margin-top: 4px;
-}
-
-.viewTitle {
-  flex-shrink: 0;
-  margin: 0 0 8px !important;
 }
 
 .taskView {

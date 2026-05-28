@@ -7,32 +7,13 @@
   height: 100%;
 }
 
-.toolbar {
-  flex-shrink: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  padding: 0 0 12px;
-}
-
-.hint {
-  font-size: 12px;
-}
-
 .chartWrap {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--lanpm-border);
   border-radius: 8px;
   background: var(--lanpm-surface-solid, #fff);
-}
-
-.spinner,
-.empty {
-  margin: auto;
-  padding: 24px;
 }
 
 .tooltip {
@@ -47,9 +28,29 @@
 }
 
 .chartWrap :global(.bar) {
-  fill: #1677ff;
+  fill: var(--lanpm-accent);
 }
 
 .chartWrap :global(.barLabel) {
   fill: #fff;
+}
+
+.chartWrap :global(.today) {
+  fill: var(--lanpm-accent-fill);
+}
+
+:global(html[data-theme='dark']) .chartWrap {
+  background: var(--lanpm-surface-solid);
+}
+
+:global(html[data-theme='dark']) .chartWrap :global(text) {
+  fill: var(--lanpm-text);
+}
+
+:global(html[data-theme='dark']) .chartWrap :global(.gridRow) {
+  fill: var(--lanpm-surface-solid);
+}
+
+:global(html[data-theme='dark']) .chartWrap :global(.gridRow:nth-child(even)) {
+  fill: var(--lanpm-bubble-bg);
 }

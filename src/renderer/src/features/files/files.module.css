@@ -7,17 +7,9 @@
   gap: 12px;
 }
 
-.toolbar {
-  flex-shrink: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
 .transferList {
   flex-shrink: 0;
-  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--lanpm-border);
   border-radius: 8px;
   padding: 0 8px;
 }
@@ -41,7 +33,7 @@
 .previewPane {
   min-height: 0;
   overflow: auto;
-  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--lanpm-border);
   border-radius: 8px;
   padding: 8px;
   background: var(--lanpm-surface-solid, #fff);
@@ -68,13 +60,8 @@
   background: var(--lanpm-bg);
 }
 
-.spinner {
-  margin: 24px auto;
-  display: block;
-}
-
 .rowSelected :global(.ant-table-cell) {
-  background: rgba(22, 119, 255, 0.08) !important;
+  background: var(--lanpm-accent-fill) !important;
 }
 
 .bookmarkPreview {

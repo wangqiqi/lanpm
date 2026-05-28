@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Input, InputNumber, Progress, Spin, Tree, message } from 'antd'
+import { Button, Input, InputNumber, Progress, Tree, message } from 'antd'
 import type { DataNode } from 'antd/es/tree'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -7,6 +7,8 @@ import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
+import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
+import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import styles from './tree.module.css'
 
 function buildTreeData(tasks: Task[]): DataNode[] {
@@ -137,54 +139,62 @@ export default function TaskTreeView(): React.ReactElement {
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <Input
-          placeholder="新建根任务标题"
-          value={newRootTitle}
-          onChange={(e) => setNewRootTitle(e.target.value)}
-          onPressEnter={() => void handleCreateRoot()}
-          style={{ maxWidth: 280 }}
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreateRoot()}>
-          根任务
-        </Button>
-        <Input
-          placeholder="子任务标题（先选中父节点）"
-          value={childTitle}
-          onChange={(e) => setChildTitle(e.target.value)}
-          disabled={!selectedParentId}
-          style={{ maxWidth: 280 }}
-        />
-        <Button disabled={!selectedParentId} onClick={() => void handleCreateChild()}>
-          添加子任务
-        </Button>
-        <Button type="link" onClick={() => navigate(groupViewPath(gid, 'board'))}>
-          看板视图
-        </Button>
-      </div>
+      <ViewToolbar
+        start={
+          <ViewToolbarGroup>
+            <Input
+              placeholder="新建根任务标题"
+              value={newRootTitle}
+              onChange={(e) => setNewRootTitle(e.target.value)}
+              onPressEnter={() => void handleCreateRoot()}
+              style={{ maxWidth: 280 }}
+            />
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreateRoot()}>
+              根任务
+            </Button>
+            <Input
+              placeholder="子任务标题（先选中父节点）"
+              value={childTitle}
+              onChange={(e) => setChildTitle(e.target.value)}
+              disabled={!selectedParentId}
+              style={{ maxWidth: 280 }}
+            />
+            <Button disabled={!selectedParentId} onClick={() => void handleCreateChild()}>
+              添加子任务
+            </Button>
+          </ViewToolbarGroup>
+        }
+        end={
+          <Button type="link" onClick={() => navigate(groupViewPath(gid, 'board'))}>
+            看板视图
+          </Button>
+        }
+      />
 
       {editingProgress && (
-        <div className={styles.toolbar}>
-          <span>叶子任务进度：</span>
-          <InputNumber
-            min={0}
-            max={100}
-            value={editingProgress.value}
-            onChange={(v) =>
-              setEditingProgress((s) => (s ? { ...s, value: Number(v ?? 0) } : s))
-            }
-          />
-          <Button type="primary" size="small" onClick={() => void saveProgress()}>
-            保存
-          </Button>
-        </div>
+        <ViewToolbar>
+          <ViewToolbarGroup>
+            <span>叶子任务进度：</span>
+            <InputNumber
+              min={0}
+              max={100}
+              value={editingProgress.value}
+              onChange={(v) =>
+                setEditingProgress((s) => (s ? { ...s, value: Number(v ?? 0) } : s))
+              }
+            />
+            <Button type="primary" size="small" onClick={() => void saveProgress()}>
+              保存
+            </Button>
+          </ViewToolbarGroup>
+        </ViewToolbar>
       )}
 
       <div className={styles.treeWrap}>
         {loading && tasks.length === 0 ? (
-          <Spin />
+          <ViewLoadingCenter />
         ) : treeData.length === 0 ? (
-          <p style={{ color: 'rgba(0,0,0,0.45)' }}>暂无任务，可在看板或此处创建</p>
+          <ViewEmptyHint>暂无任务，可在看板或此处创建</ViewEmptyHint>
         ) : (
           <Tree
             showLine

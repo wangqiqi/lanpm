@@ -1,22 +1,10 @@
 .root {
-  padding: 16px 20px 32px;
-  max-width: 1100px;
-  margin: 0 auto;
-  overflow: auto;
-  height: 100%;
-}
-
-.header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.title {
-  margin: 0 !important;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
 }
 
 .metrics {
@@ -29,7 +17,7 @@
 
 .projectRow {
   padding: 10px 0;
-  border-bottom: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.06));
+  border-bottom: 1px solid var(--lanpm-border);
 }
 
 .projectRow:last-child {
@@ -70,10 +58,5 @@
   margin: 0;
   padding: 12px;
   border-radius: 8px;
-  background: var(--lanpm-bg, rgba(0, 0, 0, 0.02));
-}
-
-.spinner {
-  display: block;
-  margin: 48px auto;
+  background: var(--lanpm-code-bg);
 }

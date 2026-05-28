@@ -40,6 +40,12 @@
   --lanpm-fill-secondary: rgba(120, 120, 128, 0.12);
   --lanpm-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   --lanpm-blur: saturate(180%) blur(20px);
+  --lanpm-border: rgba(60, 60, 67, 0.12);
+  --lanpm-bubble-bg: rgba(60, 60, 67, 0.06);
+  --lanpm-code-bg: rgba(0, 0, 0, 0.04);
+  --lanpm-accent-fill: rgba(0, 113, 227, 0.08);
+  --lanpm-accent-fill-strong: rgba(0, 113, 227, 0.12);
+  --lanpm-accent-ring: rgba(0, 113, 227, 0.2);
 }
 
 /* 暗色 */
@@ -60,6 +66,12 @@
   --lanpm-fill-secondary: rgba(120, 120, 128, 0.24);
   --lanpm-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
   --lanpm-blur: saturate(180%) blur(20px);
+  --lanpm-border: rgba(84, 84, 88, 0.36);
+  --lanpm-bubble-bg: rgba(255, 255, 255, 0.08);
+  --lanpm-code-bg: rgba(255, 255, 255, 0.06);
+  --lanpm-accent-fill: rgba(10, 132, 255, 0.12);
+  --lanpm-accent-fill-strong: rgba(10, 132, 255, 0.18);
+  --lanpm-accent-ring: rgba(10, 132, 255, 0.35);
 }
 
 :global(body) {

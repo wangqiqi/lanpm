@@ -7,7 +7,6 @@ import {
   Progress,
   Row,
   Space,
-  Spin,
   Statistic,
   Tag,
   Typography,
@@ -18,9 +17,11 @@ import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/coc
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
+import ViewHeader from '@renderer/ui/ViewHeader'
+import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import styles from './CockpitView.module.css'
 
-const { Title, Text, Paragraph } = Typography
+const { Text, Paragraph } = Typography
 
 const STATUS_TAG: Record<string, { color: string; label: string }> = {
   normal: { color: 'success', label: '正常' },
@@ -77,36 +78,36 @@ export default function CockpitView(): React.ReactElement {
   }
 
   if (loading && !dashboard) {
-    return <Spin className={styles.spinner} />
+    return <ViewLoadingCenter />
   }
 
   const summary = dashboard?.summary
 
   return (
     <div className={styles.root}>
-      <div className={styles.header}>
-        <Title level={3} className={styles.title}>
-          驾驶舱
-        </Title>
-        <Space wrap>
-          <Button loading={reportLoading} onClick={() => void runReport('weekly')}>
-            周报
-          </Button>
-          <Button loading={reportLoading} onClick={() => void runReport('monthly')}>
-            月报
-          </Button>
-          <Button
-            icon={<RobotOutlined />}
-            loading={reportLoading}
-            onClick={() => void runReport('evaluate')}
-          >
-            AI 评估
-          </Button>
-          <Button icon={<KeyOutlined />} onClick={() => setAiConfigOpen(true)}>
-            API Key
-          </Button>
-        </Space>
-      </div>
+      <ViewHeader
+        title="驾驶舱"
+        actions={
+          <Space wrap>
+            <Button loading={reportLoading} onClick={() => void runReport('weekly')}>
+              周报
+            </Button>
+            <Button loading={reportLoading} onClick={() => void runReport('monthly')}>
+              月报
+            </Button>
+            <Button
+              icon={<RobotOutlined />}
+              loading={reportLoading}
+              onClick={() => void runReport('evaluate')}
+            >
+              AI 评估
+            </Button>
+            <Button icon={<KeyOutlined />} onClick={() => setAiConfigOpen(true)}>
+              API Key
+            </Button>
+          </Space>
+        }
+      />
 
       <Row gutter={[16, 16]} className={styles.metrics}>
         <Col xs={24} sm={8}>

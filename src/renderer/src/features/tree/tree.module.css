@@ -6,20 +6,16 @@
   min-height: 0;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
 .treeWrap {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
   padding: 8px;
   border-radius: 8px;
-  background: var(--lanpm-surface-solid, #fff);
-  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  background: var(--lanpm-surface-solid);
+  border: 1px solid var(--lanpm-border);
 }
 
 .nodeRow {

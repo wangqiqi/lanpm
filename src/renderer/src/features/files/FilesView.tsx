@@ -8,7 +8,6 @@ import {
   Progress,
   Segmented,
   Space,
-  Spin,
   Table,
   Typography,
   message
@@ -18,6 +17,8 @@ import { useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
+import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import styles from './files.module.css'
 
 const { Text } = Typography
@@ -151,35 +152,39 @@ export default function FilesView(): React.ReactElement {
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <Segmented
-          options={CATEGORIES.map((c) => ({ label: c.label, value: c.value }))}
-          value={category}
-          onChange={(v) => setCategory(v as FileCategory | 'all')}
-        />
-        <Space wrap>
-          <Button
-            type="primary"
-            icon={<UploadOutlined />}
-            onClick={() =>
-              void upload(gid).catch((err: unknown) =>
-                message.error(err instanceof Error ? err.message : '上传失败')
-              )
-            }
-          >
-            上传文件
-          </Button>
-          <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
-            添加书签
-          </Button>
-          <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
-            导入书签
-          </Button>
-          <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
-            导出书签
-          </Button>
-        </Space>
-      </div>
+      <ViewToolbar
+        start={
+          <Segmented
+            options={CATEGORIES.map((c) => ({ label: c.label, value: c.value }))}
+            value={category}
+            onChange={(v) => setCategory(v as FileCategory | 'all')}
+          />
+        }
+        end={
+          <ViewToolbarGroup>
+            <Button
+              type="primary"
+              icon={<UploadOutlined />}
+              onClick={() =>
+                void upload(gid).catch((err: unknown) =>
+                  message.error(err instanceof Error ? err.message : '上传失败')
+                )
+              }
+            >
+              上传文件
+            </Button>
+            <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
+              添加书签
+            </Button>
+            <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
+              导入书签
+            </Button>
+            <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
+              导出书签
+            </Button>
+          </ViewToolbarGroup>
+        }
+      />
 
       {activeTransfers.length > 0 && (
         <List
@@ -206,7 +211,7 @@ export default function FilesView(): React.ReactElement {
       <div className={styles.body}>
         <div className={styles.listPane}>
           {loading && files.length === 0 ? (
-            <Spin className={styles.spinner} />
+            <ViewLoadingCenter />
           ) : (
             <Table
               size="small"

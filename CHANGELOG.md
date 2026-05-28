@@ -2,6 +2,26 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.4] - 2026-05-28
+
+### Added
+- **`verify:visual`**：设计令牌、布局尺寸、禁止 `#1677ff`、共享 UI 组件静态守卫（纳入 `verify:m7`）
+- **`docs/09_视觉手验清单.md`**：V-14b 亮/暗七页手验与截图归档说明
+- **UI 共享组件**：`ViewHeader`、`ViewToolbar`、`ViewState`（`src/renderer/src/ui/`）
+- **设计令牌扩展**：`--lanpm-border`、`--lanpm-bubble-bg`、`--lanpm-code-bg`、`--lanpm-accent-fill*`（`global.module.css`）
+
+### Changed
+- 五业务视图 + 驾驶舱：统一强调色、工具栏、加载/空状态；主区内边距 16px；顶栏 56px / 底栏 64px
+- `docs/05` §1：实测尺寸、页标题语义、令牌表、亮暗手验指引
+- `GroupView`：合并为单一路由渲染；移除 M1 占位死代码
+- `plan.md` / `todo.md`：待办全部迁入 `todo.md`；`plan.md` 仅保留战略与索引（V-01~V-13 已勾选，V-14 手验截图待做）
+
+### Removed
+- 未引用遗留 UI：`features/shell/*`、`features/views/*`（ViewPlaceholder / CockpitPlaceholder）
+
+### Tag
+- `v1.0.0-rc.4` — 视觉一致性 S1–S3 落地（V-01~V-13）
+
 ## [1.0.0-rc.3] - 2026-05-28
 
 ### Added

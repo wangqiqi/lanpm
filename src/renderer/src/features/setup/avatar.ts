@@ -1,4 +1,4 @@
-const PALETTE = ['#1677ff', '#52c41a', '#faad14', '#eb2f96', '#722ed1', '#13c2c2']
+const PALETTE = ['#0071e3', '#52c41a', '#faad14', '#eb2f96', '#722ed1', '#13c2c2']
 
 export function randomAvatarDataUrl(label: string): string {
   const initials = label.trim().slice(0, 2) || 'LP'

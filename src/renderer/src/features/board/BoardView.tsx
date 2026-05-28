@@ -10,7 +10,7 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { Button, Input, Modal, Select, Spin, Tag, message } from 'antd'
+import { Button, Input, Modal, Select, Tag, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { KANBAN_COLUMN_LABELS, KANBAN_COLUMN_ORDER, isTaskStatus } from '@shared/task/kanban'
@@ -20,6 +20,8 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
 import OtherReasonModal from './OtherReasonModal'
+import ViewToolbar from '@renderer/ui/ViewToolbar'
+import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import styles from './board.module.css'
 
 function KanbanColumn({
@@ -180,17 +182,21 @@ export default function BoardView(): React.ReactElement {
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-          新建任务
-        </Button>
-        <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
-          任务树视图
-        </Button>
-      </div>
+      <ViewToolbar
+        start={
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+            新建任务
+          </Button>
+        }
+        end={
+          <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
+            任务树视图
+          </Button>
+        }
+      />
 
       {loading && tasks.length === 0 ? (
-        <Spin />
+        <ViewLoadingCenter />
       ) : (
         <DndContext
           sensors={sensors}

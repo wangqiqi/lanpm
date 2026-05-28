@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Modal, Radio, Select, Space, Spin, Tag, Typography, message } from 'antd'
+import { Button, Modal, Radio, Select, Space, Tag, Typography, message } from 'antd'
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
@@ -10,6 +10,10 @@ import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { exportElementToPdf, exportElementToPng } from './ganttExport'
+import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { readCssVar } from '@renderer/ui/cssVar'
+import { useUiStore } from '@renderer/stores/uiStore'
 import styles from './gantt.module.css'
 
 const { Text } = Typography
@@ -43,6 +47,11 @@ export default function GanttView(): React.ReactElement {
   const [depType, setDepType] = useState<TaskDependencyType>('FS')
   const [exporting, setExporting] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
+  const themeMode = useUiStore((s) => s.theme)
+  const todayColor = useMemo(
+    () => readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)'),
+    [themeMode]
+  )
 
   useEffect(() => {
     if (!gid) return
@@ -130,45 +139,47 @@ export default function GanttView(): React.ReactElement {
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <Radio.Group
-          optionType="button"
-          value={viewMode}
-          options={VIEW_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
-          onChange={(e) => setViewMode(e.target.value as ViewMode)}
-        />
-        <Space wrap>
-          <Button icon={<PlusOutlined />} onClick={() => setDepOpen(true)}>
-            添加依赖
-          </Button>
-          <Button
-            icon={<DownloadOutlined />}
-            loading={exporting}
-            disabled={ganttTasks.length === 0}
-            onClick={() => void exportChart('png')}
-          >
-            导出 PNG
-          </Button>
-          <Button
-            icon={<FilePdfOutlined />}
-            loading={exporting}
-            disabled={ganttTasks.length === 0}
-            onClick={() => void exportChart('pdf')}
-          >
-            导出 PDF
-          </Button>
-          <Text type="secondary" className={styles.hint}>
-            拖拽任务条调整起止时间 · 非 FS 依赖存储后在列表展示
-          </Text>
-        </Space>
-      </div>
+      <ViewToolbar
+        start={
+          <Radio.Group
+            optionType="button"
+            value={viewMode}
+            options={VIEW_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
+            onChange={(e) => setViewMode(e.target.value as ViewMode)}
+          />
+        }
+        end={
+          <ViewToolbarGroup>
+            <Button icon={<PlusOutlined />} onClick={() => setDepOpen(true)}>
+              添加依赖
+            </Button>
+            <Button
+              icon={<DownloadOutlined />}
+              loading={exporting}
+              disabled={ganttTasks.length === 0}
+              onClick={() => void exportChart('png')}
+            >
+              导出 PNG
+            </Button>
+            <Button
+              icon={<FilePdfOutlined />}
+              loading={exporting}
+              disabled={ganttTasks.length === 0}
+              onClick={() => void exportChart('pdf')}
+            >
+              导出 PDF
+            </Button>
+            <ViewToolbarHint>
+              拖拽任务条调整起止时间 · 非 FS 依赖存储后在列表展示
+            </ViewToolbarHint>
+          </ViewToolbarGroup>
+        }
+      />
 
       {loading && tasks.length === 0 ? (
-        <Spin className={styles.spinner} />
+        <ViewLoadingCenter />
       ) : ganttTasks.length === 0 ? (
-        <Text type="secondary" className={styles.empty}>
-          暂无任务，请先在「看板」创建任务并设置时间
-        </Text>
+        <ViewEmptyHint>暂无任务，请先在「看板」创建任务并设置时间</ViewEmptyHint>
       ) : (
         <div className={styles.chartWrap} ref={chartRef}>
           <Gantt
@@ -183,7 +194,7 @@ export default function GanttView(): React.ReactElement {
             columnWidth={viewMode === ViewMode.Month ? 300 : viewMode === ViewMode.Week ? 200 : 60}
             rowHeight={44}
             barFill={56}
-            todayColor="rgba(22, 119, 255, 0.08)"
+            todayColor={todayColor}
             TooltipContent={({ task: bar }) => {
               const task = tasks.find((t) => t.taskId === bar.id)
               const deps = task?.dependencies ?? []

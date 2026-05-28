@@ -1,4 +1,3 @@
-import { Typography } from 'antd'
 import { useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import type { AppView } from '@shared/navigation/types'
@@ -12,9 +11,8 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import ViewHeader from '@renderer/ui/ViewHeader'
 import styles from './GroupView.module.css'
-
-const { Title, Text } = Typography
 
 const VIEW_LABELS: Record<AppView, string> = {
   chat: '聊天',
@@ -24,6 +22,7 @@ const VIEW_LABELS: Record<AppView, string> = {
   files: '文件'
 }
 
+/** 聊天页标题为群名/DM 名；任务类视图为模块名（docs/05 §1.1） */
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
@@ -59,81 +58,19 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     return group?.name ?? getGroupLabel(groupId)
   })()
 
-  if (view === 'chat') {
-    return (
-      <div className={styles.root}>
-        <Title level={4} className={styles.chatTitle}>
-          {chatTitle}
-        </Title>
-        <div className={styles.chatBody}>
-          <ChatView />
-        </div>
-      </div>
-    )
-  }
-
-  if (view === 'board') {
-    return (
-      <div className={`${styles.root} ${styles.taskView}`}>
-        <Title level={4} className={styles.viewTitle}>
-          {VIEW_LABELS.board}
-        </Title>
-        <div className={styles.taskBody}>
-          <BoardView />
-        </div>
-      </div>
-    )
-  }
-
-  if (view === 'tree') {
-    return (
-      <div className={`${styles.root} ${styles.taskView}`}>
-        <Title level={4} className={styles.viewTitle}>
-          {VIEW_LABELS.tree}
-        </Title>
-        <div className={styles.taskBody}>
-          <TaskTreeView />
-        </div>
-      </div>
-    )
-  }
-
-  if (view === 'gantt') {
-    return (
-      <div className={`${styles.root} ${styles.taskView}`}>
-        <Title level={4} className={styles.viewTitle}>
-          {VIEW_LABELS.gantt}
-        </Title>
-        <div className={styles.taskBody}>
-          <GanttView />
-        </div>
-      </div>
-    )
-  }
-
-  if (view === 'files') {
-    return (
-      <div className={`${styles.root} ${styles.taskView}`}>
-        <Title level={4} className={styles.viewTitle}>
-          {VIEW_LABELS.files}
-        </Title>
-        <div className={styles.taskBody}>
-          <FilesView />
-        </div>
-      </div>
-    )
-  }
+  const pageTitle = view === 'chat' ? chatTitle : VIEW_LABELS[view]
+  const isChat = view === 'chat'
 
   return (
-    <div className={styles.root}>
-      <Title level={3}>{VIEW_LABELS[view]}</Title>
-      <Text type="secondary">
-        群组：{group?.name ?? groupId}（{group?.type ?? '—'}）
-      </Text>
-      <br />
-      <Text type="secondary" className={styles.path}>
-        路由 /g/{groupId}/{view} · M1 视图占位（M2+ 接入业务）
-      </Text>
+    <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
+      <ViewHeader title={pageTitle} />
+      <div className={isChat ? styles.chatBody : styles.taskBody}>
+        {view === 'chat' && <ChatView />}
+        {view === 'board' && <BoardView />}
+        {view === 'tree' && <TaskTreeView />}
+        {view === 'gantt' && <GanttView />}
+        {view === 'files' && <FilesView />}
+      </div>
     </div>
   )
 }
