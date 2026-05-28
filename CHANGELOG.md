@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.3.0] - 2026-05-28
+
+### Added
+- 新增编号化文档拆分：
+  - `docs/01_产品需求文档.md`
+  - `docs/02_技术实现建议.md`
+  - `docs/03_验收与里程碑计划.md`
+- 新增归档记录：`archive/20260528_164300_原型归档_docs页面迁移.md`
+
+### Changed
+- 移除单体文档 `docs/需求文档.md`，改为按主题拆分维护
+- 将 `docs/index.html`、`docs/index2.html` 迁移到 `archive/prototypes/`
+- 更新 `plan.md`，补充文档治理阶段任务与历史计划说明
+
+### Tag
+- `v0.3.0-docs-split-archive` — 文档拆分编号与原型归档治理
+
 ## [0.2.2] - 2026-05-28
 
 ### Changed
