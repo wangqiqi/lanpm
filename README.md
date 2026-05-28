@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 文档基线：`v0.3.3`（见 [CHANGELOG.md](./CHANGELOG.md)）
+- 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
 - 代码：M0 尚未开始（无 `src/` 工程目录）
 - 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
 
@@ -16,7 +16,7 @@
 | [docs/01_产品需求文档.md](./docs/01_产品需求文档.md) | 产品需求（PRD） |
 | [docs/02_技术实现建议.md](./docs/02_技术实现建议.md) | 架构、网络、非功能指标 |
 | [docs/03_验收与里程碑计划.md](./docs/03_验收与里程碑计划.md) | P0 验收与 20 天排期 |
-| [docs/04_数据模型与协议草案.md](./docs/04_数据模型与协议草案.md) | 实体、协议、SQLite 初稿 |
+| [docs/04_数据模型与协议草案.md](./docs/04_数据模型与协议草案.md) | 实体、协议、SQLite（v0.2 基线） |
 | [docs/05_交互与UI约定.md](./docs/05_交互与UI约定.md) | 布局、主题、组件约定 |
 | [docs/06_测试与联调手册.md](./docs/06_测试与联调手册.md) | Stub/真网/性能测试 |
 | [plan.md](./plan.md) | 执行计划（M0–M7） |
@@ -24,9 +24,12 @@
 ## 技术选型（已拍板）
 
 - 桌面：Electron
-- 前端：React 18 + TypeScript
-- 存储：SQLite + IndexedDB
+- 前端：React 18 + TypeScript + **Ant Design 5.x**
+- 样式：**CSS Modules**；状态：**Zustand**
+- 甘特图：**gantt-task-react**（M4）
+- 存储：SQLite + IndexedDB（热缓存可选）
 - 同步：Yjs（任务）+ P2P（消息/文件）
+- 传输加密：UDP 发现 + WebRTC DataChannel + 应用层 AES-GCM/DH/HMAC
 - Office 预览：LibreOffice 本地转换（数据不出域）
 
 ## 开发排期摘要
