@@ -7,6 +7,7 @@ interface ChatState {
   loading: Record<string, boolean>
   loadMessages: (groupId: string) => Promise<void>
   sendText: (groupId: string, text: string) => Promise<void>
+  sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
 }
 
@@ -40,6 +41,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
   sendText: async (groupId, text) => {
     const message = await getLanpmApi().chat.sendText(groupId, text)
+    get().upsertMessage(message)
+  },
+  sendCode: async (groupId, code, languageHint) => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+    const message = await getLanpmApi().chat.sendCode(groupId, code, languageHint, theme)
     get().upsertMessage(message)
   },
   upsertMessage: (message) => {

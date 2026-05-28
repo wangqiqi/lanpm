@@ -34,3 +34,10 @@ export interface SendTextInput {
   groupId: string
   text: string
 }
+
+export interface SendCodeInput {
+  groupId: string
+  code: string
+  languageHint?: string
+  theme?: 'light' | 'dark'
+}

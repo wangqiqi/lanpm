@@ -17,6 +17,7 @@ import {
   messageExists
 } from '../src/main/storage/repositories/messageRepository.ts'
 import type { ChatMessage, ChatPayload } from '../src/shared/chat/types.ts'
+import { detectLanguage } from '../src/shared/chat/detectLanguage.ts'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const schemaSql = readFileSync(join(root, '../src/main/storage/schema.sql'), 'utf8')
@@ -115,6 +116,51 @@ async function runChatVerify(): Promise<void> {
     if (listA.length !== 1) {
       throw new Error('A local message missing')
     }
+
+    const pyCode = 'def hello():\n    print("LanPM")'
+    const detected = detectLanguage(pyCode)
+    if (detected !== 'python') {
+      throw new Error(`detectLanguage expected python, got ${detected}`)
+    }
+
+    const lamportTs2 = 2
+    const codeMsg: ChatMessage = {
+      msgId: 'msg_verify_code_1',
+      groupId: GROUP,
+      senderUserId: 'user_chat_a',
+      senderDeviceId: 'dev_chat_a',
+      type: 'code',
+      content: { kind: 'code', language: detected, code: pyCode },
+      lamportTs: lamportTs2,
+      createdAt: new Date().toISOString(),
+      deliveryStatus: 'sending'
+    }
+    insertMessage(dbA, codeMsg)
+
+    const codeEnvelope: SyncEnvelope = {
+      version: 1,
+      type: 'chat',
+      msgId: codeMsg.msgId,
+      senderUserId: codeMsg.senderUserId,
+      senderDeviceId: codeMsg.senderDeviceId,
+      groupId: GROUP,
+      ts: codeMsg.createdAt,
+      lamportTs: lamportTs2,
+      payload: { message: codeMsg } satisfies ChatPayload,
+      nonce: '',
+      authTag: ''
+    }
+
+    await stubA.publish(codeEnvelope)
+    await new Promise((r) => setTimeout(r, 500))
+
+    if (receivedOnB.length !== 2) {
+      throw new Error(`B expected 2 messages, got ${receivedOnB.length}`)
+    }
+    const codeContent = receivedOnB[1]?.content
+    if (codeContent?.kind !== 'code' || codeContent.language !== 'python') {
+      throw new Error('code message payload mismatch on B')
+    }
   } finally {
     stubA.stop()
     stubB.stop()
@@ -124,4 +170,4 @@ async function runChatVerify(): Promise<void> {
 }
 
 await runChatVerify()
-console.log('OK: chat text send/receive via NetworkStub + SQLite')
+console.log('OK: chat text + code send/receive, detectLanguage(python)')

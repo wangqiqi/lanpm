@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.6.1-m2] - 2026-05-28
+
+### Added
+- M2-02 代码消息：`sendCodeMessage` + `chat:sendCode` IPC；`detectLanguage` 启发式识别
+- `CodeBlock`（highlight.js 语法高亮，跟随亮/暗主题）、`CodeSendModal` 发送入口
+- 聊天输入栏「代码」按钮（对齐 `docs/05` §6.1）
+
+### Changed
+- `chatService`：抽取 `publishChatMessage` 复用文本/代码发送
+- `verify:chat`：增加 Python 代码块收发 + `detectLanguage` 断言
+- `todo.md`：M2-02 标记完成
+
+### Tag
+- `v0.6.1-m2-chat-code` — M2 代码消息与高亮
+
 ## [0.6.0-m2] - 2026-05-28
 
 ### Added

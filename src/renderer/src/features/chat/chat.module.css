@@ -43,6 +43,49 @@
   background: var(--lanpm-bubble-bg, rgba(0, 0, 0, 0.06));
 }
 
+.codeBubble {
+  align-self: flex-start;
+  max-width: 88%;
+  padding: 8px;
+  background: var(--lanpm-code-bg, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+}
+
+.codeBubble[data-own='1'] {
+  align-self: flex-end;
+}
+
+.codeWrap {
+  width: 100%;
+}
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.langTag {
+  margin: 0;
+  font-size: 11px;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  max-height: 360px;
+  overflow: auto;
+  border-radius: 6px;
+}
+
+.codeBlockExpanded {
+  max-height: none;
+}
+
 .meta {
   font-size: 12px;
   opacity: 0.85;

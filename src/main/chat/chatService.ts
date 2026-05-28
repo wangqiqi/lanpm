@@ -1,8 +1,9 @@
 import { randomUUID } from 'crypto'
 import { BrowserWindow } from 'electron'
 import type { Database } from 'better-sqlite3'
-import type { ChatMessage, ChatPayload } from '../../shared/chat/types'
+import type { ChatMessage, ChatPayload, MessageContent, MessageType } from '../../shared/chat/types'
 import { CHAT_PUSH_CHANNEL } from '../../shared/chat/channels'
+import { detectLanguage } from '../../shared/chat/detectLanguage'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network/stub'
@@ -67,14 +68,12 @@ export function listGroupMessages(db: Database, groupId: string): ChatMessage[] 
   return listMessagesByGroup(db, groupId)
 }
 
-export async function sendTextMessage(
+async function publishChatMessage(
   db: Database,
   groupId: string,
-  text: string
+  type: MessageType,
+  content: MessageContent
 ): Promise<ChatMessage> {
-  const trimmed = text.trim()
-  if (!trimmed) throw new Error('消息不能为空')
-
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
     throw new Error('请先完成身份配置')
@@ -92,8 +91,8 @@ export async function sendTextMessage(
     groupId,
     senderUserId: status.user.userId,
     senderDeviceId: status.device.deviceId,
-    type: 'text',
-    content: { kind: 'text', text: trimmed },
+    type,
+    content,
     lamportTs,
     createdAt: now,
     deliveryStatus: 'sending'
@@ -122,4 +121,32 @@ export async function sendTextMessage(
   const sent: ChatMessage = { ...msg, deliveryStatus: 'sent' }
   broadcastMessage(sent)
   return sent
+}
+
+export async function sendTextMessage(
+  db: Database,
+  groupId: string,
+  text: string
+): Promise<ChatMessage> {
+  const trimmed = text.trim()
+  if (!trimmed) throw new Error('消息不能为空')
+  return publishChatMessage(db, groupId, 'text', { kind: 'text', text: trimmed })
+}
+
+export async function sendCodeMessage(
+  db: Database,
+  groupId: string,
+  code: string,
+  languageHint?: string,
+  theme?: 'light' | 'dark'
+): Promise<ChatMessage> {
+  const trimmed = code.trim()
+  if (!trimmed) throw new Error('代码不能为空')
+  const language = detectLanguage(trimmed, languageHint)
+  return publishChatMessage(db, groupId, 'code', {
+    kind: 'code',
+    language,
+    code: trimmed,
+    theme
+  })
 }

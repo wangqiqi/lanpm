@@ -56,7 +56,7 @@
 ### M2-A 消息能力
 
 - [x] `M2-01` [P0] 文本消息发送/接收（dep: M0-09）（DoD：`chatService` + `ChatView` + `npm run verify:chat`；NetworkStub 双实例可收发）
-- [ ] `M2-02` [P0] 代码消息（语言识别 + 高亮）
+- [x] `M2-02` [P0] 代码消息（语言识别 + 高亮）（DoD：`sendCodeMessage` + `CodeBlock`(highlight.js) + `npm run verify:chat`）
 - [ ] `M2-03` [P0] @提及与桌面通知
 - [ ] `M2-04` [P0] 私聊入口与会话切换
 
@@ -146,3 +146,4 @@
 - [x] `M1-04` UI 组件库已拍板（Ant Design 5.x + CSS Modules + Zustand）
 - [x] `M1-02`~`M1-06` 顶部栏 + 主题 + i18n（`verify:m1`）
 - [x] `M2-01` 文本消息收发（`verify:chat`）
+- [x] `M2-02` 代码消息 + 语法高亮（highlight.js）

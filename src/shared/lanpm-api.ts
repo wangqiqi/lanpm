@@ -17,6 +17,12 @@ export interface LanpmApi {
   chat: {
     listMessages: (groupId: string) => Promise<ChatMessage[]>
     sendText: (groupId: string, text: string) => Promise<ChatMessage>
+    sendCode: (
+      groupId: string,
+      code: string,
+      languageHint?: string,
+      theme?: 'light' | 'dark'
+    ) => Promise<ChatMessage>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
 }

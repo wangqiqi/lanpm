@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@shared/chat/types'
+import { detectLanguage } from '@shared/chat/detectLanguage'
 import type { SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
 
@@ -114,6 +115,31 @@ export function createBrowserLanpmStub(): LanpmApi {
           senderDeviceId: status.device.deviceId,
           type: 'text',
           content: { kind: 'text', text: trimmed },
+          lamportTs,
+          createdAt: new Date().toISOString(),
+          deliveryStatus: 'sent'
+        }
+        writeChatMessages(groupId, [...prev, msg])
+        for (const fn of chatListeners) fn(msg)
+        return msg
+      },
+      sendCode: async (groupId, code, languageHint, theme) => {
+        const status = readStatus()
+        if (!status.configured || !status.user || !status.device) {
+          throw new Error('请先完成身份配置')
+        }
+        const trimmed = code.trim()
+        if (!trimmed) throw new Error('代码不能为空')
+        const prev = readChatMessages(groupId)
+        const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+        const language = detectLanguage(trimmed, languageHint)
+        const msg: ChatMessage = {
+          msgId: `msg_${crypto.randomUUID()}`,
+          groupId,
+          senderUserId: status.user.userId,
+          senderDeviceId: status.device.deviceId,
+          type: 'code',
+          content: { kind: 'code', language, code: trimmed, theme },
           lamportTs,
           createdAt: new Date().toISOString(),
           deliveryStatus: 'sent'
