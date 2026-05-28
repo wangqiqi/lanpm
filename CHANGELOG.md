@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.1] - 2026-05-28
+
+### Added
+- M7 全量回归：`npm run verify:m7`（rebuild:verify → M0–M7 → rebuild:native）
+- `npm run rebuild:verify`：系统 Node 用 better-sqlite3 编译
+- `verify:m7-acceptance`：`docs/03` §16 模块存在性映射
+- `verify:m7-stability`：SQLite WAL 持久化 / 会话 meta 恢复
+- `verify:m7-perf`：DB 初始化、加密、路由 P95 冒烟
+- [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
+
+### Notes
+- **RC1**：M0–M7 P0 功能闭环；顶栏全局搜索、任务删除 UI、任务 P2P 同步等为 RC 后迭代项（见 docs/08）
+- 性能冷启动/内存需按 docs/06 §3 在生产构建上手测填表
+
+### Tag
+- `v1.0.0-rc.1` — LanPM 首个 RC
+
 ## [0.10.0-m6] - 2026-05-28
 
 ### Added

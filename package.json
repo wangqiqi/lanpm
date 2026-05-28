@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "0.10.0-m6",
+  "version": "1.0.0-rc.1",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -29,8 +29,13 @@
     "verify:m4": "node --experimental-strip-types scripts/verify-m4.ts",
     "verify:m5": "node --experimental-strip-types scripts/verify-m5.ts",
     "verify:m6": "node --experimental-strip-types scripts/verify-m6.ts",
+    "verify:m7-acceptance": "node --experimental-strip-types scripts/verify-m7-acceptance.ts",
+    "verify:m7-stability": "node --experimental-strip-types scripts/verify-m7-stability.ts",
+    "verify:m7-perf": "node --experimental-strip-types scripts/verify-m7-perf.ts",
+    "verify:m7": "npm run rebuild:verify && node --experimental-strip-types scripts/verify-m7.ts && npm run rebuild:native",
     "build:icons": "node scripts/build-icons.mjs",
     "rebuild:native": "electron-builder install-app-deps",
+    "rebuild:verify": "npm rebuild better-sqlite3",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {

@@ -4,9 +4,9 @@
 
 ## 当前状态
 
-- 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
-- 代码：`v0.6.0-m2` — M0/M1 完成 + M2-01 文本聊天（Stub 联调）；下一步 M2 代码块/回执/双实例验收
-- 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
+- **RC**：`1.0.0-rc.1`（M0–M7 P0 闭环）
+- 全量回归：`npm run verify:m7`
+- 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
 
 ## 本地开发
 
@@ -15,8 +15,8 @@ npm install
 npm run dev      # 启动 Electron 开发模式
 npm run lint     # ESLint
 npm run typecheck
-npm run build    # 生产构建
-npm run verify:routes  # M1 Tab 规则 smoke（无 UI）
+npm run verify:m7   # 全量回归（含 rebuild:native + M0–M7）
+npm run build       # 生产构建
 ```
 
 ### 手动验收 M1 路由（需已完成首次配置）
@@ -39,6 +39,7 @@ npm run verify:routes  # M1 Tab 规则 smoke（无 UI）
 | [docs/05_交互与UI约定.md](./docs/05_交互与UI约定.md) | 布局、主题、组件约定 |
 | [docs/06_测试与联调手册.md](./docs/06_测试与联调手册.md) | Stub/真网/性能测试 |
 | [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md) | M3 看板/任务树实现与 IPC |
+| [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md) | M7 RC 验收 |
 | [plan.md](./plan.md) | 执行计划（M0–M7） |
 
 ## 技术选型（已拍板）
