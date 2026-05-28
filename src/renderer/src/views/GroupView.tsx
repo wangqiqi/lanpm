@@ -12,18 +12,13 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewHeader from '@renderer/ui/ViewHeader'
+import { useI18n } from '@renderer/i18n/useI18n'
+import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import styles from './GroupView.module.css'
-
-const VIEW_LABELS: Record<AppView, string> = {
-  chat: '聊天',
-  board: '看板',
-  tree: '任务树',
-  gantt: '甘特图',
-  files: '文件'
-}
 
 /** 聊天页标题为群名/DM 名；任务类视图为模块名（docs/05 §1.1） */
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
+  const { t } = useI18n()
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
   const getGroupLabel = useNavigationStore((s) => s.getGroupLabel)
@@ -58,7 +53,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     return group?.name ?? getGroupLabel(groupId)
   })()
 
-  const pageTitle = view === 'chat' ? chatTitle : VIEW_LABELS[view]
+  const pageTitle = view === 'chat' ? chatTitle : t(VIEW_MESSAGE_KEYS[view])
   const isChat = view === 'chat'
 
   return (

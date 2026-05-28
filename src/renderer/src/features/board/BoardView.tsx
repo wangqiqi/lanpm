@@ -22,6 +22,7 @@ import KanbanCard from './KanbanCard'
 import OtherReasonModal from './OtherReasonModal'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './board.module.css'
 
 function KanbanColumn({
@@ -58,6 +59,7 @@ function KanbanColumn({
 }
 
 export default function BoardView(): React.ReactElement {
+  const { t } = useI18n()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const navigate = useNavigate()
@@ -129,10 +131,10 @@ export default function BoardView(): React.ReactElement {
       try {
         await moveTask({ taskId, status, otherReason })
       } catch (err) {
-        message.error(err instanceof Error ? err.message : '移动失败')
+        message.error(err instanceof Error ? err.message : t('board.moveFailed'))
       }
     },
-    [moveTask]
+    [moveTask, t]
   )
 
   const handleDragEnd = (event: DragEndEvent): void => {
@@ -158,13 +160,13 @@ export default function BoardView(): React.ReactElement {
     async (taskId: string) => {
       try {
         const ok = await deleteTask(taskId)
-        if (ok) message.success('任务已删除')
-        else message.warning('任务不存在')
+        if (ok) message.success(t('board.deleted'))
+        else message.warning(t('board.notFound'))
       } catch (err) {
-        message.error(err instanceof Error ? err.message : '删除失败')
+        message.error(err instanceof Error ? err.message : t('board.deleteFailed'))
       }
     },
-    [deleteTask]
+    [deleteTask, t]
   )
 
   const handleCreate = async (): Promise<void> => {
@@ -174,9 +176,9 @@ export default function BoardView(): React.ReactElement {
       await createTask({ groupId: gid, title, priority: newPriority })
       setNewTitle('')
       setCreateOpen(false)
-      message.success('任务已创建')
+      message.success(t('board.created'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '创建失败')
+      message.error(err instanceof Error ? err.message : t('board.createFailed'))
     }
   }
 
@@ -185,12 +187,12 @@ export default function BoardView(): React.ReactElement {
       <ViewToolbar
         start={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-            新建任务
+            {t('board.newTask')}
           </Button>
         }
         end={
           <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
-            任务树视图
+            {t('board.treeViewLink')}
           </Button>
         }
       />
@@ -225,20 +227,20 @@ export default function BoardView(): React.ReactElement {
       )}
 
       <Modal
-        title="新建任务"
+        title={t('board.createTitle')}
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         onOk={() => void handleCreate()}
-        okText="创建"
+        okText={t('common.create')}
       >
         <Input
-          placeholder="任务标题"
+          placeholder={t('board.taskTitlePlaceholder')}
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           onPressEnter={() => void handleCreate()}
         />
         <div style={{ marginTop: 12 }}>
-          <span style={{ marginRight: 8 }}>优先级</span>
+          <span style={{ marginRight: 8 }}>{t('common.priority')}</span>
           <Select
             value={newPriority}
             onChange={setNewPriority}

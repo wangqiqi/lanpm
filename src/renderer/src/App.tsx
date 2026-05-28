@@ -6,9 +6,11 @@ import SetupWizard from '@renderer/features/setup/SetupWizard'
 import AppRouter from '@renderer/app/AppRouter'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import type { SetupStatus } from '@shared/identity'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './styles/App.module.css'
 
 export default function App(): React.ReactElement {
+  const { t } = useI18n()
   const hydrated = useIdentityStore((s) => s.hydrated)
   const configured = useIdentityStore((s) => s.configured)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
@@ -51,11 +53,11 @@ export default function App(): React.ReactElement {
   if (!hydrated) {
     return (
       <div className={styles.boot}>
-        <Spin size="large" tip="正在加载…">
+        <Spin size="large" tip={t('common.loading')}>
           <div className={styles.bootSpinNest} />
         </Spin>
         <Typography.Text type="secondary" className={styles.bootHint}>
-          正在加载…
+          {t('common.loading')}
         </Typography.Text>
       </div>
     )

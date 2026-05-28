@@ -59,7 +59,7 @@ export function tasksToGanttBars(tasks: Task[], dependencies: TaskDependency[]):
     .filter((t) => !t.deletedAt)
     .map((task) => {
       const { startDate, endDate } = defaultScheduleForTask(task)
-      let start = parseYmd(startDate)
+      const start = parseYmd(startDate)
       let end = parseYmd(endDate)
       if (task.milestone) {
         end = new Date(start)

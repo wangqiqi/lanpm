@@ -18,6 +18,7 @@ import MessageBubble from '@renderer/features/chat/MessageBubble'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useMentionNotifications } from '@renderer/features/chat/useMentionNotifications'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -45,6 +46,7 @@ function formatTime(iso: string): string {
 }
 
 export default function ChatView(): React.ReactElement {
+  const { t } = useI18n()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
@@ -159,7 +161,7 @@ export default function ChatView(): React.ReactElement {
     const taskCmd = parseTaskCommand(text)
     if (taskCmd) {
       if (!taskAllowed) {
-        message.warning('当前群组不支持创建任务')
+        message.warning(t('chat.taskNotAllowed'))
         setDraft('')
         return
       }
@@ -172,25 +174,25 @@ export default function ChatView(): React.ReactElement {
       try {
         const { message: chatMsg } = await createFromChat(gid, taskCmd.title)
         upsertMessage(chatMsg)
-        message.success('任务已创建，可在看板查看')
+        message.success(t('chat.taskCreated'))
       } catch (err) {
-        message.error(err instanceof Error ? err.message : '创建任务失败')
+        message.error(err instanceof Error ? err.message : t('chat.taskCreateFailed'))
       }
       return
     }
 
     setDraft('')
     await sendText(gid, text)
-  }, [draft, gid, sendText, createFromChat, upsertMessage, taskAllowed])
+  }, [draft, gid, sendText, createFromChat, upsertMessage, taskAllowed, t])
 
   const handleCreateTask = useCallback(
     async (title: string) => {
       if (!gid || !taskAllowed) return
       const { message: chatMsg } = await createFromChat(gid, title)
       upsertMessage(chatMsg)
-      message.success('任务已创建，可在看板查看')
+      message.success(t('chat.taskCreated'))
     },
-    [gid, taskAllowed, createFromChat, upsertMessage]
+    [gid, taskAllowed, createFromChat, upsertMessage, t]
   )
 
   const handleSendCode = useCallback(
@@ -221,7 +223,7 @@ export default function ChatView(): React.ReactElement {
             <Spin className={styles.empty} />
           ) : messages.length === 0 ? (
             <Text className={styles.empty} type="secondary">
-              暂无消息，输入 @成员名 可提及
+              {t('chat.noMessages')}
             </Text>
           ) : (
             <div className={styles.messageList}>
@@ -245,19 +247,19 @@ export default function ChatView(): React.ReactElement {
             onMouseDown={onResizeStart}
             role="separator"
             aria-orientation="horizontal"
-            aria-label="调整输入框高度"
+            aria-label={t('chat.resizeComposer')}
           />
           <div className={styles.inputRow}>
             <div className={styles.inputMain}>
               <Text type="secondary" className={styles.inputHint}>
-                Ctrl+Enter 发送 · @ 提及
-                {taskAllowed ? ' · /task 或 /task 标题 创建任务' : ''}
+                {t('chat.inputHint')}
+                {taskAllowed ? t('chat.inputHintTask') : ''}
               </Text>
               <div className={styles.inputWrap}>
                 <MentionSuggest draft={draft} members={members} onPick={insertMention} />
                 <TextArea
                   className={styles.inputTextarea}
-                  placeholder={taskAllowed ? '输入消息，/task 创建任务…' : '输入消息…'}
+                  placeholder={taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={onKeyDown}
@@ -271,16 +273,16 @@ export default function ChatView(): React.ReactElement {
                   onClick={() => setTaskModalOpen(true)}
                   title="/task"
                 >
-                  任务
+                  {t('chat.taskBtn')}
                 </Button>
               )}
               {codeAllowed && (
                 <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
-                  代码
+                  {t('chat.codeBtn')}
                 </Button>
               )}
               <Button type="primary" onClick={() => void handleSend()}>
-                发送
+                {t('common.send')}
               </Button>
             </div>
           </div>
@@ -300,7 +302,7 @@ export default function ChatView(): React.ReactElement {
               try {
                 await handleCreateTask(title)
               } catch (err) {
-                message.error(err instanceof Error ? err.message : '创建任务失败')
+                message.error(err instanceof Error ? err.message : t('chat.taskCreateFailed'))
                 throw err
               }
             }}

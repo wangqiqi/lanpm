@@ -14,24 +14,13 @@ import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/Vie
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { readCssVar } from '@renderer/ui/cssVar'
 import { useUiStore } from '@renderer/stores/uiStore'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './gantt.module.css'
 
 const { Text } = Typography
 
-const VIEW_OPTIONS = [
-  { label: '日', value: ViewMode.Day },
-  { label: '周', value: ViewMode.Week },
-  { label: '月', value: ViewMode.Month }
-] as const
-
-const DEP_TYPES: { value: TaskDependencyType; label: string }[] = [
-  { value: 'FS', label: 'FS 完成-开始' },
-  { value: 'SS', label: 'SS 开始-开始' },
-  { value: 'FF', label: 'FF 完成-完成' },
-  { value: 'SF', label: 'SF 开始-完成' }
-]
-
 export default function GanttView(): React.ReactElement {
+  const { t } = useI18n()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const tasks = useTaskStore((s) => s.tasksByGroup[gid] ?? [])
@@ -48,9 +37,30 @@ export default function GanttView(): React.ReactElement {
   const [exporting, setExporting] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
   const themeMode = useUiStore((s) => s.theme)
-  const todayColor = useMemo(
-    () => readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)'),
-    [themeMode]
+  const [todayColor, setTodayColor] = useState(() =>
+    readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)')
+  )
+  useEffect(() => {
+    setTodayColor(readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)'))
+  }, [themeMode])
+
+  const viewOptions = useMemo(
+    () => [
+      { label: t('gantt.viewDay'), value: ViewMode.Day },
+      { label: t('gantt.viewWeek'), value: ViewMode.Week },
+      { label: t('gantt.viewMonth'), value: ViewMode.Month }
+    ],
+    [t]
+  )
+
+  const depTypes = useMemo(
+    (): { value: TaskDependencyType; label: string }[] => [
+      { value: 'FS', label: t('gantt.depFS') },
+      { value: 'SS', label: t('gantt.depSS') },
+      { value: 'FF', label: t('gantt.depFF') },
+      { value: 'SF', label: t('gantt.depSF') }
+    ],
+    [t]
   )
 
   useEffect(() => {
@@ -78,15 +88,15 @@ export default function GanttView(): React.ReactElement {
       if (!task) return
       const { startDate, endDate } = ganttDatesToYmd(bar.start, bar.end, task.milestone)
       void updateSchedule({ taskId: task.taskId, startDate, endDate }).catch((err: unknown) => {
-        message.error(err instanceof Error ? err.message : '更新排期失败')
+        message.error(err instanceof Error ? err.message : t('gantt.scheduleFailed'))
       })
     },
-    [tasks, updateSchedule]
+    [tasks, updateSchedule, t]
   )
 
   const addDependency = async (): Promise<void> => {
     if (!gid || !fromId || !toId) {
-      message.warning('请选择前置与后续任务')
+      message.warning(t('gantt.selectBothTasks'))
       return
     }
     try {
@@ -96,12 +106,12 @@ export default function GanttView(): React.ReactElement {
         toTaskId: toId,
         type: depType
       })
-      message.success('依赖已保存')
+      message.success(t('gantt.dependencySaved'))
       setDepOpen(false)
       setFromId(undefined)
       setToId(undefined)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '保存依赖失败')
+      message.error(err instanceof Error ? err.message : t('gantt.dependencyFailed'))
     }
   }
 
@@ -113,7 +123,7 @@ export default function GanttView(): React.ReactElement {
       })
       await loadTasks(gid)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '更新里程碑失败')
+      message.error(err instanceof Error ? err.message : t('gantt.milestoneFailed'))
     }
   }
 
@@ -129,9 +139,9 @@ export default function GanttView(): React.ReactElement {
       } else {
         await exportElementToPdf(el, `${base}.pdf`)
       }
-      message.success(format === 'png' ? 'PNG 已导出' : 'PDF 已导出')
+      message.success(format === 'png' ? t('gantt.exportPngDone') : t('gantt.exportPdfDone'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '导出失败')
+      message.error(err instanceof Error ? err.message : t('gantt.exportFailed'))
     } finally {
       setExporting(false)
     }
@@ -144,14 +154,14 @@ export default function GanttView(): React.ReactElement {
           <Radio.Group
             optionType="button"
             value={viewMode}
-            options={VIEW_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
+            options={viewOptions.map((o) => ({ label: o.label, value: o.value }))}
             onChange={(e) => setViewMode(e.target.value as ViewMode)}
           />
         }
         end={
           <ViewToolbarGroup>
             <Button icon={<PlusOutlined />} onClick={() => setDepOpen(true)}>
-              添加依赖
+              {t('gantt.addDependency')}
             </Button>
             <Button
               icon={<DownloadOutlined />}
@@ -159,7 +169,7 @@ export default function GanttView(): React.ReactElement {
               disabled={ganttTasks.length === 0}
               onClick={() => void exportChart('png')}
             >
-              导出 PNG
+              {t('gantt.exportPng')}
             </Button>
             <Button
               icon={<FilePdfOutlined />}
@@ -167,11 +177,9 @@ export default function GanttView(): React.ReactElement {
               disabled={ganttTasks.length === 0}
               onClick={() => void exportChart('pdf')}
             >
-              导出 PDF
+              {t('gantt.exportPdf')}
             </Button>
-            <ViewToolbarHint>
-              拖拽任务条调整起止时间 · 非 FS 依赖存储后在列表展示
-            </ViewToolbarHint>
+            <ViewToolbarHint>{t('gantt.toolbarHint')}</ViewToolbarHint>
           </ViewToolbarGroup>
         }
       />
@@ -179,7 +187,7 @@ export default function GanttView(): React.ReactElement {
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />
       ) : ganttTasks.length === 0 ? (
-        <ViewEmptyHint>暂无任务，请先在「看板」创建任务并设置时间</ViewEmptyHint>
+        <ViewEmptyHint>{t('gantt.empty')}</ViewEmptyHint>
       ) : (
         <div className={styles.chartWrap} ref={chartRef}>
           <Gantt
@@ -203,7 +211,7 @@ export default function GanttView(): React.ReactElement {
                   <div>{bar.name}</div>
                   {deps.length > 0 && (
                     <div>
-                      依赖：
+                      {t('gantt.depsLabel')}
                       {deps.map((d) => (
                         <Tag key={`${d.fromTaskId}-${d.type}`} style={{ marginTop: 4 }}>
                           {d.type}: {d.fromTaskId.slice(-6)} → {d.toTaskId.slice(-6)}
@@ -211,7 +219,7 @@ export default function GanttView(): React.ReactElement {
                       ))}
                     </div>
                   )}
-                  <div className={styles.tooltipHint}>双击切换里程碑</div>
+                  <div className={styles.tooltipHint}>{t('gantt.milestoneHint')}</div>
                 </div>
               )
             }}
@@ -220,7 +228,7 @@ export default function GanttView(): React.ReactElement {
       )}
 
       <Modal
-        title="添加任务依赖"
+        title={t('gantt.depModalTitle')}
         open={depOpen}
         onCancel={() => setDepOpen(false)}
         onOk={() => void addDependency()}
@@ -228,30 +236,30 @@ export default function GanttView(): React.ReactElement {
       >
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <div>
-            <Text type="secondary">前置任务</Text>
+            <Text type="secondary">{t('gantt.fromTask')}</Text>
             <Select
               style={{ width: '100%', marginTop: 4 }}
-              placeholder="选择前置"
+              placeholder={t('gantt.selectFrom')}
               options={taskOptions}
               value={fromId}
               onChange={setFromId}
             />
           </div>
           <div>
-            <Text type="secondary">后续任务</Text>
+            <Text type="secondary">{t('gantt.toTask')}</Text>
             <Select
               style={{ width: '100%', marginTop: 4 }}
-              placeholder="选择后续"
+              placeholder={t('gantt.selectTo')}
               options={taskOptions}
               value={toId}
               onChange={setToId}
             />
           </div>
           <div>
-            <Text type="secondary">依赖类型</Text>
+            <Text type="secondary">{t('gantt.depType')}</Text>
             <Select
               style={{ width: '100%', marginTop: 4 }}
-              options={DEP_TYPES}
+              options={depTypes}
               value={depType}
               onChange={setDepType}
             />

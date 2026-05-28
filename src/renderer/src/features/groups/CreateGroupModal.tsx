@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Form, Input, Modal, Radio, Switch } from 'antd'
 import type { GroupType } from '@shared/navigation/types'
+import { useI18n } from '@renderer/i18n/useI18n'
 
 interface CreateGroupModalProps {
   open: boolean
@@ -13,6 +14,7 @@ export default function CreateGroupModal({
   onClose,
   onCreate
 }: CreateGroupModalProps): React.ReactElement {
+  const { t } = useI18n()
   const [form] = Form.useForm<{ type: GroupType; name: string; autoDiscover: boolean }>()
   const [saving, setSaving] = useState(false)
 
@@ -35,7 +37,7 @@ export default function CreateGroupModal({
 
   return (
     <Modal
-      title="创建群组"
+      title={t('group.createTitle')}
       open={open}
       onCancel={onClose}
       onOk={() => void submit()}
@@ -43,24 +45,24 @@ export default function CreateGroupModal({
       destroyOnHidden
     >
       <Form form={form} layout="vertical">
-        <Form.Item name="type" label="群组类型" rules={[{ required: true }]}>
+        <Form.Item name="type" label={t('group.type')} rules={[{ required: true }]}>
           <Radio.Group
             optionType="button"
             options={[
-              { label: '项目群', value: 'project' },
-              { label: '职能群', value: 'function' },
-              { label: '匿名群', value: 'anonymous' }
+              { label: t('group.typeProject'), value: 'project' },
+              { label: t('group.typeFunction'), value: 'function' },
+              { label: t('group.typeAnonymous'), value: 'anonymous' }
             ]}
           />
         </Form.Item>
         <Form.Item
           name="name"
-          label="群组名称"
-          rules={[{ required: true, min: 2, max: 40, message: '名称 2–40 字' }]}
+          label={t('group.name')}
+          rules={[{ required: true, min: 2, max: 40, message: t('group.nameRule') }]}
         >
-          <Input placeholder="例如：LanPM 开发组" />
+          <Input placeholder={t('group.namePlaceholder')} />
         </Form.Item>
-        <Form.Item name="autoDiscover" label="局域网自动发现" valuePropName="checked">
+        <Form.Item name="autoDiscover" label={t('group.autoDiscover')} valuePropName="checked">
           <Switch />
         </Form.Item>
       </Form>

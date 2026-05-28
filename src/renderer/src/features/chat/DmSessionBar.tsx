@@ -4,6 +4,7 @@ import { isDmGroupId, formatDmTitle, getDmPeerUserId } from '@shared/chat/dmSess
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { groupViewPath } from '@renderer/routes/paths'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -13,6 +14,7 @@ interface DmSessionBarProps {
 }
 
 export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): React.ReactElement {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const sessions = useDmStore((s) => s.sessions)
   const lastOriginGroupId = useDmStore((s) => s.lastOriginGroupId)
@@ -24,7 +26,7 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
   return (
     <div className={styles.dmBar}>
       <Text type="secondary" className={styles.memberTitle}>
-        私聊会话
+        {t('chat.dmSessions')}
       </Text>
       <div className={styles.dmList}>
         {!inDm && (
@@ -33,7 +35,7 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
             className={`${styles.dmChip} ${styles.dmChipMuted}`}
             disabled
           >
-            群聊
+            {t('chat.groupChat')}
           </button>
         )}
         {inDm && (
@@ -42,7 +44,7 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
             className={styles.dmChip}
             onClick={() => navigate(groupViewPath(lastOriginGroupId, 'chat'))}
           >
-            ← 返回群聊
+            {t('chat.backToGroup')}
           </button>
         )}
         {sessions.map((session) => {
@@ -63,8 +65,12 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
       </div>
       {inDm && localUserId && (
         <Text type="secondary" className={styles.dmHint}>
-          与 {getPeerDisplayName(activeGroupId, getDmPeerUserId(activeGroupId, localUserId) ?? '')}{' '}
-          私聊中
+          {t('chat.dmWith', {
+            name: getPeerDisplayName(
+              activeGroupId,
+              getDmPeerUserId(activeGroupId, localUserId) ?? ''
+            )
+          })}
         </Text>
       )}
     </div>

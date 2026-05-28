@@ -2,6 +2,25 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.5] - 2026-05-29
+
+### Added
+- **`verify:project`**：版本与 CHANGELOG 对齐、docs 索引、`lint` + `verify:search` 串联
+- **i18n 类型体系**：`types.ts`（`MessageKey` 联合类型）、`navKeys.ts`、`presence.ts`
+- **全视图 i18n**：App / TopBar / BottomNav / 看板 / 树 / 甘特 / 文件 / 聊天 / 驾驶舱 / 群组 / AI 配置 / Setup 等硬编码中文迁至 zh-CN / en-US（230+ 键）
+
+### Fixed
+- **ESLint**：移除未使用导入（main/network/renderer）、`ganttAdapter` prefer-const、`GanttView` 主题色刷新
+- **`verify:topbar`**：直接导入 locale 模块，避免 Node ESM 解析 `messages.ts` 失败导致 `verify:m7` 中断
+
+### Changed
+- **`verify:m7`**：增加 `verify:search` 步骤
+- **`docs/08`**：RC 版本号与 `verify:project` / `verify:search` / `build` 验收项同步
+- **`todo.md`**：Linux 自动化回归与项目检查项勾选；索引 docs/09 与检查报告归档
+
+### Tag
+- `v1.0.0-rc.5` — 全视图 i18n + verify:project 项目健康检查
+
 ## [1.0.0-rc.4] - 2026-05-28
 
 ### Added

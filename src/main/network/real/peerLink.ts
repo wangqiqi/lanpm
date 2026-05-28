@@ -1,7 +1,7 @@
 import net from 'node:net'
 import type { DiscoveryPayload } from '../../../shared/network/types'
 import type { SyncEnvelope } from '../../../shared/network/types'
-import { deriveAesKey, deriveSharedSecret, generateDhKeyPair, type DhKeyPair } from '../../crypto/dhSession.ts'
+import { deriveAesKey, deriveSharedSecret, type DhKeyPair } from '../../crypto/dhSession.ts'
 import { openEnvelope, sealEnvelope } from '../../crypto/envelopeCrypto.ts'
 import { createWireDecoder, encodeWire, type WireMessage } from './wireProtocol.ts'
 

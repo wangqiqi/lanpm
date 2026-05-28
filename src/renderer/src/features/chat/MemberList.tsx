@@ -4,11 +4,13 @@ import { MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
 import { isDmGroupId } from '@shared/chat/dmSession'
-import { presenceEmoji, presenceLabel } from '@shared/presence'
+import { presenceEmoji } from '@shared/presence'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { groupViewPath } from '@renderer/routes/paths'
+import { useI18n } from '@renderer/i18n/useI18n'
+import { presenceMessageKey } from '@renderer/i18n/presence'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -24,6 +26,7 @@ export default function MemberList({
   groupId,
   onInsertMention
 }: MemberListProps): React.ReactElement {
+  const { t } = useI18n()
   const [members, setMembers] = useState<GroupMemberView[]>([])
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const openSession = useDmStore((s) => s.openSession)
@@ -55,12 +58,12 @@ export default function MemberList({
   return (
     <aside className={styles.memberList}>
       <Text type="secondary" className={styles.memberTitle}>
-        {isDm ? '私聊对象' : '成员'}
+        {isDm ? t('chat.dmPeer') : t('chat.members')}
       </Text>
       <List
         size="small"
         dataSource={members}
-        locale={{ emptyText: '暂无成员' }}
+        locale={{ emptyText: t('chat.noMembers') }}
         renderItem={(member) => {
           const isSelf = member.userId === currentUserId
           const presence = member.presence ?? 'offline'
@@ -71,21 +74,21 @@ export default function MemberList({
                   type="button"
                   className={styles.memberBtn}
                   onClick={() => onInsertMention(member.displayName)}
-                  title={`@${member.displayName} · ${presenceLabel(presence)}`}
+                  title={`@${member.displayName} · ${t(presenceMessageKey(presence))}`}
                 >
                   <span className={styles.memberDot} aria-hidden>
                     {presenceEmoji(presence)}
                   </span>
                   <span className={styles.memberName}>
                     {member.displayName}
-                    {isSelf ? '（我）' : ''}
+                    {isSelf ? t('common.me') : ''}
                   </span>
                 </button>
                 {!isSelf && !isDm && (
                   <button
                     type="button"
                     className={styles.dmBtn}
-                    title="发起私聊"
+                    title={t('chat.startDm')}
                     onClick={() => startDm(member)}
                   >
                     <MessageOutlined />
@@ -98,7 +101,7 @@ export default function MemberList({
       />
       {members.length > 0 && (
         <Text type="secondary" className={styles.memberStats}>
-          在线 {onlineCount}/{members.length}
+          {t('chat.onlineStats', { online: onlineCount, total: members.length })}
         </Text>
       )}
     </aside>

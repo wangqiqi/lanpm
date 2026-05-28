@@ -83,7 +83,7 @@ export default function TopBar(): React.ReactElement {
     { key: 'profile', label: t('topbar.profile'), disabled: true },
     {
       key: 'device',
-      label: `${t('topbar.device')}：${device?.deviceName ?? '—'}`
+      label: t('topbar.deviceWithName', { name: device?.deviceName ?? '—' })
     },
     { type: 'divider' },
     {
@@ -117,7 +117,7 @@ export default function TopBar(): React.ReactElement {
           }))}
         />
         <Button type="text" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-          创建群组
+          {t('topbar.createGroup')}
         </Button>
         <Button
           type="text"
@@ -141,8 +141,8 @@ export default function TopBar(): React.ReactElement {
           value={locale}
           onChange={(v) => setLocale(v)}
           options={[
-            { value: 'zh-CN', label: '中文' },
-            { value: 'en-US', label: 'English' }
+            { value: 'zh-CN', label: t('topbar.localeZh') },
+            { value: 'en-US', label: t('topbar.localeEn') }
           ]}
           suffixIcon={<GlobalOutlined />}
         />

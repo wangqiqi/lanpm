@@ -19,19 +19,28 @@ import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { useI18n } from '@renderer/i18n/useI18n'
+import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './files.module.css'
 
 const { Text } = Typography
 
-const CATEGORIES: { label: string; value: FileCategory | 'all' }[] = [
-  { label: '全部', value: 'all' },
-  { label: '文档', value: 'document' },
-  { label: '图片', value: 'image' },
-  { label: '视频', value: 'video' },
-  { label: '代码', value: 'code' },
-  { label: '书签', value: 'bookmark' },
-  { label: '其他', value: 'other' }
+const CATEGORY_KEYS: { key: MessageKey; value: FileCategory | 'all' }[] = [
+  { key: 'files.categoryAll', value: 'all' },
+  { key: 'files.categoryDocument', value: 'document' },
+  { key: 'files.categoryImage', value: 'image' },
+  { key: 'files.categoryVideo', value: 'video' },
+  { key: 'files.categoryCode', value: 'code' },
+  { key: 'files.categoryBookmark', value: 'bookmark' },
+  { key: 'files.categoryOther', value: 'other' }
 ]
+
+const TRANSFER_STATUS_KEYS: Record<string, MessageKey> = {
+  queued: 'files.transferQueued',
+  transferring: 'files.transferTransferring',
+  completed: 'files.transferCompleted',
+  failed: 'files.transferFailed'
+}
 
 function formatSize(n: number): string {
   if (n < 1024) return `${n} B`
@@ -40,6 +49,7 @@ function formatSize(n: number): string {
 }
 
 export default function FilesView(): React.ReactElement {
+  const { t } = useI18n()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const files = useFileStore((s) => s.filesByGroup[gid] ?? [])
@@ -59,6 +69,11 @@ export default function FilesView(): React.ReactElement {
   const [bookmarkUrl, setBookmarkUrl] = useState('')
   const [bookmarkTitle, setBookmarkTitle] = useState('')
   const [bookmarkSaving, setBookmarkSaving] = useState(false)
+
+  const categories = useMemo(
+    () => CATEGORY_KEYS.map((c) => ({ label: t(c.key), value: c.value })),
+    [t]
+  )
 
   useEffect(() => {
     if (!gid) return
@@ -93,14 +108,14 @@ export default function FilesView(): React.ReactElement {
     setBookmarkSaving(true)
     try {
       await addBookmark(gid, bookmarkUrl.trim(), bookmarkTitle.trim())
-      message.success('书签已添加')
+      message.success(t('files.bookmarkAdded'))
       setBookmarkOpen(false)
       setBookmarkUrl('')
       setBookmarkTitle('')
       setCategory('bookmark')
       void loadFiles(gid, 'bookmark')
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '添加书签失败')
+      message.error(err instanceof Error ? err.message : t('files.bookmarkAddFailed'))
     } finally {
       setBookmarkSaving(false)
     }
@@ -111,14 +126,14 @@ export default function FilesView(): React.ReactElement {
     try {
       const imported = await importBookmarks(gid)
       if (imported.length === 0) {
-        message.info('未导入书签')
+        message.info(t('files.noBookmarksImported'))
         return
       }
-      message.success(`已导入 ${imported.length} 个书签`)
+      message.success(t('files.bookmarksImported', { count: imported.length }))
       setCategory('bookmark')
       void loadFiles(gid, 'bookmark')
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '导入失败')
+      message.error(err instanceof Error ? err.message : t('files.importFailed'))
     }
   }
 
@@ -126,36 +141,49 @@ export default function FilesView(): React.ReactElement {
     if (!gid) return
     try {
       const path = await exportBookmarks(gid)
-      if (path) message.success(`已导出至 ${path}`)
+      if (path) message.success(t('files.exportedTo', { path }))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '导出失败')
+      message.error(err instanceof Error ? err.message : t('files.exportFailed'))
     }
   }
 
   const activeTransfers = useMemo(
-    () => transfers.filter((t) => t.status === 'queued' || t.status === 'transferring'),
+    () => transfers.filter((tr) => tr.status === 'queued' || tr.status === 'transferring'),
     [transfers]
   )
 
-  const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name', ellipsis: true },
-    { title: '类型', dataIndex: 'category', key: 'category', width: 80 },
-    { title: '大小', key: 'size', width: 90, render: (_: unknown, r: FileMeta) => (r.isBookmark ? '—' : formatSize(r.size)) },
-    {
-      title: '预览',
-      key: 'preview',
-      width: 90,
-      render: (_: unknown, r: FileMeta) =>
-        r.isBookmark ? '链接' : r.previewStatus === 'ready' ? '就绪' : r.previewStatus === 'converting' ? '转换中' : r.previewStatus === 'failed' ? '失败' : '—'
-    }
-  ]
+  const columns = useMemo(
+    () => [
+      { title: t('files.colName'), dataIndex: 'name', key: 'name', ellipsis: true },
+      { title: t('files.colType'), dataIndex: 'category', key: 'category', width: 80 },
+      {
+        title: t('files.colSize'),
+        key: 'size',
+        width: 90,
+        render: (_: unknown, r: FileMeta) => (r.isBookmark ? '—' : formatSize(r.size))
+      },
+      {
+        title: t('files.colPreview'),
+        key: 'preview',
+        width: 90,
+        render: (_: unknown, r: FileMeta) => {
+          if (r.isBookmark) return t('common.link')
+          if (r.previewStatus === 'ready') return t('files.previewReady')
+          if (r.previewStatus === 'converting') return t('files.previewConverting')
+          if (r.previewStatus === 'failed') return t('files.previewFailed')
+          return '—'
+        }
+      }
+    ],
+    [t]
+  )
 
   return (
     <div className={styles.root}>
       <ViewToolbar
         start={
           <Segmented
-            options={CATEGORIES.map((c) => ({ label: c.label, value: c.value }))}
+            options={categories}
             value={category}
             onChange={(v) => setCategory(v as FileCategory | 'all')}
           />
@@ -167,20 +195,20 @@ export default function FilesView(): React.ReactElement {
               icon={<UploadOutlined />}
               onClick={() =>
                 void upload(gid).catch((err: unknown) =>
-                  message.error(err instanceof Error ? err.message : '上传失败')
+                  message.error(err instanceof Error ? err.message : t('files.uploadFailed'))
                 )
               }
             >
-              上传文件
+              {t('files.upload')}
             </Button>
             <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
-              添加书签
+              {t('files.addBookmark')}
             </Button>
             <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
-              导入书签
+              {t('files.importBookmarks')}
             </Button>
             <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
-              导出书签
+              {t('files.exportBookmarks')}
             </Button>
           </ViewToolbarGroup>
         }
@@ -190,18 +218,18 @@ export default function FilesView(): React.ReactElement {
         <List
           size="small"
           className={styles.transferList}
-          header={<Text type="secondary">传输队列（最多 3 路并发）</Text>}
+          header={<Text type="secondary">{t('files.transferQueue')}</Text>}
           dataSource={activeTransfers}
-          renderItem={(t) => (
+          renderItem={(tr) => (
             <List.Item>
               <div className={styles.transferRow}>
-                <span>{t.fileName}</span>
+                <span>{tr.fileName}</span>
                 <Progress
-                  percent={Math.round((t.transferredBytes / Math.max(1, t.totalBytes)) * 100)}
+                  percent={Math.round((tr.transferredBytes / Math.max(1, tr.totalBytes)) * 100)}
                   size="small"
                   style={{ flex: 1, margin: '0 12px' }}
                 />
-                <TagStatus status={t.status} />
+                <TagStatus status={tr.status} label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')} />
               </div>
             </List.Item>
           )}
@@ -230,7 +258,7 @@ export default function FilesView(): React.ReactElement {
         </div>
         <aside className={styles.previewPane}>
           {!selected ? (
-            <Text type="secondary">选择文件查看预览</Text>
+            <Text type="secondary">{t('files.selectToPreview')}</Text>
           ) : selected.isBookmark ? (
             <div className={styles.bookmarkPreview}>
               <BookOutlined style={{ fontSize: 32, marginBottom: 12 }} />
@@ -240,9 +268,9 @@ export default function FilesView(): React.ReactElement {
               </a>
             </div>
           ) : selected.previewStatus === 'converting' ? (
-            <Text>本地转换中…（LibreOffice）</Text>
+            <Text>{t('files.convertingLocal')}</Text>
           ) : selected.previewStatus === 'failed' ? (
-            <Text type="danger">预览失败，请下载原文件</Text>
+            <Text type="danger">{t('files.previewFailedDownload')}</Text>
           ) : previewUrl && selected.category === 'image' ? (
             <Image src={previewUrl} alt={selected.name} className={styles.previewImg} />
           ) : previewUrl && selected.ext.toLowerCase() === 'pdf' ? (
@@ -250,13 +278,13 @@ export default function FilesView(): React.ReactElement {
           ) : previewUrl && ['txt', 'md', 'json'].includes(selected.ext.toLowerCase()) ? (
             <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
           ) : (
-            <Text type="secondary">暂不支持内联预览：{selected.name}</Text>
+            <Text type="secondary">{t('files.noInlinePreview', { name: selected.name })}</Text>
           )}
         </aside>
       </div>
 
       <Modal
-        title="添加书签"
+        title={t('files.bookmarkModalTitle')}
         open={bookmarkOpen}
         onCancel={() => setBookmarkOpen(false)}
         onOk={() => void saveBookmark()}
@@ -265,7 +293,7 @@ export default function FilesView(): React.ReactElement {
       >
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <div>
-            <Text type="secondary">URL</Text>
+            <Text type="secondary">{t('common.url')}</Text>
             <Input
               placeholder="https://example.com"
               value={bookmarkUrl}
@@ -274,9 +302,9 @@ export default function FilesView(): React.ReactElement {
             />
           </div>
           <div>
-            <Text type="secondary">标题（可选）</Text>
+            <Text type="secondary">{t('common.titleOptional')}</Text>
             <Input
-              placeholder="书签标题"
+              placeholder={t('files.bookmarkTitlePlaceholder')}
               value={bookmarkTitle}
               onChange={(e) => setBookmarkTitle(e.target.value)}
               style={{ marginTop: 4 }}
@@ -288,12 +316,6 @@ export default function FilesView(): React.ReactElement {
   )
 }
 
-function TagStatus({ status }: { status: string }): React.ReactElement {
-  const map: Record<string, string> = {
-    queued: '排队',
-    transferring: '传输中',
-    completed: '完成',
-    failed: '失败'
-  }
-  return <Text type="secondary">{map[status] ?? status}</Text>
+function TagStatus({ status, label }: { status: string; label: string }): React.ReactElement {
+  return <Text type="secondary">{label || status}</Text>
 }

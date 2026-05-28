@@ -1,6 +1,7 @@
 import { Modal, Select, Input } from 'antd'
 import { useState } from 'react'
 import { CODE_LANGUAGE_OPTIONS, detectLanguage } from '@shared/chat/detectLanguage'
+import { useI18n } from '@renderer/i18n/useI18n'
 
 const { TextArea } = Input
 
@@ -15,6 +16,7 @@ export default function CodeSendModal({
   onClose,
   onSend
 }: CodeSendModalProps): React.ReactElement {
+  const { t } = useI18n()
   const [code, setCode] = useState('')
   const [language, setLanguage] = useState<string>('auto')
   const [sending, setSending] = useState(false)
@@ -37,33 +39,33 @@ export default function CodeSendModal({
 
   return (
     <Modal
-      title="发送代码块"
+      title={t('chat.codeModalTitle')}
       open={open}
       onCancel={onClose}
       onOk={() => void handleOk()}
-      okText="发送"
-      cancelText="取消"
+      okText={t('common.send')}
+      cancelText={t('common.cancel')}
       confirmLoading={sending}
       width={640}
       destroyOnHidden
     >
       <div style={{ marginBottom: 8 }}>
-        <span style={{ marginRight: 8 }}>语言</span>
+        <span style={{ marginRight: 8 }}>{t('common.language')}</span>
         <Select
           value={language}
           style={{ width: 160 }}
           options={CODE_LANGUAGE_OPTIONS.map((v) => ({
             value: v,
-            label: v === 'auto' ? '自动识别' : v
+            label: v === 'auto' ? t('common.autoDetect') : v
           }))}
           onChange={setLanguage}
         />
         <span style={{ marginLeft: 12, opacity: 0.65, fontSize: 12 }}>
-          识别结果：{previewLang}
+          {t('chat.detectResult', { lang: previewLang })}
         </span>
       </div>
       <TextArea
-        placeholder="粘贴或输入代码…"
+        placeholder={t('chat.codePlaceholder')}
         value={code}
         onChange={(e) => setCode(e.target.value)}
         autoSize={{ minRows: 8, maxRows: 16 }}

@@ -6,6 +6,7 @@ import {
   defaultAiProviderPreset,
   getAiProviderPreset
 } from '@shared/cockpit/aiProviders'
+import { useI18n } from '@renderer/i18n/useI18n'
 
 interface AiConfigModalProps {
   open: boolean
@@ -20,6 +21,7 @@ export default function AiConfigModal({
   onClose,
   onSave
 }: AiConfigModalProps): React.ReactElement {
+  const { t } = useI18n()
   const [form] = Form.useForm<AiConfigInput & { apiKey?: string }>()
   const [saving, setSaving] = useState(false)
   const [provider, setProvider] = useState<AiProvider>(defaultAiProviderPreset().value)
@@ -61,7 +63,7 @@ export default function AiConfigModal({
 
   return (
     <Modal
-      title="API Key 配置"
+      title={t('ai.configTitle')}
       open={open}
       onCancel={onClose}
       onOk={() => void submit()}
@@ -70,7 +72,7 @@ export default function AiConfigModal({
       width={520}
     >
       <Form form={form} layout="vertical">
-        <Form.Item name="provider" label="服务商" rules={[{ required: true }]}>
+        <Form.Item name="provider" label={t('ai.provider')} rules={[{ required: true }]}>
           <Select
             options={AI_PROVIDER_PRESETS.map((p) => ({ label: p.label, value: p.value }))}
             onChange={(v: AiProvider) => {
@@ -83,17 +85,17 @@ export default function AiConfigModal({
         <Form.Item name="baseUrl" label="Base URL" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="model" label="模型" rules={[{ required: true }]}>
+        <Form.Item name="model" label={t('ai.model')} rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item
           name="apiKey"
-          label={config?.hasApiKey ? 'API Key（留空则保留原密钥）' : 'API Key'}
-          rules={config?.hasApiKey ? [] : [{ required: true, message: '请填写 API Key' }]}
+          label={config?.hasApiKey ? t('ai.apiKeyKeep') : t('ai.apiKey')}
+          rules={config?.hasApiKey ? [] : [{ required: true, message: t('ai.apiKeyRequired') }]}
         >
           <Input.Password placeholder={apiKeyPlaceholder} autoComplete="off" />
         </Form.Item>
-        <Form.Item name="enabled" label="启用外部 AI" valuePropName="checked">
+        <Form.Item name="enabled" label={t('ai.enableExternal')} valuePropName="checked">
           <Switch />
         </Form.Item>
       </Form>

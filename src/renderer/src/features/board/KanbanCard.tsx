@@ -3,6 +3,7 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task, TaskPriority } from '@shared/task/types'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './board.module.css'
 
 const PRIORITY_COLOR: Record<TaskPriority, string> = {
@@ -17,6 +18,7 @@ interface KanbanCardProps {
 }
 
 export default function KanbanCard({ task, onDelete }: KanbanCardProps): React.ReactElement {
+  const { t } = useI18n()
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.taskId,
     data: { task }
@@ -38,10 +40,10 @@ export default function KanbanCard({ task, onDelete }: KanbanCardProps): React.R
         <div className={styles.cardTitle}>{task.title}</div>
         {onDelete && (
           <Popconfirm
-            title="删除此任务？"
-            description="软删除，甘特与树视图将同步移除。"
-            okText="删除"
-            cancelText="取消"
+            title={t('board.deleteConfirmTitle')}
+            description={t('board.deleteConfirmDesc')}
+            okText={t('common.delete')}
+            cancelText={t('common.cancel')}
             onConfirm={(e) => {
               e?.stopPropagation()
               onDelete(task.taskId)
@@ -51,7 +53,7 @@ export default function KanbanCard({ task, onDelete }: KanbanCardProps): React.R
             <button
               type="button"
               className={styles.cardDelete}
-              aria-label="删除任务"
+              aria-label={t('board.deleteTaskAria')}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
             >

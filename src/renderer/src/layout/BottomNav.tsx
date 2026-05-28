@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -22,14 +23,6 @@ const VIEW_ICONS: Record<AppView, React.ReactNode> = {
   tree: <ApartmentOutlined />,
   gantt: <BarChartOutlined />,
   files: <FolderOutlined />
-}
-
-const NAV_LABEL_KEYS: Record<AppView, MessageKey> = {
-  chat: 'nav.chat',
-  board: 'nav.board',
-  tree: 'nav.tree',
-  gantt: 'nav.gantt',
-  files: 'nav.files'
 }
 
 const DISABLED_HINT_KEYS: Record<GroupType, MessageKey> = {
@@ -59,7 +52,7 @@ export default function BottomNav(): React.ReactElement {
   const groupType = getGroupType(groupId)
 
   return (
-    <nav className={styles.nav} aria-label="主视图导航">
+    <nav className={styles.nav} aria-label={t('nav.ariaLabel')}>
       {VIEW_TABS.map((tab) => {
         const allowed = isViewAllowedForGroup(groupType, tab.view)
         const active = activeView === tab.view
@@ -73,7 +66,7 @@ export default function BottomNav(): React.ReactElement {
             }}
           >
             <span className={styles.icon}>{VIEW_ICONS[tab.view]}</span>
-            <span className={styles.label}>{t(NAV_LABEL_KEYS[tab.view])}</span>
+            <span className={styles.label}>{t(VIEW_MESSAGE_KEYS[tab.view])}</span>
           </button>
         )
         return allowed ? (

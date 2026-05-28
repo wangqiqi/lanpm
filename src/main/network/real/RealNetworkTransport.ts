@@ -8,7 +8,6 @@ import type {
 import {
   DISCOVERY_INTERVAL_MS,
   HEARTBEAT_INTERVAL_MS,
-  PEER_TTL_MS,
   RECONNECT_BACKOFF_MS
 } from '../../../shared/network/constants.ts'
 import { generateDhKeyPair } from '../../crypto/dhSession.ts'

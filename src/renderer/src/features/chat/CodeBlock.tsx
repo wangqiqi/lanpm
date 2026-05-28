@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button, Tag } from 'antd'
 import type { ThemeMode } from '@renderer/stores/uiStore'
 import { highlightCode } from '@renderer/features/chat/highlightSetup'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
 interface CodeBlockProps {
@@ -32,6 +33,7 @@ function useHighlightTheme(theme: ThemeMode): void {
 }
 
 export default function CodeBlock({ language, code, theme }: CodeBlockProps): React.ReactElement {
+  const { t } = useI18n()
   useHighlightTheme(theme)
   const [expanded, setExpanded] = useState(false)
   const html = useMemo(() => highlightCode(code, language), [code, language])
@@ -42,7 +44,7 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
         <Tag className={styles.langTag}>{language}</Tag>
         {code.split('\n').length > 12 && (
           <Button type="link" size="small" onClick={() => setExpanded((v) => !v)}>
-            {expanded ? '收起' : '展开'}
+            {expanded ? t('chat.codeCollapse') : t('chat.codeExpand')}
           </Button>
         )}
       </div>

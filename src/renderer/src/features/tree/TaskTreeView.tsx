@@ -9,6 +9,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './tree.module.css'
 
 function buildTreeData(tasks: Task[]): DataNode[] {
@@ -51,6 +52,7 @@ function buildTreeData(tasks: Task[]): DataNode[] {
 }
 
 export default function TaskTreeView(): React.ReactElement {
+  const { t } = useI18n()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const navigate = useNavigate()
@@ -102,9 +104,9 @@ export default function TaskTreeView(): React.ReactElement {
     try {
       await createTask({ groupId: gid, title })
       setNewRootTitle('')
-      message.success('已添加根任务')
+      message.success(t('tree.rootAdded'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '创建失败')
+      message.error(err instanceof Error ? err.message : t('tree.createFailed'))
     }
   }
 
@@ -117,9 +119,9 @@ export default function TaskTreeView(): React.ReactElement {
       setExpandedKeys((keys) =>
         keys.includes(selectedParentId) ? keys : [...keys, selectedParentId]
       )
-      message.success('已添加子任务')
+      message.success(t('tree.childAdded'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '创建失败')
+      message.error(err instanceof Error ? err.message : t('tree.createFailed'))
     }
   }
 
@@ -130,10 +132,10 @@ export default function TaskTreeView(): React.ReactElement {
         taskId: editingProgress.taskId,
         progressPercent: Math.min(100, Math.max(0, editingProgress.value))
       })
-      message.success('进度已更新')
+      message.success(t('tree.progressUpdated'))
       setEditingProgress(null)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '更新失败')
+      message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
     }
   }
 
@@ -143,30 +145,30 @@ export default function TaskTreeView(): React.ReactElement {
         start={
           <ViewToolbarGroup>
             <Input
-              placeholder="新建根任务标题"
+              placeholder={t('tree.rootPlaceholder')}
               value={newRootTitle}
               onChange={(e) => setNewRootTitle(e.target.value)}
               onPressEnter={() => void handleCreateRoot()}
               style={{ maxWidth: 280 }}
             />
             <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreateRoot()}>
-              根任务
+              {t('tree.rootBtn')}
             </Button>
             <Input
-              placeholder="子任务标题（先选中父节点）"
+              placeholder={t('tree.childPlaceholder')}
               value={childTitle}
               onChange={(e) => setChildTitle(e.target.value)}
               disabled={!selectedParentId}
               style={{ maxWidth: 280 }}
             />
             <Button disabled={!selectedParentId} onClick={() => void handleCreateChild()}>
-              添加子任务
+              {t('tree.addChild')}
             </Button>
           </ViewToolbarGroup>
         }
         end={
           <Button type="link" onClick={() => navigate(groupViewPath(gid, 'board'))}>
-            看板视图
+            {t('tree.boardViewLink')}
           </Button>
         }
       />
@@ -174,7 +176,7 @@ export default function TaskTreeView(): React.ReactElement {
       {editingProgress && (
         <ViewToolbar>
           <ViewToolbarGroup>
-            <span>叶子任务进度：</span>
+            <span>{t('tree.leafProgress')}</span>
             <InputNumber
               min={0}
               max={100}
@@ -184,7 +186,7 @@ export default function TaskTreeView(): React.ReactElement {
               }
             />
             <Button type="primary" size="small" onClick={() => void saveProgress()}>
-              保存
+              {t('common.save')}
             </Button>
           </ViewToolbarGroup>
         </ViewToolbar>
@@ -194,7 +196,7 @@ export default function TaskTreeView(): React.ReactElement {
         {loading && tasks.length === 0 ? (
           <ViewLoadingCenter />
         ) : treeData.length === 0 ? (
-          <ViewEmptyHint>暂无任务，可在看板或此处创建</ViewEmptyHint>
+          <ViewEmptyHint>{t('tree.empty')}</ViewEmptyHint>
         ) : (
           <Tree
             showLine

@@ -9,7 +9,7 @@ import { registerFileIpc } from './ipc/file'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
 import { registerSearchIpc } from './ipc/search'
 import { ensureSeedGroups } from './group/groupService'
-import { initNetwork, shutdownNetwork, refreshNetworkIdentity } from './network'
+import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { resolveAppIconPath } from './appIcon'
 

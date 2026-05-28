@@ -10,7 +10,7 @@ import { resolveDeviceName } from '@shared/identity/deviceName'
 const BROWSER_PREVIEW_DEVICE = '开发预览'
 import type { LanpmApi } from '@shared/lanpm-api'
 import { isMessageReadByOthers } from '@shared/chat/readReceipt'
-import type { CreateTaskInput, MoveTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
+import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
 import { validateOtherReason } from '@shared/task/validation'
 

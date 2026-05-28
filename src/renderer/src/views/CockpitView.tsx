@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Button,
@@ -19,17 +19,20 @@ import { groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { useI18n } from '@renderer/i18n/useI18n'
+import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './CockpitView.module.css'
 
 const { Text, Paragraph } = Typography
 
-const STATUS_TAG: Record<string, { color: string; label: string }> = {
-  normal: { color: 'success', label: '正常' },
-  risk: { color: 'warning', label: '风险' },
-  delayed: { color: 'error', label: '延期' }
+const STATUS_KEYS: Record<string, { color: string; key: MessageKey }> = {
+  normal: { color: 'success', key: 'cockpit.statusNormal' },
+  risk: { color: 'warning', key: 'cockpit.statusRisk' },
+  delayed: { color: 'error', key: 'cockpit.statusDelayed' }
 }
 
 export default function CockpitView(): React.ReactElement {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
@@ -48,11 +51,11 @@ export default function CockpitView(): React.ReactElement {
       setDashboard(dash)
       setAiConfig(cfg)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '加载驾驶舱失败')
+      message.error(err instanceof Error ? err.message : t('cockpit.loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void load()
@@ -69,13 +72,24 @@ export default function CockpitView(): React.ReactElement {
             ? await api.generateMonthlyReport()
             : await api.evaluateProjects()
       setReport(result)
-      message.success(result.usedExternalAi ? '已生成（含外部 AI）' : '已生成本地报告')
+      message.success(result.usedExternalAi ? t('cockpit.reportExternal') : t('cockpit.reportLocal'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '生成失败')
+      message.error(err instanceof Error ? err.message : t('cockpit.generateFailed'))
     } finally {
       setReportLoading(false)
     }
   }
+
+  const statusTags = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(STATUS_KEYS).map(([status, meta]) => [
+          status,
+          { color: meta.color, label: t(meta.key) }
+        ])
+      ) as Record<string, { color: string; label: string }>,
+    [t]
+  )
 
   if (loading && !dashboard) {
     return <ViewLoadingCenter />
@@ -86,24 +100,24 @@ export default function CockpitView(): React.ReactElement {
   return (
     <div className={styles.root}>
       <ViewHeader
-        title="驾驶舱"
+        title={t('cockpit.title')}
         actions={
           <Space wrap>
             <Button loading={reportLoading} onClick={() => void runReport('weekly')}>
-              周报
+              {t('cockpit.weeklyReport')}
             </Button>
             <Button loading={reportLoading} onClick={() => void runReport('monthly')}>
-              月报
+              {t('cockpit.monthlyReport')}
             </Button>
             <Button
               icon={<RobotOutlined />}
               loading={reportLoading}
               onClick={() => void runReport('evaluate')}
             >
-              AI 评估
+              {t('cockpit.aiEvaluate')}
             </Button>
             <Button icon={<KeyOutlined />} onClick={() => setAiConfigOpen(true)}>
-              API Key
+              {t('cockpit.apiKey')}
             </Button>
           </Space>
         }
@@ -112,39 +126,43 @@ export default function CockpitView(): React.ReactElement {
       <Row gutter={[16, 16]} className={styles.metrics}>
         <Col xs={24} sm={8}>
           <Card>
-            <Statistic title="项目总数" value={summary?.totalProjects ?? 0} />
+            <Statistic title={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
           </Card>
         </Col>
         <Col xs={24} sm={8}>
           <Card>
-            <Statistic title="进行中任务" value={summary?.inProgressCount ?? 0} />
+            <Statistic title={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
           </Card>
         </Col>
         <Col xs={24} sm={8}>
           <Card>
-            <Statistic title="延期任务" value={summary?.delayedCount ?? 0} />
+            <Statistic title={t('cockpit.delayedTasks')} value={summary?.delayedCount ?? 0} />
           </Card>
         </Col>
       </Row>
 
-      <Card title="项目进度" className={styles.section}>
+      <Card title={t('cockpit.projectProgress')} className={styles.section}>
         {(dashboard?.projects.length ?? 0) === 0 ? (
-          <Text type="secondary">暂无项目群组，请先创建项目群</Text>
+          <Text type="secondary">{t('cockpit.noProjects')}</Text>
         ) : (
           dashboard?.projects.map((p) => {
-            const meta = STATUS_TAG[p.status] ?? STATUS_TAG.normal
+            const meta = statusTags[p.status] ?? statusTags.normal
             return (
               <div key={p.groupId} className={styles.projectRow}>
                 <div className={styles.projectHead}>
                   <Text strong>{p.name}</Text>
                   <Tag color={meta.color}>{meta.label}</Tag>
                   <Button size="small" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
-                    查看
+                    {t('common.view')}
                   </Button>
                 </div>
                 <Progress percent={p.progressPercent} size="small" />
                 <Text type="secondary" className={styles.projectMeta}>
-                  任务 {p.totalTasks} · 进行中 {p.inProgressCount} · 延期 {p.delayedCount}
+                  {t('cockpit.projectMeta', {
+                    total: p.totalTasks,
+                    inProgress: p.inProgressCount,
+                    delayed: p.delayedCount
+                  })}
                 </Text>
               </div>
             )
@@ -152,25 +170,26 @@ export default function CockpitView(): React.ReactElement {
         )}
       </Card>
 
-      <Card title="部门完成率" className={styles.section}>
+      <Card title={t('cockpit.deptCompletion')} className={styles.section}>
         {(dashboard?.departments.length ?? 0) === 0 ? (
-          <Text type="secondary">暂无任务负责人部门数据</Text>
+          <Text type="secondary">{t('cockpit.noDeptData')}</Text>
         ) : (
           dashboard?.departments.map((d) => (
             <div key={d.department} className={styles.deptRow}>
               <Text>{d.department}</Text>
               <Progress percent={d.completionPercent} style={{ flex: 1 }} />
-              <Text type="secondary">{d.taskCount} 项</Text>
+              <Text type="secondary">{t('cockpit.taskCount', { count: d.taskCount })}</Text>
             </div>
           ))
         )}
       </Card>
 
       {report && (
-        <Card title="报告 / 评估输出" className={styles.section}>
+        <Card title={t('cockpit.reportOutput')} className={styles.section}>
           <Paragraph>
             <Text type="secondary">
-              {report.generatedAt} · {report.usedExternalAi ? '外部 AI' : '本地规则'}
+              {report.generatedAt} ·{' '}
+              {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
             </Text>
           </Paragraph>
           <pre className={styles.reportPre}>{report.content}</pre>
@@ -184,7 +203,7 @@ export default function CockpitView(): React.ReactElement {
         onSave={async (input) => {
           const saved = await getLanpmApi().cockpit.saveAiConfig(input)
           setAiConfig(saved)
-          message.success('API 配置已保存（密钥本地加密）')
+          message.success(t('cockpit.configSaved'))
         }}
       />
     </div>

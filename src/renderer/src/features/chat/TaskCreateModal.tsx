@@ -1,4 +1,5 @@
 import { Form, Input, Modal } from 'antd'
+import { useI18n } from '@renderer/i18n/useI18n'
 
 interface TaskCreateModalProps {
   open: boolean
@@ -11,6 +12,7 @@ export default function TaskCreateModal({
   onClose,
   onSubmit
 }: TaskCreateModalProps): React.ReactElement {
+  const { t } = useI18n()
   const [form] = Form.useForm<{ title: string }>()
 
   const handleOk = async (): Promise<void> => {
@@ -22,7 +24,7 @@ export default function TaskCreateModal({
 
   return (
     <Modal
-      title="快捷创建任务"
+      title={t('chat.taskModalTitle')}
       open={open}
       onCancel={() => {
         form.resetFields()
@@ -30,16 +32,16 @@ export default function TaskCreateModal({
       }}
       onOk={() => void handleOk()}
       destroyOnHidden
-      okText="创建"
-      cancelText="取消"
+      okText={t('common.create')}
+      cancelText={t('common.cancel')}
     >
       <Form form={form} layout="vertical">
         <Form.Item
           name="title"
-          label="任务标题"
-          rules={[{ required: true, message: '请输入任务标题' }]}
+          label={t('chat.taskTitleLabel')}
+          rules={[{ required: true, message: t('chat.taskTitleRequired') }]}
         >
-          <Input placeholder="例如：修复登录页样式" autoFocus />
+          <Input placeholder={t('chat.taskTitlePlaceholder')} autoFocus />
         </Form.Item>
       </Form>
     </Modal>
