@@ -1,4 +1,5 @@
 import type { ChatMessage } from './chat/types'
+import type { GroupMemberView } from './chat/members'
 import type { SetupInput, SetupStatus } from './identity'
 
 export interface LanpmApi {
@@ -23,6 +24,7 @@ export interface LanpmApi {
       languageHint?: string,
       theme?: 'light' | 'dark'
     ) => Promise<ChatMessage>
+    listMembers: (groupId: string) => Promise<GroupMemberView[]>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
 }

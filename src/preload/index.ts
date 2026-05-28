@@ -22,6 +22,7 @@ const api: LanpmApi = {
     sendText: (groupId, text) => ipcRenderer.invoke('chat:sendText', groupId, text),
     sendCode: (groupId, code, languageHint, theme) =>
       ipcRenderer.invoke('chat:sendCode', groupId, code, languageHint, theme),
+    listMembers: (groupId) => ipcRenderer.invoke('chat:listMembers', groupId),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)

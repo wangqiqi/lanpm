@@ -1,4 +1,6 @@
 import type { ChatMessage } from '@shared/chat/types'
+import type { GroupMemberView } from '@shared/chat/members'
+import { parseMentions } from '@shared/chat/mentions'
 import { detectLanguage } from '@shared/chat/detectLanguage'
 import type { SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
@@ -32,6 +34,24 @@ function writeChatMessages(groupId: string, messages: ChatMessage[]): void {
 }
 
 const chatListeners = new Set<(message: ChatMessage) => void>()
+
+const STUB_MEMBERS: GroupMemberView[] = [
+  { userId: 'demo-alice', displayName: 'Alice', mentionKeys: ['alice'] },
+  { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] }
+]
+
+function listStubMembers(): GroupMemberView[] {
+  const status = readStatus()
+  const members = [...STUB_MEMBERS]
+  if (status.configured && status.user) {
+    members.push({
+      userId: status.user.userId,
+      displayName: status.user.displayName,
+      mentionKeys: [status.user.baseName, status.user.userId]
+    })
+  }
+  return members
+}
 
 function readStatus(): SetupStatus {
   try {
@@ -106,6 +126,8 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         const trimmed = text.trim()
         if (!trimmed) throw new Error('消息不能为空')
+        const members = listStubMembers()
+        const mentions = parseMentions(trimmed, members)
         const prev = readChatMessages(groupId)
         const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
         const msg: ChatMessage = {
@@ -117,7 +139,8 @@ export function createBrowserLanpmStub(): LanpmApi {
           content: { kind: 'text', text: trimmed },
           lamportTs,
           createdAt: new Date().toISOString(),
-          deliveryStatus: 'sent'
+          deliveryStatus: 'sent',
+          mentions: mentions.length ? mentions : undefined
         }
         writeChatMessages(groupId, [...prev, msg])
         for (const fn of chatListeners) fn(msg)
@@ -148,6 +171,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         for (const fn of chatListeners) fn(msg)
         return msg
       },
+      listMembers: async () => listStubMembers(),
       onMessage: (handler) => {
         chatListeners.add(handler)
         return () => chatListeners.delete(handler)

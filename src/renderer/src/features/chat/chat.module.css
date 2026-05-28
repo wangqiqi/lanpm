@@ -9,6 +9,131 @@
   overflow: hidden;
 }
 
+.chatLayout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+}
+
+.memberList {
+  flex-shrink: 0;
+  width: 240px;
+  min-width: 200px;
+  border-right: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.08));
+  padding: 8px 8px 0;
+  overflow-y: auto;
+  background: var(--lanpm-bg);
+}
+
+.memberTitle {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.memberItem {
+  padding: 4px 0 !important;
+  border: none !important;
+}
+
+.memberBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  text-align: left;
+  color: inherit;
+}
+
+.memberBtn:hover {
+  background: var(--lanpm-bubble-bg, rgba(0, 0, 0, 0.06));
+}
+
+.memberDot {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.memberName {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mention {
+  color: #1677ff;
+  font-weight: 600;
+  background: rgba(22, 119, 255, 0.12);
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.mentionOwn {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inputWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mentionSuggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+  background: var(--lanpm-surface-solid, #fff);
+  border: 1px solid var(--lanpm-border, rgba(0, 0, 0, 0.12));
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+.mentionOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: inherit;
+}
+
+.mentionOption:hover,
+.mentionOptionActive {
+  background: var(--lanpm-bubble-bg, rgba(0, 0, 0, 0.06));
+}
+
+.mentionOptionId {
+  font-size: 11px;
+  opacity: 0.55;
+  margin-left: 8px;
+}
+
 .messages {
   min-height: 0;
   min-width: 0;

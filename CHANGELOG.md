@@ -2,12 +2,30 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.6.3-m2] - 2026-05-28
+
+### Added
+- M2-03 @提及：`parseMentions` / `MemberList` / `MentionSuggest` / `MentionText` 高亮
+- 桌面通知：Electron `notifyIfMentioned`；浏览器 `useMentionNotifications`
+- `chat:listMembers` IPC（Stub + LAN peers + 本机用户）
+- `npm run verify:mentions`
+
+### Changed
+- `messageRepository` 持久化 `mentions`（包装 `{ content, mentions }`）
+- `verify:chat`：增加 `parseMentions(@Bob)` 断言
+- `verify:m2`：串联 `verify:mentions` + `verify:chat`
+- `todo.md`：M2-03 标记完成
+
+### Tag
+- `v0.6.3-m2-chat-mention` — M2 @提及与桌面通知
+
 ## [0.6.2-m2] - 2026-05-28
 
 ### Fixed
 - preload 构建强制 CJS 输出，修复 Electron 沙箱中 `import outside module` 导致脚本无法加载
 - 主进程 preload 路径解析增加 `index.cjs` 候选
 - `getSuggestedDeviceName` 改由主进程同步 IPC 提供，preload 不再直接依赖 `node:os`
+- Linux 无 GPU 时禁用硬件加速，避免 Electron FATAL 退出
 
 ### Tag
 - `v0.6.2-m2-preload-fix` — preload CJS 与设备名 IPC 修复

@@ -4,5 +4,6 @@ export const CHAT_PUSH_CHANNEL = 'chat:message'
 export const CHAT_IPC = {
   listMessages: 'chat:listMessages',
   sendText: 'chat:sendText',
-  sendCode: 'chat:sendCode'
+  sendCode: 'chat:sendCode',
+  listMembers: 'chat:listMembers'
 } as const

@@ -1,11 +1,14 @@
 import type { ChatMessage } from '@shared/chat/types'
+import type { GroupMemberView } from '@shared/chat/members'
 import { useUiStore } from '@renderer/stores/uiStore'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
+import MentionText from '@renderer/features/chat/MentionText'
 import styles from './chat.module.css'
 
 interface MessageBubbleProps {
   message: ChatMessage
   own: boolean
+  members: GroupMemberView[]
   deliveryLabel: string
   formatTime: (iso: string) => string
 }
@@ -13,6 +16,7 @@ interface MessageBubbleProps {
 export default function MessageBubble({
   message,
   own,
+  members,
   deliveryLabel,
   formatTime
 }: MessageBubbleProps): React.ReactElement {
@@ -30,7 +34,11 @@ export default function MessageBubble({
         </div>
       )}
 
-      {message.content.kind === 'text' && <div>{message.content.text}</div>}
+      {message.content.kind === 'text' && (
+        <div>
+          <MentionText text={message.content.text} members={members} own={own} />
+        </div>
+      )}
 
       {message.content.kind === 'code' && (
         <CodeBlock

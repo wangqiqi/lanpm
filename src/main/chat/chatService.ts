@@ -4,8 +4,11 @@ import type { Database } from 'better-sqlite3'
 import type { ChatMessage, ChatPayload, MessageContent, MessageType } from '../../shared/chat/types'
 import { CHAT_PUSH_CHANNEL } from '../../shared/chat/channels'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
+import { parseMentions } from '../../shared/chat/mentions'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
+import { listGroupMembers } from './memberService'
+import { notifyIfMentioned } from './notificationService'
 import { getNetworkTransport } from '../network/stub'
 import {
   getMaxLamportTs,
@@ -37,6 +40,11 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   insertMessage(db, stored)
   broadcastMessage(stored)
+
+  const status = getSetupStatus(db)
+  if (status.configured && status.user) {
+    notifyIfMentioned(stored, status.user.userId)
+  }
 }
 
 function ensureSubscribed(db: Database, transport: NetworkTransport, groupId: string): void {
@@ -72,7 +80,8 @@ async function publishChatMessage(
   db: Database,
   groupId: string,
   type: MessageType,
-  content: MessageContent
+  content: MessageContent,
+  mentions?: string[]
 ): Promise<ChatMessage> {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
@@ -95,7 +104,8 @@ async function publishChatMessage(
     content,
     lamportTs,
     createdAt: now,
-    deliveryStatus: 'sending'
+    deliveryStatus: 'sending',
+    mentions: mentions?.length ? mentions : undefined
   }
 
   insertMessage(db, msg)
@@ -130,8 +140,18 @@ export async function sendTextMessage(
 ): Promise<ChatMessage> {
   const trimmed = text.trim()
   if (!trimmed) throw new Error('消息不能为空')
-  return publishChatMessage(db, groupId, 'text', { kind: 'text', text: trimmed })
+  const members = await listGroupMembers(db, groupId)
+  const mentions = parseMentions(trimmed, members)
+  return publishChatMessage(
+    db,
+    groupId,
+    'text',
+    { kind: 'text', text: trimmed },
+    mentions
+  )
 }
+
+export { listGroupMembers }
 
 export async function sendCodeMessage(
   db: Database,

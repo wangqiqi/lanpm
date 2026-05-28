@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3'
-import type { ChatMessage, MessageDeliveryStatus } from '../../../shared/chat/types'
+import type { ChatMessage, MessageContent, MessageDeliveryStatus } from '../../../shared/chat/types'
 
 interface MessageRow {
   msg_id: string
@@ -13,18 +13,44 @@ interface MessageRow {
   delivery_status: string
 }
 
+interface StoredMessagePayload {
+  content: MessageContent
+  mentions?: string[]
+  replyToMsgId?: string
+}
+
+function parsePayload(raw: string): StoredMessagePayload {
+  const parsed = JSON.parse(raw) as StoredMessagePayload | MessageContent
+  if (parsed && typeof parsed === 'object' && 'content' in parsed) {
+    return parsed as StoredMessagePayload
+  }
+  return { content: parsed as MessageContent }
+}
+
 function rowToMessage(row: MessageRow): ChatMessage {
+  const payload = parsePayload(row.content_json)
   return {
     msgId: row.msg_id,
     groupId: row.group_id,
     senderUserId: row.sender_user_id,
     senderDeviceId: row.sender_device_id,
     type: row.type as ChatMessage['type'],
-    content: JSON.parse(row.content_json) as ChatMessage['content'],
+    content: payload.content,
     lamportTs: row.lamport_ts,
     createdAt: row.created_at,
-    deliveryStatus: row.delivery_status as MessageDeliveryStatus
+    deliveryStatus: row.delivery_status as MessageDeliveryStatus,
+    mentions: payload.mentions,
+    replyToMsgId: payload.replyToMsgId
   }
+}
+
+function serializePayload(message: ChatMessage): string {
+  const payload: StoredMessagePayload = {
+    content: message.content,
+    mentions: message.mentions,
+    replyToMsgId: message.replyToMsgId
+  }
+  return JSON.stringify(payload)
 }
 
 export function insertMessage(db: Database, message: ChatMessage): void {
@@ -42,7 +68,7 @@ export function insertMessage(db: Database, message: ChatMessage): void {
     senderUserId: message.senderUserId,
     senderDeviceId: message.senderDeviceId,
     type: message.type,
-    contentJson: JSON.stringify(message.content),
+    contentJson: serializePayload(message),
     lamportTs: message.lamportTs,
     createdAt: message.createdAt,
     deliveryStatus: message.deliveryStatus

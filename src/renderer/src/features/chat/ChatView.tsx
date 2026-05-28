@@ -2,11 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Input, Spin, Typography } from 'antd'
 import { CodeOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
+import type { GroupMemberView } from '@shared/chat/members'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import CodeSendModal from '@renderer/features/chat/CodeSendModal'
+import MemberList from '@renderer/features/chat/MemberList'
+import MentionSuggest from '@renderer/features/chat/MentionSuggest'
 import MessageBubble from '@renderer/features/chat/MessageBubble'
+import { useMentionNotifications } from '@renderer/features/chat/useMentionNotifications'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -46,15 +50,22 @@ export default function ChatView(): React.ReactElement {
   const listRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
+  const [members, setMembers] = useState<GroupMemberView[]>([])
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
 
+  useMentionNotifications(gid)
+
   useEffect(() => {
     if (!gid) return
     void loadMessages(gid)
+    void getLanpmApi()
+      .chat.listMembers(gid)
+      .then(setMembers)
+      .catch(() => setMembers([]))
     const unsub = getLanpmApi().chat.onMessage((msg) => {
       if (msg.groupId === gid) upsertMessage(msg)
     })
@@ -117,6 +128,15 @@ export default function ChatView(): React.ReactElement {
     setResizing(true)
   }
 
+  const insertMention = useCallback((displayName: string) => {
+    setDraft((prev) => {
+      const replaced = prev.replace(/(?:^|\s)@([^\s@]*)$/, ` @${displayName} `)
+      if (replaced !== prev) return replaced.trimStart()
+      const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
+      return `${prev}${sep}@${displayName} `
+    })
+  }, [])
+
   const handleSend = useCallback(async () => {
     const text = draft.trim()
     if (!text || !gid) return
@@ -140,66 +160,74 @@ export default function ChatView(): React.ReactElement {
   }
 
   return (
-    <div className={styles.root} ref={rootRef}>
-      <div className={styles.messages} ref={listRef}>
-        {loading && messages.length === 0 ? (
-          <Spin className={styles.empty} />
-        ) : messages.length === 0 ? (
-          <Text className={styles.empty} type="secondary">
-            暂无消息，发送第一条吧
-          </Text>
-        ) : (
-          <div className={styles.messageList}>
-            {messages.map((msg) => (
-              <MessageBubble
-                key={msg.msgId}
-                message={msg}
-                own={msg.senderUserId === currentUserId}
-                deliveryLabel={deliveryLabel(msg.deliveryStatus)}
-                formatTime={formatTime}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+    <div className={styles.chatLayout}>
+      <MemberList groupId={gid} onInsertMention={insertMention} />
 
-      <div className={styles.composer} style={{ height: composerHeight }}>
-        <div
-          className={`${styles.resizeHandle} ${resizing ? styles.resizeHandleActive : ''}`}
-          onMouseDown={onResizeStart}
-          role="separator"
-          aria-orientation="horizontal"
-          aria-label="调整输入框高度"
-        />
-        <div className={styles.inputRow}>
-          <div className={styles.inputMain}>
-            <Text type="secondary" className={styles.inputHint}>
-              Ctrl+Enter 发送
+      <div className={styles.root} ref={rootRef}>
+        <div className={styles.messages} ref={listRef}>
+          {loading && messages.length === 0 ? (
+            <Spin className={styles.empty} />
+          ) : messages.length === 0 ? (
+            <Text className={styles.empty} type="secondary">
+              暂无消息，输入 @成员名 可提及
             </Text>
-            <TextArea
-              className={styles.inputTextarea}
-              placeholder="输入消息…"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={onKeyDown}
-            />
-          </div>
-          <div className={styles.inputActions}>
-            <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
-              代码
-            </Button>
-            <Button type="primary" onClick={() => void handleSend()}>
-              发送
-            </Button>
+          ) : (
+            <div className={styles.messageList}>
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg.msgId}
+                  message={msg}
+                  own={msg.senderUserId === currentUserId}
+                  members={members}
+                  deliveryLabel={deliveryLabel(msg.deliveryStatus)}
+                  formatTime={formatTime}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.composer} style={{ height: composerHeight }}>
+          <div
+            className={`${styles.resizeHandle} ${resizing ? styles.resizeHandleActive : ''}`}
+            onMouseDown={onResizeStart}
+            role="separator"
+            aria-orientation="horizontal"
+            aria-label="调整输入框高度"
+          />
+          <div className={styles.inputRow}>
+            <div className={styles.inputMain}>
+              <Text type="secondary" className={styles.inputHint}>
+                Ctrl+Enter 发送 · 输入 @ 提及成员
+              </Text>
+              <div className={styles.inputWrap}>
+                <MentionSuggest draft={draft} members={members} onPick={insertMention} />
+                <TextArea
+                  className={styles.inputTextarea}
+                  placeholder="输入消息…"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={onKeyDown}
+                />
+              </div>
+            </div>
+            <div className={styles.inputActions}>
+              <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
+                代码
+              </Button>
+              <Button type="primary" onClick={() => void handleSend()}>
+                发送
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <CodeSendModal
-        open={codeModalOpen}
-        onClose={() => setCodeModalOpen(false)}
-        onSend={handleSendCode}
-      />
+        <CodeSendModal
+          open={codeModalOpen}
+          onClose={() => setCodeModalOpen(false)}
+          onSend={handleSendCode}
+        />
+      </div>
     </div>
   )
 }
