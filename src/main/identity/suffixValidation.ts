@@ -6,7 +6,7 @@ import {
   type ManualUserIdValidation
 } from './idGen'
 import { userIdExists } from '../storage'
-import { getKnownLanUserIds } from '../network/stub/peerRegistry'
+import { getKnownLanUserIds } from '../network/peerDirectory'
 
 export function createUserIdExistsChecker(db: Database): (userId: string) => boolean {
   return (userId) => userIdExists(db, userId) || getKnownLanUserIds().has(userId)

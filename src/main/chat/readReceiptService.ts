@@ -4,7 +4,7 @@ import type { ReadReceipt, ReadReceiptPayload } from '../../shared/chat/readRece
 import { isMessageReadByOthers } from '../../shared/chat/readReceipt'
 import type { SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
-import { getNetworkTransport } from '../network/stub'
+import { getNetworkTransport } from '../network'
 import { NetworkStub } from '../network/stub/NetworkStub'
 import {
   getMessageById,

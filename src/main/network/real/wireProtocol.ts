@@ -1,4 +1,4 @@
-import type { SyncEnvelope } from '../../shared/network/types'
+import type { SyncEnvelope } from '../../../shared/network/types'
 
 export type WireMessage =
   | { kind: 'handshake'; deviceId: string; userId: string; displayName: string; publicKey: string }

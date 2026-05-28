@@ -1,6 +1,6 @@
 import dgram from 'node:dgram'
 import type { DiscoveryPayload } from '../../../shared/network/types'
-import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT } from '../../../shared/network/constants'
+import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT } from '../../../shared/network/constants.ts'
 
 export interface UdpDiscoveryOptions {
   deviceId: string

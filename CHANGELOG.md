@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.10.0-m6] - 2026-05-28
+
+### Added
+- M6 真实网络：`RealNetworkTransport`（UDP 43123 发现 + TCP 加密数据通道）
+- M6 加密：ECDH `prime256v1` + AES-256-GCM 信封（`dhSession` / `envelopeCrypto`）
+- 指数退避重连（1s→20s）；`LANPM_NETWORK=stub|real`（默认 real）
+- 双实例可设 `LANPM_TCP_PORT` 区分 TCP 端口
+- `npm run verify:m6`（加密 + 本机 P2P 回环）
+
+### Changed
+- 主进程 `initNetwork` 统一 Stub/Real 工厂；`verify:*` 脚本默认 `LANPM_NETWORK=stub` 处显式设置
+- `peerDirectory` 统一 LAN userId 发现；presence TTL 改用共享 `PEER_TTL_MS`
+
+### Tag
+- `v0.10.0-m6-real-network` — M6 UDP 发现 + 加密 P2P
+
 ## [0.9.0-m5] - 2026-05-28
 
 ### Added

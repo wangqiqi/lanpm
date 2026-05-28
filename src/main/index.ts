@@ -8,7 +8,7 @@ import { registerTaskIpc } from './ipc/task'
 import { registerFileIpc } from './ipc/file'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
 import { ensureSeedGroups } from './group/groupService'
-import { initNetworkStub, shutdownNetworkStub } from './network/stub'
+import { initNetwork, shutdownNetwork, refreshNetworkIdentity } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { resolveAppIconPath } from './appIcon'
 
@@ -90,7 +90,7 @@ app.whenReady().then(() => {
 
     initDatabase()
     ensureSeedGroups(getDatabase())
-    initNetworkStub(getDatabase())
+    initNetwork(getDatabase())
     initChatService(getDatabase())
     registerIdentityIpc()
     registerChatIpc()
@@ -119,6 +119,6 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   shutdownChatService()
-  shutdownNetworkStub()
+  shutdownNetwork()
   closeDatabase()
 })

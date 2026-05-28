@@ -5,7 +5,7 @@ import { isDmGroupId, parseDmGroupId } from '../../shared/chat/dmSession'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { getSetupStatus } from '../identity/setup'
 import { getAggregatedUserPresence } from '../presence/presenceRegistry'
-import { getNetworkTransport } from '../network/stub'
+import { getNetworkTransport } from '../network'
 import { getGroupById, listGroupMembers as listDbGroupMembers, resolveGroupType } from '../group/groupService'
 import { getUserById } from '../storage/repositories/userRepository'
 

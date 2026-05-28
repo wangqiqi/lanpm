@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "0.9.0-m5",
+  "version": "0.10.0-m6",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json",
     "verify:storage": "node scripts/verify-storage.mjs",
     "verify:suffix": "node --experimental-strip-types scripts/verify-suffix.ts",
-    "verify:network-stub": "node --experimental-strip-types scripts/verify-network-stub.ts",
+    "verify:network-stub": "LANPM_NETWORK=stub node --experimental-strip-types scripts/verify-network-stub.ts",
     "verify:m0": "npm run verify:storage && npm run verify:suffix && npm run verify:network-stub",
     "verify:routes": "node --experimental-strip-types scripts/verify-routes.ts",
     "verify:topbar": "node --experimental-strip-types scripts/verify-topbar.ts",
@@ -28,6 +28,7 @@
     "verify:m3": "node --experimental-strip-types scripts/verify-m3.ts",
     "verify:m4": "node --experimental-strip-types scripts/verify-m4.ts",
     "verify:m5": "node --experimental-strip-types scripts/verify-m5.ts",
+    "verify:m6": "node --experimental-strip-types scripts/verify-m6.ts",
     "build:icons": "node scripts/build-icons.mjs",
     "rebuild:native": "electron-builder install-app-deps",
     "postinstall": "electron-builder install-app-deps"

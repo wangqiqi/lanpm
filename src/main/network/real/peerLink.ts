@@ -9,6 +9,7 @@ export interface PeerLinkOptions {
   local: { deviceId: string; userId: string; displayName: string }
   keys: DhKeyPair
   onEnvelope: (envelope: SyncEnvelope) => void
+  onReady?: (remoteDeviceId: string) => void
   onClose: () => void
 }
 
@@ -25,7 +26,7 @@ export class PeerLink {
     this.opts = opts
   }
 
-  get deviceId(): string | null {
+  getRemoteDeviceId(): string | null {
     return this.remoteDeviceId
   }
 
@@ -161,6 +162,7 @@ export class PeerLink {
     const secret = deriveSharedSecret(this.opts.keys.privateKey, peerPublic)
     this.aesKey = deriveAesKey(secret)
     this.state = 'ready'
+    if (this.remoteDeviceId) this.opts.onReady?.(this.remoteDeviceId)
   }
 }
 

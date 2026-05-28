@@ -3,7 +3,7 @@ import {
   aggregateUserPresenceFromDevices,
   type DevicePresenceRecord
 } from '../../shared/presence/aggregate.ts'
-import { STUB_PEER_TTL_MS } from '../network/stub/constants.ts'
+import { PEER_TTL_MS } from '../../shared/network/constants.ts'
 
 const byDevice = new Map<string, DevicePresenceRecord>()
 
@@ -31,7 +31,7 @@ export function touchDiscoveryPeer(peer: DiscoveryPayload): void {
   if (
     existing &&
     existing.presence === 'away' &&
-    now - existing.updatedAt < STUB_PEER_TTL_MS / 3
+    now - existing.updatedAt < PEER_TTL_MS / 3
   ) {
     upsert(peer.deviceId, peer.userId, 'away', existing.updatedAt)
     return
@@ -41,7 +41,7 @@ export function touchDiscoveryPeer(peer: DiscoveryPayload): void {
 
 export function pruneStaleDevices(now = Date.now()): void {
   for (const [deviceId, rec] of byDevice) {
-    if (now - rec.updatedAt > STUB_PEER_TTL_MS) {
+    if (now - rec.updatedAt > PEER_TTL_MS) {
       byDevice.delete(deviceId)
     }
   }
@@ -49,7 +49,7 @@ export function pruneStaleDevices(now = Date.now()): void {
 
 export function getAggregatedUserPresence(userId: string, now = Date.now()): UserPresence {
   pruneStaleDevices(now)
-  return aggregateUserPresenceFromDevices([...byDevice.values()], userId, now, STUB_PEER_TTL_MS)
+  return aggregateUserPresenceFromDevices([...byDevice.values()], userId, now, PEER_TTL_MS)
 }
 
 export function resetPresenceRegistry(): void {

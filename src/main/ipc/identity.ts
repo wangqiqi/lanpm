@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import { completeSetup, getSetupStatus, getSuggestedDeviceName, type SetupInput } from '../identity/setup'
 import { ensureSeedGroups } from '../group/groupService'
-import { refreshNetworkStubIdentity } from '../network/stub'
+import { refreshNetworkIdentity } from '../network'
 import { getDatabase } from '../storage'
 
 export const IDENTITY_CHANNELS = {
@@ -23,7 +23,7 @@ export function registerIdentityIpc(): void {
     const db = getDatabase()
     const status = completeSetup(db, input)
     ensureSeedGroups(db)
-    refreshNetworkStubIdentity(db)
+    refreshNetworkIdentity(db)
     return status
   })
 }

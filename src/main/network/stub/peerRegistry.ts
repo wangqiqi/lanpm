@@ -1,20 +1,9 @@
 import { readdirSync, readFileSync, statSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import type { DiscoveryPayload } from '../../../shared/network'
-import { STUB_PEER_TTL_MS, STUB_PEERS_DIR } from './constants.ts'
-
-const lanUserIds = new Set<string>()
-
-export function getKnownLanUserIds(): Set<string> {
-  return lanUserIds
-}
-
-export function refreshLanUserIds(peers: DiscoveryPayload[]): void {
-  lanUserIds.clear()
-  for (const p of peers) {
-    if (p.userId) lanUserIds.add(p.userId)
-  }
-}
+import { PEER_TTL_MS } from '../../../shared/network/constants.ts'
+import { STUB_PEERS_DIR } from './constants.ts'
+import { refreshLanUserIds } from '../peerDirectory.ts'
 
 export function readPeerRecords(excludeDeviceId?: string): DiscoveryPayload[] {
   let names: string[] = []
@@ -32,7 +21,7 @@ export function readPeerRecords(excludeDeviceId?: string): DiscoveryPayload[] {
     const filePath = join(STUB_PEERS_DIR, name)
     try {
       const st = statSync(filePath)
-      if (now - st.mtimeMs > STUB_PEER_TTL_MS) {
+      if (now - st.mtimeMs > PEER_TTL_MS) {
         unlinkSync(filePath)
         continue
       }
@@ -45,5 +34,8 @@ export function readPeerRecords(excludeDeviceId?: string): DiscoveryPayload[] {
     }
   }
 
+  refreshLanUserIds(peers)
   return peers
 }
+
+export { getKnownLanUserIds, refreshLanUserIds } from '../peerDirectory.ts'

@@ -11,7 +11,7 @@ import { listGroupMembers } from './memberService'
 import { notifyIfMentioned } from './notificationService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import { broadcastMessage } from './chatBroadcast'
-import { getNetworkTransport } from '../network/stub'
+import { getNetworkTransport } from '../network'
 import {
   appendAnonymousMessage,
   listAnonymousMessages
