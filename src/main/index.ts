@@ -27,6 +27,7 @@ function startupErrorMessage(err: unknown): string {
 function resolvePreloadPath(): string {
   const candidates = [
     join(__dirname, '../preload/index.js'),
+    join(__dirname, '../preload/index.cjs'),
     join(__dirname, '../preload/index.mjs')
   ]
   return candidates.find((p) => existsSync(p)) ?? candidates[0]!

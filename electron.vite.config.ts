@@ -26,7 +26,16 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin()]
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    build: {
+      rollupOptions: {
+        output: {
+          /** preload 在 Electron 沙箱中必须以 CJS 运行，ESM 会报 import outside module */
+          format: 'cjs',
+          entryFileNames: '[name].js'
+        }
+      }
+    }
   },
   renderer: {
     resolve: {

@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.6.2-m2] - 2026-05-28
+
+### Fixed
+- preload 构建强制 CJS 输出，修复 Electron 沙箱中 `import outside module` 导致脚本无法加载
+- 主进程 preload 路径解析增加 `index.cjs` 候选
+- `getSuggestedDeviceName` 改由主进程同步 IPC 提供，preload 不再直接依赖 `node:os`
+
+### Tag
+- `v0.6.2-m2-preload-fix` — preload CJS 与设备名 IPC 修复
+
 ## [0.6.1-m2] - 2026-05-28
 
 ### Added
