@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.3.3] - 2026-05-28
+
+### Added
+- 新增 `docs/05_交互与UI约定.md`：布局、路由、主题、模块 UI 与组件库选型约定
+- 新增 `docs/06_测试与联调手册.md`：NetworkStub、局域网真网、性能测量与 M7 回归清单
+- `docs/04` 新增 SQLite 表结构初稿（§11）与 Yjs 粒度拍板（§10）
+
+### Changed
+- `docs/01`：核心理念表述与「数据不出域 + 可选 AI 外呼」对齐
+- `docs/03`：P0 表 LibreOffice 表述、§17 里程碑补充 Stub、§16.11–12 链至测试手册
+- `docs/00` / `README.md` / `plan.md`：纳入 docs/05、06 索引与执行引用
+
+### Tag
+- `v0.3.3-docs-deepening` — 文档深化（UI/测试/DDL/Yjs）
+
 ## [0.3.2] - 2026-05-28
 
 ### Added
