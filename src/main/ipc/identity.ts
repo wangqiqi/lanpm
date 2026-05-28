@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { completeSetup, getSetupStatus, type SetupInput } from '../identity/setup'
+import { refreshNetworkStubIdentity } from '../network/stub'
 import { getDatabase } from '../storage'
 
 export const IDENTITY_CHANNELS = {
@@ -13,6 +14,8 @@ export function registerIdentityIpc(): void {
   })
 
   ipcMain.handle(IDENTITY_CHANNELS.complete, (_event, input: SetupInput) => {
-    return completeSetup(getDatabase(), input)
+    const status = completeSetup(getDatabase(), input)
+    refreshNetworkStubIdentity(getDatabase())
+    return status
   })
 }

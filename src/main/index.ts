@@ -1,7 +1,8 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { registerIdentityIpc } from './ipc/identity'
-import { closeDatabase, getDatabasePath, initDatabase } from './storage'
+import { initNetworkStub, shutdownNetworkStub } from './network/stub'
+import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 
 const isDev = !app.isPackaged
 
@@ -38,6 +39,7 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   initDatabase()
+  initNetworkStub(getDatabase())
   registerIdentityIpc()
   if (!app.isPackaged) {
     console.info('[lanpm] SQLite ready at', getDatabasePath())
@@ -54,5 +56,6 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  shutdownNetworkStub()
   closeDatabase()
 })

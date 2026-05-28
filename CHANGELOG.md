@@ -2,6 +2,35 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [0.5.1-m1] - 2026-05-28
+
+### Added
+- 主壳路由：`HashRouter` + `/g/:groupId/:view`（chat/board/tree/gantt/files）与 `/cockpit` 占位
+- `MainLayout` + `BottomNav`（56px 顶栏 + 64px 底栏，对齐 `docs/05` §1–2）
+- `navigationStore` 占位三群组（项目/职能/匿名）；`tabRules.ts` 控制 Tab 可见与非法路由重定向
+- `npm run verify:routes`：Tab 规则 smoke
+
+### Changed
+- `App.tsx`：配置完成后进入 `AppRouter` 主壳
+- `todo.md` / `plan.md`：M1-01、M1-03 标记完成
+
+## [0.5.0-m0] - 2026-05-28
+
+### Added
+- `src/shared/network/types.ts`：`NetworkTransport`、`SyncEnvelope`、`DiscoveryPayload`（对齐 `docs/04` §6.4）
+- `NetworkStub`：本机文件总线（`$TMP/lanpm-stub`）实现 `publish` / `subscribe` / `discoverPeers`
+- 后缀与唯一性：`allocateUserIdWithLanCheck`（SQLite + LAN peer 注册表）、`validateManualUserId`
+- `MessageDedup`（`senderDeviceId:msgId`）与 `LamportClock`（M0-10）
+- 校验脚本：`npm run verify:suffix`、`verify:network-stub`、`verify:m0`
+
+### Changed
+- `idGen` 迁至 `src/shared/identity/idGen.ts`；首次配置走 LAN 感知分配
+- 主进程启动时 `initNetworkStub`；配置完成后 `refreshNetworkStubIdentity`
+- `todo.md` / `plan.md`：M0-07~M0-10 标记完成
+
+### Tag
+- `v0.5.0-m0-network-stub` — M0 后缀规则与 NetworkStub
+
 ## [0.4.2-m0] - 2026-05-28
 
 ### Added

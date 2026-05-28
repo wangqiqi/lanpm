@@ -6,6 +6,6 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  phase: 'M0',
+  phase: 'M1',
   setPhase: (phase) => set({ phase })
 }))

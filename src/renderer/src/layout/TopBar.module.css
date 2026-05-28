@@ -1,0 +1,63 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+}
+
+.logo {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 4px;
+  color: inherit;
+}
+
+.logo:hover {
+  color: #1677ff;
+}
+
+.projectSelect {
+  min-width: 200px;
+}
+
+.groupType {
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.search {
+  width: 240px;
+}
+
+.localeSelect {
+  width: 108px;
+}
+
+.userBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: inherit;
+}
+
+.userBtn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.userName {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}

@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "0.4.2-m0",
+  "version": "0.5.1-m1",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -12,6 +12,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json",
     "verify:storage": "node scripts/verify-storage.mjs",
+    "verify:suffix": "node --experimental-strip-types scripts/verify-suffix.ts",
+    "verify:network-stub": "node --experimental-strip-types scripts/verify-network-stub.ts",
+    "verify:m0": "npm run verify:storage && npm run verify:suffix && npm run verify:network-stub",
+    "verify:routes": "node --experimental-strip-types scripts/verify-routes.ts",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {

@@ -3,12 +3,12 @@ import {
   getDeviceById,
   getUserById,
   upsertDevice,
-  upsertUser,
-  userIdExists
+  upsertUser
 } from '../storage'
 import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 import type { LocalDevice, UserProfile } from '../storage/types'
-import { allocateUserId, newDeviceId } from './idGen'
+import { newDeviceId } from './idGen'
+import { allocateUserIdWithLanCheck } from './suffixValidation'
 
 export const LOCAL_DEVICE_ID_KEY = 'local_device_id'
 
@@ -52,7 +52,7 @@ export function completeSetup(db: Database, input: SetupInput): SetupStatus {
     throw new Error('设备名称须为 1–30 个字符')
   }
 
-  const { userId, suffix, displayName } = allocateUserId(baseName, (id) => userIdExists(db, id))
+  const { userId, suffix, displayName } = allocateUserIdWithLanCheck(db, baseName)
   const now = new Date().toISOString()
 
   const profile: UserProfile = {

@@ -1,0 +1,52 @@
+.nav {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: 64px;
+  border-top: 1px solid rgba(5, 5, 5, 0.06);
+  background: var(--lanpm-nav-bg, #fff);
+}
+
+.tabWrap {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 4px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.tab:hover:not(:disabled) {
+  color: #1677ff;
+}
+
+.tabActive {
+  color: #1677ff;
+}
+
+.tabDisabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.label {
+  line-height: 1.2;
+}

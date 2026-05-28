@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 文档基线：`v0.3.5`（见 [CHANGELOG.md](./CHANGELOG.md)；[Review 报告](./archive/20260528_190000_文档全量Review报告.md)）
-- 代码：`v0.4.2-m0` — 脚手架 + SQLite + 首次配置向导（M0-06 完成；后缀局域网校验 / NetworkStub 待做）
+- 代码：`v0.5.1-m1` — M0 完成 + M1 五视图路由与群组 Tab 规则；下一步 M1-02 顶部栏
 - 历史 HTML 原型已归档至 [archive/prototypes/](./archive/prototypes/)
 
 ## 本地开发
@@ -16,7 +16,16 @@ npm run dev      # 启动 Electron 开发模式
 npm run lint     # ESLint
 npm run typecheck
 npm run build    # 生产构建
+npm run verify:routes  # M1 Tab 规则 smoke（无 UI）
 ```
+
+### 手动验收 M1 路由（需已完成首次配置）
+
+1. `npm run dev`，进入主壳后默认 `#/g/demo-project/chat`。
+2. 底部 5 个 Tab 切换，地址栏 hash 依次为 `.../chat|board|tree|gantt|files`，主区标题对应变化。
+3. 顶栏下拉选「示例职能群」：看板/任务树/甘特置灰，仅聊天与文件可点。
+4. 选「示例匿名群」：仅聊天可点；手动访问 `#/g/demo-anonymous/board` 应重定向到 `.../chat`。
+5. 浏览器地址输入 `#/cockpit` 进入驾驶舱占位页（无底栏）。
 
 ## 文档（开发必读）
 

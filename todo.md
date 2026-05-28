@@ -28,13 +28,10 @@
 - [x] `M0-04` [P0] 建 SQLite 初始化脚本（按 `docs/04` §11 DDL）（DoD：首次启动自动建库建表；证据：`npm run verify:storage`；`app.whenReady` → `initDatabase()` → `{userData}/lanpm.db`）
 - [x] `M0-05` [P0] 实现 `users/devices` 读写仓储（DoD：可写入并读回 `userId/deviceId`；证据：`userRepository`/`deviceRepository` + `verify:storage` 往返）
 - [x] `M0-06` [P0] 首次配置向导 UI（用户名/设备名/部门/头像）（DoD：未配置时强制进入向导；证据：`SetupWizard` + `identity:*` IPC；`sync_meta.local_device_id` 持久化）
-- [ ] `M0-07` [P0] 后缀规则：自动 `-yymm` + 手动唯一性校验（DoD：冲突用例通过）
-
-### M0-C NetworkStub
-
-- [ ] `M0-08` [P0] 定义传输接口 `NetworkTransport`（DoD：与 `docs/04` §6.4 对齐）
-- [ ] `M0-09` [P0] 实现 `NetworkStub.publish/subscribe/discoverPeers`（DoD：双实例互通）
-- [ ] `M0-10` [P1] Stub 去重与顺序（`msgId`/`lamportTs`）（DoD：无重复消息）
+- [x] `M0-07` [P0] 后缀规则：自动 `-yymm` + 手动唯一性校验（DoD：`npm run verify:suffix`；`allocateUserIdWithLanCheck` 本机 DB + LAN peer 集）
+- [x] `M0-08` [P0] 定义传输接口 `NetworkTransport`（DoD：`src/shared/network/types.ts` 对齐 `docs/04` §6.4）
+- [x] `M0-09` [P0] 实现 `NetworkStub.publish/subscribe/discoverPeers`（DoD：`npm run verify:network-stub`；`$TMP/lanpm-stub` 文件总线双实例）
+- [x] `M0-10` [P1] Stub 去重与顺序（`msgId`/`lamportTs`）（DoD：`MessageDedup` + `LamportClock`；verify 含重复投递用例）
 
 ---
 
@@ -42,9 +39,9 @@
 
 ### M1-A 路由与框架
 
-- [ ] `M1-01` [P0] 实现 5 视图路由：聊天/看板/任务树/甘特/文件（dep: M0-01）
+- [x] `M1-01` [P0] 实现 5 视图路由：聊天/看板/任务树/甘特/文件（dep: M0-01）（DoD：`HashRouter` + `/g/:groupId/:view`；`npm run verify:routes`；`npm run dev` 底部 Tab 切换五视图）
 - [ ] `M1-02` [P0] 顶部栏：项目切换/驾驶舱/搜索/主题/语言/用户面板
-- [ ] `M1-03` [P0] 群组类型 Tab 规则（项目全开、职能部分、匿名仅聊天）
+- [x] `M1-03` [P0] 群组类型 Tab 规则（项目全开、职能部分、匿名仅聊天）（DoD：`tabRules.ts` + `BottomNav` 置灰；`verify:routes`；占位群组下拉可验三种类型）
 
 ### M1-B UI 基础设施
 
@@ -143,5 +140,7 @@
 - [x] `M0-04` SQLite 初始化脚本与建表
 - [x] `M0-05` users/devices 读写仓储
 - [x] `M0-06` 首次配置向导 UI
-- [ ] `M0-09` NetworkStub 双实例互通
+- [x] `M0-07`~`M0-10` 后缀规则 + NetworkStub（`npm run verify:m0`）
+- [x] `M1-01` 五视图路由 + 底部导航（`verify:routes`）
+- [x] `M1-03` 群组类型 Tab 规则（占位三群组）
 - [x] `M1-04` UI 组件库已拍板（Ant Design 5.x + CSS Modules + Zustand）

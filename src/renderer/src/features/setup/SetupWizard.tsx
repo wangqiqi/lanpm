@@ -129,7 +129,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
               </Space>
             </div>
             <Text type="secondary" className={styles.hint}>
-              后缀规则（-yymm）将在保存时自动处理（M0-07）
+              若局域网内已有同名用户，将自动添加 -yymm 后缀以保证唯一
             </Text>
           </Form.Item>
 
