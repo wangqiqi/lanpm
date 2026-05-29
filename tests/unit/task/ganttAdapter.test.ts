@@ -41,9 +41,7 @@ describe('defaultScheduleForTask', () => {
 describe('tasksToGanttBars', () => {
   it('maps FS dependencies to gantt dependencies', () => {
     const tasks = [task({ taskId: 'a' }), task({ taskId: 'b' })]
-    const deps: TaskDependency[] = [
-      { fromTaskId: 'a', toTaskId: 'b', type: 'FS', groupId: 'g1' }
-    ]
+    const deps: TaskDependency[] = [{ fromTaskId: 'a', toTaskId: 'b', type: 'FS' }]
     const bars = tasksToGanttBars(tasks, deps)
     expect(bars.find((b) => b.id === 'b')?.dependencies).toEqual(['a'])
   })

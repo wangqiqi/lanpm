@@ -36,6 +36,9 @@
 | group | `guards.test.ts` | `@shared/group/guards` | ✅ |
 | network | `manualPeer.test.ts` | `@shared/network/manualPeer` | ✅ |
 | identity | `idGen.test.ts` | `@shared/identity/idGen` | ✅ |
+| task | `ganttAdapter.test.ts` | `@shared/task/ganttAdapter` | ✅ |
+| cockpit | `aiProviders.test.ts` | `@shared/cockpit/aiProviders` | ✅ |
+| presence | `display.test.ts` | `@shared/presence/display` | ✅ |
 
 **命令**：`npm run test` · `npm run test:watch` · `npm run test:coverage` · `npm run test:unit`
 
@@ -51,7 +54,7 @@
 |------|------|------|
 | `verify:shared` | 纯 shared 冒烟串联 | ✅ |
 | `verify:m7` | 全量回归（含 `npm run test`） | ✅ |
-| `verify:project` | 项目健康（lint + test + search） | ✅ |
+| `verify:project` | 项目健康（lint + test + shared + search） | ✅ |
 | `verify:task-sync` / `verify:file-sync` | P2P 同步双 Stub | ✅ |
 | `verify:m2-integration` | 聊天 + 已读 + 任务闭环 | ✅ |
 
@@ -61,8 +64,4 @@
 
 ### 待补（可选增强）
 
-- [ ] `task/ganttAdapter.test.ts` — 甘特日期与依赖条转换
-- [ ] `cockpit/aiProviders.test.ts` — AI 预设与默认 provider
-- [ ] `presence/display.test.ts` — 在线态 emoji/label
-- [ ] `verify:shared` 纳入 `verify:project` 或 CI 预检
 - [ ] Vitest 覆盖率阈值门禁（`coverage` 百分比下限）

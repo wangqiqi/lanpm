@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.28] - 2026-05-29
+
+### Added
+- **Vitest 扩展**：`ganttAdapter` · `aiProviders` · `presence/display`（**22 文件 / 92 用例**）
+
+### Changed
+- **`verify:project`**：串联 `verify:shared`
+- **`todo.md`**：单元测试矩阵与待补项更新
+
+### Fixed
+- **`ganttAdapter.test.ts`**：`TaskDependency` 用例与类型定义对齐
+
+### Tag
+- `v1.0.0-rc.28` — Vitest 扩展与 verify:project 串联 shared
+
 ## [1.0.0-rc.27] - 2026-05-29
 
 ### Changed
