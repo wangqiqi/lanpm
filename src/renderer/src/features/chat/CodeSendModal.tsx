@@ -1,4 +1,4 @@
-import { Modal, Select, Input } from 'antd'
+import { Modal, Select, Input, message } from 'antd'
 import { useState } from 'react'
 import { CODE_LANGUAGE_OPTIONS, detectLanguage } from '@shared/chat/detectLanguage'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -32,6 +32,8 @@ export default function CodeSendModal({
       setCode('')
       setLanguage('auto')
       onClose()
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('chat.codeSendFailed'))
     } finally {
       setSending(false)
     }

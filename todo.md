@@ -117,7 +117,7 @@
 ### P1 — 弱闭环（UX 审查 §4.3、§3）
 
 - [x] **UX-W-01** 创建群组失败 toast — 同 **UX-F-14**
-- [ ] **UX-W-02** 发代码 / AI 配置保存失败 toast（`CodeSendModal`、`AiConfigModal` 补 catch）
+- [x] **UX-W-02** 发代码 / AI 配置保存失败 toast（`CodeSendModal`、`AiConfigModal` 补 catch）
 - [ ] **UX-W-03** `markRead` 失败非静默（toast 或重试）
 - [ ] **UX-W-04** `loadMessages` / `loadGroups` 失败错误 UI（`ChatView`、群列表等）
 - [ ] **UX-W-05** 驾驶舱离开：「返回上次群」或 Logo 回 `lastNonCockpitPath` — 同 **UX-N-01** / **UX-PATH-01**
@@ -130,7 +130,7 @@
 ### P2 — 最短路径优化（UX 审查 §5.2、§9）
 
 - [ ] **UX-PATH-01** 驾驶舱 → 继续协作：1 步回到上次群/视图 — 同 **UX-W-05**
-- [ ] **UX-PATH-02** 用户菜单「API Key」直接打开 `AiConfigModal`（免先跳驾驶舱）
+- [x] **UX-PATH-02** 用户菜单「API Key」直接打开 `AiConfigModal`（免先跳驾驶舱）
 - [ ] **UX-PATH-03** 看板 toolbar inline 快速建任务（对齐任务树输入 + 按钮）
 - [ ] **UX-PATH-04**（可选）任务树：行内 slider / 双击改进度，减少 toolbar 第二行步骤
 - [ ] **UX-PATH-05** DM 中点击 Logo：明确回 `lastOriginGroupId` 项目群或文档化当前行为
@@ -151,7 +151,7 @@
 
 ## 文档与版本对齐（来源：[评估归档](./archive/20260529_095839_实现文档一致性评估_评估.md) §2、§7、§9）
 
-- [ ] **DOC-01** 统一 `README.md`、`docs/08` 文首、README 中 RC 号为当前 `package.json` 版本
+- [x] **DOC-01** 统一 `README.md`、`docs/08` 文首、README 中 RC 号为当前 `package.json` 版本
 - [ ] **DOC-02** 在 `docs/01` §1.3 增加「RC 实现现状」子表（或指向 `docs/08`），区分目标栈与已落地栈
 - [ ] **DOC-03** 将 `docs/03` §16.11「7 天离线补同步」改为 P1/post-RC，或与 **ARCH-07** 合并排期
 - [ ] **DOC-04** `README` 技术选型改为「目标架构 / 当前 RC 实现」分栏（同 **ARCH-06**）

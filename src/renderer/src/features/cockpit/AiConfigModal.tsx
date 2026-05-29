@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Form, Input, Modal, Select, Switch } from 'antd'
+import { Form, Input, Modal, Select, Switch, message } from 'antd'
 import type { AiConfigInput, AiConfigView, AiProvider } from '@shared/cockpit/types'
 import {
   AI_PROVIDER_PRESETS,
@@ -56,6 +56,8 @@ export default function AiConfigModal({
         apiKey: values.apiKey?.trim() || undefined
       })
       onClose()
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('ai.saveFailed'))
     } finally {
       setSaving(false)
     }

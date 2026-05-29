@@ -126,7 +126,7 @@ export default function TopBar(): React.ReactElement {
     {
       key: 'api',
       label: t('topbar.apiKey'),
-      onClick: () => navigate(cockpitPath())
+      onClick: () => navigate(cockpitPath(), { state: { openAiConfig: true } })
     }
   ]
 

@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.1`（M0–M7 P0 闭环）
+- **RC**：`1.0.0-rc.8`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
 

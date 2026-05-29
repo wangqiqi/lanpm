@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Button,
   Card,
@@ -34,6 +34,7 @@ const STATUS_KEYS: Record<string, { color: string; key: MessageKey }> = {
 export default function CockpitView(): React.ReactElement {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const location = useLocation()
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -64,6 +65,14 @@ export default function CockpitView(): React.ReactElement {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    const state = location.state as { openAiConfig?: boolean } | null
+    if (state?.openAiConfig) {
+      setAiConfigOpen(true)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.pathname, location.state, navigate])
 
   const runReport = async (kind: 'weekly' | 'monthly' | 'evaluate'): Promise<void> => {
     setReportLoading(true)
