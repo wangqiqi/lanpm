@@ -101,14 +101,13 @@ export default function App(): React.ReactElement {
     )
   }
 
+  if (!configured) {
+    return <SetupWizard onComplete={handleSetupComplete} />
+  }
+
   return (
     <div className={styles.appShell}>
       <AppRouter />
-      {!configured && (
-        <div className={styles.setupOverlay} role="dialog" aria-modal="true">
-          <SetupWizard onComplete={handleSetupComplete} />
-        </div>
-      )}
     </div>
   )
 }

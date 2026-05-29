@@ -34,9 +34,7 @@ function RouteSuspense({ children }: { children: React.ReactNode }): React.React
 
 export default function AppRouter(): React.ReactElement {
   return (
-    <HashRouter
-      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-    >
+    <HashRouter>
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route element={<MainLayout />}>

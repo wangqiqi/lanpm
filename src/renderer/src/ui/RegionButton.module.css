@@ -1,0 +1,53 @@
+.btn {
+  composes: region from './regionInteract.module.css';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: inherit;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.pill {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lanpm-text);
+}
+
+.text {
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--lanpm-text);
+}
+
+.text:hover:not(:disabled):not(.regionDisabled) {
+  color: var(--lanpm-accent);
+}
+
+.user {
+  padding: 4px 10px;
+  border-radius: 980px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lanpm-text);
+}
+
+.userName {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

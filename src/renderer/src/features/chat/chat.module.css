@@ -32,50 +32,14 @@
 
 .dmBar {
   flex-shrink: 0;
-  padding: 8px 8px 0;
+  padding: 8px 0 0;
   border-bottom: 1px solid var(--lanpm-border);
-}
-
-.dmList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.dmChip {
-  border: 1px solid var(--lanpm-border);
-  background: var(--lanpm-surface-solid, #fff);
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 12px;
-  cursor: pointer;
-  color: inherit;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dmChip:hover {
-  background: var(--lanpm-bubble-bg, rgba(0, 0, 0, 0.06));
-}
-
-.dmChipActive {
-  border-color: var(--lanpm-accent);
-  background: var(--lanpm-accent-fill-strong);
-  color: var(--lanpm-accent);
-}
-
-.dmChipMuted {
-  opacity: 0.5;
-  cursor: default;
 }
 
 .dmHint {
   display: block;
   font-size: 11px;
-  margin-bottom: 6px;
+  margin: 0 8px 8px;
   padding-left: 4px;
 }
 
@@ -110,8 +74,18 @@
 .memberRow {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.memberRow:hover .memberBtn {
+  background: var(--lanpm-hover-bg);
+}
+
+.memberRow:active .memberBtn {
+  background: var(--lanpm-accent-fill-strong);
 }
 
 .dmBtn {
@@ -119,15 +93,22 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 6px;
-  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: var(--lanpm-text-secondary);
   font-size: 14px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .dmBtn:hover {
   color: var(--lanpm-accent);
-  background: var(--lanpm-accent-fill);
+  background: var(--lanpm-hover-bg);
+}
+
+.dmBtn:active {
+  background: var(--lanpm-accent-fill-strong);
 }
 
 .memberBtn {
@@ -139,14 +120,11 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
   text-align: left;
   color: inherit;
-}
-
-.memberBtn:hover {
-  background: var(--lanpm-bubble-bg, rgba(0, 0, 0, 0.06));
+  transition: background-color 0.15s ease;
 }
 
 .memberDot {

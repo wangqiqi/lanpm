@@ -4,14 +4,15 @@ import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
-import type { Plugin } from 'vite'
+import type { HotPayload, Plugin } from 'vite'
 
-/** Node 17+ 默认先解析 localhost → ::1；开发服务若只监听 127.0.0.1 会导致 http://localhost 连不上 */
+/** Node 17+ 默认先解析 localhost → ::1；配合 host: 'localhost' 一般可同时访问 localhost / 127.0.0.1 */
 dns.setDefaultResultOrder('ipv4first')
 
 const root = dirname(fileURLToPath(import.meta.url))
+const isBrowserDev = process.env.LANPM_BROWSER_DEV === '1'
 
-/** 开发态 Vite 会注入 inline script / HMR；index.html 的生产 CSP 会阻止浏览器与 Cursor 预览加载 */
+/** 开发态移除 CSP，避免 Vite 内联脚本被拦 */
 function lanpmDevCspPlugin(): Plugin {
   return {
     name: 'lanpm-dev-csp',
@@ -19,8 +20,53 @@ function lanpmDevCspPlugin(): Plugin {
       order: 'pre',
       handler(html, ctx) {
         if (!ctx.server) return html
-        /* 开发态移除 CSP：Vite HMR / Cursor 内置浏览器对 port 通配 CSP 支持差，易导致白屏 */
         return html.replace(/<meta\s+http-equiv="Content-Security-Policy"[^>]*>\s*/i, '')
+      }
+    }
+  }
+}
+
+/** 开发态 HTML：禁用 Vite 错误遮罩（Cursor 内嵌浏览器里常挡住全部点击） */
+function lanpmDevOverlayGuardHtmlPlugin(): Plugin {
+  return {
+    name: 'lanpm-dev-overlay-guard-html',
+    apply: 'serve',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        const patch = `<style id="lanpm-dev-overlay-guard">
+vite-error-overlay{display:none!important;pointer-events:none!important}
+html[data-lanpm-browser-preview],html[data-lanpm-browser-preview] body,html[data-lanpm-browser-preview] #root{pointer-events:auto!important}
+</style>`
+        return html.includes('</head>') ? html.replace('</head>', `${patch}</head>`) : patch + html
+      }
+    }
+  }
+}
+
+/**
+ * electron-vite 在 preload 重建时会 server.ws.send({ type: 'full-reload' })，
+ * 连到同一 Vite 端口的浏览器/Cursor 预览也会跟着整页刷新，形成“无法点击”的刷新风暴。
+ */
+function lanpmFullReloadGuardPlugin(): Plugin {
+  return {
+    name: 'lanpm-full-reload-guard',
+    apply: 'serve',
+    configureServer(server) {
+      const send = server.ws.send.bind(server.ws)
+      server.ws.send = (payload: HotPayload) => {
+        if (
+          payload &&
+          typeof payload === 'object' &&
+          'type' in payload &&
+          payload.type === 'full-reload'
+        ) {
+          server.config.logger.info(
+            '[lanpm] 已忽略 full-reload（开发态；Electron 内请手动刷新，浏览器请用 npm run dev:web）'
+          )
+          return
+        }
+        return send(payload)
       }
     }
   }
@@ -45,10 +91,6 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin()]
   },
   preload: {
-    /**
-     * electron-vite 预设 ssr.noExternal=true 会把 npm 包 electron/index.js 打进 preload（含 require('fs')），
-     * 沙箱下 preload 失败、窗口空白。须显式 externalize 运行时模块 electron。
-     */
     ssr: {
       external: ['electron']
     },
@@ -56,7 +98,6 @@ export default defineConfig({
       externalizeDeps: false,
       rollupOptions: {
         output: {
-          /** preload 在 Electron 沙箱中必须以 CJS 运行，ESM 会报 import outside module */
           format: 'cjs',
           entryFileNames: '[name].js'
         }
@@ -72,15 +113,19 @@ export default defineConfig({
       }
     },
     server: {
-      /** 0.0.0.0：同时接受 127.0.0.1；配合 dns.setDefaultResultOrder('ipv4first') 改善 localhost */
-      host: true,
+      host: 'localhost',
       strictPort: false,
-      hmr: {
-        /** 避免页面在 ::/localhost 与 ws 地址不一致时 HMR 连不上 → 整页反复刷新 */
-        host: '127.0.0.1',
-        protocol: 'ws'
+      /** 浏览器专用 dev：关闭 HMR；其它开发态也关闭错误遮罩，避免 Cursor 内嵌页无法点击 */
+      hmr: isBrowserDev ? false : { overlay: false },
+      watch: {
+        ignored: ['**/out/**', '**/.git/**', '**/node_modules/**', '**/*.db', '**/.config/**']
       }
     },
-    plugins: [react(), lanpmDevCspPlugin()]
+    plugins: [
+      react(),
+      lanpmDevCspPlugin(),
+      lanpmDevOverlayGuardHtmlPlugin(),
+      lanpmFullReloadGuardPlugin()
+    ]
   }
 })

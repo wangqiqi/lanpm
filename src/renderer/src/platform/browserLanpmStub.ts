@@ -9,6 +9,7 @@ import { resolveDeviceName } from '@shared/identity/deviceName'
 
 const BROWSER_PREVIEW_DEVICE = '开发预览'
 import type { LanpmApi } from '@shared/lanpm-api'
+import { randomAvatarDataUrl } from '@renderer/features/setup/avatar'
 import { isMessageReadByOthers } from '@shared/chat/readReceipt'
 import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
@@ -245,6 +246,31 @@ function writeStatus(status: SetupStatus): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(status))
 }
 
+/** 浏览器预览默认身份，避免全屏遮罩挡住 #/g/.../chat 导致无法点击 */
+function ensureDevPreviewIdentity(): SetupStatus {
+  const existing = readStatus()
+  if (existing.configured && existing.user && existing.device) {
+    return existing
+  }
+  const status: SetupStatus = {
+    configured: true,
+    user: {
+      userId: 'preview-user',
+      displayName: '预览用户',
+      baseName: '预览',
+      suffix: '00',
+      department: '开发预览',
+      avatarUrl: randomAvatarDataUrl('预览')
+    },
+    device: {
+      deviceId: 'dev-preview',
+      deviceName: previewDeviceName()
+    }
+  }
+  writeStatus(status)
+  return status
+}
+
 /** 浏览器直连 Vite 时的身份 API 桩（无 Electron preload） */
 function previewDeviceName(): string {
   return resolveDeviceName('', BROWSER_PREVIEW_DEVICE)
@@ -295,6 +321,9 @@ export function createBrowserLanpmStub(): LanpmApi {
     getSuggestedDeviceName: previewDeviceName,
     identity: {
       getSetupStatus: async () => {
+        if (import.meta.env.DEV) {
+          return ensureDevPreviewIdentity()
+        }
         const status = readStatus()
         if (!status.configured) {
           return {

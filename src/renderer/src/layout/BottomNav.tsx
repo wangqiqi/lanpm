@@ -98,39 +98,46 @@ export default function BottomNav(): React.ReactElement {
       {VIEW_TABS.map((tab) => {
         const allowed = isViewAllowedForGroup(groupType, tab.view)
         const active = activeView === tab.view
-        const btn = (
-          <button
-            type="button"
-            className={`${styles.tab} ${active ? styles.tabActive : ''} ${!allowed ? styles.tabDisabled : ''}`}
-            disabled={!allowed}
-            aria-disabled={!allowed}
-            onClick={() => {
-              if (allowed) navigate(groupViewPath(groupId, tab.view))
-            }}
-          >
-            <span className={styles.icon}>
-              <Badge count={tabBadgeCount(tab.view)} size="small" offset={[-2, 2]}>
-                {VIEW_ICONS[tab.view]}
-              </Badge>
-            </span>
-            <span className={styles.label}>{t(VIEW_MESSAGE_KEYS[tab.view])}</span>
-          </button>
-        )
-        const wrap = (
+        const tabRegion = (
           <span
-            className={styles.tabWrap}
+            className={`${styles.tabWrap} ${active ? styles.tabWrapActive : ''} ${!allowed ? styles.tabWrapDisabled : ''}`}
             onClick={() => {
               if (!allowed) maybeShowFunctionGuide()
             }}
           >
-            {btn}
+            <button
+              type="button"
+              className={`${styles.tab} ${active ? styles.tabActive : ''} ${!allowed ? styles.tabDisabled : ''}`}
+              disabled={!allowed}
+              aria-disabled={!allowed}
+              aria-current={active ? 'page' : undefined}
+              onClick={() => {
+                if (allowed) navigate(groupViewPath(groupId, tab.view))
+              }}
+            >
+              <span className={styles.icon}>
+                <Badge count={tabBadgeCount(tab.view)} size="small" offset={[-2, 2]}>
+                  {VIEW_ICONS[tab.view]}
+                </Badge>
+              </span>
+              <span className={styles.label}>{t(VIEW_MESSAGE_KEYS[tab.view])}</span>
+            </button>
           </span>
         )
-        return allowed ? (
-          <span key={tab.view}>{wrap}</span>
-        ) : (
-          <Tooltip key={tab.view} title={t(DISABLED_HINT_KEYS[groupType])}>
-            {wrap}
+        if (allowed) {
+          return (
+            <span key={tab.view} className={styles.tabSlot}>
+              {tabRegion}
+            </span>
+          )
+        }
+        return (
+          <Tooltip
+            key={tab.view}
+            title={t(DISABLED_HINT_KEYS[groupType])}
+            classNames={{ root: styles.tabSlot }}
+          >
+            {tabRegion}
           </Tooltip>
         )
       })}

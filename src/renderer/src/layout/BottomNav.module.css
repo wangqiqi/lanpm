@@ -1,7 +1,7 @@
 .nav {
   display: flex;
   align-items: stretch;
-  justify-content: space-around;
+  width: 100%;
   height: 64px;
   padding-bottom: env(safe-area-inset-bottom, 0);
   border-top: 0.5px solid var(--lanpm-bar-border);
@@ -10,14 +10,71 @@
   -webkit-backdrop-filter: var(--lanpm-blur);
 }
 
+.tabSlot {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  position: relative;
+}
+
+.tabSlot:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 0.5px;
+  background: var(--lanpm-bar-border);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .tabWrap {
   flex: 1;
   display: flex;
   min-width: 0;
+  position: relative;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.tabWrap:hover:not(.tabWrapDisabled) {
+  background: var(--lanpm-hover-bg);
+}
+
+.tabWrap:active:not(.tabWrapDisabled) {
+  background: var(--lanpm-accent-fill-strong);
+}
+
+.tabWrapActive {
+  background: var(--lanpm-accent-fill);
+}
+
+.tabWrapActive::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16%;
+  right: 16%;
+  height: 2px;
+  background: var(--lanpm-accent);
+  border-radius: 0 0 2px 2px;
+  pointer-events: none;
+}
+
+.tabWrapActive:hover:not(.tabWrapDisabled) {
+  background: var(--lanpm-accent-fill-strong);
+}
+
+.tabWrapDisabled {
+  cursor: not-allowed;
 }
 
 .tab {
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,7 +82,7 @@
   gap: 2px;
   border: none;
   background: transparent;
-  cursor: pointer;
+  cursor: inherit;
   padding: 6px 4px 8px;
   color: var(--lanpm-text-secondary);
   font-size: 10px;

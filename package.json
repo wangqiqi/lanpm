@@ -1,13 +1,13 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.13",
+  "version": "1.0.0-rc.14",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "env -u ELECTRON_RUN_AS_NODE electron-vite dev",
-    "dev:web": "env -u ELECTRON_RUN_AS_NODE electron-vite dev --rendererOnly",
+    "dev:web": "env -u ELECTRON_RUN_AS_NODE LANPM_BROWSER_DEV=1 electron-vite dev --rendererOnly",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "lint": "eslint .",

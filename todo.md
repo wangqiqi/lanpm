@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.12` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.14` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -276,6 +276,41 @@
 
 ---
 
+## UI/UX — 交互区域与点击反馈（2026-05-29，BottomNav 改版延伸）
+
+> 原则：横向 Tab / 列表行 / 顶栏图标按钮应有**足够大的可点区域**，以及 **hover / active / selected** 分层反馈；复用 `--lanpm-hover-bg`、`--lanpm-accent-fill`、`--lanpm-accent-fill-strong`（`global.module.css`）。  
+> 来源：BottomNav 均分改版后的全项目审查（聊天 DM 条、成员列表、TopBar、视图内 Segmented/Radio）。
+
+### P0 — 与 BottomNav 同类的导航条
+
+- [x] **UX-INT-01** BottomNav 五 Tab **均分槽位** + 区域 hover / active / 选中顶条 + 槽位分隔线（`BottomNav.tsx` / `BottomNav.module.css`）
+- [x] **UX-INT-02** **DM 会话条** Tab 化：`DmSessionBar` 由内容宽度 pill 改为横向 Tab 栏（`min-width`、溢出横向滚动）；hover / active / 选中态与 BottomNav 对齐（`RegionTabBar` + `chat.module.css`）
+- [ ] **UX-INT-03** **成员列表行**：`memberBtn` 整行 hover / active 背景（统一 token，非 `--lanpm-bubble-bg`）；`dmBtn` 补 `:active`；可选 @ 提及对象行高亮（`MemberList.tsx` / `chat.module.css`）
+
+### P1 — 全局壳层与视图内切换
+
+- [ ] **UX-INT-04** **TopBar 图标按钮区**：Logo / 网络点 / 主题 / 用户等统一圆角区域 hover + active；创建群 / 驾驶舱等 `Button type="text"` 与自定义按钮视觉对齐（`TopBar.module.css` / `TopBar.tsx`）
+- [ ] **UX-INT-05** **文件分类 Segmented**：等宽 Tab 或增强 `ThemeProvider` 中 Segmented token，补 hover / 按下态（`FilesView.tsx` / `ThemeProvider.tsx`）
+- [ ] **UX-INT-06** **甘特日/周/月切换**：`Radio.Group` 与文件页 Segmented 共用一套切换控件（`GanttView.tsx`；实现 **UX-INT-07** 时优先复用 `ui/ViewSegment`）
+
+### P2 — 工程化与文档
+
+- [ ] **UX-INT-07**（可选）抽取 **`ui/RegionTabBar`** + **`ui/RegionButton`**，供 BottomNav / DM 条 / 文件·甘特切换复用
+- [ ] **UX-INT-08** **`docs/05`** 补充「导航 Tab / 列表行 / 顶栏按钮」交互区域约定（hover / active / selected / disabled）
+- [ ] **UX-INT-09** **亮/暗手验**：DM 条、成员列表、TopBar 按钮、文件/甘特切换 — 并入 [docs/09](./docs/09_视觉手验清单.md) 或随 **V-14b**
+
+### 暂不必大改（审查结论，仅记录）
+
+| 区域 | 说明 |
+|------|------|
+| 看板卡片 | 拖拽为主，已有 drag / columnOver 反馈 |
+| @ 提及候选 | 已有 hover + `mentionOptionActive` |
+| 全局搜索下拉 | Ant Design AutoComplete 默认行为 |
+| 文件 Table 行 | 已有 `.rowSelected` |
+| Setup 向导 | 表单流，非 Tab 导航 |
+
+---
+
 ## 去重索引（实现时只算一项）
 
 | 主题 | 主 ID | 合并 |
@@ -298,5 +333,7 @@
 | @ 键盘 | **UX-A-03** | ux §3.3 与 **UX-W** 提及路径 |
 | 成员搜索 P1 | **P1-R-06** | 评估 §4.2 |
 | plan 已迁 archive | **DOC-07** `[x]` | DOC-01 |
+| 文件/甘特视图切换 | **UX-INT-06** | 依赖 **UX-INT-05** / **UX-INT-07**（可选） |
+| 交互区域手验 | **UX-INT-09** | **V-14b**（可选合并） |
 
 > **说明**：上表左侧为主 ID；勾选完成时同步勾选合并列，或只保留主 ID 一条。

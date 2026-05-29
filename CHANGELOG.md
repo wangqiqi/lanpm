@@ -2,6 +2,32 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.14] - 2026-05-29
+
+### Added
+- **`devPreviewClient.ts`**：浏览器/Cursor 预览移除 `vite-error-overlay` 并标记 `data-lanpm-browser-preview`
+- **`browserPreview.ts`**：`isBrowserPreview()` 辅助判断开发态浏览器桩
+- **Vite 插件**：`lanpmDevOverlayGuardHtmlPlugin`（内嵌页禁用错误遮罩）、`lanpmFullReloadGuardPlugin`（拦截 preload 触发的 full-reload 风暴）
+- **`dev:web`** 注入 `LANPM_BROWSER_DEV=1`，关闭 HMR，专用于浏览器预览
+- **BottomNav 均分 Tab**（**UX-INT-01**）：槽位分隔线、区域 hover / active / 选中顶条
+- **`regionInteract.module.css`** + **`RegionButton`** + **`ViewSegment`** + **`RegionTabBar`**：交互区域 hover/active/selected 共用样式与 Tab/分段切换基础（**UX-INT-07** 前置）
+- **DM 会话条 Tab 化**（**UX-INT-02**）：`DmSessionBar` 改用 `RegionTabBar`，横向均分 + 溢出滚动
+
+### Fixed
+- **浏览器预览默认可点击**：Stub 开发态自动写入预览身份，避免 Setup 全屏遮罩挡住 `#/g/.../chat`
+- **Cursor 内嵌浏览器**：`full-reload` 不再因 preload 重建导致整页刷新循环
+- **`HomeRedirect`**：改用 `useNavigate` + `useEffect`，减少 StrictMode 双次重定向
+- **Setup 未完成**：恢复全屏 Setup 向导（非 overlay），Electron 与浏览器行为一致
+
+### Changed
+- **Vite dev server**：`host: 'localhost'`；非 browser dev 关闭 HMR overlay；扩展 `watch.ignored`
+- **开发态 StrictMode**：仅生产构建启用，减轻 dev 双挂载副作用
+- **`HashRouter`**：移除 `future` 实验 flag
+- **todo.md**：新增 §UX-INT 交互区域与点击反馈 backlog
+
+### Tag
+- `v1.0.0-rc.14` — Cursor/浏览器预览可点击修复、BottomNav 均分改版与 dev 热更新防护
+
 ## [1.0.0-rc.13] - 2026-05-29
 
 ### Added

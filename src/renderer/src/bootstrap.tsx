@@ -11,12 +11,14 @@ if (!rootEl) {
   throw new Error('#root 不存在')
 }
 
+const tree = (
+  <RootErrorBoundary>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </RootErrorBoundary>
+)
+
 ReactDOM.createRoot(rootEl).render(
-  <React.StrictMode>
-    <RootErrorBoundary>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </RootErrorBoundary>
-  </React.StrictMode>
+  import.meta.env.DEV ? tree : <React.StrictMode>{tree}</React.StrictMode>
 )

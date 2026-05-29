@@ -1,0 +1,81 @@
+.bar {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  border-bottom: 1px solid var(--lanpm-border);
+  margin-bottom: 8px;
+}
+
+.slot {
+  flex: 1 1 0;
+  min-width: 72px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+}
+
+.scrollable .slot {
+  flex: 0 0 auto;
+  min-width: 80px;
+}
+
+.slot:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 0.5px;
+  background: var(--lanpm-bar-border);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.wrap {
+  composes: region regionSelectedIndicator from './regionInteract.module.css';
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.wrapSelected {
+  composes: regionSelected from './regionInteract.module.css';
+}
+
+.wrapDisabled {
+  composes: regionDisabled from './regionInteract.module.css';
+  cursor: not-allowed;
+}
+
+.tab {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: inherit;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lanpm-text-secondary);
+  transition: color 0.15s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab:hover:not(:disabled) {
+  color: var(--lanpm-accent);
+}
+
+.tabSelected {
+  color: var(--lanpm-accent);
+}
+
+.tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}

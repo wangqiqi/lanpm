@@ -1,4 +1,5 @@
 import { installLanpmBridge } from '@renderer/platform/installLanpmBridge'
+import { installDevPreviewClientGuards } from '@renderer/platform/devPreviewClient'
 
 function showFatalError(err: unknown): void {
   const root = document.getElementById('root')
@@ -11,6 +12,7 @@ function showFatalError(err: unknown): void {
 
 try {
   installLanpmBridge()
+  installDevPreviewClientGuards()
   if (import.meta.env.DEV) {
     console.info('[lanpm] renderer boot', window.location.href)
   }
