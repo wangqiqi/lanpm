@@ -8,7 +8,10 @@ export function ViewLoadingCenter(): React.ReactElement {
   const { t } = useI18n()
   return (
     <div className={styles.center}>
-      <Spin tip={t('common.loading')} />
+      <Spin />
+      <Text type="secondary" className={styles.loadingHint}>
+        {t('common.loading')}
+      </Text>
     </div>
   )
 }

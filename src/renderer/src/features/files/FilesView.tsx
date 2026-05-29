@@ -9,9 +9,9 @@ import {
   Segmented,
   Space,
   Table,
-  Typography,
-  message
+  Typography
 } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { BookOutlined, CommentOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
@@ -51,6 +51,7 @@ function formatSize(n: number): string {
 
 export default function FilesView(): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''

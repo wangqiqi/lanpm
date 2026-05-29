@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Input, Modal, Radio, Select, Space, Tag, Typography, message } from 'antd'
+import { Button, Input, Modal, Radio, Select, Space, Tag, Typography } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
@@ -22,6 +23,7 @@ const { Text } = Typography
 
 export default function GanttView(): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
@@ -250,7 +252,11 @@ export default function GanttView(): React.ReactElement {
                     <div>
                       {t('gantt.depsLabel')}
                       {deps.map((d) => (
-                        <Tag key={`${d.fromTaskId}-${d.type}`} style={{ marginTop: 4 }}>
+                        <Tag
+                          key={`${d.fromTaskId}-${d.type}`}
+                          color="default"
+                          style={{ marginTop: 4 }}
+                        >
                           {d.type}: {d.fromTaskId.slice(-6)} → {d.toTaskId.slice(-6)}
                         </Tag>
                       ))}

@@ -34,7 +34,8 @@ interface NavigationState {
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   groups: FALLBACK_GROUPS,
   activeGroupId: FALLBACK_GROUPS[0].groupId,
-  groupsLoaded: false,
+  /** 已有占位群列表，避免未完成身份配置时首页永远卡在加载 */
+  groupsLoaded: true,
   groupsLoadFailed: false,
   lastNonCockpitPath: null,
   setActiveGroupId: (groupId) => set({ activeGroupId: groupId }),

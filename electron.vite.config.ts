@@ -1,3 +1,4 @@
+import dns from 'node:dns'
 import { copyFileSync, mkdirSync } from 'fs'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -5,7 +6,25 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
 
+/** Node 17+ 默认先解析 localhost → ::1；开发服务若只监听 127.0.0.1 会导致 http://localhost 连不上 */
+dns.setDefaultResultOrder('ipv4first')
+
 const root = dirname(fileURLToPath(import.meta.url))
+
+/** 开发态 Vite 会注入 inline script / HMR；index.html 的生产 CSP 会阻止浏览器与 Cursor 预览加载 */
+function lanpmDevCspPlugin(): Plugin {
+  return {
+    name: 'lanpm-dev-csp',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html, ctx) {
+        if (!ctx.server) return html
+        /* 开发态移除 CSP：Vite HMR / Cursor 内置浏览器对 port 通配 CSP 支持差，易导致白屏 */
+        return html.replace(/<meta\s+http-equiv="Content-Security-Policy"[^>]*>\s*/i, '')
+      }
+    }
+  }
+}
 
 function copySchemaSqlPlugin(): Plugin {
   return {
@@ -52,6 +71,16 @@ export default defineConfig({
         '@resources': resolve('resources')
       }
     },
-    plugins: [react()]
+    server: {
+      /** 0.0.0.0：同时接受 127.0.0.1；配合 dns.setDefaultResultOrder('ipv4first') 改善 localhost */
+      host: true,
+      strictPort: false,
+      hmr: {
+        /** 避免页面在 ::/localhost 与 ws 地址不一致时 HMR 连不上 → 整页反复刷新 */
+        host: '127.0.0.1',
+        protocol: 'ws'
+      }
+    },
+    plugins: [react(), lanpmDevCspPlugin()]
   }
 })

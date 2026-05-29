@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { ConfigProvider, theme as antTheme } from 'antd'
+import { App as AntdApp, ConfigProvider, theme as antTheme } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import enUS from 'antd/locale/en_US'
 import { useUiStore } from '@renderer/stores/uiStore'
@@ -62,6 +62,12 @@ export default function ThemeProvider({
           colorText: palette.text,
           colorTextSecondary: palette.textSecondary,
           colorFillSecondary: palette.fillSecondary,
+          colorFillTertiary: isDark
+            ? 'rgba(120, 120, 128, 0.18)'
+            : 'rgba(120, 120, 128, 0.08)',
+          colorFillQuaternary: isDark
+            ? 'rgba(120, 120, 128, 0.12)'
+            : 'rgba(120, 120, 128, 0.04)',
           controlHeight: 40,
           lineHeight: 1.47059
         },
@@ -87,11 +93,41 @@ export default function ThemeProvider({
           Tag: {
             defaultBg: palette.fillSecondary,
             defaultColor: palette.textSecondary
+          },
+          Segmented: {
+            trackBg: palette.fillSecondary,
+            itemColor: palette.textSecondary,
+            itemSelectedBg: palette.surfaceSolid,
+            itemSelectedColor: palette.text
+          },
+          Descriptions: {
+            labelBg: palette.fillSecondary,
+            titleColor: palette.text
+          },
+          Tree: {
+            nodeSelectedBg: palette.fillSecondary
+          },
+          Menu: {
+            itemSelectedBg: palette.fillSecondary,
+            itemSelectedColor: palette.text
+          },
+          Radio: {
+            buttonBg: palette.fillSecondary,
+            buttonCheckedBg: palette.surfaceSolid,
+            buttonColor: palette.text
+          },
+          List: {
+            headerBg: palette.fillSecondary,
+            footerBg: palette.fillSecondary
+          },
+          Slider: {
+            trackBg: palette.fillSecondary,
+            trackHoverBg: palette.fillSecondary
           }
         }
       }}
     >
-      {children}
+      <AntdApp>{children}</AntdApp>
     </ConfigProvider>
   )
 }

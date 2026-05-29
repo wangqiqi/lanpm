@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { message } from 'antd'
 import type { ChatMessage } from '@shared/chat/types'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { translate } from '@renderer/i18n/messages'
 import { useUiStore } from '@renderer/stores/uiStore'
@@ -8,6 +8,7 @@ import { useBadgeStore } from '@renderer/stores/badgeStore'
 
 /** 会话可见时标记他人消息已读（M2-06） */
 export function useMarkRead(groupId: string, messages: ChatMessage[], localUserId?: string): void {
+  const { message } = useLanpmApp()
   const markedRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -37,5 +38,5 @@ export function useMarkRead(groupId: string, messages: ChatMessage[], localUserI
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [groupId, localUserId, messages])
+  }, [groupId, localUserId, messages, message])
 }

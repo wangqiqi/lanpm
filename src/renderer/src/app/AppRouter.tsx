@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react'
 import { HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import MainLayout from '@renderer/layout/MainLayout'
 import GroupViewGuard from '@renderer/routes/GroupViewGuard'
-import GroupView from '@renderer/views/GroupView'
-import CockpitView from '@renderer/views/CockpitView'
 import HomeRedirect from '@renderer/routes/HomeRedirect'
+import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+
+const GroupView = lazy(() => import('@renderer/views/GroupView'))
+const CockpitView = lazy(() => import('@renderer/views/CockpitView'))
 import { groupViewPath } from '@renderer/routes/paths'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import type { AppView } from '@shared/navigation/types'
@@ -18,9 +21,15 @@ function GroupIndexRedirect(): React.ReactElement {
 function viewRoute(view: AppView): React.ReactElement {
   return (
     <GroupViewGuard view={view}>
-      <GroupView view={view} />
+      <RouteSuspense>
+        <GroupView view={view} />
+      </RouteSuspense>
     </GroupViewGuard>
   )
+}
+
+function RouteSuspense({ children }: { children: React.ReactNode }): React.ReactElement {
+  return <Suspense fallback={<ViewLoadingCenter />}>{children}</Suspense>
 }
 
 export default function AppRouter(): React.ReactElement {
@@ -31,7 +40,14 @@ export default function AppRouter(): React.ReactElement {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route element={<MainLayout />}>
-          <Route path="/cockpit" element={<CockpitView />} />
+          <Route
+            path="/cockpit"
+            element={
+              <RouteSuspense>
+                <CockpitView />
+              </RouteSuspense>
+            }
+          />
           <Route path="/g/:groupId" element={<GroupIndexRedirect />} />
           <Route path="/g/:groupId/chat" element={viewRoute('chat')} />
           <Route path="/g/:groupId/board" element={viewRoute('board')} />

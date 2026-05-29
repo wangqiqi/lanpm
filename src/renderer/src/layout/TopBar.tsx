@@ -4,7 +4,6 @@ import {
   Avatar,
   Button,
   Dropdown,
-  Modal,
   Select,
   Space,
   Tooltip,
@@ -19,6 +18,7 @@ import {
   SunOutlined,
   UserOutlined
 } from '@ant-design/icons'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -52,6 +52,7 @@ export default function TopBar(): React.ReactElement {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useI18n()
+  const { modal } = useLanpmApp()
   const groups = useNavigationStore((s) => s.groups)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
@@ -76,7 +77,7 @@ export default function TopBar(): React.ReactElement {
 
   useEffect(() => {
     void refreshNetwork()
-    const timer = setInterval(() => void refreshNetwork(), 8000)
+    const timer = setInterval(() => void refreshNetwork({ silent: true }), 8000)
     return () => clearInterval(timer)
   }, [refreshNetwork])
 
@@ -125,7 +126,7 @@ export default function TopBar(): React.ReactElement {
       activeGroupId !== groupId
 
     if (leavingAnonymous) {
-      Modal.confirm({
+      modal.confirm({
         title: t('group.leaveAnonymousTitle'),
         content: t('group.leaveAnonymousContent'),
         okText: t('common.confirm'),

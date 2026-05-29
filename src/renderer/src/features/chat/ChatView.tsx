@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Input, Typography, message } from 'antd'
+import { Button, Input, Typography } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { CodeOutlined, PlusSquareOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
@@ -44,6 +45,7 @@ function formatTime(iso: string): string {
 
 export default function ChatView(): React.ReactElement {
   const { t, locale } = useI18n()
+  const { message } = useLanpmApp()
   const navigate = useNavigate()
   const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()

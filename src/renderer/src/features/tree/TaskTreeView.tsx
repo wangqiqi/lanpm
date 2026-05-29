@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Input, Progress, Slider, Tree, message } from 'antd'
+import { Alert, Button, Input, Progress, Slider, Tree } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { DataNode } from 'antd/es/tree'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -81,6 +82,7 @@ function buildTreeData(
 
 export default function TaskTreeView(): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const navigate = useNavigate()

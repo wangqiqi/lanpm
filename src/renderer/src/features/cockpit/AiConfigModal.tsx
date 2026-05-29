@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Form, Input, Modal, Select, Switch, message } from 'antd'
+import { Form, Input, Modal, Select, Switch } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AiConfigInput, AiConfigView, AiProvider } from '@shared/cockpit/types'
 import {
   AI_PROVIDER_PRESETS,
@@ -22,6 +23,7 @@ export default function AiConfigModal({
   onSave
 }: AiConfigModalProps): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const [form] = Form.useForm<AiConfigInput & { apiKey?: string }>()
   const [saving, setSaving] = useState(false)
   const [provider, setProvider] = useState<AiProvider>(defaultAiProviderPreset().value)

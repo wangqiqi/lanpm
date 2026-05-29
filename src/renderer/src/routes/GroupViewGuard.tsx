@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
+import type { MessageInstance } from 'antd/es/message/interface'
 import { Navigate, useParams } from 'react-router-dom'
-import { message } from 'antd'
 import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { groupViewPath } from '@renderer/routes/paths'
@@ -16,6 +17,9 @@ export default function GroupViewGuard({
 }): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
   const { t } = useI18n()
+  const { message } = useLanpmApp()
+  const messageRef = useRef<MessageInstance>(message)
+  messageRef.current = message
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const warnedRef = useRef<string | null>(null)
 
@@ -28,7 +32,7 @@ export default function GroupViewGuard({
     const key = `${groupId}:${view}`
     if (warnedRef.current === key) return
     warnedRef.current = key
-    message.warning(t('nav.viewRedirected'))
+    messageRef.current.warning(t('nav.viewRedirected'))
   }, [groupId, allowed, view, t])
 
   if (!groupId) {

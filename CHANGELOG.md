@@ -2,6 +2,31 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.13] - 2026-05-29
+
+### Added
+- **`dev:web`**：仅启动渲染进程 Vite（`electron-vite dev --rendererOnly`）
+- **`bootstrap.tsx`** + **`RootErrorBoundary`**：异步启动与渲染崩溃兜底，避免浏览器/Cursor 预览白屏无提示
+- **`useLanpmApp`**：统一 `App.useApp()` 的 `message` / `modal`，替代静态 API 以正确消费主题
+- 路由与视图 **React.lazy** 分包（`GroupView` / `CockpitView` / 各 Tab 视图）
+- 身份未配置时 **Setup 全屏 overlay**，主壳（TopBar/BottomNav）仍可预览
+
+### Fixed
+- **Cursor 内置浏览器**：`installLanpmBridge` 开发态优先走浏览器桩，不再因 Electron UA 误判 preload 失败
+- **Vite 开发服务**：`host: '::'` + `dns.setDefaultResultOrder('ipv4first')`，修复 `localhost` → `::1` 白屏
+- 开发态 **移除 index.html CSP**（Vite HMR / Cursor 预览与 port 通配 CSP 冲突）
+- **`npm run dev`**：`env -u ELECTRON_RUN_AS_NODE`，避免 Cursor 终端继承变量导致 Electron 无法启动
+- **`HomeRedirect`** / **`navigationStore`**：占位群列表默认可用，未完成 Setup 时首页不再永久 loading
+- **`networkStore`**：IPC 不可用时静默忽略，不阻塞页面
+- Ant Design **`Spin.tip` 嵌套警告**；Tag 暗色对比（`color="default"`）
+
+### Changed
+- **`ThemeProvider`**：包裹 `antd App`；补齐 Segmented / Tree / Menu / Slider 等暗色 Token
+- **`index.html`**：根节点增加「LanPM 加载中…」占位
+
+### Tag
+- `v1.0.0-rc.13` — Cursor/浏览器开发预览修复、启动健壮性与 Ant Design 静态 API 迁移
+
 ## [1.0.0-rc.12] - 2026-05-29
 
 ### Added

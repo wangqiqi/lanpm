@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { Badge, Modal, Tooltip } from 'antd'
+import { Badge, Tooltip } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   CommentOutlined,
   ProjectOutlined,
@@ -40,6 +41,7 @@ export default function BottomNav(): React.ReactElement {
   const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()
   const { t } = useI18n()
+  const { modal } = useLanpmApp()
   const getGroupType = useNavigationStore((s) => s.getGroupType)
 
   const activeView = useMemo((): AppView | null => {
@@ -83,7 +85,7 @@ export default function BottomNav(): React.ReactElement {
   const maybeShowFunctionGuide = (): void => {
     if (groupType !== 'function') return
     if (localStorage.getItem(FUNCTION_GUIDE_KEY)) return
-    Modal.info({
+    modal.info({
       title: t('nav.functionGuideTitle'),
       content: t('nav.functionGuideBody'),
       okText: t('common.confirm'),

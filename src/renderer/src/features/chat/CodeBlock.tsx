@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Tag, message } from 'antd'
+import { Button, Tag } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { CopyOutlined } from '@ant-design/icons'
 import githubCssUrl from 'highlight.js/styles/github.css?url'
 import githubDarkCssUrl from 'highlight.js/styles/github-dark.css?url'
@@ -31,6 +32,7 @@ function useHighlightTheme(theme: ThemeMode): void {
 
 export default function CodeBlock({ language, code, theme }: CodeBlockProps): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   useHighlightTheme(theme)
   const [expanded, setExpanded] = useState(false)
   const html = useMemo(() => highlightCode(code, language), [code, language])
@@ -47,7 +49,9 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
   return (
     <div className={styles.codeWrap}>
       <div className={styles.codeHeader}>
-        <Tag className={styles.langTag}>{language}</Tag>
+        <Tag color="default" className={styles.langTag}>
+          {language}
+        </Tag>
         <Button
           type="text"
           size="small"

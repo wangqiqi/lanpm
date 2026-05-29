@@ -1,4 +1,5 @@
-import { Modal, Select, Input, message } from 'antd'
+import { Modal, Select, Input } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useState } from 'react'
 import { CODE_LANGUAGE_OPTIONS, detectLanguage } from '@shared/chat/detectLanguage'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -17,6 +18,7 @@ export default function CodeSendModal({
   onSend
 }: CodeSendModalProps): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const [code, setCode] = useState('')
   const [language, setLanguage] = useState<string>('auto')
   const [sending, setSending] = useState(false)

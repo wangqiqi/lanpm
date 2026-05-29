@@ -10,7 +10,8 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { Button, Input, Modal, Select, message } from 'antd'
+import { Button, Input, Modal, Select } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
@@ -102,6 +103,7 @@ function KanbanColumn({
 
 export default function BoardView(): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const navigate = useNavigate()

@@ -40,6 +40,18 @@ function resolvePreloadPath(): string {
   return candidates.find((p) => existsSync(p)) ?? candidates[0]!
 }
 
+function registerAllIpcHandlers(): void {
+  registerIdentityIpc()
+  registerChatIpc()
+  registerTaskIpc()
+  registerFileIpc()
+  registerGroupIpc()
+  registerCockpitIpc()
+  registerSearchIpc()
+  registerNetworkIpc()
+  registerBadgeIpc()
+}
+
 function createWindow(): void {
   const iconPath = resolveAppIconPath()
   const mainWindow = new BrowserWindow({
@@ -94,15 +106,7 @@ app.whenReady().then(() => {
     ensureSeedGroups(getDatabase())
     initNetwork(getDatabase())
     initChatService(getDatabase())
-    registerIdentityIpc()
-    registerChatIpc()
-    registerTaskIpc()
-    registerFileIpc()
-    registerGroupIpc()
-    registerCockpitIpc()
-    registerSearchIpc()
-    registerNetworkIpc()
-    registerBadgeIpc()
+    registerAllIpcHandlers()
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
     }

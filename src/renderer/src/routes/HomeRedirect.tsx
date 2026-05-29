@@ -8,7 +8,7 @@ export default function HomeRedirect(): React.ReactElement {
   const groups = useNavigationStore((s) => s.groups)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
 
-  if (!groupsLoaded) {
+  if (!groupsLoaded && groups.length === 0) {
     return <ViewLoadingCenter />
   }
 

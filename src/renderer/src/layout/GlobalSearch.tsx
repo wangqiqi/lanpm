@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
-import { AutoComplete, Typography, message } from 'antd'
+import { AutoComplete, Typography } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { FileTextOutlined, MessageOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -20,6 +21,7 @@ interface SearchOption {
 
 export default function GlobalSearch(): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const navigate = useNavigate()
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
   const getGroupType = useNavigationStore((s) => s.getGroupType)

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Avatar, Button, Form, Input, Upload, message, type UploadProps } from 'antd'
+import { Avatar, Button, Form, Input, Upload, type UploadProps } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ReloadOutlined, UploadOutlined } from '@ant-design/icons'
 import type { SetupStatus } from '@shared/identity'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -19,6 +20,7 @@ interface FormValues {
 
 export default function SetupWizard({ onComplete }: SetupWizardProps): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const [form] = Form.useForm<FormValues>()
   const [avatarUrl, setAvatarUrl] = useState(() => randomAvatarDataUrl('LP'))
   const [submitting, setSubmitting] = useState(false)

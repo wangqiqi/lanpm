@@ -36,6 +36,18 @@
   text-align: center;
 }
 
+.appShell {
+  min-height: 100vh;
+}
+
+.setupOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  overflow: auto;
+  background: var(--lanpm-bg);
+}
+
 .boot {
   min-height: 100vh;
   display: flex;

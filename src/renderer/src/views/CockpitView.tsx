@@ -9,9 +9,9 @@ import {
   Space,
   Statistic,
   Tag,
-  Typography,
-  message
+  Typography
 } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -34,6 +34,7 @@ const STATUS_KEYS: Record<string, { color: string; key: MessageKey }> = {
 
 export default function CockpitView(): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const navigate = useNavigate()
   const location = useLocation()
   const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Form, Input, Modal, Radio, Switch, message } from 'antd'
+import { Form, Input, Modal, Radio, Switch } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { GroupType } from '@shared/navigation/types'
 import { useI18n } from '@renderer/i18n/useI18n'
 
@@ -15,6 +16,7 @@ export default function CreateGroupModal({
   onCreate
 }: CreateGroupModalProps): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const [form] = Form.useForm<{ type: GroupType; name: string; autoDiscover: boolean }>()
   const [saving, setSaving] = useState(false)
 

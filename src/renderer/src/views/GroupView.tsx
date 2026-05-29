@@ -1,13 +1,9 @@
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
-import { message } from 'antd'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
 import { formatDmTitle, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
-import ChatView from '@renderer/features/chat/ChatView'
-import BoardView from '@renderer/features/board/BoardView'
-import TaskTreeView from '@renderer/features/tree/TaskTreeView'
-import GanttView from '@renderer/features/gantt/GanttView'
-import FilesView from '@renderer/features/files/FilesView'
+import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -17,9 +13,16 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import styles from './GroupView.module.css'
 
+const ChatView = lazy(() => import('@renderer/features/chat/ChatView'))
+const BoardView = lazy(() => import('@renderer/features/board/BoardView'))
+const TaskTreeView = lazy(() => import('@renderer/features/tree/TaskTreeView'))
+const GanttView = lazy(() => import('@renderer/features/gantt/GanttView'))
+const FilesView = lazy(() => import('@renderer/features/files/FilesView'))
+
 /** 聊天页标题为群名/DM 名；任务类视图为模块名（docs/05 §1.1） */
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
   const getGroupLabel = useNavigationStore((s) => s.getGroupLabel)
@@ -47,7 +50,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     return () => {
       void getLanpmApi().group.leaveAnonymous(groupId)
     }
-  }, [groupId, getGroupType, t])
+  }, [groupId, getGroupType, t, message])
 
   const chatTitle = (() => {
     if (!groupId) return '—'
@@ -67,11 +70,13 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
       <ViewHeader title={pageTitle} />
       <div className={isChat ? styles.chatBody : styles.taskBody}>
-        {view === 'chat' && <ChatView />}
-        {view === 'board' && <BoardView />}
-        {view === 'tree' && <TaskTreeView />}
-        {view === 'gantt' && <GanttView />}
-        {view === 'files' && <FilesView />}
+        <Suspense fallback={<ViewLoadingCenter />}>
+          {view === 'chat' && <ChatView />}
+          {view === 'board' && <BoardView />}
+          {view === 'tree' && <TaskTreeView />}
+          {view === 'gantt' && <GanttView />}
+          {view === 'files' && <FilesView />}
+        </Suspense>
       </div>
     </div>
   )
