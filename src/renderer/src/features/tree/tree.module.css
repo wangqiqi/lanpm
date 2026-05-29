@@ -45,6 +45,63 @@
   margin-bottom: 0;
 }
 
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 34%);
+  gap: 12px;
+}
+
+.detailPanel {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--lanpm-surface-solid);
+  border: 1px solid var(--lanpm-border);
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.detailField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailMeta {
+  font-size: 12px;
+}
+
+.detailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+@media (max-width: 960px) {
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(200px, 1fr) auto;
+    overflow-y: auto;
+  }
+
+  .detailPanel {
+    max-height: 50vh;
+  }
+}
+
 @keyframes lanpmHighlightPulse {
   0%,
   15% {

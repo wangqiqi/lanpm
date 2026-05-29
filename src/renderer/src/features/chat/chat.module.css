@@ -30,6 +30,84 @@
   min-height: 0;
 }
 
+.sidebarBackdrop {
+  display: none;
+}
+
+.sidebarToggle {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 200px;
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 900px) {
+  .chatLayout {
+    position: relative;
+  }
+
+  .sidebarToggle {
+    display: inline-flex;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 22;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: var(--lanpm-surface-solid, #fff);
+    border: 1px solid var(--lanpm-border);
+    color: var(--lanpm-text);
+    cursor: pointer;
+    box-shadow: var(--lanpm-shadow);
+    transition: background-color 0.15s ease;
+  }
+
+  .sidebarToggle:hover {
+    background: var(--lanpm-hover-bg);
+  }
+
+  .sidebarBackdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 19;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
+
+  .sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    width: min(280px, 88vw);
+    min-width: 0;
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--lanpm-shadow);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .root {
+    padding-top: 0;
+  }
+}
+
 .dmBar {
   flex-shrink: 0;
   padding: 8px 0 0;

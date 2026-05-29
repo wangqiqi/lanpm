@@ -4,13 +4,15 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { DataNode } from 'antd/es/tree'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
-import type { Task } from '@shared/task/types'
+import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
+import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import TaskDetailPanel from '@renderer/features/tree/TaskDetailPanel'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './tree.module.css'
 
@@ -91,11 +93,14 @@ export default function TaskTreeView(): React.ReactElement {
   const loadTasks = useTaskStore((s) => s.loadTasks)
   const createTask = useTaskStore((s) => s.createTask)
   const updateTask = useTaskStore((s) => s.updateTask)
+  const deleteTask = useTaskStore((s) => s.deleteTask)
+  const loadMembers = useChatMembersStore((s) => s.loadMembers)
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
   const [newRootTitle, setNewRootTitle] = useState('')
   const [childTitle, setChildTitle] = useState('')
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [inlineEditTaskId, setInlineEditTaskId] = useState<string | null>(null)
   const [parentSelected, setParentSelected] = useState(false)
 
@@ -117,6 +122,16 @@ export default function TaskTreeView(): React.ReactElement {
     },
     [updateTask, t]
   )
+
+  const selectedTask = useMemo(
+    () => (selectedTaskId ? tasks.find((t) => t.taskId === selectedTaskId) ?? null : null),
+    [tasks, selectedTaskId]
+  )
+
+  useEffect(() => {
+    if (!gid) return
+    void loadMembers(gid)
+  }, [gid, loadMembers])
 
   const treeData = useMemo(
     () =>
@@ -144,6 +159,8 @@ export default function TaskTreeView(): React.ReactElement {
     const ancestors = ancestorKeysForTask(highlightId, tasks)
     if (ancestors.length === 0) return
     setExpandedKeys((keys) => [...new Set([...keys, ...ancestors])])
+    setSelectedTaskId(highlightId)
+    setSelectedParentId(highlightId)
   }, [highlightId, tasks])
 
   const onSelect = useCallback(
@@ -152,9 +169,11 @@ export default function TaskTreeView(): React.ReactElement {
       if (typeof id !== 'string') {
         setParentSelected(false)
         setInlineEditTaskId(null)
+        setSelectedTaskId(null)
         return
       }
       setSelectedParentId(id)
+      setSelectedTaskId(id)
       const task = tasks.find((t) => t.taskId === id)
       if (task) {
         const hasChildren = tasks.some((t) => t.parentTaskId === id)
@@ -163,6 +182,47 @@ export default function TaskTreeView(): React.ReactElement {
       }
     },
     [tasks]
+  )
+
+  const handleDetailSave = useCallback(
+    async (input: {
+      taskId: string
+      title: string
+      description: string
+      status: TaskStatus
+      priority: TaskPriority
+      assigneeUserId: string | null
+      endDate: string | null
+    }) => {
+      await updateTask({
+        taskId: input.taskId,
+        title: input.title,
+        description: input.description.trim() || undefined,
+        status: input.status,
+        priority: input.priority,
+        assigneeUserId: input.assigneeUserId,
+        endDate: input.endDate
+      })
+    },
+    [updateTask]
+  )
+
+  const handleDetailDelete = useCallback(
+    async (taskId: string) => {
+      try {
+        const ok = await deleteTask(taskId)
+        if (ok) {
+          message.success(t('tree.detailDeleted'))
+          setSelectedTaskId(null)
+          setSelectedParentId(null)
+        } else {
+          message.warning(t('board.notFound'))
+        }
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t('board.deleteFailed'))
+      }
+    },
+    [deleteTask, t, message]
   )
 
   const handleCreateRoot = async (): Promise<void> => {
@@ -233,19 +293,32 @@ export default function TaskTreeView(): React.ReactElement {
         <Alert type="info" showIcon message={t('tree.parentProgressHint')} className={styles.parentHint} />
       )}
 
-      <div className={styles.treeWrap}>
-        {loading && tasks.length === 0 ? (
-          <ViewLoadingCenter />
-        ) : treeData.length === 0 ? (
-          <ViewEmptyHint>{t('tree.empty')}</ViewEmptyHint>
-        ) : (
-          <Tree
-            showLine
-            expandedKeys={expandedKeys}
-            onExpand={(keys) => setExpandedKeys(keys as string[])}
-            treeData={treeData}
-            onSelect={onSelect}
-            defaultExpandAll={false}
+      <div className={styles.body}>
+        <div className={styles.treeWrap}>
+          {loading && tasks.length === 0 ? (
+            <ViewLoadingCenter />
+          ) : treeData.length === 0 ? (
+            <ViewEmptyHint>{t('tree.empty')}</ViewEmptyHint>
+          ) : (
+            <Tree
+              showLine
+              expandedKeys={expandedKeys}
+              onExpand={(keys) => setExpandedKeys(keys as string[])}
+              treeData={treeData}
+              onSelect={onSelect}
+              selectedKeys={selectedTaskId ? [selectedTaskId] : []}
+              defaultExpandAll={false}
+            />
+          )}
+        </div>
+        {selectedTask && (
+          <TaskDetailPanel
+            groupId={gid}
+            task={selectedTask}
+            tasks={tasks}
+            onClose={() => setSelectedTaskId(null)}
+            onSave={handleDetailSave}
+            onDelete={handleDetailDelete}
           />
         )}
       </div>

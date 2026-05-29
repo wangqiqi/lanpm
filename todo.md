@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.15` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.16` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -165,15 +165,15 @@
 
 ### P0 — 发布判断 / PRD 承诺
 
-- [ ] **PRD-F-01** 任务树右侧任务详情面板（负责人/状态/描述/子任务/关联文件）（`01` §8.3）
+- [x] **PRD-F-01** 任务树右侧任务详情面板（`TaskDetailPanel`：负责人/状态/优先级/截止/描述/子任务统计/保存删除）
 - [ ] **PRD-F-02** 聊天文件发送（拖拽/点击，P2P）（`01` §6.3）
 - [ ] **PRD-F-03** 书签内嵌 WebView，不离开应用（`01` §10.3）
-- [ ] **PRD-F-04** 视频内嵌播放 mp4/webm（`01` §10.2）
+- [x] **PRD-F-04** 视频内嵌播放 mp4/webm（`FilesView` `<video controls>`）
 - [x] **PRD-F-05** 全局搜索跳转高亮（`highlightTaskId` / `highlightMsgId` 各视图消费）— 同 **UX-X-01** / **UX-F-01**
-- [ ] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）— RC 部分：**截止日期** `endDate` 已展示（`KanbanCard`）；标签/垃圾桶待做
+- [x] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）— RC 完成（里程碑 Tag；独立「标签」字段待 PRD 数据模型）
 - [ ] **PRD-F-07** 离线 7 天内消息补同步 — 与 **ARCH-07**
 - [x] **PRD-F-08** 顶栏个人信息配置面板（`TopBar` profile 非 disabled）（`01` §5.2）— 与 **UX-F-06**（RC：只读资料弹窗）
-- [ ] **PRD-F-09** 驾驶舱部门完成率视图（`01` §12.1）
+- [x] **PRD-F-09** 驾驶舱部门完成率视图（`01` §12.1）— `CockpitView` `deptCompletion` 卡片（已有）
 - [ ] **PRD-F-10** 文件断点续传（中断后续传逻辑）
 - [ ] **PRD-F-11** 传输限速可配置（`01` §10.4）
 - [ ] **PRD-F-12** 传输历史可查（完整历史归档 UI）
@@ -263,11 +263,11 @@
 - [x] **UX-V-06** Setup 图标使用 `resources/logo.svg` 替代字母「L」
 - [x] **UX-V-07** 驾驶舱失败 vs 真实 0 — 与 **UX-F-03**
 - [x] **UX-V-08**（文档）Hash 路由 `#/g/...` 深链说明 — `docs/05` §2
-- [ ] **UX-R-01**（可选）小窗口 `@media` 断点设计
+- [ ] **UX-R-01**（可选）小窗口 `@media` 断点设计 — 部分已落 **UX-R-02~06**
 - [x] **UX-R-02** TopBar 窄窗 flex-wrap / 折叠菜单（`TopBar.module.css` `@media max-width: 1100px`）
-- [ ] **UX-R-03** 聊天侧栏窄窗宽度策略（当前固定 240px）
-- [ ] **UX-R-04** 看板窄屏单列/stack 模式
-- [ ] **UX-R-05** 文件预览区窄屏单栏模式
+- [x] **UX-R-03** 聊天侧栏窄窗策略：`≤1100px` 缩窄；`≤900px` 抽屉 + 遮罩 + 菜单按钮（`ChatView` / `chat.module.css`）
+- [x] **UX-R-04** 看板窄屏单列/stack 模式（`board.module.css` `@media max-width: 1100px`）
+- [x] **UX-R-05** 文件预览区窄屏单栏模式（`files.module.css` `@media max-width: 960px`）
 - [x] **UX-R-06** BottomNav 窄屏仅 icon 模式（`@media max-width: 720px`）
 - [x] **UX-N-01** 驾驶舱返回群路径（与 BottomNav 对称性）— 同 **UX-W-05** / **UX-PATH-01**
 - [x] **UX-N-02** `GroupViewGuard` 非法视图 redirect 时 toast — 同 **UX-W-07**

@@ -325,6 +325,13 @@ export default function FilesView(): React.ReactElement {
             <ViewErrorCenter message={t('files.previewLoadFailed')} onRetry={retryPreview} />
           ) : selected.previewStatus === 'failed' ? (
             <Text type="danger">{t('files.previewFailedDownload')}</Text>
+          ) : previewUrl && ['mp4', 'webm'].includes(selected.ext.toLowerCase()) ? (
+            <video
+              src={previewUrl}
+              controls
+              className={styles.previewVideo}
+              aria-label={selected.name}
+            />
           ) : previewUrl && selected.category === 'image' ? (
             <Image src={previewUrl} alt={selected.name} className={styles.previewImg} />
           ) : previewUrl && selected.ext.toLowerCase() === 'pdf' ? (

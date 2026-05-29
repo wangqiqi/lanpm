@@ -120,6 +120,9 @@ export default function KanbanCard({
         {task.assigneeUserId && (
           <span>@{assigneeName ?? task.assigneeUserId}</span>
         )}
+        {task.milestone && (
+          <Tag color="blue">{t('board.milestone')}</Tag>
+        )}
         {task.endDate && (
           <span className={styles.cardDue}>{t('board.dueDate', { date: task.endDate })}</span>
         )}

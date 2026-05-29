@@ -12,10 +12,10 @@ import {
 } from '@dnd-kit/core'
 import { Button, Input, Modal, Select } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
-import { KANBAN_COLUMN_ORDER, isTaskStatus } from '@shared/task/kanban'
+import { KANBAN_COLUMN_ORDER, isTaskStatus, KANBAN_TRASH_DROP_ID, isKanbanTrashDropId } from '@shared/task/kanban'
 import type { MessageKey } from '@renderer/i18n/messages'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
@@ -41,6 +41,30 @@ const PRIORITY_OPTIONS: { value: TaskPriority; key: MessageKey }[] = [
   { value: 'medium', key: 'board.priorityMedium' },
   { value: 'high', key: 'board.priorityHigh' }
 ]
+
+function TrashDropZone({
+  visible,
+  isOver
+}: {
+  visible: boolean
+  isOver: boolean
+}): React.ReactElement | null {
+  const { t } = useI18n()
+  const { setNodeRef } = useDroppable({ id: KANBAN_TRASH_DROP_ID })
+
+  if (!visible) return null
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${styles.trashZone} ${isOver ? styles.trashZoneOver : ''}`}
+      aria-live="polite"
+    >
+      <DeleteOutlined aria-hidden />
+      <span>{t('board.trashDrop')}</span>
+    </div>
+  )
+}
 
 function KanbanColumn({
   groupId,
@@ -121,6 +145,7 @@ export default function BoardView(): React.ReactElement {
   const [newPriority, setNewPriority] = useState<TaskPriority>('medium')
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [overColumn, setOverColumn] = useState<TaskStatus | null>(null)
+  const [overTrash, setOverTrash] = useState(false)
   const [pendingOther, setPendingOther] = useState<{ taskId: string; title: string } | null>(null)
   const [otherLoading, setOtherLoading] = useState(false)
 
@@ -178,9 +203,14 @@ export default function BoardView(): React.ReactElement {
 
   const handleDragOver = (event: DragOverEvent): void => {
     const overId = event.over?.id
-    if (typeof overId === 'string' && isTaskStatus(overId)) {
+    if (typeof overId === 'string' && isKanbanTrashDropId(overId)) {
+      setOverTrash(true)
+      setOverColumn(null)
+    } else if (typeof overId === 'string' && isTaskStatus(overId)) {
+      setOverTrash(false)
       setOverColumn(overId)
     } else {
+      setOverTrash(false)
       setOverColumn(null)
     }
   }
@@ -199,9 +229,17 @@ export default function BoardView(): React.ReactElement {
   const handleDragEnd = (event: DragEndEvent): void => {
     setActiveTask(null)
     setOverColumn(null)
+    setOverTrash(false)
     const taskId = String(event.active.id)
     const overId = event.over?.id
-    if (!overId || !isTaskStatus(String(overId))) return
+    if (!overId) return
+
+    if (isKanbanTrashDropId(String(overId))) {
+      void handleDelete(taskId)
+      return
+    }
+
+    if (!isTaskStatus(String(overId))) return
 
     const targetStatus = String(overId) as TaskStatus
     const task = boardTasks.find((t) => t.taskId === taskId)
@@ -299,7 +337,9 @@ export default function BoardView(): React.ReactElement {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className={styles.columns}>
+          <div className={styles.boardBody}>
+            <TrashDropZone visible={!!activeTask} isOver={overTrash} />
+            <div className={styles.columns}>
             {KANBAN_COLUMN_ORDER.map((status) => (
               <KanbanColumn
                 key={status}
@@ -315,6 +355,7 @@ export default function BoardView(): React.ReactElement {
                 isTaskHighlighted={isTaskHighlighted}
               />
             ))}
+            </div>
           </div>
           <DragOverlay>
             {activeTask ? (

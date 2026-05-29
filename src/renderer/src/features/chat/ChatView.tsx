@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Input, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { CodeOutlined, PlusSquareOutlined } from '@ant-design/icons'
+import { CodeOutlined, MenuOutlined, PlusSquareOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
@@ -70,7 +70,16 @@ export default function ChatView(): React.ReactElement {
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)')
+    const sync = (): void => setSidebarOpen(!mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const messagesReady = !loading || messages.length > 0
   const { isHighlighted: isMsgHighlighted } = useSearchHighlight('msg', messagesReady)
@@ -241,13 +250,33 @@ export default function ChatView(): React.ReactElement {
 
   return (
     <div className={styles.chatLayout}>
-      <div className={styles.sidebar}>
+      {sidebarOpen && (
+        <button
+          type="button"
+          className={styles.sidebarBackdrop}
+          aria-label={t('chat.closeSidebar')}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <button
+        type="button"
+        className={styles.sidebarToggle}
+        aria-label={sidebarOpen ? t('chat.closeSidebar') : t('chat.openSidebar')}
+        aria-expanded={sidebarOpen}
+        onClick={() => setSidebarOpen((v) => !v)}
+      >
+        <MenuOutlined />
+      </button>
+      <div className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <DmSessionBar activeGroupId={gid} />
         <MemberList
           groupId={gid}
           members={members}
           onRefresh={() => void loadMembers(gid)}
-          onInsertMention={insertMention}
+          onInsertMention={(name) => {
+            insertMention(name)
+            if (window.matchMedia('(max-width: 900px)').matches) setSidebarOpen(false)
+          }}
         />
       </div>
 

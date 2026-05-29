@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.16] - 2026-05-29
+
+### Added
+- **任务树详情面板**（**PRD-F-01**）：`TaskDetailPanel` 右侧编辑名称/负责人/状态/优先级/截止/描述，保存与删除；搜索高亮自动选中
+- **看板拖入垃圾桶删除**（**PRD-F-06**）：`KANBAN_TRASH_DROP_ID` + `TrashDropZone`；里程碑 Tag
+- **文件视频预览**（**PRD-F-04**）：`.mp4` / `.webm` 内嵌 `<video controls>`
+- **i18n**：`tree.detail*`、`board.trashDrop` / `board.milestone`、`chat.openSidebar` / `chat.closeSidebar`
+
+### Changed
+- **窄屏响应式**（**UX-R-03~05**）：聊天侧栏 `≤900px` 抽屉；看板 `≤1100px` 纵向堆叠；文件 `≤960px` 单栏预览
+- **`todo.md`**：勾选 **PRD-F-01/04/06/09**、**UX-R-03~05**
+
+### Tag
+- `v1.0.0-rc.16` — 任务树详情面板、看板垃圾桶拖删、视频预览与窄屏布局
+
 ## [1.0.0-rc.15] - 2026-05-29
 
 ### Added

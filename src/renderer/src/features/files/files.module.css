@@ -56,6 +56,13 @@
   object-fit: contain;
 }
 
+.previewVideo {
+  width: 100%;
+  max-height: min(480px, 60vh);
+  border-radius: 6px;
+  background: #000;
+}
+
 .previewFrame {
   flex: 1;
   min-height: 320px;
@@ -76,4 +83,20 @@
   gap: 8px;
   padding: 8px 0;
   word-break: break-all;
+}
+
+@media (max-width: 960px) {
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(200px, 1fr) minmax(240px, auto);
+    overflow-y: auto;
+  }
+
+  .listPane {
+    max-height: 50vh;
+  }
+
+  .previewPane {
+    min-height: 240px;
+  }
 }
