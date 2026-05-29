@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.33] - 2026-05-29
+
+### Added
+- **语义/阴影设计令牌**：`--lanpm-success` / `warning` / `danger`、`--lanpm-on-accent`、`--lanpm-overlay`、`--lanpm-shadow-sm/md/lg`（亮暗双主题）
+- **`crash.module.css`**：渲染崩溃页用语义令牌，跟随 `data-theme`
+
+### Changed
+- **视觉阶段 A（VIS-01~03）**：TopBar/看板/聊天/文件/甘特/Setup 去除 Ant 语义色与错误 rgba fallback；扩展 `verify:visual` 守卫
+- **视觉阶段 B（VIS-04~06）**：`docs/04` §1.3 圆角尺度；`main.tsx` 启动失败页随主题；`App` 顶栏边框；甘特导出背景读 `--lanpm-bg`
+- **`verify:project`**：串联 `verify:docs-code -- --strict`
+- **`todo.md`** · **`视觉.md`**：待办与审计状态同步
+
+### Tag
+- `v1.0.0-rc.33` — 视觉语义令牌与阶段 A/B 整改
+
 ## [1.0.0-rc.32] - 2026-05-29
 
 ### Added

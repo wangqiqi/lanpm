@@ -42,7 +42,7 @@
   border: 1px solid var(--lanpm-border);
   border-radius: 8px;
   padding: 8px;
-  background: var(--lanpm-surface-solid, #fff);
+  background: var(--lanpm-surface-solid);
 }
 
 .previewPane {
@@ -70,7 +70,7 @@
   gap: 8px 16px;
   margin-top: 6px;
   font-size: 12px;
-  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  color: var(--lanpm-text-secondary);
 }
 
 .searchRow {
@@ -98,7 +98,7 @@
   width: 100%;
   max-height: min(480px, 60vh);
   border-radius: 6px;
-  background: #000;
+  background: var(--lanpm-media-bg);
 }
 
 .previewFrame {

@@ -13,7 +13,7 @@
   overflow: auto;
   border: 1px solid var(--lanpm-border);
   border-radius: 8px;
-  background: var(--lanpm-surface-solid, #fff);
+  background: var(--lanpm-surface-solid);
 }
 
 .tooltip {
@@ -39,7 +39,7 @@
 }
 
 .chartWrap :global(.barLabel) {
-  fill: #fff;
+  fill: var(--lanpm-on-accent);
 }
 
 .chartWrap :global(.today) {

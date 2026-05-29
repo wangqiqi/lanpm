@@ -10,7 +10,7 @@
 
 .groupLabel {
   font-size: 11px;
-  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  color: var(--lanpm-text-secondary);
   margin-bottom: 4px;
 }
 
@@ -36,7 +36,7 @@
 }
 
 .emojiBtn:hover {
-  background: var(--lanpm-hover-bg, rgba(0, 0, 0, 0.06));
+  background: var(--lanpm-hover-bg);
 }
 
 .emojiBtn:active {

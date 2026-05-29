@@ -1,12 +1,24 @@
 import { installLanpmBridge } from '@renderer/platform/installLanpmBridge'
 import { installDevPreviewClientGuards } from '@renderer/platform/devPreviewClient'
+import './styles/global.module.css'
+
+function readThemeDataset(): void {
+  const theme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
+  document.documentElement.dataset.theme = theme
+  document.documentElement.style.colorScheme = theme
+}
 
 function showFatalError(err: unknown): void {
+  readThemeDataset()
   const root = document.getElementById('root')
   const msg = err instanceof Error ? `${err.name}: ${err.message}\n${err.stack ?? ''}` : String(err)
   console.error('[lanpm] bootstrap failed:', err)
   if (root) {
-    root.innerHTML = `<pre style="margin:24px;padding:12px;font:13px/1.45 ui-monospace,monospace;white-space:pre-wrap;background:#fff;border:1px solid #ddd;border-radius:8px">${msg}</pre>`
+    const escaped = msg
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    root.innerHTML = `<pre class="lanpm-fatal">${escaped}</pre>`
   }
 }
 

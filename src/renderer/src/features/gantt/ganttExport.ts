@@ -10,9 +10,16 @@ function downloadBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url)
 }
 
+function ganttExportBackground(): string {
+  const fromCss = getComputedStyle(document.documentElement)
+    .getPropertyValue('--lanpm-bg')
+    .trim()
+  return fromCss || '#ffffff'
+}
+
 export async function exportElementToPng(element: HTMLElement, filename: string): Promise<void> {
   const canvas = await html2canvas(element, {
-    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--lanpm-bg') || '#ffffff',
+    backgroundColor: ganttExportBackground(),
     scale: 2,
     useCORS: true,
     logging: false
@@ -25,7 +32,7 @@ export async function exportElementToPng(element: HTMLElement, filename: string)
 
 export async function exportElementToPdf(element: HTMLElement, filename: string): Promise<void> {
   const canvas = await html2canvas(element, {
-    backgroundColor: '#ffffff',
+    backgroundColor: ganttExportBackground(),
     scale: 2,
     useCORS: true,
     logging: false

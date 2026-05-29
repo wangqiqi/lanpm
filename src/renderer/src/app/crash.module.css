@@ -1,0 +1,43 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  font-family: system-ui, sans-serif;
+  background: var(--lanpm-bg);
+  color: var(--lanpm-text);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.detail {
+  max-width: 720px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--lanpm-surface-solid);
+  border: 1px solid var(--lanpm-border);
+  font-size: 13px;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.reload {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--lanpm-accent);
+  color: var(--lanpm-on-accent);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.reload:hover {
+  background: var(--lanpm-accent-hover);
+}

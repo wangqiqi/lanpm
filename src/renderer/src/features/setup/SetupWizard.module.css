@@ -28,7 +28,7 @@
   border-radius: 14px;
   font-size: 28px;
   font-weight: 600;
-  color: #fff;
+  color: var(--lanpm-on-accent);
   background: var(--lanpm-accent);
   box-shadow: var(--lanpm-shadow);
   letter-spacing: -0.03em;
@@ -61,7 +61,7 @@
 
 .avatar {
   margin-bottom: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--lanpm-shadow-lg);
 }
 
 .avatarLinks {

@@ -16,16 +16,27 @@ const REQUIRED_TOKENS = [
   '--lanpm-code-bg',
   '--lanpm-accent-fill',
   '--lanpm-accent-fill-strong',
-  '--lanpm-accent-ring'
+  '--lanpm-accent-ring',
+  '--lanpm-success',
+  '--lanpm-warning',
+  '--lanpm-danger',
+  '--lanpm-on-accent',
+  '--lanpm-shadow-md'
 ] as const
 
 const FORBIDDEN_PATTERNS = [
   /#1677ff/i,
   /rgba\(\s*22\s*,\s*119\s*,\s*255/gi,
+  /#52c41a/i,
+  /#ff4d4f/i,
+  /#faad14/i,
+  /#cf1322/i,
   /features\/shell\//,
   /ViewPlaceholder/,
   /CockpitPlaceholder/
 ] as const
+
+const BAD_TOKEN_FALLBACK = /var\(--lanpm-[^,)]+,\s*rgba\(\s*0\s*,\s*0\s*,\s*0/gi
 
 const UI_COMPONENTS = [
   'ui/ViewHeader.tsx',
@@ -136,10 +147,12 @@ for (const file of cssFiles) {
   const rel = file.slice(renderer.length + 1)
   const content = readFileSync(file, 'utf8')
   scanned++
-  for (const pat of FORBIDDEN_PATTERNS.slice(0, 2)) {
+  for (const pat of FORBIDDEN_PATTERNS.slice(0, 6)) {
     const m = content.match(pat)
     assert.ok(!m, `${rel}: forbidden color pattern ${pat} → ${m?.[0] ?? ''}`)
   }
+  const badFallback = content.match(BAD_TOKEN_FALLBACK)
+  assert.ok(!badFallback, `${rel}: use --lanpm-* without rgba(0,0,0,*) fallback`)
 }
 
 const tsxFiles: string[] = []
@@ -154,7 +167,7 @@ walkTsx(renderer)
 for (const file of tsxFiles) {
   const rel = file.slice(renderer.length + 1)
   const content = readFileSync(file, 'utf8')
-  for (const pat of FORBIDDEN_PATTERNS.slice(2)) {
+  for (const pat of FORBIDDEN_PATTERNS.slice(6)) {
     assert.ok(!pat.test(content), `${rel}: forbidden reference ${pat}`)
   }
 }

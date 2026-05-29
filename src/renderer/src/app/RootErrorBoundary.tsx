@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { translate, type LocaleId } from '@renderer/i18n/messages'
+import styles from './crash.module.css'
 
 interface Props {
   children: ReactNode
@@ -26,47 +27,10 @@ export default class RootErrorBoundary extends Component<Props, State> {
       const locale = (localStorage.getItem('locale') as LocaleId | null) ?? 'zh-CN'
       const t = (key: Parameters<typeof translate>[1]) => translate(locale, key)
       return (
-        <div
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            padding: 24,
-            fontFamily: 'system-ui, sans-serif',
-            background: '#f5f5f7',
-            color: '#1d1d1f'
-          }}
-        >
-          <h1 style={{ margin: 0, fontSize: 18 }}>{t('app.crashTitle')}</h1>
-          <pre
-            style={{
-              maxWidth: 720,
-              overflow: 'auto',
-              padding: 12,
-              borderRadius: 8,
-              background: '#fff',
-              border: '1px solid rgba(60,60,67,0.18)',
-              fontSize: 13,
-              whiteSpace: 'pre-wrap'
-            }}
-          >
-            {this.state.error.message}
-          </pre>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 8,
-              border: 'none',
-              background: '#0071e3',
-              color: '#fff',
-              cursor: 'pointer'
-            }}
-          >
+        <div className={styles.shell}>
+          <h1 className={styles.title}>{t('app.crashTitle')}</h1>
+          <pre className={styles.detail}>{this.state.error.message}</pre>
+          <button type="button" className={styles.reload} onClick={() => window.location.reload()}>
             {t('app.crashReload')}
           </button>
         </div>

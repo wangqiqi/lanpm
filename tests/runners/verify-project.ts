@@ -73,6 +73,9 @@ console.log('verify:project — static checks OK', `(v${pkg.version})`)
 console.log('\n=== verify:project / verify:p0 ===')
 run('npm run verify:p0')
 
+console.log('\n=== verify:project / verify:docs-code (strict) ===')
+run('npm run verify:docs-code -- --strict')
+
 console.log('\n=== verify:project / lint ===')
 run('npm run lint')
 

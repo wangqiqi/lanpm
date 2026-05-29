@@ -38,7 +38,7 @@ export default function OtherReasonModal({
       }}
     >
       {taskTitle && (
-        <p style={{ marginBottom: 12, color: 'rgba(0,0,0,0.65)' }}>
+        <p style={{ marginBottom: 12, color: 'var(--lanpm-text-secondary)' }}>
           {t('board.otherModalTask', { title: taskTitle })}
         </p>
       )}

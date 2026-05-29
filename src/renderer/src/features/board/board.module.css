@@ -22,7 +22,7 @@
   flex-direction: column;
   min-height: 200px;
   border-radius: 8px;
-  background: var(--lanpm-surface-solid, #fff);
+  background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-border);
 }
 
@@ -32,8 +32,8 @@
 }
 
 .columnInvalid {
-  border-color: #ff4d4f;
-  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.25);
+  border-color: var(--lanpm-danger);
+  box-shadow: 0 0 0 2px var(--lanpm-danger-ring);
 }
 
 .columnHeader {
@@ -73,7 +73,7 @@
   padding: 12px;
   border: 1px dashed var(--lanpm-border);
   border-radius: 8px;
-  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  color: var(--lanpm-text-secondary);
   font-size: 12px;
   text-align: center;
 }
@@ -81,7 +81,7 @@
 .card {
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--lanpm-bg, #fafafa);
+  background: var(--lanpm-bg);
   border: 1px solid var(--lanpm-border);
   cursor: grab;
   touch-action: none;
@@ -137,14 +137,14 @@
   background: transparent;
   padding: 2px 4px;
   border-radius: 4px;
-  color: var(--lanpm-text-tertiary, rgba(0, 0, 0, 0.35));
+  color: var(--lanpm-text-tertiary);
   cursor: pointer;
   line-height: 1;
 }
 
 .cardMenu:hover {
   color: var(--lanpm-text-secondary);
-  background: var(--lanpm-hover-bg, rgba(0, 0, 0, 0.04));
+  background: var(--lanpm-hover-bg);
 }
 
 .cardMeta {
@@ -152,7 +152,7 @@
   flex-wrap: wrap;
   gap: 6px;
   font-size: 12px;
-  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  color: var(--lanpm-text-secondary);
 }
 
 .cardDue {
@@ -162,15 +162,15 @@
 .otherReason {
   margin-top: 6px;
   font-size: 12px;
-  color: #cf1322;
+  color: var(--lanpm-danger-strong);
 }
 
 .overlayCard {
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--lanpm-surface-solid, #fff);
+  background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-accent);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--lanpm-shadow-md);
   max-width: 260px;
 }
 
@@ -201,9 +201,9 @@
 }
 
 .trashZoneOver {
-  border-color: #ff4d4f;
-  background: rgba(255, 77, 79, 0.08);
-  color: #ff4d4f;
+  border-color: var(--lanpm-danger);
+  background: var(--lanpm-danger-fill);
+  color: var(--lanpm-danger);
 }
 
 @media (max-width: 1100px) {
