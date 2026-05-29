@@ -7,6 +7,13 @@
   height: 100%;
 }
 
+/* 暗色下 disabled 导出钮可读（V-14b-SEM 对比度） */
+.root :global(.ant-btn-default:disabled) {
+  color: var(--lanpm-text-tertiary);
+  border-color: var(--lanpm-border);
+  background: var(--lanpm-fill-secondary);
+}
+
 .chartWrap {
   flex: 1;
   min-height: 0;

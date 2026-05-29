@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.37] - 2026-05-29
+
+### Added
+- **`verify:profile-panel`**：顶栏 Profile 可打开 `ProfileModal`（DOC-F-04）
+- **AUTO-20 甘特种子任务**：`visualCapture` 在 `demo-project` 写入带排期任务（`截图·设计评审`），看板/甘特截图非空态
+- **`verify:visual-screenshots`**：`*_gantt.png` ≥ 41KB 守卫
+
+### Changed
+- **`verify:topbar`**：TopBar 网络点语义色令牌静态检查
+- **`gantt.module.css`**：暗色 disabled 导出钮对比度（V-14b-SEM）
+- **`docs/05` §2.2** · **`docs/06` §2.4–2.5**：种子任务说明、m7-perf 填表日期
+- **`todo.md`**：AUTO-20 / V-14b-GNT / DOC-F-03~04 进度同步
+
+### Tag
+- `v1.0.0-rc.37` — 视觉截图甘特种子任务、Profile 守卫与验收文档同步
+
 ## [1.0.0-rc.36] - 2026-05-29
 
 ### Added

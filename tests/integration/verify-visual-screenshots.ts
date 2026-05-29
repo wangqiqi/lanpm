@@ -4,7 +4,8 @@
  */
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { createHash, existsSync, mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -70,12 +71,23 @@ const missing = EXPECTED.filter((name) => !written.has(name))
 assert.equal(missing.length, 0, `missing screenshots: ${missing.join(', ')} → ${outDir}`)
 
 const MIN_BYTES = 8_000
+/** 含排期任务时甘特截图应大于纯空态（~40.8KB） */
+const MIN_GANTT_BYTES = 41_000
 const THEME_PAGES = ['chat', 'board', 'tree', 'gantt', 'files', 'cockpit'] as const
 
 for (const name of EXPECTED) {
   const path = join(outDir, `${name}.png`)
   const size = statSync(path).size
   assert.ok(size >= MIN_BYTES, `${name}.png too small (${size} B) — blank or error page?`)
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  const ganttPath = join(outDir, `${theme}_gantt.png`)
+  const ganttSize = statSync(ganttPath).size
+  assert.ok(
+    ganttSize >= MIN_GANTT_BYTES,
+    `${theme}_gantt.png too small (${ganttSize} B) — gantt chart may be empty`
+  )
 }
 
 for (const page of THEME_PAGES) {

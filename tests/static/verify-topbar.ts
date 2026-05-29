@@ -2,10 +2,15 @@
  * M1-02 / M1-05 / M1-06：顶部栏路径、i18n 键、主题持久化键名
  * 运行：npm run verify:topbar
  */
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import enUS from '../../src/renderer/src/i18n/locales/en-US.ts'
 import zhCN from '../../src/renderer/src/i18n/locales/zh-CN.ts'
 import type { LocaleId, MessageKey, TranslateParams } from '../../src/renderer/src/i18n/types.ts'
 import { cockpitPath, groupViewPath } from '../../src/renderer/src/routes/paths.ts'
+import { projectRoot } from '../projectRoot.ts'
+
+const root = projectRoot
 
 const MESSAGES: Record<LocaleId, Record<MessageKey, string>> = {
   'zh-CN': zhCN,
@@ -57,6 +62,14 @@ assert(translate('zh-CN', 'chat.onlineStats', { online: 2, total: 5 }).includes(
 
 assert(THEME_KEY === 'theme', 'localStorage.theme key')
 assert(LOCALE_KEY === 'locale', 'localStorage.locale key')
+
+const topbarCss = readFileSync(
+  join(root, 'src/renderer/src/layout/TopBar.module.css'),
+  'utf8'
+)
+assert(topbarCss.includes('var(--lanpm-success)'), 'TopBar net_online semantic color')
+assert(topbarCss.includes('var(--lanpm-danger)'), 'TopBar net_offline semantic color')
+assert(topbarCss.includes('var(--lanpm-warning)'), 'TopBar net_stub semantic color')
 
 if (failed > 0) process.exit(1)
 console.log('verify:topbar OK', `(${zhKeys.length} i18n keys)`)
