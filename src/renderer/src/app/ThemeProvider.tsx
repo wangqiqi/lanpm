@@ -14,7 +14,7 @@ const LANPM_PALETTE = {
     text: '#1d1d1f',
     textSecondary: '#86868b',
     separator: 'rgba(60, 60, 67, 0.18)',
-    border: 'rgba(60, 60, 67, 0.12)',
+    border: 'rgba(60, 60, 67, 0.18)',
     fillSecondary: 'rgba(120, 120, 128, 0.12)'
   },
   dark: {

@@ -17,8 +17,25 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.barGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   min-width: 0;
+}
+
+.barDivider {
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 0.5px;
+  min-height: 24px;
+  margin: 4px 2px;
+  background: var(--lanpm-bar-border);
 }
 
 @media (max-width: 1100px) {

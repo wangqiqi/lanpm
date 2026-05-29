@@ -42,7 +42,7 @@
   width: 240px;
   min-width: 160px;
   border-right: 1px solid var(--lanpm-border);
-  background: var(--lanpm-bg);
+  background: var(--lanpm-surface-solid);
   min-height: 0;
 }
 
@@ -205,7 +205,7 @@
   justify-content: center;
   padding: 6px 16px 8px;
   border-bottom: 1px solid var(--lanpm-border);
-  background: var(--lanpm-bg);
+  background: var(--lanpm-surface-solid);
 }
 
 /* 仅包裹两个选项的胶囊宽度；勿 width:100%（会在右侧留出大块空白轨道） */
@@ -612,7 +612,7 @@
   gap: 8px;
   padding: 6px 12px 8px;
   border-bottom: 1px solid var(--lanpm-border);
-  background: var(--lanpm-bg);
+  background: var(--lanpm-surface-solid);
 }
 
 .chatContextMeta {
@@ -857,7 +857,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--lanpm-bg);
+  background: var(--lanpm-surface-solid);
   border-top: 1px solid var(--lanpm-border);
 }
 

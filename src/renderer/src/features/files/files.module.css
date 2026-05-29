@@ -13,6 +13,7 @@
   border-radius: 8px;
   padding: 0 8px;
   margin: 0 16px 8px;
+  background: var(--lanpm-surface-solid);
 }
 
 .transferHistory {

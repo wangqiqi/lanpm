@@ -252,40 +252,45 @@ export default function TopBar(): React.ReactElement {
   return (
     <header className={styles.bar}>
       <div className={styles.barSection}>
-        <RegionButton variant="text" className={styles.logo} onClick={handleLogoClick}>
-          <img
-            src={logoUrl}
-            alt={t('topbar.logoAlt')}
-            className={styles.logoMark}
-            width={24}
-            height={24}
-          />
-          <span>{t('topbar.logo')}</span>
-        </RegionButton>
-        <Select
-          className={styles.projectSelect}
-          value={activeGroupId}
-          onChange={handleGroupChange}
-          options={groupSelectOptions}
-        />
-        <RegionButton variant="pill" onClick={() => setDiscoverOpen(true)}>
-          <CompassOutlined />
-          {t('topbar.discover')}
-        </RegionButton>
-        <RegionButton variant="pill" onClick={() => setCreateOpen(true)}>
-          <PlusOutlined />
-          {t('topbar.createGroup')}
-        </RegionButton>
-        {canDissolveGroup ? (
-          <RegionButton variant="pill" onClick={handleDissolveGroup}>
-            <DeleteOutlined />
-            {t('group.dissolve')}
+        <div className={styles.barGroup}>
+          <RegionButton variant="text" className={styles.logo} onClick={handleLogoClick}>
+            <img
+              src={logoUrl}
+              alt={t('topbar.logoAlt')}
+              className={styles.logoMark}
+              width={24}
+              height={24}
+            />
+            <span>{t('topbar.logo')}</span>
           </RegionButton>
-        ) : null}
-        <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
-          <DashboardOutlined />
-          {t('topbar.cockpit')}
-        </RegionButton>
+          <Select
+            className={styles.projectSelect}
+            value={activeGroupId}
+            onChange={handleGroupChange}
+            options={groupSelectOptions}
+          />
+        </div>
+        <span className={styles.barDivider} aria-hidden />
+        <div className={styles.barGroup}>
+          <RegionButton variant="pill" onClick={() => setDiscoverOpen(true)}>
+            <CompassOutlined />
+            {t('topbar.discover')}
+          </RegionButton>
+          <RegionButton variant="pill" onClick={() => setCreateOpen(true)}>
+            <PlusOutlined />
+            {t('topbar.createGroup')}
+          </RegionButton>
+          {canDissolveGroup ? (
+            <RegionButton variant="pill" onClick={handleDissolveGroup}>
+              <DeleteOutlined />
+              {t('group.dissolve')}
+            </RegionButton>
+          ) : null}
+          <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
+            <DashboardOutlined />
+            {t('topbar.cockpit')}
+          </RegionButton>
+        </div>
       </div>
 
       <div className={styles.barSection}>
@@ -347,6 +352,8 @@ export default function TopBar(): React.ReactElement {
           }}
         />
         <GlobalSearch />
+        <span className={styles.barDivider} aria-hidden />
+        <div className={styles.barGroup}>
         <RegionButton
           variant="icon"
           aria-label={t('topbar.toggleTheme')}
@@ -370,6 +377,7 @@ export default function TopBar(): React.ReactElement {
             <span className={styles.userName}>{user?.displayName ?? t('topbar.userFallback')}</span>
           </RegionButton>
         </Dropdown>
+        </div>
       </div>
       <DiscoverModal open={discoverOpen} onClose={() => setDiscoverOpen(false)} />
       <CreateGroupModal
