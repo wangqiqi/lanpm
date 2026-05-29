@@ -2,6 +2,27 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.43] - 2026-05-29
+
+### Added
+- **`onekey_run.bat`**：Windows CMD 原生一键运维（taskkill/wmic/netstat，不依赖 PowerShell）
+- **`onekey_run.ps1`**：Windows PowerShell 独立入口（与 bat/sh 并列）
+- **`scripts/dev-run.mjs`**：跨平台 `npm run dev`（Windows 下清除 `ELECTRON_RUN_AS_NODE`，替代 Unix `env -u`）
+- **`getLocalLanIp`**（`src/main/network/localIp.ts`）：智能选择局域网 IPv4（优先 WLAN/以太网，排除 VMware/VPN/198.18/169.254）
+- **`NetworkStatusView.localIp`**：顶栏用户菜单与个人设置展示本机 IP
+- **`tests/unit/network/localIp.test.ts`**：局域网 IP 评分与发现 host 解析单测
+
+### Changed
+- **`package.json`**：`dev` / `dev:web` 经 `scripts/dev-run.mjs` 启动（Windows 兼容）
+- **`onekey_run.sh`**：Git Bash/Windows 兼容（无 `setsid` 时 fallback、`taskkill`/PowerShell 清理残留、electron-vite PID 追踪）；菜单提示 bat/ps1 分流
+- **UDP discovery**：广播包携带 `host`；收包时 `resolvePeerHost` 优先对端自报局域网 IP
+- **i18n**：`topbar.ipWithAddress` / `profile.ipWithAddress`（中/英）
+- **浏览器桩**：`network.getStatus` 等返回 `localIp: null` 与 Electron 契约对齐
+- **`README.md`**：Windows 开发入口说明
+
+### Tag
+- `v1.0.0-rc.43` — Windows 一键运维、局域网 IP 智能选择与发现增强
+
 ## [1.0.0-rc.42] - 2026-05-29
 
 ### Added

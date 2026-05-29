@@ -1,6 +1,7 @@
 import dgram from 'node:dgram'
 import type { DiscoveryPayload } from '../../../shared/network/types'
 import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR } from '../../../shared/network/constants.ts'
+import { getLocalLanIp, resolvePeerHost } from '../localIp'
 
 export interface UdpDiscoveryOptions {
   deviceId: string
@@ -43,7 +44,8 @@ export class UdpDiscovery {
         }
         if (packet.v !== 1 || packet.kind !== 'discovery' || !packet.payload?.deviceId) return
         if (packet.payload.deviceId === this.opts.deviceId) return
-        this.remember({ ...packet.payload, host: rinfo.address })
+        const host = resolvePeerHost(packet.payload.host, rinfo.address)
+        this.remember({ ...packet.payload, host })
       } catch {
         // ignore
       }
@@ -86,12 +88,14 @@ export class UdpDiscovery {
   }
 
   private payload(): DiscoveryPayload {
+    const host = getLocalLanIp() ?? undefined
     return {
       deviceId: this.opts.deviceId,
       userId: this.opts.userId,
       displayName: this.opts.displayName,
       listenPort: this.opts.listenPort,
-      capabilities: this.opts.capabilities ?? ['chat', 'file', 'task']
+      capabilities: this.opts.capabilities ?? ['chat', 'file', 'task'],
+      host
     }
   }
 

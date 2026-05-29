@@ -29,6 +29,74 @@ need_cmd() {
   command -v "$1" >/dev/null 2>&1 || { err "缺少命令: $1"; exit 1; }
 }
 
+is_windows() {
+  case "$(uname -s 2>/dev/null)" in
+    MINGW*|MSYS*|CYGWIN*) return 0 ;;
+  esac
+  return 1
+}
+
+pid_alive() {
+  local p="$1"
+  [[ -n "$p" && "$p" =~ ^[0-9]+$ ]] || return 1
+  if is_windows && command -v tasklist >/dev/null 2>&1; then
+    tasklist //FI "PID eq $p" 2>/dev/null | grep -qE "[[:space:]]${p}[[:space:]]"
+  else
+    kill -0 "$p" 2>/dev/null
+  fi
+}
+
+# Windows：按进程树结束 dev（Git Bash 无 setsid / pgrep）
+win_kill_tree() {
+  local p="$1"
+  if command -v taskkill >/dev/null 2>&1; then
+    taskkill //T //PID "$p" >/dev/null 2>&1 || taskkill /T /PID "$p" >/dev/null 2>&1 || true
+  else
+    kill "$p" 2>/dev/null || true
+  fi
+}
+
+win_force_kill_tree() {
+  local p="$1"
+  if command -v taskkill >/dev/null 2>&1; then
+    taskkill //F //T //PID "$p" >/dev/null 2>&1 || taskkill /F /T /PID "$p" >/dev/null 2>&1 || true
+  else
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+
+lanpm_vite_procs() {
+  if command -v pgrep >/dev/null 2>&1; then
+    pgrep -af "electron-vite" 2>/dev/null | grep -F "$ROOT" || true
+    return
+  fi
+  if is_windows && command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command "
+      Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" -ErrorAction SilentlyContinue |
+        Where-Object { \$_.CommandLine -match 'electron-vite' -and \$_.CommandLine -match 'lanpm' } |
+        ForEach-Object { \$_.ProcessId.ToString() + ' ' + \$_.CommandLine }
+    " 2>/dev/null || true
+  fi
+}
+
+lanpm_vite_root_pid() {
+  local line pid
+  line="$(lanpm_vite_procs | head -1)"
+  [[ -n "$line" ]] || return 1
+  pid="${line%% *}"
+  [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+  echo "$pid"
+}
+
+win_stop_lanpm_vite() {
+  command -v powershell.exe >/dev/null 2>&1 || return 0
+  powershell.exe -NoProfile -Command "
+    Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" -ErrorAction SilentlyContinue |
+      Where-Object { \$_.CommandLine -match 'electron-vite' -and \$_.CommandLine -match 'lanpm' } |
+      ForEach-Object { Stop-Process -Id \$_.ProcessId -Force -ErrorAction SilentlyContinue }
+  " >/dev/null 2>&1 || true
+}
+
 ensure_run_dir() {
   mkdir -p "$RUN_DIR"
 }
@@ -41,36 +109,41 @@ read_pid() {
   echo "$p"
 }
 
-pid_alive() {
-  local p="$1"
-  kill -0 "$p" 2>/dev/null
-}
-
 # 按会话 / 进程组结束 dev 树（npm → electron-vite → electron）
 kill_tree() {
   local p="$1"
   if ! pid_alive "$p"; then
     return 0
   fi
-  # setsid 启动时 p 为 session leader，负 pid 结束整组
-  kill -TERM -"$p" 2>/dev/null || kill -TERM "$p" 2>/dev/null || true
+  if is_windows; then
+    win_kill_tree "$p"
+  else
+    # setsid 启动时 p 为 session leader，负 pid 结束整组
+    kill -TERM -"$p" 2>/dev/null || kill -TERM "$p" 2>/dev/null || true
+  fi
   local i=0
   while pid_alive "$p" && [[ $i -lt 20 ]]; do
     sleep 0.3
     i=$((i + 1))
   done
   if pid_alive "$p"; then
-    kill -KILL -"$p" 2>/dev/null || kill -KILL "$p" 2>/dev/null || true
+    if is_windows; then
+      win_force_kill_tree "$p"
+    else
+      kill -KILL -"$p" 2>/dev/null || kill -KILL "$p" 2>/dev/null || true
+    fi
   fi
 }
 
 # 兜底：清理仍监听本项目 vite 端口的残留
 cleanup_stray() {
-  local pattern
-  pattern="electron-vite dev"
-  if pgrep -af "$pattern" 2>/dev/null | grep -Fq "$ROOT"; then
+  if [[ -n "$(lanpm_vite_procs)" ]]; then
     warn "清理残留 electron-vite 进程 …"
-    pkill -f "$pattern" 2>/dev/null || true
+    if command -v pkill >/dev/null 2>&1; then
+      pkill -f "electron-vite" 2>/dev/null || true
+    else
+      win_stop_lanpm_vite
+    fi
     sleep 0.5
   fi
 }
@@ -78,11 +151,13 @@ cleanup_stray() {
 is_running() {
   local p
   p="$(read_pid 2>/dev/null)" || return 1
-  pid_alive "$p"
+  pid_alive "$p" && return 0
+  # Git Bash：npm 父进程可能已退出，electron-vite 仍在
+  lanpm_vite_running
 }
 
 lanpm_vite_running() {
-  pgrep -af "electron-vite dev" 2>/dev/null | grep -Fq "$ROOT"
+  [[ -n "$(lanpm_vite_procs)" ]]
 }
 
 port_listener_summary() {
@@ -184,19 +259,29 @@ start_dev() {
   local npm_script="dev"
   [[ "$mode" == "web" ]] && npm_script="dev:web"
 
-  # setsid：npm 为 session leader，stop 时 kill -TERM -$pid 可结束整棵 dev 树
+  # Linux setsid：npm 为 session leader，stop 时 kill -TERM -$pid 结束整棵 dev 树
+  # Windows Git Bash 无 setsid，用 taskkill /T 结束进程树
   cd "$ROOT"
   export LANPM_ONEKEY=1
-  if [[ "$mode" == "web" ]]; then
-    setsid npm run dev:web >>"$LOG_FILE" 2>&1 &
+  if command -v setsid >/dev/null 2>&1; then
+    setsid npm run "$npm_script" >>"$LOG_FILE" 2>&1 &
   else
-    setsid npm run dev >>"$LOG_FILE" 2>&1 &
+    npm run "$npm_script" >>"$LOG_FILE" 2>&1 &
   fi
   local pid=$!
   echo "$pid" >"$PID_FILE"
-  sleep 2
+  sleep 3
 
-  if pid_alive "$pid"; then
+  if ! pid_alive "$pid" && lanpm_vite_running; then
+    local vite_pid
+    vite_pid="$(lanpm_vite_root_pid 2>/dev/null || true)"
+    if [[ -n "$vite_pid" ]]; then
+      pid="$vite_pid"
+      echo "$pid" >"$PID_FILE"
+    fi
+  fi
+
+  if pid_alive "$pid" || lanpm_vite_running; then
     ok "已启动 pid=$pid ($npm_script)"
     info "查看日志: ./onekey_run.sh logs"
   else
@@ -225,7 +310,9 @@ cmd_stop() {
   else
     warn "无 pid 文件，尝试清理残留进程"
   fi
-  cleanup_stray
+  if lanpm_vite_running; then
+    cleanup_stray
+  fi
   ok "已停止"
 }
 
@@ -340,6 +427,9 @@ show_menu() {
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo ""
   info "目录: $ROOT"
+  if is_windows; then
+    echo -e "  ${CYAN}Windows:${NC} CMD 用 ${GREEN}onekey_run.bat${NC}，PowerShell 用 ${GREEN}onekey_run.ps1${NC}（勿与本 sh 混用）"
+  fi
   menu_status_brief 2>/dev/null || true
   echo ""
   echo "  1) start      启动 Electron 开发"

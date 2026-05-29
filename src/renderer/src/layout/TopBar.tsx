@@ -177,6 +177,10 @@ export default function TopBar(): React.ReactElement {
       key: 'device',
       label: t('topbar.deviceWithName', { name: device?.deviceName ?? '—' })
     },
+    {
+      key: 'ip',
+      label: t('topbar.ipWithAddress', { ip: networkStatus?.localIp ?? '—' })
+    },
     { type: 'divider' },
     {
       key: 'api',

@@ -12,10 +12,28 @@
 ## 本地开发
 
 ```bash
-chmod +x onekey_run.sh   # 首次
+chmod +x onekey_run.sh   # 首次（Linux / macOS / Git Bash）
 ./onekey_run.sh          # 交互菜单：start / stop / status / build / check …
 ./onekey_run.sh start    # 后台启动 dev，日志见 .lanpm/dev.log
+```
 
+**Windows** 三套脚本**互不调用**，按终端选用：
+
+| 终端 | 脚本 |
+|------|------|
+| CMD | `onekey_run.bat` |
+| PowerShell | `.\onekey_run.ps1` |
+| Git Bash / WSL | `./onekey_run.sh` |
+
+```bat
+onekey_run.bat start
+```
+
+```powershell
+.\onekey_run.ps1 start
+```
+
+```bash
 npm install      # postinstall 会自动将 better-sqlite3 对齐到 Electron ABI
 npm run dev      # 启动前也会自动检测并重编（若 ABI 不一致）
 npm run lint     # ESLint

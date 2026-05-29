@@ -3,6 +3,7 @@ import { Avatar, Form, Input, Modal, Typography } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useNetworkStore } from '@renderer/stores/networkStore'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { ProfileUpdateInput } from '@shared/identity'
@@ -22,9 +23,16 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   const { message } = useLanpmApp()
   const user = useIdentityStore((s) => s.user)
   const device = useIdentityStore((s) => s.device)
+  const localIp = useNetworkStore((s) => s.status?.localIp)
+  const refreshNetwork = useNetworkStore((s) => s.refresh)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const [form] = Form.useForm<ProfileFormValues>()
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    void refreshNetwork({ silent: true })
+  }, [open, refreshNetwork])
 
   useEffect(() => {
     if (!open || !user) return
@@ -96,6 +104,11 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
         </Form.Item>
         <Form.Item label={t('profile.device')}>
           <Typography.Text>{device?.deviceName ?? '—'}</Typography.Text>
+          <div>
+            <Typography.Text type="secondary">
+              {t('profile.ipWithAddress', { ip: localIp ?? '—' })}
+            </Typography.Text>
+          </div>
         </Form.Item>
       </Form>
     </Modal>

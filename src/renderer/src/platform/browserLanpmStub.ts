@@ -755,11 +755,21 @@ export function createBrowserLanpmStub(): LanpmApi {
       }
     },
     network: {
-      getStatus: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 }),
-      reconnect: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 }),
+      getStatus: async () => ({
+        mode: 'stub' as const,
+        linkState: 'stub' as const,
+        peerCount: 0,
+        localIp: null
+      }),
+      reconnect: async () => ({
+        mode: 'stub' as const,
+        linkState: 'stub' as const,
+        peerCount: 0,
+        localIp: null
+      }),
       connectManualPeer: async (address) => {
         parseHostPort(address)
-        return { mode: 'stub' as const, linkState: 'stub' as const, peerCount: 1 }
+        return { mode: 'stub' as const, linkState: 'stub' as const, peerCount: 1, localIp: null }
       }
     },
     badge: {

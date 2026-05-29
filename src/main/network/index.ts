@@ -12,6 +12,7 @@ import {
   NetworkStub
 } from './stub/index'
 import { getKnownLanUserIds } from './peerDirectory'
+import { getLocalLanIp } from './localIp'
 
 export type { NetworkMode } from '../../shared/network/status'
 
@@ -81,19 +82,25 @@ export function shutdownNetwork(): void {
 
 export async function fetchNetworkStatus(): Promise<NetworkStatusView> {
   const mode = resolveNetworkMode()
+  const localIp = getLocalLanIp()
   const transport = getNetworkTransport()
   if (!transport) {
-    return { mode, linkState: 'offline', peerCount: 0 }
+    return { mode, linkState: 'offline', peerCount: 0, localIp }
   }
   try {
     const peers = await transport.discoverPeers()
     const peerCount = peers.filter((p) => p.userId && p.userId !== '__lanpm_probe__').length
     if (mode === 'stub') {
-      return { mode: 'stub', linkState: 'stub', peerCount }
+      return { mode: 'stub', linkState: 'stub', peerCount, localIp }
     }
-    return { mode: 'real', linkState: peerCount > 0 ? 'online' : 'offline', peerCount }
+    return {
+      mode: 'real',
+      linkState: peerCount > 0 ? 'online' : 'offline',
+      peerCount,
+      localIp
+    }
   } catch {
-    return { mode, linkState: 'offline', peerCount: 0 }
+    return { mode, linkState: 'offline', peerCount: 0, localIp }
   }
 }
 

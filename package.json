@@ -1,14 +1,14 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.42",
+  "version": "1.0.0-rc.43",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
   "main": "./out/main/index.js",
   "scripts": {
     "predev": "node scripts/ensure-native-deps.mjs",
-    "dev": "env -u ELECTRON_RUN_AS_NODE electron-vite dev",
-    "dev:web": "env -u ELECTRON_RUN_AS_NODE LANPM_BROWSER_DEV=1 electron-vite dev --rendererOnly",
+    "dev": "node scripts/dev-run.mjs",
+    "dev:web": "node scripts/dev-run.mjs --web",
     "prebuild": "node scripts/ensure-native-deps.mjs",
     "build": "electron-vite build",
     "prepreview": "node scripts/ensure-native-deps.mjs",
