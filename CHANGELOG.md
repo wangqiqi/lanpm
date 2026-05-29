@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.25] - 2026-05-29
+
+### Added
+- **Vitest 单元测试扩展**：`tests/unit/` 新增 chat（dmSession / detectLanguage / readReceipt）、file（bookmarks / formatFileType / inferCategory）、task（validation / kanban）、presence、group、network、identity（**19 文件 / 76 用例**）
+- **`npm run verify:shared`**：纯 shared 冒烟串联；`package.json` 暴露 **`verify:preview-extensions`** / **`verify:format-file-type`**
+- **`todo.md`**：测试体系清单（单元 + 集成 + 待补项）
+
+### Changed
+- **`.npmrc`**：`legacy-peer-deps=true`，修复 `vite@8` 与 `@vitejs/plugin-react` 的 peer 冲突导致 `npm install` / Vitest 不可用
+- **README** / **`docs/10`**：补充 `npm run test`、`verify:shared` 与单元测试矩阵
+
+### Tag
+- `v1.0.0-rc.25` — 单元测试扩展、verify:shared 与 npm 依赖安装修复
+
 ## [1.0.0-rc.24] - 2026-05-29
 
 ### Added

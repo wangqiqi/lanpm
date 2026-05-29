@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.23`（M0–M7 已闭环；发布门禁见 [docs/08](./docs/08_M7_RC验收清单.md)）
+- **RC**：`1.0.0-rc.25`（M0–M7 已闭环；发布门禁见 [docs/08](./docs/08_M7_RC验收清单.md)）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
@@ -20,7 +20,8 @@ npm install      # postinstall 会自动将 better-sqlite3 对齐到 Electron AB
 npm run dev      # 启动前也会自动检测并重编（若 ABI 不一致）
 npm run lint     # ESLint
 npm run typecheck
-npm run verify:m7   # 全量回归（SQLite 相关脚本走 Electron Node，不再切换 ABI）
+npm run test        # Vitest 单元（tests/unit，见 docs/10）
+npm run verify:m7   # 全量回归（含 test + verify:* 集成）
 npm run build       # 生产构建
 ```
 
@@ -57,6 +58,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）；浏览器桩与 Electro
 | [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md) | M3 看板/任务树实现与 IPC |
 | [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md) | M7 RC 验收 |
 | [docs/09_视觉手验清单.md](./docs/09_视觉手验清单.md) | 亮/暗主题手验（V-14b） |
+| [docs/10_测试体系说明.md](./docs/10_测试体系说明.md) | Vitest 单元 + verify 集成分层 |
 
 ## 技术选型
 

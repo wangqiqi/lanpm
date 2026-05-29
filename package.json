@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.24",
+  "version": "1.0.0-rc.25",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -19,6 +19,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run tests/unit",
+    "verify:preview-extensions": "node --experimental-strip-types scripts/verify-preview-extensions.ts",
+    "verify:format-file-type": "node --experimental-strip-types scripts/verify-format-file-type.ts",
+    "verify:shared": "node --experimental-strip-types scripts/verify-shared.ts",
     "verify:storage": "node scripts/run-electron-node.mjs scripts/verify-storage.mjs",
     "verify:suffix": "node --experimental-strip-types scripts/verify-suffix.ts",
     "verify:network-stub": "LANPM_NETWORK=stub node --experimental-strip-types scripts/verify-network-stub.ts",

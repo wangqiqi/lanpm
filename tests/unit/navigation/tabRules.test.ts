@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
+import { defaultViewForGroup, isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import type { AppView } from '@shared/navigation/types'
 
 const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'files']
@@ -21,5 +21,11 @@ describe('isViewAllowedForGroup', () => {
     for (const view of views) {
       expect(isViewAllowedForGroup('anonymous', view, dmId)).toBe(view === 'chat')
     }
+  })
+})
+
+describe('defaultViewForGroup', () => {
+  it.each(['project', 'function', 'anonymous'] as const)('%s defaults to chat', (type) => {
+    expect(defaultViewForGroup(type)).toBe('chat')
   })
 })
