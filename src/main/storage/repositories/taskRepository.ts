@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { CreateTaskInput, Task, TaskPriority, TaskStatus, UpdateTaskInput } from '../../../shared/task/types'
+import { clampProgressPercent } from '../../../shared/task/validation'
 
 interface TaskRow {
   task_id: string
@@ -129,7 +130,10 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
         : input.assigneeUserId !== undefined
           ? input.assigneeUserId
           : existing.assigneeUserId,
-    progressPercent: input.progressPercent ?? existing.progressPercent,
+    progressPercent:
+      input.progressPercent !== undefined
+        ? clampProgressPercent(input.progressPercent)
+        : existing.progressPercent,
     parentTaskId:
       input.parentTaskId === null
         ? undefined

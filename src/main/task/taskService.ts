@@ -7,7 +7,13 @@ import { applyAggregatedProgress } from '../../shared/task/progress'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '../../shared/task/types'
 import type { TaskDependency, UpsertDependencyInput } from '../../shared/task/dependency'
 import { throwLanpm } from '../../shared/errors/lanpmError'
-import { validateOtherReason } from '../../shared/task/validation'
+import {
+  clampProgressPercent,
+  normalizeTaskTitle,
+  validateOtherReason,
+  validateTaskDateRange,
+  validateTaskTitle
+} from '../../shared/task/validation'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
@@ -65,11 +71,15 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
   if (!status.configured || !status.user) {
     throwLanpm('stub.identityRequired')
   }
-  const title = input.title.trim()
-  if (!title) throwLanpm('stub.taskTitleEmpty')
+  const titleErr = validateTaskTitle(input.title)
+  if (titleErr) throwLanpm(titleErr)
 
   const taskId = `task_${randomUUID()}`
-  const task = buildTaskFromInput(input, status.user.userId, taskId)
+  const task = buildTaskFromInput(
+    { ...input, title: normalizeTaskTitle(input.title) },
+    status.user.userId,
+    taskId
+  )
   task.sortOrder = getMaxSortOrderInColumn(db, input.groupId, task.status) + 1
 
   const reasonErr = validateOtherReason(task.status, task.otherReason)
@@ -97,7 +107,26 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
   const reasonErr = validateOtherReason(nextStatus, nextReason)
   if (reasonErr) throwLanpm(reasonErr)
 
-  const updated = updateTaskRow(db, input)
+  if (input.title !== undefined) {
+    const titleErr = validateTaskTitle(input.title)
+    if (titleErr) throwLanpm(titleErr)
+  }
+
+  const nextStart =
+    input.startDate !== undefined ? input.startDate : existing.startDate ?? null
+  const nextEnd = input.endDate !== undefined ? input.endDate : existing.endDate ?? null
+  const dateErr = validateTaskDateRange(nextStart, nextEnd)
+  if (dateErr) throwLanpm(dateErr)
+
+  const patch: UpdateTaskInput = {
+    ...input,
+    ...(input.title !== undefined ? { title: normalizeTaskTitle(input.title) } : {}),
+    ...(input.progressPercent !== undefined
+      ? { progressPercent: clampProgressPercent(input.progressPercent) }
+      : {})
+  }
+
+  const updated = updateTaskRow(db, patch)
   if (!updated) throwLanpm('err.taskUpdateFailed')
   publishTaskUpsert(db, updated)
   broadcastTasksChanged(existing.groupId)

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Checkbox, Input, InputNumber, Select, Slider, Typography } from 'antd'
+import { Alert, Button, Checkbox, Input, InputNumber, Select, Slider, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
@@ -14,7 +14,24 @@ import {
 import TaskRelationSection from '@renderer/features/task/TaskRelationSection'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
+import {
+  evaluateTaskSchedule,
+  scheduleHealthAlertKey,
+  treeProgressScheduleProps
+} from '@renderer/features/task/scheduleHealthUi'
 import { onCtrlEnter, onEnterUnlessShift, runOnEnter } from '@renderer/lib/inputKeyboard'
+import {
+  taskValidationMessage,
+  TASK_DESCRIPTION_MAX_LENGTH,
+  TASK_TITLE_MAX_LENGTH
+} from '@renderer/features/task/taskValidationMessage'
+import {
+  clampProgressPercent,
+  normalizeTaskDescription,
+  normalizeOtherReason,
+  normalizeTaskTitle,
+  validateTaskForm
+} from '@shared/task/validation'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -98,6 +115,21 @@ export default function TaskDetailPanel({
     setMilestone(!!task.milestone)
   }, [task])
 
+  const scheduleDraft = useMemo(
+    () => ({
+      ...task,
+      status,
+      startDate: startDate.trim() || undefined,
+      endDate: endDate.trim() || undefined,
+      progressPercent,
+      milestone
+    }),
+    [task, status, startDate, endDate, progressPercent, milestone]
+  )
+  const { health: scheduleHealth, expectedPercent } = evaluateTaskSchedule(scheduleDraft)
+  const scheduleAlertKey = scheduleHealthAlertKey(scheduleHealth)
+  const progressSchedule = treeProgressScheduleProps(scheduleHealth, status)
+
   const children = useMemo(
     () => tasks.filter((t) => t.parentTaskId === task.taskId),
     [tasks, task.taskId]
@@ -126,28 +158,30 @@ export default function TaskDetailPanel({
   )
 
   const handleSave = async (): Promise<void> => {
-    const trimmed = title.trim()
-    if (!trimmed) {
-      message.warning(t('tree.detailTitleRequired'))
-      return
-    }
-    if (status === 'other' && !otherReason.trim()) {
-      message.warning(t('board.otherReasonRequired'))
+    const formErr = validateTaskForm({
+      title,
+      status,
+      otherReason,
+      startDate: startDate.trim() || null,
+      endDate: endDate.trim() || null
+    })
+    if (formErr) {
+      message.warning(taskValidationMessage(t, formErr))
       return
     }
     setSaving(true)
     try {
       await onSave({
         taskId: task.taskId,
-        title: trimmed,
-        description: description.trim(),
+        title: normalizeTaskTitle(title),
+        description: normalizeTaskDescription(description),
         status,
-        otherReason: status === 'other' ? otherReason.trim() : null,
+        otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
         assigneeUserId: assigneeUserId || null,
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
-        progressPercent: Math.min(100, Math.max(0, progressPercent)),
+        progressPercent: clampProgressPercent(progressPercent),
         milestone
       })
       message.success(t('tree.detailSaved'))
@@ -179,11 +213,24 @@ export default function TaskDetailPanel({
         </Text>
       )}
 
+      {scheduleAlertKey && expectedPercent != null && (
+        <Alert
+          type={scheduleHealth === 'overdue' ? 'error' : 'warning'}
+          showIcon
+          message={t(scheduleAlertKey, {
+            expected: expectedPercent,
+            current: progressPercent
+          })}
+        />
+      )}
+
       <label className={styles.detailField}>
         <Text type="secondary">{t('tree.detailName')}</Text>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder={t('board.taskTitlePlaceholder')}
+          maxLength={TASK_TITLE_MAX_LENGTH}
           onPressEnter={runOnEnter(trySave, saveDisabled || saving)}
         />
       </label>
@@ -254,8 +301,13 @@ export default function TaskDetailPanel({
               min={0}
               max={100}
               value={progressPercent}
-              onChange={setProgressPercent}
+              onChange={(v) => setProgressPercent(clampProgressPercent(v))}
               className={styles.detailProgressSlider}
+              trackStyle={
+                progressSchedule.strokeColor
+                  ? { background: progressSchedule.strokeColor }
+                  : undefined
+              }
             />
             <InputNumber
               min={0}
@@ -263,7 +315,7 @@ export default function TaskDetailPanel({
               size="small"
               controls={false}
               value={progressPercent}
-              onChange={(v) => setProgressPercent(typeof v === 'number' ? v : 0)}
+              onChange={(v) => setProgressPercent(clampProgressPercent(v))}
               addonAfter="%"
               className={styles.detailProgressInput}
             />
@@ -284,6 +336,8 @@ export default function TaskDetailPanel({
           className={styles.detailDescriptionInput}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          placeholder={t('tree.detailDescriptionPlaceholder')}
+          maxLength={TASK_DESCRIPTION_MAX_LENGTH}
           onKeyDown={(e) => onCtrlEnter(e, trySave, saveDisabled || saving)}
         />
       </label>

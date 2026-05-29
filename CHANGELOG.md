@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.75] - 2026-05-29
+
+### Added
+- **工期健康度（三视图统一）**：`scheduleHealth.ts` — 绿 `on_track` / 深黄 `behind` / 纯红 `overdue`；`scheduleHealthUi.ts` + `scheduleHealth.module.css`
+- **看板**：卡片工期色、截止/进度字色、图例（绿·黄·红）；**任务树**：行左缘色条 + 进度条；**甘特**：条进度色合并族色；tooltip 期望/当前 %
+- **任务详情**：落后/延期 `Alert`（期望 vs 当前进度）
+- **单测**：`scheduleHealth.test.ts`、`scheduleHealthGantt.test.ts`
+
+### Changed
+- **驾驶舱**：`delayedCount` / 项目 `risk` 与看板同源（`getTaskScheduleHealth`），不再用「进度&lt;40%」启发式
+- **任务校验**：`taskService` / `taskRepository` 统一标题规范化、日期范围、`clampProgressPercent`；看板/树/聊天创建表单对齐 `validateTaskForm`
+- **docs/04**：§6.0 工期健康度表（四态语义与各视图表现）
+
+### Tag
+- `v1.0.0-rc.75` — 工期健康度三视图一致
+
 ## [1.0.0-rc.74] - 2026-05-29
 
 ### Fixed

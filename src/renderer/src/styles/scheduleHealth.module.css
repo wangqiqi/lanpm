@@ -1,0 +1,76 @@
+/* 工期健康度：绿 = 正常，深黄 = 落后，纯红 = 延期 */
+
+.cardOnTrack {
+  background: color-mix(in srgb, #34c759 12%, var(--lanpm-bg));
+  border-color: #248a3d;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent);
+}
+
+.cardBehind {
+  background: color-mix(in srgb, #c99700 22%, var(--lanpm-bg));
+  border-color: #a67c00;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #8f6b00 35%, transparent);
+}
+
+.cardOverdue {
+  background: color-mix(in srgb, #ff0000 14%, var(--lanpm-bg));
+  border-color: #ff0000;
+  box-shadow: inset 0 0 0 1px #ff0000;
+}
+
+.dueOnTrack {
+  color: #248a3d;
+  font-weight: 600;
+}
+
+.dueBehind {
+  color: #8f6b00;
+  font-weight: 600;
+}
+
+.dueOverdue {
+  color: #ff0000;
+  font-weight: 600;
+}
+
+.progressOnTrack {
+  color: #248a3d;
+  font-weight: 600;
+}
+
+.progressBehind {
+  color: #8f6b00;
+  font-weight: 600;
+}
+
+.progressOverdue {
+  color: #ff0000;
+  font-weight: 600;
+}
+
+.treeRowOnTrack {
+  box-shadow: inset 3px 0 0 #34c759;
+  border-radius: 4px;
+}
+
+.treeRowBehind {
+  box-shadow: inset 3px 0 0 #c99700;
+  border-radius: 4px;
+}
+
+.treeRowOverdue {
+  box-shadow: inset 3px 0 0 #ff0000;
+  border-radius: 4px;
+}
+
+.legendSwatchOnTrack {
+  background-color: #34c759;
+}
+
+.legendSwatchBehind {
+  background-color: #c99700;
+}
+
+.legendSwatchOverdue {
+  background-color: #ff0000;
+}

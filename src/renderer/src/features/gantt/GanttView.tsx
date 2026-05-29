@@ -30,8 +30,10 @@ import { readCssVar } from '@renderer/ui/cssVar'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { listTaskPredecessors, listTaskSuccessors } from '@shared/task/boardRelations'
+import { validateTaskDateRange } from '@shared/task/validation'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { scrollGanttChartToTask } from './ganttScroll'
+import { evaluateTaskSchedule, scheduleHealthHintKey } from '@renderer/features/task/scheduleHealthUi'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
@@ -214,6 +216,11 @@ export default function GanttView(): React.ReactElement {
 
   const saveSchedule = async (): Promise<void> => {
     if (!scheduleTask) return
+    const dateErr = validateTaskDateRange(scheduleStart, scheduleEnd)
+    if (dateErr) {
+      message.warning(t(dateErr))
+      return
+    }
     setScheduleSaving(true)
     try {
       await updateSchedule({
@@ -338,9 +345,20 @@ export default function GanttView(): React.ReactElement {
               }
               const preds = listTaskPredecessors(task, tasksById)
               const succs = listTaskSuccessors(task.taskId, tasks)
+              const { health: scheduleHealth, expectedPercent } = evaluateTaskSchedule(task)
+              const scheduleHintKey = scheduleHealthHintKey(scheduleHealth)
               return (
                 <div className={styles.tooltip}>
                   <div>{bar.name}</div>
+                  {scheduleHintKey && expectedPercent != null && (
+                    <div className={styles.tooltipSchedule}>
+                      {t('gantt.scheduleHealthLine', {
+                        hint: t(scheduleHintKey),
+                        expected: expectedPercent,
+                        current: task.progressPercent
+                      })}
+                    </div>
+                  )}
                   {preds.length > 0 && (
                     <div className={styles.tooltipDeps}>
                       <div>{t('task.predecessors')}</div>

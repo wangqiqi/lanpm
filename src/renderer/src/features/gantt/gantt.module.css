@@ -45,6 +45,13 @@
   gap: 4px;
 }
 
+.tooltipSchedule {
+  margin-top: 6px;
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  line-height: var(--lanpm-line-body);
+}
+
 .chartHighlight {
   box-shadow: 0 0 0 2px var(--lanpm-accent-ring);
 }

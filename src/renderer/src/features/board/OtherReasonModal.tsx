@@ -1,6 +1,7 @@
 import { Form, Input, Modal } from 'antd'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { onEnterUnlessShift } from '@renderer/lib/inputKeyboard'
+import { TASK_OTHER_REASON_MAX_LENGTH } from '@shared/task/validation'
 
 interface OtherReasonModalProps {
   open: boolean
@@ -55,7 +56,7 @@ export default function OtherReasonModal({
           <Input.TextArea
             rows={3}
             placeholder={t('board.otherReasonPlaceholder')}
-            maxLength={500}
+            maxLength={TASK_OTHER_REASON_MAX_LENGTH}
             onKeyDown={(e) => onEnterUnlessShift(e, () => form.submit())}
           />
         </Form.Item>

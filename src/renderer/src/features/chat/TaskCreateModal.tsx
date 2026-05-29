@@ -1,6 +1,7 @@
 import { Form, Input, Modal } from 'antd'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
+import { TASK_TITLE_MAX_LENGTH } from '@shared/task/validation'
 
 interface TaskCreateModalProps {
   open: boolean
@@ -40,10 +41,17 @@ export default function TaskCreateModal({
         <Form.Item
           name="title"
           label={t('chat.taskTitleLabel')}
-          rules={[{ required: true, message: t('chat.taskTitleRequired') }]}
+          rules={[
+            { required: true, message: t('chat.taskTitleRequired') },
+            {
+              max: TASK_TITLE_MAX_LENGTH,
+              message: t('task.titleTooLong', { max: TASK_TITLE_MAX_LENGTH })
+            }
+          ]}
         >
           <Input
             placeholder={t('chat.taskTitlePlaceholder')}
+            maxLength={TASK_TITLE_MAX_LENGTH}
             autoFocus
             onPressEnter={submitFormOnEnter(form)}
           />

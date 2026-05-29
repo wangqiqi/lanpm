@@ -8,6 +8,13 @@ import type { BoardTaskRelation } from '@shared/task/boardRelations'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
+import {
+  evaluateTaskSchedule,
+  kanbanCardScheduleClasses,
+  kanbanDueScheduleClass,
+  kanbanProgressScheduleClass,
+  scheduleHealthHintKey
+} from '@renderer/features/task/scheduleHealthUi'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './board.module.css'
@@ -77,6 +84,8 @@ export default function KanbanCard({
       ? taskFamilyStripeClass(relation.familyIndex)
       : undefined
   const blocked = (relation?.blockedBy.length ?? 0) > 0
+  const { health: scheduleHealth } = evaluateTaskSchedule(task)
+  const scheduleHintKey = scheduleHealthHintKey(scheduleHealth)
 
   const menuItems: MenuProps['items'] = []
 
@@ -206,13 +215,20 @@ export default function KanbanCard({
         isOver ? styles.cardOver : '',
         highlighted ? styles.searchHighlight : '',
         blocked ? styles.cardBlocked : '',
+        ...kanbanCardScheduleClasses(scheduleHealth),
         relationDimmed ? styles.cardRelationDimmed : '',
         relationFocused ? styles.cardRelationFocus : ''
       ]
         .filter(Boolean)
         .join(' ')}
       data-task-id={task.taskId}
-      title={onEdit ? t('board.editDoubleClickHint') : undefined}
+      title={
+        scheduleHintKey
+          ? t(scheduleHintKey)
+          : onEdit
+            ? t('board.editDoubleClickHint')
+            : undefined
+      }
       onDoubleClick={
         onEdit
           ? (e) => {
@@ -272,9 +288,19 @@ export default function KanbanCard({
           </Tag>
         )}
         {task.endDate && (
-          <span className={styles.cardDue}>{t('board.dueDate', { date: task.endDate })}</span>
+          <span
+            className={[styles.cardDue, kanbanDueScheduleClass(scheduleHealth)]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {t('board.dueDate', { date: task.endDate })}
+          </span>
         )}
-        <span>{task.progressPercent}%</span>
+        <span
+          className={kanbanProgressScheduleClass(scheduleHealth) ?? undefined}
+        >
+          {task.progressPercent}%
+        </span>
       </div>
       {task.status === 'other' && task.otherReason && (
         <div className={styles.otherReason}>{task.otherReason}</div>

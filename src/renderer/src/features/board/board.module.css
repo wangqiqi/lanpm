@@ -335,6 +335,11 @@
   line-height: var(--lanpm-line-body);
 }
 
+.legendDivider {
+  color: var(--lanpm-text-tertiary);
+  user-select: none;
+}
+
 @media (max-width: 1100px) {
   .columns {
     flex-direction: column;

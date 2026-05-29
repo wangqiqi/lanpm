@@ -15,7 +15,13 @@ import { randomAvatarDataUrl } from '@renderer/features/setup/avatar'
 import { isMessageReadByOthers } from '@shared/chat/readReceipt'
 import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
-import { validateOtherReason } from '@shared/task/validation'
+import {
+  clampProgressPercent,
+  normalizeTaskTitle,
+  validateOtherReason,
+  validateTaskDateRange,
+  validateTaskTitle
+} from '@shared/task/validation'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -73,8 +79,9 @@ function stubCreateTask(input: CreateTaskInput): Task {
   assertStubTaskWritable(input.groupId)
   const status = readStatus()
   if (!status.configured || !status.user) throw stubError('stub.identityRequired')
-  const title = input.title.trim()
-  if (!title) throw stubError('stub.taskTitleEmpty')
+  const titleErr = validateTaskTitle(input.title)
+  if (titleErr) throw new Error(titleErr)
+  const title = normalizeTaskTitle(input.title)
   const prev = readAllTasks()[input.groupId] ?? []
   const taskStatus = input.status ?? 'todo'
   const task: Task = {
@@ -85,7 +92,7 @@ function stubCreateTask(input: CreateTaskInput): Task {
     status: taskStatus,
     priority: input.priority ?? 'medium',
     assigneeUserId: input.assigneeUserId,
-    progressPercent: input.progressPercent ?? 0,
+    progressPercent: clampProgressPercent(input.progressPercent ?? 0),
     sortOrder: maxSortInColumn(prev, taskStatus) + 1,
     createdBy: status.user.userId,
     createdAt: new Date().toISOString(),
@@ -120,9 +127,18 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
         : existing.otherReason
   const err = validateOtherReason(nextStatus, nextReason)
   if (err) throw new Error(err)
+  if (input.title !== undefined) {
+    const titleErr = validateTaskTitle(input.title)
+    if (titleErr) throw new Error(titleErr)
+  }
+  const nextStart =
+    input.startDate !== undefined ? input.startDate : existing.startDate ?? null
+  const nextEnd = input.endDate !== undefined ? input.endDate : existing.endDate ?? null
+  const dateErr = validateTaskDateRange(nextStart, nextEnd)
+  if (dateErr) throw new Error(dateErr)
   tasks[idx] = {
     ...existing,
-    title: input.title ?? existing.title,
+    title: input.title !== undefined ? normalizeTaskTitle(input.title) : existing.title,
     status: nextStatus,
     otherReason: nextReason,
     priority: input.priority ?? existing.priority,
@@ -130,7 +146,10 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
       input.assigneeUserId === null
         ? undefined
         : input.assigneeUserId ?? existing.assigneeUserId,
-    progressPercent: input.progressPercent ?? existing.progressPercent,
+    progressPercent:
+      input.progressPercent !== undefined
+        ? clampProgressPercent(input.progressPercent)
+        : existing.progressPercent,
     parentTaskId:
       input.parentTaskId === null
         ? undefined

@@ -24,7 +24,14 @@ import {
   countTaskDescendants
 } from '@renderer/features/task/confirmDeleteParentTask'
 import { buildBoardRelationMap, type BoardTaskRelation } from '@shared/task/boardRelations'
+import { TASK_TITLE_MAX_LENGTH, validateTaskTitle } from '@shared/task/validation'
+import { taskValidationMessage } from '@renderer/features/task/taskValidationMessage'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
+import {
+  evaluateTaskSchedule,
+  treeProgressScheduleProps,
+  treeRowScheduleClass
+} from '@renderer/features/task/scheduleHealthUi'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import styles from './tree.module.css'
 
@@ -77,12 +84,15 @@ function buildTreeData(
       const isLeaf = !hasChildren
       const familyIndex = relationMap.get(task.taskId)?.familyIndex ?? -1
       const familyStripe = taskFamilyStripeClass(familyIndex, { treeNode: true })
+      const { health: scheduleHealth } = evaluateTaskSchedule(task)
+      const rowScheduleClass = treeRowScheduleClass(scheduleHealth)
+      const progressSchedule = treeProgressScheduleProps(scheduleHealth, task.status)
 
       return {
         key: task.taskId,
         title: (
           <div
-            className={`${styles.nodeRow} ${familyStripe ?? ''} ${isTaskHighlighted(task.taskId) ? styles.searchHighlight : ''}`}
+            className={`${styles.nodeRow} ${familyStripe ?? ''} ${rowScheduleClass ?? ''} ${isTaskHighlighted(task.taskId) ? styles.searchHighlight : ''}`}
             data-task-id={task.taskId}
           >
             <span className={styles.nodeTitle}>{task.title}</span>
@@ -106,7 +116,8 @@ function buildTreeData(
                 <Progress
                   percent={task.progressPercent}
                   size="small"
-                  status={task.status === 'done' ? 'success' : 'active'}
+                  status={progressSchedule.status}
+                  strokeColor={progressSchedule.strokeColor}
                 />
               )}
             </div>
@@ -294,7 +305,16 @@ export default function TaskTreeView(): React.ReactElement {
 
   const handleCreateRoot = async (): Promise<void> => {
     const title = newRootTitle.trim()
-    if (!title || !gid) return
+    if (!title) {
+      message.warning(t('chat.taskTitleRequired'))
+      return
+    }
+    const titleErr = validateTaskTitle(newRootTitle)
+    if (titleErr) {
+      message.warning(taskValidationMessage(t, titleErr))
+      return
+    }
+    if (!gid) return
     try {
       await createTask({ groupId: gid, title })
       setNewRootTitle('')
@@ -306,7 +326,16 @@ export default function TaskTreeView(): React.ReactElement {
 
   const handleCreateChild = async (): Promise<void> => {
     const title = childTitle.trim()
-    if (!title || !gid || !selectedParentId) return
+    if (!title) {
+      message.warning(t('chat.taskTitleRequired'))
+      return
+    }
+    const titleErr = validateTaskTitle(childTitle)
+    if (titleErr) {
+      message.warning(taskValidationMessage(t, titleErr))
+      return
+    }
+    if (!gid || !selectedParentId) return
     try {
       await createTask({ groupId: gid, title, parentTaskId: selectedParentId })
       setChildTitle('')
@@ -328,6 +357,7 @@ export default function TaskTreeView(): React.ReactElement {
               <Input
                 placeholder={t('tree.rootPlaceholder')}
                 value={newRootTitle}
+                maxLength={TASK_TITLE_MAX_LENGTH}
                 onChange={(e) => setNewRootTitle(e.target.value)}
                 onPressEnter={() => void handleCreateRoot()}
                 style={{ width: 220, maxWidth: 'min(280px, 42vw)' }}
@@ -340,6 +370,7 @@ export default function TaskTreeView(): React.ReactElement {
               <Input
                 placeholder={t('tree.childPlaceholder')}
                 value={childTitle}
+                maxLength={TASK_TITLE_MAX_LENGTH}
                 onChange={(e) => setChildTitle(e.target.value)}
                 onPressEnter={() => void handleCreateChild()}
                 disabled={!selectedParentId}

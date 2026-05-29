@@ -1,6 +1,7 @@
 import { buildBoardRelationMap } from './boardRelations'
 import type { Task } from './types'
 import type { TaskDependency } from './dependency'
+import { mergeGanttBarStyles } from './scheduleHealthGantt'
 import { taskFamilyBarColors } from './taskFamilyColors'
 
 /** gantt-task-react 任务条（与库类型对齐的最小集） */
@@ -74,6 +75,14 @@ export function tasksToGanttBars(tasks: Task[], dependencies: TaskDependency[]):
 
       const familyIndex = relationMap.get(task.taskId)?.familyIndex ?? -1
       const familyBar = taskFamilyBarColors(familyIndex)
+      const barStyles = task.milestone
+        ? {
+            backgroundColor: '#f59e0b',
+            backgroundSelectedColor: '#d97706',
+            progressColor: '#fbbf24',
+            progressSelectedColor: '#f59e0b'
+          }
+        : mergeGanttBarStyles(task, familyBar)
 
       return {
         id: task.taskId,
@@ -83,14 +92,7 @@ export function tasksToGanttBars(tasks: Task[], dependencies: TaskDependency[]):
         end,
         progress: Math.min(100, Math.max(0, task.progressPercent)) / 100,
         dependencies: depMap.get(task.taskId),
-        styles: task.milestone
-          ? {
-              backgroundColor: '#f59e0b',
-              backgroundSelectedColor: '#d97706',
-              progressColor: '#fbbf24',
-              progressSelectedColor: '#f59e0b'
-            }
-          : familyBar
+        styles: barStyles
       }
     })
 }

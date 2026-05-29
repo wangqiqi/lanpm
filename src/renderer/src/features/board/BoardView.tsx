@@ -17,6 +17,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { KANBAN_COLUMN_ORDER, isTaskStatus, KANBAN_TRASH_DROP_ID, isKanbanTrashDropId } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
+import { TASK_TITLE_MAX_LENGTH, validateTaskTitle } from '@shared/task/validation'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
@@ -425,6 +426,15 @@ export default function BoardView(): React.ReactElement {
       message.warning(t('chat.taskTitleRequired'))
       return
     }
+    const titleErr = validateTaskTitle(newTitle)
+    if (titleErr) {
+      message.warning(
+        titleErr === 'task.titleTooLong'
+          ? t('task.titleTooLong', { max: TASK_TITLE_MAX_LENGTH })
+          : t(titleErr)
+      )
+      return
+    }
     if (!gid) return
     try {
       await createTask({ groupId: gid, title, priority: newPriority })
@@ -560,12 +570,14 @@ export default function BoardView(): React.ReactElement {
         onCancel={() => setCreateOpen(false)}
         onOk={() => void handleCreate()}
         okText={t('common.create')}
+        okButtonProps={{ disabled: !newTitle.trim() }}
       >
         <Form layout="vertical" style={{ marginTop: 8 }}>
           <Form.Item label={t('chat.taskTitleLabel')} required>
             <Input
               placeholder={t('board.taskTitlePlaceholder')}
               value={newTitle}
+              maxLength={TASK_TITLE_MAX_LENGTH}
               onChange={(e) => setNewTitle(e.target.value)}
               onPressEnter={() => void handleCreate()}
             />

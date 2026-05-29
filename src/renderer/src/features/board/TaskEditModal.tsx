@@ -7,6 +7,17 @@ import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { onCtrlEnter, onEnterUnlessShift } from '@renderer/lib/inputKeyboard'
+import { taskValidationMessage, TASK_TITLE_MAX_LENGTH } from '@renderer/features/task/taskValidationMessage'
+import {
+  clampProgressPercent,
+  normalizeTaskDescription,
+  normalizeOtherReason,
+  normalizeTaskTitle,
+  TASK_DESCRIPTION_MAX_LENGTH,
+  TASK_OTHER_REASON_MAX_LENGTH,
+  validateTaskForm
+} from '@shared/task/validation'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 
 const { TextArea } = Input
 
@@ -39,6 +50,7 @@ export default function TaskEditModal({
   onSave
 }: TaskEditModalProps): React.ReactElement {
   const { t } = useI18n()
+  const { message } = useLanpmApp()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
 
   const [title, setTitle] = useState('')
@@ -79,21 +91,31 @@ export default function TaskEditModal({
 
   const handleOk = async (): Promise<void> => {
     if (!task || okDisabled) return
-    const trimmed = title.trim()
+    const formErr = validateTaskForm({
+      title,
+      status,
+      otherReason,
+      startDate: startDate.trim() || null,
+      endDate: endDate.trim() || null
+    })
+    if (formErr) {
+      message.warning(taskValidationMessage(t, formErr))
+      return
+    }
 
     setSaving(true)
     try {
       await onSave({
         taskId: task.taskId,
-        title: trimmed,
-        description: description.trim(),
+        title: normalizeTaskTitle(title),
+        description: normalizeTaskDescription(description),
         status,
-        otherReason: status === 'other' ? otherReason.trim() : null,
+        otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
         assigneeUserId: assigneeUserId || null,
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
-        progressPercent: Math.min(100, Math.max(0, progressPercent)),
+        progressPercent: clampProgressPercent(progressPercent),
         milestone
       })
       onCancel()
@@ -124,6 +146,7 @@ export default function TaskEditModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('board.taskTitlePlaceholder')}
+            maxLength={TASK_TITLE_MAX_LENGTH}
             onPressEnter={() => {
               if (!okDisabled) void handleOk()
             }}
@@ -180,7 +203,7 @@ export default function TaskEditModal({
               value={otherReason}
               onChange={(e) => setOtherReason(e.target.value)}
               placeholder={t('board.otherReasonPlaceholder')}
-              maxLength={500}
+              maxLength={TASK_OTHER_REASON_MAX_LENGTH}
               onKeyDown={(e) => {
                 if (!okDisabled) onEnterUnlessShift(e, () => void handleOk())
               }}
@@ -219,7 +242,7 @@ export default function TaskEditModal({
               min={0}
               max={100}
               value={progressPercent}
-              onChange={(v) => setProgressPercent(typeof v === 'number' ? v : 0)}
+              onChange={(v) => setProgressPercent(clampProgressPercent(v))}
               addonAfter="%"
               style={{ width: '100%' }}
             />
@@ -241,6 +264,8 @@ export default function TaskEditModal({
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder={t('tree.detailDescriptionPlaceholder')}
+            maxLength={TASK_DESCRIPTION_MAX_LENGTH}
             onKeyDown={(e) => {
               if (!okDisabled) onCtrlEnter(e, () => void handleOk())
             }}

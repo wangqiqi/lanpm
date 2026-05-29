@@ -1,8 +1,9 @@
 import { TASK_FAMILY_COLORS } from '@shared/task/taskFamilyColors'
 import { useI18n } from '@renderer/i18n/useI18n'
+import scheduleStyles from '@renderer/styles/scheduleHealth.module.css'
 import styles from './board.module.css'
 
-/** 看板工具栏：任务族色条图例（与 taskFamily 配色一致） */
+/** 看板工具栏：任务族色 + 工期健康度图例 */
 export default function BoardRelationLegend(): React.ReactElement {
   const { t } = useI18n()
 
@@ -19,6 +20,24 @@ export default function BoardRelationLegend(): React.ReactElement {
         ))}
       </div>
       <span className={styles.legendHint}>{t('board.legendToolbar')}</span>
+      <span className={styles.legendDivider} aria-hidden>
+        ·
+      </span>
+      <div className={styles.legendSwatches} role="presentation">
+        <span
+          className={`${styles.legendSwatch} ${scheduleStyles.legendSwatchOnTrack}`}
+          title={t('board.scheduleOnTrackHint')}
+        />
+        <span
+          className={`${styles.legendSwatch} ${scheduleStyles.legendSwatchBehind}`}
+          title={t('board.scheduleBehindHint')}
+        />
+        <span
+          className={`${styles.legendSwatch} ${scheduleStyles.legendSwatchOverdue}`}
+          title={t('board.scheduleOverdueHint')}
+        />
+      </div>
+      <span className={styles.legendHint}>{t('board.legendSchedule')}</span>
     </div>
   )
 }

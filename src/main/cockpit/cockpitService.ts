@@ -6,20 +6,16 @@ import type {
   ProjectDashboardItem,
   ProjectHealth
 } from '../../shared/cockpit/types'
+import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
 import { listTasksByGroup } from '../storage/repositories/taskRepository'
 import { getUserById } from '../storage/repositories/userRepository'
 import { getAiConfig, getDecryptedApiKey } from '../ai/aiConfigService'
 
-function todayYmd(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function taskHealth(task: Task): ProjectHealth | null {
-  if (task.status === 'done') return null
-  if (task.endDate && task.endDate < todayYmd()) return 'delayed'
-  if (task.progressPercent < 40) return 'risk'
+function projectHealthFromTasks(open: Task[]): ProjectHealth {
+  if (open.some((t) => getTaskScheduleHealth(t) === 'overdue')) return 'delayed'
+  if (open.some((t) => getTaskScheduleHealth(t) === 'behind')) return 'risk'
   return 'normal'
 }
 
@@ -27,15 +23,13 @@ function aggregateProject(tasks: Task[]): Omit<ProjectDashboardItem, 'groupId' |
   const active = tasks.filter((t) => !t.deletedAt)
   const open = active.filter((t) => t.status !== 'done')
   const inProgressCount = open.filter((t) => t.status === 'doing' || t.status === 'todo').length
-  const delayedCount = open.filter((t) => taskHealth(t) === 'delayed').length
+  const { overdue: delayedCount } = countScheduleHealth(open)
   const progressPercent =
     active.length === 0
       ? 0
       : Math.round(active.reduce((sum, t) => sum + t.progressPercent, 0) / active.length)
 
-  let status: ProjectHealth = 'normal'
-  if (delayedCount > 0) status = 'delayed'
-  else if (open.some((t) => taskHealth(t) === 'risk')) status = 'risk'
+  const status = projectHealthFromTasks(open)
 
   return {
     progressPercent,
@@ -202,9 +196,9 @@ export async function evaluateProjects(db: Database): Promise<AiReportResult> {
     ...dash.projects.map((p) => {
       const hint =
         p.status === 'delayed'
-          ? '存在延期任务，建议优先处理'
+          ? '存在已过截止日的任务，建议优先处理'
           : p.status === 'risk'
-            ? '进度偏慢，需关注'
+            ? '存在进度落后于工期的任务，需关注'
             : '进度正常'
       return `- ${p.name}：${hint}`
     })
