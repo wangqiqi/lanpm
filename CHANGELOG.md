@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.32] - 2026-05-29
+
+### Added
+- **`verify:docs-code`**：文档↔代码机读一致性检查，输出 `代码文档差异.md`（`--strict` 门禁）
+- **Cursor `lanpm-docs-code-audit` skill**：全量文档/实现审计工作流
+
+### Changed
+- **`.cursor/README.md`** · **`lanpm-visual-audit`** · **`视觉.md`** · **`todo.md`**：视觉与文档审计分工说明
+
+### Tag
+- `v1.0.0-rc.32` — 文档代码一致性守卫与 docs-code-audit skill
+
 ## [1.0.0-rc.31] - 2026-05-29
 
 ### Added

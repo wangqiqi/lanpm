@@ -133,9 +133,24 @@ npm run dev                                   # V-14b 手验
 
 ---
 
+## 文档与代码一致性
+
+> **报告**：[代码文档差异.md](./代码文档差异.md) · **Cursor**：`.cursor/skills/lanpm-docs-code-audit`
+
+| ID | 任务 | 命令 | 状态 |
+|----|------|------|------|
+| DOC-01 | 机读：RC 号、docs/05 脚本表、布局数字 | `npm run verify:docs-code` | 随脚本刷新 |
+| DOC-02 | 全量：PRD P0 vs 实现 → 写入报告 §2 | Agent + `verify:p0` | [ ] |
+| DOC-03 | 发版门禁：`verify:docs-code -- --strict` | 纳入发版 checklist | [ ] |
+
+发版前建议：`视觉.md`（§视觉 阶段 A）+ `代码文档差异.md`（§1 无 P0/P1）。
+
+---
+
 ## 维护
 
 - 新增 IPC → 更新 `channels.ts`，跑 `verify:ipc-contract`
 - 新增 i18n key → 同步 zh/en，跑 `verify:i18n-keys`
 - 改 UI 色/圆角 → 对照 [视觉.md](./视觉.md) 与 `docs/04`；跑 `verify:visual`
-- 发版前：`npm run verify:project && npm run verify:m7` + §视觉 阶段 A
+- 改 docs/05 命令表或 RC 号 → 跑 `verify:docs-code`
+- 发版前：`npm run verify:project && npm run verify:m7` + §视觉 阶段 A + `代码文档差异.md` §1

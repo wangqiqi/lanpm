@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.31",
+  "version": "1.0.0-rc.32",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -26,6 +26,7 @@
     "verify:ipc-contract": "node --experimental-strip-types tests/static/verify-ipc-contract.ts",
     "verify:i18n-keys": "node --experimental-strip-types tests/static/verify-i18n-keys.ts",
     "verify:docs-links": "node --experimental-strip-types tests/static/verify-docs-links.ts",
+    "verify:docs-code": "node --experimental-strip-types tests/static/verify-docs-code.ts",
     "verify:rc-reality": "node --experimental-strip-types tests/static/verify-rc-reality.ts",
     "verify:router-views": "node --experimental-strip-types tests/static/verify-router-views.ts",
     "verify:stub-parity": "node --experimental-strip-types tests/static/verify-stub-parity.ts",
