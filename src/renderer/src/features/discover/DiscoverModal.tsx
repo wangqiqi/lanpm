@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Avatar, Button, Empty, List, Modal, Tabs, Tag, Typography } from 'antd'
 import { ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import type { DiscoverGroupView, DiscoverPeerView, DiscoverSnapshot } from '@shared/discover/types'
+import { groupAllowsDirectMessage } from '@shared/group/guards'
 import type { GroupType } from '@shared/navigation/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
@@ -34,6 +35,7 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
   const navigate = useNavigate()
   const localUserId = useIdentityStore((s) => s.user?.userId)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
   const joinGroup = useNavigationStore((s) => s.joinGroup)
   const openSession = useDmStore((s) => s.openSession)
   const [snapshot, setSnapshot] = useState<DiscoverSnapshot>({ peers: [], groups: [] })
@@ -82,12 +84,25 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
     }
   }
 
+  const dmOriginGroupId = activeGroupId.startsWith('dm:')
+    ? useDmStore.getState().lastOriginGroupId
+    : activeGroupId
+  const dmOriginAllowed = groupAllowsDirectMessage(getGroupType(dmOriginGroupId))
+
   const startDm = (peer: DiscoverPeerView): void => {
     if (!localUserId) return
-    const originGroupId = activeGroupId.startsWith('dm:')
-      ? useDmStore.getState().lastOriginGroupId
-      : activeGroupId
-    const dmGroupId = openSession(peer.userId, peer.displayName, localUserId, originGroupId)
+    if (!dmOriginAllowed) {
+      message.warning(t('chat.dmNotAllowedAnonymous'))
+      return
+    }
+    const dmGroupId = openSession(
+      peer.userId,
+      peer.displayName,
+      localUserId,
+      dmOriginGroupId,
+      getGroupType(dmOriginGroupId)
+    )
+    if (!dmGroupId) return
     navigate(groupViewPath(dmGroupId, 'chat'))
     onClose()
   }
@@ -167,8 +182,8 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
                 dataSource={snapshot.peers}
                 renderItem={(peer) => (
                   <List.Item
-                    className={`${styles.row} ${styles.rowClickable}`}
-                    onClick={() => startDm(peer)}
+                    className={`${styles.row} ${dmOriginAllowed ? styles.rowClickable : ''}`}
+                    onClick={dmOriginAllowed ? () => startDm(peer) : undefined}
                   >
                     <List.Item.Meta
                       avatar={
@@ -187,7 +202,7 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
                       description={t('discover.devices', { count: peer.deviceCount })}
                     />
                     <Text type="secondary" className={styles.dmHint}>
-                      {t('discover.chatHint')}
+                      {dmOriginAllowed ? t('discover.chatHint') : t('chat.dmNotAllowedAnonymous')}
                     </Text>
                   </List.Item>
                 )}

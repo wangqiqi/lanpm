@@ -14,6 +14,8 @@ import {
 } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
+import { groupViewPath } from '@renderer/routes/paths'
+import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
@@ -66,6 +68,15 @@ export default function ChatView(): React.ReactElement {
   const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
+  const inDm = isDmGroupId(gid)
+  const lastOriginGroupId = useDmStore((s) => s.lastOriginGroupId)
+  const dmSession = useDmStore((s) => (inDm ? s.getSession(gid) : undefined))
+  const projectGroupId = inDm ? (dmSession?.originGroupId ?? lastOriginGroupId) : gid
+  const [dmPickerOpen, setDmPickerOpen] = useState(false)
+
+  useEffect(() => {
+    setDmPickerOpen(false)
+  }, [gid])
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
   const loading = useChatStore((s) => s.loading[gid])
   const loadError = useChatStore((s) => s.loadError[gid])
@@ -98,6 +109,19 @@ export default function ChatView(): React.ReactElement {
   })
   const [sidebarResizing, setSidebarResizing] = useState(false)
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
+  const chatChannel: 'group' | 'dm' = dmPickerOpen || inDm ? 'dm' : 'group'
+  const showDmPicker = dmPickerOpen
+
+  const onChatChannelChange = (value: string | number): void => {
+    if (value === 'group') {
+      setDmPickerOpen(false)
+      if (inDm && projectGroupId) {
+        navigate(groupViewPath(projectGroupId, 'chat'))
+      }
+      return
+    }
+    setDmPickerOpen(true)
+  }
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
   const sidebarDragRef = useRef<{ startX: number; startW: number } | null>(null)
 
@@ -372,7 +396,6 @@ export default function ChatView(): React.ReactElement {
             </button>
           </div>
         )}
-        <DmSessionBar activeGroupId={gid} />
         <MemberList
           groupId={gid}
           members={members}
@@ -421,6 +444,22 @@ export default function ChatView(): React.ReactElement {
         {fileDragOver && fileAllowed && (
           <div className={styles.fileDropOverlay}>{t('chat.fileDropHint')}</div>
         )}
+        <div className={styles.chatModeBar}>
+          <Segmented
+            className={styles.chatChannelToggle}
+            size="small"
+            value={chatChannel}
+            onChange={onChatChannelChange}
+            options={[
+              { label: t('chat.groupChat'), value: 'group' },
+              { label: t('chat.dmTab'), value: 'dm' }
+            ]}
+          />
+        </div>
+        {showDmPicker ? (
+          <DmSessionBar activeGroupId={gid} layout="main" />
+        ) : (
+          <>
         <div className={styles.messages} ref={listRef}>
           {loading && messages.length === 0 ? (
             <ViewLoadingCenter />
@@ -586,6 +625,8 @@ export default function ChatView(): React.ReactElement {
             </div>
           </div>
         </div>
+          </>
+        )}
 
         <CodeSendModal
           open={codeModalOpen}

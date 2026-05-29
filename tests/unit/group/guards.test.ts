@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   assertGroupAllowsFiles,
   assertGroupAllowsTasks,
+  groupAllowsDirectMessage,
   isAnonymousGroupType,
   isMemoryOnlyChatGroup
 } from '@shared/group/guards'
@@ -10,6 +11,14 @@ describe('isAnonymousGroupType', () => {
   it('detects anonymous groups', () => {
     expect(isAnonymousGroupType('anonymous')).toBe(true)
     expect(isAnonymousGroupType('project')).toBe(false)
+  })
+})
+
+describe('groupAllowsDirectMessage', () => {
+  it('blocks anonymous origins only', () => {
+    expect(groupAllowsDirectMessage('project')).toBe(true)
+    expect(groupAllowsDirectMessage('function')).toBe(true)
+    expect(groupAllowsDirectMessage('anonymous')).toBe(false)
   })
 })
 

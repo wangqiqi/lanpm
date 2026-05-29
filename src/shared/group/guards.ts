@@ -4,6 +4,11 @@ export function isAnonymousGroupType(type: GroupType): boolean {
   return type === 'anonymous'
 }
 
+/** 匿名群仅临时会话，不可发起持久化私聊 */
+export function groupAllowsDirectMessage(type: GroupType): boolean {
+  return !isAnonymousGroupType(type)
+}
+
 /** 内存匿名群（非 DM）：仅文本、不走常规持久化聊天链路 */
 export function isMemoryOnlyChatGroup(groupId: string, type: GroupType): boolean {
   if (groupId.startsWith('dm:')) return false

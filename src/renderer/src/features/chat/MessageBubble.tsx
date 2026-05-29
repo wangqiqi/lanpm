@@ -1,4 +1,3 @@
-import { Button } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
@@ -69,28 +68,26 @@ export default function MessageBubble({
       )}
 
       {message.content.kind === 'file' && groupId && (
-        <Button
-          type="link"
-          size="small"
-          style={{ padding: 0, height: 'auto' }}
+        <button
+          type="button"
+          className={styles.bubbleAttachLink}
           onClick={() => navigate(groupViewPath(groupId, 'files'))}
         >
           {t('chat.fileMessage', {
             name: message.content.fileName,
             size: formatFileSize(message.content.size)
           })}
-        </Button>
+        </button>
       )}
 
       {message.content.kind === 'task_ref' && groupId && (
-        <Button
-          type="link"
-          size="small"
-          style={{ padding: 0, height: 'auto' }}
+        <button
+          type="button"
+          className={styles.bubbleAttachLink}
           onClick={() => navigate(groupViewPath(groupId, 'board'))}
         >
           {t('chat.taskRef', { title: message.content.title })}
-        </Button>
+        </button>
       )}
 
       {message.content.kind !== 'text' &&

@@ -4,9 +4,11 @@ import { MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
 import { isDmGroupId } from '@shared/chat/dmSession'
+import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { presenceEmoji } from '@shared/presence'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useDmStore } from '@renderer/stores/dmStore'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { presenceMessageKey } from '@renderer/i18n/presence'
@@ -32,8 +34,11 @@ export default function MemberList({
   const { t } = useI18n()
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const openSession = useDmStore((s) => s.openSession)
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
   const navigate = useNavigate()
   const isDm = isDmGroupId(groupId)
+  const originGroupId = isDm ? useDmStore.getState().lastOriginGroupId : groupId
+  const dmAllowed = groupAllowsDirectMessage(getGroupType(originGroupId))
 
   useEffect(() => {
     onRefresh()
@@ -42,9 +47,15 @@ export default function MemberList({
   }, [groupId, onRefresh])
 
   const startDm = (member: GroupMemberView): void => {
-    if (!currentUserId || member.userId === currentUserId) return
-    const originGroupId = isDm ? useDmStore.getState().lastOriginGroupId : groupId
-    const dmGroupId = openSession(member.userId, member.displayName, currentUserId, originGroupId)
+    if (!currentUserId || member.userId === currentUserId || !dmAllowed) return
+    const dmGroupId = openSession(
+      member.userId,
+      member.displayName,
+      currentUserId,
+      originGroupId,
+      getGroupType(originGroupId)
+    )
+    if (!dmGroupId) return
     navigate(groupViewPath(dmGroupId, 'chat'))
   }
 
@@ -79,7 +90,7 @@ export default function MemberList({
                     {isSelf ? t('common.me') : ''}
                   </span>
                 </button>
-                {!isSelf && !isDm && (
+                {!isSelf && !isDm && dmAllowed && (
                   <button
                     type="button"
                     className={styles.dmBtn}

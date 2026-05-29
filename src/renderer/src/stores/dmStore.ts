@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { buildDmGroupId } from '@shared/chat/dmSession'
+import { groupAllowsDirectMessage } from '@shared/group/guards'
+import type { GroupType } from '@shared/navigation/types'
 import { DEFAULT_GROUP_ID } from '@renderer/routes/paths'
 
 export interface DmSession {
@@ -18,11 +20,13 @@ interface DmState {
     peerUserId: string,
     peerDisplayName: string,
     localUserId: string,
-    originGroupId?: string
-  ) => string
+    originGroupId?: string,
+    originGroupType?: GroupType
+  ) => string | null
   touchSession: (groupId: string) => void
   getSession: (groupId: string) => DmSession | undefined
   getPeerDisplayName: (groupId: string, peerUserId: string) => string
+  pruneDisallowedOrigins: (resolveType: (groupId: string) => GroupType) => void
 }
 
 export const useDmStore = create<DmState>()(
@@ -30,9 +34,12 @@ export const useDmStore = create<DmState>()(
     (set, get) => ({
       sessions: [],
       lastOriginGroupId: DEFAULT_GROUP_ID,
-      openSession: (peerUserId, peerDisplayName, localUserId, originGroupId) => {
+      openSession: (peerUserId, peerDisplayName, localUserId, originGroupId, originGroupType) => {
         const groupId = buildDmGroupId(localUserId, peerUserId)
         const origin = originGroupId ?? get().lastOriginGroupId
+        if (originGroupType !== undefined && !groupAllowsDirectMessage(originGroupType)) {
+          return null
+        }
         const now = new Date().toISOString()
         const existing = get().sessions.find((s) => s.groupId === groupId)
         const next: DmSession = {
@@ -66,6 +73,13 @@ export const useDmStore = create<DmState>()(
         const session = get().getSession(groupId)
         if (session) return session.peerDisplayName
         return peerUserId
+      },
+      pruneDisallowedOrigins: (resolveType) => {
+        set((state) => ({
+          sessions: state.sessions.filter((s) =>
+            groupAllowsDirectMessage(resolveType(s.originGroupId))
+          )
+        }))
       }
     }),
     { name: 'lanpm.dm.sessions' }

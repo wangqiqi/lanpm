@@ -1,69 +1,127 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
+import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { useNavigate } from 'react-router-dom'
 import { Typography } from 'antd'
-import { isDmGroupId, getDmPeerUserId } from '@shared/chat/dmSession'
-import { useDmStore } from '@renderer/stores/dmStore'
+import { isDmGroupId } from '@shared/chat/dmSession'
+import { useDmStore, type DmSession } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
+import type { MessageKey } from '@renderer/i18n/messages'
+import type { TranslateParams } from '@renderer/i18n/messages'
+import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
+import type { NavGroup } from '@shared/navigation/types'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useI18n } from '@renderer/i18n/useI18n'
-import RegionTabBar, { type RegionTabItem } from '@renderer/ui/RegionTabBar'
 import styles from './chat.module.css'
 
 const { Text } = Typography
 
+export type ChatDmPanelLayout = 'main'
+
 interface DmSessionBarProps {
   activeGroupId: string
+  layout: ChatDmPanelLayout
 }
 
-export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): React.ReactElement {
+function originLabel(
+  session: DmSession,
+  groups: NavGroup[],
+  t: (key: MessageKey, params?: TranslateParams) => string
+): string {
+  const g = groups.find((x) => x.groupId === session.originGroupId)
+  const name = g ? resolveGroupDisplayName(g, t) : session.originGroupId
+  return t('chat.dmFromProject', { name })
+}
+
+export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProps): React.ReactElement {
   const { t } = useI18n()
   const navigate = useNavigate()
   const sessions = useDmStore((s) => s.sessions)
   const lastOriginGroupId = useDmStore((s) => s.lastOriginGroupId)
   const localUserId = useIdentityStore((s) => s.user?.userId)
-  const getPeerDisplayName = useDmStore((s) => s.getPeerDisplayName)
+  const groups = useNavigationStore((s) => s.groups)
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const pruneDisallowedOrigins = useDmStore((s) => s.pruneDisallowedOrigins)
+
+  useEffect(() => {
+    pruneDisallowedOrigins(getGroupType)
+  }, [pruneDisallowedOrigins, getGroupType])
 
   const inDm = isDmGroupId(activeGroupId)
+  const contextProjectId = inDm
+    ? (useDmStore.getState().getSession(activeGroupId)?.originGroupId ?? lastOriginGroupId)
+    : activeGroupId
 
-  const tabItems = useMemo((): RegionTabItem[] => {
-    const items: RegionTabItem[] = []
-    if (!inDm) {
-      items.push({
-        key: 'group',
-        label: t('chat.groupChat'),
-        active: true,
-        disabled: true
-      })
-    } else {
-      items.push({
-        key: 'back',
-        label: t('chat.backToGroup'),
-        onClick: () => navigate(groupViewPath(lastOriginGroupId, 'chat'))
-      })
+  const { projectDms, otherDms } = useMemo(() => {
+    const project: DmSession[] = []
+    const other: DmSession[] = []
+    for (const s of sessions) {
+      if (!groupAllowsDirectMessage(getGroupType(s.originGroupId))) continue
+      if (s.originGroupId === contextProjectId) project.push(s)
+      else other.push(s)
     }
-    for (const session of sessions) {
-      const active = session.groupId === activeGroupId
-      items.push({
-        key: session.groupId,
-        label: t('topbar.dmLabel', { name: session.peerDisplayName }),
-        title: session.peerDisplayName,
-        active,
-        onClick: () => navigate(groupViewPath(session.groupId, 'chat'))
-      })
-    }
-    return items
-  }, [inDm, lastOriginGroupId, sessions, activeGroupId, navigate, t])
+    return { projectDms: project, otherDms: other }
+  }, [sessions, contextProjectId, getGroupType])
+
+  const openDm = (groupId: string): void => {
+    navigate(groupViewPath(groupId, 'chat'))
+  }
+
+  const renderDmRow = (session: DmSession, showOrigin: boolean): React.ReactElement => {
+    const active = session.groupId === activeGroupId
+    return (
+      <button
+        key={session.groupId}
+        type="button"
+        className={`${styles.dmSessionItem} ${active ? styles.dmSessionItemActive : ''}`}
+        onClick={() => openDm(session.groupId)}
+      >
+        <span className={styles.dmSessionName}>{session.peerDisplayName}</span>
+        {showOrigin && (
+          <span className={styles.dmSessionOrigin}>{originLabel(session, groups, t)}</span>
+        )}
+      </button>
+    )
+  }
+
+  const panelClass = layout === 'main' ? styles.dmPanelMain : styles.dmBar
 
   return (
-    <div className={styles.dmBar}>
-      <Text className={styles.sidebarSectionTitle}>{t('chat.dmSessions')}</Text>
-      <RegionTabBar items={tabItems} ariaLabel={t('chat.dmSessions')} />
-      {inDm && localUserId && (
-        <Text type="secondary" className={styles.dmHint}>
-          {t('chat.dmWith', {
-            name: getPeerDisplayName(
-              activeGroupId,
-              getDmPeerUserId(activeGroupId, localUserId) ?? ''
+    <div className={panelClass}>
+      <Text className={layout === 'main' ? styles.dmPanelIntro : styles.sidebarSectionTitle}>
+        {t('chat.dmPickerHint')}
+      </Text>
+
+      <Text className={styles.sidebarSectionTitle}>{t('chat.dmInProject')}</Text>
+      <div className={styles.dmSessionList}>
+        {projectDms.length === 0 ? (
+          <Text type="secondary" className={styles.dmSessionEmpty}>
+            {t('chat.noDmInProject')}
+          </Text>
+        ) : (
+          projectDms.map((s) => renderDmRow(s, false))
+        )}
+      </div>
+
+      {otherDms.length > 0 && (
+        <>
+          <Text className={styles.sidebarSectionTitle}>{t('chat.dmOtherProjects')}</Text>
+          <div className={styles.dmSessionList}>
+            {otherDms.map((s) => renderDmRow(s, true))}
+          </div>
+        </>
+      )}
+
+      {layout === 'main' && inDm && localUserId && (
+        <Text type="secondary" className={styles.dmPanelFooter}>
+          {t('chat.dmFromProject', {
+            name: resolveGroupDisplayName(
+              groups.find((g) => g.groupId === contextProjectId) ?? {
+                groupId: contextProjectId,
+                name: contextProjectId,
+                type: 'project'
+              },
+              t
             )
           })}
         </Text>
