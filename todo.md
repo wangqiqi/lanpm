@@ -110,8 +110,8 @@
 - [x] **UX-X-03** 驾驶舱加载失败：错误页 + 重试，禁止全 0 假数据 — 同 **UX-F-03** / **UX-V-07**
 - [x] **UX-X-04** App 身份 `getSetupStatus` 失败：错误页/重试，区分未配置 vs 服务不可用 — 同 **UX-F-04**
 - [x] **UX-X-05** 全局搜索 API 失败：toast 或错误态，与「无结果」区分 — 同 **UX-F-05**
-- [ ] **UX-X-06** TopBar「个人设置」：实现或移除 disabled 死胡同 — 同 **UX-F-06** / **PRD-F-08**
-- [ ] **UX-X-07** DM 会话时 TopBar：`dm:*` 在 Select 中显示「私聊：{name}」option 或只读 Badge（`TopBar` + `navigationStore`）
+- [x] **UX-X-06** TopBar「个人设置」：实现或移除 disabled 死胡同 — 同 **UX-F-06** / **PRD-F-08**
+- [x] **UX-X-07** DM 会话时 TopBar：`dm:*` 在 Select 中显示「私聊：{name}」option 或只读 Badge（`TopBar` + `navigationStore`）
 - [x] **UX-X-08** 任务树：选中含子节点任务时改进度，展示不可编辑说明（`TaskTreeView` L90-96）
 
 ### P1 — 弱闭环（UX 审查 §4.3、§3）
@@ -172,7 +172,7 @@
 - [x] **PRD-F-05** 全局搜索跳转高亮（`highlightTaskId` / `highlightMsgId` 各视图消费）— 同 **UX-X-01** / **UX-F-01**
 - [ ] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）
 - [ ] **PRD-F-07** 离线 7 天内消息补同步 — 与 **ARCH-07**
-- [ ] **PRD-F-08** 顶栏个人信息配置面板（`TopBar` profile 非 disabled）（`01` §5.2）— 与 **UX-F-06**
+- [x] **PRD-F-08** 顶栏个人信息配置面板（`TopBar` profile 非 disabled）（`01` §5.2）— 与 **UX-F-06**（RC：只读资料弹窗）
 - [ ] **PRD-F-09** 驾驶舱部门完成率视图（`01` §12.1）
 - [ ] **PRD-F-10** 文件断点续传（中断后续传逻辑）
 - [ ] **PRD-F-11** 传输限速可配置（`01` §10.4）
@@ -197,11 +197,11 @@
 ### 第一批（高价值 / 低成本）
 
 - [x] **UX-F-01** 全局搜索结果跳转后 scrollIntoView + 临时高亮（`GlobalSearch` → Chat/Board/Tree）— 同 **UX-X-01** / **PRD-F-05**
-- [ ] **UX-F-02** 他人消息显示昵称（`MessageBubble` + `members` 映射）
+- [x] **UX-F-02** 他人消息显示昵称（`MessageBubble` + `members` 映射）
 - [x] **UX-F-03** 驾驶舱加载失败：错误页 + 重试，勿展示全 0 假数据（`CockpitView`）— 同 **UX-X-03**
 - [x] **UX-F-04** App 启动身份拉取失败：错误页/重试，区分未配置 vs 服务不可用（`App.tsx`）— 同 **UX-X-04**
 - [x] **UX-F-05** 全局搜索失败：`message.error` 或 AutoComplete 错误态（`GlobalSearch.tsx`）— 同 **UX-X-05**
-- [ ] **UX-F-06** TopBar「个人设置」：实现或移除 disabled 项 — 同 **UX-X-06** / **PRD-F-08**
+- [x] **UX-F-06** TopBar「个人设置」：实现或移除 disabled 项 — 同 **UX-X-06** / **PRD-F-08**
 
 ### 第二批（体验 polish）
 

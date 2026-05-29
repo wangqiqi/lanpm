@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Avatar,
   Button,
@@ -23,10 +23,13 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { isDmGroupId, getDmPeerUserId } from '@shared/chat/dmSession'
 import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
+import ProfileModal from '@renderer/features/profile/ProfileModal'
+import { useDmStore } from '@renderer/stores/dmStore'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
@@ -51,7 +54,11 @@ export default function TopBar(): React.ReactElement {
   const createGroup = useNavigationStore((s) => s.createGroup)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const [createOpen, setCreateOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const user = useIdentityStore((s) => s.user)
+  const localUserId = user?.userId
+  const getDmSession = useDmStore((s) => s.getSession)
+  const getPeerDisplayName = useDmStore((s) => s.getPeerDisplayName)
   const device = useIdentityStore((s) => s.device)
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
@@ -64,7 +71,11 @@ export default function TopBar(): React.ReactElement {
 
   const handleGroupChange = (groupId: string): void => {
     const prevType = getGroupType(activeGroupId)
-    if (prevType === 'anonymous' && activeGroupId !== groupId) {
+    if (
+      prevType === 'anonymous' &&
+      activeGroupId !== groupId &&
+      !isDmGroupId(activeGroupId)
+    ) {
       void getLanpmApi().group.leaveAnonymous(activeGroupId)
     }
 
@@ -79,8 +90,34 @@ export default function TopBar(): React.ReactElement {
     navigate(groupViewPath(groupId, view))
   }
 
+  const groupSelectOptions = useMemo(() => {
+    const opts = groups.map((g) => ({
+      value: g.groupId,
+      label: (
+        <span>
+          {g.name}{' '}
+          <Text type="secondary" className={styles.groupType}>
+            {t(GROUP_TYPE_KEYS[g.type])}
+          </Text>
+        </span>
+      )
+    }))
+    if (isDmGroupId(activeGroupId) && !opts.some((o) => o.value === activeGroupId)) {
+      const session = getDmSession(activeGroupId)
+      const peerId = localUserId ? getDmPeerUserId(activeGroupId, localUserId) : null
+      const name =
+        session?.peerDisplayName ??
+        (peerId ? getPeerDisplayName(activeGroupId, peerId) : activeGroupId)
+      opts.unshift({
+        value: activeGroupId,
+        label: <span>{t('topbar.dmLabel', { name })}</span>
+      })
+    }
+    return opts
+  }, [groups, activeGroupId, localUserId, getDmSession, getPeerDisplayName, t])
+
   const userMenu: MenuProps['items'] = [
-    { key: 'profile', label: t('topbar.profile'), disabled: true },
+    { key: 'profile', label: t('topbar.profile'), onClick: () => setProfileOpen(true) },
     {
       key: 'device',
       label: t('topbar.deviceWithName', { name: device?.deviceName ?? '—' })
@@ -104,17 +141,7 @@ export default function TopBar(): React.ReactElement {
           className={styles.projectSelect}
           value={activeGroupId}
           onChange={handleGroupChange}
-          options={groups.map((g) => ({
-            value: g.groupId,
-            label: (
-              <span>
-                {g.name}{' '}
-                <Text type="secondary" className={styles.groupType}>
-                  {t(GROUP_TYPE_KEYS[g.type])}
-                </Text>
-              </span>
-            )
-          }))}
+          options={groupSelectOptions}
         />
         <Button type="text" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
           {t('topbar.createGroup')}
@@ -161,6 +188,7 @@ export default function TopBar(): React.ReactElement {
           navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
         }}
       />
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </header>
   )
 }

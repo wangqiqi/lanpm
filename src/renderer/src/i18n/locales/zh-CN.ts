@@ -23,7 +23,8 @@ const zhCN = {
   'topbar.searchPlaceholder': '搜索任务、消息…',
   'topbar.toggleTheme': '切换主题',
   'topbar.userFallback': '用户',
-  'topbar.profile': '个人设置（占位）',
+  'topbar.profile': '个人设置',
+  'topbar.dmLabel': '私聊：{name}',
   'topbar.device': '设备',
   'topbar.deviceWithName': '设备：{name}',
   'topbar.apiKey': 'API Key（M5）',
@@ -243,7 +244,12 @@ const zhCN = {
   'ai.enableExternal': '启用外部 AI',
   'presence.online': '在线',
   'presence.away': '离开',
-  'presence.offline': '离线'
+  'presence.offline': '离线',
+  'profile.title': '个人设置',
+  'profile.displayName': '显示名',
+  'profile.userId': '用户 ID',
+  'profile.department': '部门',
+  'profile.device': '本机设备'
 } satisfies Record<MessageKey, string>
 
 export default zhCN

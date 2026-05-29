@@ -23,7 +23,8 @@ const enUS = {
   'topbar.searchPlaceholder': 'Search tasks, messages…',
   'topbar.toggleTheme': 'Toggle theme',
   'topbar.userFallback': 'User',
-  'topbar.profile': 'Profile (placeholder)',
+  'topbar.profile': 'Profile',
+  'topbar.dmLabel': 'DM: {name}',
   'topbar.device': 'Device',
   'topbar.deviceWithName': 'Device: {name}',
   'topbar.apiKey': 'API Key (M5)',
@@ -243,7 +244,12 @@ const enUS = {
   'ai.enableExternal': 'Enable external AI',
   'presence.online': 'Online',
   'presence.away': 'Away',
-  'presence.offline': 'Offline'
+  'presence.offline': 'Offline',
+  'profile.title': 'Profile',
+  'profile.displayName': 'Display name',
+  'profile.userId': 'User ID',
+  'profile.department': 'Department',
+  'profile.device': 'This device'
 } satisfies Record<MessageKey, string>
 
 export default enUS

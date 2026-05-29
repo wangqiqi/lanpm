@@ -29,6 +29,8 @@ export default function MessageBubble({
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const isCode = message.content.kind === 'code'
+  const senderName =
+    members.find((m) => m.userId === message.senderUserId)?.displayName ?? message.senderUserId
 
   return (
     <div
@@ -38,7 +40,7 @@ export default function MessageBubble({
     >
       {!own && (
         <div className={styles.meta}>
-          {message.senderUserId} · {formatTime(message.createdAt)}
+          {senderName} · {formatTime(message.createdAt)}
         </div>
       )}
 

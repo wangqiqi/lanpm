@@ -24,6 +24,7 @@ export type MessageKey =
   | 'topbar.toggleTheme'
   | 'topbar.userFallback'
   | 'topbar.profile'
+  | 'topbar.dmLabel'
   | 'topbar.device'
   | 'topbar.deviceWithName'
   | 'topbar.apiKey'
@@ -243,5 +244,10 @@ export type MessageKey =
   | 'presence.online'
   | 'presence.away'
   | 'presence.offline'
+  | 'profile.title'
+  | 'profile.displayName'
+  | 'profile.userId'
+  | 'profile.department'
+  | 'profile.device'
 
 export type TranslateParams = Record<string, string | number>
