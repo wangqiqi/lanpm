@@ -7,6 +7,7 @@ import { useNetworkStore } from '@renderer/stores/networkStore'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { ProfileUpdateInput } from '@shared/identity'
+import { LANPM_APP_VERSION } from '@shared/appVersion'
 
 interface ProfileModalProps {
   open: boolean
@@ -107,6 +108,11 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
           <div>
             <Typography.Text type="secondary">
               {t('profile.ipWithAddress', { ip: localIp ?? '—' })}
+            </Typography.Text>
+          </div>
+          <div>
+            <Typography.Text type="secondary">
+              {t('profile.versionWithNumber', { version: LANPM_APP_VERSION })}
             </Typography.Text>
           </div>
         </Form.Item>

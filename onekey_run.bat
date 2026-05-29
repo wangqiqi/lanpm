@@ -37,18 +37,21 @@ if /i "%ACT%"=="clean" goto :cmd_clean_dispatch
 if /i "%ACT%"=="pack" goto :cmd_pack
 echo [lanpm] unknown action: %ACT%
 exit /b 1
+:print
+echo %~1
+exit /b 0
 :ensure_run_dir
 if not exist "%RUN_DIR%" mkdir "%RUN_DIR%"
 exit /b 0
 :pid_alive
 set "CHKPID=%~1"
 if not defined CHKPID exit /b 1
-tasklist /FI "PID eq %CHKPID%" 2>nul | find /i "%CHKPID%" >nul
+tasklist /FI "PID eq %CHKPID%" 2>nul | findstr /b /i "%CHKPID%" >nul
 exit /b %ERRORLEVEL%
 :count_vite
 set "VITE_COUNT=0"
 for /f "skip=1 tokens=1" %%p in ('wmic process where "Name='node.exe' and CommandLine like '%%electron-vite%%' and CommandLine like '%%lanpm%%'" get ProcessId 2^>nul') do (
-  if not "%%p"=="" set /a VITE_COUNT+=1
+  echo %%p| findstr /r "^[0-9][0-9]*$" >nul && set /a VITE_COUNT+=1
 )
 exit /b 0
 :test_dev_running
@@ -75,7 +78,7 @@ exit /b 0
 for /f "skip=1 tokens=1" %%p in ('wmic process where "Name='node.exe' and CommandLine like '%%electron-vite%%' and CommandLine like '%%lanpm%%'" get ProcessId 2^>nul') do (
   if not "%%p"=="" taskkill /F /PID %%p >nul 2>&1
 )
-timeout /t 1 /nobreak >nul
+ping 127.0.0.1 -n 2 >nul
 exit /b 0
 :stop_dev_tree
 set "KILLPID=%~1"
@@ -83,7 +86,7 @@ if not defined KILLPID exit /b 0
 call :pid_alive %KILLPID%
 if errorlevel 1 exit /b 0
 taskkill /T /PID %KILLPID% >nul 2>&1
-timeout /t 1 /nobreak >nul
+ping 127.0.0.1 -n 2 >nul
 call :pid_alive %KILLPID%
 if not errorlevel 1 taskkill /F /T /PID %KILLPID% >nul 2>&1
 exit /b 0
@@ -93,7 +96,7 @@ for %%P in (5173 5174) do (
   for /f "tokens=5" %%a in ('netstat -ano ^| findstr /C:":%%P " ^| findstr LISTENING') do (
     set "PORT_FOUND=1"
     set "LPID=%%a"
-    for /f "tokens=1" %%n in ('tasklist /FI "PID eq %%a" /NH 2^>nul') do echo   :%%P  %%n ^(pid %%a^)
+    for /f "tokens=1" %%n in ('tasklist /FI "PID eq %%a" /NH 2^>nul') do echo   :%%P  %%n pid=%%a
   )
 )
 if "%PORT_FOUND%"=="0" echo   5173/5174 not listening
@@ -108,29 +111,32 @@ if not errorlevel 1 (
 )
 if /i "%DEV_MODE%"=="web" (set "NPM_SCRIPT=dev:web") else (set "NPM_SCRIPT=dev")
 type nul >"%LOG_FILE%"
-echo %DEV_MODE%>"%MODE_FILE%"
+>"%MODE_FILE%" echo(%DEV_MODE%)
 echo [lanpm] starting dev mode: %DEV_MODE% ...
 echo [lanpm] log: %LOG_FILE%
 set "LANPM_ONEKEY=1"
 set "ELECTRON_RUN_AS_NODE="
 start "lanpm-dev" /MIN cmd /c "cd /d "%ROOT%" && set ELECTRON_RUN_AS_NODE= && npm run %NPM_SCRIPT% >> "%LOG_FILE%" 2>&1"
-timeout /t 3 /nobreak >nul
+ping 127.0.0.1 -n 4 >nul
 call :find_vite_pid
 if defined VITE_PID (
-  echo !VITE_PID!>"%PID_FILE%"
-  echo [lanpm] started pid=!VITE_PID! ^(%NPM_SCRIPT%^)
-  echo [lanpm] logs: onekey_run.bat logs
-  exit /b 0
+  echo !VITE_PID!| findstr /r "^[0-9][0-9]*$" >nul
+  if not errorlevel 1 goto :start_dev_pid_ok
 )
 call :test_dev_running
 if not errorlevel 1 (
-  echo [lanpm] started ^(vite detected^)
+  echo [lanpm] started - vite detected
   exit /b 0
 )
 echo [lanpm] start failed; see log:
 if exist "%LOG_FILE%" call :log_tail 30
 del "%PID_FILE%" "%MODE_FILE%" 2>nul
 exit /b 1
+:start_dev_pid_ok
+>"%PID_FILE%" echo(!VITE_PID!)
+call :print "[lanpm] started pid=!VITE_PID! mode=!NPM_SCRIPT!"
+call :print "[lanpm] logs: onekey_run.bat logs"
+exit /b 0
 :cmd_start
 call :start_dev electron
 exit /b %ERRORLEVEL%
@@ -141,11 +147,17 @@ exit /b %ERRORLEVEL%
 call :ensure_run_dir
 if exist "%PID_FILE%" (
   set /p "SPID=" <"%PID_FILE%"
-  echo [lanpm] stopping pid=!SPID! ...
-  call :stop_dev_tree !SPID!
+  set "SPID=!SPID: =!"
+  echo !SPID!| findstr /r "^[0-9][0-9]*$" >nul
+  if not errorlevel 1 (
+    call :print "[lanpm] stopping pid=!SPID! ..."
+    call :stop_dev_tree !SPID!
+  ) else (
+    call :print "[lanpm] invalid pid file; cleaning stray processes"
+  )
   del "%PID_FILE%" "%MODE_FILE%" 2>nul
 ) else (
-  echo [lanpm] no pid file; cleaning stray processes
+  call :print "[lanpm] no pid file; cleaning stray processes"
 )
 call :count_vite
 if !VITE_COUNT! gtr 0 (
@@ -158,7 +170,7 @@ exit /b 0
 set "RMODE=electron"
 if exist "%MODE_FILE%" set /p "RMODE=" <"%MODE_FILE%"
 call :cmd_stop
-timeout /t 1 /nobreak >nul
+ping 127.0.0.1 -n 2 >nul
 call :start_dev !RMODE!
 exit /b %ERRORLEVEL%
 :cmd_status
@@ -172,16 +184,16 @@ if not errorlevel 1 (
   if exist "%PID_FILE%" set /p "SPID=" <"%PID_FILE%"
   set "SMODE=electron"
   if exist "%MODE_FILE%" set /p "SMODE=" <"%MODE_FILE%"
-  echo [lanpm] dev: running ^(pid=!SPID!, mode=!SMODE!^)
+  echo [lanpm] dev: running pid=!SPID! mode=!SMODE!
 ) else (
   echo [lanpm] dev: not running
 )
 echo.
-echo [lanpm] Vite ports ^(5173/5174^):
+echo [lanpm] Vite ports 5173/5174:
 call :show_vite_ports
 echo.
 if exist "%LOG_FILE%" (
-  echo [lanpm] recent log ^(%LOG_FILE%^):
+  echo [lanpm] recent log: %LOG_FILE%
   call :log_tail 8
 )
 exit /b 0
@@ -194,7 +206,7 @@ if not errorlevel 1 (
   if exist "%MODE_FILE%" set /p "SMODE=" <"%MODE_FILE%"
   echo [lanpm] dev: running  pid=!SPID!  mode=!SMODE!
 ) else (
-  echo [lanpm] dev: not running ^(use start/web^)
+  echo [lanpm] dev: not running - 选项 1 或 2 可启动
 )
 call :show_vite_ports
 exit /b 0
@@ -220,7 +232,7 @@ where tail >nul 2>&1
 if not errorlevel 1 (
   tail -n %LOG_LINES% -f "%LOG_FILE%"
 ) else (
-  echo [lanpm] 未找到 tail，显示最近 %LOG_LINES% 行 ^(实时跟踪请用 onekey_run.ps1 logs^)
+  echo [lanpm] 未找到 tail，显示最近 %LOG_LINES% 行 - 实时跟踪请用 onekey_run.ps1 logs
   call :log_tail %LOG_LINES%
 )
 exit /b 0
@@ -237,7 +249,7 @@ if errorlevel 1 exit /b %ERRORLEVEL%
 echo [lanpm] build done -^> out/
 exit /b 0
 :cmd_preview
-echo [lanpm] preview ^(foreground^) ...
+echo [lanpm] preview - foreground ...
 call npm run preview
 exit /b %ERRORLEVEL%
 :cmd_rebuild
@@ -266,7 +278,7 @@ if /i not "!CHK_MODE!"=="quick" (
 echo [lanpm] check passed
 exit /b 0
 :cmd_verify
-echo [lanpm] verify:m7 ^(long^) ...
+echo [lanpm] verify:m7 - long ...
 call npm run verify:m7
 exit /b %ERRORLEVEL%
 :cmd_clean
@@ -292,7 +304,7 @@ if not exist "%ROOT%\out\main" (
   call npm run build
   if errorlevel 1 exit /b %ERRORLEVEL%
 )
-echo [lanpm] packing ^(electron-builder^) ...
+echo [lanpm] packing - electron-builder ...
 call npx electron-builder --config electron-builder.yml
 exit /b %ERRORLEVEL%
 :menu
@@ -305,23 +317,23 @@ echo.
 echo [lanpm] 目录: %ROOT%
 call :cmd_menu_brief
 echo.
-echo   1) start      启动 Electron 开发
-echo   2) web        仅渲染进程 ^(浏览器预览^)
-echo   3) restart    重启开发服务
-echo   4) stop       停止开发服务
-echo   5) status     查看状态
-echo   6) logs       跟踪日志
-echo   7) build      生产构建
-echo   8) preview    预览构建 ^(前台^)
-echo   9) rebuild    重编 native 依赖
-echo  10) check       typecheck + lint + verify:m0
-echo  11) check quick 跳过 verify:m0
-echo  12) verify      全量 verify:m7
-echo  13) install     npm install
-echo  14) clean       清理 out/dist
-echo  15) clean deep  含 node_modules
-echo  16) pack        安装包 ^(electron-builder^)
-echo   0) exit
+call :print "  1) start      启动 Electron 开发"
+call :print "  2) web        仅渲染进程 (浏览器预览)"
+call :print "  3) restart    重启开发服务"
+call :print "  4) stop       停止开发服务"
+call :print "  5) status     查看状态"
+call :print "  6) logs       跟踪日志"
+call :print "  7) build      生产构建"
+call :print "  8) preview    预览构建 (前台)"
+call :print "  9) rebuild    重编 native 依赖"
+call :print " 10) check       typecheck + lint + verify:m0"
+call :print " 11) check quick 跳过 verify:m0"
+call :print " 12) verify      全量 verify:m7"
+call :print " 13) install     npm install"
+call :print " 14) clean       清理 out/dist"
+call :print " 15) clean deep  含 node_modules"
+call :print " 16) pack        安装包 (electron-builder)"
+call :print "  0) exit"
 echo.
 set /p "choice=请选择 [0-16]: "
 echo.

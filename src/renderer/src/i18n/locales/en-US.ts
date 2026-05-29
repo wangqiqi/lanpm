@@ -42,6 +42,7 @@ const enUS = {
   'topbar.device': 'Device',
   'topbar.deviceWithName': 'Device: {name}',
   'topbar.ipWithAddress': 'IP: {ip}',
+  'topbar.versionWithNumber': 'Version: {version}',
   'topbar.apiKey': 'API Key (M5)',
   'topbar.resetIdentity': 'Sign out identity',
   'topbar.resetIdentityTitle': 'Sign out this device?',
@@ -406,6 +407,7 @@ const enUS = {
   'profile.department': 'Department',
   'profile.device': 'This device',
   'profile.ipWithAddress': 'IP: {ip}',
+  'profile.versionWithNumber': 'Version: {version}',
   'profile.saved': 'Profile saved',
   'profile.saveFailed': 'Failed to save profile',
   'profile.suffixHint': 'Shown as “{displayName}” (suffix {suffix} is kept)'

@@ -35,6 +35,7 @@ import { useNetworkStore } from '@renderer/stores/networkStore'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
 import ManualPeerModal from '@renderer/features/network/ManualPeerModal'
 import RegionButton from '@renderer/ui/RegionButton'
+import { LANPM_APP_VERSION } from '@shared/appVersion'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
 
@@ -180,6 +181,11 @@ export default function TopBar(): React.ReactElement {
     {
       key: 'ip',
       label: t('topbar.ipWithAddress', { ip: networkStatus?.localIp ?? '—' })
+    },
+    {
+      key: 'version',
+      label: t('topbar.versionWithNumber', { version: LANPM_APP_VERSION }),
+      disabled: true
     },
     { type: 'divider' },
     {

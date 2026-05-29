@@ -42,6 +42,7 @@ const zhCN = {
   'topbar.device': '设备',
   'topbar.deviceWithName': '设备：{name}',
   'topbar.ipWithAddress': 'IP：{ip}',
+  'topbar.versionWithNumber': '版本：{version}',
   'topbar.apiKey': 'API Key（M5）',
   'topbar.resetIdentity': '注销身份',
   'topbar.resetIdentityTitle': '注销本机身份？',
@@ -405,6 +406,7 @@ const zhCN = {
   'profile.department': '部门',
   'profile.device': '本机设备',
   'profile.ipWithAddress': 'IP：{ip}',
+  'profile.versionWithNumber': '版本：{version}',
   'profile.saved': '个人设置已保存',
   'profile.saveFailed': '保存个人设置失败',
   'profile.suffixHint': '对外显示为「{displayName}」（后缀 {suffix} 不变）'

@@ -11,10 +11,10 @@ const env = { ...process.env }
 delete env.ELECTRON_RUN_AS_NODE
 if (web) env.LANPM_BROWSER_DEV = '1'
 
-const args = ['electron-vite', 'dev', ...(web ? ['--rendererOnly'] : [])]
-const bin = process.platform === 'win32' ? 'npx.cmd' : 'npx'
+const cli = path.join(root, 'node_modules', 'electron-vite', 'bin', 'electron-vite.js')
+const args = [cli, 'dev', ...(web ? ['--rendererOnly'] : [])]
 
-const child = spawn(bin, args, {
+const child = spawn(process.execPath, args, {
   cwd: root,
   env,
   stdio: 'inherit',

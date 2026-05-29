@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.44] - 2026-05-29
+
+### Added
+- **`src/shared/appVersion.ts`**：从 `package.json` 读取 `LANPM_APP_VERSION`（构建期内联，Electron / 浏览器预览一致）
+- **顶栏用户菜单 / 个人设置**：本机设备与 IP 下方展示软件版本号
+
+### Changed
+- **`scripts/dev-run.mjs`**：以 `node electron-vite/bin/electron-vite.js` 启动，避免 Windows 下 `npx.cmd` 路径差异
+- **`onekey_run.bat`**：PID 数字校验、`echo` 写 pid/mode 文件、等待与菜单输出加固（CMD 兼容）
+- **`onekey_run.ps1`**：与 bat 同步的运维输出与健壮性调整
+- **i18n**：`topbar.versionWithNumber` / `profile.versionWithNumber`（中/英）
+- **`README.md`**：当前 RC 号与 `package.json` 对齐
+
+### Tag
+- `v1.0.0-rc.44` — 用户菜单版本展示与 Windows 开发启动加固
+
 ## [1.0.0-rc.43] - 2026-05-29
 
 ### Added
