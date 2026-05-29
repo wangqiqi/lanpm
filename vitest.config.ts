@@ -15,7 +15,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/shared/**/*.ts'],
-      exclude: ['**/*.d.ts', 'src/shared/**/channels.ts', 'src/shared/lanpm-api.ts']
+      exclude: ['**/*.d.ts', 'src/shared/**/channels.ts', 'src/shared/lanpm-api.ts'],
+      thresholds: {
+        lines: 85,
+        statements: 85,
+        functions: 85,
+        branches: 80
+      }
     }
   }
 })

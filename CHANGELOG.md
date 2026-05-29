@@ -2,6 +2,33 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.30] - 2026-05-29
+
+### Added
+- **AUTO-13** `verify:offline-sync-integration`：chat_sync_request → chat_sync_batch → SQLite 落库 + TTL 过滤
+- **AUTO-14** `verify:file-concurrency`：`FILE_MAX_CONCURRENT` + `countActiveTransfers` 边界
+- **AUTO-15** 扩展 `verify:m7-perf`：500 条消息分页 P95 门禁
+- **AUTO-16** `verify:coverage`：`src/shared` 覆盖率阈值（lines/functions/statements ≥85%，branches ≥80%）
+- **AUTO-17** 扩展 `verify:visual`：七页视图 token 守卫 + 亮/暗主题差异断言
+
+### Changed
+- **`verify:project`**：`npm run test` → `verify:coverage`（含阈值）
+- **`verify:m7`**：串联 offline-sync-integration · file-concurrency
+
+### Tag
+- `v1.0.0-rc.30` — P2 稳定性/边界自动化守卫
+
+## [1.0.0-rc.29] - 2026-05-29
+
+### Added
+- **AUTO-01~09 / AUTO-06 / AUTO-12**：P0 一致性守卫（`verify:p0`：IPC 契约 · i18n 键 · 文档链接 · RC 现状 · 路由 · Stub parity · sync handler · schema）
+- **AUTO-10** `verify:dual-stub`：单机双 Stub 联调（discover + chat + read_receipt + task_patch），纳入 `verify:m2`
+- **AUTO-12** `verify:peer-registry`：Stub peer TTL / excludeDeviceId，纳入 `verify:m0`
+- **`verify:project`**：串联 `verify:p0` + `npm run build`（AUTO-04/11）
+
+### Tag
+- `v1.0.0-rc.29` — P0/P1 自动化一致性守卫与双 Stub 联调
+
 ## [1.0.0-rc.28] - 2026-05-29
 
 ### Added

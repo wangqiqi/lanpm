@@ -8,10 +8,12 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { randomUUID } from 'node:crypto'
 import { generateDhKeyPair, deriveSharedSecret, deriveAesKey } from '../../src/main/crypto/dhSession.ts'
 import { sealEnvelope, openEnvelope } from '../../src/main/crypto/envelopeCrypto.ts'
 import { groupViewPath } from '../../src/renderer/src/routes/paths.ts'
 import type { SyncEnvelope } from '../../src/shared/network/types.ts'
+import { listMessagesByGroup } from '../../src/main/storage/repositories/messageRepository.ts'
 
 function p95(samples: number[]): number {
   const sorted = [...samples].sort((a, b) => a - b)
@@ -35,7 +37,6 @@ try {
       `INSERT INTO sync_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`
     ).run(`k${i}`, `v${i}`)
   }
-  db.close()
   const dbInitMs = performance.now() - t0
   assert.ok(dbInitMs < 800, `schema+100 writes took ${dbInitMs.toFixed(1)}ms (limit 800ms)`)
 
@@ -74,8 +75,41 @@ try {
   const routeP95 = p95(routeSamples)
   assert.ok(routeP95 < 1, `route P95 ${routeP95.toFixed(3)}ms (limit 1ms)`)
 
+  const GROUP = 'perf-messages'
+  const now = new Date().toISOString()
+  const insertStmt = db.prepare(
+    `INSERT INTO messages (
+      msg_id, group_id, sender_user_id, sender_device_id, type, content_json,
+      lamport_ts, created_at, delivery_status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+  for (let i = 0; i < 500; i++) {
+    insertStmt.run(
+      `msg_perf_${i}_${randomUUID()}`,
+      GROUP,
+      'user_perf',
+      'dev_perf',
+      'text',
+      JSON.stringify({ kind: 'text', text: `perf ${i}` }),
+      i + 1,
+      now,
+      'sent'
+    )
+  }
+
+  const msgSamples: number[] = []
+  for (let i = 0; i < 200; i++) {
+    const s = performance.now()
+    listMessagesByGroup(db, GROUP, 200)
+    msgSamples.push(performance.now() - s)
+  }
+  const msgP95 = p95(msgSamples)
+  assert.ok(msgP95 < 15, `message page P95 ${msgP95.toFixed(2)}ms (limit 15ms)`)
+
+  db.close()
+
   console.log(
-    `verify-m7-perf: ok (db=${dbInitMs.toFixed(1)}ms cryptoP95=${cryptoP95.toFixed(2)}ms routeP95=${routeP95.toFixed(3)}ms)`
+    `verify-m7-perf: ok (db=${dbInitMs.toFixed(1)}ms cryptoP95=${cryptoP95.toFixed(2)}ms routeP95=${routeP95.toFixed(3)}ms msgP95=${msgP95.toFixed(2)}ms)`
   )
 } finally {
   rmSync(dir, { recursive: true, force: true })

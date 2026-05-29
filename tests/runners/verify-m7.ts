@@ -12,6 +12,8 @@ const steps: { name: string; cmd: string; env?: Record<string, string> }[] = [
   { name: 'i18n-en', cmd: 'npm run verify:i18n-en' },
   { name: 'network-multicast', cmd: 'npm run verify:network-multicast' },
   { name: 'offline-sync', cmd: 'npm run verify:offline-sync' },
+  { name: 'offline-sync-integration', cmd: 'npm run verify:offline-sync-integration', env: { LANPM_NETWORK: 'stub' } },
+  { name: 'file-concurrency', cmd: 'npm run verify:file-concurrency' },
   { name: 'task-sync', cmd: 'npm run verify:task-sync' },
   { name: 'file-sync', cmd: 'npm run verify:file-sync' },
   { name: 'm7-acceptance', cmd: 'npm run verify:m7-acceptance' },

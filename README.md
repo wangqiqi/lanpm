@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.28`（M0–M7 已闭环；发布门禁见 [docs/06](./docs/06_验收与里程碑计划.md) §2）
+- **RC**：`1.0.0-rc.30`（M0–M7 已闭环；发布门禁见 [docs/06](./docs/06_验收与里程碑计划.md) §2）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md)
@@ -21,6 +21,7 @@ npm run dev      # 启动前也会自动检测并重编（若 ABI 不一致）
 npm run lint     # ESLint
 npm run typecheck
 npm run test        # Vitest 单元（tests/unit，见 docs/05 §1）
+npm run verify:p0       # P0 一致性守卫（IPC / i18n / docs …）
 npm run verify:m7   # 全量回归（含 test + verify:* 集成）
 npm run build       # 生产构建
 ```

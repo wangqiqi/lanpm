@@ -87,6 +87,23 @@ for (const token of REQUIRED_TOKENS) {
   assert.ok(darkBlock.includes(token), `dark theme missing ${token}`)
 }
 
+function themeTokenValue(block: string, token: string): string | null {
+  const re = new RegExp(`${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:\\s*([^;]+);`)
+  const m = block.match(re)
+  return m?.[1]?.trim() ?? null
+}
+
+const lightIdx = globalCss.indexOf("html[data-theme='light']")
+const darkIdx = globalCss.indexOf("html[data-theme='dark']")
+const lightBlock = globalCss.slice(lightIdx, darkIdx)
+const darkBlock = globalCss.slice(darkIdx)
+for (const token of ['--lanpm-bg', '--lanpm-text', '--lanpm-bubble-bg'] as const) {
+  const lightVal = themeTokenValue(lightBlock, token)
+  const darkVal = themeTokenValue(darkBlock, token)
+  assert.ok(lightVal && darkVal, `${token} must be defined in both themes`)
+  assert.notEqual(lightVal, darkVal, `${token} light/dark must differ (AUTO-17)`)
+}
+
 // --- UI components ---
 for (const rel of UI_COMPONENTS) {
   assert.ok(existsSync(join(renderer, rel)), `missing ${rel}`)
@@ -176,7 +193,29 @@ for (const [rel, token] of [
   assert.match(src, new RegExp(token), `${rel} should use ${token}`)
 }
 
+const TOKEN_PATTERN = /var\(--lanpm|readCssVar|cssVar\(/
+
+const SEVEN_PAGE_VIEWS: { tsx: string; css?: string; label: string }[] = [
+  { tsx: 'features/chat/ChatView.tsx', css: 'features/chat/chat.module.css', label: 'Chat' },
+  { tsx: 'features/board/BoardView.tsx', css: 'features/board/board.module.css', label: 'Board' },
+  { tsx: 'features/tree/TaskTreeView.tsx', css: 'features/tree/tree.module.css', label: 'Tree' },
+  { tsx: 'features/gantt/GanttView.tsx', css: 'features/gantt/gantt.module.css', label: 'Gantt' },
+  { tsx: 'features/files/FilesView.tsx', css: 'features/files/files.module.css', label: 'Files' },
+  { tsx: 'views/CockpitView.tsx', css: 'views/CockpitView.module.css', label: 'Cockpit' },
+  { tsx: 'features/setup/SetupWizard.tsx', css: 'features/setup/SetupWizard.module.css', label: 'Setup' }
+]
+
+for (const { tsx, css, label } of SEVEN_PAGE_VIEWS) {
+  const tsxSrc = readFileSync(join(renderer, tsx), 'utf8')
+  const cssPath = css ? join(renderer, css) : null
+  const cssSrc = cssPath && existsSync(cssPath) ? readFileSync(cssPath, 'utf8') : ''
+  assert.ok(
+    TOKEN_PATTERN.test(tsxSrc) || TOKEN_PATTERN.test(cssSrc),
+    `${label} view (${tsx}) must use LanPM design tokens`
+  )
+}
+
 console.log(
   'verify:visual OK',
-  `(${REQUIRED_TOKENS.length} tokens, ${UI_COMPONENTS.length} ui modules, ${scanned} css files)`
+  `(${REQUIRED_TOKENS.length} tokens, ${UI_COMPONENTS.length} ui modules, ${SEVEN_PAGE_VIEWS.length} page views, ${scanned} css files)`
 )
