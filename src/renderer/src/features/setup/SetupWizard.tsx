@@ -20,7 +20,7 @@ interface FormValues {
 }
 
 export default function SetupWizard({ onComplete }: SetupWizardProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
   const [form] = Form.useForm<FormValues>()
@@ -86,7 +86,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
       message.success(t('setup.saved'))
       onComplete(status)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('setup.saveFailed'))
+      message.error(formatError(err, 'setup.saveFailed'))
     } finally {
       setSubmitting(false)
     }

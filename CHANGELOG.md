@@ -2,6 +2,24 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.61] - 2026-05-29
+
+### Added
+- **i18n 错误码体系**：`shared/errors/lanpmError`（`throwLanpm` / `isLanpmErrorCode`）；主进程用户可见错误统一为 key；Renderer `formatAppError` + `useI18n().formatError`
+- **err.* / member.***：36 条业务错误与访客展示文案（zh-CN / en-US，共 545 key）
+- **任务树详情栏**：右侧常驻详情区（对齐文件预览）；默认选中首个根任务；`tree.selectToViewDetail`
+- **设计微调.md**：亮/暗视觉层次与分界备忘（聊天侧栏、顶栏、令牌）
+
+### Changed
+- **访客 / 私聊占位**：`LANPM_GUEST_DISPLAY`、`LANPM_DM_GROUP_LABEL`；`memberDisplay` / `groupLabels` 展示层解析
+- **Renderer**：各页 `message.error` 改用 `formatError`；`verify:i18n-keys` 扫描 `throwLanpm` 与 `throw new Error('key')`
+- **verify:visual**：校验 CSS 中 `var(--lanpm-*)` 须在 `global.module.css` 定义
+- **聊天**：成员列表标题按钮 `--lanpm-text` 令牌修正
+- **plan.md / 微信借鉴.md**：rc.54–rc.60 与 WX 全文迁入 `archive/plan/20260529_224315_*`；根目录仅保留手验索引
+
+### Tag
+- `v1.0.0-rc.61` — 全栈 i18n 错误码、任务树详情栏、视觉备忘
+
 ## [1.0.0-rc.60] - 2026-05-29
 
 ### Added

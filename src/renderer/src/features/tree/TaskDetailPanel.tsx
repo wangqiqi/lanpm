@@ -55,7 +55,7 @@ export default function TaskDetailPanel({
   onSave,
   onDelete
 }: TaskDetailPanelProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
@@ -128,7 +128,7 @@ export default function TaskDetailPanel({
       })
       message.success(t('tree.detailSaved'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
+      message.error(formatError(err, 'tree.updateFailed'))
     } finally {
       setSaving(false)
     }

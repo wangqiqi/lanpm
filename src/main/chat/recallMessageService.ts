@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import type { ChatMessage } from '../../shared/chat/types'
 import {
   applyRecallPayload,
@@ -69,7 +70,7 @@ export async function recallMessage(
 ): Promise<ChatMessage> {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
 
   let existing: ChatMessage | null | undefined
@@ -80,10 +81,10 @@ export async function recallMessage(
   }
 
   if (!existing || existing.groupId !== groupId) {
-    throw new Error('消息不存在')
+    throwLanpm('stub.messageNotFound')
   }
   if (!canRecallMessage(existing, status.user.userId)) {
-    throw new Error('只能撤回自己发送的消息')
+    throwLanpm('stub.recallNotAllowed')
   }
 
   const recalledAt = new Date().toISOString()

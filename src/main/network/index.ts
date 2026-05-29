@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import type { NetworkTransport } from '../../shared/network'
 import type { NetworkMode, NetworkStatusView } from '../../shared/network/status'
 import { initChatService } from '../chat/chatService'
@@ -118,7 +119,7 @@ export function reconnectNetwork(db: Database): void {
 
 export async function connectManualPeer(host: string, port: number): Promise<void> {
   const transport = getNetworkTransport()
-  if (!transport) throw new Error('网络未就绪')
+  if (!transport) throwLanpm('err.networkNotReady')
 
   if (transport instanceof RealNetworkTransport) {
     await transport.connectManualHost(host, port)
@@ -128,7 +129,7 @@ export async function connectManualPeer(host: string, port: number): Promise<voi
     transport.registerManualPeer(host, port)
     return
   }
-  throw new Error('当前网络模式不支持手动添加节点')
+  throwLanpm('err.manualPeerUnsupported')
 }
 
 export { getKnownLanUserIds, NetworkStub, RealNetworkTransport }

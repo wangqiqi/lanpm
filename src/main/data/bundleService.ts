@@ -7,6 +7,7 @@ import type {
   BundleConflictMode,
   GroupBundleImportResult
 } from '../../shared/data/bundle'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { sealBytes, openBytes } from '../crypto/envelopeCrypto'
 import { listMessagesByGroup } from '../storage/repositories/messageRepository'
 import { listTasksByGroup } from '../storage/repositories/taskRepository'
@@ -93,7 +94,7 @@ export function importGroupBundle(
   conflictMode: BundleConflictMode
 ): GroupBundleImportResult {
   const wrapped = JSON.parse(readFileSync(inputPath, 'utf8')) as BundleFile
-  if (wrapped.version !== BUNDLE_VERSION) throw new Error('不支持的备份版本')
+  if (wrapped.version !== BUNDLE_VERSION) throwLanpm('err.bundleVersionUnsupported')
   const key = deriveKey(password, Buffer.from(wrapped.kdfSalt, 'base64'))
   const plainBuf = openBytes(
     key,

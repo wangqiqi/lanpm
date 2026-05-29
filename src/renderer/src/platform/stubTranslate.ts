@@ -13,5 +13,5 @@ export function stubT(key: MessageKey): string {
 }
 
 export function stubError(key: MessageKey): Error {
-  return new Error(stubT(key))
+  return new Error(key)
 }

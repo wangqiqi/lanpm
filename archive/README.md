@@ -12,7 +12,7 @@
 | `todo/` | 已完成 todo 迁出；手验快照 `20260529_223000_todo手验与维护项_rc58.md`（原根目录 `todo.md`） |
 | `review/` | V-14b 审图、UI/UX 评估与检查报告 |
 | `milestone/` | M3/M7 等里程碑实现说明 |
-| `plan/` | plan 迁出 |
+| `plan/` | plan 迁出；含 `20260529_224315_plan与微信借鉴已完成全量归档_rc60.md`（根目录 plan/微信借鉴 已完成段） |
 | `docs-meta/` | 文档体系合并、原型迁移记录 |
 | `prototypes/` | 历史 HTML 原型 |
 

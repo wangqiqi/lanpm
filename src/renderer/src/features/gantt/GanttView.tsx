@@ -33,7 +33,7 @@ const GANTT_ROW_HEIGHT = 44
 const GANTT_HEADER_HEIGHT = 50
 
 export default function GanttView(): React.ReactElement {
-  const { locale, t } = useI18n()
+  const { locale, t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
@@ -141,7 +141,7 @@ export default function GanttView(): React.ReactElement {
         await updateSchedule({ taskId: task.taskId, startDate, endDate })
         return true
       } catch (err: unknown) {
-        message.error(err instanceof Error ? err.message : t('gantt.scheduleFailed'))
+        message.error(formatError(err, 'gantt.scheduleFailed'))
         return false
       } finally {
         window.setTimeout(() => {
@@ -169,7 +169,7 @@ export default function GanttView(): React.ReactElement {
       setFromId(undefined)
       setToId(undefined)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('gantt.dependencyFailed'))
+      message.error(formatError(err, 'gantt.dependencyFailed'))
     }
   }
 
@@ -181,7 +181,7 @@ export default function GanttView(): React.ReactElement {
       })
       await loadTasks(gid)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('gantt.milestoneFailed'))
+      message.error(formatError(err, 'gantt.milestoneFailed'))
     }
   }
 
@@ -205,7 +205,7 @@ export default function GanttView(): React.ReactElement {
       message.success(t('gantt.scheduleSaved'))
       setScheduleOpen(false)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('gantt.scheduleFailed'))
+      message.error(formatError(err, 'gantt.scheduleFailed'))
     } finally {
       setScheduleSaving(false)
     }

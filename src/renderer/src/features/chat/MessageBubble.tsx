@@ -8,6 +8,7 @@ import { canRecallMessage } from '@shared/chat/recall'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
+import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import MentionText from '@renderer/features/chat/MentionText'
@@ -70,7 +71,10 @@ export default function MessageBubble({
     () => members.find((m) => m.userId === message.senderUserId),
     [members, message.senderUserId]
   )
-  const senderName = sender?.displayName ?? message.senderUserId
+  const senderName = resolveMemberDisplayName(
+    sender?.displayName ?? message.senderUserId,
+    t
+  )
   const senderMember: GroupMemberView = sender ?? {
     userId: message.senderUserId,
     displayName: senderName
@@ -81,7 +85,9 @@ export default function MessageBubble({
     const { recalledBy } = message.content
     if (recalledBy === currentUserId) return t('chat.recalledYou')
     const actor = members.find((m) => m.userId === recalledBy)
-    return actor?.displayName ?? recalledBy
+    return actor
+      ? resolveMemberDisplayName(actor.displayName, t)
+      : recalledBy
   }, [message.content, members, currentUserId, t])
 
   const senderMenu: MenuProps = useMemo(() => {
@@ -143,6 +149,7 @@ export default function MessageBubble({
         <button
           type="button"
           className={styles.bubbleAttachLink}
+          aria-label={t('chat.openInFiles')}
           onClick={() => {
             if (message.content.kind !== 'file') return
             navigate(groupViewPath(groupId, 'files'), {

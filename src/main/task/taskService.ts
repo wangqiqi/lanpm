@@ -6,6 +6,7 @@ import { TASK_PUSH_CHANNEL } from '../../shared/task/channels'
 import { applyAggregatedProgress } from '../../shared/task/progress'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '../../shared/task/types'
 import type { TaskDependency, UpsertDependencyInput } from '../../shared/task/dependency'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { validateOtherReason } from '../../shared/task/validation'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
@@ -32,7 +33,7 @@ import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { publishTaskDelete, publishTaskUpsert } from './taskSyncService'
 
 function assertTaskWritable(db: Database, groupId: string): void {
-  if (groupId.startsWith('dm:')) throw new Error('私聊不支持任务')
+  if (groupId.startsWith('dm:')) throwLanpm('stub.dmNoTask')
   assertGroupAllowsTasks(resolveGroupType(db, groupId))
 }
 
@@ -62,17 +63,17 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
   assertTaskWritable(db, input.groupId)
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
   const title = input.title.trim()
-  if (!title) throw new Error('任务标题不能为空')
+  if (!title) throwLanpm('stub.taskTitleEmpty')
 
   const taskId = `task_${randomUUID()}`
   const task = buildTaskFromInput(input, status.user.userId, taskId)
   task.sortOrder = getMaxSortOrderInColumn(db, input.groupId, task.status) + 1
 
   const reasonErr = validateOtherReason(task.status, task.otherReason)
-  if (reasonErr) throw new Error(reasonErr)
+  if (reasonErr) throwLanpm(reasonErr)
 
   insertTask(db, task)
   publishTaskUpsert(db, task)
@@ -82,7 +83,7 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
 
 export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
   const existing = getTaskById(db, input.taskId)
-  if (!existing) throw new Error('任务不存在')
+  if (!existing) throwLanpm('stub.taskNotFound')
   assertTaskWritable(db, existing.groupId)
 
   const nextStatus = input.status ?? existing.status
@@ -94,10 +95,10 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
         : existing.otherReason
 
   const reasonErr = validateOtherReason(nextStatus, nextReason)
-  if (reasonErr) throw new Error(reasonErr)
+  if (reasonErr) throwLanpm(reasonErr)
 
   const updated = updateTaskRow(db, input)
-  if (!updated) throw new Error('任务更新失败')
+  if (!updated) throwLanpm('err.taskUpdateFailed')
   publishTaskUpsert(db, updated)
   broadcastTasksChanged(existing.groupId)
   return listGroupTasks(db, existing.groupId).find((t) => t.taskId === updated.taskId) ?? updated
@@ -105,11 +106,11 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
 
 export function moveGroupTask(db: Database, input: MoveTaskInput): Task {
   const existing = getTaskById(db, input.taskId)
-  if (!existing) throw new Error('任务不存在')
+  if (!existing) throwLanpm('stub.taskNotFound')
   assertTaskWritable(db, existing.groupId)
 
   const reasonErr = validateOtherReason(input.status, input.otherReason ?? existing.otherReason)
-  if (reasonErr) throw new Error(reasonErr)
+  if (reasonErr) throwLanpm(reasonErr)
 
   const sortOrder =
     input.sortOrder ??
@@ -143,7 +144,7 @@ export async function createTaskFromChat(
 
 export function updateTaskSchedule(db: Database, input: GanttScheduleInput): Task {
   const existing = getTaskById(db, input.taskId)
-  if (!existing) throw new Error('任务不存在')
+  if (!existing) throwLanpm('stub.taskNotFound')
   assertTaskWritable(db, existing.groupId)
   return updateGroupTask(db, {
     taskId: input.taskId,
@@ -157,7 +158,7 @@ export function upsertTaskDependency(db: Database, input: UpsertDependencyInput)
   const from = getTaskById(db, input.fromTaskId)
   const to = getTaskById(db, input.toTaskId)
   if (!from || !to || from.groupId !== input.groupId || to.groupId !== input.groupId) {
-    throw new Error('依赖任务不存在或不属于该群组')
+    throwLanpm('err.dependencyInvalid')
   }
   const dep = upsertDependency(db, input)
   broadcastTasksChanged(input.groupId)

@@ -4,7 +4,7 @@ const DM_SEP = '__'
 /** 两用户确定性私聊 groupId（字典序，对齐 docs/03 私聊 P0） */
 export function buildDmGroupId(userA: string, userB: string): string {
   if (userA === userB) {
-    throw new Error('不能与自己私聊')
+    throw new Error('err.dmSelf')
   }
   const [a, b] = [userA, userB].sort()
   return `${DM_PREFIX}${a}${DM_SEP}${b}`
@@ -35,5 +35,5 @@ export function getDmPeerUserId(groupId: string, localUserId: string): string | 
 }
 
 export function formatDmTitle(peerDisplayName: string): string {
-  return `私聊 · ${peerDisplayName}`
+  return peerDisplayName
 }

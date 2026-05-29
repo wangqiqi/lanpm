@@ -35,7 +35,7 @@ try {
   buildDmGroupId(alice, alice)
   throw new Error('expected self-dm error')
 } catch (e) {
-  if (!(e instanceof Error) || !e.message.includes('不能与自己私聊')) {
+  if (!(e instanceof Error) || e.message !== 'err.dmSelf') {
     throw e
   }
 }

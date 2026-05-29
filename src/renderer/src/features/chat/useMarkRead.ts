@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import { translate } from '@renderer/i18n/messages'
+import { formatAppError } from '@renderer/i18n/formatAppError'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useBadgeStore } from '@renderer/stores/badgeStore'
 
@@ -32,8 +32,10 @@ export function useMarkRead(groupId: string, messages: ChatMessage[], localUserI
           for (const id of pending) markedRef.current.add(id)
           void useBadgeStore.getState().refresh(groupId)
         })
-        .catch(() => {
-          message.error(translate(useUiStore.getState().locale, 'chat.markReadFailed'))
+        .catch((err: unknown) => {
+          message.error(
+            formatAppError(err, useUiStore.getState().locale, 'chat.markReadFailed')
+          )
         })
     }, 300)
 

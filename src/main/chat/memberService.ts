@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import { LANPM_GUEST_DISPLAY } from '../../shared/constants/display'
 import type { GroupMemberView } from '../../shared/chat/members'
 import type { UserPresence } from '../../shared/network/types'
 import { isDmGroupId, parseDmGroupId } from '../../shared/chat/dmSession'
@@ -62,7 +63,7 @@ function anonymousMembers(db: Database, groupId: string): GroupMemberView[] {
   const records = listDbGroupMembers(db, groupId)
   return records.map((m) => ({
     userId: m.userId,
-    displayName: m.displayAlias ?? '访客',
+    displayName: m.displayAlias ?? LANPM_GUEST_DISPLAY,
     mentionKeys: m.displayAlias ? [m.displayAlias] : []
   }))
 }
@@ -111,7 +112,7 @@ export function getMemberDisplayName(db: Database, groupId: string, userId: stri
   const groupType = resolveGroupType(db, groupId)
   if (isAnonymousGroupType(groupType)) {
     const alias = listDbGroupMembers(db, groupId).find((m) => m.userId === userId)?.displayAlias
-    return alias ?? '访客'
+    return alias ?? LANPM_GUEST_DISPLAY
   }
   const user = getUserById(db, userId)
   return user?.displayName ?? userId

@@ -66,7 +66,7 @@ function formatTime(iso: string): string {
 }
 
 export default function ChatView(): React.ReactElement {
-  const { t, locale } = useI18n()
+  const { t, locale, formatError } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -349,7 +349,7 @@ export default function ChatView(): React.ReactElement {
         upsertMessage(chatMsg)
         message.success(t('chat.taskCreated'))
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('chat.taskCreateFailed'))
+        message.error(formatError(err, 'chat.taskCreateFailed'))
       }
       return
     }
@@ -359,7 +359,7 @@ export default function ChatView(): React.ReactElement {
       await sendText(gid, text)
       setDraft('')
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('chat.sendFailed'))
+      message.error(formatError(err, 'chat.sendFailed'))
       setDraft(savedDraft)
     }
   }, [draft, gid, sendText, createFromChat, upsertMessage, taskAllowed, t])
@@ -396,7 +396,7 @@ export default function ChatView(): React.ReactElement {
       try {
         await recallMessage(gid, msgId)
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('chat.recallFailed'))
+        message.error(formatError(err, 'chat.recallFailed'))
       }
     },
     [gid, recallMessage, message, t]
@@ -488,7 +488,7 @@ export default function ChatView(): React.ReactElement {
             return
           }
           void sendFile(gid, path).catch((err: unknown) =>
-            message.error(err instanceof Error ? err.message : t('chat.fileSendFailed'))
+            message.error(formatError(err, 'chat.fileSendFailed'))
           )
         }}
       >
@@ -626,7 +626,7 @@ export default function ChatView(): React.ReactElement {
                     onClick={() =>
                       void pickAndSendFile(gid).catch((err: unknown) =>
                         message.error(
-                          err instanceof Error ? err.message : t('chat.fileSendFailed')
+                          formatError(err, 'chat.fileSendFailed')
                         )
                       )
                     }
@@ -641,7 +641,7 @@ export default function ChatView(): React.ReactElement {
                     onClick={() =>
                       void captureAndSendScreenshot(gid).catch((err: unknown) =>
                         message.error(
-                          err instanceof Error ? err.message : t('chat.screenshotFailed')
+                          formatError(err, 'chat.screenshotFailed')
                         )
                       )
                     }
@@ -733,7 +733,7 @@ export default function ChatView(): React.ReactElement {
               try {
                 await handleCreateTask(title)
               } catch (err) {
-                message.error(err instanceof Error ? err.message : t('chat.taskCreateFailed'))
+                message.error(formatError(err, 'chat.taskCreateFailed'))
                 throw err
               }
             }}

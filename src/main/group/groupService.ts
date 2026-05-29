@@ -5,6 +5,8 @@ import { BrowserWindow } from 'electron'
 import type { CreateGroupInput, GroupRecord } from '../../shared/group/types'
 import type { GroupType } from '../../shared/navigation/types'
 import { GROUP_PUSH_CHANNEL } from '../../shared/group/channels'
+import { LANPM_GUEST_DISPLAY } from '../../shared/constants/display'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { MOCK_GROUPS } from '../../shared/group/mock'
 import { LOCAL_REMOVED_PREFIX, REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import { getCachedGroup } from '../discover/discoverGroupRegistry'
@@ -36,7 +38,7 @@ export function ensureSeedGroups(db: Database): void {
 
 function nextAnonymousAlias(db: Database, groupId: string): string {
   const n = countAnonymousAliases(db, groupId) + 1
-  return `访客${n}`
+  return `${LANPM_GUEST_DISPLAY}:${n}`
 }
 
 function joinGroupMember(db: Database, groupId: string, userId: string, anonymous: boolean): void {
@@ -93,14 +95,14 @@ export function listDiscoverableGroupsForAdvert(db: Database): {
 export function joinDiscoverableGroup(db: Database, groupId: string): GroupRecord {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
 
   let group = getGroupById(db, groupId)
   if (!group) {
     const cached = getCachedGroup(groupId)
     if (!cached) {
-      throw new Error('未在局域网发现该群组，请刷新后重试')
+      throwLanpm('err.groupNotDiscovered')
     }
     const now = new Date().toISOString()
     group = {
@@ -122,12 +124,12 @@ export function joinDiscoverableGroup(db: Database, groupId: string): GroupRecor
 export function createUserGroup(db: Database, input: CreateGroupInput): GroupRecord {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
 
   const name = input.name.trim()
   if (name.length < 2 || name.length > 40) {
-    throw new Error('群组名称须为 2–40 个字符')
+    throwLanpm('err.groupNameLength')
   }
 
   const groupId = `grp_${randomUUID()}`
@@ -150,18 +152,18 @@ export function createUserGroup(db: Database, input: CreateGroupInput): GroupRec
 export function dissolveGroup(db: Database, groupId: string): void {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
   if (groupId.startsWith('dm:')) {
-    throw new Error('无法解散私信会话')
+    throwLanpm('err.cannotDissolveDm')
   }
 
   const group = getGroupById(db, groupId)
   if (!group) {
-    throw new Error('群组不存在')
+    throwLanpm('err.groupNotFound')
   }
   if (group.createdBy !== status.user.userId) {
-    throw new Error('仅群主可解散群组')
+    throwLanpm('err.dissolveOwnerOnly')
   }
 
   purgeGroupFilesFromDisk(db, groupId)

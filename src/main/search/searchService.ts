@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import { LANPM_DM_GROUP_LABEL } from '../../shared/constants/display'
 import type { GlobalSearchHit, GlobalSearchResult } from '../../shared/search/types'
 import { getGroupById } from '../storage/repositories/groupRepository'
 import { searchMessagesByContent, searchTasksByTitle } from '../storage/repositories/searchRepository'
@@ -8,7 +9,7 @@ import { listGroupMembers } from '../chat/memberService'
 function groupLabel(db: Database, groupId: string): string {
   const g = getGroupById(db, groupId)
   if (g) return g.name
-  if (groupId.startsWith('dm:')) return '私聊'
+  if (groupId.startsWith('dm:')) return LANPM_DM_GROUP_LABEL
   return groupId
 }
 

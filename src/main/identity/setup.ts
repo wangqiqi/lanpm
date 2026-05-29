@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { hostname } from 'node:os'
 import { resolveDeviceName } from '../../shared/identity/deviceName'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from '../../shared/identity'
@@ -64,7 +65,7 @@ export function completeSetup(db: Database, input: SetupInput): SetupStatus {
   const baseName = input.baseName.trim()
   const deviceName = getSuggestedDeviceName()
   if (baseName.length < 2 || baseName.length > 20) {
-    throw new Error('用户名须为 2–20 个字符')
+    throwLanpm('err.usernameLength')
   }
 
   const { userId, suffix, displayName } = allocateUserIdWithLanCheck(db, baseName)
@@ -99,17 +100,17 @@ export function completeSetup(db: Database, input: SetupInput): SetupStatus {
 export function updateProfile(db: Database, input: ProfileUpdateInput): SetupStatus {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
 
   const baseName = input.baseName.trim()
   if (baseName.length < 2 || baseName.length > 20) {
-    throw new Error('用户名须为 2–20 个字符')
+    throwLanpm('err.usernameLength')
   }
 
   const existing = getUserById(db, status.user.userId)
   if (!existing) {
-    throw new Error('用户资料不存在')
+    throwLanpm('err.profileNotFound')
   }
 
   const now = new Date().toISOString()

@@ -17,7 +17,9 @@ const KEY_PATTERNS = [
   /\bt\(\s*['"]([^'"]+)['"]/g,
   /\bt\(\s*['"]([^'"]+)['"]\s*,/g,
   /key:\s*['"]([^'"]+)['"]/g,
-  /MessageKey\s*=\s*['"]([^'"]+)['"]/g
+  /MessageKey\s*=\s*['"]([^'"]+)['"]/g,
+  /throwLanpm\(\s*['"]([^'"]+)['"]/g,
+  /throw new Error\(\s*['"]([^'"]+)['"]\s*\)/g
 ]
 
 const IGNORE = new Set(['', 'a', 'div', 'span', 'path', 'id', 'type', 'name', 'title', 'url'])

@@ -17,7 +17,7 @@ export default function CodeSendModal({
   onClose,
   onSend
 }: CodeSendModalProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const [code, setCode] = useState('')
   const [language, setLanguage] = useState<string>('auto')
@@ -35,7 +35,7 @@ export default function CodeSendModal({
       setLanguage('auto')
       onClose()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('chat.codeSendFailed'))
+      message.error(formatError(err, 'chat.codeSendFailed'))
     } finally {
       setSending(false)
     }

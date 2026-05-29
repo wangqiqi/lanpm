@@ -267,7 +267,7 @@ export async function exportGanttChart(
 ): Promise<void> {
   const { target, layout, saved } = prepareGanttFullCapture(container, opts)
   if (layout.gridHeight <= 0) {
-    throw new Error('GANTT_EXPORT_EMPTY_GRID')
+    throw new Error('err.ganttExportEmpty')
   }
 
   try {
@@ -275,7 +275,7 @@ export async function exportGanttChart(
     if (format === 'png') {
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
-          (b) => (b ? resolve(b) : reject(new Error('GANTT_EXPORT_PNG_FAILED'))),
+          (b) => (b ? resolve(b) : reject(new Error('err.ganttExportPngFailed'))),
           'image/png'
         )
       })

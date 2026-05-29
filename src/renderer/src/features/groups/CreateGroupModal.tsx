@@ -15,7 +15,7 @@ export default function CreateGroupModal({
   onClose,
   onCreate
 }: CreateGroupModalProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const [form] = Form.useForm<{ type: GroupType; name: string; autoDiscover: boolean }>()
   const [saving, setSaving] = useState(false)
@@ -33,7 +33,7 @@ export default function CreateGroupModal({
       await onCreate(values)
       onClose()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('group.createFailed'))
+      message.error(formatError(err, 'group.createFailed'))
     } finally {
       setSaving(false)
     }

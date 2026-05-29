@@ -8,6 +8,7 @@ import type {
   FileMetaBroadcastPayload,
   FilePullRequestPayload
 } from '../../shared/file/sync'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { FILE_CHUNK_SIZE, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
@@ -234,7 +235,7 @@ export function publishFileMeta(db: Database, meta: FileMeta): void {
 
 export async function pullRemoteFile(db: Database, fileId: string): Promise<FileMeta> {
   const meta = getFileById(db, fileId)
-  if (!meta) throw new Error('文件不存在')
+  if (!meta) throwLanpm('err.fileNotFound')
   if (!meta.storagePath.startsWith(REMOTE_PENDING_PREFIX)) {
     return meta
   }

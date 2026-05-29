@@ -142,7 +142,7 @@ function KanbanColumn({
 }
 
 export default function BoardView(): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
@@ -242,7 +242,7 @@ export default function BoardView(): React.ReactElement {
       try {
         await moveTask({ taskId, status, otherReason, sortOrder })
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('board.moveFailed'))
+        message.error(formatError(err, 'board.moveFailed'))
       }
     },
     [moveTask, message, t]
@@ -263,7 +263,7 @@ export default function BoardView(): React.ReactElement {
           }
         }
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('board.moveFailed'))
+        message.error(formatError(err, 'board.moveFailed'))
       }
     },
     [tasksByColumn, moveTask, message, t]
@@ -341,7 +341,7 @@ export default function BoardView(): React.ReactElement {
         if (ok) message.success(t('board.deleted'))
         else message.warning(t('board.notFound'))
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('board.deleteFailed'))
+        message.error(formatError(err, 'board.deleteFailed'))
       }
     },
     [boardTasks, deleteTask, t]
@@ -360,7 +360,7 @@ export default function BoardView(): React.ReactElement {
       if (createOpen) setCreateOpen(false)
       message.success(t('board.created'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('board.createFailed'))
+      message.error(formatError(err, 'board.createFailed'))
     }
   }
 
@@ -398,7 +398,7 @@ export default function BoardView(): React.ReactElement {
         })
         message.success(t('tree.detailSaved'))
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
+        message.error(formatError(err, 'tree.updateFailed'))
         throw err
       }
     },

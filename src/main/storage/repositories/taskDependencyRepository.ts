@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import { throwLanpm } from '../../../shared/errors/lanpmError'
 import type { TaskDependency, TaskDependencyType, UpsertDependencyInput } from '../../../shared/task/dependency'
 
 interface DepRow {
@@ -27,7 +28,7 @@ export function listDependenciesByGroup(db: Database, groupId: string): TaskDepe
 
 export function upsertDependency(db: Database, input: UpsertDependencyInput): TaskDependency {
   if (input.fromTaskId === input.toTaskId) {
-    throw new Error('任务不能依赖自身')
+    throwLanpm('err.dependencySelf')
   }
   db.prepare(
     `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type)

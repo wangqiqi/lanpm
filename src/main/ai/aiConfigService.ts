@@ -1,6 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto'
 import { safeStorage } from 'electron'
 import type { Database } from 'better-sqlite3'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import type { AiConfigInput, AiConfigView, AiProvider } from '../../shared/cockpit/types'
 
 interface AiConfigRow {
@@ -39,7 +40,7 @@ function decryptApiKey(stored: string): string {
     decipher.setAuthTag(tag)
     return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8')
   }
-  throw new Error('无法解密 API Key')
+  throwLanpm('err.apiKeyDecryptFailed')
 }
 
 function rowToView(row: AiConfigRow): AiConfigView {
@@ -68,7 +69,7 @@ export function saveAiConfig(db: Database, input: AiConfigInput): AiConfigView {
     apiKeyEnc = encryptApiKey(input.apiKey.trim())
   }
   if (!apiKeyEnc) {
-    throw new Error('请填写 API Key')
+    throwLanpm('err.apiKeyRequired')
   }
 
   db.prepare(

@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { readFileSync, writeFileSync } from 'fs'
 import type { BrowserWindow } from 'electron'
 import type { BookmarkEntry } from '../../shared/file/bookmarks'
@@ -18,12 +19,12 @@ export function createBookmark(
 ): FileMeta {
   assertFileWritable(db, groupId)
   const status = getSetupStatus(db)
-  if (!status.configured || !status.user) throw new Error('请先完成身份配置')
+  if (!status.configured || !status.user) throwLanpm('stub.identityRequired')
 
   const trimmedUrl = url.trim()
   const trimmedTitle = title.trim() || trimmedUrl
   if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
-    throw new Error('书签 URL 须以 http:// 或 https:// 开头')
+    throwLanpm('err.bookmarkUrlInvalid')
   }
 
   const fileId = `file_${randomUUID()}`
@@ -55,7 +56,7 @@ export function importBookmarksFromHtml(
   html: string
 ): FileMeta[] {
   const entries = parseBookmarkHtml(html)
-  if (entries.length === 0) throw new Error('未解析到有效书签链接')
+  if (entries.length === 0) throwLanpm('err.bookmarkImportEmpty')
   return entries.map((e) => createBookmark(db, groupId, e.url, e.title))
 }
 
@@ -79,7 +80,7 @@ export async function exportGroupBookmarks(
   parent?: BrowserWindow | null
 ): Promise<string | null> {
   const bookmarks = listFilesByGroup(db, groupId, 'bookmark').filter((f) => f.isBookmark)
-  if (bookmarks.length === 0) throw new Error('当前群组没有书签可导出')
+  if (bookmarks.length === 0) throwLanpm('err.bookmarkExportEmpty')
 
   const entries: BookmarkEntry[] = bookmarks.map((b) => ({
     url: b.bookmarkUrl ?? '',

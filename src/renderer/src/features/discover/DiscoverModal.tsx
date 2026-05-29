@@ -30,7 +30,7 @@ interface DiscoverModalProps {
 }
 
 export default function DiscoverModal({ open, onClose }: DiscoverModalProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const localUserId = useIdentityStore((s) => s.user?.userId)
@@ -49,7 +49,7 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
       const data = await getLanpmApi().discover.snapshot()
       setSnapshot(data)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('discover.loadFailed'))
+      message.error(formatError(err, 'discover.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -78,7 +78,7 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
       navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
       onClose()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('discover.joinFailed'))
+      message.error(formatError(err, 'discover.joinFailed'))
     } finally {
       setJoiningId(null)
     }

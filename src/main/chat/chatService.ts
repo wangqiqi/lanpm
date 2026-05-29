@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import type { BrowserWindow } from 'electron'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
 import { parseMentions } from '../../shared/chat/mentions'
@@ -146,15 +147,15 @@ export async function publishChatMessage(
 ): Promise<ChatMessage> {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
 
   if (isAnonymousGroup(db, groupId)) {
-    if (type !== 'text') throw new Error('匿名群仅支持文本消息')
+    if (type !== 'text') throwLanpm('err.anonymousTextOnly')
   }
 
   const transport = getNetworkTransport()
-  if (!transport) throw new Error('网络未就绪')
+  if (!transport) throwLanpm('err.networkNotReady')
 
   ensureSubscribed(db, transport, groupId)
 
@@ -228,7 +229,7 @@ export async function sendTextMessage(
   text: string
 ): Promise<ChatMessage> {
   const trimmed = text.trim()
-  if (!trimmed) throw new Error('消息不能为空')
+  if (!trimmed) throwLanpm('stub.messageEmpty')
   const members = await listGroupMembers(db, groupId)
   const mentions = parseMentions(trimmed, members)
   return publishChatMessage(
@@ -258,7 +259,7 @@ export async function sendFileMessage(
   sourcePath: string
 ): Promise<ChatMessage> {
   if (isAnonymousGroup(db, groupId)) {
-    throw new Error('匿名群不支持发送文件')
+    throwLanpm('err.anonymousNoFile')
   }
   const meta = await uploadFileFromPath(db, groupId, sourcePath)
   return sendExistingFileMessage(db, groupId, meta.fileId)
@@ -270,11 +271,11 @@ export async function sendExistingFileMessage(
   fileId: string
 ): Promise<ChatMessage> {
   if (isAnonymousGroup(db, groupId)) {
-    throw new Error('匿名群不支持发送文件')
+    throwLanpm('err.anonymousNoFile')
   }
   const meta = getFileById(db, fileId)
-  if (!meta) throw new Error('文件不存在')
-  if (meta.groupId !== groupId) throw new Error('文件不属于当前群组')
+  if (!meta) throwLanpm('err.fileNotFound')
+  if (meta.groupId !== groupId) throwLanpm('err.fileWrongGroup')
   return publishChatMessage(db, groupId, 'file', {
     kind: 'file',
     fileId: meta.fileId,
@@ -291,10 +292,10 @@ export async function sendCodeMessage(
   theme?: 'light' | 'dark'
 ): Promise<ChatMessage> {
   if (isAnonymousGroup(db, groupId)) {
-    throw new Error('匿名群仅支持文本消息')
+    throwLanpm('err.anonymousTextOnly')
   }
   const trimmed = code.trim()
-  if (!trimmed) throw new Error('代码不能为空')
+  if (!trimmed) throwLanpm('stub.codeEmpty')
   const language = detectLanguage(trimmed, languageHint)
   return publishChatMessage(db, groupId, 'code', {
     kind: 'code',

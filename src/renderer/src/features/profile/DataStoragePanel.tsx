@@ -26,7 +26,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { DataCleanupOptions } from '@shared/data/types'
 
 export default function DataStoragePanel(): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const settings = useDataStore((s) => s.settings)
   const usage = useDataStore((s) => s.usage)
@@ -69,7 +69,7 @@ export default function DataStoragePanel(): React.ReactElement {
       await setRetentionDays(retention)
       message.success(t('data.retentionSaved'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('data.saveFailed'))
+      message.error(formatError(err, 'data.saveFailed'))
     }
   }
 
@@ -91,7 +91,7 @@ export default function DataStoragePanel(): React.ReactElement {
           )
           setCleanOpen(false)
         } catch (err) {
-          message.error(err instanceof Error ? err.message : t('data.saveFailed'))
+          message.error(formatError(err, 'data.saveFailed'))
         }
       }
     })
@@ -114,7 +114,7 @@ export default function DataStoragePanel(): React.ReactElement {
           evictGroup(clearGroupId)
           message.success(t('data.clearGroupDone', { count: n }))
         } catch (err) {
-          message.error(err instanceof Error ? err.message : t('data.saveFailed'))
+          message.error(formatError(err, 'data.saveFailed'))
         }
       }
     })
@@ -218,7 +218,7 @@ export default function DataStoragePanel(): React.ReactElement {
                       if (path) message.success(t('data.bundleExportDone', { path }))
                     })
                     .catch((err) =>
-                      message.error(err instanceof Error ? err.message : t('data.saveFailed'))
+                      message.error(formatError(err, 'data.saveFailed'))
                     )
                 }}
               >
@@ -259,7 +259,7 @@ export default function DataStoragePanel(): React.ReactElement {
                     )
                   })
                   .catch((err) =>
-                    message.error(err instanceof Error ? err.message : t('data.saveFailed'))
+                    message.error(formatError(err, 'data.saveFailed'))
                   )
               }}
             >

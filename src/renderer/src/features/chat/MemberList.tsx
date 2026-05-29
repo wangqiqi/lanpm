@@ -10,6 +10,7 @@ import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { groupViewPath } from '@renderer/routes/paths'
+import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { presenceMessageKey } from '@renderer/i18n/presence'
 import styles from './chat.module.css'
@@ -73,6 +74,7 @@ export default function MemberList({
         renderItem={(member) => {
           const isSelf = member.userId === currentUserId
           const presence = member.presence ?? 'offline'
+          const displayLabel = resolveMemberDisplayName(member.displayName, t)
           return (
             <List.Item className={styles.memberItem}>
               <div className={styles.memberRow}>
@@ -80,13 +82,13 @@ export default function MemberList({
                   type="button"
                   className={styles.memberBtn}
                   onClick={() => onInsertMention(member.displayName)}
-                  title={`@${member.displayName} · ${t(presenceMessageKey(presence))}`}
+                  title={`@${displayLabel} · ${t(presenceMessageKey(presence))}`}
                 >
                   <span className={styles.memberDot} aria-hidden>
                     {presenceEmoji(presence)}
                   </span>
                   <span className={styles.memberName}>
-                    {member.displayName}
+                    {displayLabel}
                     {isSelf ? t('common.me') : ''}
                   </span>
                 </button>

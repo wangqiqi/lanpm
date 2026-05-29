@@ -8,8 +8,8 @@ assert.equal(KANBAN_COLUMN_ORDER.length, 4)
 assert.equal(KANBAN_COLUMN_LABELS.todo, 'TODO')
 assert.equal(KANBAN_COLUMN_LABELS.other, 'OTHER')
 
-assert.equal(validateOtherReason('other', ''), '移入 OTHER 列必须填写原因')
-assert.equal(validateOtherReason('other', '  '), '移入 OTHER 列必须填写原因')
+assert.equal(validateOtherReason('other', ''), 'board.otherReasonRequired')
+assert.equal(validateOtherReason('other', '  '), 'board.otherReasonRequired')
 assert.equal(validateOtherReason('other', 'blocked'), null)
 assert.equal(validateOtherReason('todo', undefined), null)
 

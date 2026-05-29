@@ -22,7 +22,7 @@ export default function AiConfigModal({
   onClose,
   onSave
 }: AiConfigModalProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const [form] = Form.useForm<AiConfigInput & { apiKey?: string }>()
   const [saving, setSaving] = useState(false)
@@ -59,7 +59,7 @@ export default function AiConfigModal({
       })
       onClose()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('ai.saveFailed'))
+      message.error(formatError(err, 'ai.saveFailed'))
     } finally {
       setSaving(false)
     }

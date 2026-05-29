@@ -13,11 +13,11 @@ import type { GroupRecord } from '../../src/shared/group/types.ts'
 assert.equal(isAnonymousGroupType('anonymous'), true)
 assert.equal(isAnonymousGroupType('project'), false)
 
-assert.throws(() => assertGroupAllowsTasks('anonymous'), /匿名群/)
-assert.throws(() => assertGroupAllowsTasks('function'), /职能群/)
+assert.throws(() => assertGroupAllowsTasks('anonymous'), /stub\.anonymousNoTask/)
+assert.throws(() => assertGroupAllowsTasks('function'), /stub\.functionNoTask/)
 assert.doesNotThrow(() => assertGroupAllowsTasks('project'))
 
-assert.throws(() => assertGroupAllowsFiles('anonymous'), /匿名群/)
+assert.throws(() => assertGroupAllowsFiles('anonymous'), /err\.anonymousNoFile/)
 assert.doesNotThrow(() => assertGroupAllowsFiles('project'))
 assert.doesNotThrow(() => assertGroupAllowsFiles('project', 'dm:u1__u2'))
 

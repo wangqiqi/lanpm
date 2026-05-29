@@ -746,7 +746,7 @@
   font: inherit;
   font-size: var(--lanpm-font-body);
   font-weight: 600;
-  color: var(--lanpm-text-primary);
+  color: var(--lanpm-text);
   cursor: pointer;
 }
 

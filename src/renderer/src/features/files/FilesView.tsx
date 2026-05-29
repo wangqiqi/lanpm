@@ -92,7 +92,7 @@ function previewMetaKey(meta: FileMeta): string {
 }
 
 export default function FilesView(): React.ReactElement {
-  const { t, locale } = useI18n()
+  const { t, locale, formatError } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -297,7 +297,7 @@ export default function FilesView(): React.ReactElement {
       setSelected(meta)
       message.success(t('files.previewReady'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('files.pullRemoteFailed'))
+      message.error(formatError(err, 'files.pullRemoteFailed'))
     } finally {
       setPulling(false)
     }
@@ -381,7 +381,7 @@ export default function FilesView(): React.ReactElement {
         const path = await download(file.fileId)
         if (path) message.success(t('files.downloadSuccess', { path }))
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('files.downloadFailed'))
+        message.error(formatError(err, 'files.downloadFailed'))
       } finally {
         setDownloading(false)
       }
@@ -416,7 +416,7 @@ export default function FilesView(): React.ReactElement {
         navigate(groupViewPath(gid, 'chat'))
       })
       .catch((err: unknown) => {
-        message.error(err instanceof Error ? err.message : t('chat.fileSendFailed'))
+        message.error(formatError(err, 'chat.fileSendFailed'))
       })
       .finally(() => setSharingToChat(false))
   }
@@ -433,7 +433,7 @@ export default function FilesView(): React.ReactElement {
       setCategory('bookmark')
       void loadFiles(gid, 'bookmark')
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('files.bookmarkAddFailed'))
+      message.error(formatError(err, 'files.bookmarkAddFailed'))
     } finally {
       setBookmarkSaving(false)
     }
@@ -451,7 +451,7 @@ export default function FilesView(): React.ReactElement {
       setCategory('bookmark')
       void loadFiles(gid, 'bookmark')
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('files.importFailed'))
+      message.error(formatError(err, 'files.importFailed'))
     }
   }
 
@@ -461,7 +461,7 @@ export default function FilesView(): React.ReactElement {
       const path = await exportBookmarks(gid)
       if (path) message.success(t('files.exportedTo', { path }))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('files.exportFailed'))
+      message.error(formatError(err, 'files.exportFailed'))
     }
   }
 
@@ -472,7 +472,7 @@ export default function FilesView(): React.ReactElement {
 
   const handleResume = (transferId: string): void => {
     void resumeTransfer(gid, transferId).catch((err: unknown) =>
-      message.error(err instanceof Error ? err.message : t('files.transferResumeFailed'))
+      message.error(formatError(err, 'files.transferResumeFailed'))
     )
   }
 
@@ -582,7 +582,9 @@ export default function FilesView(): React.ReactElement {
           <>
             <div className={styles.toolbarPrimary}>
               <Space size="small" align="center">
-                <Text type="secondary">{t('files.rateLimitKbps')}</Text>
+                <Text type="secondary">
+                  {t('files.rateLimitKbps')} · {t('files.rateLimitHint')}
+                </Text>
                 <InputNumber
                   min={0}
                   step={128}
@@ -600,7 +602,7 @@ export default function FilesView(): React.ReactElement {
                 icon={<UploadOutlined />}
                 onClick={() =>
                   void upload(gid).catch((err: unknown) =>
-                    message.error(err instanceof Error ? err.message : t('files.uploadFailed'))
+                    message.error(formatError(err, 'files.uploadFailed'))
                   )
                 }
               >

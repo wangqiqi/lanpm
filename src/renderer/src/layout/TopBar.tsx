@@ -55,7 +55,7 @@ const VIEW_PATH_RE = /^\/g\/[^/]+\/(\w+)/
 export default function TopBar(): React.ReactElement {
   const navigate = useNavigate()
   const location = useLocation()
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { modal, message } = useLanpmApp()
   const groups = useNavigationStore((s) => s.groups)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
@@ -173,7 +173,7 @@ export default function TopBar(): React.ReactElement {
           const nextType = useNavigationStore.getState().getGroupType(nextId)
           navigate(groupViewPath(nextId, defaultViewForGroup(nextType)))
         } catch (err) {
-          message.error(err instanceof Error ? err.message : t('group.dissolveFailed'))
+          message.error(formatError(err, 'group.dissolveFailed'))
         }
       }
     })
@@ -340,7 +340,7 @@ export default function TopBar(): React.ReactElement {
               setManualPeerOpen(false)
             } catch (err) {
               message.error(
-                err instanceof Error ? err.message : t('topbar.manualPeerFailed')
+                formatError(err, 'topbar.manualPeerFailed')
               )
               throw err
             }

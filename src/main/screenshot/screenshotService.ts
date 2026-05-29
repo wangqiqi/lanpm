@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import Screenshots from 'electron-screenshots'
 import { writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
@@ -117,10 +118,10 @@ export function initScreenshotService(): void {
 
 export async function captureAndSendScreenshot(groupId: string): Promise<ChatMessage | null> {
   if (!screenshots) {
-    throw new Error('截图服务未初始化')
+    throwLanpm('err.screenshotNotReady')
   }
   if (pending) {
-    throw new Error('截图进行中，请先完成或取消当前截图')
+    throwLanpm('err.screenshotInProgress')
   }
 
   return new Promise((resolve, reject) => {

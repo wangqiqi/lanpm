@@ -11,6 +11,7 @@ import {
   TEXT_PREVIEW_MAX_BYTES
 } from '../../shared/file/previewExtensions.ts'
 import { FILE_CHUNK_SIZE, FILE_MAX_CONCURRENT, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { isRemotePendingPath } from '../../shared/file/sync'
 import { getSetupStatus } from '../identity/setup'
 import {
@@ -124,19 +125,19 @@ async function runChunkedUpload(
 /** PRD-F-10 — 从已中断的分片进度续传 */
 export async function resumeTransfer(db: Database, transferId: string): Promise<FileTransferView> {
   const transfer = getTransferById(db, transferId)
-  if (!transfer) throw new Error('传输任务不存在')
+  if (!transfer) throwLanpm('err.transferNotFound')
   if (transfer.status !== 'failed' && transfer.status !== 'paused') {
-    throw new Error('仅失败或暂停的任务可续传')
+    throwLanpm('err.transferResumeInvalid')
   }
   if (transfer.transferredBytes <= 0 || transfer.transferredBytes >= transfer.totalBytes) {
-    throw new Error('无可续传进度')
+    throwLanpm('err.transferNoProgress')
   }
 
   const meta = getFileById(db, transfer.fileId)
-  if (!meta) throw new Error('文件不存在')
+  if (!meta) throwLanpm('err.fileNotFound')
 
   const status = getSetupStatus(db)
-  if (!status.configured || !status.device) throw new Error('请先完成身份配置')
+  if (!status.configured || !status.device) throwLanpm('stub.identityRequired')
 
   await runChunkedUpload(db, meta, status.device.deviceId, {
     transferId,
@@ -153,9 +154,9 @@ export async function uploadFileFromPath(
   assertFileWritable(db, groupId)
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
-    throw new Error('请先完成身份配置')
+    throwLanpm('stub.identityRequired')
   }
-  if (!existsSync(sourcePath)) throw new Error('文件不存在')
+  if (!existsSync(sourcePath)) throwLanpm('err.fileNotFound')
 
   const name = sourcePath.split(/[/\\]/).pop() ?? 'file'
   const ext = extname(name).replace('.', '') || 'bin'
@@ -236,13 +237,13 @@ export async function downloadFileToDisk(
   parent?: BrowserWindow | null
 ): Promise<string | null> {
   const meta = getFileById(db, fileId)
-  if (!meta) throw new Error('文件不存在')
-  if (meta.isBookmark) throw new Error('书签请使用浏览器打开链接')
+  if (!meta) throwLanpm('err.fileNotFound')
+  if (meta.isBookmark) throwLanpm('err.bookmarkOpenExternal')
   if (isRemotePendingPath(meta.storagePath)) {
-    throw new Error('请先通过「从局域网下载」获取文件')
+    throwLanpm('err.fileRemoteRequired')
   }
   const diskPath = resolveFileDiskPath(meta)
-  if (!diskPath) throw new Error('本地文件不存在')
+  if (!diskPath) throwLanpm('err.fileLocalMissing')
 
   const result = await showSaveDialog(parent, { defaultPath: meta.name })
   if (result.canceled || !result.filePath) return null

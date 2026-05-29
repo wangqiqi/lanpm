@@ -1,5 +1,6 @@
-import type { MessageKey } from '@renderer/i18n/messages'
+import type { MessageKey, TranslateParams } from '@renderer/i18n/messages'
 import type { NavGroup } from '@shared/navigation/types'
+import { LANPM_DM_GROUP_LABEL } from '@shared/constants/display'
 import { isDemoGroupId } from '@renderer/routes/paths'
 
 const DEMO_NAME_KEYS: Record<string, MessageKey> = {
@@ -10,7 +11,7 @@ const DEMO_NAME_KEYS: Record<string, MessageKey> = {
 
 export function resolveGroupDisplayName(
   group: NavGroup,
-  t: (key: MessageKey) => string
+  t: (key: MessageKey, params?: TranslateParams) => string
 ): string {
   return resolveGroupDisplayNameById(group.groupId, group.name, t)
 }
@@ -19,14 +20,20 @@ export function resolveGroupDisplayName(
 export function resolveGroupDisplayNameById(
   groupId: string,
   storedName: string,
-  t: (key: MessageKey) => string
+  t: (key: MessageKey, params?: TranslateParams) => string
 ): string {
   if (isDemoGroupId(groupId)) {
     const key = DEMO_NAME_KEYS[groupId]
     if (key) return t(key)
   }
-  if (groupId.startsWith('dm:') && storedName === '私聊') {
-    return t('search.dmGroup')
+  if (groupId.startsWith('dm:')) {
+    if (storedName === LANPM_DM_GROUP_LABEL || storedName === '私聊') {
+      return t('search.dmGroup')
+    }
+    if (storedName.startsWith('私聊 · ')) {
+      return t('topbar.dmLabel', { name: storedName.slice('私聊 · '.length) })
+    }
+    return t('topbar.dmLabel', { name: storedName })
   }
   return storedName
 }

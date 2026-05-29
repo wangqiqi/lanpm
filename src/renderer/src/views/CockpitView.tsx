@@ -34,7 +34,7 @@ const STATUS_KEYS: Record<string, { color: string; key: MessageKey }> = {
 }
 
 export default function CockpitView(): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -62,7 +62,7 @@ export default function CockpitView(): React.ReactElement {
     } catch (err) {
       setDashboard(null)
       setLoadError(true)
-      message.error(err instanceof Error ? err.message : t('cockpit.loadFailed'))
+      message.error(formatError(err, 'cockpit.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -93,7 +93,7 @@ export default function CockpitView(): React.ReactElement {
       setReport(result)
       message.success(result.usedExternalAi ? t('cockpit.reportExternal') : t('cockpit.reportLocal'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('cockpit.generateFailed'))
+      message.error(formatError(err, 'cockpit.generateFailed'))
     } finally {
       setReportLoading(false)
     }

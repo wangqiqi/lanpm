@@ -28,8 +28,8 @@ describe('assertGroupAllowsTasks', () => {
   })
 
   it('blocks anonymous and function groups', () => {
-    expect(() => assertGroupAllowsTasks('anonymous')).toThrow('匿名群不支持任务')
-    expect(() => assertGroupAllowsTasks('function')).toThrow('职能群不支持看板任务')
+    expect(() => assertGroupAllowsTasks('anonymous')).toThrow('stub.anonymousNoTask')
+    expect(() => assertGroupAllowsTasks('function')).toThrow('stub.functionNoTask')
   })
 })
 
@@ -40,7 +40,7 @@ describe('assertGroupAllowsFiles', () => {
   })
 
   it('blocks anonymous', () => {
-    expect(() => assertGroupAllowsFiles('anonymous')).toThrow('匿名群不支持文件')
+    expect(() => assertGroupAllowsFiles('anonymous')).toThrow('err.anonymousNoFile')
   })
 
   it('allows function group files', () => {

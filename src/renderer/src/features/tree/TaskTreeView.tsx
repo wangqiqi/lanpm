@@ -110,7 +110,7 @@ function buildTreeData(
 }
 
 export default function TaskTreeView(): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
@@ -145,7 +145,7 @@ export default function TaskTreeView(): React.ReactElement {
         message.success(t('tree.progressUpdated'))
         setInlineEditTaskId(null)
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
+        message.error(formatError(err, 'tree.updateFailed'))
       }
     },
     [updateTask, t]
@@ -269,7 +269,7 @@ export default function TaskTreeView(): React.ReactElement {
           message.warning(t('board.notFound'))
         }
       } catch (err) {
-        message.error(err instanceof Error ? err.message : t('board.deleteFailed'))
+        message.error(formatError(err, 'board.deleteFailed'))
       }
     },
     [tasks, deleteTask, t, message]
@@ -283,7 +283,7 @@ export default function TaskTreeView(): React.ReactElement {
       setNewRootTitle('')
       message.success(t('tree.rootAdded'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('tree.createFailed'))
+      message.error(formatError(err, 'tree.createFailed'))
     }
   }
 
@@ -298,7 +298,7 @@ export default function TaskTreeView(): React.ReactElement {
       )
       message.success(t('tree.childAdded'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('tree.createFailed'))
+      message.error(formatError(err, 'tree.createFailed'))
     }
   }
 

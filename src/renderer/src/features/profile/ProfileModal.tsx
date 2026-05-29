@@ -22,7 +22,7 @@ interface ProfileFormValues {
 }
 
 export default function ProfileModal({ open, onClose }: ProfileModalProps): React.ReactElement {
-  const { t } = useI18n()
+  const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const user = useIdentityStore((s) => s.user)
   const device = useIdentityStore((s) => s.device)
@@ -66,7 +66,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
       message.success(t('profile.saved'))
       onClose()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : t('profile.saveFailed'))
+      message.error(formatError(err, 'profile.saveFailed'))
     } finally {
       setSaving(false)
     }

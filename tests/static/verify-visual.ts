@@ -154,6 +154,24 @@ for (const { file, pattern, label, invert } of LAYOUT_SNIPPETS) {
 
 // --- forbidden colors / dead refs in renderer ---
 const cssFiles = walkCssFiles(renderer)
+
+const definedLanpmTokens = new Set(
+  [...globalCss.matchAll(/(--lanpm-[a-z0-9-]+):/g)].map((m) => m[1])
+)
+const usedLanpmTokens = new Set<string>()
+for (const file of cssFiles) {
+  const content = readFileSync(file, 'utf8')
+  for (const m of content.matchAll(/var\((--lanpm-[a-z0-9-]+)\)/g)) {
+    usedLanpmTokens.add(m[1])
+  }
+}
+const undefinedTokens = [...usedLanpmTokens].filter((t) => !definedLanpmTokens.has(t)).sort()
+assert.equal(
+  undefinedTokens.length,
+  0,
+  `CSS references undefined --lanpm-* tokens: ${undefinedTokens.join(', ')}`
+)
+
 let scanned = 0
 for (const file of cssFiles) {
   const rel = file.slice(renderer.length + 1)

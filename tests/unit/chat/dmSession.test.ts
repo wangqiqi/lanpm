@@ -14,7 +14,7 @@ describe('buildDmGroupId', () => {
   })
 
   it('rejects self-dm', () => {
-    expect(() => buildDmGroupId('alice', 'alice')).toThrow('不能与自己私聊')
+    expect(() => buildDmGroupId('alice', 'alice')).toThrow('err.dmSelf')
   })
 })
 
@@ -35,8 +35,8 @@ describe('parseDmGroupId', () => {
 })
 
 describe('formatDmTitle', () => {
-  it('prefixes peer display name', () => {
-    expect(formatDmTitle('Bob')).toBe('私聊 · Bob')
+  it('returns peer display name for UI layer to label', () => {
+    expect(formatDmTitle('Bob')).toBe('Bob')
   })
 })
 

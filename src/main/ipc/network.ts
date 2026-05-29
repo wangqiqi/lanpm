@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { throwLanpm } from '../../shared/errors/lanpmError'
 import { NETWORK_IPC } from '../../shared/network/status'
 import { BADGE_IPC } from '../../shared/badge/types'
 import { parseHostPort } from '../../shared/network/manualPeer'
@@ -23,7 +24,7 @@ export function registerNetworkIpc(): void {
     try {
       ;({ host, port } = parseHostPort(address))
     } catch {
-      throw new Error('地址格式应为 host:port，例如 192.168.1.10:43124')
+      throwLanpm('err.peerAddressInvalid')
     }
     return connectManualPeer(host, port).then(() => fetchNetworkStatus())
   })
