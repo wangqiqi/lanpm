@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.18] - 2026-05-29
+
+### Added
+- **看板任务编辑**（**PRD-F-01** 延伸）：`TaskEditModal` 双击卡片打开；`KanbanCard` 统一「⋯」菜单（编辑 / 讨论 / 移列 / 删除）
+- **任务详情字段补全**：`TaskDetailPanel` 增加开始日期、进度、里程碑、OTHER 原因；导出 `TaskDetailSaveInput` 供看板/树共用
+- **i18n**：`board.toolbarHint`、`board.moveToColumn`、`board.cardMenuAria`
+
+### Changed
+- **看板工具栏**：非空看板显示操作提示；空看板仅保留空态 CTA；创建任务 Modal 改为 `Form` 纵向布局
+- **`KanbanCard`**：移除卡片内「讨论」链接与独立删除按钮，操作收入下拉菜单
+
+### Tag
+- `v1.0.0-rc.18` — 看板双击编辑、卡片统一菜单与任务详情字段补全
+
 ## [1.0.0-rc.17] - 2026-05-29
 
 ### Added

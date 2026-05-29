@@ -131,8 +131,7 @@
   flex-shrink: 0;
 }
 
-.cardMenu,
-.cardDelete {
+.cardMenu {
   flex-shrink: 0;
   border: none;
   background: transparent;
@@ -143,9 +142,9 @@
   line-height: 1;
 }
 
-.cardDelete:hover {
-  color: #ff4d4f;
-  background: rgba(255, 77, 79, 0.08);
+.cardMenu:hover {
+  color: var(--lanpm-text-secondary);
+  background: var(--lanpm-hover-bg, rgba(0, 0, 0, 0.04));
 }
 
 .cardMeta {
@@ -164,13 +163,6 @@
   margin-top: 6px;
   font-size: 12px;
   color: #cf1322;
-}
-
-.discussBtn {
-  padding: 0;
-  height: auto;
-  margin-top: 4px;
-  font-size: 12px;
 }
 
 .overlayCard {

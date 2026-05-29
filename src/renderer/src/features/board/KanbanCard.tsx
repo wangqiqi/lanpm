@@ -1,6 +1,6 @@
-import { Button, Dropdown, Popconfirm, Tag } from 'antd'
+import { Dropdown, Modal, Tag } from 'antd'
 import type { MenuProps } from 'antd'
-import { DeleteOutlined, MoreOutlined } from '@ant-design/icons'
+import { MoreOutlined } from '@ant-design/icons'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
@@ -57,13 +57,61 @@ export default function KanbanCard({
     ? { transform: CSS.Translate.toString(transform) }
     : undefined
 
-  const moveMenuItems: MenuProps['items'] = onMoveTo
-    ? KANBAN_COLUMN_ORDER.filter((status) => status !== task.status).map((status) => ({
-        key: status,
-        label: t(MOVE_COLUMN_KEYS[status]),
-        onClick: () => onMoveTo(task.taskId, status)
-      }))
-    : undefined
+  const menuItems: MenuProps['items'] = []
+
+  if (onEdit) {
+    menuItems.push({
+      key: 'edit',
+      label: t('board.editTitle'),
+      onClick: () => onEdit(task)
+    })
+  }
+
+  if (onDiscuss) {
+    menuItems.push({
+      key: 'discuss',
+      label: t('board.discussInChat'),
+      onClick: () => onDiscuss(task)
+    })
+  }
+
+  const moveTargets = onMoveTo
+    ? KANBAN_COLUMN_ORDER.filter((status) => status !== task.status)
+    : []
+
+  if (moveTargets.length > 0) {
+    if (menuItems.length > 0) {
+      menuItems.push({ type: 'divider' })
+    }
+    for (const status of moveTargets) {
+      menuItems.push({
+        key: `move-${status}`,
+        label: t('board.moveToColumn', { column: t(MOVE_COLUMN_KEYS[status]) }),
+        onClick: () => onMoveTo!(task.taskId, status)
+      })
+    }
+  }
+
+  if (onDelete) {
+    if (menuItems.length > 0) {
+      menuItems.push({ type: 'divider' })
+    }
+    menuItems.push({
+      key: 'delete',
+      label: t('common.delete'),
+      danger: true,
+      onClick: () => {
+        Modal.confirm({
+          title: t('board.deleteConfirmTitle'),
+          content: t('board.deleteConfirmDesc'),
+          okText: t('common.delete'),
+          cancelText: t('common.cancel'),
+          okButtonProps: { danger: true },
+          onOk: () => onDelete(task.taskId)
+        })
+      }
+    })
+  }
 
   return (
     <div
@@ -85,44 +133,21 @@ export default function KanbanCard({
     >
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>{task.title}</div>
-        <div className={styles.cardActions}>
-          {moveMenuItems && moveMenuItems.length > 0 && (
-            <Dropdown menu={{ items: moveMenuItems }} trigger={['click']}>
+        {menuItems.length > 0 && (
+          <div className={styles.cardActions}>
+            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
               <button
                 type="button"
                 className={styles.cardMenu}
-                aria-label={t('board.moveToColumnMenu')}
+                aria-label={t('board.cardMenuAria')}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreOutlined />
               </button>
             </Dropdown>
-          )}
-          {onDelete && (
-            <Popconfirm
-              title={t('board.deleteConfirmTitle')}
-              description={t('board.deleteConfirmDesc')}
-              okText={t('common.delete')}
-              cancelText={t('common.cancel')}
-              onConfirm={(e) => {
-                e?.stopPropagation()
-                onDelete(task.taskId)
-              }}
-              onCancel={(e) => e?.stopPropagation()}
-            >
-              <button
-                type="button"
-                className={styles.cardDelete}
-                aria-label={t('board.deleteTaskAria')}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <DeleteOutlined />
-              </button>
-            </Popconfirm>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <div className={styles.cardMeta}>
         <Tag color={PRIORITY_COLOR[task.priority]}>
@@ -145,20 +170,6 @@ export default function KanbanCard({
         )}
         <span>{task.progressPercent}%</span>
       </div>
-      {onDiscuss && (
-        <Button
-          type="link"
-          size="small"
-          className={styles.discussBtn}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation()
-            onDiscuss(task)
-          }}
-        >
-          {t('board.discussInChat')}
-        </Button>
-      )}
       {task.status === 'other' && task.otherReason && (
         <div className={styles.otherReason}>{task.otherReason}</div>
       )}

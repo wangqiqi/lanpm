@@ -78,6 +78,25 @@
   gap: 4px;
 }
 
+.detailFieldRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.detailFieldGrow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.detailMilestone {
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
 .detailMeta {
   font-size: 12px;
 }

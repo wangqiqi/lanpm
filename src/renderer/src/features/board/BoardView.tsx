@@ -10,14 +10,15 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { Button, Input, Modal, Select } from 'antd'
+import { Button, Form, Input, Modal, Select } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { KANBAN_COLUMN_ORDER, isTaskStatus, KANBAN_TRASH_DROP_ID, isKanbanTrashDropId } from '@shared/task/kanban'
-import type { MessageKey } from '@renderer/i18n/messages'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
+import type { TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPanel'
+import type { MessageKey } from '@renderer/i18n/messages'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -25,7 +26,7 @@ import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
 import OtherReasonModal from './OtherReasonModal'
 import TaskEditModal from './TaskEditModal'
-import ViewToolbar from '@renderer/ui/ViewToolbar'
+import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './board.module.css'
@@ -397,13 +398,20 @@ export default function BoardView(): React.ReactElement {
     ? boardTasks.find((t) => t.taskId === editTask.taskId) ?? editTask
     : null
 
+  const isBoardEmpty = !loading && boardTasks.length === 0
+
   return (
     <div className={styles.root}>
       <ViewToolbar
         start={
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
-            {t('board.newTask')}
-          </Button>
+          !isBoardEmpty ? (
+            <ViewToolbarGroup>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+                {t('board.newTask')}
+              </Button>
+              <ViewToolbarHint>{t('board.toolbarHint')}</ViewToolbarHint>
+            </ViewToolbarGroup>
+          ) : undefined
         }
         end={
           <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
@@ -466,21 +474,24 @@ export default function BoardView(): React.ReactElement {
         onOk={() => void handleCreate()}
         okText={t('common.create')}
       >
-        <Input
-          placeholder={t('board.taskTitlePlaceholder')}
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          onPressEnter={() => void handleCreate()}
-        />
-        <div style={{ marginTop: 12 }}>
-          <span style={{ marginRight: 8 }}>{t('common.priority')}</span>
-          <Select
-            value={newPriority}
-            onChange={setNewPriority}
-            style={{ width: 120 }}
-            options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: t(o.key) }))}
-          />
-        </div>
+        <Form layout="vertical" style={{ marginTop: 8 }}>
+          <Form.Item label={t('chat.taskTitleLabel')} required>
+            <Input
+              placeholder={t('board.taskTitlePlaceholder')}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onPressEnter={() => void handleCreate()}
+            />
+          </Form.Item>
+          <Form.Item label={t('common.priority')}>
+            <Select
+              value={newPriority}
+              onChange={setNewPriority}
+              style={{ width: '100%' }}
+              options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: t(o.key) }))}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
 
       <OtherReasonModal

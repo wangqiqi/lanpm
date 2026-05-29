@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Input, Popconfirm, Select, Typography } from 'antd'
+import { Button, Checkbox, Input, InputNumber, Popconfirm, Select, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
@@ -24,20 +24,26 @@ const PRIORITY_KEYS: Record<TaskPriority, MessageKey> = {
   high: 'board.priorityHigh'
 }
 
+export interface TaskDetailSaveInput {
+  taskId: string
+  title: string
+  description: string
+  status: TaskStatus
+  otherReason: string | null
+  priority: TaskPriority
+  assigneeUserId: string | null
+  startDate: string | null
+  endDate: string | null
+  progressPercent: number
+  milestone: boolean
+}
+
 interface TaskDetailPanelProps {
   groupId: string
   task: Task
   tasks: Task[]
   onClose: () => void
-  onSave: (input: {
-    taskId: string
-    title: string
-    description: string
-    status: TaskStatus
-    priority: TaskPriority
-    assigneeUserId: string | null
-    endDate: string | null
-  }) => Promise<void>
+  onSave: (input: TaskDetailSaveInput) => Promise<void>
   onDelete: (taskId: string) => Promise<void>
 }
 
@@ -57,20 +63,28 @@ export default function TaskDetailPanel({
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description ?? '')
   const [status, setStatus] = useState<TaskStatus>(task.status)
+  const [otherReason, setOtherReason] = useState(task.otherReason ?? '')
   const [priority, setPriority] = useState<TaskPriority>(task.priority)
   const [assigneeUserId, setAssigneeUserId] = useState<string | undefined>(
     task.assigneeUserId
   )
+  const [startDate, setStartDate] = useState(task.startDate ?? '')
   const [endDate, setEndDate] = useState(task.endDate ?? '')
+  const [progressPercent, setProgressPercent] = useState(task.progressPercent)
+  const [milestone, setMilestone] = useState(!!task.milestone)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     setTitle(task.title)
     setDescription(task.description ?? '')
     setStatus(task.status)
+    setOtherReason(task.otherReason ?? '')
     setPriority(task.priority)
     setAssigneeUserId(task.assigneeUserId)
+    setStartDate(task.startDate ?? '')
     setEndDate(task.endDate ?? '')
+    setProgressPercent(task.progressPercent)
+    setMilestone(!!task.milestone)
   }, [task])
 
   const children = useMemo(
@@ -93,6 +107,10 @@ export default function TaskDetailPanel({
       message.warning(t('tree.detailTitleRequired'))
       return
     }
+    if (status === 'other' && !otherReason.trim()) {
+      message.warning(t('board.otherReasonRequired'))
+      return
+    }
     setSaving(true)
     try {
       await onSave({
@@ -100,9 +118,13 @@ export default function TaskDetailPanel({
         title: trimmed,
         description: description.trim(),
         status,
+        otherReason: status === 'other' ? otherReason.trim() : null,
         priority,
         assigneeUserId: assigneeUserId || null,
-        endDate: endDate.trim() || null
+        startDate: startDate.trim() || null,
+        endDate: endDate.trim() || null,
+        progressPercent: Math.min(100, Math.max(0, progressPercent)),
+        milestone
       })
       message.success(t('tree.detailSaved'))
     } catch (err) {
@@ -111,6 +133,8 @@ export default function TaskDetailPanel({
       setSaving(false)
     }
   }
+
+  const saveDisabled = !title.trim() || (status === 'other' && !otherReason.trim())
 
   return (
     <aside className={styles.detailPanel}>
@@ -159,10 +183,49 @@ export default function TaskDetailPanel({
         />
       </label>
 
+      {status === 'other' && (
+        <label className={styles.detailField}>
+          <Text type="secondary">{t('board.otherReasonLabel')}</Text>
+          <TextArea
+            rows={2}
+            value={otherReason}
+            onChange={(e) => setOtherReason(e.target.value)}
+            placeholder={t('board.otherReasonPlaceholder')}
+            maxLength={500}
+          />
+        </label>
+      )}
+
+      <label className={styles.detailField}>
+        <Text type="secondary">{t('board.detailStartDate')}</Text>
+        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+      </label>
+
       <label className={styles.detailField}>
         <Text type="secondary">{t('tree.detailEndDate')}</Text>
         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
       </label>
+
+      <div className={styles.detailFieldRow}>
+        <label className={styles.detailFieldGrow}>
+          <Text type="secondary">{t('board.detailProgress')}</Text>
+          <InputNumber
+            min={0}
+            max={100}
+            value={progressPercent}
+            onChange={(v) => setProgressPercent(typeof v === 'number' ? v : 0)}
+            addonAfter="%"
+            style={{ width: '100%' }}
+          />
+        </label>
+        <Checkbox
+          checked={milestone}
+          onChange={(e) => setMilestone(e.target.checked)}
+          className={styles.detailMilestone}
+        >
+          {t('board.milestone')}
+        </Checkbox>
+      </div>
 
       <label className={styles.detailField}>
         <Text type="secondary">{t('tree.detailDescription')}</Text>
@@ -186,7 +249,12 @@ export default function TaskDetailPanel({
       </Text>
 
       <div className={styles.detailActions}>
-        <Button type="primary" loading={saving} onClick={() => void handleSave()}>
+        <Button
+          type="primary"
+          loading={saving}
+          disabled={saveDisabled}
+          onClick={() => void handleSave()}
+        >
           {t('common.save')}
         </Button>
         <Popconfirm

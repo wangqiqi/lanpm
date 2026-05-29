@@ -12,7 +12,7 @@ import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/Vie
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
-import TaskDetailPanel from '@renderer/features/tree/TaskDetailPanel'
+import TaskDetailPanel, { type TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPanel'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './tree.module.css'
 
@@ -185,23 +185,19 @@ export default function TaskTreeView(): React.ReactElement {
   )
 
   const handleDetailSave = useCallback(
-    async (input: {
-      taskId: string
-      title: string
-      description: string
-      status: TaskStatus
-      priority: TaskPriority
-      assigneeUserId: string | null
-      endDate: string | null
-    }) => {
+    async (input: TaskDetailSaveInput) => {
       await updateTask({
         taskId: input.taskId,
         title: input.title,
-        description: input.description.trim() || undefined,
+        description: input.description || undefined,
         status: input.status,
+        otherReason: input.otherReason,
         priority: input.priority,
         assigneeUserId: input.assigneeUserId,
-        endDate: input.endDate
+        startDate: input.startDate,
+        endDate: input.endDate,
+        progressPercent: input.progressPercent,
+        milestone: input.milestone
       })
     },
     [updateTask]

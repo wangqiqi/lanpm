@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Checkbox, Input, InputNumber, Modal, Select } from 'antd'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
+import type { TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPanel'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
@@ -26,19 +27,7 @@ interface TaskEditModalProps {
   groupId: string
   task: Task | null
   onCancel: () => void
-  onSave: (input: {
-    taskId: string
-    title: string
-    description: string
-    status: TaskStatus
-    otherReason: string | null
-    priority: TaskPriority
-    assigneeUserId: string | null
-    startDate: string | null
-    endDate: string | null
-    progressPercent: number
-    milestone: boolean
-  }) => Promise<void>
+  onSave: (input: TaskDetailSaveInput) => Promise<void>
 }
 
 export default function TaskEditModal({
