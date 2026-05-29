@@ -117,3 +117,24 @@ export function listMessagesByGroup(
     .all(groupId, limit) as MessageRow[]
   return rows.map(rowToMessage)
 }
+
+/** ARCH-07 — 离线补同步：拉取 lamport 之后且未过 TTL 的消息 */
+export function listMessagesSince(
+  db: Database,
+  groupId: string,
+  sinceLamportTs: number,
+  minCreatedAt: string,
+  limit = 100
+): ChatMessage[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM messages
+       WHERE group_id = ?
+         AND lamport_ts > ?
+         AND created_at >= ?
+       ORDER BY lamport_ts ASC, created_at ASC
+       LIMIT ?`
+    )
+    .all(groupId, sinceLamportTs, minCreatedAt, limit) as MessageRow[]
+  return rows.map(rowToMessage)
+}

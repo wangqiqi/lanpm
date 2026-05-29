@@ -69,6 +69,10 @@ export interface LanpmApi {
     getPreviewUrl: (fileId: string) => Promise<string | null>
     getPreviewText: (fileId: string) => Promise<string | null>
     listTransfers: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
+    listTransferHistory: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
+    resumeTransfer: (transferId: string) => Promise<import('./file/types').FileTransferView>
+    getTransferSettings: () => Promise<import('./file/settings').FileTransferSettingsView>
+    setTransferRate: (rateKbps: number) => Promise<import('./file/settings').FileTransferSettingsView>
     addBookmark: (
       groupId: string,
       url: string,

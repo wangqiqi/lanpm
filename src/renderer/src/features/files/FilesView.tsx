@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   Button,
+  Collapse,
   Image,
   Input,
+  InputNumber,
   List,
   Modal,
   Progress,
@@ -42,7 +44,8 @@ const TRANSFER_STATUS_KEYS: Record<string, MessageKey> = {
   queued: 'files.transferQueued',
   transferring: 'files.transferTransferring',
   completed: 'files.transferCompleted',
-  failed: 'files.transferFailed'
+  failed: 'files.transferFailed',
+  paused: 'files.transferPaused'
 }
 
 function formatSize(n: number): string {
@@ -59,9 +62,15 @@ export default function FilesView(): React.ReactElement {
   const gid = groupId ?? ''
   const files = useFileStore((s) => s.filesByGroup[gid] ?? [])
   const transfers = useFileStore((s) => s.transfersByGroup[gid] ?? [])
+  const transferHistory = useFileStore((s) => s.transferHistoryByGroup[gid] ?? [])
+  const transferSettings = useFileStore((s) => s.transferSettings)
   const loading = useFileStore((s) => s.loading[gid])
   const loadFiles = useFileStore((s) => s.loadFiles)
   const loadTransfers = useFileStore((s) => s.loadTransfers)
+  const loadTransferHistory = useFileStore((s) => s.loadTransferHistory)
+  const loadTransferSettings = useFileStore((s) => s.loadTransferSettings)
+  const setTransferRate = useFileStore((s) => s.setTransferRate)
+  const resumeTransfer = useFileStore((s) => s.resumeTransfer)
   const upload = useFileStore((s) => s.upload)
   const addBookmark = useFileStore((s) => s.addBookmark)
   const importBookmarks = useFileStore((s) => s.importBookmarks)
@@ -86,14 +95,17 @@ export default function FilesView(): React.ReactElement {
     if (!gid) return
     void loadFiles(gid, category === 'all' ? undefined : category)
     void loadTransfers(gid)
+    void loadTransferHistory(gid)
+    void loadTransferSettings()
     const unsub = getLanpmApi().file.onTransfersChanged((changed) => {
       if (changed === gid) {
         void loadTransfers(gid)
+        void loadTransferHistory(gid)
         void loadFiles(gid, category === 'all' ? undefined : category)
       }
     })
     return unsub
-  }, [gid, category, loadFiles, loadTransfers])
+  }, [gid, category, loadFiles, loadTransfers, loadTransferHistory, loadTransferSettings])
 
   useEffect(() => {
     if (!selected) {
@@ -222,6 +234,12 @@ export default function FilesView(): React.ReactElement {
     [transfers]
   )
 
+  const handleResume = (transferId: string): void => {
+    void resumeTransfer(gid, transferId).catch((err: unknown) =>
+      message.error(err instanceof Error ? err.message : t('files.transferResumeFailed'))
+    )
+  }
+
   const columns = useMemo(
     () => [
       { title: t('files.colName'), dataIndex: 'name', key: 'name', ellipsis: true },
@@ -263,6 +281,20 @@ export default function FilesView(): React.ReactElement {
         }
         end={
           <ViewToolbarGroup>
+            <Space size="small" align="center">
+              <Text type="secondary">{t('files.rateLimitKbps')}</Text>
+              <InputNumber
+                min={0}
+                step={128}
+                value={transferSettings?.rateKbps ?? 0}
+                onChange={(v) => {
+                  if (v === null) return
+                  void setTransferRate(v).catch(() => undefined)
+                }}
+                style={{ width: 120 }}
+                aria-label={t('files.rateLimitKbps')}
+              />
+            </Space>
             <Button
               type="primary"
               icon={<UploadOutlined />}
@@ -306,6 +338,53 @@ export default function FilesView(): React.ReactElement {
               </div>
             </List.Item>
           )}
+        />
+      )}
+
+      {transferHistory.length > 0 && (
+        <Collapse
+          className={styles.transferHistory}
+          items={[
+            {
+              key: 'history',
+              label: `${t('files.transferHistory')} (${transferHistory.length})`,
+              children: (
+                <List
+                  size="small"
+                  dataSource={transferHistory}
+                  renderItem={(tr) => (
+                    <List.Item
+                      actions={
+                        tr.status === 'failed' || tr.status === 'paused'
+                          ? [
+                              <Button
+                                key="resume"
+                                type="link"
+                                size="small"
+                                onClick={() => handleResume(tr.transferId)}
+                              >
+                                {t('files.transferResume')}
+                              </Button>
+                            ]
+                          : undefined
+                      }
+                    >
+                      <div className={styles.transferRow}>
+                        <span>{tr.fileName}</span>
+                        <Text type="secondary" style={{ flex: 1, margin: '0 12px' }}>
+                          {formatSize(tr.transferredBytes)} / {formatSize(tr.totalBytes)}
+                        </Text>
+                        <TagStatus
+                          status={tr.status}
+                          label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
+                        />
+                      </div>
+                    </List.Item>
+                  )}
+                />
+              )
+            }
+          ]}
         />
       )}
 

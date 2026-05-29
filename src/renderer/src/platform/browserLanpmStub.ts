@@ -528,6 +528,13 @@ export function createBrowserLanpmStub(): LanpmApi {
       getPreviewUrl: async () => null,
       getPreviewText: async () => null,
       listTransfers: async () => [],
+      listTransferHistory: async () => [],
+      resumeTransfer: async (transferId) => {
+        void transferId
+        throw stubError('stub.uploadElectronOnly')
+      },
+      getTransferSettings: async () => ({ rateKbps: 0 }),
+      setTransferRate: async (rateKbps) => ({ rateKbps }),
       addBookmark: async (groupId, url, title) => ({
         fileId: `stub_${Date.now()}`,
         groupId,

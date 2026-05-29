@@ -49,7 +49,12 @@ export default function EmojiPicker({ onPick }: EmojiPickerProps): React.ReactEl
       placement="topLeft"
       destroyOnHidden
     >
-      <Button icon={<SmileOutlined />} title={t('chat.emojiBtn')} aria-label={t('chat.emojiBtn')} />
+      <Button
+        type="text"
+        icon={<SmileOutlined />}
+        title={t('chat.emojiBtn')}
+        aria-label={t('chat.emojiBtn')}
+      />
     </Popover>
   )
 }

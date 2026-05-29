@@ -1,0 +1,390 @@
+#!/usr/bin/env bash
+# LanPM 一键运维脚本 — 交互菜单 + 命令行子命令
+# 用法: ./onekey_run.sh [start|restart|stop|status|build|rebuild|check|clean|...]
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+
+RUN_DIR="$ROOT/.lanpm"
+PID_FILE="$RUN_DIR/dev.pid"
+LOG_FILE="$RUN_DIR/dev.log"
+MODE_FILE="$RUN_DIR/dev.mode"
+
+# shellcheck disable=SC2034
+VERSION="$(node -p "require('./package.json').version" 2>/dev/null || echo '?')"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+info()  { echo -e "${CYAN}[lanpm]${NC} $*"; }
+ok()    { echo -e "${GREEN}[lanpm]${NC} $*"; }
+warn()  { echo -e "${YELLOW}[lanpm]${NC} $*"; }
+err()   { echo -e "${RED}[lanpm]${NC} $*" >&2; }
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || { err "缺少命令: $1"; exit 1; }
+}
+
+ensure_run_dir() {
+  mkdir -p "$RUN_DIR"
+}
+
+read_pid() {
+  [[ -f "$PID_FILE" ]] || return 1
+  local p
+  p="$(tr -d '[:space:]' <"$PID_FILE")"
+  [[ -n "$p" && "$p" =~ ^[0-9]+$ ]] || return 1
+  echo "$p"
+}
+
+pid_alive() {
+  local p="$1"
+  kill -0 "$p" 2>/dev/null
+}
+
+# 按会话 / 进程组结束 dev 树（npm → electron-vite → electron）
+kill_tree() {
+  local p="$1"
+  if ! pid_alive "$p"; then
+    return 0
+  fi
+  # setsid 启动时 p 为 session leader，负 pid 结束整组
+  kill -TERM -"$p" 2>/dev/null || kill -TERM "$p" 2>/dev/null || true
+  local i=0
+  while pid_alive "$p" && [[ $i -lt 20 ]]; do
+    sleep 0.3
+    i=$((i + 1))
+  done
+  if pid_alive "$p"; then
+    kill -KILL -"$p" 2>/dev/null || kill -KILL "$p" 2>/dev/null || true
+  fi
+}
+
+# 兜底：清理仍监听本项目 vite 端口的残留
+cleanup_stray() {
+  local pattern
+  pattern="electron-vite dev"
+  if pgrep -af "$pattern" 2>/dev/null | grep -Fq "$ROOT"; then
+    warn "清理残留 electron-vite 进程 …"
+    pkill -f "$pattern" 2>/dev/null || true
+    sleep 0.5
+  fi
+}
+
+is_running() {
+  local p
+  p="$(read_pid 2>/dev/null)" || return 1
+  pid_alive "$p"
+}
+
+vite_ports_status() {
+  need_cmd lsof
+  local ports="5173 5174"
+  local found=0
+  for port in $ports; do
+    local lines
+    lines="$(lsof -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+    if [[ -n "$lines" ]]; then
+      found=1
+      echo "  :$port LISTEN"
+      echo "$lines" | awk 'NR==1 || /LISTEN/ {print "    "$0}' | head -6
+    fi
+  done
+  [[ $found -eq 0 ]] && echo "  (5173/5174 无监听)"
+}
+
+cmd_status() {
+  ensure_run_dir
+  info "项目: $ROOT"
+  info "版本: v$VERSION"
+  echo ""
+  if is_running; then
+    local p mode
+    p="$(read_pid)"
+    mode="electron"
+    [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
+    ok "开发服务: 运行中 (pid=$p, mode=$mode)"
+  else
+    warn "开发服务: 未运行"
+  fi
+  echo ""
+  info "Vite 端口:"
+  vite_ports_status
+  echo ""
+  if [[ -f "$LOG_FILE" ]]; then
+    info "最近日志 ($LOG_FILE):"
+    tail -n 8 "$LOG_FILE" 2>/dev/null | sed 's/^/  /' || true
+  fi
+}
+
+start_dev() {
+  local mode="${1:-electron}"
+  ensure_run_dir
+  need_cmd npm
+  need_cmd node
+
+  if is_running; then
+    warn "已在运行 (pid=$(read_pid))，请先 stop 或 restart"
+    return 1
+  fi
+
+  : >"$LOG_FILE"
+  echo "$mode" >"$MODE_FILE"
+
+  info "启动开发模式: $mode …"
+  info "日志: $LOG_FILE"
+
+  local npm_script="dev"
+  [[ "$mode" == "web" ]] && npm_script="dev:web"
+
+  # setsid：独立会话，stop 时可一次结束子进程树
+  (
+    cd "$ROOT"
+    export LANPM_ONEKEY=1
+    if [[ "$mode" == "web" ]]; then
+      setsid npm run dev:web >>"$LOG_FILE" 2>&1
+    else
+      setsid npm run dev >>"$LOG_FILE" 2>&1
+    fi
+  ) &
+
+  local pid=$!
+  echo "$pid" >"$PID_FILE"
+  sleep 2
+
+  if pid_alive "$pid"; then
+    ok "已启动 pid=$pid ($npm_script)"
+    info "查看日志: ./onekey_run.sh logs"
+  else
+    err "启动失败，请查看日志:"
+    tail -n 30 "$LOG_FILE" 2>/dev/null || true
+    rm -f "$PID_FILE" "$MODE_FILE"
+    return 1
+  fi
+}
+
+cmd_start() {
+  start_dev "electron"
+}
+
+cmd_start_web() {
+  start_dev "web"
+}
+
+cmd_stop() {
+  ensure_run_dir
+  local p
+  if p="$(read_pid 2>/dev/null)"; then
+    info "停止 pid=$p …"
+    kill_tree "$p"
+    rm -f "$PID_FILE" "$MODE_FILE"
+  else
+    warn "无 pid 文件，尝试清理残留进程"
+  fi
+  cleanup_stray
+  ok "已停止"
+}
+
+cmd_restart() {
+  cmd_stop || true
+  sleep 1
+  cmd_start
+}
+
+cmd_logs() {
+  ensure_run_dir
+  if [[ ! -f "$LOG_FILE" ]]; then
+    warn "尚无日志: $LOG_FILE"
+    return 1
+  fi
+  local lines="${1:-50}"
+  tail -n "$lines" -f "$LOG_FILE"
+}
+
+cmd_build() {
+  need_cmd npm
+  info "生产构建 …"
+  npm run build
+  ok "构建完成 → out/"
+}
+
+cmd_preview() {
+  need_cmd npm
+  info "预览构建产物 (前台) …"
+  npm run preview
+}
+
+cmd_rebuild() {
+  need_cmd npm
+  info "强制重编 native 模块 (better-sqlite3 ↔ Electron) …"
+  npm run rebuild:native
+  ok "native 依赖已对齐"
+}
+
+cmd_install() {
+  need_cmd npm
+  info "npm install …"
+  npm install
+  ok "依赖安装完成 (postinstall 已 ensure native)"
+}
+
+cmd_check() {
+  need_cmd npm
+  local quick="${1:-}"
+  info "ensure:native …"
+  npm run ensure:native
+  info "typecheck …"
+  npm run typecheck
+  info "lint …"
+  npm run lint
+  if [[ "$quick" != "quick" ]]; then
+    info "verify:m0 (storage + suffix + network-stub) …"
+    npm run verify:m0
+  fi
+  ok "检查通过"
+}
+
+cmd_verify() {
+  need_cmd npm
+  info "全量回归 verify:m7（耗时较长）…"
+  npm run verify:m7
+  ok "verify:m7 通过"
+}
+
+cmd_clean() {
+  local deep="${1:-}"
+  info "清理构建产物 …"
+  rm -rf "$ROOT/out" "$ROOT/dist"
+  rm -f "$ROOT"/*.tsbuildinfo
+  find "$ROOT" -name '*.tsbuildinfo' -delete 2>/dev/null || true
+  if [[ -d "$RUN_DIR" ]]; then
+    rm -f "$PID_FILE" "$MODE_FILE"
+    : >"$LOG_FILE" 2>/dev/null || rm -f "$LOG_FILE"
+  fi
+  ok "已清理 out/ dist/ .lanpm 运行状态"
+
+  if [[ "$deep" == "deep" || "$deep" == "--deep" ]]; then
+    warn "深度清理: node_modules …"
+    rm -rf "$ROOT/node_modules"
+    ok "已删除 node_modules，请执行: ./onekey_run.sh install"
+  fi
+}
+
+show_menu() {
+  clear 2>/dev/null || true
+  echo ""
+  echo -e "${CYAN}╔══════════════════════════════════════╗${NC}"
+  echo -e "${CYAN}║${NC}  LanPM 一键运维  ${GREEN}v${VERSION}${NC}              ${CYAN}║${NC}"
+  echo -e "${CYAN}╚══════════════════════════════════════╝${NC}"
+  echo ""
+  cmd_status 2>/dev/null || true
+  echo ""
+  echo "  1) start      启动 Electron 开发"
+  echo "  2) web        仅渲染进程 (浏览器预览)"
+  echo "  3) restart    重启开发服务"
+  echo "  4) stop       停止开发服务"
+  echo "  5) status     查看状态"
+  echo "  6) logs       跟踪日志"
+  echo "  7) build      生产构建"
+  echo "  8) preview    预览构建 (前台)"
+  echo "  9) rebuild    重编 native 依赖"
+  echo " 10) check       typecheck + lint + verify:m0"
+  echo " 11) check quick 跳过 verify:m0"
+  echo " 12) verify      全量 verify:m7"
+  echo " 13) install     npm install"
+  echo " 14) clean       清理 out/dist"
+  echo " 15) clean deep  含 node_modules"
+  echo "  0) exit"
+  echo ""
+}
+
+menu_loop() {
+  while true; do
+    show_menu
+    read -r -p "请选择 [0-15]: " choice
+    echo ""
+    case "$choice" in
+      1)  start_dev electron || true ;;
+      2)  start_dev web || true ;;
+      3)  cmd_stop || true; sleep 1; start_dev electron || true ;;
+      4)  cmd_stop || true ;;
+      5)  cmd_status ;;
+      6)  read -r -p "日志行数 [50]: " n; cmd_logs "${n:-50}" ;;
+      7)  cmd_build ;;
+      8)  cmd_preview ;;
+      9)  cmd_rebuild ;;
+      10) cmd_check ;;
+      11) cmd_check quick ;;
+      12) cmd_verify ;;
+      13) cmd_install ;;
+      14) cmd_clean ;;
+      15) cmd_clean deep ;;
+      0|q|Q|exit) ok "再见"; exit 0 ;;
+      *) warn "无效选项: $choice" ;;
+    esac
+    echo ""
+    read -r -p "按 Enter 继续 …" _
+  done
+}
+
+usage() {
+  cat <<EOF
+用法: $0 [命令] [参数]
+
+命令:
+  start | start:web | web   启动开发 (Electron / 仅渲染)
+  stop                      停止开发服务
+  restart                   重启
+  status                    状态与端口
+  logs [行数]               跟踪 dev 日志 (默认 50)
+  build                     npm run build
+  preview                   npm run preview (前台)
+  rebuild                   重编 better-sqlite3 (Electron ABI)
+  install                   npm install
+  check [quick]             typecheck + lint [+ verify:m0]
+  verify                    npm run verify:m7
+  clean [deep]              清理 out/dist [.lanpm] [node_modules]
+  menu                      交互菜单 (默认)
+  help                      本帮助
+
+示例:
+  $0 start
+  $0 restart
+  $0 check quick
+  $0 clean deep
+EOF
+}
+
+main() {
+  local cmd="${1:-menu}"
+  shift || true
+
+  case "$cmd" in
+    start)        cmd_start ;;
+    start:web|web) cmd_start_web ;;
+    stop)         cmd_stop ;;
+    restart)      cmd_restart ;;
+    status)       cmd_status ;;
+    logs)         cmd_logs "${1:-50}" ;;
+    build)        cmd_build ;;
+    preview)      cmd_preview ;;
+    rebuild|rebuild:native) cmd_rebuild ;;
+    install)      cmd_install ;;
+    check)        cmd_check "${1:-}" ;;
+    verify|verify:m7) cmd_verify ;;
+    clean)        cmd_clean "${1:-}" ;;
+    menu|"")      menu_loop ;;
+    help|-h|--help) usage ;;
+    *)
+      err "未知命令: $cmd"
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

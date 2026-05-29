@@ -3,7 +3,7 @@ import type { Database } from 'better-sqlite3'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'fs'
 import { extname, join } from 'path'
 import { app, BrowserWindow, dialog } from 'electron'
-import type { FileCategory, FileMeta } from '../../shared/file/types'
+import type { FileCategory, FileMeta, FileTransferView } from '../../shared/file/types'
 import { inferCategory } from '../../shared/file/types'
 import { FILE_CHUNK_SIZE, FILE_MAX_CONCURRENT, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
 import { getSetupStatus } from '../identity/setup'
@@ -15,10 +15,13 @@ import {
 import {
   countActiveTransfers,
   finishTransfer,
+  getTransferById,
   insertTransfer,
+  listTransferHistory,
   listTransfersByGroup,
   updateTransferProgress
 } from '../storage/repositories/fileTransferRepository'
+import { chunkDelayMs, getFileTransferSettings } from './transferSettings.ts'
 import { generatePreview } from './previewService.ts'
 import { previewUrlForFileId } from './previewProtocol.ts'
 import { assertFileWritable } from './fileServiceHelpers'
@@ -47,6 +50,13 @@ export function listGroupTransfers(db: Database, groupId: string) {
   return listTransfersByGroup(db, groupId)
 }
 
+export function listGroupTransferHistory(db: Database, groupId: string) {
+  return listTransferHistory(db, groupId)
+}
+
+export { getFileTransferSettings, setFileTransferRateKbps } from './transferSettings.ts'
+export type { FileTransferSettings } from './transferSettings.ts'
+
 function sha256File(path: string): string {
   const buf = readFileSync(path)
   return createHash('sha256').update(buf).digest('hex')
@@ -55,40 +65,74 @@ function sha256File(path: string): string {
 async function runChunkedUpload(
   db: Database,
   meta: FileMeta,
-  deviceId: string
+  deviceId: string,
+  options?: { transferId?: string; startOffset?: number }
 ): Promise<void> {
   while (countActiveTransfers(db) >= FILE_MAX_CONCURRENT) {
     await new Promise((r) => setTimeout(r, 100))
   }
 
-  const transferId = `xfer_${randomUUID()}`
   const totalBytes = meta.size
-  insertTransfer(db, {
-    transferId,
-    fileId: meta.fileId,
-    groupId: meta.groupId,
-    direction: 'upload',
-    fromDeviceId: deviceId,
-    toDeviceId: deviceId,
-    status: 'transferring',
-    totalBytes,
-    transferredBytes: 0,
-    chunkSize: FILE_CHUNK_SIZE,
-    checksum: meta.sha256,
-    startedAt: new Date().toISOString()
-  })
+  let offset = options?.startOffset ?? 0
+  if (offset >= totalBytes) offset = 0
+
+  const transferId = options?.transferId ?? `xfer_${randomUUID()}`
+  if (!options?.transferId) {
+    insertTransfer(db, {
+      transferId,
+      fileId: meta.fileId,
+      groupId: meta.groupId,
+      direction: 'upload',
+      fromDeviceId: deviceId,
+      toDeviceId: deviceId,
+      status: offset > 0 ? 'transferring' : 'transferring',
+      totalBytes,
+      transferredBytes: offset,
+      chunkSize: FILE_CHUNK_SIZE,
+      checksum: meta.sha256,
+      startedAt: new Date().toISOString()
+    })
+  } else {
+    updateTransferProgress(db, transferId, offset, 'transferring')
+  }
   broadcastTransfers(meta.groupId)
 
-  let offset = 0
+  const { rateKbps } = getFileTransferSettings(db)
   while (offset < totalBytes) {
+    const prev = offset
     offset = Math.min(totalBytes, offset + FILE_CHUNK_SIZE)
+    const chunkBytes = offset - prev
     updateTransferProgress(db, transferId, offset, 'transferring')
     broadcastTransfers(meta.groupId)
-    await new Promise((r) => setTimeout(r, 20))
+    await new Promise((r) => setTimeout(r, chunkDelayMs(chunkBytes, rateKbps)))
   }
 
   finishTransfer(db, transferId, 'completed')
   broadcastTransfers(meta.groupId)
+}
+
+/** PRD-F-10 — 从已中断的分片进度续传 */
+export async function resumeTransfer(db: Database, transferId: string): Promise<FileTransferView> {
+  const transfer = getTransferById(db, transferId)
+  if (!transfer) throw new Error('传输任务不存在')
+  if (transfer.status !== 'failed' && transfer.status !== 'paused') {
+    throw new Error('仅失败或暂停的任务可续传')
+  }
+  if (transfer.transferredBytes <= 0 || transfer.transferredBytes >= transfer.totalBytes) {
+    throw new Error('无可续传进度')
+  }
+
+  const meta = getFileById(db, transfer.fileId)
+  if (!meta) throw new Error('文件不存在')
+
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.device) throw new Error('请先完成身份配置')
+
+  await runChunkedUpload(db, meta, status.device.deviceId, {
+    transferId,
+    startOffset: transfer.transferredBytes
+  })
+  return getTransferById(db, transferId)!
 }
 
 export async function uploadFileFromPath(

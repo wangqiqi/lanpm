@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.21] - 2026-05-29
+
+### Added
+- **ARCH-07 / PRD-F-07** 离线 7 天补同步：`chat_sync_request` / `chat_sync_batch` 报文 + `offlineSyncService`（重连/初始化时拉取）
+- **PRD-F-10** 文件断点续传：`file:resumeTransfer` IPC，从 `transferredBytes` 续传
+- **PRD-F-11** 传输限速：FilesView KB/s 配置 + `chunkDelayMs` 分片节流
+- **PRD-F-12** 传输历史：FilesView 折叠历史列表 + 失败/暂停「续传」
+- **`verify:offline-sync`**：TTL  cutoff 与限速延迟脚本
+
+### Changed
+- **ARCH-05 / ARCH-08** 文档对齐：`docs/01` §1.3.1 / README — RC 以 SQLite 为唯一持久化层；库级加密 post-RC
+- **Native 依赖**：`ensure-native-deps.mjs` + `run-electron-node.mjs`；`predev`/`prebuild` 自动检测 better-sqlite3；含 SQLite 的 `verify:*` 改走 Electron Node（`docs/08` 更新）
+
+### Tag
+- `v1.0.0-rc.21` — 离线补同步、文件续传/限速/历史
+
 ## [1.0.0-rc.20] - 2026-05-29
 
 ### Added
@@ -355,8 +371,8 @@
 ## [1.0.0-rc.1] - 2026-05-28
 
 ### Added
-- M7 全量回归：`npm run verify:m7`（rebuild:verify → M0–M7 → rebuild:native）
-- `npm run rebuild:verify`：系统 Node 用 better-sqlite3 编译
+- M7 全量回归：`npm run verify:m7`（`ensure:native` → M0–M7；SQLite 脚本走 Electron Node）
+- `scripts/ensure-native-deps.mjs`：`postinstall` / `predev` / `prebuild` 自动对齐 better-sqlite3 ↔ Electron ABI
 - `verify:m7-acceptance`：`docs/03` §16 模块存在性映射
 - `verify:m7-stability`：SQLite WAL 持久化 / 会话 meta 恢复
 - `verify:m7-perf`：DB 初始化、加密、路由 P95 冒烟

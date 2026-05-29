@@ -6,6 +6,10 @@ export const FILE_IPC = {
   getPreviewUrl: 'file:getPreviewUrl',
   getPreviewText: 'file:getPreviewText',
   listTransfers: 'file:listTransfers',
+  listTransferHistory: 'file:listTransferHistory',
+  resumeTransfer: 'file:resumeTransfer',
+  getTransferSettings: 'file:getTransferSettings',
+  setTransferRate: 'file:setTransferRate',
   addBookmark: 'file:addBookmark',
   importBookmarks: 'file:importBookmarks',
   exportBookmarks: 'file:exportBookmarks'

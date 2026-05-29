@@ -118,3 +118,80 @@ export function countActiveTransfers(db: Database): number {
     .get() as { c: number }
   return row.c
 }
+
+export function getTransferById(db: Database, transferId: string): FileTransferView | null {
+  const row = db
+    .prepare(
+      `SELECT t.*, f.name AS file_name FROM file_transfers t
+       LEFT JOIN files f ON f.file_id = t.file_id
+       WHERE t.transfer_id = ?`
+    )
+    .get(transferId) as (TransferRow & { file_name?: string }) | undefined
+  if (!row) return null
+  return {
+    transferId: row.transfer_id,
+    fileId: row.file_id,
+    groupId: row.group_id,
+    direction: row.direction as 'upload' | 'download',
+    status: row.status as FileTransferStatus,
+    totalBytes: row.total_bytes,
+    transferredBytes: row.transferred_bytes,
+    fileName: row.file_name ?? row.file_id,
+    startedAt: row.started_at,
+    finishedAt: row.finished_at ?? undefined,
+    errorMessage: row.error_message ?? undefined
+  }
+}
+
+export function listTransferHistory(db: Database, groupId: string, limit = 100): FileTransferView[] {
+  const rows = db
+    .prepare(
+      `SELECT t.*, f.name AS file_name FROM file_transfers t
+       LEFT JOIN files f ON f.file_id = t.file_id
+       WHERE t.group_id = ?
+         AND t.status IN ('completed', 'failed', 'cancelled', 'paused')
+       ORDER BY COALESCE(t.finished_at, t.started_at) DESC
+       LIMIT ?`
+    )
+    .all(groupId, limit) as (TransferRow & { file_name?: string })[]
+  return rows.map((r) => ({
+    transferId: r.transfer_id,
+    fileId: r.file_id,
+    groupId: r.group_id,
+    direction: r.direction as 'upload' | 'download',
+    status: r.status as FileTransferStatus,
+    totalBytes: r.total_bytes,
+    transferredBytes: r.transferred_bytes,
+    fileName: r.file_name ?? r.file_id,
+    startedAt: r.started_at,
+    finishedAt: r.finished_at ?? undefined,
+    errorMessage: r.error_message ?? undefined
+  }))
+}
+
+export function listResumableTransfers(db: Database, groupId: string): FileTransferView[] {
+  const rows = db
+    .prepare(
+      `SELECT t.*, f.name AS file_name FROM file_transfers t
+       LEFT JOIN files f ON f.file_id = t.file_id
+       WHERE t.group_id = ?
+         AND t.status IN ('failed', 'paused')
+         AND t.transferred_bytes > 0
+         AND t.transferred_bytes < t.total_bytes
+       ORDER BY t.started_at DESC`
+    )
+    .all(groupId) as (TransferRow & { file_name?: string })[]
+  return rows.map((r) => ({
+    transferId: r.transfer_id,
+    fileId: r.file_id,
+    groupId: r.group_id,
+    direction: r.direction as 'upload' | 'download',
+    status: r.status as FileTransferStatus,
+    totalBytes: r.total_bytes,
+    transferredBytes: r.transferred_bytes,
+    fileName: r.file_name ?? r.file_id,
+    startedAt: r.started_at,
+    finishedAt: r.finished_at ?? undefined,
+    errorMessage: r.error_message ?? undefined
+  }))
+}

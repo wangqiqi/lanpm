@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.20`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
+- **RC**：`1.0.0-rc.21`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
@@ -12,11 +12,15 @@
 ## 本地开发
 
 ```bash
-npm install
-npm run dev      # 启动 Electron 开发模式
+chmod +x onekey_run.sh   # 首次
+./onekey_run.sh          # 交互菜单：start / stop / status / build / check …
+./onekey_run.sh start    # 后台启动 dev，日志见 .lanpm/dev.log
+
+npm install      # postinstall 会自动将 better-sqlite3 对齐到 Electron ABI
+npm run dev      # 启动前也会自动检测并重编（若 ABI 不一致）
 npm run lint     # ESLint
 npm run typecheck
-npm run verify:m7   # 全量回归（含 rebuild:native + M0–M7）
+npm run verify:m7   # 全量回归（SQLite 相关脚本走 Electron Node，不再切换 ABI）
 npm run build       # 生产构建
 ```
 
@@ -68,7 +72,7 @@ Stub 错误文案仍为英文硬编码（见 todo **I18N-06** / **UX-I-07**）�
 - 传输加密：UDP 发现 + WebRTC DataChannel + 应用层 AES-GCM/DH（独立 HMAC 字段见 todo **ARCH-04**）
 - Office 预览：LibreOffice 本地转换（数据不出域）
 
-**当前 RC 实现**：主路径为 Electron + React + SQLite + TCP/Stub 联调；Yjs/WebRTC/IndexedDB 热缓存与 7 天离线补同步为 post-RC（见 [docs/01 §1.3.1](./docs/01_产品需求文档.md)）。
+**当前 RC 实现**：主路径为 Electron + React + **SQLite（唯一持久化层）** + TCP/Stub 联调；Yjs/WebRTC/IndexedDB 热缓存为 post-RC；**7 天离线补同步**与文件断点续传/限速已落地 RC（见 [docs/01 §1.3.1](./docs/01_产品需求文档.md)）。
 
 ## 开发排期摘要
 

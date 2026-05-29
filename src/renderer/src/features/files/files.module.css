@@ -12,6 +12,12 @@
   border: 1px solid var(--lanpm-border);
   border-radius: 8px;
   padding: 0 8px;
+  margin: 0 16px 8px;
+}
+
+.transferHistory {
+  flex-shrink: 0;
+  margin: 0 16px 8px;
 }
 
 .transferRow {

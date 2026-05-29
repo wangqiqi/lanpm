@@ -30,7 +30,7 @@ if (process.platform === 'linux') {
 function startupErrorMessage(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err)
   if (msg.includes('NODE_MODULE_VERSION') || msg.includes('better_sqlite3')) {
-    return `${msg}\n\n请在本项目根目录执行：\nnpm run rebuild:native\n\n（勿单独 npm rebuild better-sqlite3，那会按系统 Node 编译，Electron 无法加载）`
+    return `${msg}\n\n请在本项目根目录执行：\nnpm run ensure:native\n\n（开发/构建前会自动检测并重编；勿单独 npm rebuild better-sqlite3）`
   }
   return msg
 }

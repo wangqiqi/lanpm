@@ -467,9 +467,39 @@
   flex: 1;
   min-height: 0;
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 8px 10px;
+}
+
+.toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  padding: 2px 0 0;
+  border-bottom: 1px solid var(--lanpm-border);
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.inputModeToggle {
+  flex-shrink: 0;
+}
+
+.composerBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
   align-items: stretch;
   gap: 8px;
-  padding: 0 8px 10px;
 }
 
 .inputMain {
@@ -513,10 +543,36 @@
   font-family: inherit;
 }
 
-.inputActions {
+.sendBtn {
   flex-shrink: 0;
+  align-self: stretch;
+  min-width: 72px;
+  max-width: 88px;
+  height: auto !important;
+  padding: 12px 10px !important;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.voicePanel {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
+  padding: 8px 4px;
+}
+
+.voiceHoldBtn {
+  max-width: 280px;
+  height: 44px !important;
+}
+
+.voiceHint {
+  font-size: 12px;
+  text-align: center;
 }

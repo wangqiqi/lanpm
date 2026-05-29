@@ -7,11 +7,15 @@ import {
   pickAndImportBookmarks
 } from '../file/bookmarkService'
 import {
+  getFileTransferSettings,
   listGroupFiles,
+  listGroupTransferHistory,
   listGroupTransfers,
   pickAndUploadFile,
   readPreviewText,
   resolvePreviewUrl,
+  resumeTransfer,
+  setFileTransferRateKbps,
   uploadFileFromPath
 } from '../file/fileService'
 import { getDatabase } from '../storage'
@@ -43,6 +47,23 @@ export function registerFileIpc(): void {
   ipcMain.handle(FILE_IPC.listTransfers, (_event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
     return listGroupTransfers(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(FILE_IPC.listTransferHistory, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return listGroupTransferHistory(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(FILE_IPC.resumeTransfer, (_event, transferId: string) => {
+    if (typeof transferId !== 'string' || !transferId) throw new Error('transferId required')
+    return resumeTransfer(getDatabase(), transferId)
+  })
+
+  ipcMain.handle(FILE_IPC.getTransferSettings, () => getFileTransferSettings(getDatabase()))
+
+  ipcMain.handle(FILE_IPC.setTransferRate, (_event, rateKbps: number) => {
+    if (typeof rateKbps !== 'number' || rateKbps < 0) throw new Error('rateKbps invalid')
+    return setFileTransferRateKbps(getDatabase(), rateKbps)
   })
 
   ipcMain.handle(

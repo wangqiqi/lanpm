@@ -11,6 +11,12 @@ import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { listGroupMembers } from './memberService'
 import { notifyIfMentioned } from './notificationService'
 import { handleGroupKeyRotate, initGroupKeyService, shutdownGroupKeyService } from '../crypto/groupKeyService'
+import {
+  handleChatSyncBatch,
+  handleChatSyncRequest,
+  initOfflineSyncMeta,
+  requestOfflineSync
+} from './offlineSyncService'
 import { uploadFileFromPath } from '../file/fileService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import { broadcastMessage } from './chatBroadcast'
@@ -36,6 +42,14 @@ function isAnonymousGroup(db: Database, groupId: string): boolean {
 function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   if (envelope.type === 'group_key_rotate') {
     handleGroupKeyRotate(db, envelope)
+    return
+  }
+  if (envelope.type === 'chat_sync_request') {
+    void handleChatSyncRequest(db, envelope).catch(() => undefined)
+    return
+  }
+  if (envelope.type === 'chat_sync_batch') {
+    handleChatSyncBatch(db, envelope)
     return
   }
   if (envelope.type !== 'chat' || !envelope.groupId) return
@@ -89,6 +103,8 @@ export function initChatService(db: Database): void {
   refreshGroupSubscriptions(db, transport)
   initReadReceiptService(db)
   initGroupKeyService(db)
+  initOfflineSyncMeta(db)
+  void requestOfflineSync(db).catch(() => undefined)
 }
 
 export function shutdownChatService(): void {

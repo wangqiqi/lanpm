@@ -10,6 +10,8 @@ export type SyncMessageType =
   | 'file_chunk'
   | 'member_event'
   | 'group_key_rotate'
+  | 'chat_sync_request'
+  | 'chat_sync_batch'
 
 /** docs/04 §6.1 */
 export interface SyncEnvelope {

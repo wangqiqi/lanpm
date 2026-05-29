@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Input, Typography } from 'antd'
+import { Button, Input, Segmented, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { CodeOutlined, MenuOutlined, PaperClipOutlined, PlusSquareOutlined } from '@ant-design/icons'
+import {
+  AudioOutlined,
+  CameraOutlined,
+  CodeOutlined,
+  EditOutlined,
+  MenuOutlined,
+  PaperClipOutlined,
+  PlusSquareOutlined
+} from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
@@ -32,7 +40,7 @@ const { TextArea } = Input
 
 const COMPOSER_MIN = 88
 const COMPOSER_MAX = 320
-const COMPOSER_DEFAULT = 120
+const COMPOSER_DEFAULT = 136
 const MESSAGES_MIN = 96
 
 function formatTime(iso: string): string {
@@ -74,6 +82,7 @@ export default function ChatView(): React.ReactElement {
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
 
   useEffect(() => {
@@ -364,57 +373,113 @@ export default function ChatView(): React.ReactElement {
             aria-label={t('chat.resizeComposer')}
           />
           <div className={styles.inputRow}>
-            <div className={styles.inputMain}>
-              <Text type="secondary" className={styles.inputHint}>
-                {t('chat.inputHintEnter')}
-                {taskAllowed ? t('chat.inputHintTask') : ''}
-              </Text>
-              <div className={styles.inputWrap}>
-                <MentionSuggest
-                  candidates={candidates}
-                  activeIndex={activeIndex}
-                  onPick={insertMention}
-                />
-                <TextArea
-                  className={styles.inputTextarea}
-                  placeholder={taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={onKeyDown}
-                />
-              </div>
-            </div>
-            <div className={styles.inputActions}>
-              <EmojiPicker onPick={insertEmoji} />
-              {taskAllowed && (
-                <Button
-                  icon={<PlusSquareOutlined />}
-                  onClick={() => setTaskModalOpen(true)}
-                  title="/task"
-                >
-                  {t('chat.taskBtn')}
-                </Button>
-              )}
-              {codeAllowed && (
-                <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
-                  {t('chat.codeBtn')}
-                </Button>
-              )}
-              {fileAllowed && (
-                <Button
-                  icon={<PaperClipOutlined />}
-                  onClick={() =>
-                    void pickAndSendFile(gid).catch((err: unknown) =>
-                      message.error(
-                        err instanceof Error ? err.message : t('chat.fileSendFailed')
+            <div className={styles.toolbar}>
+              <div className={styles.toolbarActions}>
+                <EmojiPicker onPick={insertEmoji} />
+                {taskAllowed && (
+                  <Button
+                    type="text"
+                    icon={<PlusSquareOutlined />}
+                    onClick={() => setTaskModalOpen(true)}
+                    title={t('chat.taskBtn')}
+                    aria-label={t('chat.taskBtn')}
+                  />
+                )}
+                {codeAllowed && (
+                  <Button
+                    type="text"
+                    icon={<CodeOutlined />}
+                    onClick={() => setCodeModalOpen(true)}
+                    title={t('chat.codeBtn')}
+                    aria-label={t('chat.codeBtn')}
+                  />
+                )}
+                {fileAllowed && (
+                  <Button
+                    type="text"
+                    icon={<PaperClipOutlined />}
+                    onClick={() =>
+                      void pickAndSendFile(gid).catch((err: unknown) =>
+                        message.error(
+                          err instanceof Error ? err.message : t('chat.fileSendFailed')
+                        )
                       )
-                    )
+                    }
+                    title={t('chat.fileBtn')}
+                    aria-label={t('chat.fileBtn')}
+                  />
+                )}
+                {fileAllowed && (
+                  <Button
+                    type="text"
+                    icon={<CameraOutlined />}
+                    onClick={() => message.info(t('chat.screenshotSoon'))}
+                    title={t('chat.screenshotBtn')}
+                    aria-label={t('chat.screenshotBtn')}
+                  />
+                )}
+              </div>
+              <Segmented
+                className={styles.inputModeToggle}
+                size="small"
+                value={inputMode}
+                onChange={(v) => setInputMode(v as 'text' | 'voice')}
+                options={[
+                  {
+                    value: 'text',
+                    icon: <EditOutlined />,
+                    label: t('chat.inputModeText')
+                  },
+                  {
+                    value: 'voice',
+                    icon: <AudioOutlined />,
+                    label: t('chat.inputModeVoice')
                   }
-                >
-                  {t('chat.fileBtn')}
-                </Button>
-              )}
-              <Button type="primary" onClick={() => void handleSend()}>
+                ]}
+              />
+            </div>
+            <div className={styles.composerBody}>
+              <div className={styles.inputMain}>
+                {inputMode === 'text' ? (
+                  <>
+                    <Text type="secondary" className={styles.inputHint}>
+                      {t('chat.inputHintEnter')}
+                      {taskAllowed ? t('chat.inputHintTask') : ''}
+                    </Text>
+                    <div className={styles.inputWrap}>
+                      <MentionSuggest
+                        candidates={candidates}
+                        activeIndex={activeIndex}
+                        onPick={insertMention}
+                      />
+                      <TextArea
+                        className={styles.inputTextarea}
+                        placeholder={
+                          taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')
+                        }
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={onKeyDown}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.voicePanel}>
+                    <Button className={styles.voiceHoldBtn} disabled block>
+                      {t('chat.voiceHoldHint')}
+                    </Button>
+                    <Text type="secondary" className={styles.voiceHint}>
+                      {t('chat.voiceComingSoon')}
+                    </Text>
+                  </div>
+                )}
+              </div>
+              <Button
+                type="primary"
+                className={styles.sendBtn}
+                disabled={inputMode === 'voice'}
+                onClick={() => void handleSend()}
+              >
                 {t('common.send')}
               </Button>
             </div>
