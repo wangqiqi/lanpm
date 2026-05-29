@@ -88,6 +88,18 @@ export function updateFilePreview(
   ).run(previewStatus, previewPath ?? null, new Date().toISOString(), fileId)
 }
 
+/** 修复历史上传后 preview_path 被清空的记录 */
+export function repairFilePreviewPaths(db: Database): void {
+  db.prepare(
+    `UPDATE files
+     SET preview_path = storage_path, updated_at = ?
+     WHERE preview_status = 'ready'
+       AND (preview_path IS NULL OR preview_path = '')
+       AND is_bookmark = 0
+       AND ext IN ('txt', 'md', 'json', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg')`
+  ).run(new Date().toISOString())
+}
+
 export function listFilesByGroup(
   db: Database,
   groupId: string,

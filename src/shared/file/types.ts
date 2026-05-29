@@ -48,7 +48,7 @@ export function inferCategory(ext: string, mime?: string): FileCategory {
   const e = ext.toLowerCase()
   if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(e)) return 'image'
   if (['mp4', 'webm', 'mov', 'avi'].includes(e)) return 'video'
-  if (['js', 'ts', 'tsx', 'py', 'go', 'rs', 'java', 'cpp', 'c', 'md'].includes(e)) return 'code'
+  if (['js', 'ts', 'tsx', 'py', 'go', 'rs', 'java', 'cpp', 'c', 'md', 'txt', 'json'].includes(e)) return 'code'
   if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods'].includes(e)) return 'document'
   if (mime?.startsWith('image/')) return 'image'
   if (mime?.startsWith('video/')) return 'video'

@@ -59,7 +59,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const groupId = Object.keys(existing).find((gid) =>
       existing[gid]?.some((t) => t.taskId === input.taskId)
     )
-    if (groupId) await get().loadTasks(groupId)
+    if (groupId) {
+      set((s) => ({
+        tasksByGroup: {
+          ...s.tasksByGroup,
+          [groupId]: (s.tasksByGroup[groupId] ?? []).map((t) =>
+            t.taskId === task.taskId ? task : t
+          )
+        }
+      }))
+    }
     return task
   },
 

@@ -2,6 +2,26 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.19] - 2026-05-29
+
+### Added
+- **文本文件内联预览**（**PRD-F-04** 延伸）：`file:getPreviewText` IPC + `loadPreviewText`；`.txt` / `.md` / `.json` 以 `<pre>` 展示
+- **`lanpm-preview://` 自定义协议**：主进程 `previewProtocol.ts` 注册预览协议，替代 `file://` iframe，解决 Electron 开发态跨协议拦截
+- **甘特拖拽配置**（`ganttDragConfig.ts`）：加宽拖动手柄（12px）、日视图列宽 72px、拖拽步进对齐日粒度
+- **`docs/05`** §6.0：看板 / 任务树 / 甘特「内容统一、交互分视图」约定
+
+### Changed
+- **文件分类**：`.txt` / `.json` 归入 `code` 类别
+- **甘特图**：`locale` 跟随应用语言；拖条改期后抑制误触单击弹窗；`updateSchedule` 乐观更新本地任务列表
+- **启动时** `repairFilePreviewPaths` 修复历史 `preview_path` 为空记录
+
+### Fixed
+- **文本预览失败**：上传后 `preview_path` 被二次写入清空；`file://` iframe / fetch 在 `http://localhost` 下不可用 → 改 IPC + 自定义协议
+- **preload 未热更新**：`loadPreviewText` 在缺少 `getPreviewText` 时回退 `getPreviewUrl` + fetch
+
+### Tag
+- `v1.0.0-rc.19` — 文本文件预览修复、lanpm-preview 协议与甘特拖拽优化
+
 ## [1.0.0-rc.18] - 2026-05-29
 
 ### Added

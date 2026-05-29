@@ -519,6 +519,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         throw stubError('stub.uploadElectronOnly')
       },
       getPreviewUrl: async () => null,
+      getPreviewText: async () => null,
       listTransfers: async () => [],
       addBookmark: async (groupId, url, title) => ({
         fileId: `stub_${Date.now()}`,

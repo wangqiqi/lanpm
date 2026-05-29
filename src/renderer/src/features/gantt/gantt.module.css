@@ -27,6 +27,13 @@
   font-size: 11px;
 }
 
+.chartWrap :global(.handleGroup) rect {
+  cursor: ew-resize;
+  stroke: transparent;
+  stroke-width: 10;
+  paint-order: stroke;
+}
+
 .chartWrap :global(.bar) {
   fill: var(--lanpm-accent);
 }

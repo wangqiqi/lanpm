@@ -72,6 +72,21 @@
   background: var(--lanpm-bg);
 }
 
+.previewText {
+  flex: 1;
+  min-height: 320px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--lanpm-bg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .rowSelected :global(.ant-table-cell) {
   background: var(--lanpm-accent-fill) !important;
 }

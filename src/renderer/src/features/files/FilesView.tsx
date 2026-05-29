@@ -23,6 +23,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { groupViewPath } from '@renderer/routes/paths'
 import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
+import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
 import styles from './files.module.css'
 
 const { Text } = Typography
@@ -69,6 +70,7 @@ export default function FilesView(): React.ReactElement {
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
   const [selected, setSelected] = useState<FileMeta | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewText, setPreviewText] = useState<string | null>(null)
   const [previewError, setPreviewError] = useState(false)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [bookmarkUrl, setBookmarkUrl] = useState('')
@@ -96,15 +98,36 @@ export default function FilesView(): React.ReactElement {
   useEffect(() => {
     if (!selected) {
       setPreviewUrl(null)
+      setPreviewText(null)
       setPreviewError(false)
       return
     }
     if (selected.isBookmark) {
       setPreviewUrl(null)
+      setPreviewText(null)
       setPreviewError(false)
       return
     }
+
+    const ext = selected.ext.toLowerCase()
+    const isTextPreview = ['txt', 'md', 'json'].includes(ext)
+
     setPreviewError(false)
+    if (isTextPreview) {
+      setPreviewUrl(null)
+      void loadPreviewText(selected.fileId)
+        .then((text) => {
+          setPreviewText(text)
+          setPreviewError(text === null)
+        })
+        .catch(() => {
+          setPreviewText(null)
+          setPreviewError(true)
+        })
+      return
+    }
+
+    setPreviewText(null)
     void getLanpmApi()
       .file.getPreviewUrl(selected.fileId)
       .then((url) => {
@@ -120,6 +143,16 @@ export default function FilesView(): React.ReactElement {
   const retryPreview = (): void => {
     if (!selected || selected.isBookmark) return
     setPreviewError(false)
+    const ext = selected.ext.toLowerCase()
+    if (['txt', 'md', 'json'].includes(ext)) {
+      void loadPreviewText(selected.fileId)
+        .then((text) => {
+          setPreviewText(text)
+          setPreviewError(text === null)
+        })
+        .catch(() => setPreviewError(true))
+      return
+    }
     void getLanpmApi()
       .file.getPreviewUrl(selected.fileId)
       .then((url) => {
@@ -344,8 +377,8 @@ export default function FilesView(): React.ReactElement {
             <Image src={previewUrl} alt={selected.name} className={styles.previewImg} />
           ) : previewUrl && selected.ext.toLowerCase() === 'pdf' ? (
             <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
-          ) : previewUrl && ['txt', 'md', 'json'].includes(selected.ext.toLowerCase()) ? (
-            <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
+          ) : previewText !== null ? (
+            <pre className={styles.previewText}>{previewText}</pre>
           ) : (
             <Text type="secondary">{t('files.noInlinePreview', { name: selected.name })}</Text>
           )}

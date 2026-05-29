@@ -6,6 +6,7 @@ import { registerChatIpc } from './ipc/chat'
 import { registerIdentityIpc } from './ipc/identity'
 import { registerTaskIpc } from './ipc/task'
 import { registerFileIpc } from './ipc/file'
+import { repairFilePreviewPaths } from './storage/repositories/fileRepository'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
 import { registerSearchIpc } from './ipc/search'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
@@ -13,8 +14,11 @@ import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { resolveAppIconPath } from './appIcon'
+import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
 
 const isDev = !app.isPackaged
+
+registerPreviewScheme()
 
 /** Linux 无可用 GPU/Vulkan 时 Electron 会直接 FATAL 退出；开发环境禁用硬件加速 */
 if (process.platform === 'linux') {
@@ -104,6 +108,8 @@ app.whenReady().then(() => {
     Menu.setApplicationMenu(null)
 
     initDatabase()
+    repairFilePreviewPaths(getDatabase())
+    registerPreviewProtocol(getDatabase)
     ensureSeedGroups(getDatabase())
     initNetwork(getDatabase())
     initChatService(getDatabase())

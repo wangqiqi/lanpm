@@ -10,6 +10,7 @@ import {
   listGroupFiles,
   listGroupTransfers,
   pickAndUploadFile,
+  readPreviewText,
   resolvePreviewUrl,
   uploadFileFromPath
 } from '../file/fileService'
@@ -32,6 +33,11 @@ export function registerFileIpc(): void {
   ipcMain.handle(FILE_IPC.getPreviewUrl, (_event, fileId: string) => {
     if (typeof fileId !== 'string' || !fileId) throw new Error('fileId required')
     return resolvePreviewUrl(getDatabase(), fileId)
+  })
+
+  ipcMain.handle(FILE_IPC.getPreviewText, (_event, fileId: string) => {
+    if (typeof fileId !== 'string' || !fileId) throw new Error('fileId required')
+    return readPreviewText(getDatabase(), fileId)
   })
 
   ipcMain.handle(FILE_IPC.listTransfers, (_event, groupId: string) => {

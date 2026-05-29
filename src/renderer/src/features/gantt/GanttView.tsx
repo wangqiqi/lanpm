@@ -12,6 +12,11 @@ import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { exportElementToPdf, exportElementToPng } from './ganttExport'
+import {
+  GANTT_HANDLE_WIDTH,
+  ganttColumnWidthForView,
+  ganttTimeStepForView
+} from './ganttDragConfig'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
@@ -23,7 +28,7 @@ import styles from './gantt.module.css'
 const { Text } = Typography
 
 export default function GanttView(): React.ReactElement {
-  const { t } = useI18n()
+  const { locale, t } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
@@ -46,6 +51,7 @@ export default function GanttView(): React.ReactElement {
   const [scheduleEnd, setScheduleEnd] = useState('')
   const [scheduleSaving, setScheduleSaving] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
+  const suppressClickRef = useRef(false)
   const themeMode = useUiStore((s) => s.theme)
   const [todayColor, setTodayColor] = useState(() =>
     readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)')
@@ -93,15 +99,27 @@ export default function GanttView(): React.ReactElement {
   )
 
   const onDateChange = useCallback(
-    (bar: GanttTask) => {
-      const task = tasks.find((t) => t.taskId === bar.id)
-      if (!task) return
+    async (bar: GanttTask): Promise<boolean> => {
+      const task = tasks.find((item) => item.taskId === bar.id)
+      if (!task) return false
+
+      suppressClickRef.current = true
       const { startDate, endDate } = ganttDatesToYmd(bar.start, bar.end, task.milestone)
-      void updateSchedule({ taskId: task.taskId, startDate, endDate }).catch((err: unknown) => {
+      if (!task.milestone && endDate < startDate) return false
+
+      try {
+        await updateSchedule({ taskId: task.taskId, startDate, endDate })
+        return true
+      } catch (err: unknown) {
         message.error(err instanceof Error ? err.message : t('gantt.scheduleFailed'))
-      })
+        return false
+      } finally {
+        window.setTimeout(() => {
+          suppressClickRef.current = false
+        }, 200)
+      }
     },
-    [tasks, updateSchedule, t]
+    [tasks, updateSchedule, message, t]
   )
 
   const addDependency = async (): Promise<void> => {
@@ -227,11 +245,16 @@ export default function GanttView(): React.ReactElement {
       ) : (
         <div className={styles.chartWrap} ref={chartRef}>
           <Gantt
+            key={locale}
             tasks={ganttTasks}
             viewMode={viewMode}
+            locale={locale}
             onDateChange={onDateChange}
+            handleWidth={GANTT_HANDLE_WIDTH}
+            timeStep={ganttTimeStepForView(viewMode)}
             onClick={(bar) => {
-              const task = tasks.find((t) => t.taskId === bar.id)
+              if (suppressClickRef.current) return
+              const task = tasks.find((item) => item.taskId === bar.id)
               if (task) openScheduleModal(task)
             }}
             onDoubleClick={(bar) => {
@@ -239,7 +262,7 @@ export default function GanttView(): React.ReactElement {
               if (task) void toggleMilestone(task)
             }}
             listCellWidth=""
-            columnWidth={viewMode === ViewMode.Month ? 300 : viewMode === ViewMode.Week ? 200 : 60}
+            columnWidth={ganttColumnWidthForView(viewMode)}
             rowHeight={44}
             barFill={56}
             todayColor={todayColor}

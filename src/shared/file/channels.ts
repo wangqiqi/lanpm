@@ -4,6 +4,7 @@ export const FILE_IPC = {
   list: 'file:list',
   upload: 'file:upload',
   getPreviewUrl: 'file:getPreviewUrl',
+  getPreviewText: 'file:getPreviewText',
   listTransfers: 'file:listTransfers',
   addBookmark: 'file:addBookmark',
   importBookmarks: 'file:importBookmarks',
