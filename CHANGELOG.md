@@ -2,13 +2,31 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.66] - 2026-05-29
+
+### Added
+- **`RegionButton` `caption`**：行内小号强调链接（替代 Ant `type="link"`）
+
+### Changed
+- **文件预览**：「分享到聊天」改为默认按钮；传输续传用语义链接样式
+- **代码块 / 驾驶舱报表**：展开折叠改用 `caption`
+- **看板/树/甘特**：面板边框 `0.5px` `--lanpm-separator`（补交 rc.65 未提交部分）
+- **文档版本号**：README、`docs/01` §1.3.1、`docs/02` RC 说明与 `package.json` 对齐
+
+### Tag
+- `v1.0.0-rc.66` — 内联链接与次要按钮 Apple 化
+
 ## [1.0.0-rc.65] - 2026-05-29
 
 ### Changed
-- **Apple HIG 文档与守卫**：`docs/04` §1.1/§1.6 对齐 iOS Tab Bar（49px + safe-area）、ViewSegment 浮起、`toolbar` 文字按钮；`verify:visual` 断言更新；BottomNav 去掉冗余 `tabWrapActive`
+- **`RegionTabBar`**：对齐 BottomNav（发丝底边、选中仅强调色；无竖线/顶条/蓝底）
+- **聊天上下文 / 成员资料 / 甘特排期**：`type="link"` / `pill` → `RegionButton` `toolbar`
+- **`ViewHeader`**：任务视图无底部分隔；聊天页 `showDivider` 发丝线
+- **内容面板**：文件列表/预览单卡片 + inset 分隔；看板/树/甘特边框 `0.5px` `--lanpm-separator`
+- **docs/04** §1.4 / §1.6；**`verify:visual`** 增加 `RegionTabBar` 守卫
 
 ### Tag
-- `v1.0.0-rc.65` — Apple HIG 文档与视觉守卫对齐
+- `v1.0.0-rc.65` — Apple HIG 全应用 Tab/面板/捷径统一
 
 ## [1.0.0-rc.64] - 2026-05-29
 

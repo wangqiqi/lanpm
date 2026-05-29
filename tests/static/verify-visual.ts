@@ -268,6 +268,17 @@ assert.ok(
 )
 assert.match(bottomNavCss, /var\(--lanpm-font-tab\)/, 'BottomNav tab label should use --lanpm-font-tab')
 
+const regionTabBarCss = readFileSync(join(renderer, 'ui/RegionTabBar.module.css'), 'utf8')
+assert.ok(
+  !/composes:\s*region.*regionInteract/.test(regionTabBarCss),
+  'RegionTabBar uses dedicated tab styles (not regionInteract composes)'
+)
+assert.match(
+  regionTabBarCss,
+  /var\(--lanpm-separator\)/,
+  'RegionTabBar should use hairline --lanpm-separator'
+)
+
 const regionCss = readFileSync(join(renderer, 'ui/regionInteract.module.css'), 'utf8')
 assert.match(regionCss, /--lanpm-hover-bg/, 'regionInteract hover must use --lanpm-hover-bg (V-14b-HOV static)')
 assert.match(regionCss, /--lanpm-accent-fill/, 'regionInteract selected must use accent fill tokens')

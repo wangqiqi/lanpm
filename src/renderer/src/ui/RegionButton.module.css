@@ -43,6 +43,19 @@
   color: var(--lanpm-accent-hover);
 }
 
+/* 表格行内 / 代码块折叠等小号强调链接 */
+.caption {
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: var(--lanpm-font-caption);
+  font-weight: 400;
+  color: var(--lanpm-accent);
+}
+
+.caption:hover:not(:disabled):not(.regionDisabled) {
+  color: var(--lanpm-accent-hover);
+}
+
 .text {
   padding: 6px 10px;
   border-radius: 10px;

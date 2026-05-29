@@ -23,7 +23,7 @@
   min-height: 200px;
   border-radius: 8px;
   background: var(--lanpm-surface-solid);
-  border: 1px solid var(--lanpm-border);
+  border: 0.5px solid var(--lanpm-separator);
 }
 
 .columnOver {

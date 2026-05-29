@@ -385,8 +385,8 @@ export default function GanttView(): React.ReactElement {
         destroyOnHidden
         footer={(_, { OkBtn, CancelBtn }) => (
           <>
-            <Button
-              type="link"
+            <RegionButton
+              variant="toolbar"
               onClick={() => {
                 if (!scheduleTask) return
                 setScheduleOpen(false)
@@ -396,7 +396,7 @@ export default function GanttView(): React.ReactElement {
               }}
             >
               {t('gantt.openInBoard')}
-            </Button>
+            </RegionButton>
             <CancelBtn />
             <OkBtn />
           </>

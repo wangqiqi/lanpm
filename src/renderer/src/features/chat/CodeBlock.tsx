@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button, Tag } from 'antd'
+import RegionButton from '@renderer/ui/RegionButton'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { CopyOutlined } from '@ant-design/icons'
 import githubCssUrl from 'highlight.js/styles/github.css?url'
@@ -62,9 +63,9 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
           {t('chat.copyCode')}
         </Button>
         {code.split('\n').length > 12 && (
-          <Button type="link" size="small" onClick={() => setExpanded((v) => !v)}>
+          <RegionButton variant="caption" onClick={() => setExpanded((v) => !v)}>
             {expanded ? t('chat.codeCollapse') : t('chat.codeExpand')}
-          </Button>
+          </RegionButton>
         )}
       </div>
       <pre

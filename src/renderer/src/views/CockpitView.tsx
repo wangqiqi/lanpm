@@ -19,6 +19,7 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
+import RegionButton from '@renderer/ui/RegionButton'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
@@ -253,9 +254,9 @@ export default function CockpitView(): React.ReactElement {
               >
                 {t('cockpit.reportCopy')}
               </Button>
-              <Button size="small" type="link" onClick={() => setReportExpanded((v) => !v)}>
+              <RegionButton variant="caption" onClick={() => setReportExpanded((v) => !v)}>
                 {reportExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
-              </Button>
+              </RegionButton>
             </Space>
           }
         >

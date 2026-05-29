@@ -32,6 +32,7 @@ import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
 import ViewSegment from '@renderer/ui/ViewSegment'
+import RegionButton from '@renderer/ui/RegionButton'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
@@ -679,14 +680,13 @@ export default function FilesView(): React.ReactElement {
                       actions={
                         tr.status === 'failed' || tr.status === 'paused'
                           ? [
-                              <Button
+                              <RegionButton
                                 key="resume"
-                                type="link"
-                                size="small"
+                                variant="caption"
                                 onClick={() => handleResume(tr.transferId)}
                               >
                                 {t('files.transferResume')}
-                              </Button>
+                              </RegionButton>
                             ]
                           : undefined
                       }
@@ -765,7 +765,6 @@ export default function FilesView(): React.ReactElement {
                   </Button>
                 ) : null}
                 <Button
-                  type="primary"
                   size="small"
                   icon={<CommentOutlined />}
                   loading={sharingToChat}
