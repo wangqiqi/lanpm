@@ -1,5 +1,5 @@
 /**
- * M0-09 / M0-10 NetworkStub self-test (in-process dual stub).
+ * M0-09 / M0-10 NetworkStub self-test (in-process dual stub; no LANPM_NETWORK needed).
  * Run: npm run verify:network-stub
  */
 import { randomUUID } from 'crypto'

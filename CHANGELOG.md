@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.48] - 2026-05-29
+
+### Fixed
+- **CI Windows `verify:m0`**：移除 `verify:network-stub` 中 Unix 专用 `LANPM_NETWORK=stub` 前缀（该脚本直接测 `NetworkStub`，无需环境变量；cmd 会报 not recognized）
+
+### Tag
+- `v1.0.0-rc.48` — Windows verify:m7 m0 步骤修复
+
 ## [1.0.0-rc.47] - 2026-05-29
 
 ### Fixed
