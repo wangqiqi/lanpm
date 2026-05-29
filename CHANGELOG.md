@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.68] - 2026-05-29
+
+### Changed
+- **跨平台字体**：`--lanpm-font-family` SSOT；macOS 用 `-apple-system`（SF）+ 苹方，Windows/Linux 系统回退；**不捆绑** SF Pro 字体文件
+- **docs/04** §1.5.1：字体族与平台说明
+- **ThemeProvider**：与 `global.module.css` 字体栈对齐
+
+### Tag
+- `v1.0.0-rc.68` — 跨平台系统字体栈（Apple 平台自动 SF/苹方）
+
 ## [1.0.0-rc.67] - 2026-05-29
 
 ### Added

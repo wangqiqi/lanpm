@@ -4,8 +4,9 @@ import zhCN from 'antd/locale/zh_CN'
 import enUS from 'antd/locale/en_US'
 import { useUiStore } from '@renderer/stores/uiStore'
 
-const APPLE_FONT =
-  "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', sans-serif"
+/** 与 global.module.css `--lanpm-font-family` 一致（Ant token 须写完整栈，不能用 var） */
+const LANPM_FONT_FAMILY =
+  "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', 'Helvetica Neue', sans-serif"
 
 /** 与 global.module.css 一致；Ant Design 无法对 CSS 变量做颜色运算，须用实色 */
 const LANPM_PALETTE = {
@@ -52,7 +53,7 @@ export default function ThemeProvider({
       theme={{
         algorithm: isDark ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: {
-          fontFamily: APPLE_FONT,
+          fontFamily: LANPM_FONT_FAMILY,
           borderRadius: 10,
           borderRadiusLG: 12,
           colorPrimary: isDark ? '#0a84ff' : '#0071e3',

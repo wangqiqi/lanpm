@@ -4,16 +4,7 @@
   margin: 0;
   height: 100%;
   overflow: hidden;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'SF Pro Text',
-    'SF Pro Display',
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+  font-family: var(--lanpm-font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -22,8 +13,25 @@
   box-sizing: border-box;
 }
 
-/* 字体尺度（亮暗共用；新样式优先 var(--lanpm-font-*)） */
+/*
+ * 字体族（勿在仓库内捆绑 SF Pro 字体文件 — 有版权）
+ * macOS：-apple-system → San Francisco；PingFang SC → 中文
+ * Windows：Segoe UI + 微软雅黑
+ * Linux：system-ui / Noto Sans SC（未安装苹果字体时不会命中 SF Pro 名称）
+ */
 :global(html) {
+  --lanpm-font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei UI',
+    'Microsoft YaHei',
+    'Noto Sans SC',
+    'Helvetica Neue',
+    sans-serif;
   --lanpm-font-caption: 11px;
   --lanpm-font-body: 13px;
   --lanpm-font-title: 17px;
