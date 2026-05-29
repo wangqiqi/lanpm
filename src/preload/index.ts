@@ -29,6 +29,8 @@ const api: LanpmApi = {
     markRead: (groupId, msgIds) => ipcRenderer.invoke('chat:markRead', groupId, msgIds),
     pickAndSendFile: (groupId) => ipcRenderer.invoke('chat:pickAndSendFile', groupId),
     sendFile: (groupId, filePath) => ipcRenderer.invoke('chat:sendFile', groupId, filePath),
+    captureAndSendScreenshot: (groupId) =>
+      ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)
@@ -71,6 +73,8 @@ const api: LanpmApi = {
       ipcRenderer.invoke('file:addBookmark', groupId, url, title),
     importBookmarks: (groupId) => ipcRenderer.invoke('file:importBookmarks', groupId),
     exportBookmarks: (groupId) => ipcRenderer.invoke('file:exportBookmarks', groupId),
+    pullRemote: (fileId) => ipcRenderer.invoke('file:pullRemote', fileId),
+    download: (fileId) => ipcRenderer.invoke('file:download', fileId),
     onTransfersChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)

@@ -25,6 +25,7 @@ import {
   upsertDependency
 } from '../storage/repositories/taskDependencyRepository'
 import { publishChatMessage } from '../chat/chatService'
+import { publishTaskDelete, publishTaskUpsert } from './taskSyncService'
 
 function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throw new Error('私聊不支持任务')
@@ -70,6 +71,7 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
   if (reasonErr) throw new Error(reasonErr)
 
   insertTask(db, task)
+  publishTaskUpsert(db, task)
   broadcastTasksChanged(input.groupId)
   return getTaskById(db, taskId)!
 }
@@ -92,6 +94,7 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
 
   const updated = updateTaskRow(db, input)
   if (!updated) throw new Error('任务更新失败')
+  publishTaskUpsert(db, updated)
   broadcastTasksChanged(existing.groupId)
   return listGroupTasks(db, existing.groupId).find((t) => t.taskId === updated.taskId) ?? updated
 }
@@ -162,7 +165,10 @@ export function deleteGroupTask(db: Database, taskId: string): boolean {
   if (!existing) return false
   assertTaskWritable(db, existing.groupId)
   const ok = softDeleteTask(db, taskId)
-  if (ok) broadcastTasksChanged(existing.groupId)
+  if (ok) {
+    publishTaskDelete(db, existing)
+    broadcastTasksChanged(existing.groupId)
+  }
   return ok
 }
 

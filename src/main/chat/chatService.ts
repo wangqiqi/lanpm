@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
-import { dialog } from 'electron'
+import type { BrowserWindow } from 'electron'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
@@ -18,7 +18,10 @@ import {
   requestOfflineSync
 } from './offlineSyncService'
 import { uploadFileFromPath } from '../file/fileService'
+import { showOpenDialog } from '../systemDialog'
+import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
+import { initTaskSyncService, shutdownTaskSyncService } from '../task/taskSyncService'
 import { broadcastMessage } from './chatBroadcast'
 import { getNetworkTransport } from '../network'
 import {
@@ -104,10 +107,14 @@ export function initChatService(db: Database): void {
   initReadReceiptService(db)
   initGroupKeyService(db)
   initOfflineSyncMeta(db)
+  initTaskSyncService(db)
+  initFileSyncService(db)
   void requestOfflineSync(db).catch(() => undefined)
 }
 
 export function shutdownChatService(): void {
+  shutdownTaskSyncService()
+  shutdownFileSyncService()
   shutdownGroupKeyService()
   shutdownReadReceiptService()
   for (const unsub of subscribedGroups.values()) unsub()
@@ -231,9 +238,10 @@ export { listGroupMembers }
 
 export async function pickAndSendFileMessage(
   db: Database,
-  groupId: string
+  groupId: string,
+  parent?: BrowserWindow | null
 ): Promise<ChatMessage | null> {
-  const result = await dialog.showOpenDialog({ properties: ['openFile'] })
+  const result = await showOpenDialog(parent, { properties: ['openFile'] })
   if (result.canceled || !result.filePaths[0]) return null
   return sendFileMessage(db, groupId, result.filePaths[0])
 }

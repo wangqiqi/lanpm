@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import type { FileCategory } from '../../shared/file/types'
 import { FILE_IPC } from '../../shared/file/channels'
 import {
@@ -16,7 +16,9 @@ import {
   resolvePreviewUrl,
   resumeTransfer,
   setFileTransferRateKbps,
-  uploadFileFromPath
+  pullRemoteFile,
+  uploadFileFromPath,
+  downloadFileToDisk
 } from '../file/fileService'
 import { getDatabase } from '../storage'
 
@@ -26,12 +28,13 @@ export function registerFileIpc(): void {
     return listGroupFiles(getDatabase(), groupId, category)
   })
 
-  ipcMain.handle(FILE_IPC.upload, (_event, groupId: string, filePath?: string) => {
+  ipcMain.handle(FILE_IPC.upload, (event, groupId: string, filePath?: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    const parent = BrowserWindow.fromWebContents(event.sender)
     if (filePath && typeof filePath === 'string') {
       return uploadFileFromPath(getDatabase(), groupId, filePath)
     }
-    return pickAndUploadFile(getDatabase(), groupId)
+    return pickAndUploadFile(getDatabase(), groupId, parent)
   })
 
   ipcMain.handle(FILE_IPC.getPreviewUrl, (_event, fileId: string) => {
@@ -75,13 +78,26 @@ export function registerFileIpc(): void {
     }
   )
 
-  ipcMain.handle(FILE_IPC.importBookmarks, (_event, groupId: string) => {
+  ipcMain.handle(FILE_IPC.importBookmarks, (event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
-    return pickAndImportBookmarks(getDatabase(), groupId)
+    const parent = BrowserWindow.fromWebContents(event.sender)
+    return pickAndImportBookmarks(getDatabase(), groupId, parent)
   })
 
-  ipcMain.handle(FILE_IPC.exportBookmarks, (_event, groupId: string) => {
+  ipcMain.handle(FILE_IPC.exportBookmarks, (event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
-    return exportGroupBookmarks(getDatabase(), groupId)
+    const parent = BrowserWindow.fromWebContents(event.sender)
+    return exportGroupBookmarks(getDatabase(), groupId, parent)
+  })
+
+  ipcMain.handle(FILE_IPC.pullRemote, (_event, fileId: string) => {
+    if (typeof fileId !== 'string' || !fileId) throw new Error('fileId required')
+    return pullRemoteFile(getDatabase(), fileId)
+  })
+
+  ipcMain.handle(FILE_IPC.download, (event, fileId: string) => {
+    if (typeof fileId !== 'string' || !fileId) throw new Error('fileId required')
+    const parent = BrowserWindow.fromWebContents(event.sender)
+    return downloadFileToDisk(getDatabase(), fileId, parent)
   })
 }

@@ -15,6 +15,8 @@ import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { resolveAppIconPath } from './appIcon'
 import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
+import { initScreenshotService, shutdownScreenshotService } from './screenshot/screenshotService'
+import { LANPM_MAIN_WINDOW_TITLE, setMainWindow } from './mainWindow'
 
 const isDev = !app.isPackaged
 
@@ -56,7 +58,7 @@ function registerAllIpcHandlers(): void {
   registerBadgeIpc()
 }
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   const iconPath = resolveAppIconPath()
   const mainWindow = new BrowserWindow({
     width: 1440,
@@ -64,7 +66,7 @@ function createWindow(): void {
     minWidth: 1280,
     minHeight: 720,
     show: false,
-    title: 'LanPM',
+    title: LANPM_MAIN_WINDOW_TITLE,
     ...(iconPath ? { icon: iconPath } : {}),
     /** Linux/Windows：不显示 File/Edit/View 等原生菜单栏（应用内 TopBar 已承担导航） */
     autoHideMenuBar: true,
@@ -101,6 +103,9 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  setMainWindow(mainWindow)
+  return mainWindow
 }
 
 app.whenReady().then(() => {
@@ -113,6 +118,7 @@ app.whenReady().then(() => {
     ensureSeedGroups(getDatabase())
     initNetwork(getDatabase())
     initChatService(getDatabase())
+    initScreenshotService()
     registerAllIpcHandlers()
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
@@ -134,6 +140,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  shutdownScreenshotService()
   shutdownChatService()
   shutdownNetwork()
   closeDatabase()

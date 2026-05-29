@@ -8,5 +8,6 @@ export const CHAT_IPC = {
   listMembers: 'chat:listMembers',
   markRead: 'chat:markRead',
   sendFile: 'chat:sendFile',
-  pickAndSendFile: 'chat:pickAndSendFile'
+  pickAndSendFile: 'chat:pickAndSendFile',
+  captureAndSendScreenshot: 'chat:captureAndSendScreenshot'
 } as const

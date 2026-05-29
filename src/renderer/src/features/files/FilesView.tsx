@@ -13,9 +13,11 @@ import {
   Typography
 } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { CommentOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import type { ColumnsType, TableProps } from 'antd/es/table'
+import { CommentOutlined, DownloadOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
+import { isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
@@ -25,6 +27,16 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { groupViewPath } from '@renderer/routes/paths'
 import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
+import { formatFileTypeLabel } from '@shared/file/formatFileType'
+import {
+  CATEGORY_I18N_KEYS,
+  filterFiles,
+  formatFileUploadedAt,
+  sortFiles,
+  type FileSortField,
+  type FileSortOrder
+} from '@renderer/features/files/fileListModel'
+import { isTextPreviewFile } from '@shared/file/previewExtensions'
 import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
 import styles from './files.module.css'
 
@@ -55,7 +67,7 @@ function formatSize(n: number): string {
 }
 
 export default function FilesView(): React.ReactElement {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
@@ -75,9 +87,16 @@ export default function FilesView(): React.ReactElement {
   const addBookmark = useFileStore((s) => s.addBookmark)
   const importBookmarks = useFileStore((s) => s.importBookmarks)
   const exportBookmarks = useFileStore((s) => s.exportBookmarks)
+  const pullRemote = useFileStore((s) => s.pullRemote)
+  const download = useFileStore((s) => s.download)
 
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortField, setSortField] = useState<FileSortField>('uploadedAt')
+  const [sortOrder, setSortOrder] = useState<FileSortOrder>('descend')
   const [selected, setSelected] = useState<FileMeta | null>(null)
+  const [pulling, setPulling] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewText, setPreviewText] = useState<string | null>(null)
   const [previewError, setPreviewError] = useState(false)
@@ -89,6 +108,23 @@ export default function FilesView(): React.ReactElement {
   const categories = useMemo(
     () => CATEGORY_KEYS.map((c) => ({ label: t(c.key), value: c.value })),
     [t]
+  )
+
+  const categoryLabels = useMemo(
+    () => ({
+      document: t(CATEGORY_I18N_KEYS.document),
+      image: t(CATEGORY_I18N_KEYS.image),
+      video: t(CATEGORY_I18N_KEYS.video),
+      code: t(CATEGORY_I18N_KEYS.code),
+      bookmark: t(CATEGORY_I18N_KEYS.bookmark),
+      other: t(CATEGORY_I18N_KEYS.other)
+    }),
+    [t]
+  )
+
+  const displayFiles = useMemo(
+    () => sortFiles(filterFiles(files, searchQuery), sortField, sortOrder, categoryLabels),
+    [files, searchQuery, sortField, sortOrder, categoryLabels]
   )
 
   useEffect(() => {
@@ -120,9 +156,14 @@ export default function FilesView(): React.ReactElement {
       setPreviewError(false)
       return
     }
+    if (isRemotePendingPath(selected.storagePath)) {
+      setPreviewUrl(null)
+      setPreviewText(null)
+      setPreviewError(false)
+      return
+    }
 
-    const ext = selected.ext.toLowerCase()
-    const isTextPreview = ['txt', 'md', 'json'].includes(ext)
+    const isTextPreview = isTextPreviewFile(selected.name, selected.ext)
 
     setPreviewError(false)
     if (isTextPreview) {
@@ -152,11 +193,28 @@ export default function FilesView(): React.ReactElement {
       })
   }, [selected])
 
+  const handlePullRemote = async (): Promise<void> => {
+    if (!selected || !gid || !isRemotePendingPath(selected.storagePath)) return
+    setPulling(true)
+    try {
+      const meta = await pullRemote(gid, selected.fileId)
+      setSelected(meta)
+      message.success(t('files.previewReady'))
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('files.pullRemoteFailed'))
+    } finally {
+      setPulling(false)
+    }
+  }
+
   const retryPreview = (): void => {
     if (!selected || selected.isBookmark) return
+    if (isRemotePendingPath(selected.storagePath)) {
+      void handlePullRemote()
+      return
+    }
     setPreviewError(false)
-    const ext = selected.ext.toLowerCase()
-    if (['txt', 'md', 'json'].includes(ext)) {
+    if (isTextPreviewFile(selected.name, selected.ext)) {
       void loadPreviewText(selected.fileId)
         .then((text) => {
           setPreviewText(text)
@@ -172,6 +230,25 @@ export default function FilesView(): React.ReactElement {
         setPreviewError(!url)
       })
       .catch(() => setPreviewError(true))
+  }
+
+  const handleDownload = async (file: FileMeta): Promise<void> => {
+    if (file.isBookmark || isRemotePendingPath(file.storagePath)) return
+    setDownloading(true)
+    try {
+      const path = await download(file.fileId)
+      if (path) message.success(t('files.downloadSuccess', { path }))
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('files.downloadFailed'))
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const handleTableChange: TableProps<FileMeta>['onChange'] = (_pag, _filters, sorter) => {
+    if (Array.isArray(sorter) || !sorter?.field) return
+    setSortField(sorter.field as FileSortField)
+    setSortOrder((sorter.order as FileSortOrder | undefined) ?? 'ascend')
   }
 
   const handleShareToChat = (): void => {
@@ -240,31 +317,75 @@ export default function FilesView(): React.ReactElement {
     )
   }
 
-  const columns = useMemo(
-    () => [
-      { title: t('files.colName'), dataIndex: 'name', key: 'name', ellipsis: true },
-      { title: t('files.colType'), dataIndex: 'category', key: 'category', width: 80 },
+  const columns = useMemo((): ColumnsType<FileMeta> => {
+    const sortIcon = (field: FileSortField) => (sortField === field ? sortOrder : null)
+    return [
+      {
+        title: t('files.colName'),
+        dataIndex: 'name',
+        key: 'name',
+        ellipsis: true,
+        sorter: true,
+        sortOrder: sortIcon('name')
+      },
+      {
+        title: t('files.colType'),
+        key: 'type',
+        width: 112,
+        sorter: true,
+        sortOrder: sortIcon('type'),
+        render: (_: unknown, r: FileMeta) => formatFileTypeLabel(r, categoryLabels)
+      },
       {
         title: t('files.colSize'),
         key: 'size',
-        width: 90,
+        width: 88,
+        sorter: true,
+        sortOrder: sortIcon('size'),
         render: (_: unknown, r: FileMeta) => (r.isBookmark ? '—' : formatSize(r.size))
+      },
+      {
+        title: t('files.colUploaded'),
+        key: 'uploadedAt',
+        width: 148,
+        sorter: true,
+        sortOrder: sortIcon('uploadedAt'),
+        render: (_: unknown, r: FileMeta) => formatFileUploadedAt(r.uploadedAt, locale)
       },
       {
         title: t('files.colPreview'),
         key: 'preview',
-        width: 90,
+        width: 72,
         render: (_: unknown, r: FileMeta) => {
           if (r.isBookmark) return t('common.link')
+          if (isRemotePendingPath(r.storagePath)) return t('files.remotePending')
           if (r.previewStatus === 'ready') return t('files.previewReady')
           if (r.previewStatus === 'converting') return t('files.previewConverting')
           if (r.previewStatus === 'failed') return t('files.previewFailed')
           return '—'
         }
+      },
+      {
+        title: t('files.colActions'),
+        key: 'actions',
+        width: 56,
+        render: (_: unknown, r: FileMeta) =>
+          r.isBookmark || isRemotePendingPath(r.storagePath) ? null : (
+            <Button
+              type="text"
+              size="small"
+              icon={<DownloadOutlined />}
+              aria-label={t('files.download')}
+              title={t('files.download')}
+              onClick={(e) => {
+                e.stopPropagation()
+                void handleDownload(r)
+              }}
+            />
+          )
       }
-    ],
-    [t]
-  )
+    ]
+  }, [t, locale, categoryLabels, sortField, sortOrder])
 
   return (
     <div className={styles.root}>
@@ -415,6 +536,11 @@ export default function FilesView(): React.ReactElement {
           ) : (
             <>
               <div className={styles.previewActions}>
+                {selected && !selected.isBookmark && isRemotePendingPath(selected.storagePath) ? (
+                  <Button type="primary" size="small" loading={pulling} onClick={() => void handlePullRemote()}>
+                    {t('files.pullRemote')}
+                  </Button>
+                ) : null}
                 <Button
                   type="primary"
                   size="small"
@@ -439,6 +565,8 @@ export default function FilesView(): React.ReactElement {
                     {t('files.openBookmarkExternal')}
                   </a>
                 </div>
+              ) : isRemotePendingPath(selected.storagePath) ? (
+                <Text type="secondary">{t('files.remotePending')}</Text>
               ) : selected.previewStatus === 'converting' ? (
             <Text>{t('files.convertingLocal')}</Text>
           ) : previewError ? (

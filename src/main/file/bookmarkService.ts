@@ -1,13 +1,14 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import { readFileSync, writeFileSync } from 'fs'
-import { dialog } from 'electron'
+import type { BrowserWindow } from 'electron'
 import type { BookmarkEntry } from '../../shared/file/bookmarks'
 import { exportBookmarkHtml, parseBookmarkHtml } from '../../shared/file/bookmarks'
 import type { FileMeta } from '../../shared/file/types'
 import { getSetupStatus } from '../identity/setup'
 import { getFileById, insertFile, listFilesByGroup } from '../storage/repositories/fileRepository'
 import { assertFileWritable } from './fileServiceHelpers'
+import { showOpenDialog, showSaveDialog } from '../systemDialog'
 
 export function createBookmark(
   db: Database,
@@ -58,8 +59,12 @@ export function importBookmarksFromHtml(
   return entries.map((e) => createBookmark(db, groupId, e.url, e.title))
 }
 
-export async function pickAndImportBookmarks(db: Database, groupId: string): Promise<FileMeta[]> {
-  const result = await dialog.showOpenDialog({
+export async function pickAndImportBookmarks(
+  db: Database,
+  groupId: string,
+  parent?: BrowserWindow | null
+): Promise<FileMeta[]> {
+  const result = await showOpenDialog(parent, {
     properties: ['openFile'],
     filters: [{ name: 'HTML 书签', extensions: ['html', 'htm'] }]
   })
@@ -70,7 +75,8 @@ export async function pickAndImportBookmarks(db: Database, groupId: string): Pro
 
 export async function exportGroupBookmarks(
   db: Database,
-  groupId: string
+  groupId: string,
+  parent?: BrowserWindow | null
 ): Promise<string | null> {
   const bookmarks = listFilesByGroup(db, groupId, 'bookmark').filter((f) => f.isBookmark)
   if (bookmarks.length === 0) throw new Error('当前群组没有书签可导出')
@@ -81,7 +87,7 @@ export async function exportGroupBookmarks(
   }))
   const html = exportBookmarkHtml(entries, `LanPM-${groupId}`)
 
-  const result = await dialog.showSaveDialog({
+  const result = await showSaveDialog(parent, {
     defaultPath: `lanpm-bookmarks-${groupId}.html`,
     filters: [{ name: 'HTML 书签', extensions: ['html'] }]
   })

@@ -2,6 +2,25 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.23] - 2026-05-29
+
+### Added
+- **B-01** 任务 P2P 同步：`taskSyncService` 发布/订阅 `task_patch`（LWW by `updatedAt`）
+- **B-02** 远端文件 P2P 下载：`fileSyncService`（`file_meta` / `file_pull_request` / `file_chunk`）+ FilesView「从局域网下载」+ `file:pullRemote`
+- 聊天**区域截图**发送：`electron-screenshots` + `chat:captureScreenshot` IPC
+- 文件**另存为**下载：`file:download` IPC + FilesView 下载按钮
+- **`previewExtensions`**：预览扩展名集中定义 + `verify:preview-extensions`
+- **`verify:task-sync`** / **`verify:file-sync`**，纳入 `verify:m7`
+- **`systemDialog`**：文件对话框统一父窗口，避免截图 overlay 遮挡
+
+### Changed
+- **`todo.md`** 仅保留 6 项手验待办；已完成全量迁入 `archive/20260529_140842_todo已完成项全量归档.md`
+- **`docs/` / `README`**：文档互链限定 `docs/` 目录，去除对 `todo.md` / `archive/` 的引用
+- 书签/聊天/文件选路经 `systemDialog`；`mainWindow` 模块供截图与对话框定位
+
+### Tag
+- `v1.0.0-rc.23` — 任务/文件 P2P 同步、聊天截图、todo 归档与文档清理
+
 ## [1.0.0-rc.22] - 2026-05-29
 
 ### Added

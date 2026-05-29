@@ -19,6 +19,8 @@ interface FileState {
   addBookmark: (groupId: string, url: string, title: string) => Promise<FileMeta>
   importBookmarks: (groupId: string) => Promise<FileMeta[]>
   exportBookmarks: (groupId: string) => Promise<string | null>
+  pullRemote: (groupId: string, fileId: string) => Promise<FileMeta>
+  download: (fileId: string) => Promise<string | null>
 }
 
 export const useFileStore = create<FileState>((set) => ({
@@ -81,5 +83,14 @@ export const useFileStore = create<FileState>((set) => ({
 
   importBookmarks: async (groupId) => getLanpmApi().file.importBookmarks(groupId),
 
-  exportBookmarks: async (groupId) => getLanpmApi().file.exportBookmarks(groupId)
+  exportBookmarks: async (groupId) => getLanpmApi().file.exportBookmarks(groupId),
+
+  pullRemote: async (groupId, fileId) => {
+    const meta = await getLanpmApi().file.pullRemote(fileId)
+    const files = await getLanpmApi().file.listFiles(groupId)
+    set((s) => ({ filesByGroup: { ...s.filesByGroup, [groupId]: files } }))
+    return meta
+  },
+
+  download: async (fileId) => getLanpmApi().file.download(fileId)
 }))

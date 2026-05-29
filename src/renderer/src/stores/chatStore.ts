@@ -12,6 +12,7 @@ interface ChatState {
   sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
   pickAndSendFile: (groupId: string) => Promise<void>
   sendFile: (groupId: string, filePath: string) => Promise<void>
+  captureAndSendScreenshot: (groupId: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
 }
 
@@ -67,6 +68,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendFile: async (groupId, filePath) => {
     const message = await getLanpmApi().chat.sendFile(groupId, filePath)
     get().upsertMessage(message)
+  },
+  captureAndSendScreenshot: async (groupId) => {
+    const message = await getLanpmApi().chat.captureAndSendScreenshot(groupId)
+    if (message) get().upsertMessage(message)
   },
   upsertMessage: (message) => {
     set((s) => {

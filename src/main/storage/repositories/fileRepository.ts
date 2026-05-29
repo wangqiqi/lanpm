@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { FileCategory, FileMeta, FilePreviewStatus } from '../../../shared/file/types'
+import { isDirectPreviewReady } from '../../../shared/file/previewExtensions.ts'
 
 interface FileRow {
   file_id: string
@@ -88,16 +89,28 @@ export function updateFilePreview(
   ).run(previewStatus, previewPath ?? null, new Date().toISOString(), fileId)
 }
 
-/** 修复历史上传后 preview_path 被清空的记录 */
+/** 修复历史上传后 preview_path 被清空的记录，并将可直读预览的文件标记为 ready */
 export function repairFilePreviewPaths(db: Database): void {
+  const now = new Date().toISOString()
   db.prepare(
     `UPDATE files
      SET preview_path = storage_path, updated_at = ?
      WHERE preview_status = 'ready'
        AND (preview_path IS NULL OR preview_path = '')
-       AND is_bookmark = 0
-       AND ext IN ('txt', 'md', 'json', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg')`
-  ).run(new Date().toISOString())
+       AND is_bookmark = 0`
+  ).run(now)
+
+  const rows = db
+    .prepare(
+      `SELECT file_id, name, ext, storage_path, preview_status FROM files WHERE is_bookmark = 0`
+    )
+    .all() as Pick<FileRow, 'file_id' | 'name' | 'ext' | 'storage_path' | 'preview_status'>[]
+
+  for (const row of rows) {
+    if (!isDirectPreviewReady({ name: row.name, ext: row.ext })) continue
+    if (row.preview_status === 'ready') continue
+    updateFilePreview(db, row.file_id, 'ready', row.storage_path)
+  }
 }
 
 export function listFilesByGroup(
@@ -118,4 +131,15 @@ export function listFilesByGroup(
 export function getFileById(db: Database, fileId: string): FileMeta | null {
   const row = db.prepare(`SELECT * FROM files WHERE file_id = ?`).get(fileId) as FileRow | undefined
   return row ? rowToMeta(row) : null
+}
+
+/** B-02 — 远端 file_meta 登记（待 pull） */
+export function upsertRemoteFileMeta(db: Database, meta: FileMeta): boolean {
+  const existing = getFileById(db, meta.fileId)
+  if (existing) {
+    if (existing.updatedAt >= meta.updatedAt) return false
+    db.prepare(`DELETE FROM files WHERE file_id = ?`).run(meta.fileId)
+  }
+  insertFile(db, meta)
+  return true
 }

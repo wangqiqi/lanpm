@@ -2,10 +2,16 @@ import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'fs'
 import { extname, join } from 'path'
-import { app, BrowserWindow, dialog } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import type { FileCategory, FileMeta, FileTransferView } from '../../shared/file/types'
 import { inferCategory } from '../../shared/file/types'
+import {
+  isTextPreviewFile,
+  supportsInlinePreview,
+  TEXT_PREVIEW_MAX_BYTES
+} from '../../shared/file/previewExtensions.ts'
 import { FILE_CHUNK_SIZE, FILE_MAX_CONCURRENT, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
+import { isRemotePendingPath } from '../../shared/file/sync'
 import { getSetupStatus } from '../identity/setup'
 import {
   getFileById,
@@ -25,6 +31,8 @@ import { chunkDelayMs, getFileTransferSettings } from './transferSettings.ts'
 import { generatePreview } from './previewService.ts'
 import { previewUrlForFileId } from './previewProtocol.ts'
 import { assertFileWritable } from './fileServiceHelpers'
+import { showOpenDialog, showSaveDialog } from '../systemDialog'
+import { publishFileMeta, pullRemoteFile } from './fileSyncService'
 
 function filesRootDir(): string {
   const dir = join(app.getPath('userData'), 'files')
@@ -173,18 +181,18 @@ export async function uploadFileFromPath(
   }
 
   insertFile(db, meta)
+  publishFileMeta(db, meta)
   await runChunkedUpload(db, meta, status.device.deviceId)
   await generatePreview(db, meta)
   return getFileById(db, fileId)!
 }
 
-const TEXT_PREVIEW_EXT = new Set(['txt', 'md', 'json'])
-const TEXT_PREVIEW_MAX_BYTES = 512 * 1024
+export { pullRemoteFile }
 
 export function readPreviewText(db: Database, fileId: string): string | null {
   const meta = getFileById(db, fileId)
   if (!meta || meta.isBookmark) return null
-  if (!TEXT_PREVIEW_EXT.has(meta.ext.toLowerCase())) return null
+  if (!isTextPreviewFile(meta.name, meta.ext)) return null
   if (!existsSync(meta.storagePath)) return null
   const size = statSync(meta.storagePath).size
   if (size > TEXT_PREVIEW_MAX_BYTES) {
@@ -194,8 +202,12 @@ export function readPreviewText(db: Database, fileId: string): string | null {
   return readFileSync(meta.storagePath, 'utf8')
 }
 
-export async function pickAndUploadFile(db: Database, groupId: string): Promise<FileMeta | null> {
-  const result = await dialog.showOpenDialog({
+export async function pickAndUploadFile(
+  db: Database,
+  groupId: string,
+  parent?: BrowserWindow | null
+): Promise<FileMeta | null> {
+  const result = await showOpenDialog(parent, {
     properties: ['openFile']
   })
   if (result.canceled || !result.filePaths[0]) return null
@@ -206,13 +218,30 @@ export function resolvePreviewUrl(db: Database, fileId: string): string | null {
   const meta = getFileById(db, fileId)
   if (!meta || meta.isBookmark) return null
 
-  const ext = meta.ext.toLowerCase()
-  const inlineExt = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'txt', 'md', 'json', 'pdf', 'mp4', 'webm']
   if (meta.previewStatus === 'ready' && meta.previewPath && existsSync(meta.previewPath)) {
     return previewUrlForFileId(fileId)
   }
-  if (inlineExt.includes(ext) && existsSync(meta.storagePath)) {
+  if (supportsInlinePreview(meta) && existsSync(meta.storagePath)) {
     return previewUrlForFileId(fileId)
   }
   return null
+}
+
+export async function downloadFileToDisk(
+  db: Database,
+  fileId: string,
+  parent?: BrowserWindow | null
+): Promise<string | null> {
+  const meta = getFileById(db, fileId)
+  if (!meta) throw new Error('文件不存在')
+  if (meta.isBookmark) throw new Error('书签请使用浏览器打开链接')
+  if (isRemotePendingPath(meta.storagePath)) {
+    throw new Error('请先通过「从局域网下载」获取文件')
+  }
+  if (!existsSync(meta.storagePath)) throw new Error('本地文件不存在')
+
+  const result = await showSaveDialog(parent, { defaultPath: meta.name })
+  if (result.canceled || !result.filePath) return null
+  copyFileSync(meta.storagePath, result.filePath)
+  return result.filePath
 }

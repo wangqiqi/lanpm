@@ -7,6 +7,7 @@ export type SyncMessageType =
   | 'task_patch'
   | 'task_crdt'
   | 'file_meta'
+  | 'file_pull_request'
   | 'file_chunk'
   | 'member_event'
   | 'group_key_rotate'

@@ -43,6 +43,8 @@ export interface LanpmApi {
     markRead: (groupId: string, msgIds: string[]) => Promise<void>
     pickAndSendFile: (groupId: string) => Promise<ChatMessage | null>
     sendFile: (groupId: string, filePath: string) => Promise<ChatMessage>
+    /** 区域截图 + 标注，确认后作为图片文件发送到群聊（仅 Electron） */
+    captureAndSendScreenshot: (groupId: string) => Promise<ChatMessage | null>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
   task: {
@@ -80,6 +82,8 @@ export interface LanpmApi {
     ) => Promise<import('./file/types').FileMeta>
     importBookmarks: (groupId: string) => Promise<import('./file/types').FileMeta[]>
     exportBookmarks: (groupId: string) => Promise<string | null>
+    pullRemote: (fileId: string) => Promise<import('./file/types').FileMeta>
+    download: (fileId: string) => Promise<string | null>
     onTransfersChanged: (handler: (groupId: string) => void) => () => void
   }
   group: {

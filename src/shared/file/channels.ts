@@ -12,7 +12,9 @@ export const FILE_IPC = {
   setTransferRate: 'file:setTransferRate',
   addBookmark: 'file:addBookmark',
   importBookmarks: 'file:importBookmarks',
-  exportBookmarks: 'file:exportBookmarks'
+  exportBookmarks: 'file:exportBookmarks',
+  pullRemote: 'file:pullRemote',
+  download: 'file:download'
 } as const
 
 export const FILE_CHUNK_SIZE = 256 * 1024

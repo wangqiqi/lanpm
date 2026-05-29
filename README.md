@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.22`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
+- **RC**：`1.0.0-rc.23`（M0–M7 已闭环；发布门禁见 [docs/08](./docs/08_M7_RC验收清单.md)）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
@@ -33,7 +33,7 @@ npm run build       # 生产构建
 | 路由 | HashRouter `#/g/...` | 同 Hash，但无 Electron 窗口壳 |
 | 推荐验收 | **以 Electron 为准** | 仅 UI 快速预览 |
 
-Stub 错误文案仍为英文硬编码（见 todo **I18N-06** / **UX-I-07**）。
+Stub 错误文案走 i18n（`verify:i18n-en` 守卫）；浏览器桩与 Electron 行为差异见上表。
 
 ### 手动验收 M1 路由（需已完成首次配置）
 
@@ -56,8 +56,7 @@ Stub 错误文案仍为英文硬编码（见 todo **I18N-06** / **UX-I-07**）�
 | [docs/06_测试与联调手册.md](./docs/06_测试与联调手册.md) | Stub/真网/性能测试 |
 | [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md) | M3 看板/任务树实现与 IPC |
 | [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md) | M7 RC 验收 |
-| [todo.md](./todo.md) | **唯一任务真源**（RC / v1.1 / UI·UX·评估项） |
-| [archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md) | 执行计划概述（只读） |
+| [docs/09_视觉手验清单.md](./docs/09_视觉手验清单.md) | 亮/暗主题手验（V-14b） |
 
 ## 技术选型
 
@@ -69,7 +68,7 @@ Stub 错误文案仍为英文硬编码（见 todo **I18N-06** / **UX-I-07**）�
 - 甘特图：**gantt-task-react**（M4）
 - 存储：SQLite + IndexedDB（热缓存）
 - 同步：Yjs（任务）+ P2P/WebRTC（消息/文件）
-- 传输加密：UDP 发现 + WebRTC DataChannel + 应用层 AES-GCM/DH（独立 HMAC 字段见 todo **ARCH-04**）
+- 传输加密：UDP/TCP 发现 + 应用层 AES-GCM/DH（字段说明见 [docs/02](./docs/02_技术实现建议.md)）
 - Office 预览：LibreOffice 本地转换（数据不出域）
 
 **当前 RC 实现**：主路径为 Electron + React + **SQLite（唯一持久化层）** + TCP/Stub 联调；Yjs/WebRTC/IndexedDB 热缓存为 post-RC；**7 天离线补同步**与文件断点续传/限速已落地 RC（见 [docs/01 §1.3.1](./docs/01_产品需求文档.md)）。
@@ -81,18 +80,10 @@ Stub 错误文案仍为英文硬编码（见 todo **I18N-06** / **UX-I-07**）�
 | M0–M1 | 工程骨架、首次配置、主框架 5 视图 |
 | M2–M5 | 业务模块（聊天/任务/文件/群组/驾驶舱），**NetworkStub 联调** |
 | M6 | 真实 UDP/WebRTC 替换 Stub |
-| M7 | 验收、性能、发布 |
+| M7 | 验收、性能、发布（见 [docs/08](./docs/08_M7_RC验收清单.md)） |
 
-待办与排期见 [todo.md](./todo.md)；计划背景见 [archive/plan 概述](./archive/20260529_095839_plan概述_SSOT后归档.md)。
-
-## 查看历史原型（可选）
-
-```bash
-# 归档路径
-archive/prototypes/index.html
-archive/prototypes/index2.html
-```
+发布前手验与联调步骤见 [docs/06](./docs/06_测试与联调手册.md)、[docs/09](./docs/09_视觉手验清单.md)。
 
 ## 版本
 
-最新文档版本见 [CHANGELOG.md](./CHANGELOG.md) 顶部条目。
+当前 RC 号见 `package.json`；验收状态见 [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)。

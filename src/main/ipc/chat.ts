@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import {
   listGroupMembers,
   listGroupMessages,
@@ -7,6 +7,7 @@ import {
   sendFileMessage,
   sendTextMessage
 } from '../chat/chatService'
+import { captureAndSendScreenshot } from '../screenshot/screenshotService'
 import { markMessagesRead } from '../chat/readReceiptService'
 import { getDatabase } from '../storage'
 import { CHAT_IPC } from '../../shared/chat/channels'
@@ -43,11 +44,12 @@ export function registerChatIpc(): void {
     }
   )
 
-  ipcMain.handle(CHAT_IPC.pickAndSendFile, (_event, groupId: string) => {
+  ipcMain.handle(CHAT_IPC.pickAndSendFile, (event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) {
       throw new Error('groupId required')
     }
-    return pickAndSendFileMessage(getDatabase(), groupId)
+    const parent = BrowserWindow.fromWebContents(event.sender)
+    return pickAndSendFileMessage(getDatabase(), groupId, parent)
   })
 
   ipcMain.handle(CHAT_IPC.sendFile, (_event, groupId: string, filePath: string) => {
@@ -58,6 +60,13 @@ export function registerChatIpc(): void {
       throw new Error('filePath required')
     }
     return sendFileMessage(getDatabase(), groupId, filePath)
+  })
+
+  ipcMain.handle(CHAT_IPC.captureAndSendScreenshot, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) {
+      throw new Error('groupId required')
+    }
+    return captureAndSendScreenshot(groupId)
   })
 
   ipcMain.handle(CHAT_IPC.markRead, (_event, groupId: string, msgIds: string[]) => {

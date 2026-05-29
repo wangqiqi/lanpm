@@ -67,6 +67,7 @@ export default function ChatView(): React.ReactElement {
   const sendCode = useChatStore((s) => s.sendCode)
   const pickAndSendFile = useChatStore((s) => s.pickAndSendFile)
   const sendFile = useChatStore((s) => s.sendFile)
+  const captureAndSendScreenshot = useChatStore((s) => s.captureAndSendScreenshot)
   const upsertMessage = useChatStore((s) => s.upsertMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
@@ -413,7 +414,13 @@ export default function ChatView(): React.ReactElement {
                   <Button
                     type="text"
                     icon={<CameraOutlined />}
-                    onClick={() => message.info(t('chat.screenshotSoon'))}
+                    onClick={() =>
+                      void captureAndSendScreenshot(gid).catch((err: unknown) =>
+                        message.error(
+                          err instanceof Error ? err.message : t('chat.screenshotFailed')
+                        )
+                      )
+                    }
                     title={t('chat.screenshotBtn')}
                     aria-label={t('chat.screenshotBtn')}
                   />

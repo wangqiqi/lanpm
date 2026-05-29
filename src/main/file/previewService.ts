@@ -5,6 +5,7 @@ import { promisify } from 'util'
 import { app } from 'electron'
 import type { Database } from 'better-sqlite3'
 import type { FileMeta, FilePreviewStatus } from '../../shared/file/types'
+import { isDirectPreviewReady } from '../../shared/file/previewExtensions.ts'
 import { updateFilePreview } from '../storage/repositories/fileRepository'
 
 const execFileAsync = promisify(execFile)
@@ -18,13 +19,12 @@ function previewRootDir(): string {
 }
 
 export async function generatePreview(db: Database, meta: FileMeta): Promise<FilePreviewStatus> {
-  const ext = meta.ext.toLowerCase()
-
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'txt', 'md', 'json', 'pdf'].includes(ext)) {
+  if (isDirectPreviewReady(meta)) {
     updateFilePreview(db, meta.fileId, 'ready', meta.storagePath)
     return 'ready'
   }
 
+  const ext = meta.ext.toLowerCase()
   if (!OFFICE_EXT.has(ext)) {
     updateFilePreview(db, meta.fileId, 'none')
     return 'none'

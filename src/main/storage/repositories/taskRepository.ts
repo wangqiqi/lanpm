@@ -207,6 +207,34 @@ export function softDeleteTask(db: Database, taskId: string): boolean {
   return result.changes > 0
 }
 
+function getTaskRowById(db: Database, taskId: string): Task | null {
+  const row = db.prepare(`SELECT * FROM tasks WHERE task_id = ?`).get(taskId) as TaskRow | undefined
+  return row ? rowToTask(row) : null
+}
+
+/** B-01 — 远端 task_patch LWW 合并 */
+export function upsertTaskFromRemote(db: Database, task: Task): boolean {
+  const existing = getTaskRowById(db, task.taskId)
+  if (existing) {
+    if (existing.updatedAt > task.updatedAt) return false
+    if (existing.updatedAt === task.updatedAt) return false
+    db.prepare(`DELETE FROM tasks WHERE task_id = ?`).run(task.taskId)
+  }
+  insertTask(db, task)
+  return true
+}
+
+export function applyRemoteTaskDelete(db: Database, task: Task): boolean {
+  const existing = getTaskRowById(db, task.taskId)
+  if (existing?.deletedAt) return false
+  if (existing && existing.updatedAt > task.updatedAt) return false
+  if (!existing) {
+    insertTask(db, { ...task, deletedAt: task.deletedAt ?? task.updatedAt })
+    return true
+  }
+  return softDeleteTask(db, task.taskId)
+}
+
 export function buildTaskFromInput(
   input: CreateTaskInput,
   createdBy: string,

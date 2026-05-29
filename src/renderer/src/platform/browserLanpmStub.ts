@@ -423,6 +423,9 @@ export function createBrowserLanpmStub(): LanpmApi {
       sendFile: async () => {
         throw stubError('stub.uploadElectronOnly')
       },
+      captureAndSendScreenshot: async () => {
+        throw stubError('stub.screenshotElectronOnly')
+      },
       markRead: async (groupId, msgIds) => {
         const status = readStatus()
         if (!status.configured || !status.user) return
@@ -555,6 +558,17 @@ export function createBrowserLanpmStub(): LanpmApi {
       importBookmarks: async () => [],
       exportBookmarks: async () => {
         throw stubError('stub.exportBookmarksElectronOnly')
+      },
+      pullRemote: async (fileId) => {
+        void fileId
+        throw stubError('stub.uploadElectronOnly')
+      },
+      download: async () => {
+        throw stubError('stub.uploadElectronOnly')
+      },
+      download: async (fileId) => {
+        void fileId
+        throw stubError('stub.uploadElectronOnly')
       },
       onTransfersChanged: () => () => undefined
     },
