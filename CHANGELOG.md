@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.50] - 2026-05-29
+
+### Fixed
+- **CI `verify:visual-screenshots`**：截图前等待甘特 SVG 条绘制；PNG 体积改为 `max(light,dark)≥41KB` 且双侧 `≥12KB`（亮主题压缩更小，避免误杀）
+
+### Tag
+- `v1.0.0-rc.50` — 视觉截图甘特 CI 门禁
+
 ## [1.0.0-rc.49] - 2026-05-29
 
 ### Removed

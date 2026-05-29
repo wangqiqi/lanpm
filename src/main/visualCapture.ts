@@ -129,6 +129,27 @@ async function waitForSeededTaskChrome(win: BrowserWindow, marker: string): Prom
   `)
 }
 
+/** 任务名列可见 ≠ 甘特条已绘制；无头窗需等 SVG 条再截图 */
+async function waitForGanttChartPainted(win: BrowserWindow): Promise<void> {
+  await win.webContents.executeJavaScript(`
+    new Promise((resolve, reject) => {
+      const deadline = Date.now() + 25_000
+      const tick = () => {
+        const wrap = document.querySelector('[data-lanpm-visual="gantt-chart"]')
+        const shapes = wrap?.querySelectorAll('svg rect, svg path') ?? []
+        if (wrap && shapes.length >= 4) return resolve(true)
+        if (Date.now() > deadline) {
+          return reject(
+            new Error('gantt bars not painted (svg shapes=' + shapes.length + ')')
+          )
+        }
+        setTimeout(tick, 200)
+      }
+      tick()
+    })
+  `)
+}
+
 function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) return
@@ -210,10 +231,14 @@ async function capture(
   outDir: string,
   fileName: string,
   theme: (typeof THEMES)[number],
-  opts?: { waitForText?: string }
+  opts?: { waitForText?: string; waitForGanttBars?: boolean }
 ): Promise<void> {
   await waitForHealthyUi(win)
   if (opts?.waitForText) await waitForSeededTaskChrome(win, opts.waitForText)
+  if (opts?.waitForGanttBars) {
+    await waitForGanttChartPainted(win)
+    await wait(600)
+  }
   win.setBackgroundColor(THEME_WINDOW_BG[theme])
   if (!win.isVisible()) win.show()
   await flushPaint(win)
@@ -265,7 +290,11 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
       await applyTheme(win, theme)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
-      await capture(win, outDir, `${theme}_${page.slug}.png`, theme, { waitForText })
+      const waitForGanttBars = page.slug === 'gantt'
+      await capture(win, outDir, `${theme}_${page.slug}.png`, theme, {
+        waitForText,
+        waitForGanttBars
+      })
     }
   }
 
