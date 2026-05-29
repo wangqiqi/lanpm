@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
@@ -11,7 +11,9 @@ import { tasksToGanttBars, ganttDatesToYmd, defaultScheduleForTask } from '@shar
 import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import { exportElementToPdf, exportElementToPng } from './ganttExport'
+import { patchGanttCalendarLabels } from './ganttCalendarLabels'
+import { exportGanttChart } from './ganttExport'
+import { computeGanttTimelineDates } from '@shared/task/ganttTimeline'
 import {
   GANTT_HANDLE_WIDTH,
   ganttColumnWidthForView,
@@ -104,6 +106,19 @@ export default function GanttView(): React.ReactElement {
     const allDeps = tasks.flatMap((t) => t.dependencies ?? [])
     return tasksToGanttBars(tasks, allDeps)
   }, [tasks])
+
+  const columnWidth = useMemo(() => ganttColumnWidthForView(viewMode), [viewMode])
+
+  const timelineDates = useMemo(
+    () => computeGanttTimelineDates(ganttTasks, viewMode),
+    [ganttTasks, viewMode]
+  )
+
+  useLayoutEffect(() => {
+    const el = chartRef.current
+    if (!el || ganttTasks.length === 0) return
+    patchGanttCalendarLabels(el, timelineDates, viewMode, columnWidth, locale)
+  }, [ganttTasks, timelineDates, viewMode, columnWidth, locale])
 
   const taskOptions = useMemo(
     () => tasks.map((t) => ({ label: t.title, value: t.taskId })),
@@ -198,13 +213,10 @@ export default function GanttView(): React.ReactElement {
     if (!el) return
     setExporting(true)
     try {
+      patchGanttCalendarLabels(el, timelineDates, viewMode, columnWidth, locale)
       const stamp = new Date().toISOString().slice(0, 10)
       const base = `gantt-${gid || 'group'}-${stamp}`
-      if (format === 'png') {
-        await exportElementToPng(el, `${base}.png`)
-      } else {
-        await exportElementToPdf(el, `${base}.pdf`)
-      }
+      await exportGanttChart(el, `${base}.${format}`, format)
       message.success(format === 'png' ? t('gantt.exportPngDone') : t('gantt.exportPdfDone'))
     } catch {
       message.error(t('gantt.exportFailed'))
@@ -274,7 +286,7 @@ export default function GanttView(): React.ReactElement {
               if (task) void toggleMilestone(task)
             }}
             listCellWidth=""
-            columnWidth={ganttColumnWidthForView(viewMode)}
+            columnWidth={columnWidth}
             rowHeight={44}
             barFill={56}
             todayColor={todayColor}

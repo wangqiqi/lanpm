@@ -57,6 +57,7 @@ export default function MessageBubble({
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const isCode = message.content.kind === 'code'
+  const isSystem = message.type === 'system' || message.content.kind === 'system'
 
   const sender = useMemo(
     () => members.find((m) => m.userId === message.senderUserId),
@@ -146,6 +147,16 @@ export default function MessageBubble({
   )
 
   const bubbleClass = `${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted ? styles.searchHighlight : ''}`
+
+  if (isSystem) {
+    const event =
+      message.content.kind === 'system' ? message.content.event : message.type
+    return (
+      <div className={styles.systemMessageRow} data-msg-id={message.msgId}>
+        <span className={styles.systemMessageText}>{t('chat.systemMessage', { event })}</span>
+      </div>
+    )
+  }
 
   if (own) {
     return (

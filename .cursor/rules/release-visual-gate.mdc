@@ -1,5 +1,5 @@
 ---
-description: Before LanPM major release or RC, run visual gate (verify:visual, todo.md)
+description: Before LanPM major release or RC, run visual gate (verify:visual, docs/06 §2.6)
 alwaysApply: false
 ---
 
@@ -8,6 +8,6 @@ alwaysApply: false
 当用户提到 **发版、RC、1.0.0、release、准备发布** 且涉及 UI 或全量回归时：
 
 1. 执行 `.cursor/skills/lanpm-visual-audit/SKILL.md` **门禁模式**
-2. 确认 `todo.md` 中 V-14b / VIS-* 状态
+2. 确认 `docs/06` §2.6 手验项与 V-14b / VIS-* 状态
 3. 跑 `npm run verify:release-gate`（或至少 `verify:visual` + `verify:m7`）
 4. 勿将 `.lanpm/visual-screenshots/` 提交入库

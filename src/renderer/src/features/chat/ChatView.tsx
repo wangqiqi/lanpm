@@ -7,6 +7,7 @@ import {
   CameraOutlined,
   CodeOutlined,
   EditOutlined,
+  FolderOutlined,
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
@@ -36,7 +37,7 @@ import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
-import { useMentionNotifications } from '@renderer/features/chat/useMentionNotifications'
+import { useNewMessageScroll } from '@renderer/features/chat/useNewMessageScroll'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -198,8 +199,22 @@ export default function ChatView(): React.ReactElement {
     dismissMention
   )
 
-  useMentionNotifications(gid)
   useMarkRead(gid, messages, currentUserId)
+
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined
+  const { pendingNewCount, onMessagesScroll, jumpToLatest } = useNewMessageScroll({
+    listRef,
+    messageCount: messages.length,
+    lastSenderUserId: lastMessage?.senderUserId,
+    currentUserId,
+    groupKey: gid
+  })
+
+  const onlineCount = useMemo(
+    () => members.filter((m) => m.presence === 'online').length,
+    [members]
+  )
+  const showChatContextBar = !showDmPicker && !inDm && members.length > 0
 
   const [fileDragOver, setFileDragOver] = useState(false)
 
@@ -219,11 +234,6 @@ export default function ChatView(): React.ReactElement {
     setDraft(state.composeDraft)
     navigate(location.pathname, { replace: true, state: {} })
   }, [location.pathname, location.state, navigate])
-
-  useEffect(() => {
-    const el = listRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [messages.length])
 
   useEffect(() => {
     const el = rootRef.current
@@ -488,7 +498,26 @@ export default function ChatView(): React.ReactElement {
           <DmSessionBar activeGroupId={gid} layout="main" />
         ) : (
           <>
-        <div className={styles.messages} ref={listRef}>
+        {showChatContextBar && (
+          <div className={styles.chatContextBar}>
+            <Text className={styles.chatContextMeta}>
+              {t('chat.onlineStats', { online: onlineCount, total: members.length })}
+            </Text>
+            {groupType === 'project' && (
+              <Button
+                type="link"
+                size="small"
+                icon={<FolderOutlined />}
+                className={styles.chatContextLink}
+                onClick={() => navigate(groupViewPath(gid, 'files'))}
+              >
+                {t('chat.openGroupFiles')}
+              </Button>
+            )}
+          </div>
+        )}
+        <div className={styles.messagesWrap}>
+        <div className={styles.messages} ref={listRef} onScroll={onMessagesScroll}>
           {loading && messages.length === 0 ? (
             <ViewLoadingCenter />
           ) : loadError && messages.length === 0 ? (
@@ -534,6 +563,16 @@ export default function ChatView(): React.ReactElement {
               ))}
             </div>
           )}
+        </div>
+        {pendingNewCount > 0 && (
+          <button
+            type="button"
+            className={styles.newMessagesJump}
+            onClick={jumpToLatest}
+          >
+            {t('chat.newMessagesJump', { count: pendingNewCount })}
+          </button>
+        )}
         </div>
 
         <div className={styles.composer} style={{ height: composerHeight }}>

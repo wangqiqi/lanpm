@@ -153,7 +153,7 @@ const DOCS_CODE_REPORT = join(
   'archive/audit/docs-code/20260529_170000_代码文档差异_rc38.md'
 )
 const outPath = DOCS_CODE_REPORT
-let tail = '\n## 2. 待办\n\n见根目录 `todo.md`。\n'
+let tail = '\n## 2. 待办\n\n见 `docs/06` §2.6 手验待办。\n'
 if (existsSync(outPath)) {
   const raw = readFileSync(outPath, 'utf8')
   const idx = raw.indexOf('\n## 2.')

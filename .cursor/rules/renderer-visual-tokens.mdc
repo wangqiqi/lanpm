@@ -11,7 +11,7 @@ alwaysApply: false
 ## 颜色
 
 - 使用 `var(--lanpm-accent|text|border|hover-bg|…)`，禁止 `#1677ff` / Ant 旧蓝
-- 语义色优先 `--lanpm-success|warning|danger`（若尚未定义，见 `todo.md` VIS-01）
+- 语义色优先 `--lanpm-success|warning|danger`（见 `docs/04` §1.4 与 `verify:visual`）
 - 禁止 `var(--lanpm-*, rgba(0, 0, 0, …))` 作 fallback
 
 ## 布局

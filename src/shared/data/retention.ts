@@ -1,4 +1,4 @@
-/** 本机消息保留（天）— 数据.md §11 */
+/** 本机消息保留（天）— docs/03 §12 数据生命周期 */
 export const LOCAL_RETENTION_DAYS_DEFAULT = 90
 export const LOCAL_RETENTION_DAYS_MIN = 7
 export const LOCAL_RETENTION_DAYS_MAX = 365

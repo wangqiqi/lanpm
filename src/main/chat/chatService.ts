@@ -9,7 +9,6 @@ import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { listGroupMembers } from './memberService'
-import { notifyIfMentioned } from './notificationService'
 import { handleGroupKeyRotate, initGroupKeyService, shutdownGroupKeyService } from '../crypto/groupKeyService'
 import {
   handleChatSyncBatch,
@@ -82,11 +81,6 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   insertMessage(db, stored)
   broadcastMessage(stored)
-
-  const status = getSetupStatus(db)
-  if (status.configured && status.user) {
-    notifyIfMentioned(stored, status.user.userId)
-  }
 }
 
 function ensureSubscribed(db: Database, transport: NetworkTransport, groupId: string): void {

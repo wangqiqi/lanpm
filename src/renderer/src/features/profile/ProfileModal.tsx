@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Avatar, Form, Input, Modal, Tabs, Typography } from 'antd'
+import { Avatar, Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
 import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
 import { UserOutlined } from '@ant-design/icons'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNetworkStore } from '@renderer/stores/networkStore'
+import { useNotificationPrefsStore } from '@renderer/stores/notificationPrefsStore'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { ProfileUpdateInput } from '@shared/identity'
@@ -27,6 +28,9 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   const device = useIdentityStore((s) => s.device)
   const localIp = useNetworkStore((s) => s.status?.localIp)
   const refreshNetwork = useNetworkStore((s) => s.refresh)
+  const notifyAllMessages = useNotificationPrefsStore((s) => s.notifyAllMessages)
+  const setNotifyAllMessages = useNotificationPrefsStore((s) => s.setNotifyAllMessages)
+  const hydrateNotificationPrefs = useNotificationPrefsStore((s) => s.hydrate)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const [form] = Form.useForm<ProfileFormValues>()
   const [saving, setSaving] = useState(false)
@@ -35,7 +39,8 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   useEffect(() => {
     if (!open) return
     void refreshNetwork({ silent: true })
-  }, [open, refreshNetwork])
+    hydrateNotificationPrefs()
+  }, [open, refreshNetwork, hydrateNotificationPrefs])
 
   useEffect(() => {
     if (!open || !user) return
@@ -114,6 +119,17 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
         </Form.Item>
         <Form.Item name="department" label={t('profile.department')}>
           <Input maxLength={50} placeholder={t('setup.departmentPlaceholder')} />
+        </Form.Item>
+        <Form.Item label={t('profile.notifications')}>
+          <Checkbox
+            checked={notifyAllMessages}
+            onChange={(e) => setNotifyAllMessages(e.target.checked)}
+          >
+            {t('profile.notifyAllMessages')}
+          </Checkbox>
+          <div>
+            <Typography.Text type="secondary">{t('profile.notifyAllMessagesHint')}</Typography.Text>
+          </div>
         </Form.Item>
         <Form.Item label={t('profile.device')}>
           <Typography.Text>{device?.deviceName ?? '—'}</Typography.Text>

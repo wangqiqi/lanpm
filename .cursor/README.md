@@ -7,4 +7,4 @@
 | [renderer-visual-tokens](./rules/renderer-visual-tokens.mdc) | 编辑 `src/renderer` |
 | [release-visual-gate](./rules/release-visual-gate.mdc) | 发版门禁 |
 
-待办：`todo.md`。发版：`verify:project` · `verify:m7` · `verify:docs-code -- --strict`。
+待办：`docs/06` §2.6。发版：`verify:project` · `verify:m7` · `verify:docs-code -- --strict`。

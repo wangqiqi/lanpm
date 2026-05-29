@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import TopBar from '@renderer/layout/TopBar'
 import BottomNav from '@renderer/layout/BottomNav'
+import { useChatNotifications } from '@renderer/features/chat/useChatNotifications'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import styles from './MainLayout.module.css'
 
@@ -10,6 +11,8 @@ export default function MainLayout(): React.ReactElement {
   const location = useLocation()
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
   const rememberNonCockpitPath = useNavigationStore((s) => s.rememberNonCockpitPath)
+
+  useChatNotifications()
 
   useEffect(() => {
     if (groupId) setActiveGroupId(groupId)

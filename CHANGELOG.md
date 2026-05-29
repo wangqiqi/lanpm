@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.59] - 2026-05-29
+
+### Added
+- **WX-01～06 聊天体验**：新消息跳转条、DM 最后消息预览、群聊上下文栏、系统消息弱样式、桌面通知偏好（`useChatNotifications` / `notificationPrefsStore`）
+- **shared/chat**：`messagePreview`、`scrollPin`、`notificationPreferences`；单测 `messagePreview`、`useNewMessageScroll`
+- **甘特图**：导出增强（`ganttExport` / 日历标签 `ganttCalendarLabels` / `ganttTimeline`）
+
+### Changed
+- **根目录文档迁出**：`todo.md` → `archive/todo/20260529_223000_*`；`数据.md` → `archive/audit/20260529_223000_*`；手验 SSOT → `docs/06` §2.6
+- **聊天滚动**：仅贴底或自己发送时自动滚底；`useMentionNotifications` 合并为 `useChatNotifications`
+- **主进程**：移除 `chatService` 重复 @ 桌面通知
+- **plan.md / 微信借鉴.md**：WX 对照表与待办同步
+
+### Tag
+- `v1.0.0-rc.59` — 微信借鉴聊天增强、根目录 SSOT 迁入 docs/06、甘特导出
+
 ## [1.0.0-rc.58] - 2026-05-29
 
 ### Added
