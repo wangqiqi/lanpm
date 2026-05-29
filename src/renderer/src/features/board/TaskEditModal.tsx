@@ -6,6 +6,7 @@ import type { TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPane
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { onCtrlEnter, onEnterUnlessShift } from '@renderer/lib/inputKeyboard'
 
 const { TextArea } = Input
 
@@ -74,11 +75,11 @@ export default function TaskEditModal({
     [members, t]
   )
 
+  const okDisabled = !title.trim() || (status === 'other' && !otherReason.trim())
+
   const handleOk = async (): Promise<void> => {
-    if (!task) return
+    if (!task || okDisabled) return
     const trimmed = title.trim()
-    if (!trimmed) return
-    if (status === 'other' && !otherReason.trim()) return
 
     setSaving(true)
     try {
@@ -111,10 +112,7 @@ export default function TaskEditModal({
       cancelText={t('common.cancel')}
       onCancel={onCancel}
       onOk={() => void handleOk()}
-      okButtonProps={{
-        disabled:
-          !title.trim() || (status === 'other' && !otherReason.trim())
-      }}
+      okButtonProps={{ disabled: okDisabled }}
       width={520}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -126,7 +124,9 @@ export default function TaskEditModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('board.taskTitlePlaceholder')}
-            onPressEnter={() => void handleOk()}
+            onPressEnter={() => {
+              if (!okDisabled) void handleOk()
+            }}
           />
         </label>
 
@@ -181,6 +181,9 @@ export default function TaskEditModal({
               onChange={(e) => setOtherReason(e.target.value)}
               placeholder={t('board.otherReasonPlaceholder')}
               maxLength={500}
+              onKeyDown={(e) => {
+                if (!okDisabled) onEnterUnlessShift(e, () => void handleOk())
+              }}
             />
           </label>
         )}
@@ -196,7 +199,14 @@ export default function TaskEditModal({
             <div style={{ marginBottom: 4, fontSize: 12, color: 'var(--lanpm-text-secondary)' }}>
               {t('tree.detailEndDate')}
             </div>
-            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              onPressEnter={() => {
+                if (!okDisabled) void handleOk()
+              }}
+            />
           </label>
         </div>
 
@@ -231,6 +241,9 @@ export default function TaskEditModal({
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            onKeyDown={(e) => {
+              if (!okDisabled) onCtrlEnter(e, () => void handleOk())
+            }}
           />
         </label>
       </div>

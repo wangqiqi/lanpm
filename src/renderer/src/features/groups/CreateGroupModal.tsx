@@ -3,6 +3,7 @@ import { Form, Input, Modal, Radio, Switch } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { GroupType } from '@shared/navigation/types'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
 interface CreateGroupModalProps {
   open: boolean
@@ -44,11 +45,11 @@ export default function CreateGroupModal({
       title={t('group.createTitle')}
       open={open}
       onCancel={onClose}
-      onOk={() => void submit()}
+      onOk={() => form.submit()}
       confirmLoading={saving}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onFinish={() => void submit()}>
         <Form.Item name="type" label={t('group.type')} rules={[{ required: true }]}>
           <Radio.Group
             optionType="button"
@@ -64,7 +65,10 @@ export default function CreateGroupModal({
           label={t('group.name')}
           rules={[{ required: true, min: 2, max: 40, message: t('group.nameRule') }]}
         >
-          <Input placeholder={t('group.namePlaceholder')} />
+          <Input
+            placeholder={t('group.namePlaceholder')}
+            onPressEnter={submitFormOnEnter(form)}
+          />
         </Form.Item>
         <Form.Item name="autoDiscover" label={t('group.autoDiscover')} valuePropName="checked">
           <Switch />

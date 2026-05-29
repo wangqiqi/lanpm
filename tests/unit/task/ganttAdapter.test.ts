@@ -79,6 +79,15 @@ describe('tasksToGanttBars', () => {
     const bars = tasksToGanttBars([task({ taskId: 't1', progressPercent: 150 })], [])
     expect(bars[0]?.progress).toBe(1)
   })
+
+  it('applies family bar colors for related tasks', () => {
+    const parent = task({ taskId: 'p1', title: 'Parent' })
+    const child = task({ taskId: 'c1', title: 'Child', parentTaskId: 'p1' })
+    const bars = tasksToGanttBars([parent, child], [])
+    const childBar = bars.find((b) => b.id === 'c1')
+    expect(childBar?.styles?.backgroundColor).toBeTruthy()
+    expect(childBar?.styles?.backgroundColor).not.toBe('#f59e0b')
+  })
 })
 
 describe('ganttDatesToYmd', () => {

@@ -1,5 +1,7 @@
+import { buildBoardRelationMap } from './boardRelations'
 import type { Task } from './types'
 import type { TaskDependency } from './dependency'
+import { taskFamilyBarColors } from './taskFamilyColors'
 
 /** gantt-task-react 任务条（与库类型对齐的最小集） */
 export interface GanttBarTask {
@@ -55,6 +57,8 @@ export function tasksToGanttBars(tasks: Task[], dependencies: TaskDependency[]):
     depMap.set(dep.toTaskId, list)
   }
 
+  const relationMap = buildBoardRelationMap(tasks)
+
   return tasks
     .filter((t) => !t.deletedAt)
     .map((task) => {
@@ -67,6 +71,9 @@ export function tasksToGanttBars(tasks: Task[], dependencies: TaskDependency[]):
         end = new Date(start)
         end.setDate(end.getDate() + 1)
       }
+
+      const familyIndex = relationMap.get(task.taskId)?.familyIndex ?? -1
+      const familyBar = taskFamilyBarColors(familyIndex)
 
       return {
         id: task.taskId,
@@ -83,7 +90,7 @@ export function tasksToGanttBars(tasks: Task[], dependencies: TaskDependency[]):
               progressColor: '#fbbf24',
               progressSelectedColor: '#f59e0b'
             }
-          : undefined
+          : familyBar
       }
     })
 }

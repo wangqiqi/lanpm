@@ -4,7 +4,10 @@ import { MoreOutlined } from '@ant-design/icons'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
+import type { BoardTaskRelation } from '@shared/task/boardRelations'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
+import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
+import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './board.module.css'
@@ -24,21 +27,33 @@ const MOVE_COLUMN_KEYS: Record<TaskStatus, MessageKey> = {
 
 interface KanbanCardProps {
   task: Task
+  relation?: BoardTaskRelation
   assigneeName?: string
+  relationDimmed?: boolean
+  relationFocused?: boolean
   onDelete?: (taskId: string) => void
   onDiscuss?: (task: Task) => void
   onMoveTo?: (taskId: string, status: TaskStatus) => void
   onEdit?: (task: Task) => void
+  onHighlightRelations?: (taskId: string | null) => void
+  onPinRelations?: (taskId: string | null) => void
+  onLocateTask?: (taskId: string, view: TaskLocateView) => void
   highlighted?: boolean
 }
 
 export default function KanbanCard({
   task,
+  relation,
   assigneeName,
+  relationDimmed = false,
+  relationFocused = false,
   onDelete,
   onDiscuss,
   onMoveTo,
   onEdit,
+  onHighlightRelations,
+  onPinRelations,
+  onLocateTask,
   highlighted = false
 }: KanbanCardProps): React.ReactElement {
   const { t } = useI18n()
@@ -57,7 +72,21 @@ export default function KanbanCard({
     ? { transform: CSS.Translate.toString(transform) }
     : undefined
 
+  const familyClass =
+    relation && relation.familyIndex >= 0
+      ? taskFamilyStripeClass(relation.familyIndex)
+      : undefined
+  const blocked = (relation?.blockedBy.length ?? 0) > 0
+
   const menuItems: MenuProps['items'] = []
+
+  if (onPinRelations) {
+    menuItems.push({
+      key: 'highlight',
+      label: relationFocused ? t('board.relClearHighlight') : t('board.relHighlight'),
+      onClick: () => onPinRelations(relationFocused ? null : task.taskId)
+    })
+  }
 
   if (onEdit) {
     menuItems.push({
@@ -72,6 +101,22 @@ export default function KanbanCard({
       key: 'discuss',
       label: t('board.discussInChat'),
       onClick: () => onDiscuss(task)
+    })
+  }
+
+  if (onLocateTask) {
+    if (menuItems.length > 0) {
+      menuItems.push({ type: 'divider' })
+    }
+    menuItems.push({
+      key: 'locate-tree',
+      label: t('task.openInTree'),
+      onClick: () => onLocateTask(task.taskId, 'tree')
+    })
+    menuItems.push({
+      key: 'locate-gantt',
+      label: t('task.openInGantt'),
+      onClick: () => onLocateTask(task.taskId, 'gantt')
     })
   }
 
@@ -113,11 +158,59 @@ export default function KanbanCard({
     })
   }
 
+  const relationTags: { key: string; label: string; className: string }[] = []
+  if (relation?.parentTitle) {
+    relationTags.push({
+      key: 'parent',
+      label: t('board.relParent', { title: relation.parentTitle }),
+      className: styles.relationTagFamily
+    })
+  }
+  if (relation && relation.childCount > 0) {
+    relationTags.push({
+      key: 'children',
+      label: t('board.relChildren', { count: relation.childCount }),
+      className: styles.relationTagFamily
+    })
+  }
+  if (relation && relation.siblingCount > 0) {
+    relationTags.push({
+      key: 'siblings',
+      label: t('board.relSiblings', { count: relation.siblingCount }),
+      className: styles.relationTagFamily
+    })
+  }
+  for (const b of relation?.blockedBy ?? []) {
+    relationTags.push({
+      key: `block-${b.taskId}`,
+      label: t('board.relBlockedDep', { type: b.type, title: b.title }),
+      className: styles.relationTagWarn
+    })
+  }
+  for (const s of (relation?.successors ?? []).slice(0, 2)) {
+    relationTags.push({
+      key: `succ-${s.taskId}`,
+      label: t('board.relBlocks', { title: s.title, type: s.type }),
+      className: styles.relationTagDep
+    })
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`${styles.card} ${isDragging ? styles.cardDragging : ''} ${isOver ? styles.cardOver : ''} ${highlighted ? styles.searchHighlight : ''}`}
+      className={[
+        styles.card,
+        familyClass,
+        isDragging ? styles.cardDragging : '',
+        isOver ? styles.cardOver : '',
+        highlighted ? styles.searchHighlight : '',
+        blocked ? styles.cardBlocked : '',
+        relationDimmed ? styles.cardRelationDimmed : '',
+        relationFocused ? styles.cardRelationFocus : ''
+      ]
+        .filter(Boolean)
+        .join(' ')}
       data-task-id={task.taskId}
       title={onEdit ? t('board.editDoubleClickHint') : undefined}
       onDoubleClick={
@@ -128,9 +221,20 @@ export default function KanbanCard({
             }
           : undefined
       }
+      onMouseEnter={() => onHighlightRelations?.(task.taskId)}
+      onMouseLeave={() => onHighlightRelations?.(null)}
       {...listeners}
       {...attributes}
     >
+      {relationTags.length > 0 && (
+        <div className={styles.cardRelations}>
+          {relationTags.slice(0, 4).map((tag) => (
+            <Tag key={tag.key} bordered={false} className={`${styles.relationTag} ${tag.className}`}>
+              {tag.label}
+            </Tag>
+          ))}
+        </div>
+      )}
       <div className={styles.cardHeader}>
         <div className={styles.cardTitle}>{task.title}</div>
         {menuItems.length > 0 && (

@@ -1,5 +1,6 @@
 import { Form, Input, Modal } from 'antd'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
 interface TaskCreateModalProps {
   open: boolean
@@ -30,18 +31,22 @@ export default function TaskCreateModal({
         form.resetFields()
         onClose()
       }}
-      onOk={() => void handleOk()}
+      onOk={() => form.submit()}
       destroyOnHidden
       okText={t('common.create')}
       cancelText={t('common.cancel')}
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onFinish={() => void handleOk()}>
         <Form.Item
           name="title"
           label={t('chat.taskTitleLabel')}
           rules={[{ required: true, message: t('chat.taskTitleRequired') }]}
         >
-          <Input placeholder={t('chat.taskTitlePlaceholder')} autoFocus />
+          <Input
+            placeholder={t('chat.taskTitlePlaceholder')}
+            autoFocus
+            onPressEnter={submitFormOnEnter(form)}
+          />
         </Form.Item>
       </Form>
     </Modal>

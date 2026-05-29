@@ -3,6 +3,7 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useState } from 'react'
 import { CODE_LANGUAGE_OPTIONS, detectLanguage } from '@shared/chat/detectLanguage'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { onCtrlEnter } from '@renderer/lib/inputKeyboard'
 
 const { TextArea } = Input
 
@@ -74,6 +75,7 @@ export default function CodeSendModal({
         onChange={(e) => setCode(e.target.value)}
         autoSize={{ minRows: 8, maxRows: 16 }}
         style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13 }}
+        onKeyDown={(e) => onCtrlEnter(e, () => void handleOk())}
       />
     </Modal>
   )

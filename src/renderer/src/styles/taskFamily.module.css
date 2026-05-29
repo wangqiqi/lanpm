@@ -1,0 +1,39 @@
+/* 任务族色条：看板卡片、任务树行、甘特条共用（色值见 shared/task/taskFamilyColors.ts） */
+
+.familyStripe0 {
+  border-left: 3px solid #0071e3;
+}
+
+.familyStripe1 {
+  border-left: 3px solid #5856d6;
+}
+
+.familyStripe2 {
+  border-left: 3px solid #34c759;
+}
+
+.familyStripe3 {
+  border-left: 3px solid #ff9500;
+}
+
+.familyStripe4 {
+  border-left: 3px solid #ff2d55;
+}
+
+.familyStripe5 {
+  border-left: 3px solid #00c7be;
+}
+
+.familyStripe6 {
+  border-left: 3px solid #af52de;
+}
+
+.familyStripe7 {
+  border-left: 3px solid #8e8e93;
+}
+
+.nodeFamilyStripe {
+  padding-left: 8px;
+  margin-left: -4px;
+  border-radius: 4px;
+}

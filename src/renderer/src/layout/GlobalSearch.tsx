@@ -142,6 +142,11 @@ export default function GlobalSearch({ className }: GlobalSearchProps): React.Re
     setOptions([])
   }
 
+  const openFirstHit = (): void => {
+    const first = options[0]
+    if (first) navigateToHit(first.hit)
+  }
+
   const rootClass = [styles.root, className].filter(Boolean).join(' ')
 
   return (
@@ -157,6 +162,12 @@ export default function GlobalSearch({ className }: GlobalSearchProps): React.Re
         className={styles.input}
         placeholder={t('topbar.searchPlaceholder')}
         aria-label={t('topbar.searchPlaceholder')}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && options.length > 0) {
+            e.preventDefault()
+            openFirstHit()
+          }
+        }}
       />
     </AutoComplete>
   )

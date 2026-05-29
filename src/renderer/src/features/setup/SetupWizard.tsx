@@ -8,6 +8,7 @@ import { fileToDataUrl, defaultAvatarDataUrl, randomAvatarDataUrl } from './avat
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import logoUrl from '@resources/logo.svg'
+import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 import styles from './SetupWizard.module.css'
 
 interface SetupWizardProps {
@@ -140,6 +141,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
                   className={styles.rowInput}
                   placeholder={t('setup.usernamePlaceholder')}
                   maxLength={20}
+                  onPressEnter={submitFormOnEnter(form)}
                 />
               </div>
             </Form.Item>
@@ -157,6 +159,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
                   className={styles.rowInput}
                   placeholder={t('setup.departmentPlaceholder')}
                   maxLength={50}
+                  onPressEnter={submitFormOnEnter(form)}
                 />
               </div>
             </Form.Item>

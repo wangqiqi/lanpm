@@ -1,0 +1,72 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--lanpm-fill-secondary);
+  border: 0.5px solid var(--lanpm-separator);
+}
+
+.sectionTitle {
+  font-size: var(--lanpm-font-body);
+  font-weight: 600;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.groupLabel {
+  font-size: var(--lanpm-font-caption);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.listItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: var(--lanpm-font-body);
+}
+
+.typeTag {
+  margin: 0;
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  background: var(--lanpm-bg);
+}
+
+.itemTitle {
+  flex: 1;
+  min-width: 80px;
+  font-weight: 500;
+}
+
+.itemMeta {
+  font-size: var(--lanpm-font-caption);
+}
+
+.locateBtn {
+  padding: 0;
+  height: auto;
+}
+
+.selfLocate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--lanpm-separator);
+}

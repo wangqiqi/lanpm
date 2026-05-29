@@ -8,6 +8,7 @@ import {
   getAiProviderPreset
 } from '@shared/cockpit/aiProviders'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
 interface AiConfigModalProps {
   open: boolean
@@ -70,12 +71,12 @@ export default function AiConfigModal({
       title={t('ai.configTitle')}
       open={open}
       onCancel={onClose}
-      onOk={() => void submit()}
+      onOk={() => form.submit()}
       confirmLoading={saving}
       destroyOnHidden
       width={520}
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onFinish={() => void submit()}>
         <Form.Item name="provider" label={t('ai.provider')} rules={[{ required: true }]}>
           <Select
             options={AI_PROVIDER_PRESETS.map((p) => ({ label: p.label, value: p.value }))}
@@ -87,17 +88,21 @@ export default function AiConfigModal({
           />
         </Form.Item>
         <Form.Item name="baseUrl" label="Base URL" rules={[{ required: true }]}>
-          <Input />
+          <Input onPressEnter={submitFormOnEnter(form)} />
         </Form.Item>
         <Form.Item name="model" label={t('ai.model')} rules={[{ required: true }]}>
-          <Input />
+          <Input onPressEnter={submitFormOnEnter(form)} />
         </Form.Item>
         <Form.Item
           name="apiKey"
           label={config?.hasApiKey ? t('ai.apiKeyKeep') : t('ai.apiKey')}
           rules={config?.hasApiKey ? [] : [{ required: true, message: t('ai.apiKeyRequired') }]}
         >
-          <Input.Password placeholder={apiKeyPlaceholder} autoComplete="off" />
+          <Input.Password
+            placeholder={apiKeyPlaceholder}
+            autoComplete="off"
+            onPressEnter={submitFormOnEnter(form)}
+          />
         </Form.Item>
         <Form.Item name="enabled" label={t('ai.enableExternal')} valuePropName="checked">
           <Switch />

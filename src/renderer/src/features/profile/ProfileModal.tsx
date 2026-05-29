@@ -10,6 +10,7 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { ProfileUpdateInput } from '@shared/identity'
 import { LANPM_APP_VERSION } from '@shared/appVersion'
+import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
 interface ProfileModalProps {
   open: boolean
@@ -82,7 +83,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
       title={t('profile.title')}
       open={open}
       onCancel={onClose}
-      onOk={() => (activeTab === 'profile' ? void submit() : onClose())}
+      onOk={() => (activeTab === 'profile' ? form.submit() : onClose())}
       okText={activeTab === 'profile' ? undefined : t('common.cancel')}
       confirmLoading={activeTab === 'profile' ? saving : false}
       destroyOnHidden
@@ -105,7 +106,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
         </div>
       </div>
 
-      <Form form={form} layout="vertical" requiredMark={false}>
+      <Form form={form} layout="vertical" requiredMark={false} onFinish={() => void submit()}>
         <Form.Item
           name="baseName"
           label={t('profile.displayName')}
@@ -115,10 +116,18 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
           ]}
           extra={suffixHint}
         >
-          <Input maxLength={20} placeholder={t('setup.usernamePlaceholder')} />
+          <Input
+            maxLength={20}
+            placeholder={t('setup.usernamePlaceholder')}
+            onPressEnter={submitFormOnEnter(form)}
+          />
         </Form.Item>
         <Form.Item name="department" label={t('profile.department')}>
-          <Input maxLength={50} placeholder={t('setup.departmentPlaceholder')} />
+          <Input
+            maxLength={50}
+            placeholder={t('setup.departmentPlaceholder')}
+            onPressEnter={submitFormOnEnter(form)}
+          />
         </Form.Item>
         <Form.Item label={t('profile.notifications')}>
           <Checkbox

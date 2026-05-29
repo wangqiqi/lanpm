@@ -23,6 +23,7 @@ import {
   LOCAL_RETENTION_DAYS_MIN
 } from '@shared/data/retention'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import type { DataCleanupOptions } from '@shared/data/types'
 
 export default function DataStoragePanel(): React.ReactElement {
@@ -140,6 +141,7 @@ export default function DataStoragePanel(): React.ReactElement {
               max={LOCAL_RETENTION_DAYS_MAX}
               value={retention}
               onChange={(v) => setRetention(v ?? 90)}
+              onPressEnter={runOnEnter(() => void saveRetention())}
             />
             <Button type="primary" loading={loading} onClick={() => void saveRetention()}>
               {t('common.save')}

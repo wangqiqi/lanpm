@@ -1,5 +1,6 @@
 import { Form, Input, Modal } from 'antd'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { onEnterUnlessShift } from '@renderer/lib/inputKeyboard'
 
 interface OtherReasonModalProps {
   open: boolean
@@ -31,24 +32,32 @@ export default function OtherReasonModal({
         form.resetFields()
         onCancel()
       }}
-      onOk={async () => {
-        const values = await form.validateFields()
-        onConfirm(values.reason.trim())
-        form.resetFields()
-      }}
+      onOk={() => form.submit()}
     >
       {taskTitle && (
         <p style={{ marginBottom: 12, color: 'var(--lanpm-text-secondary)' }}>
           {t('board.otherModalTask', { title: taskTitle })}
         </p>
       )}
-      <Form form={form} layout="vertical">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={(values) => {
+          onConfirm(values.reason.trim())
+          form.resetFields()
+        }}
+      >
         <Form.Item
           name="reason"
           label={t('board.otherReasonLabel')}
           rules={[{ required: true, whitespace: true, message: t('board.otherReasonRequired') }]}
         >
-          <Input.TextArea rows={3} placeholder={t('board.otherReasonPlaceholder')} maxLength={500} />
+          <Input.TextArea
+            rows={3}
+            placeholder={t('board.otherReasonPlaceholder')}
+            maxLength={500}
+            onKeyDown={(e) => onEnterUnlessShift(e, () => form.submit())}
+          />
         </Form.Item>
       </Form>
     </Modal>

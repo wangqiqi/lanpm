@@ -23,9 +23,10 @@ import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
+import BoardRelationLegend from './BoardRelationLegend'
 import OtherReasonModal from './OtherReasonModal'
 import TaskEditModal from './TaskEditModal'
-import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -33,6 +34,12 @@ import {
   confirmDeleteParentTask,
   countTaskDescendants
 } from '@renderer/features/task/confirmDeleteParentTask'
+import {
+  buildBoardRelationMap,
+  getDependencyBlockersForStatus,
+  type BoardTaskRelation
+} from '@shared/task/boardRelations'
+import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -92,7 +99,13 @@ function KanbanColumn({
   onMoveTo,
   onEdit,
   getMemberDisplayName,
-  isTaskHighlighted
+  isTaskHighlighted,
+  relationMap,
+  relatedSet,
+  relationFocusId,
+  onHighlightRelations,
+  onPinRelations,
+  onLocateTask
 }: {
   groupId: string
   status: TaskStatus
@@ -106,6 +119,12 @@ function KanbanColumn({
   onEdit: (task: Task) => void
   getMemberDisplayName: (groupId: string, userId: string) => string
   isTaskHighlighted: (taskId: string) => boolean
+  relationMap: Map<string, BoardTaskRelation>
+  relatedSet: Set<string> | null
+  relationFocusId: string | null
+  onHighlightRelations: (taskId: string | null) => void
+  onPinRelations: (taskId: string | null) => void
+  onLocateTask: (taskId: string, view: 'board' | 'tree' | 'gantt') => void
 }): React.ReactElement {
   const { t } = useI18n()
   const { setNodeRef } = useDroppable({ id: status })
@@ -139,15 +158,21 @@ function KanbanColumn({
           <KanbanCard
             key={task.taskId}
             task={task}
+            relation={relationMap.get(task.taskId)}
             assigneeName={
               task.assigneeUserId
                 ? getMemberDisplayName(groupId, task.assigneeUserId)
                 : undefined
             }
+            relationDimmed={relatedSet !== null && !relatedSet.has(task.taskId)}
+            relationFocused={relationFocusId === task.taskId}
             onDelete={onDeleteTask}
             onDiscuss={onDiscuss}
             onMoveTo={onMoveTo}
             onEdit={onEdit}
+            onHighlightRelations={onHighlightRelations}
+            onPinRelations={onPinRelations}
+            onLocateTask={onLocateTask}
             highlighted={isTaskHighlighted(task.taskId)}
           />
         ))}
@@ -181,13 +206,29 @@ export default function BoardView(): React.ReactElement {
   const [pendingOther, setPendingOther] = useState<{ taskId: string; title: string } | null>(null)
   const [otherLoading, setOtherLoading] = useState(false)
   const [editTask, setEditTask] = useState<Task | null>(null)
+  const [relationFocusId, setRelationFocusId] = useState<string | null>(null)
+  const [relationHoverId, setRelationHoverId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   )
 
   const boardReady = !loading || tasks.length > 0
-  const { isHighlighted: isTaskHighlighted } = useSearchHighlight('task', boardReady)
+  const { highlightId, isHighlighted: isTaskHighlighted } = useSearchHighlight('task', boardReady)
+
+  useEffect(() => {
+    if (!highlightId) return
+    setRelationFocusId(highlightId)
+    setRelationHoverId(null)
+  }, [highlightId])
+
+  const relationMap = useMemo(() => buildBoardRelationMap(tasks), [tasks])
+  const tasksById = useMemo(() => new Map(tasks.map((t) => [t.taskId, t])), [tasks])
+  const activeRelationId = relationFocusId ?? relationHoverId
+  const relatedSet = useMemo(() => {
+    if (!activeRelationId) return null
+    return new Set(relationMap.get(activeRelationId)?.relatedIds ?? [])
+  }, [activeRelationId, relationMap])
 
   const tasksByColumn = useMemo(() => {
     const map: Record<TaskStatus, Task[]> = {
@@ -247,6 +288,22 @@ export default function BoardView(): React.ReactElement {
     }
   }
 
+  const locateTask = useLocateTask(gid)
+
+  const warnDependencyBlocked = useCallback(
+    (task: Task, targetStatus: TaskStatus): boolean => {
+      const blockers = getDependencyBlockersForStatus(task, tasksById, targetStatus)
+      if (blockers.length === 0) return false
+      message.warning(
+        t('board.depBlockedDesc', {
+          titles: blockers.map((b) => `${b.type}·${b.title}`).join('、')
+        })
+      )
+      return true
+    },
+    [tasksById, message, t]
+  )
+
   const finishMove = useCallback(
     async (taskId: string, status: TaskStatus, otherReason?: string, sortOrder?: number) => {
       try {
@@ -255,7 +312,7 @@ export default function BoardView(): React.ReactElement {
         message.error(formatError(err, 'board.moveFailed'))
       }
     },
-    [moveTask, message, t]
+    [moveTask, message, formatError]
   )
 
   const reorderWithinColumn = useCallback(
@@ -302,6 +359,8 @@ export default function BoardView(): React.ReactElement {
         return
       }
 
+      if (warnDependencyBlocked(task, targetStatus)) return
+
       void finishMove(taskId, targetStatus)
       return
     }
@@ -320,6 +379,8 @@ export default function BoardView(): React.ReactElement {
       return
     }
 
+    if (warnDependencyBlocked(activeTaskItem, overTask.status)) return
+
     void finishMove(taskId, overTask.status)
   }
 
@@ -331,9 +392,10 @@ export default function BoardView(): React.ReactElement {
         setPendingOther({ taskId, title: task.title })
         return
       }
+      if (warnDependencyBlocked(task, status)) return
       void finishMove(taskId, status)
     },
-    [tasks, finishMove]
+    [tasks, finishMove, warnDependencyBlocked]
   )
 
   const handleDelete = useCallback(
@@ -421,13 +483,22 @@ export default function BoardView(): React.ReactElement {
 
   const showBoardToolbar = !loading && tasks.length > 0
 
+  const handleHighlightRelations = useCallback((taskId: string | null) => {
+    setRelationHoverId(taskId)
+  }, [])
+
+  const handlePinRelations = useCallback((taskId: string | null) => {
+    setRelationFocusId(taskId)
+    if (taskId) setRelationHoverId(null)
+  }, [])
+
   return (
     <div className={styles.root}>
       <ViewToolbar
         start={
           showBoardToolbar ? (
             <ViewToolbarGroup>
-              <ViewToolbarHint>{t('board.toolbarHint')}</ViewToolbarHint>
+              <BoardRelationLegend />
             </ViewToolbarGroup>
           ) : undefined
         }
@@ -465,6 +536,12 @@ export default function BoardView(): React.ReactElement {
                 onEdit={setEditTask}
                 getMemberDisplayName={getMemberDisplayName}
                 isTaskHighlighted={isTaskHighlighted}
+                relationMap={relationMap}
+                relatedSet={relatedSet}
+                relationFocusId={relationFocusId}
+                onHighlightRelations={handleHighlightRelations}
+                onPinRelations={handlePinRelations}
+                onLocateTask={locateTask}
               />
             ))}
             </div>

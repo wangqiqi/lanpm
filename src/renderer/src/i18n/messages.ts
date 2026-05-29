@@ -14,7 +14,8 @@ export function translate(
   key: MessageKey,
   params?: TranslateParams
 ): string {
-  let text = MESSAGES[locale][key] ?? MESSAGES['zh-CN'][key] ?? key
+  const bundle = MESSAGES[locale] ?? MESSAGES['zh-CN']
+  let text = bundle[key] ?? MESSAGES['zh-CN'][key] ?? key
   if (params) {
     for (const [name, value] of Object.entries(params)) {
       text = text.replaceAll(`{${name}}`, String(value))

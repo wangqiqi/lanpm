@@ -28,7 +28,10 @@ import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { readCssVar } from '@renderer/ui/cssVar'
 import { useUiStore } from '@renderer/stores/uiStore'
+import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
+import { listTaskPredecessors, listTaskSuccessors } from '@shared/task/boardRelations'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { scrollGanttChartToTask } from './ganttScroll'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
@@ -111,6 +114,20 @@ export default function GanttView(): React.ReactElement {
     const allDeps = tasks.flatMap((t) => t.dependencies ?? [])
     return tasksToGanttBars(tasks, allDeps)
   }, [tasks])
+
+  const ganttReady = !loading && ganttTasks.length > 0
+  const { highlightId } = useSearchHighlight('task', ganttReady)
+  const tasksById = useMemo(() => new Map(tasks.map((t) => [t.taskId, t])), [tasks])
+
+  useEffect(() => {
+    if (!highlightId || !chartRef.current) return
+    scrollGanttChartToTask(
+      chartRef.current,
+      highlightId,
+      GANTT_ROW_HEIGHT,
+      ganttTasks.map((b) => b.id)
+    )
+  }, [highlightId, ganttTasks])
 
   const columnWidth = useMemo(() => ganttColumnWidthForView(viewMode), [viewMode])
 
@@ -279,7 +296,11 @@ export default function GanttView(): React.ReactElement {
       ) : ganttTasks.length === 0 ? (
         <ViewEmptyHint>{t('gantt.empty')}</ViewEmptyHint>
       ) : (
-        <div className={styles.chartWrap} ref={chartRef} data-lanpm-visual="gantt-chart">
+        <div
+          className={`${styles.chartWrap} ${highlightId ? styles.chartHighlight : ''}`}
+          ref={chartRef}
+          data-lanpm-visual="gantt-chart"
+        >
           <Gantt
             key={locale}
             tasks={ganttTasks}
@@ -308,20 +329,34 @@ export default function GanttView(): React.ReactElement {
             barProgressSelectedColor={ganttBarColors.barProgressSelectedColor}
             TooltipContent={({ task: bar }) => {
               const task = tasks.find((t) => t.taskId === bar.id)
-              const deps = task?.dependencies ?? []
+              if (!task) {
+                return (
+                  <div className={styles.tooltip}>
+                    <div>{bar.name}</div>
+                  </div>
+                )
+              }
+              const preds = listTaskPredecessors(task, tasksById)
+              const succs = listTaskSuccessors(task.taskId, tasks)
               return (
                 <div className={styles.tooltip}>
                   <div>{bar.name}</div>
-                  {deps.length > 0 && (
-                    <div>
-                      {t('gantt.depsLabel')}
-                      {deps.map((d) => (
-                        <Tag
-                          key={`${d.fromTaskId}-${d.type}`}
-                          color="default"
-                          style={{ marginTop: 4 }}
-                        >
-                          {d.type}: {d.fromTaskId.slice(-6)} → {d.toTaskId.slice(-6)}
+                  {preds.length > 0 && (
+                    <div className={styles.tooltipDeps}>
+                      <div>{t('task.predecessors')}</div>
+                      {preds.map((d) => (
+                        <Tag key={`${d.taskId}-${d.type}`} bordered={false}>
+                          {d.type} · {d.title}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+                  {succs.length > 0 && (
+                    <div className={styles.tooltipDeps}>
+                      <div>{t('task.successors')}</div>
+                      {succs.map((d) => (
+                        <Tag key={`${d.taskId}-${d.type}`} bordered={false}>
+                          {d.type} · {d.title}
                         </Tag>
                       ))}
                     </div>
@@ -420,6 +455,7 @@ export default function GanttView(): React.ReactElement {
                 type="date"
                 value={scheduleEnd}
                 onChange={(e) => setScheduleEnd(e.target.value)}
+                onPressEnter={() => void saveSchedule()}
                 style={{ width: '100%', marginTop: 4 }}
               />
             </div>

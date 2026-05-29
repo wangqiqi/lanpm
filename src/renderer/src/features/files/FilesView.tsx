@@ -48,6 +48,7 @@ import {
 } from '@renderer/features/files/fileListModel'
 import { isTextPreviewFile } from '@shared/file/previewExtensions'
 import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
+import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import styles from './files.module.css'
 
 const { Text } = Typography
@@ -836,6 +837,7 @@ export default function FilesView(): React.ReactElement {
               placeholder={t('files.bookmarkUrlPlaceholder')}
               value={bookmarkUrl}
               onChange={(e) => setBookmarkUrl(e.target.value)}
+              onPressEnter={runOnEnter(() => void saveBookmark())}
               style={{ marginTop: 4 }}
             />
           </div>
@@ -845,6 +847,7 @@ export default function FilesView(): React.ReactElement {
               placeholder={t('files.bookmarkTitlePlaceholder')}
               value={bookmarkTitle}
               onChange={(e) => setBookmarkTitle(e.target.value)}
+              onPressEnter={runOnEnter(() => void saveBookmark())}
               style={{ marginTop: 4 }}
             />
           </div>

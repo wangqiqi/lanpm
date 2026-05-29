@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Checkbox, Input, InputNumber, Select, Typography } from 'antd'
+import { Button, Checkbox, Input, InputNumber, Select, Slider, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import {
+  buildBoardRelationMap,
+  listTaskPredecessors,
+  listTaskSuccessors
+} from '@shared/task/boardRelations'
+import TaskRelationSection from '@renderer/features/task/TaskRelationSection'
+import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
+import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
+import { onCtrlEnter, onEnterUnlessShift, runOnEnter } from '@renderer/lib/inputKeyboard'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -45,6 +54,7 @@ interface TaskDetailPanelProps {
   onClose: () => void
   onSave: (input: TaskDetailSaveInput) => Promise<void>
   onDelete: (taskId: string) => Promise<void>
+  onLocateTask: (taskId: string, view: TaskLocateView) => void
 }
 
 export default function TaskDetailPanel({
@@ -53,7 +63,8 @@ export default function TaskDetailPanel({
   tasks,
   onClose,
   onSave,
-  onDelete
+  onDelete,
+  onLocateTask
 }: TaskDetailPanelProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
@@ -92,6 +103,19 @@ export default function TaskDetailPanel({
     [tasks, task.taskId]
   )
   const childrenDone = children.filter((t) => t.status === 'done').length
+
+  const tasksById = useMemo(() => new Map(tasks.map((t) => [t.taskId, t])), [tasks])
+  const relation = useMemo(() => buildBoardRelationMap(tasks).get(task.taskId), [tasks, task.taskId])
+  const predecessors = useMemo(
+    () => listTaskPredecessors(task, tasksById),
+    [task, tasksById]
+  )
+  const successors = useMemo(
+    () => listTaskSuccessors(task.taskId, tasks),
+    [task.taskId, tasks]
+  )
+  const familyStripe = relation ? taskFamilyStripeClass(relation.familyIndex) : undefined
+  const parentTask = task.parentTaskId ? tasksById.get(task.parentTaskId) : undefined
 
   const memberOptions = useMemo(
     () => [
@@ -135,9 +159,13 @@ export default function TaskDetailPanel({
   }
 
   const saveDisabled = !title.trim() || (status === 'other' && !otherReason.trim())
+  const trySave = (): void => {
+    if (saveDisabled || saving) return
+    void handleSave()
+  }
 
   return (
-    <div className={styles.detailPanelBody}>
+    <div className={`${styles.detailPanelBody} ${familyStripe ?? ''}`}>
       <div className={styles.detailHeader}>
         <Text strong>{t('tree.detailTitle')}</Text>
         <Button type="text" size="small" onClick={onClose}>
@@ -145,43 +173,53 @@ export default function TaskDetailPanel({
         </Button>
       </div>
 
+      {parentTask && (
+        <Text type="secondary" className={styles.detailBreadcrumb}>
+          {t('board.relParent', { title: parentTask.title })}
+        </Text>
+      )}
+
       <label className={styles.detailField}>
         <Text type="secondary">{t('tree.detailName')}</Text>
-        <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-      </label>
-
-      <label className={styles.detailField}>
-        <Text type="secondary">{t('tree.detailAssignee')}</Text>
-        <Select
-          value={assigneeUserId ?? ''}
-          onChange={(v) => setAssigneeUserId(v || undefined)}
-          options={memberOptions}
-          style={{ width: '100%' }}
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onPressEnter={runOnEnter(trySave, saveDisabled || saving)}
         />
       </label>
 
-      <label className={styles.detailField}>
-        <Text type="secondary">{t('tree.detailStatus')}</Text>
-        <Select
-          value={status}
-          onChange={setStatus}
-          options={KANBAN_COLUMN_ORDER.map((s) => ({ value: s, label: t(STATUS_KEYS[s]) }))}
-          style={{ width: '100%' }}
-        />
-      </label>
-
-      <label className={styles.detailField}>
-        <Text type="secondary">{t('common.priority')}</Text>
-        <Select
-          value={priority}
-          onChange={setPriority}
-          options={(['low', 'medium', 'high'] as const).map((p) => ({
-            value: p,
-            label: t(PRIORITY_KEYS[p])
-          }))}
-          style={{ width: '100%' }}
-        />
-      </label>
+      <div className={styles.detailFieldRow}>
+        <label className={styles.detailFieldGrow}>
+          <Text type="secondary">{t('tree.detailAssignee')}</Text>
+          <Select
+            value={assigneeUserId ?? ''}
+            onChange={(v) => setAssigneeUserId(v || undefined)}
+            options={memberOptions}
+            style={{ width: '100%' }}
+          />
+        </label>
+        <label className={styles.detailFieldGrow}>
+          <Text type="secondary">{t('tree.detailStatus')}</Text>
+          <Select
+            value={status}
+            onChange={setStatus}
+            options={KANBAN_COLUMN_ORDER.map((s) => ({ value: s, label: t(STATUS_KEYS[s]) }))}
+            style={{ width: '100%' }}
+          />
+        </label>
+        <label className={styles.detailFieldGrow}>
+          <Text type="secondary">{t('common.priority')}</Text>
+          <Select
+            value={priority}
+            onChange={setPriority}
+            options={(['low', 'medium', 'high'] as const).map((p) => ({
+              value: p,
+              label: t(PRIORITY_KEYS[p])
+            }))}
+            style={{ width: '100%' }}
+          />
+        </label>
+      </div>
 
       {status === 'other' && (
         <label className={styles.detailField}>
@@ -192,31 +230,44 @@ export default function TaskDetailPanel({
             onChange={(e) => setOtherReason(e.target.value)}
             placeholder={t('board.otherReasonPlaceholder')}
             maxLength={500}
+            onKeyDown={(e) => onEnterUnlessShift(e, trySave, saveDisabled || saving)}
           />
         </label>
       )}
 
-      <label className={styles.detailField}>
-        <Text type="secondary">{t('board.detailStartDate')}</Text>
-        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-      </label>
-
-      <label className={styles.detailField}>
-        <Text type="secondary">{t('tree.detailEndDate')}</Text>
-        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-      </label>
-
       <div className={styles.detailFieldRow}>
         <label className={styles.detailFieldGrow}>
+          <Text type="secondary">{t('board.detailStartDate')}</Text>
+          <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        </label>
+        <label className={styles.detailFieldGrow}>
+          <Text type="secondary">{t('tree.detailEndDate')}</Text>
+          <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        </label>
+      </div>
+
+      <div className={styles.detailFieldRow}>
+        <label className={styles.detailProgressField}>
           <Text type="secondary">{t('board.detailProgress')}</Text>
-          <InputNumber
-            min={0}
-            max={100}
-            value={progressPercent}
-            onChange={(v) => setProgressPercent(typeof v === 'number' ? v : 0)}
-            addonAfter="%"
-            style={{ width: '100%' }}
-          />
+          <div className={styles.detailProgressControl}>
+            <Slider
+              min={0}
+              max={100}
+              value={progressPercent}
+              onChange={setProgressPercent}
+              className={styles.detailProgressSlider}
+            />
+            <InputNumber
+              min={0}
+              max={100}
+              size="small"
+              controls={false}
+              value={progressPercent}
+              onChange={(v) => setProgressPercent(typeof v === 'number' ? v : 0)}
+              addonAfter="%"
+              className={styles.detailProgressInput}
+            />
+          </div>
         </label>
         <Checkbox
           checked={milestone}
@@ -227,12 +278,13 @@ export default function TaskDetailPanel({
         </Checkbox>
       </div>
 
-      <label className={styles.detailField}>
+      <label className={`${styles.detailField} ${styles.detailDescriptionField}`}>
         <Text type="secondary">{t('tree.detailDescription')}</Text>
         <TextArea
-          rows={4}
+          className={styles.detailDescriptionInput}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          onKeyDown={(e) => onCtrlEnter(e, trySave, saveDisabled || saving)}
         />
       </label>
 
@@ -247,6 +299,14 @@ export default function TaskDetailPanel({
           </>
         )}
       </Text>
+
+      <TaskRelationSection
+        task={task}
+        tasks={tasks}
+        predecessors={predecessors}
+        successors={successors}
+        onLocate={onLocateTask}
+      />
 
       <div className={styles.detailActions}>
         <Button

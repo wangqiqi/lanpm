@@ -23,6 +23,9 @@ import {
   confirmDeleteParentTask,
   countTaskDescendants
 } from '@renderer/features/task/confirmDeleteParentTask'
+import { buildBoardRelationMap, type BoardTaskRelation } from '@shared/task/boardRelations'
+import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
+import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -48,6 +51,7 @@ function applyTaskSelection(
 
 function buildTreeData(
   tasks: Task[],
+  relationMap: Map<string, BoardTaskRelation>,
   isTaskHighlighted: (taskId: string) => boolean,
   inlineEditTaskId: string | null,
   onStartInlineEdit: (taskId: string) => void,
@@ -71,11 +75,14 @@ function buildTreeData(
       const childNodes = build(task.taskId)
       const hasChildren = childNodes.length > 0
       const isLeaf = !hasChildren
+      const familyIndex = relationMap.get(task.taskId)?.familyIndex ?? -1
+      const familyStripe = taskFamilyStripeClass(familyIndex, { treeNode: true })
+
       return {
         key: task.taskId,
         title: (
           <div
-            className={`${styles.nodeRow} ${isTaskHighlighted(task.taskId) ? styles.searchHighlight : ''}`}
+            className={`${styles.nodeRow} ${familyStripe ?? ''} ${isTaskHighlighted(task.taskId) ? styles.searchHighlight : ''}`}
             data-task-id={task.taskId}
           >
             <span className={styles.nodeTitle}>{task.title}</span>
@@ -166,16 +173,21 @@ export default function TaskTreeView(): React.ReactElement {
     void loadMembers(gid)
   }, [gid, loadMembers])
 
+  const relationMap = useMemo(() => buildBoardRelationMap(tasks), [tasks])
+
+  const locateTask = useLocateTask(gid)
+
   const treeData = useMemo(
     () =>
       buildTreeData(
         tasks,
+        relationMap,
         isTaskHighlighted,
         inlineEditTaskId,
         (taskId) => setInlineEditTaskId(taskId),
         (taskId, value) => void commitInlineProgress(taskId, value)
       ),
-    [tasks, isTaskHighlighted, inlineEditTaskId, commitInlineProgress]
+    [tasks, relationMap, isTaskHighlighted, inlineEditTaskId, commitInlineProgress]
   )
 
   useEffect(() => {
@@ -366,6 +378,8 @@ export default function TaskTreeView(): React.ReactElement {
             <ViewEmptyHint>{t('tree.empty')}</ViewEmptyHint>
           ) : (
             <Tree
+              blockNode
+              className={styles.tree}
               showLine
               expandedKeys={expandedKeys}
               onExpand={(keys) => setExpandedKeys(keys as string[])}
@@ -389,6 +403,7 @@ export default function TaskTreeView(): React.ReactElement {
               }}
               onSave={handleDetailSave}
               onDelete={handleDetailDelete}
+              onLocateTask={locateTask}
             />
           ) : (
             <div className={styles.detailPanelPlaceholder}>

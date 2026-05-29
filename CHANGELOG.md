@@ -2,6 +2,49 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.74] - 2026-05-29
+
+### Fixed
+- **看板图例 i18n**：合并为 `board.legendToolbar` 单条文案，避免显示原始 key；`translate` 对非法 locale 回退
+
+### Added
+- **表单快捷键**：`inputKeyboard`；任务/群组/配置/文件书签/数据保留等支持 Enter / Ctrl+Enter 提交
+- **全局搜索**：Enter 打开首条结果（带 `highlightTaskId` 跳转看板/树/甘特）
+- **看板**：任务族色条图例；卡片菜单「在任务树 / 甘特中定位」；`useLocateTask` 统一跨视图跳转
+- **甘特**：`highlightTaskId` 行滚动定位；tooltip 展示前置/后继任务标题
+
+### Changed
+- **看板拖列**：FS/SS/FF/SF 依赖规则（`getDependencyBlockersForStatus`）；卡片等待标签覆盖全部阻塞类型
+
+### Tag
+- `v1.0.0-rc.74` — 多视图关系体验补全
+
+## [1.0.0-rc.73] - 2026-05-29
+
+### Added
+- **任务族视觉 SSOT**：`taskFamilyColors.ts` + `taskFamily.module.css`；看板 / 任务树 / 甘特条共用 8 色
+- **任务树详情**：前置 / 后继列表、父任务面包屑、「在看板 / 甘特中定位」
+- **跨视图定位**：`highlightTaskId` 进入看板时自动固定关联高亮
+
+### Changed
+- **甘特条**：有关联任务使用族色（里程碑仍为琥珀色）
+- **docs/04**：三视图关系与配色说明
+
+### Tag
+- `v1.0.0-rc.73` — 多视图任务关系视觉一致
+
+## [1.0.0-rc.72] - 2026-05-29
+
+### Added
+- **看板任务关系**：族色条、父/子/同级与 FS 依赖标签；悬停或菜单「固定高亮」关联卡；拖入进行中/已完成时校验 FS 前置
+- **`shared/task/boardRelations.ts`** + 单测 `tests/unit/task/boardRelations.test.ts`
+
+### Changed
+- **docs/04**：看板与树/甘特多视角关系说明
+
+### Tag
+- `v1.0.0-rc.72` — 看板关系可视化与 FS 约束
+
 ## [1.0.0-rc.71] - 2026-05-29
 
 ### Changed
