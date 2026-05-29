@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.25`（M0–M7 已闭环；发布门禁见 [docs/08](./docs/08_M7_RC验收清单.md)）
+- **RC**：`1.0.0-rc.27`（M0–M7 已闭环；发布门禁见 [docs/06](./docs/06_验收与里程碑计划.md) §2）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
-- 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
+- 验收清单：[docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md)
 
 ## 本地开发
 
@@ -20,7 +20,7 @@ npm install      # postinstall 会自动将 better-sqlite3 对齐到 Electron AB
 npm run dev      # 启动前也会自动检测并重编（若 ABI 不一致）
 npm run lint     # ESLint
 npm run typecheck
-npm run test        # Vitest 单元（tests/unit，见 docs/10）
+npm run test        # Vitest 单元（tests/unit，见 docs/05 §1）
 npm run verify:m7   # 全量回归（含 test + verify:* 集成）
 npm run build       # 生产构建
 ```
@@ -50,15 +50,11 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）；浏览器桩与 Electro
 |------|------|
 | [docs/00_文档导航.md](./docs/00_文档导航.md) | 索引、追溯矩阵、已拍板决策 |
 | [docs/01_产品需求文档.md](./docs/01_产品需求文档.md) | 产品需求（PRD） |
-| [docs/02_技术实现建议.md](./docs/02_技术实现建议.md) | 架构、网络、非功能指标 |
-| [docs/03_验收与里程碑计划.md](./docs/03_验收与里程碑计划.md) | P0 验收与 20 天排期 |
-| [docs/04_数据模型与协议草案.md](./docs/04_数据模型与协议草案.md) | 实体、协议、SQLite（v0.2 基线） |
-| [docs/05_交互与UI约定.md](./docs/05_交互与UI约定.md) | 布局、主题、组件约定 |
-| [docs/06_测试与联调手册.md](./docs/06_测试与联调手册.md) | Stub/真网/性能测试 |
-| [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md) | M3 看板/任务树实现与 IPC |
-| [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md) | M7 RC 验收 |
-| [docs/09_视觉手验清单.md](./docs/09_视觉手验清单.md) | 亮/暗主题手验（V-14b） |
-| [docs/10_测试体系说明.md](./docs/10_测试体系说明.md) | Vitest 单元 + verify 集成分层 |
+| [docs/02_技术实现建议.md](./docs/02_技术实现建议.md) | 架构、网络（§13.6 手动添加节点）、非功能 |
+| [docs/03_数据模型与协议草案.md](./docs/03_数据模型与协议草案.md) | 实体、协议、SQLite（v0.2 基线） |
+| [docs/04_交互与UI约定.md](./docs/04_交互与UI约定.md) | 布局、主题、组件约定 |
+| [docs/05_测试与联调发布.md](./docs/05_测试与联调发布.md) | Vitest、verify:*、联调、视觉手验 |
+| [docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md) | P0 验收、里程碑、RC 发布门禁 |
 
 ## 技术选型
 
@@ -82,10 +78,10 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）；浏览器桩与 Electro
 | M0–M1 | 工程骨架、首次配置、主框架 5 视图 |
 | M2–M5 | 业务模块（聊天/任务/文件/群组/驾驶舱），**NetworkStub 联调** |
 | M6 | 真实 UDP/WebRTC 替换 Stub |
-| M7 | 验收、性能、发布（见 [docs/08](./docs/08_M7_RC验收清单.md)） |
+| M7 | 验收、性能、发布（见 [docs/06](./docs/06_验收与里程碑计划.md) §2） |
 
-发布前手验与联调步骤见 [docs/06](./docs/06_测试与联调手册.md)、[docs/09](./docs/09_视觉手验清单.md)。
+发布前手验与联调步骤见 [docs/05](./docs/05_测试与联调发布.md)。
 
 ## 版本
 
-当前 RC 号见 `package.json`；验收状态见 [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)。
+当前 RC 号见 `package.json`；验收状态见 [docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md) §2。
