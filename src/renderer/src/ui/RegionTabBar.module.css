@@ -1,9 +1,11 @@
+/* 横向会话 Tab — 与 BottomNav 同系：发丝底边、选中仅强调色 */
+
 .bar {
   display: flex;
   align-items: stretch;
   overflow-x: auto;
   scrollbar-width: thin;
-  border-bottom: 1px solid var(--lanpm-border);
+  border-bottom: 0.5px solid var(--lanpm-separator);
   margin-bottom: 8px;
 }
 
@@ -11,7 +13,6 @@
   flex: 1 1 0;
   min-width: 72px;
   flex-shrink: 0;
-  position: relative;
   display: flex;
 }
 
@@ -20,31 +21,14 @@
   min-width: 80px;
 }
 
-.slot:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: 0;
-  width: 0.5px;
-  background: var(--lanpm-bar-border);
-  pointer-events: none;
-  z-index: 1;
-}
-
 .wrap {
-  composes: region regionSelectedIndicator from './regionInteract.module.css';
   flex: 1;
   display: flex;
   min-width: 0;
-}
-
-.wrapSelected {
-  composes: regionSelected from './regionInteract.module.css';
+  background: transparent;
 }
 
 .wrapDisabled {
-  composes: regionDisabled from './regionInteract.module.css';
   cursor: not-allowed;
 }
 
@@ -57,25 +41,26 @@
   border: none;
   background: transparent;
   cursor: inherit;
-  padding: 8px 10px;
+  padding: 10px 12px;
   font-size: var(--lanpm-font-body);
   font-weight: 500;
-  color: var(--lanpm-text-secondary);
-  transition: color 0.15s ease;
+  color: var(--lanpm-text-tertiary);
+  transition: color 0.2s ease;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .tab:hover:not(:disabled) {
-  color: var(--lanpm-accent);
+  color: var(--lanpm-text-secondary);
 }
 
 .tabSelected {
   color: var(--lanpm-accent);
+  font-weight: 600;
 }
 
 .tab:disabled {
   cursor: not-allowed;
-  opacity: 0.32;
+  opacity: 0.4;
 }

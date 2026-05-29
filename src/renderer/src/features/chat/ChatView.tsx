@@ -41,6 +41,7 @@ import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useNewMessageScroll } from '@renderer/features/chat/useNewMessageScroll'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import RegionButton from '@renderer/ui/RegionButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
@@ -518,26 +519,24 @@ export default function ChatView(): React.ReactElement {
               {t('chat.onlineStats', { online: onlineCount, total: members.length })}
             </Text>
             {groupType === 'project' && (
-              <>
-                <Button
-                  type="link"
-                  size="small"
-                  icon={<ProjectOutlined />}
-                  className={styles.chatContextLink}
+              <div className={styles.chatContextActions}>
+                <RegionButton
+                  variant="toolbar"
+                  className={styles.chatContextAction}
                   onClick={() => navigate(groupViewPath(gid, 'board'))}
                 >
+                  <ProjectOutlined />
                   {t('chat.openBoard')}
-                </Button>
-                <Button
-                  type="link"
-                  size="small"
-                  icon={<FolderOutlined />}
-                  className={styles.chatContextLink}
+                </RegionButton>
+                <RegionButton
+                  variant="toolbar"
+                  className={styles.chatContextAction}
                   onClick={() => navigate(groupViewPath(gid, 'files'))}
                 >
+                  <FolderOutlined />
                   {t('chat.openGroupFiles')}
-                </Button>
-              </>
+                </RegionButton>
+              </div>
             )}
           </div>
         )}

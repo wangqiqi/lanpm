@@ -75,7 +75,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
 
   return (
     <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
-      <ViewHeader title={pageTitle} />
+      <ViewHeader title={pageTitle} showDivider={isChat} />
       {showFunctionGuide ? (
         <Alert
           type="info"

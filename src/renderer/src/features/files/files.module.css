@@ -9,10 +9,10 @@
 
 .transferList {
   flex-shrink: 0;
-  border: 1px solid var(--lanpm-border);
-  border-radius: 8px;
+  border: 0.5px solid var(--lanpm-separator);
+  border-radius: 10px;
   padding: 0 8px;
-  margin: 0 16px 8px;
+  margin: 0;
   background: var(--lanpm-surface-solid);
 }
 
@@ -33,17 +33,25 @@
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 36%);
-  gap: 12px;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--lanpm-surface-solid);
+  border: 0.5px solid var(--lanpm-separator);
 }
 
 .listPane,
 .previewPane {
   min-height: 0;
   overflow: auto;
-  border: 1px solid var(--lanpm-border);
-  border-radius: 8px;
-  padding: 8px;
-  background: var(--lanpm-surface-solid);
+  border: none;
+  border-radius: 0;
+  padding: 8px 10px;
+  background: transparent;
+}
+
+.listPane {
+  border-right: 0.5px solid var(--lanpm-separator);
 }
 
 .previewPane {
@@ -102,11 +110,11 @@
 }
 
 .toolbarDivider {
-  width: 1px;
+  width: 0.5px;
   height: 24px;
   flex-shrink: 0;
-  background: var(--lanpm-border);
-  margin: 0 2px;
+  background: var(--lanpm-separator);
+  margin: 0 4px;
 }
 
 .searchInput {
@@ -197,6 +205,8 @@
 
   .listPane {
     max-height: 50vh;
+    border-right: none;
+    border-bottom: 0.5px solid var(--lanpm-separator);
   }
 
   .previewPane {

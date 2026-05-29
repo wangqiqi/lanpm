@@ -30,13 +30,7 @@ export default function RegionTabBar({
       {items.map((item) => (
         <span key={item.key} className={styles.slot}>
           <span
-            className={[
-              styles.wrap,
-              item.active ? styles.wrapSelected : '',
-              item.disabled ? styles.wrapDisabled : ''
-            ]
-              .filter(Boolean)
-              .join(' ')}
+            className={[styles.wrap, item.disabled ? styles.wrapDisabled : ''].filter(Boolean).join(' ')}
           >
             <button
               type="button"

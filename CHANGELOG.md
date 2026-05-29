@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.65] - 2026-05-29
+
+### Changed
+- **Apple HIG 文档与守卫**：`docs/04` §1.1/§1.6 对齐 iOS Tab Bar（49px + safe-area）、ViewSegment 浮起、`toolbar` 文字按钮；`verify:visual` 断言更新；BottomNav 去掉冗余 `tabWrapActive`
+
+### Tag
+- `v1.0.0-rc.65` — Apple HIG 文档与视觉守卫对齐
+
 ## [1.0.0-rc.64] - 2026-05-29
 
 ### Added
@@ -12,6 +20,7 @@
 - **全局搜索**：结果标注目标视图（`search.openInView`）
 
 ### Changed
+- **Apple HIG 收敛**：BottomNav iOS Tab Bar；`ViewSegment` 分段浮起；顶栏 `toolbar` 文字按钮；`ViewHeader` 大标题；区域 hover 去描边环
 - **匿名群 BottomNav**：仅渲染聊天 Tab
 - **主视图导航**：五 Tab 仅保留 BottomNav，避免与工具栏重复分段
 - **docs/04** §2：导航 SSOT 补充

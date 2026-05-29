@@ -73,7 +73,7 @@ export default function MemberProfileModal({
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {!isSelf ? (
               <RegionButton
-                variant="pill"
+                variant="toolbar"
                 onClick={() => {
                   onMention(member.displayName)
                   onClose()
@@ -84,7 +84,7 @@ export default function MemberProfileModal({
             ) : null}
             {!isSelf && dmAllowed && onStartDm ? (
               <RegionButton
-                variant="pill"
+                variant="toolbar"
                 onClick={() => {
                   onStartDm(member)
                   onClose()

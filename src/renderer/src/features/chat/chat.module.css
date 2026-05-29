@@ -611,8 +611,21 @@
   justify-content: space-between;
   gap: 8px;
   padding: 6px 12px 8px;
-  border-bottom: 1px solid var(--lanpm-border);
+  border-bottom: 0.5px solid var(--lanpm-separator);
   background: var(--lanpm-surface-solid);
+}
+
+.chatContextActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.chatContextAction {
+  font-size: var(--lanpm-font-caption) !important;
+  padding: 4px 8px !important;
 }
 
 .chatContextMeta {
@@ -624,12 +637,6 @@
   display: flex;
   justify-content: center;
   padding: 6px 12px;
-}
-
-.chatContextLink {
-  padding-inline: 4px !important;
-  font-size: var(--lanpm-font-caption) !important;
-  height: auto !important;
 }
 
 .dayGroup {

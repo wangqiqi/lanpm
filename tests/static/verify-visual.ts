@@ -59,7 +59,11 @@ const UI_COMPONENTS = [
 
 const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
   { file: 'layout/TopBar.module.css', pattern: /height:\s*56px/, label: 'TopBar 56px' },
-  { file: 'layout/BottomNav.module.css', pattern: /height:\s*64px/, label: 'BottomNav 64px' },
+  {
+    file: 'layout/BottomNav.module.css',
+    pattern: /min-height:\s*49px/,
+    label: 'BottomNav iOS tab bar min-height 49px'
+  },
   {
     file: 'layout/MainLayout.module.css',
     pattern: /\.main\s*\{[^}]*padding:\s*16px/s,
@@ -258,19 +262,22 @@ for (const rel of ['app/AppRouter.tsx', 'views/GroupView.tsx'] as const) {
 }
 
 const bottomNavCss = readFileSync(join(renderer, 'layout/BottomNav.module.css'), 'utf8')
-assert.match(
-  bottomNavCss,
-  /composes:\s*region.*regionInteract/,
-  'BottomNav should compose regionInteract'
+assert.ok(
+  !/composes:\s*region.*regionInteract/.test(bottomNavCss),
+  'BottomNav uses dedicated iOS tab styles (not regionInteract composes)'
 )
-assert.match(bottomNavCss, /var\(--lanpm-font-caption\)/, 'BottomNav tab label should use font caption token')
+assert.match(bottomNavCss, /var\(--lanpm-font-tab\)/, 'BottomNav tab label should use --lanpm-font-tab')
 
 const regionCss = readFileSync(join(renderer, 'ui/regionInteract.module.css'), 'utf8')
 assert.match(regionCss, /--lanpm-hover-bg/, 'regionInteract hover must use --lanpm-hover-bg (V-14b-HOV static)')
 assert.match(regionCss, /--lanpm-accent-fill/, 'regionInteract selected must use accent fill tokens')
 
 const viewSegmentCss = readFileSync(join(renderer, 'ui/ViewSegment.module.css'), 'utf8')
-assert.match(viewSegmentCss, /\.wrap:hover/, 'ViewSegment wrap hover ring (V-14b-HOV)')
+assert.match(
+  viewSegmentCss,
+  /var\(--lanpm-segment-shadow\)/,
+  'ViewSegment selected segment uses --lanpm-segment-shadow'
+)
 
 const sharedUiFontToken = /var\(--lanpm-font-(caption|body|title|display)\)/
 for (const rel of [

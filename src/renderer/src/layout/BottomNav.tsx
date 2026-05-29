@@ -101,7 +101,7 @@ export default function BottomNav(): React.ReactElement {
         const active = activeView === tab.view
         const tabRegion = (
           <span
-            className={`${styles.tabWrap} ${active ? styles.tabWrapActive : ''} ${!allowed ? styles.tabWrapDisabled : ''}`}
+            className={`${styles.tabWrap} ${!allowed ? styles.tabWrapDisabled : ''}`}
             onClick={() => {
               if (!allowed) maybeShowFunctionGuide()
             }}

@@ -23,6 +23,7 @@ import {
 } from './ganttDragConfig'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
+import RegionButton from '@renderer/ui/RegionButton'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { readCssVar } from '@renderer/ui/cssVar'
