@@ -9,6 +9,7 @@ import {
   type MenuProps
 } from 'antd'
 import {
+  CompassOutlined,
   DashboardOutlined,
   GlobalOutlined,
   MoonOutlined,
@@ -28,6 +29,7 @@ import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/t
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
+import DiscoverModal from '@renderer/features/discover/DiscoverModal'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
@@ -61,6 +63,7 @@ export default function TopBar(): React.ReactElement {
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
   const [createOpen, setCreateOpen] = useState(false)
+  const [discoverOpen, setDiscoverOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const user = useIdentityStore((s) => s.user)
   const localUserId = user?.userId
@@ -235,6 +238,10 @@ export default function TopBar(): React.ReactElement {
           onChange={handleGroupChange}
           options={groupSelectOptions}
         />
+        <RegionButton variant="pill" onClick={() => setDiscoverOpen(true)}>
+          <CompassOutlined />
+          {t('topbar.discover')}
+        </RegionButton>
         <RegionButton variant="pill" onClick={() => setCreateOpen(true)}>
           <PlusOutlined />
           {t('topbar.createGroup')}
@@ -328,6 +335,7 @@ export default function TopBar(): React.ReactElement {
           </RegionButton>
         </Dropdown>
       </div>
+      <DiscoverModal open={discoverOpen} onClose={() => setDiscoverOpen(false)} />
       <CreateGroupModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}

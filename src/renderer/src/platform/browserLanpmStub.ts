@@ -634,6 +634,14 @@ export function createBrowserLanpmStub(): LanpmApi {
         createdAt: new Date().toISOString(),
         autoDiscover: input.autoDiscover ?? true
       }),
+      join: async (groupId) => ({
+        groupId,
+        type: 'project' as const,
+        name: 'LanPM 协作组',
+        createdBy: 'demo-alice',
+        createdAt: new Date().toISOString(),
+        autoDiscover: true
+      }),
       enterAnonymous: async () => undefined,
       leaveAnonymous: async () => undefined,
       onListChanged: () => () => undefined
@@ -774,6 +782,33 @@ export function createBrowserLanpmStub(): LanpmApi {
     },
     badge: {
       getGroupTabBadges: async (groupId) => stubGroupTabBadges(groupId)
+    },
+    discover: {
+      snapshot: async () => {
+        const status = readStatus()
+        const localUserId = status.configured && status.user ? status.user.userId : undefined
+        const peers = listStubMembers('demo-project')
+          .filter((m) => m.userId !== localUserId)
+          .map((m) => ({
+            userId: m.userId,
+            displayName: m.displayName,
+            deviceCount: 1,
+            online: true
+          }))
+        return {
+          peers,
+          groups: [
+            {
+              groupId: 'stub-remote-project',
+              name: 'LanPM 协作组',
+              type: 'project' as const,
+              ownerUserId: 'demo-alice',
+              ownerDisplayName: 'Alice',
+              joined: false
+            }
+          ]
+        }
+      }
     }
   }
 }

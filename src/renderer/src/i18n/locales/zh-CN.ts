@@ -50,6 +50,7 @@ const zhCN = {
     '将清除本机身份绑定并返回 Setup 页，可重新设置用户名与头像。群组与任务数据仍保留在本机数据库中。',
   'topbar.resetIdentityConfirm': '注销',
   'topbar.createGroup': '创建群组',
+  'topbar.discover': '发现',
   'topbar.localeZh': '中文',
   'topbar.localeEn': 'English',
   'search.kindTask': '任务',
@@ -409,7 +410,22 @@ const zhCN = {
   'profile.versionWithNumber': '版本：{version}',
   'profile.saved': '个人设置已保存',
   'profile.saveFailed': '保存个人设置失败',
-  'profile.suffixHint': '对外显示为「{displayName}」（后缀 {suffix} 不变）'
+  'profile.suffixHint': '对外显示为「{displayName}」（后缀 {suffix} 不变）',
+  'discover.title': '发现',
+  'discover.tabGroups': '群组',
+  'discover.tabPeople': '成员',
+  'discover.refresh': '刷新',
+  'discover.hint': '扫描局域网内可加入的群组与在线成员',
+  'discover.emptyGroups': '暂未发现可加入的群组',
+  'discover.emptyPeople': '暂未发现在线成员',
+  'discover.join': '加入',
+  'discover.open': '进入',
+  'discover.joinSuccess': '已加入「{name}」',
+  'discover.joinFailed': '加入群组失败',
+  'discover.loadFailed': '发现列表加载失败',
+  'discover.owner': '来自 {name}',
+  'discover.devices': '{count} 台设备在线',
+  'discover.chatHint': '私聊'
 } satisfies Record<MessageKey, string>
 
 export default zhCN

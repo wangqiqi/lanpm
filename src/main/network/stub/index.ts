@@ -1,7 +1,9 @@
 import type { Database } from 'better-sqlite3'
 import type { NetworkTransport } from '../../../shared/network'
 import { initChatService } from '../../chat/chatService'
+import { listDiscoverableGroupsForAdvert } from '../../group/groupService'
 import { getSetupStatus } from '../../identity/setup'
+import { setDiscoverableGroupsProvider } from '../../discover/advertProvider'
 import { NetworkStub } from './NetworkStub'
 import { resetPresenceRegistry } from '../../presence/presenceRegistry'
 
@@ -27,6 +29,7 @@ function ensureAnonymousStub(): NetworkStub {
 }
 
 export function initNetworkStub(db: Database): NetworkTransport | null {
+  setDiscoverableGroupsProvider(() => listDiscoverableGroupsForAdvert(db))
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
     ensureAnonymousStub()
@@ -40,6 +43,7 @@ export function initNetworkStub(db: Database): NetworkTransport | null {
 }
 
 export function refreshNetworkStubIdentity(db: Database): void {
+  setDiscoverableGroupsProvider(() => listDiscoverableGroupsForAdvert(db))
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) return
 

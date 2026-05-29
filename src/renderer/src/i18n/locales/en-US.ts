@@ -50,6 +50,7 @@ const enUS = {
     'Clears the local identity binding and returns to Setup. Groups and tasks remain in the local database.',
   'topbar.resetIdentityConfirm': 'Sign out',
   'topbar.createGroup': 'Create group',
+  'topbar.discover': 'Discover',
   'topbar.localeZh': '中文',
   'topbar.localeEn': 'English',
   'search.kindTask': 'Task',
@@ -410,7 +411,22 @@ const enUS = {
   'profile.versionWithNumber': 'Version: {version}',
   'profile.saved': 'Profile saved',
   'profile.saveFailed': 'Failed to save profile',
-  'profile.suffixHint': 'Shown as “{displayName}” (suffix {suffix} is kept)'
+  'profile.suffixHint': 'Shown as “{displayName}” (suffix {suffix} is kept)',
+  'discover.title': 'Discover',
+  'discover.tabGroups': 'Groups',
+  'discover.tabPeople': 'People',
+  'discover.refresh': 'Refresh',
+  'discover.hint': 'Find joinable groups and online members on the LAN',
+  'discover.emptyGroups': 'No joinable groups found',
+  'discover.emptyPeople': 'No members found',
+  'discover.join': 'Join',
+  'discover.open': 'Open',
+  'discover.joinSuccess': 'Joined “{name}”',
+  'discover.joinFailed': 'Failed to join group',
+  'discover.loadFailed': 'Failed to load discover list',
+  'discover.owner': 'From {name}',
+  'discover.devices': '{count} device(s) online',
+  'discover.chatHint': 'Chat'
 } satisfies Record<MessageKey, string>
 
 export default enUS

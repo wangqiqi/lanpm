@@ -89,6 +89,7 @@ const api: LanpmApi = {
   group: {
     list: () => ipcRenderer.invoke('group:list'),
     create: (input) => ipcRenderer.invoke('group:create', input),
+    join: (groupId) => ipcRenderer.invoke('group:join', groupId),
     enterAnonymous: (groupId) => ipcRenderer.invoke('group:enterAnonymous', groupId),
     leaveAnonymous: (groupId) => ipcRenderer.invoke('group:leaveAnonymous', groupId),
     onListChanged: (handler) => {
@@ -115,6 +116,9 @@ const api: LanpmApi = {
   },
   badge: {
     getGroupTabBadges: (groupId) => ipcRenderer.invoke('badge:getGroupTabBadges', groupId)
+  },
+  discover: {
+    snapshot: () => ipcRenderer.invoke('discover:snapshot')
   }
 }
 

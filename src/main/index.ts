@@ -10,6 +10,7 @@ import { registerFileIpc } from './ipc/file'
 import { repairFilePreviewPaths } from './storage/repositories/fileRepository'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
 import { registerSearchIpc } from './ipc/search'
+import { registerDiscoverIpc } from './ipc/discover'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
@@ -70,6 +71,7 @@ function registerAllIpcHandlers(): void {
   registerSearchIpc()
   registerNetworkIpc()
   registerBadgeIpc()
+  registerDiscoverIpc()
 }
 
 function createWindow(): BrowserWindow {

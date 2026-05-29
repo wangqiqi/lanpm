@@ -2,7 +2,9 @@ import type { Database } from 'better-sqlite3'
 import type { NetworkTransport } from '../../shared/network'
 import type { NetworkMode, NetworkStatusView } from '../../shared/network/status'
 import { initChatService } from '../chat/chatService'
+import { listDiscoverableGroupsForAdvert } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
+import { setDiscoverableGroupsProvider } from '../discover/advertProvider'
 import { RealNetworkTransport } from './real/RealNetworkTransport'
 import {
   initNetworkStub,
@@ -17,6 +19,10 @@ import { getLocalLanIp } from './localIp'
 export type { NetworkMode } from '../../shared/network/status'
 
 let realTransport: RealNetworkTransport | null = null
+
+function bindDiscoverableGroupsProvider(db: Database): void {
+  setDiscoverableGroupsProvider(() => listDiscoverableGroupsForAdvert(db))
+}
 
 export function resolveNetworkMode(): NetworkMode {
   const env = process.env.LANPM_NETWORK?.toLowerCase()
@@ -39,6 +45,7 @@ function buildReal(deviceId: string, userId: string, displayName: string): RealN
 }
 
 export function initNetwork(db: Database): NetworkTransport | null {
+  bindDiscoverableGroupsProvider(db)
   const mode = resolveNetworkMode()
   if (mode === 'stub') return initNetworkStub(db)
 
@@ -54,6 +61,7 @@ export function initNetwork(db: Database): NetworkTransport | null {
 }
 
 export function refreshNetworkIdentity(db: Database): void {
+  bindDiscoverableGroupsProvider(db)
   const mode = resolveNetworkMode()
   if (mode === 'stub') {
     refreshNetworkStubIdentity(db)

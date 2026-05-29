@@ -1,7 +1,10 @@
 import dgram from 'node:dgram'
+import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
 import type { DiscoveryPayload } from '../../../shared/network/types'
 import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR } from '../../../shared/network/constants.ts'
 import { getLocalLanIp, resolvePeerHost } from '../localIp'
+import { rememberPeerGroups } from '../../discover/discoverGroupRegistry'
+import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider'
 
 export interface UdpDiscoveryOptions {
   deviceId: string
@@ -95,7 +98,8 @@ export class UdpDiscovery {
       displayName: this.opts.displayName,
       listenPort: this.opts.listenPort,
       capabilities: this.opts.capabilities ?? ['chat', 'file', 'task'],
-      host
+      host,
+      groups: getDiscoverableGroupsForAdvert()
     }
   }
 
@@ -115,6 +119,7 @@ export class UdpDiscovery {
 
   private remember(peer: DiscoveryPayload): void {
     this.peers.set(peer.deviceId, { peer, updatedAt: Date.now() })
+    rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
     this.opts.onPeer(peer)
   }
 

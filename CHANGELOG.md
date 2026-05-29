@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.45] - 2026-05-29
+
+### Added
+- **顶栏「发现」**：`DiscoverModal` — 群组 Tab（局域网 `autoDiscover` 加入）+ 成员 Tab（点击私聊）
+- **`discover:snapshot`** / **`group:join`** IPC；UDP/stub 发现包携带 `groups[]`
+- **`verify:discover`**；`verify:release-gate` 与 `verify:m1` 串联
+
+### Changed
+- **`docs/01`–`05`/`08`/`README`**：RC 号、顶栏发现、DiscoveryPayload、双机手验步骤
+- **`todo.md`**：`UX-DISCOVER` 完成；DOC-ACC-03 含发现联调
+
+### Tag
+- `v1.0.0-rc.45` — 局域网发现面板（群组 + 成员私聊）
+
 ## [1.0.0-rc.44] - 2026-05-29
 
 ### Added

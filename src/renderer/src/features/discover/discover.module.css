@@ -1,0 +1,61 @@
+.modal :global(.ant-modal-body) {
+  padding-top: 12px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.list {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.row {
+  border-radius: 8px;
+  padding-inline: 8px !important;
+  transition: background-color 0.15s ease;
+}
+
+.rowClickable {
+  cursor: pointer;
+}
+
+.rowClickable:hover {
+  background: var(--lanpm-accent-fill);
+}
+
+.rowTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.typeTag {
+  font-weight: 400;
+  margin-inline-end: 0 !important;
+}
+
+.onlineDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lanpm-success);
+  flex-shrink: 0;
+}
+
+.peerAvatar {
+  background: var(--lanpm-accent);
+  color: var(--lanpm-on-accent);
+}
+
+.dmHint {
+  font-size: var(--lanpm-font-caption);
+  white-space: nowrap;
+}

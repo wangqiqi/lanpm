@@ -21,6 +21,8 @@ import {
 import { MessageDedup } from './dedup.ts'
 import { LamportClock } from './lamport.ts'
 import { join } from 'path'
+import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider'
+import { rememberPeerGroups } from '../../discover/discoverGroupRegistry'
 import { readPeerRecords, refreshLanUserIds } from './peerRegistry.ts'
 import {
   touchDiscoveryPeer,
@@ -118,12 +120,14 @@ export class NetworkStub implements NetworkTransport {
       userId: this.userId,
       displayName: this.displayName,
       listenPort: STUB_LISTEN_PORT,
-      capabilities: this.capabilities
+      capabilities: this.capabilities,
+      groups: getDiscoverableGroupsForAdvert()
     }
     writeFileSync(this.peerFilePath, JSON.stringify(payload), 'utf8')
     const peers = readPeerRecords(this.deviceId)
     for (const peer of peers) {
       touchDiscoveryPeer(peer)
+      rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
     }
     refreshLanUserIds(peers)
   }

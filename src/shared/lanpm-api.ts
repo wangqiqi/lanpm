@@ -1,3 +1,4 @@
+import type { DiscoverSnapshot } from './discover/types'
 import type { ChatMessage } from './chat/types'
 import type { GroupMemberView } from './chat/members'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from './identity'
@@ -91,6 +92,7 @@ export interface LanpmApi {
   group: {
     list: () => Promise<GroupRecord[]>
     create: (input: CreateGroupInput) => Promise<GroupRecord>
+    join: (groupId: string) => Promise<GroupRecord>
     enterAnonymous: (groupId: string) => Promise<void>
     leaveAnonymous: (groupId: string) => Promise<void>
     onListChanged: (handler: () => void) => () => void
@@ -110,5 +112,8 @@ export interface LanpmApi {
   }
   badge: {
     getGroupTabBadges: (groupId: string) => Promise<import('./badge/types').GroupTabBadges>
+  }
+  discover: {
+    snapshot: () => Promise<DiscoverSnapshot>
   }
 }

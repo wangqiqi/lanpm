@@ -4,6 +4,7 @@ import { BrowserWindow } from 'electron'
 import type { CreateGroupInput, GroupRecord } from '../../shared/group/types'
 import type { GroupType } from '../../shared/navigation/types'
 import { GROUP_PUSH_CHANNEL } from '../../shared/group/channels'
+import { getCachedGroup } from '../discover/discoverGroupRegistry'
 import { getSetupStatus } from '../identity/setup'
 import {
   countAnonymousAliases,
@@ -86,6 +87,46 @@ function joinGroupMember(db: Database, groupId: string, userId: string, anonymou
 export function listUserGroups(db: Database): GroupRecord[] {
   ensureSeedGroups(db)
   return listGroups(db)
+}
+
+export function listDiscoverableGroupsForAdvert(db: Database): {
+  groupId: string
+  name: string
+  type: GroupType
+}[] {
+  ensureSeedGroups(db)
+  return listGroups(db)
+    .filter((g) => g.autoDiscover)
+    .map((g) => ({ groupId: g.groupId, name: g.name, type: g.type }))
+}
+
+export function joinDiscoverableGroup(db: Database, groupId: string): GroupRecord {
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user) {
+    throw new Error('请先完成身份配置')
+  }
+
+  let group = getGroupById(db, groupId)
+  if (!group) {
+    const cached = getCachedGroup(groupId)
+    if (!cached) {
+      throw new Error('未在局域网发现该群组，请刷新后重试')
+    }
+    const now = new Date().toISOString()
+    group = {
+      groupId: cached.advert.groupId,
+      type: cached.advert.type,
+      name: cached.advert.name,
+      createdBy: cached.ownerUserId,
+      createdAt: now,
+      autoDiscover: true
+    }
+    insertGroup(db, group)
+  }
+
+  joinGroupMember(db, groupId, status.user.userId, group.type === 'anonymous')
+  broadcastGroupsChanged()
+  return group
 }
 
 export function createUserGroup(db: Database, input: CreateGroupInput): GroupRecord {

@@ -13,6 +13,7 @@ import {
   createUserGroup,
   enterAnonymousGroup,
   getGroupById,
+  joinDiscoverableGroup,
   leaveAnonymousGroup,
   listUserGroups
 } from '../group/groupService'
@@ -32,6 +33,11 @@ export function registerGroupIpc(): void {
       throw new Error('invalid create group input')
     }
     return createUserGroup(getDatabase(), input)
+  })
+
+  ipcMain.handle(GROUP_IPC.join, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return joinDiscoverableGroup(getDatabase(), groupId)
   })
 
   ipcMain.handle(GROUP_IPC.leaveAnonymous, (_event, groupId: string) => {

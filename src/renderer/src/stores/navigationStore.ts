@@ -25,6 +25,7 @@ interface NavigationState {
   rememberNonCockpitPath: (path: string) => void
   loadGroups: () => Promise<boolean>
   createGroup: (input: CreateGroupInput) => Promise<NavGroup>
+  joinGroup: (groupId: string) => Promise<NavGroup>
   getActiveGroup: () => NavGroup | undefined
   getGroupType: (groupId: string) => GroupType
   getGroupLabel: (groupId: string) => string
@@ -71,6 +72,19 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
     const record = await getLanpmApi().group.create(input)
     const nav = toNavGroup(record)
     set((s) => ({ groups: [...s.groups, nav], activeGroupId: nav.groupId }))
+    return nav
+  },
+
+  joinGroup: async (groupId) => {
+    const record = await getLanpmApi().group.join(groupId)
+    const nav = toNavGroup(record)
+    set((s) => {
+      const exists = s.groups.some((g) => g.groupId === nav.groupId)
+      return {
+        groups: exists ? s.groups : [...s.groups, nav],
+        activeGroupId: nav.groupId
+      }
+    })
     return nav
   },
 

@@ -41,6 +41,7 @@
 | **UX-FILES-TOOLBAR** | P2 | 文件页上传 vs 书签工具栏分层 | [x] |
 | **UX-BRAND** | P2 | regionInteract hover 环 + Setup/看板 accent 锚点 | [x] |
 | **UX-RESET** | — | 顶栏用户菜单「注销身份」回 Setup | [x] |
+| **UX-DISCOVER** | — | 顶栏「发现」：群组加入 + 成员私聊 | [x] |
 
 审图归档：[archive/review/20260529_173500_V14b设计还原度审图_rc37.md](archive/review/20260529_173500_V14b设计还原度审图_rc37.md)
 
@@ -65,7 +66,7 @@ npm run verify:release-gate
 | ID | 任务 | 状态 |
 |----|------|------|
 | DOC-ACC-02 | 三平台真机 UI 抽检 | [ ] |
-| DOC-ACC-03 | 双机局域网真网联调 | [ ] |
+| DOC-ACC-03 | 双机局域网真网联调（含 **发现 → 加群 / 私聊**） | [ ] |
 | — | 性能手测（冷启动/内存/Tab P95）填 `docs/06` §2.4 | [ ] |
 | DOC-ACC-04 | I18N 英文 UI 长文案折行 | [ ] |
 | — | 发布 **1.0.0** | [ ] |

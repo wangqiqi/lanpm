@@ -24,6 +24,7 @@ const steps = [
   'npm run verify:docs-code -- --strict',
   'npm run verify:visual',
   'npm run verify:profile-panel',
+  'npm run verify:discover',
   'npm run verify:project',
   'npm run verify:m7',
   screenshotCmd

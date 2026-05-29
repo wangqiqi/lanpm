@@ -1,3 +1,5 @@
+import type { DiscoverableGroupAdvert } from '../discover/types'
+
 /** Sync message kinds — aligned with docs/04 §2 */
 export type SyncMessageType =
   | 'discovery'
@@ -39,6 +41,8 @@ export interface DiscoveryPayload {
   capabilities: string[]
   /** UDP 发现来源 IP（M6 真网 P2P 建链） */
   host?: string
+  /** 本机可局域网发现的群组（autoDiscover） */
+  groups?: DiscoverableGroupAdvert[]
 }
 
 export type UserPresence = 'online' | 'away' | 'offline'
