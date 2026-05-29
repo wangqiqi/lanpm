@@ -30,45 +30,20 @@
 }
 
 .tabWrap {
+  composes: region regionSelectedIndicator from '../ui/regionInteract.module.css';
   flex: 1;
   display: flex;
   min-width: 0;
   position: relative;
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.tabWrap:hover:not(.tabWrapDisabled) {
-  background: var(--lanpm-hover-bg);
-}
-
-.tabWrap:active:not(.tabWrapDisabled) {
-  background: var(--lanpm-accent-fill-strong);
 }
 
 .tabWrapActive {
-  background: var(--lanpm-accent-fill);
-}
-
-.tabWrapActive::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 16%;
-  right: 16%;
-  height: 2px;
-  background: var(--lanpm-accent);
-  border-radius: 0 0 2px 2px;
-  pointer-events: none;
-}
-
-.tabWrapActive:hover:not(.tabWrapDisabled) {
-  background: var(--lanpm-accent-fill-strong);
+  composes: regionSelected from '../ui/regionInteract.module.css';
 }
 
 .tabWrapDisabled {
+  composes: regionDisabled from '../ui/regionInteract.module.css';
   cursor: not-allowed;
 }
 

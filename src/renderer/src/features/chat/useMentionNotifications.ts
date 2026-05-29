@@ -2,19 +2,23 @@ import { useEffect, useRef } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useI18n } from '@renderer/i18n/useI18n'
 
 const notifiedIds = new Set<string>()
 
-function previewBody(message: ChatMessage): string {
-  if (message.content.kind === 'text') return message.content.text
-  if (message.content.kind === 'code') return `[代码 · ${message.content.language}]`
-  return '[新消息]'
-}
-
 /** 浏览器预览：@提及 时 Web Notification；Electron 由主进程处理 */
 export function useMentionNotifications(groupId: string): void {
+  const { t } = useI18n()
   const userId = useIdentityStore((s) => s.user?.userId)
   const apiRef = useRef(getLanpmApi())
+
+  const previewBody = (message: ChatMessage): string => {
+    if (message.content.kind === 'text') return message.content.text
+    if (message.content.kind === 'code') {
+      return t('chat.notificationCodePreview', { language: message.content.language })
+    }
+    return t('chat.notificationNewMessage')
+  }
 
   useEffect(() => {
     if (apiRef.current.platform !== 'browser') return
@@ -29,9 +33,12 @@ export function useMentionNotifications(groupId: string): void {
 
       if (typeof Notification === 'undefined') return
       const show = (): void => {
-        new Notification(`${message.senderUserId} 提到了你`, {
-          body: previewBody(message).slice(0, 200)
-        })
+        new Notification(
+          t('chat.notificationMentionTitle', { sender: message.senderUserId }),
+          {
+            body: previewBody(message).slice(0, 200)
+          }
+        )
       }
       if (Notification.permission === 'granted') {
         show()
@@ -43,5 +50,5 @@ export function useMentionNotifications(groupId: string): void {
     })
 
     return unsub
-  }, [groupId, userId])
+  }, [groupId, userId, t])
 }

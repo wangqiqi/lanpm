@@ -6,7 +6,6 @@ import {
   List,
   Modal,
   Progress,
-  Segmented,
   Space,
   Table,
   Typography
@@ -18,6 +17,7 @@ import type { FileCategory, FileMeta } from '@shared/file/types'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
+import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
@@ -218,10 +218,13 @@ export default function FilesView(): React.ReactElement {
     <div className={styles.root}>
       <ViewToolbar
         start={
-          <Segmented
-            options={categories}
+          <ViewSegment
             value={category}
+            options={categories}
             onChange={(v) => setCategory(v as FileCategory | 'all')}
+            scrollable
+            equalWidth={false}
+            ariaLabel={t('files.categoryFilter')}
           />
         }
         end={

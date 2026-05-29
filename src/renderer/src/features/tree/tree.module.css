@@ -48,7 +48,7 @@
 @keyframes lanpmHighlightPulse {
   0%,
   15% {
-    box-shadow: 0 0 0 3px var(--lanpm-accent-ring, rgba(22, 119, 255, 0.45));
+    box-shadow: 0 0 0 3px var(--lanpm-accent-ring);
   }
   100% {
     box-shadow: 0 0 0 0 transparent;

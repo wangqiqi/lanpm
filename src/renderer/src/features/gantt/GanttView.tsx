@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Input, Modal, Radio, Select, Space, Tag, Typography } from 'antd'
+import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
@@ -13,6 +13,7 @@ import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { exportElementToPdf, exportElementToPng } from './ganttExport'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { readCssVar } from '@renderer/ui/cssVar'
 import { useUiStore } from '@renderer/stores/uiStore'
@@ -175,8 +176,8 @@ export default function GanttView(): React.ReactElement {
         await exportElementToPdf(el, `${base}.pdf`)
       }
       message.success(format === 'png' ? t('gantt.exportPngDone') : t('gantt.exportPdfDone'))
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : t('gantt.exportFailed'))
+    } catch {
+      message.error(t('gantt.exportFailed'))
     } finally {
       setExporting(false)
     }
@@ -186,11 +187,11 @@ export default function GanttView(): React.ReactElement {
     <div className={styles.root}>
       <ViewToolbar
         start={
-          <Radio.Group
-            optionType="button"
+          <ViewSegment
             value={viewMode}
-            options={viewOptions.map((o) => ({ label: o.label, value: o.value }))}
-            onChange={(e) => setViewMode(e.target.value as ViewMode)}
+            options={viewOptions}
+            onChange={(v) => setViewMode(v as ViewMode)}
+            ariaLabel={t('gantt.viewModeAria')}
           />
         }
         end={

@@ -2,10 +2,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
-  Button,
   Dropdown,
   Select,
-  Space,
   Tooltip,
   Typography,
   type MenuProps
@@ -35,6 +33,7 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
 import { useNetworkStore } from '@renderer/stores/networkStore'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
+import RegionButton from '@renderer/ui/RegionButton'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
 
@@ -185,8 +184,8 @@ export default function TopBar(): React.ReactElement {
 
   return (
     <header className={styles.bar}>
-      <Space size="middle" align="center">
-        <button type="button" className={styles.logo} onClick={handleLogoClick}>
+      <div className={styles.barSection}>
+        <RegionButton variant="text" className={styles.logo} onClick={handleLogoClick}>
           <img
             src={logoUrl}
             alt={t('topbar.logoAlt')}
@@ -195,29 +194,27 @@ export default function TopBar(): React.ReactElement {
             height={24}
           />
           <span>{t('topbar.logo')}</span>
-        </button>
+        </RegionButton>
         <Select
           className={styles.projectSelect}
           value={activeGroupId}
           onChange={handleGroupChange}
           options={groupSelectOptions}
         />
-        <Button type="text" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+        <RegionButton variant="pill" onClick={() => setCreateOpen(true)}>
+          <PlusOutlined />
           {t('topbar.createGroup')}
-        </Button>
-        <Button
-          type="text"
-          icon={<DashboardOutlined />}
-          onClick={() => navigate(cockpitPath())}
-        >
+        </RegionButton>
+        <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
+          <DashboardOutlined />
           {t('topbar.cockpit')}
-        </Button>
-      </Space>
+        </RegionButton>
+      </div>
 
-      <Space size="middle" align="center">
+      <div className={styles.barSection}>
         <Tooltip title={networkTooltip}>
-          <button
-            type="button"
+          <RegionButton
+            variant="icon"
             className={styles.netBtn}
             aria-label={networkTooltip}
             disabled={networkLoading}
@@ -229,15 +226,16 @@ export default function TopBar(): React.ReactElement {
             <span
               className={`${styles.netDot} ${styles[`net_${networkStatus?.linkState ?? 'offline'}`]}`}
             />
-          </button>
+          </RegionButton>
         </Tooltip>
         <GlobalSearch />
-        <Button
-          type="text"
+        <RegionButton
+          variant="icon"
           aria-label={t('topbar.toggleTheme')}
-          icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
           onClick={toggleTheme}
-        />
+        >
+          {theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+        </RegionButton>
         <Select
           className={styles.localeSelect}
           value={locale}
@@ -249,16 +247,12 @@ export default function TopBar(): React.ReactElement {
           suffixIcon={<GlobalOutlined />}
         />
         <Dropdown menu={{ items: userMenu }} trigger={['click']}>
-          <button
-            type="button"
-            className={styles.userBtn}
-            aria-label={t('topbar.userMenu')}
-          >
+          <RegionButton variant="user" aria-label={t('topbar.userMenu')}>
             <Avatar size="small" icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
             <span className={styles.userName}>{user?.displayName ?? t('topbar.userFallback')}</span>
-          </button>
+          </RegionButton>
         </Dropdown>
-      </Space>
+      </div>
       <CreateGroupModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}

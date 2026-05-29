@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.14` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.15` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -170,7 +170,7 @@
 - [ ] **PRD-F-03** 书签内嵌 WebView，不离开应用（`01` §10.3）
 - [ ] **PRD-F-04** 视频内嵌播放 mp4/webm（`01` §10.2）
 - [x] **PRD-F-05** 全局搜索跳转高亮（`highlightTaskId` / `highlightMsgId` 各视图消费）— 同 **UX-X-01** / **UX-F-01**
-- [ ] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）
+- [ ] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）— RC 部分：**截止日期** `endDate` 已展示（`KanbanCard`）；标签/垃圾桶待做
 - [ ] **PRD-F-07** 离线 7 天内消息补同步 — 与 **ARCH-07**
 - [x] **PRD-F-08** 顶栏个人信息配置面板（`TopBar` profile 非 disabled）（`01` §5.2）— 与 **UX-F-06**（RC：只读资料弹窗）
 - [ ] **PRD-F-09** 驾驶舱部门完成率视图（`01` §12.1）
@@ -233,7 +233,7 @@
 - [x] **UX-I-05** 书签 URL placeholder i18n（`FilesView`）
 - [x] **UX-I-06** 切换 locale 时更新 `document.documentElement.lang`（`index.html` 默认 zh-CN）
 - [ ] **UX-I-07** `browserLanpmStub.ts` 错误文案 i18n（开发桩）— 可并入 **I18N-06**
-- [ ] **UX-I-08** 收尾硬编码：FilesView / GanttView / TaskTreeView / CockpitView / KanbanCard 等（评估 §5）
+- [x] **UX-I-08** 收尾硬编码：浏览器 @ 提及通知 + 甘特导出错误 toast（`useMentionNotifications`、`GanttView`）；其余视图主体已 i18n
 
 ---
 
@@ -264,7 +264,7 @@
 - [x] **UX-V-07** 驾驶舱失败 vs 真实 0 — 与 **UX-F-03**
 - [x] **UX-V-08**（文档）Hash 路由 `#/g/...` 深链说明 — `docs/05` §2
 - [ ] **UX-R-01**（可选）小窗口 `@media` 断点设计
-- [ ] **UX-R-02** TopBar 窄窗 flex-wrap / 折叠菜单
+- [x] **UX-R-02** TopBar 窄窗 flex-wrap / 折叠菜单（`TopBar.module.css` `@media max-width: 1100px`）
 - [ ] **UX-R-03** 聊天侧栏窄窗宽度策略（当前固定 240px）
 - [ ] **UX-R-04** 看板窄屏单列/stack 模式
 - [ ] **UX-R-05** 文件预览区窄屏单栏模式
@@ -285,19 +285,20 @@
 
 - [x] **UX-INT-01** BottomNav 五 Tab **均分槽位** + 区域 hover / active / 选中顶条 + 槽位分隔线（`BottomNav.tsx` / `BottomNav.module.css`）
 - [x] **UX-INT-02** **DM 会话条** Tab 化：`DmSessionBar` 由内容宽度 pill 改为横向 Tab 栏（`min-width`、溢出横向滚动）；hover / active / 选中态与 BottomNav 对齐（`RegionTabBar` + `chat.module.css`）
-- [ ] **UX-INT-03** **成员列表行**：`memberBtn` 整行 hover / active 背景（统一 token，非 `--lanpm-bubble-bg`）；`dmBtn` 补 `:active`；可选 @ 提及对象行高亮（`MemberList.tsx` / `chat.module.css`）
+- [x] **UX-INT-03** **成员列表行**：整行 hover/active token；`dmBtn` `:active`（`chat.module.css`）
 
 ### P1 — 全局壳层与视图内切换
 
-- [ ] **UX-INT-04** **TopBar 图标按钮区**：Logo / 网络点 / 主题 / 用户等统一圆角区域 hover + active；创建群 / 驾驶舱等 `Button type="text"` 与自定义按钮视觉对齐（`TopBar.module.css` / `TopBar.tsx`）
-- [ ] **UX-INT-05** **文件分类 Segmented**：等宽 Tab 或增强 `ThemeProvider` 中 Segmented token，补 hover / 按下态（`FilesView.tsx` / `ThemeProvider.tsx`）
-- [ ] **UX-INT-06** **甘特日/周/月切换**：`Radio.Group` 与文件页 Segmented 共用一套切换控件（`GanttView.tsx`；实现 **UX-INT-07** 时优先复用 `ui/ViewSegment`）
+- [x] **UX-INT-04** **TopBar 图标按钮区**：`RegionButton` 统一 hover + active（`TopBar.tsx`）
+- [x] **UX-INT-05** **文件分类**：`ViewSegment` 替代 Segmented（`FilesView.tsx`）
+- [x] **UX-INT-06** **甘特日/周/月**：`ViewSegment` 与文件页共用（`GanttView.tsx`）
 
 ### P2 — 工程化与文档
 
-- [ ] **UX-INT-07**（可选）抽取 **`ui/RegionTabBar`** + **`ui/RegionButton`**，供 BottomNav / DM 条 / 文件·甘特切换复用
-- [ ] **UX-INT-08** **`docs/05`** 补充「导航 Tab / 列表行 / 顶栏按钮」交互区域约定（hover / active / selected / disabled）
-- [ ] **UX-INT-09** **亮/暗手验**：DM 条、成员列表、TopBar 按钮、文件/甘特切换 — 并入 [docs/09](./docs/09_视觉手验清单.md) 或随 **V-14b**
+- [x] **UX-INT-07**（可选）`ui/RegionTabBar` + `RegionButton` + `ViewSegment` + `regionInteract.module.css`
+- [x] **UX-INT-08** **`docs/05`** §1.3 交互区域约定
+- [x] **UX-INT-09** 检查点并入 [docs/09](./docs/09_视觉手验清单.md)（人工 ☐ 随 **V-14b**）
+- [x] **UX-INT-10** `BottomNav` 复用 `regionInteract.module.css`（`composes` 与共享 token 对齐）
 
 ### 暂不必大改（审查结论，仅记录）
 

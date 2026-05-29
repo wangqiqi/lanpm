@@ -18,7 +18,7 @@ export async function exportElementToPng(element: HTMLElement, filename: string)
     logging: false
   })
   const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG 导出失败'))), 'image/png')
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('GANTT_EXPORT_PNG_FAILED'))), 'image/png')
   })
   downloadBlob(blob, filename)
 }

@@ -120,6 +120,9 @@ export default function KanbanCard({
         {task.assigneeUserId && (
           <span>@{assigneeName ?? task.assigneeUserId}</span>
         )}
+        {task.endDate && (
+          <span className={styles.cardDue}>{t('board.dueDate', { date: task.endDate })}</span>
+        )}
         <span>{task.progressPercent}%</span>
       </div>
       {onDiscuss && (

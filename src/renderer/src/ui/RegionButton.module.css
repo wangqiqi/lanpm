@@ -44,10 +44,3 @@
   font-weight: 500;
   color: var(--lanpm-text);
 }
-
-.userName {
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}

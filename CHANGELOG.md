@@ -2,6 +2,27 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.15] - 2026-05-29
+
+### Added
+- **看板卡片截止日期**（**PRD-F-06** 部分）：`KanbanCard` 展示 `endDate`（`board.dueDate` i18n）
+- **i18n**：`chat.notification*`（浏览器 @ 提及通知）、`files.categoryFilter`、`gantt.viewModeAria`
+
+### Changed
+- **TopBar**（**UX-INT-04** / **UX-R-02**）：`RegionButton` 替换 Ant `Button type="text"`；`≤1100px` 双行 `flex-wrap`（`barSection`）
+- **文件 / 甘特工具栏**（**UX-INT-05/06**）：`ViewSegment` 替代 `Segmented` / `Radio.Group`，统一区域 hover/active/选中
+- **成员列表**（**UX-INT-03**）：整行 hover/active token；`dmBtn` 按下态
+- **BottomNav**（**UX-INT-10**）：`tabWrap` 通过 `composes` 复用 `regionInteract.module.css`
+- **`verify:visual`**：守卫 `RegionButton` / `RegionTabBar` / `ViewSegment` 与 BottomNav composes；高亮动画移除 Ant 蓝 `#1677ff` 回退色
+- **`docs/05`** §1.3 交互区域约定；**`docs/09`** 补充 DM/成员/ViewSegment/顶栏手验检查点
+- **`todo.md`**：勾选 **UX-INT-03~10**、**UX-R-02**、**UX-I-08**；**PRD-F-06** 标注部分完成
+
+### Fixed
+- **甘特导出失败**：toast 统一 `gantt.exportFailed`，不再暴露内部英文错误串
+
+### Tag
+- `v1.0.0-rc.15` — 交互区域 UX-INT 收尾、TopBar 窄屏与看板截止日期
+
 ## [1.0.0-rc.14] - 2026-05-29
 
 ### Added

@@ -31,7 +31,11 @@ const UI_COMPONENTS = [
   'ui/ViewHeader.tsx',
   'ui/ViewToolbar.tsx',
   'ui/ViewState.tsx',
-  'ui/cssVar.ts'
+  'ui/cssVar.ts',
+  'ui/regionInteract.module.css',
+  'ui/RegionButton.tsx',
+  'ui/RegionTabBar.tsx',
+  'ui/ViewSegment.tsx'
 ] as const
 
 const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
@@ -154,6 +158,23 @@ assert.ok(
   readFileSync(join(renderer, 'features/gantt/GanttView.tsx'), 'utf8').includes('readCssVar'),
   'GanttView should read accent fill for todayColor'
 )
+
+const bottomNavCss = readFileSync(join(renderer, 'layout/BottomNav.module.css'), 'utf8')
+assert.match(
+  bottomNavCss,
+  /composes:\s*region.*regionInteract/,
+  'BottomNav should compose regionInteract'
+)
+
+for (const [rel, token] of [
+  ['features/files/FilesView.tsx', 'ViewSegment'],
+  ['features/gantt/GanttView.tsx', 'ViewSegment'],
+  ['features/chat/DmSessionBar.tsx', 'RegionTabBar'],
+  ['layout/TopBar.tsx', 'RegionButton']
+] as const) {
+  const src = readFileSync(join(renderer, rel), 'utf8')
+  assert.match(src, new RegExp(token), `${rel} should use ${token}`)
+}
 
 console.log(
   'verify:visual OK',
