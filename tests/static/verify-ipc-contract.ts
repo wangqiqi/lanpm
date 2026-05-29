@@ -18,6 +18,7 @@ import { BADGE_IPC } from '../../src/shared/badge/types.ts'
 const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
   complete: 'identity:completeSetup',
+  updateProfile: 'identity:updateProfile',
   getSuggestedDeviceNameSync: 'identity:getSuggestedDeviceNameSync'
 } as const
 

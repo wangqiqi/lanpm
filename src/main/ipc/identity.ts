@@ -1,5 +1,12 @@
 import { ipcMain } from 'electron'
-import { completeSetup, getSetupStatus, getSuggestedDeviceName, type SetupInput } from '../identity/setup'
+import {
+  completeSetup,
+  getSetupStatus,
+  getSuggestedDeviceName,
+  updateProfile,
+  type ProfileUpdateInput,
+  type SetupInput
+} from '../identity/setup'
 import { ensureSeedGroups } from '../group/groupService'
 import { refreshNetworkIdentity } from '../network'
 import { getDatabase } from '../storage'
@@ -7,6 +14,7 @@ import { getDatabase } from '../storage'
 export const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
   complete: 'identity:completeSetup',
+  updateProfile: 'identity:updateProfile',
   getSuggestedDeviceNameSync: 'identity:getSuggestedDeviceNameSync'
 } as const
 
@@ -23,6 +31,13 @@ export function registerIdentityIpc(): void {
     const db = getDatabase()
     const status = completeSetup(db, input)
     ensureSeedGroups(db)
+    refreshNetworkIdentity(db)
+    return status
+  })
+
+  ipcMain.handle(IDENTITY_CHANNELS.updateProfile, (_event, input: ProfileUpdateInput) => {
+    const db = getDatabase()
+    const status = updateProfile(db, input)
     refreshNetworkIdentity(db)
     return status
   })

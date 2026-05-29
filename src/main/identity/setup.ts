@@ -1,7 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import { hostname } from 'node:os'
 import { resolveDeviceName } from '../../shared/identity/deviceName'
-import type { SetupInput, SetupStatus } from '../../shared/identity'
+import type { ProfileUpdateInput, SetupInput, SetupStatus } from '../../shared/identity'
 import {
   getDeviceById,
   getUserById,
@@ -15,7 +15,22 @@ import { allocateUserIdWithLanCheck } from './suffixValidation'
 
 export const LOCAL_DEVICE_ID_KEY = 'local_device_id'
 
-export type { SetupInput, SetupStatus }
+export type { ProfileUpdateInput, SetupInput, SetupStatus }
+
+function profileToSetupUser(profile: UserProfile): SetupStatus['user'] {
+  return {
+    userId: profile.userId,
+    displayName: profile.displayName,
+    baseName: profile.baseName,
+    suffix: profile.suffix,
+    department: profile.department,
+    avatarUrl: profile.avatarUrl
+  }
+}
+
+function buildDisplayName(baseName: string, suffix?: string): string {
+  return suffix ? `${baseName}${suffix}` : baseName
+}
 
 export function getSuggestedDeviceName(): string {
   return resolveDeviceName(hostname())
@@ -41,7 +56,7 @@ export function getSetupStatus(db: Database): SetupStatus {
     return { configured: false, suggestedDeviceName: getSuggestedDeviceName() }
   }
 
-  return { configured: true, user, device }
+  return { configured: true, user: profileToSetupUser(user), device }
 }
 
 export function completeSetup(db: Database, input: SetupInput): SetupStatus {
@@ -77,5 +92,35 @@ export function completeSetup(db: Database, input: SetupInput): SetupStatus {
   upsertDevice(db, device)
   setMeta(db, LOCAL_DEVICE_ID_KEY, deviceId)
 
-  return { configured: true, user: profile, device }
+  return { configured: true, user: profileToSetupUser(profile), device }
+}
+
+export function updateProfile(db: Database, input: ProfileUpdateInput): SetupStatus {
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user || !status.device) {
+    throw new Error('请先完成身份配置')
+  }
+
+  const baseName = input.baseName.trim()
+  if (baseName.length < 2 || baseName.length > 20) {
+    throw new Error('用户名须为 2–20 个字符')
+  }
+
+  const existing = getUserById(db, status.user.userId)
+  if (!existing) {
+    throw new Error('用户资料不存在')
+  }
+
+  const now = new Date().toISOString()
+  const profile: UserProfile = {
+    ...existing,
+    baseName,
+    displayName: buildDisplayName(baseName, existing.suffix),
+    department: input.department?.trim() || undefined,
+    avatarUrl: input.avatarUrl !== undefined ? input.avatarUrl : existing.avatarUrl,
+    updatedAt: now
+  }
+
+  upsertUser(db, profile)
+  return { configured: true, user: profileToSetupUser(profile), device: status.device }
 }

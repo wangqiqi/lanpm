@@ -5,7 +5,7 @@ import { detectLanguage } from '@shared/chat/detectLanguage'
 import { isDmGroupId, parseDmGroupId } from '@shared/chat/dmSession'
 import type { UserPresence } from '@shared/network/types'
 import { parseHostPort } from '@shared/network/manualPeer'
-import type { SetupInput, SetupStatus } from '@shared/identity'
+import type { ProfileUpdateInput, SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
 
 const BROWSER_PREVIEW_DEVICE = '开发预览'
@@ -356,6 +356,28 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         writeStatus(status)
         return status
+      },
+      updateProfile: async (input: ProfileUpdateInput) => {
+        const status = readStatus()
+        if (!status.configured || !status.user || !status.device) {
+          throw stubError('stub.identityRequired')
+        }
+        const baseName = input.baseName.trim()
+        const suffix = status.user.suffix
+        const displayName = suffix ? `${baseName}${suffix}` : baseName
+        const next: SetupStatus = {
+          configured: true,
+          user: {
+            ...status.user,
+            baseName,
+            displayName,
+            department: input.department?.trim() || undefined,
+            avatarUrl: input.avatarUrl ?? status.user.avatarUrl
+          },
+          device: status.device
+        }
+        writeStatus(next)
+        return next
       }
     },
     chat: {

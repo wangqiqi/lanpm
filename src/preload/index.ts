@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { ChatMessage } from '../shared/chat/types'
-import type { SetupInput } from '../shared/identity'
+import type { ProfileUpdateInput, SetupInput } from '../shared/identity'
 import type { LanpmApi } from '../shared/lanpm-api'
 import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { TASK_PUSH_CHANNEL } from '../shared/task/channels'
@@ -18,7 +18,9 @@ const api: LanpmApi = {
     ipcRenderer.sendSync('identity:getSuggestedDeviceNameSync') as string,
   identity: {
     getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),
-    completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input)
+    completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input),
+    updateProfile: (input: ProfileUpdateInput) =>
+      ipcRenderer.invoke('identity:updateProfile', input)
   },
   chat: {
     listMessages: (groupId) => ipcRenderer.invoke('chat:listMessages', groupId),

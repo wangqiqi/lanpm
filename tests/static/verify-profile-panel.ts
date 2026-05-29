@@ -1,5 +1,5 @@
 /**
- * DOC-F-04：顶栏 Profile 入口可打开只读面板（非 disabled 占位）。
+ * DOC-F-04：顶栏 Profile 可编辑并保存用户名/部门。
  * Run: npm run verify:profile-panel
  */
 import assert from 'node:assert/strict'
@@ -15,5 +15,7 @@ assert.match(topbar, /key:\s*['"]profile['"]/)
 assert.match(topbar, /setProfileOpen\(true\)/)
 assert.match(topbar, /<ProfileModal/)
 assert.doesNotMatch(profile, /\bdisabled\b/, 'ProfileModal should not disable fields')
+assert.match(profile, /updateProfile/)
+assert.match(profile, /name="baseName"/)
 
 console.log('verify:profile-panel: ok')

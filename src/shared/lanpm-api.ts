@@ -1,6 +1,6 @@
 import type { ChatMessage } from './chat/types'
 import type { GroupMemberView } from './chat/members'
-import type { SetupInput, SetupStatus } from './identity'
+import type { ProfileUpdateInput, SetupInput, SetupStatus } from './identity'
 import type {
   CreateTaskInput,
   GanttScheduleInput,
@@ -29,6 +29,7 @@ export interface LanpmApi {
   identity: {
     getSetupStatus: () => Promise<SetupStatus>
     completeSetup: (input: SetupInput) => Promise<SetupStatus>
+    updateProfile: (input: ProfileUpdateInput) => Promise<SetupStatus>
   }
   chat: {
     listMessages: (groupId: string) => Promise<ChatMessage[]>

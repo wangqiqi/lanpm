@@ -4,6 +4,13 @@ export interface SetupInput {
   avatarUrl?: string
 }
 
+/** 已配置用户修改显示名/部门（userId 不变，后缀保留） */
+export interface ProfileUpdateInput {
+  baseName: string
+  department?: string
+  avatarUrl?: string
+}
+
 export interface SetupUserView {
   userId: string
   displayName: string

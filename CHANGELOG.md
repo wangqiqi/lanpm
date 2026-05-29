@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.40] - 2026-05-29
+
+### Added
+- **`identity:updateProfile`**：个人设置可修改显示名（2–20 字）与部门；保留 userId/后缀，保存后刷新局域网身份
+
+### Changed
+- **`ProfileModal`**：由只读 Descriptions 改为可编辑表单（DOC-F-04）
+- **浏览器预览桩**：`identity.updateProfile` 与 Electron 对齐
+- **`verify:profile-panel`**：校验 `updateProfile` 与 `baseName` 表单字段
+
+### Tag
+- `v1.0.0-rc.40` — 个人设置用户名/部门可保存
+
 ## [1.0.0-rc.39] - 2026-05-29
 
 ### Added

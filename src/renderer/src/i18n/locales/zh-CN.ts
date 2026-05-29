@@ -396,7 +396,10 @@ const zhCN = {
   'profile.displayName': '显示名',
   'profile.userId': '用户 ID',
   'profile.department': '部门',
-  'profile.device': '本机设备'
+  'profile.device': '本机设备',
+  'profile.saved': '个人设置已保存',
+  'profile.saveFailed': '保存个人设置失败',
+  'profile.suffixHint': '对外显示为「{displayName}」（后缀 {suffix} 不变）'
 } satisfies Record<MessageKey, string>
 
 export default zhCN

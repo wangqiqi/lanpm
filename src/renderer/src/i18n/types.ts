@@ -396,5 +396,8 @@ export type MessageKey =
   | 'profile.userId'
   | 'profile.department'
   | 'profile.device'
+  | 'profile.saved'
+  | 'profile.saveFailed'
+  | 'profile.suffixHint'
 
 export type TranslateParams = Record<string, string | number>

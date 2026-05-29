@@ -397,7 +397,10 @@ const enUS = {
   'profile.displayName': 'Display name',
   'profile.userId': 'User ID',
   'profile.department': 'Department',
-  'profile.device': 'This device'
+  'profile.device': 'This device',
+  'profile.saved': 'Profile saved',
+  'profile.saveFailed': 'Failed to save profile',
+  'profile.suffixHint': 'Shown as “{displayName}” (suffix {suffix} is kept)'
 } satisfies Record<MessageKey, string>
 
 export default enUS
