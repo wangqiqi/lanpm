@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.7` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.8` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -105,18 +105,18 @@
 
 ### P0 — 断环 / 丢数据（UX 审查 §4.2、§9）
 
-- [ ] **UX-X-01** 搜索 → 定位：各视图消费 `highlightTaskId` / `highlightMsgId`，scrollIntoView + 临时高亮 — 同 **UX-F-01** / **PRD-F-05**
-- [ ] **UX-X-02** 发纯文本：`await sendText` 成功后再 `setDraft('')`；失败 `message.error` 并恢复 draft（`ChatView` L184-185）
-- [ ] **UX-X-03** 驾驶舱加载失败：错误页 + 重试，禁止全 0 假数据 — 同 **UX-F-03** / **UX-V-07**
-- [ ] **UX-X-04** App 身份 `getSetupStatus` 失败：错误页/重试，区分未配置 vs 服务不可用 — 同 **UX-F-04**
-- [ ] **UX-X-05** 全局搜索 API 失败：toast 或错误态，与「无结果」区分 — 同 **UX-F-05**
+- [x] **UX-X-01** 搜索 → 定位：各视图消费 `highlightTaskId` / `highlightMsgId`，scrollIntoView + 临时高亮 — 同 **UX-F-01** / **PRD-F-05**
+- [x] **UX-X-02** 发纯文本：`await sendText` 成功后再 `setDraft('')`；失败 `message.error` 并恢复 draft（`ChatView` L184-185）
+- [x] **UX-X-03** 驾驶舱加载失败：错误页 + 重试，禁止全 0 假数据 — 同 **UX-F-03** / **UX-V-07**
+- [x] **UX-X-04** App 身份 `getSetupStatus` 失败：错误页/重试，区分未配置 vs 服务不可用 — 同 **UX-F-04**
+- [x] **UX-X-05** 全局搜索 API 失败：toast 或错误态，与「无结果」区分 — 同 **UX-F-05**
 - [ ] **UX-X-06** TopBar「个人设置」：实现或移除 disabled 死胡同 — 同 **UX-F-06** / **PRD-F-08**
 - [ ] **UX-X-07** DM 会话时 TopBar：`dm:*` 在 Select 中显示「私聊：{name}」option 或只读 Badge（`TopBar` + `navigationStore`）
-- [ ] **UX-X-08** 任务树：选中含子节点任务时改进度，展示不可编辑说明（`TaskTreeView` L90-96）
+- [x] **UX-X-08** 任务树：选中含子节点任务时改进度，展示不可编辑说明（`TaskTreeView` L90-96）
 
 ### P1 — 弱闭环（UX 审查 §4.3、§3）
 
-- [ ] **UX-W-01** 创建群组失败 toast — 同 **UX-F-14**
+- [x] **UX-W-01** 创建群组失败 toast — 同 **UX-F-14**
 - [ ] **UX-W-02** 发代码 / AI 配置保存失败 toast（`CodeSendModal`、`AiConfigModal` 补 catch）
 - [ ] **UX-W-03** `markRead` 失败非静默（toast 或重试）
 - [ ] **UX-W-04** `loadMessages` / `loadGroups` 失败错误 UI（`ChatView`、群列表等）
@@ -169,7 +169,7 @@
 - [ ] **PRD-F-02** 聊天文件发送（拖拽/点击，P2P）（`01` §6.3）
 - [ ] **PRD-F-03** 书签内嵌 WebView，不离开应用（`01` §10.3）
 - [ ] **PRD-F-04** 视频内嵌播放 mp4/webm（`01` §10.2）
-- [ ] **PRD-F-05** 全局搜索跳转高亮（`highlightTaskId` / `highlightMsgId` 各视图消费）— 同 **UX-X-01** / **UX-F-01**
+- [x] **PRD-F-05** 全局搜索跳转高亮（`highlightTaskId` / `highlightMsgId` 各视图消费）— 同 **UX-X-01** / **UX-F-01**
 - [ ] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）
 - [ ] **PRD-F-07** 离线 7 天内消息补同步 — 与 **ARCH-07**
 - [ ] **PRD-F-08** 顶栏个人信息配置面板（`TopBar` profile 非 disabled）（`01` §5.2）— 与 **UX-F-06**
@@ -196,11 +196,11 @@
 
 ### 第一批（高价值 / 低成本）
 
-- [ ] **UX-F-01** 全局搜索结果跳转后 scrollIntoView + 临时高亮（`GlobalSearch` → Chat/Board/Tree）— 同 **UX-X-01** / **PRD-F-05**
+- [x] **UX-F-01** 全局搜索结果跳转后 scrollIntoView + 临时高亮（`GlobalSearch` → Chat/Board/Tree）— 同 **UX-X-01** / **PRD-F-05**
 - [ ] **UX-F-02** 他人消息显示昵称（`MessageBubble` + `members` 映射）
-- [ ] **UX-F-03** 驾驶舱加载失败：错误页 + 重试，勿展示全 0 假数据（`CockpitView`）— 同 **UX-X-03**
-- [ ] **UX-F-04** App 启动身份拉取失败：错误页/重试，区分未配置 vs 服务不可用（`App.tsx`）— 同 **UX-X-04**
-- [ ] **UX-F-05** 全局搜索失败：`message.error` 或 AutoComplete 错误态（`GlobalSearch.tsx`）— 同 **UX-X-05**
+- [x] **UX-F-03** 驾驶舱加载失败：错误页 + 重试，勿展示全 0 假数据（`CockpitView`）— 同 **UX-X-03**
+- [x] **UX-F-04** App 启动身份拉取失败：错误页/重试，区分未配置 vs 服务不可用（`App.tsx`）— 同 **UX-X-04**
+- [x] **UX-F-05** 全局搜索失败：`message.error` 或 AutoComplete 错误态（`GlobalSearch.tsx`）— 同 **UX-X-05**
 - [ ] **UX-F-06** TopBar「个人设置」：实现或移除 disabled 项 — 同 **UX-X-06** / **PRD-F-08**
 
 ### 第二批（体验 polish）
@@ -212,13 +212,13 @@
 - [ ] **UX-F-11** 看板列内「拖放任务到此」dashed 占位 + i18n
 - [ ] **UX-F-12** 甘特：任务详情弹窗编辑日期（键盘改期替代）
 - [ ] **UX-F-13** 文件 Table 空态：`locale.emptyText: t('files.empty')`
-- [ ] **UX-F-14** 创建群组失败：`catch` + `message.error`（`CreateGroupModal`）— 同 **UX-W-01**
+- [x] **UX-F-14** 创建群组失败：`catch` + `message.error`（`CreateGroupModal`）— 同 **UX-W-01**
 - [ ] **UX-F-15** 默认路由：重定向 `activeGroupId` 或首群，非写死 `demo-project` — 同 **UX-W-09**
 - [ ] **UX-F-16** `navigationStore` 演示群名 i18n 或 Skeleton
 - [ ] **UX-F-17** TopBar 连接状态点 + 重连（在线/离线/同步）
 - [ ] **UX-F-18** BottomNav 未读/待办角标（chat、board 等）
 - [ ] **UX-F-19** 驾驶舱 AI 报告：复制按钮、最大高度 + 展开
-- [ ] **UX-F-20** 代码块右上角「复制代码」（`CodeBlock.tsx`）
+- [x] **UX-F-20** 代码块右上角「复制代码」（`CodeBlock.tsx`）
 - [ ] **UX-F-21** 未知消息类型 i18n fallback，非 raw `[type]`
 - [ ] **UX-F-22** 文件预览失败：侧栏/预览区错误态 + 重试，与「不支持预览」区分（`FilesView`；UX 审查 §3.7）
 
@@ -261,7 +261,7 @@
 - [ ] **UX-V-04** 看板列头英文大写与中文 UI 统一 — 与 **UX-I-01**
 - [ ] **UX-V-05** 看板卡片 assignee 显示昵称非 raw userId
 - [ ] **UX-V-06** Setup 图标使用 `resources/logo.svg` 替代字母「L」
-- [ ] **UX-V-07** 驾驶舱失败 vs 真实 0 — 与 **UX-F-03**
+- [x] **UX-V-07** 驾驶舱失败 vs 真实 0 — 与 **UX-F-03**
 - [ ] **UX-V-08**（文档）Hash 路由 `#/g/...` 深链说明（Electron 可接受）
 - [ ] **UX-R-01**（可选）小窗口 `@media` 断点设计
 - [ ] **UX-R-02** TopBar 窄窗 flex-wrap / 折叠菜单

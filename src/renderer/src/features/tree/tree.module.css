@@ -34,3 +34,23 @@
   width: 120px;
   flex-shrink: 0;
 }
+
+.searchHighlight {
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--lanpm-accent);
+  animation: lanpmHighlightPulse 3.2s ease-out;
+}
+
+.parentHint {
+  margin-bottom: 0;
+}
+
+@keyframes lanpmHighlightPulse {
+  0%,
+  15% {
+    box-shadow: 0 0 0 3px var(--lanpm-accent-ring, rgba(22, 119, 255, 0.45));
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}

@@ -13,6 +13,7 @@ import {
 import { Button, Input, Modal, Select, Tag, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { KANBAN_COLUMN_LABELS, KANBAN_COLUMN_ORDER, isTaskStatus } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
@@ -30,13 +31,15 @@ function KanbanColumn({
   tasks,
   isOver,
   invalid,
-  onDeleteTask
+  onDeleteTask,
+  isTaskHighlighted
 }: {
   status: TaskStatus
   tasks: Task[]
   isOver: boolean
   invalid: boolean
   onDeleteTask?: (taskId: string) => void
+  isTaskHighlighted: (taskId: string) => boolean
 }): React.ReactElement {
   const { setNodeRef } = useDroppable({ id: status })
 
@@ -51,7 +54,12 @@ function KanbanColumn({
       </div>
       <div className={styles.columnBody}>
         {tasks.map((task) => (
-          <KanbanCard key={task.taskId} task={task} onDelete={onDeleteTask} />
+          <KanbanCard
+            key={task.taskId}
+            task={task}
+            onDelete={onDeleteTask}
+            highlighted={isTaskHighlighted(task.taskId)}
+          />
         ))}
       </div>
     </div>
@@ -81,6 +89,9 @@ export default function BoardView(): React.ReactElement {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   )
+
+  const boardReady = !loading || tasks.length > 0
+  const { isHighlighted: isTaskHighlighted } = useSearchHighlight('task', boardReady)
 
   const boardTasks = useMemo(
     () => tasks.filter((t) => !t.parentTaskId),
@@ -215,6 +226,7 @@ export default function BoardView(): React.ReactElement {
                 isOver={overColumn === status}
                 invalid={false}
                 onDeleteTask={(id) => void handleDelete(id)}
+                isTaskHighlighted={isTaskHighlighted}
               />
             ))}
           </div>

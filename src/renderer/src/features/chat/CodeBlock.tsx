@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Tag } from 'antd'
+import { Button, Tag, message } from 'antd'
+import { CopyOutlined } from '@ant-design/icons'
 import githubCssUrl from 'highlight.js/styles/github.css?url'
 import githubDarkCssUrl from 'highlight.js/styles/github-dark.css?url'
 import type { ThemeMode } from '@renderer/stores/uiStore'
@@ -34,10 +35,28 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
   const [expanded, setExpanded] = useState(false)
   const html = useMemo(() => highlightCode(code, language), [code, language])
 
+  const copyCode = async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(code)
+      message.success(t('chat.copied'))
+    } catch {
+      message.error(t('chat.copyCode'))
+    }
+  }
+
   return (
     <div className={styles.codeWrap}>
       <div className={styles.codeHeader}>
         <Tag className={styles.langTag}>{language}</Tag>
+        <Button
+          type="text"
+          size="small"
+          icon={<CopyOutlined />}
+          aria-label={t('chat.copyCode')}
+          onClick={() => void copyCode()}
+        >
+          {t('chat.copyCode')}
+        </Button>
         {code.split('\n').length > 12 && (
           <Button type="link" size="small" onClick={() => setExpanded((v) => !v)}>
             {expanded ? t('chat.codeCollapse') : t('chat.codeExpand')}

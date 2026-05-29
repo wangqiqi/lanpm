@@ -15,9 +15,14 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
 interface KanbanCardProps {
   task: Task
   onDelete?: (taskId: string) => void
+  highlighted?: boolean
 }
 
-export default function KanbanCard({ task, onDelete }: KanbanCardProps): React.ReactElement {
+export default function KanbanCard({
+  task,
+  onDelete,
+  highlighted = false
+}: KanbanCardProps): React.ReactElement {
   const { t } = useI18n()
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.taskId,
@@ -32,7 +37,8 @@ export default function KanbanCard({ task, onDelete }: KanbanCardProps): React.R
     <div
       ref={setNodeRef}
       style={style}
-      className={`${styles.card} ${isDragging ? styles.cardDragging : ''}`}
+      className={`${styles.card} ${isDragging ? styles.cardDragging : ''} ${highlighted ? styles.searchHighlight : ''}`}
+      data-task-id={task.taskId}
       {...listeners}
       {...attributes}
     >

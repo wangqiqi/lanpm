@@ -268,6 +268,21 @@
   background: var(--lanpm-bubble-bg, rgba(0, 0, 0, 0.06));
 }
 
+.searchHighlight {
+  box-shadow: 0 0 0 2px var(--lanpm-accent);
+  animation: lanpmHighlightPulse 3.2s ease-out;
+}
+
+@keyframes lanpmHighlightPulse {
+  0%,
+  15% {
+    box-shadow: 0 0 0 3px var(--lanpm-accent-ring, rgba(22, 119, 255, 0.45));
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
 .codeBubble {
   align-self: stretch;
   max-width: 100%;

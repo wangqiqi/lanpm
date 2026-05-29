@@ -13,3 +13,7 @@
   color: var(--lanpm-text-secondary);
   font-size: 14px;
 }
+
+.retryBtn {
+  margin-top: 12px;
+}

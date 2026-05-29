@@ -14,6 +14,7 @@ interface MessageBubbleProps {
   members: GroupMemberView[]
   deliveryLabel: string
   formatTime: (iso: string) => string
+  highlighted?: boolean
 }
 
 export default function MessageBubble({
@@ -21,7 +22,8 @@ export default function MessageBubble({
   own,
   members,
   deliveryLabel,
-  formatTime
+  formatTime,
+  highlighted = false
 }: MessageBubbleProps): React.ReactElement {
   const theme = useUiStore((s) => s.theme)
   const navigate = useNavigate()
@@ -30,8 +32,9 @@ export default function MessageBubble({
 
   return (
     <div
-      className={`${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther}`}
+      className={`${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted ? styles.searchHighlight : ''}`}
       data-own={own ? '1' : '0'}
+      data-msg-id={message.msgId}
     >
       {!own && (
         <div className={styles.meta}>

@@ -18,7 +18,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
-import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './CockpitView.module.css'
@@ -36,6 +36,7 @@ export default function CockpitView(): React.ReactElement {
   const navigate = useNavigate()
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [aiConfig, setAiConfig] = useState<AiConfigView | null>(null)
   const [aiConfigOpen, setAiConfigOpen] = useState(false)
   const [report, setReport] = useState<AiReportResult | null>(null)
@@ -43,6 +44,7 @@ export default function CockpitView(): React.ReactElement {
 
   const load = useCallback(async () => {
     setLoading(true)
+    setLoadError(false)
     try {
       const [dash, cfg] = await Promise.all([
         getLanpmApi().cockpit.getDashboard(),
@@ -51,6 +53,8 @@ export default function CockpitView(): React.ReactElement {
       setDashboard(dash)
       setAiConfig(cfg)
     } catch (err) {
+      setDashboard(null)
+      setLoadError(true)
       message.error(err instanceof Error ? err.message : t('cockpit.loadFailed'))
     } finally {
       setLoading(false)
@@ -93,6 +97,12 @@ export default function CockpitView(): React.ReactElement {
 
   if (loading && !dashboard) {
     return <ViewLoadingCenter />
+  }
+
+  if (loadError && !dashboard) {
+    return (
+      <ViewErrorCenter message={t('cockpit.loadErrorHint')} onRetry={() => void load()} />
+    )
   }
 
   const summary = dashboard?.summary

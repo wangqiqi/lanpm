@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Form, Input, Modal, Radio, Switch } from 'antd'
+import { Form, Input, Modal, Radio, Switch, message } from 'antd'
 import type { GroupType } from '@shared/navigation/types'
 import { useI18n } from '@renderer/i18n/useI18n'
 
@@ -30,6 +30,8 @@ export default function CreateGroupModal({
     try {
       await onCreate(values)
       onClose()
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('group.createFailed'))
     } finally {
       setSaving(false)
     }

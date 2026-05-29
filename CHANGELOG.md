@@ -2,6 +2,24 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.8] - 2026-05-29
+
+### Added
+- **`useSearchHighlight`**：全局搜索跳转后 scrollIntoView + 3.2s 高亮脉冲（聊天 / 看板 / 任务树）
+- **`ViewErrorCenter`**：页级加载失败 + 重试（驾驶舱、App 启动身份）
+- **代码块「复制代码」**（`CodeBlock.tsx`）
+
+### Fixed
+- **UX-X-02**：纯文本发送成功后再清空 draft，失败保留并 toast
+- **UX-X-04**：`getSetupStatus` 失败显示错误页，不再误进 Setup 向导
+- **UX-X-03**：驾驶舱加载失败不再展示全 0 假数据
+- **UX-X-05**：全局搜索 API 失败 toast，与「无结果」区分
+- **UX-W-01 / UX-F-14**：创建群组失败 toast
+- **UX-X-08**：任务树选中父任务时提示进度不可直接编辑
+
+### Tag
+- `v1.0.0-rc.8` — P0 断环与高价值 UX 批次
+
 ## [1.0.0-rc.7] - 2026-05-29
 
 ### Added

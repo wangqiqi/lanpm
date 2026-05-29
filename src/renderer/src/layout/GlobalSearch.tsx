@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { AutoComplete, Typography } from 'antd'
+import { AutoComplete, Typography, message } from 'antd'
 import { FileTextOutlined, MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -63,6 +63,7 @@ export default function GlobalSearch(): React.ReactElement {
       )
     } catch {
       setOptions([])
+      message.error(t('search.failed'))
     } finally {
       setLoading(false)
     }

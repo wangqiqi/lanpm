@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Input, InputNumber, Progress, Tree, message } from 'antd'
+import { Alert, Button, Input, InputNumber, Progress, Tree, message } from 'antd'
 import type { DataNode } from 'antd/es/tree'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -9,10 +9,14 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './tree.module.css'
 
-function buildTreeData(tasks: Task[]): DataNode[] {
+function buildTreeData(
+  tasks: Task[],
+  isTaskHighlighted: (taskId: string) => boolean
+): DataNode[] {
   const byParent = new Map<string | undefined, Task[]>()
   for (const t of tasks) {
     const key = t.parentTaskId ?? '__root__'
@@ -31,7 +35,10 @@ function buildTreeData(tasks: Task[]): DataNode[] {
       return {
         key: task.taskId,
         title: (
-          <div className={styles.nodeRow}>
+          <div
+            className={`${styles.nodeRow} ${isTaskHighlighted(task.taskId) ? styles.searchHighlight : ''}`}
+            data-task-id={task.taskId}
+          >
             <span className={styles.nodeTitle}>{task.title}</span>
             <div className={styles.nodeProgress}>
               <Progress
@@ -70,8 +77,12 @@ export default function TaskTreeView(): React.ReactElement {
     taskId: string
     value: number
   } | null>(null)
+  const [parentSelected, setParentSelected] = useState(false)
 
-  const treeData = useMemo(() => buildTreeData(tasks), [tasks])
+  const treeReady = !loading || tasks.length > 0
+  const { highlightId, isHighlighted: isTaskHighlighted } = useSearchHighlight('task', treeReady)
+
+  const treeData = useMemo(() => buildTreeData(tasks, isTaskHighlighted), [tasks, isTaskHighlighted])
 
   useEffect(() => {
     if (!gid) return
@@ -82,18 +93,30 @@ export default function TaskTreeView(): React.ReactElement {
     return unsub
   }, [gid, loadTasks])
 
+  useEffect(() => {
+    if (!highlightId) return
+    const ancestors = ancestorKeysForTask(highlightId, tasks)
+    if (ancestors.length === 0) return
+    setExpandedKeys((keys) => [...new Set([...keys, ...ancestors])])
+  }, [highlightId, tasks])
+
   const onSelect = useCallback((keys: React.Key[]) => {
     const id = keys[0]
-    if (typeof id === 'string') {
-      setSelectedParentId(id)
-      const task = tasks.find((t) => t.taskId === id)
-      if (task) {
-        const hasChildren = tasks.some((t) => t.parentTaskId === id)
-        if (!hasChildren) {
-          setEditingProgress({ taskId: id, value: task.progressPercent })
-        } else {
-          setEditingProgress(null)
-        }
+    if (typeof id !== 'string') {
+      setParentSelected(false)
+      setEditingProgress(null)
+      return
+    }
+    setSelectedParentId(id)
+    const task = tasks.find((t) => t.taskId === id)
+    if (task) {
+      const hasChildren = tasks.some((t) => t.parentTaskId === id)
+      if (!hasChildren) {
+        setEditingProgress({ taskId: id, value: task.progressPercent })
+        setParentSelected(false)
+      } else {
+        setEditingProgress(null)
+        setParentSelected(true)
       }
     }
   }, [tasks])
@@ -172,6 +195,10 @@ export default function TaskTreeView(): React.ReactElement {
           </Button>
         }
       />
+
+      {parentSelected && !editingProgress && (
+        <Alert type="info" showIcon message={t('tree.parentProgressHint')} className={styles.parentHint} />
+      )}
 
       {editingProgress && (
         <ViewToolbar>

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Spin, Typography } from 'antd'
+import { useCallback, useEffect } from 'react'
+import { Button, Spin, Typography } from 'antd'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import SetupWizard from '@renderer/features/setup/SetupWizard'
@@ -13,18 +13,16 @@ export default function App(): React.ReactElement {
   const { t } = useI18n()
   const hydrated = useIdentityStore((s) => s.hydrated)
   const configured = useIdentityStore((s) => s.configured)
+  const bootFailed = useIdentityStore((s) => s.bootFailed)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const setHydrated = useIdentityStore((s) => s.setHydrated)
+  const setBootFailed = useIdentityStore((s) => s.setBootFailed)
   const loadGroups = useNavigationStore((s) => s.loadGroups)
 
-  useEffect(() => {
-    if (!configured) return
-    const unsub = getLanpmApi().group.onListChanged(() => void loadGroups())
-    return unsub
-  }, [configured, loadGroups])
-
-  useEffect(() => {
+  const loadIdentity = useCallback(() => {
     let cancelled = false
+    setBootFailed(false)
+    setHydrated(false)
     try {
       void getLanpmApi()
         .identity.getSetupStatus()
@@ -35,15 +33,23 @@ export default function App(): React.ReactElement {
           }
         })
         .catch(() => {
-          if (!cancelled) setHydrated(true)
+          if (!cancelled) setBootFailed(true)
         })
     } catch {
-      if (!cancelled) setHydrated(true)
+      if (!cancelled) setBootFailed(true)
     }
     return () => {
       cancelled = true
     }
-  }, [setFromStatus, setHydrated, loadGroups])
+  }, [setFromStatus, setHydrated, setBootFailed, loadGroups])
+
+  useEffect(() => {
+    if (!configured) return
+    const unsub = getLanpmApi().group.onListChanged(() => void loadGroups())
+    return unsub
+  }, [configured, loadGroups])
+
+  useEffect(() => loadIdentity(), [loadIdentity])
 
   const handleSetupComplete = (status: SetupStatus): void => {
     setFromStatus(status.configured, status.user, status.device)
@@ -59,6 +65,17 @@ export default function App(): React.ReactElement {
         <Typography.Text type="secondary" className={styles.bootHint}>
           {t('common.loading')}
         </Typography.Text>
+      </div>
+    )
+  }
+
+  if (bootFailed) {
+    return (
+      <div className={styles.boot}>
+        <Typography.Text type="danger">{t('app.identityLoadFailed')}</Typography.Text>
+        <Button type="primary" className={styles.bootRetry} onClick={() => loadIdentity()}>
+          {t('app.identityRetry')}
+        </Button>
       </div>
     )
   }

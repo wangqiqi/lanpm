@@ -18,6 +18,7 @@ import MessageBubble from '@renderer/features/chat/MessageBubble'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useMentionNotifications } from '@renderer/features/chat/useMentionNotifications'
+import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
@@ -68,6 +69,9 @@ export default function ChatView(): React.ReactElement {
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
+
+  const messagesReady = !loading || messages.length > 0
+  const { isHighlighted: isMsgHighlighted } = useSearchHighlight('msg', messagesReady)
 
   useMentionNotifications(gid)
   useMarkRead(gid, messages, currentUserId)
@@ -181,8 +185,14 @@ export default function ChatView(): React.ReactElement {
       return
     }
 
-    setDraft('')
-    await sendText(gid, text)
+    const savedDraft = draft
+    try {
+      await sendText(gid, text)
+      setDraft('')
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('chat.sendFailed'))
+      setDraft(savedDraft)
+    }
   }, [draft, gid, sendText, createFromChat, upsertMessage, taskAllowed, t])
 
   const handleCreateTask = useCallback(
@@ -235,6 +245,7 @@ export default function ChatView(): React.ReactElement {
                   members={members}
                   deliveryLabel={deliveryLabel(msg.deliveryStatus)}
                   formatTime={formatTime}
+                  highlighted={isMsgHighlighted(msg.msgId)}
                 />
               ))}
             </div>
