@@ -6,7 +6,6 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { electronCiChromiumFlags } from './electron-ci-chromium-flags.mjs'
 import { resolveElectronBin } from './resolve-electron-bin.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -33,7 +32,7 @@ function probe() {
   }
   const r = spawnSync(
     electronBin,
-    [...electronCiChromiumFlags(), '-e', "require('better-sqlite3')(':memory:')"],
+    ['-e', "require('better-sqlite3')(':memory:')"],
     {
       cwd: root,
       encoding: 'utf8',

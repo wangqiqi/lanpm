@@ -7,7 +7,6 @@
 import { spawnSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { electronCiChromiumFlags } from './electron-ci-chromium-flags.mjs'
 import { resolveElectronBin } from './resolve-electron-bin.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -24,7 +23,7 @@ if (!electronBin) {
   process.exit(1)
 }
 
-const r = spawnSync(electronBin, [...electronCiChromiumFlags(), ...args], {
+const r = spawnSync(electronBin, args, {
   cwd: root,
   stdio: 'inherit',
   env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }

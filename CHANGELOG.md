@@ -2,10 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.47] - 2026-05-29
+
+### Fixed
+- **CI `postinstall`**：`ELECTRON_RUN_AS_NODE` 探测/脚本不再传入 Chromium 标志（`bad option: --no-sandbox`）；`--no-sandbox` 仅用于无头完整 Electron 启动（visual-screenshots / electron-smoke）
+
+### Tag
+- `v1.0.0-rc.47` — CI postinstall 与 Chromium 标志作用域修正
+
 ## [1.0.0-rc.46] - 2026-05-29
 
 ### Fixed
-- **CI 三平台 `verify:m7`**：`resolve-electron-bin.mjs` 用 `require('electron')` 解析二进制（macOS `Electron.app` 路径）；`electron-ci-chromium-flags.mjs` 为 Linux GHA 附加 `--no-sandbox` 等
+- **CI 三平台 `verify:m7`**：`resolve-electron-bin.mjs` 用 `require('electron')` 解析二进制（macOS `Electron.app` 路径）；`electron-ci-chromium-flags.mjs` 为 Linux GHA 无头 GUI 附加 `--no-sandbox` 等
 - **CI `verify:visual-screenshots`**：无头 Electron 与 `verify:electron-smoke` 共用路径解析与 CI Chromium 标志
 - **CI 生产构建**：`gantt-task-react` 精确别名至 CJS 入口，避免 Rolldown 解析 `index.modern.js` 子路径失败
 
