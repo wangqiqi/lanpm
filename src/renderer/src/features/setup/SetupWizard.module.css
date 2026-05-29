@@ -26,7 +26,7 @@
   height: 64px;
   margin-bottom: 16px;
   border-radius: 14px;
-  font-size: 28px;
+  font-size: var(--lanpm-font-display);
   font-weight: 600;
   color: var(--lanpm-on-accent);
   background: var(--lanpm-accent);
@@ -36,10 +36,10 @@
 
 .title {
   margin: 0 0 6px;
-  font-size: 28px;
+  font-size: var(--lanpm-font-display);
   font-weight: 600;
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: var(--lanpm-line-display);
   color: var(--lanpm-text);
 }
 

@@ -11,14 +11,14 @@
 
 .loadingHint {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
 }
 
 .empty {
   margin: 0;
   text-align: center;
   color: var(--lanpm-text-secondary);
-  font-size: 14px;
+  font-size: var(--lanpm-font-body);
 }
 
 .retryBtn {

@@ -60,7 +60,7 @@
   cursor: inherit;
   padding: 6px 4px 8px;
   color: var(--lanpm-text-secondary);
-  font-size: 10px;
+  font-size: var(--lanpm-font-caption);
   font-weight: 500;
   letter-spacing: 0.01em;
   transition: color 0.15s ease;

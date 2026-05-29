@@ -58,7 +58,7 @@
   background: transparent;
   cursor: inherit;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text-secondary);
   transition: color 0.15s ease;

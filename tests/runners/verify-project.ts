@@ -91,4 +91,7 @@ run('npm run verify:search')
 console.log('\n=== verify:project / build ===')
 run('npm run build')
 
+console.log('\n=== verify:project / verify:electron-smoke ===')
+run('npm run verify:electron-smoke')
+
 console.log('\nverify:project: all passed')

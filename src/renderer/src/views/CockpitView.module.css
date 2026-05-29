@@ -3,12 +3,17 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  min-width: 0;
   height: 100%;
   overflow: auto;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 .metrics {
   margin-bottom: 16px;
+  margin-inline: 0 !important;
+  max-width: 100%;
 }
 
 .section {
@@ -26,9 +31,11 @@
 
 .projectHead {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
+  min-width: 0;
 }
 
 .projectMeta {
@@ -42,6 +49,13 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 10px;
+  min-width: 0;
+}
+
+.deptRow :global(.ant-progress) {
+  flex: 1;
+  min-width: 0;
+  margin-inline-end: 0;
 }
 
 .deptRow:last-child {

@@ -60,7 +60,7 @@
   background: transparent;
   cursor: inherit;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text-secondary);
   transition: color 0.15s ease;

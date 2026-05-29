@@ -9,10 +9,10 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './board.module.css'
 
-const PRIORITY_COLOR: Record<TaskPriority, string> = {
-  low: 'default',
-  high: 'red',
-  medium: 'orange'
+const PRIORITY_CLASS: Record<TaskPriority, string> = {
+  low: styles.priorityLow,
+  high: styles.priorityHigh,
+  medium: styles.priorityMedium
 }
 
 const MOVE_COLUMN_KEYS: Record<TaskStatus, MessageKey> = {
@@ -150,7 +150,7 @@ export default function KanbanCard({
         )}
       </div>
       <div className={styles.cardMeta}>
-        <Tag color={PRIORITY_COLOR[task.priority]}>
+        <Tag bordered={false} className={PRIORITY_CLASS[task.priority]}>
           {t(
             task.priority === 'low'
               ? 'board.priorityLow'
@@ -163,7 +163,9 @@ export default function KanbanCard({
           <span>@{assigneeName ?? task.assigneeUserId}</span>
         )}
         {task.milestone && (
-          <Tag color="blue">{t('board.milestone')}</Tag>
+          <Tag bordered={false} className={styles.milestoneTag}>
+            {t('board.milestone')}
+          </Tag>
         )}
         {task.endDate && (
           <span className={styles.cardDue}>{t('board.dueDate', { date: task.endDate })}</span>

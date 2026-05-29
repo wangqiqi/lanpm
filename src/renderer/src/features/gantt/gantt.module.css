@@ -46,34 +46,38 @@
   fill: var(--lanpm-accent-fill);
 }
 
-:global(html[data-theme='dark']) .chartWrap {
-  background: var(--lanpm-surface-solid);
-}
-
-:global(html[data-theme='dark']) .chartWrap :global(text) {
-  fill: var(--lanpm-text);
-}
-
-:global(html[data-theme='dark']) .chartWrap :global(.gridRow) {
+/* gantt-task-react 日历/网格：库内为 CSS Modules 哈希类，用稳定的全局类名覆盖（VIS-FIX-01） */
+.chartWrap :global(.calendar > rect) {
   fill: var(--lanpm-surface-solid);
+  stroke: var(--lanpm-border);
+  stroke-width: 1;
 }
 
-:global(html[data-theme='dark']) .chartWrap :global(.gridRow:nth-child(even)) {
-  fill: var(--lanpm-bubble-bg);
-}
-
-:global(html[data-theme='dark']) .chartWrap :global(.calendarHeader) {
-  fill: var(--lanpm-surface-solid);
-}
-
-:global(html[data-theme='dark']) .chartWrap :global(.calendarHeader text) {
+.chartWrap :global(.calendar text) {
   fill: var(--lanpm-text-secondary);
 }
 
-:global(html[data-theme='dark']) .chartWrap :global(.gridTick) {
+.chartWrap :global(.calendar line) {
   stroke: var(--lanpm-border);
 }
 
-:global(html[data-theme='dark']) .chartWrap :global(.arrow) {
+.chartWrap :global(.gridBody .rows > rect) {
+  fill: var(--lanpm-surface-solid);
+}
+
+.chartWrap :global(.gridBody .rows > rect:nth-child(even)) {
+  fill: var(--lanpm-bubble-bg);
+}
+
+.chartWrap :global(.gridBody .rowLines line),
+.chartWrap :global(.gridBody .ticks line) {
+  stroke: var(--lanpm-border);
+}
+
+.chartWrap :global(.arrow) {
   fill: var(--lanpm-text-secondary);
+}
+
+.chartWrap :global(.arrow path) {
+  stroke: var(--lanpm-text-secondary);
 }

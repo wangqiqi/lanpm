@@ -24,6 +24,14 @@ const REQUIRED_TOKENS = [
   '--lanpm-shadow-md'
 ] as const
 
+const REQUIRED_FONT_TOKENS = [
+  '--lanpm-font-caption',
+  '--lanpm-font-body',
+  '--lanpm-font-title',
+  '--lanpm-font-display',
+  '--lanpm-line-body'
+] as const
+
 const FORBIDDEN_PATTERNS = [
   /#1677ff/i,
   /rgba\(\s*22\s*,\s*119\s*,\s*255/gi,
@@ -88,6 +96,10 @@ for (const theme of ["html[data-theme='light']", "html[data-theme='dark']"]) {
   const block = globalCss.includes(theme)
   assert.ok(block, `global.module.css missing ${theme}`)
 }
+for (const token of REQUIRED_FONT_TOKENS) {
+  assert.ok(globalCss.includes(token), `global.module.css missing font token ${token}`)
+}
+
 for (const token of REQUIRED_TOKENS) {
   assert.ok(globalCss.includes(token), `global.module.css missing ${token} in both themes`)
   const lightIdx = globalCss.indexOf("html[data-theme='light']")
@@ -184,10 +196,23 @@ for (const rel of [
   assert.match(src, /ViewLoadingCenter|ViewEmptyHint/, `${rel} should use ViewState helpers`)
 }
 
-assert.ok(
-  readFileSync(join(renderer, 'features/gantt/GanttView.tsx'), 'utf8').includes('readCssVar'),
-  'GanttView should read accent fill for todayColor'
+const ganttViewSrc = readFileSync(join(renderer, 'features/gantt/GanttView.tsx'), 'utf8')
+assert.ok(ganttViewSrc.includes('readCssVar'), 'GanttView should read accent fill for todayColor')
+assert.match(
+  ganttViewSrc,
+  /barBackgroundColor=\{ganttBarColors\.barBackgroundColor\}/,
+  'GanttView should pass bar colors from design tokens (VIS-FIX-04)'
 )
+
+const ganttCss = readFileSync(join(renderer, 'features/gantt/gantt.module.css'), 'utf8')
+assert.match(
+  ganttCss,
+  /\.calendar\s*>\s*rect/,
+  'gantt.module.css should target .calendar > rect (VIS-FIX-01)'
+)
+
+const boardCss = readFileSync(join(renderer, 'features/board/board.module.css'), 'utf8')
+assert.match(boardCss, /\.priorityHigh/, 'board.module.css should define priorityHigh (VIS-FIX-03)')
 
 const bottomNavCss = readFileSync(join(renderer, 'layout/BottomNav.module.css'), 'utf8')
 assert.match(
@@ -195,6 +220,18 @@ assert.match(
   /composes:\s*region.*regionInteract/,
   'BottomNav should compose regionInteract'
 )
+assert.match(bottomNavCss, /var\(--lanpm-font-caption\)/, 'BottomNav tab label should use font caption token')
+
+const sharedUiFontToken = /var\(--lanpm-font-(caption|body|title|display)\)/
+for (const rel of [
+  'ui/ViewToolbar.module.css',
+  'ui/ViewState.module.css',
+  'ui/ViewSegment.module.css',
+  'ui/RegionButton.module.css'
+] as const) {
+  const css = readFileSync(join(renderer, rel), 'utf8')
+  assert.ok(sharedUiFontToken.test(css), `${rel} should use --lanpm-font-* tokens (VIS-07)`)
+}
 
 for (const [rel, token] of [
   ['features/files/FilesView.tsx', 'ViewSegment'],
@@ -230,5 +267,5 @@ for (const { tsx, css, label } of SEVEN_PAGE_VIEWS) {
 
 console.log(
   'verify:visual OK',
-  `(${REQUIRED_TOKENS.length} tokens, ${UI_COMPONENTS.length} ui modules, ${SEVEN_PAGE_VIEWS.length} page views, ${scanned} css files)`
+  `(${REQUIRED_TOKENS.length}+${REQUIRED_FONT_TOKENS.length} tokens, ${UI_COMPONENTS.length} ui modules, ${SEVEN_PAGE_VIEWS.length} page views, ${scanned} css files)`
 )

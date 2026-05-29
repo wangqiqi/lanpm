@@ -19,7 +19,7 @@
 .pill {
   padding: 6px 12px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text);
 }
@@ -27,7 +27,7 @@
 .text {
   padding: 6px 10px;
   border-radius: 10px;
-  font-size: 17px;
+  font-size: var(--lanpm-font-title);
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--lanpm-text);
@@ -40,7 +40,7 @@
 .user {
   padding: 4px 10px;
   border-radius: 980px;
-  font-size: 14px;
+  font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text);
 }

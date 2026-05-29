@@ -56,8 +56,20 @@ export default function GanttView(): React.ReactElement {
   const [todayColor, setTodayColor] = useState(() =>
     readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)')
   )
+  const [ganttBarColors, setGanttBarColors] = useState(() => ({
+    barBackgroundColor: readCssVar('--lanpm-accent', '#0071e3'),
+    barBackgroundSelectedColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
+    barProgressColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
+    barProgressSelectedColor: readCssVar('--lanpm-accent', '#0071e3')
+  }))
   useEffect(() => {
     setTodayColor(readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)'))
+    setGanttBarColors({
+      barBackgroundColor: readCssVar('--lanpm-accent', '#0071e3'),
+      barBackgroundSelectedColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
+      barProgressColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
+      barProgressSelectedColor: readCssVar('--lanpm-accent', '#0071e3')
+    })
   }, [themeMode])
 
   const viewOptions = useMemo(
@@ -266,6 +278,10 @@ export default function GanttView(): React.ReactElement {
             rowHeight={44}
             barFill={56}
             todayColor={todayColor}
+            barBackgroundColor={ganttBarColors.barBackgroundColor}
+            barBackgroundSelectedColor={ganttBarColors.barBackgroundSelectedColor}
+            barProgressColor={ganttBarColors.barProgressColor}
+            barProgressSelectedColor={ganttBarColors.barProgressSelectedColor}
             TooltipContent={({ task: bar }) => {
               const task = tasks.find((t) => t.taskId === bar.id)
               const deps = task?.dependencies ?? []

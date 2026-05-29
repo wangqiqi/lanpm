@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.34] - 2026-05-29
+
+### Added
+- **AUTO-19** `verify:electron-smoke`：无头 Electron 加载 `out/renderer`，确认 `#root` 挂载；`verify:project` 已串联
+
+### Changed
+- **VIS-07 字体尺度令牌**：`--lanpm-font-caption/body/title/display` 与 `--lanpm-line-*`；共享 UI / Setup / BottomNav 已迁移
+- **VIS-FIX-01~04（暗色手验）**：甘特日历表头覆盖、任务条读 accent 令牌、看板优先级/里程碑改语义色、驾驶舱 1280×720 无横向溢出
+- **`verify:visual`**：字体令牌、甘特/看板修复项守卫
+- **`docs/04`** §1.5.1 字体尺度 · **`docs/05`** electron-smoke 说明
+- **`todo.md`** · **`视觉.md`**：VIS-FIX / AUTO-19 / VIS-07 状态同步
+
+### Tag
+- `v1.0.0-rc.34` — 暗色视觉修复、字体令牌与 Electron smoke
+
 ## [1.0.0-rc.33] - 2026-05-29
 
 ### Added

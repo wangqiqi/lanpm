@@ -155,6 +155,30 @@
   color: var(--lanpm-text-secondary);
 }
 
+.priorityHigh {
+  margin-inline-end: 0;
+  color: var(--lanpm-danger);
+  background: var(--lanpm-danger-fill);
+}
+
+.priorityMedium {
+  margin-inline-end: 0;
+  color: var(--lanpm-warning);
+  background: var(--lanpm-warning-ring);
+}
+
+.priorityLow {
+  margin-inline-end: 0;
+  color: var(--lanpm-text-secondary);
+  background: var(--lanpm-fill-secondary);
+}
+
+.milestoneTag {
+  margin-inline-end: 0;
+  color: var(--lanpm-accent);
+  background: var(--lanpm-accent-fill);
+}
+
 .cardDue {
   color: var(--lanpm-text-tertiary);
 }
