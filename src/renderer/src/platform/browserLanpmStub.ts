@@ -14,6 +14,7 @@ import { isMessageReadByOthers } from '@shared/chat/readReceipt'
 import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
 import { validateOtherReason } from '@shared/task/validation'
+import { stubError } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
 const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
@@ -23,9 +24,9 @@ const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
 const taskListeners = new Set<(groupId: string) => void>()
 
 function assertStubTaskWritable(groupId: string): void {
-  if (groupId.startsWith('dm:')) throw new Error('私聊不支持任务')
-  if (groupId === 'demo-anonymous') throw new Error('匿名群不支持任务')
-  if (groupId === 'demo-function') throw new Error('职能群不支持看板任务')
+  if (groupId.startsWith('dm:')) throw stubError('stub.dmNoTask')
+  if (groupId === 'demo-anonymous') throw stubError('stub.anonymousNoTask')
+  if (groupId === 'demo-function') throw stubError('stub.functionNoTask')
 }
 
 function readAllTasks(): Record<string, Task[]> {
@@ -52,9 +53,9 @@ function maxSortInColumn(tasks: Task[], status: TaskStatus): number {
 function stubCreateTask(input: CreateTaskInput): Task {
   assertStubTaskWritable(input.groupId)
   const status = readStatus()
-  if (!status.configured || !status.user) throw new Error('请先完成身份配置')
+  if (!status.configured || !status.user) throw stubError('stub.identityRequired')
   const title = input.title.trim()
-  if (!title) throw new Error('任务标题不能为空')
+  if (!title) throw stubError('stub.taskTitleEmpty')
   const prev = readAllTasks()[input.groupId] ?? []
   const taskStatus = input.status ?? 'todo'
   const task: Task = {
@@ -88,7 +89,7 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
       break
     }
   }
-  if (!groupId) throw new Error('任务不存在')
+  if (!groupId) throw stubError('stub.taskNotFound')
   const idx = tasks.findIndex((t) => t.taskId === input.taskId)
   const existing = tasks[idx]!
   const nextStatus = input.status ?? existing.status
@@ -365,10 +366,10 @@ export function createBrowserLanpmStub(): LanpmApi {
       sendText: async (groupId, text) => {
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
-          throw new Error('请先完成身份配置')
+          throw stubError('stub.identityRequired')
         }
         const trimmed = text.trim()
-        if (!trimmed) throw new Error('消息不能为空')
+        if (!trimmed) throw stubError('stub.messageEmpty')
         const members = listStubMembers()
         const mentions = parseMentions(trimmed, members)
         const prev = readChatMessages(groupId)
@@ -392,10 +393,10 @@ export function createBrowserLanpmStub(): LanpmApi {
       sendCode: async (groupId, code, languageHint, theme) => {
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
-          throw new Error('请先完成身份配置')
+          throw stubError('stub.identityRequired')
         }
         const trimmed = code.trim()
-        if (!trimmed) throw new Error('代码不能为空')
+        if (!trimmed) throw stubError('stub.codeEmpty')
         const prev = readChatMessages(groupId)
         const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
         const language = detectLanguage(trimmed, languageHint)
@@ -459,13 +460,13 @@ export function createBrowserLanpmStub(): LanpmApi {
             otherReason: input.status === 'other' ? (input.otherReason ?? null) : null
           })
         }
-        throw new Error('任务不存在')
+        throw stubError('stub.taskNotFound')
       },
       createFromChat: async (groupId, title) => {
         const task = stubCreateTask({ groupId, title, status: 'todo' })
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
-          throw new Error('请先完成身份配置')
+          throw stubError('stub.identityRequired')
         }
         const prev = readChatMessages(groupId)
         const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
@@ -492,7 +493,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         }),
       upsertDependency: async (input) => {
         void input
-        throw new Error('浏览器预览暂不支持甘特依赖')
+        throw stubError('stub.ganttDepsUnsupported')
       },
       removeDependency: async () => false,
       deleteTask: async (taskId) => {
@@ -515,7 +516,7 @@ export function createBrowserLanpmStub(): LanpmApi {
     file: {
       listFiles: async () => [],
       upload: async () => {
-        throw new Error('浏览器预览请使用 Electron 客户端上传文件')
+        throw stubError('stub.uploadElectronOnly')
       },
       getPreviewUrl: async () => null,
       listTransfers: async () => [],
@@ -538,7 +539,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       }),
       importBookmarks: async () => [],
       exportBookmarks: async () => {
-        throw new Error('浏览器预览请使用 Electron 客户端导出书签')
+        throw stubError('stub.exportBookmarksElectronOnly')
       },
       onTransfersChanged: () => () => undefined
     },

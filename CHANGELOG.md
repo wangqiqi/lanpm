@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.17] - 2026-05-29
+
+### Added
+- **聊天表情**（**P1-CHAT-01**）：`EmojiPicker` Popover + 常用表情网格插入输入框
+- **书签内嵌 WebView**（**PRD-F-03** / **P1-FILES-01**）：`BookmarkWebView`；主进程 `webviewTag: true`；浏览器预览降级外链提示
+- **看板列内排序**（**B-03**）：卡片互拖落点 + `sortOrder` 重编号持久化（`@dnd-kit/core`）
+- **Stub i18n**（**I18N-06** / **UX-I-07**）：`stubTranslate` + `stub.*` 键替换 `browserLanpmStub` 硬编码中文
+
+### Changed
+- **`todo.md`**：未完成置顶、已完成归档至文末；勾选 **P1-CHAT-01**、**P1-FILES-01**、**B-03**、**PRD-F-03**、**I18N-06**、**UX-I-07**
+
+### Tag
+- `v1.0.0-rc.17` — 聊天表情、书签 WebView、看板列内排序与 Stub i18n
+
 ## [1.0.0-rc.16] - 2026-05-29
 
 ### Added

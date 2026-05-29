@@ -1,7 +1,7 @@
 import { Button, Dropdown, Popconfirm, Tag } from 'antd'
 import type { MenuProps } from 'antd'
 import { DeleteOutlined, MoreOutlined } from '@ant-design/icons'
-import { useDraggable } from '@dnd-kit/core'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
@@ -28,6 +28,7 @@ interface KanbanCardProps {
   onDelete?: (taskId: string) => void
   onDiscuss?: (task: Task) => void
   onMoveTo?: (taskId: string, status: TaskStatus) => void
+  onEdit?: (task: Task) => void
   highlighted?: boolean
 }
 
@@ -37,13 +38,20 @@ export default function KanbanCard({
   onDelete,
   onDiscuss,
   onMoveTo,
+  onEdit,
   highlighted = false
 }: KanbanCardProps): React.ReactElement {
   const { t } = useI18n()
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef: setDragRef, transform, isDragging } = useDraggable({
     id: task.taskId,
     data: { task }
   })
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: task.taskId })
+
+  const setNodeRef = (node: HTMLElement | null): void => {
+    setDragRef(node)
+    setDropRef(node)
+  }
 
   const style = transform
     ? { transform: CSS.Translate.toString(transform) }
@@ -61,8 +69,17 @@ export default function KanbanCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`${styles.card} ${isDragging ? styles.cardDragging : ''} ${highlighted ? styles.searchHighlight : ''}`}
+      className={`${styles.card} ${isDragging ? styles.cardDragging : ''} ${isOver ? styles.cardOver : ''} ${highlighted ? styles.searchHighlight : ''}`}
       data-task-id={task.taskId}
+      title={onEdit ? t('board.editDoubleClickHint') : undefined}
+      onDoubleClick={
+        onEdit
+          ? (e) => {
+              e.stopPropagation()
+              onEdit(task)
+            }
+          : undefined
+      }
       {...listeners}
       {...attributes}
     >

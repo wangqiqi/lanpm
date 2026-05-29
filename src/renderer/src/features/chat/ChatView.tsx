@@ -18,6 +18,7 @@ import DmSessionBar from '@renderer/features/chat/DmSessionBar'
 import MemberList from '@renderer/features/chat/MemberList'
 import MentionSuggest from '@renderer/features/chat/MentionSuggest'
 import MessageBubble from '@renderer/features/chat/MessageBubble'
+import EmojiPicker from '@renderer/features/chat/EmojiPicker'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useMentionNotifications } from '@renderer/features/chat/useMentionNotifications'
@@ -92,6 +93,10 @@ export default function ChatView(): React.ReactElement {
       const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
       return `${prev}${sep}@${displayName} `
     })
+  }, [])
+
+  const insertEmoji = useCallback((emoji: string) => {
+    setDraft((prev) => `${prev}${emoji}`)
   }, [])
 
   const dismissMention = useCallback(() => {
@@ -349,6 +354,7 @@ export default function ChatView(): React.ReactElement {
               </div>
             </div>
             <div className={styles.inputActions}>
+              <EmojiPicker onPick={insertEmoji} />
               {taskAllowed && (
                 <Button
                   icon={<PlusSquareOutlined />}

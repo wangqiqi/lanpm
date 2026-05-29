@@ -11,7 +11,7 @@ import {
   Typography
 } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { BookOutlined, CommentOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import { CommentOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
 import { useFileStore } from '@renderer/stores/fileStore'
@@ -22,6 +22,7 @@ import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { groupViewPath } from '@renderer/routes/paths'
+import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
 import styles from './files.module.css'
 
 const { Text } = Typography
@@ -312,13 +313,20 @@ export default function FilesView(): React.ReactElement {
                 </Button>
               </div>
               {selected.isBookmark ? (
-            <div className={styles.bookmarkPreview}>
-              <BookOutlined style={{ fontSize: 32, marginBottom: 12 }} />
-              <Text strong>{selected.bookmarkTitle ?? selected.name}</Text>
-              <a href={selected.bookmarkUrl} target="_blank" rel="noreferrer">
-                {selected.bookmarkUrl}
-              </a>
-            </div>
+                <div className={styles.bookmarkPreviewWrap}>
+                  <BookmarkWebView
+                    url={selected.bookmarkUrl ?? ''}
+                    title={selected.bookmarkTitle ?? selected.name}
+                  />
+                  <a
+                    className={styles.bookmarkExternalLink}
+                    href={selected.bookmarkUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t('files.openBookmarkExternal')}
+                  </a>
+                </div>
               ) : selected.previewStatus === 'converting' ? (
             <Text>{t('files.convertingLocal')}</Text>
           ) : previewError ? (

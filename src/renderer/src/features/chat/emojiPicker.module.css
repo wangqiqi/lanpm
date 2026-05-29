@@ -1,0 +1,44 @@
+.panel {
+  width: 280px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.group + .group {
+  margin-top: 8px;
+}
+
+.groupLabel {
+  font-size: 11px;
+  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  margin-bottom: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 2px;
+}
+
+.emojiBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.emojiBtn:hover {
+  background: var(--lanpm-hover-bg, rgba(0, 0, 0, 0.06));
+}
+
+.emojiBtn:active {
+  background: var(--lanpm-accent-fill, rgba(22, 119, 255, 0.12));
+}

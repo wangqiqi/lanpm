@@ -24,6 +24,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
 import OtherReasonModal from './OtherReasonModal'
+import TaskEditModal from './TaskEditModal'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -41,6 +42,14 @@ const PRIORITY_OPTIONS: { value: TaskPriority; key: MessageKey }[] = [
   { value: 'medium', key: 'board.priorityMedium' },
   { value: 'high', key: 'board.priorityHigh' }
 ]
+
+function arrayMove<T>(items: T[], from: number, to: number): T[] {
+  const next = items.slice()
+  const [moved] = next.splice(from, 1)
+  if (moved === undefined) return items
+  next.splice(to, 0, moved)
+  return next
+}
 
 function TrashDropZone({
   visible,
@@ -75,6 +84,7 @@ function KanbanColumn({
   onDeleteTask,
   onDiscuss,
   onMoveTo,
+  onEdit,
   getMemberDisplayName,
   isTaskHighlighted
 }: {
@@ -86,6 +96,7 @@ function KanbanColumn({
   onDeleteTask?: (taskId: string) => void
   onDiscuss: (task: Task) => void
   onMoveTo: (taskId: string, status: TaskStatus) => void
+  onEdit: (task: Task) => void
   getMemberDisplayName: (groupId: string, userId: string) => string
   isTaskHighlighted: (taskId: string) => boolean
 }): React.ReactElement {
@@ -117,6 +128,7 @@ function KanbanColumn({
             onDelete={onDeleteTask}
             onDiscuss={onDiscuss}
             onMoveTo={onMoveTo}
+            onEdit={onEdit}
             highlighted={isTaskHighlighted(task.taskId)}
           />
         ))}
@@ -136,6 +148,7 @@ export default function BoardView(): React.ReactElement {
   const loadTasks = useTaskStore((s) => s.loadTasks)
   const createTask = useTaskStore((s) => s.createTask)
   const moveTask = useTaskStore((s) => s.moveTask)
+  const updateTask = useTaskStore((s) => s.updateTask)
   const deleteTask = useTaskStore((s) => s.deleteTask)
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
@@ -148,6 +161,7 @@ export default function BoardView(): React.ReactElement {
   const [overTrash, setOverTrash] = useState(false)
   const [pendingOther, setPendingOther] = useState<{ taskId: string; title: string } | null>(null)
   const [otherLoading, setOtherLoading] = useState(false)
+  const [editTask, setEditTask] = useState<Task | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -209,6 +223,10 @@ export default function BoardView(): React.ReactElement {
     } else if (typeof overId === 'string' && isTaskStatus(overId)) {
       setOverTrash(false)
       setOverColumn(overId)
+    } else if (typeof overId === 'string') {
+      const overTask = boardTasks.find((t) => t.taskId === overId)
+      setOverTrash(false)
+      setOverColumn(overTask?.status ?? null)
     } else {
       setOverTrash(false)
       setOverColumn(null)
@@ -216,14 +234,35 @@ export default function BoardView(): React.ReactElement {
   }
 
   const finishMove = useCallback(
-    async (taskId: string, status: TaskStatus, otherReason?: string) => {
+    async (taskId: string, status: TaskStatus, otherReason?: string, sortOrder?: number) => {
       try {
-        await moveTask({ taskId, status, otherReason })
+        await moveTask({ taskId, status, otherReason, sortOrder })
       } catch (err) {
         message.error(err instanceof Error ? err.message : t('board.moveFailed'))
       }
     },
-    [moveTask, t]
+    [moveTask, message, t]
+  )
+
+  const reorderWithinColumn = useCallback(
+    async (status: TaskStatus, activeId: string, overId: string) => {
+      const columnTasks = tasksByColumn[status]
+      const oldIndex = columnTasks.findIndex((t) => t.taskId === activeId)
+      const newIndex = columnTasks.findIndex((t) => t.taskId === overId)
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return
+      const reordered = arrayMove(columnTasks, oldIndex, newIndex)
+      try {
+        for (let i = 0; i < reordered.length; i++) {
+          const task = reordered[i]!
+          if (task.sortOrder !== i) {
+            await moveTask({ taskId: task.taskId, status: task.status, sortOrder: i })
+          }
+        }
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t('board.moveFailed'))
+      }
+    },
+    [tasksByColumn, moveTask, message, t]
   )
 
   const handleDragEnd = (event: DragEndEvent): void => {
@@ -239,18 +278,35 @@ export default function BoardView(): React.ReactElement {
       return
     }
 
-    if (!isTaskStatus(String(overId))) return
+    if (isTaskStatus(String(overId))) {
+      const targetStatus = String(overId) as TaskStatus
+      const task = boardTasks.find((t) => t.taskId === taskId)
+      if (!task || task.status === targetStatus) return
 
-    const targetStatus = String(overId) as TaskStatus
-    const task = boardTasks.find((t) => t.taskId === taskId)
-    if (!task || task.status === targetStatus) return
+      if (targetStatus === 'other') {
+        setPendingOther({ taskId, title: task.title })
+        return
+      }
 
-    if (targetStatus === 'other') {
-      setPendingOther({ taskId, title: task.title })
+      void finishMove(taskId, targetStatus)
       return
     }
 
-    void finishMove(taskId, targetStatus)
+    const overTask = boardTasks.find((t) => t.taskId === String(overId))
+    const activeTaskItem = boardTasks.find((t) => t.taskId === taskId)
+    if (!overTask || !activeTaskItem) return
+
+    if (activeTaskItem.status === overTask.status) {
+      void reorderWithinColumn(activeTaskItem.status, taskId, String(overId))
+      return
+    }
+
+    if (overTask.status === 'other') {
+      setPendingOther({ taskId, title: activeTaskItem.title })
+      return
+    }
+
+    void finishMove(taskId, overTask.status)
   }
 
   const handleMoveTo = useCallback(
@@ -281,7 +337,11 @@ export default function BoardView(): React.ReactElement {
 
   const handleCreate = async (): Promise<void> => {
     const title = newTitle.trim()
-    if (!title || !gid) return
+    if (!title) {
+      message.warning(t('chat.taskTitleRequired'))
+      return
+    }
+    if (!gid) return
     try {
       await createTask({ groupId: gid, title, priority: newPriority })
       setNewTitle('')
@@ -292,25 +352,58 @@ export default function BoardView(): React.ReactElement {
     }
   }
 
+  const handleOpenCreate = (): void => {
+    setCreateOpen(true)
+  }
+
+  const handleEditSave = useCallback(
+    async (input: {
+      taskId: string
+      title: string
+      description: string
+      status: TaskStatus
+      otherReason: string | null
+      priority: TaskPriority
+      assigneeUserId: string | null
+      startDate: string | null
+      endDate: string | null
+      progressPercent: number
+      milestone: boolean
+    }) => {
+      try {
+        await updateTask({
+          taskId: input.taskId,
+          title: input.title,
+          description: input.description || undefined,
+          status: input.status,
+          otherReason: input.otherReason,
+          priority: input.priority,
+          assigneeUserId: input.assigneeUserId,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          progressPercent: input.progressPercent,
+          milestone: input.milestone
+        })
+        message.success(t('tree.detailSaved'))
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
+        throw err
+      }
+    },
+    [updateTask, message, t]
+  )
+
+  const editTaskLive = editTask
+    ? boardTasks.find((t) => t.taskId === editTask.taskId) ?? editTask
+    : null
+
   return (
     <div className={styles.root}>
       <ViewToolbar
         start={
-          <>
-            <Input
-              placeholder={t('board.taskTitlePlaceholder')}
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onPressEnter={() => void handleCreate()}
-              style={{ maxWidth: 280 }}
-            />
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreate()}>
-              {t('board.newTask')}
-            </Button>
-            <Button type="link" onClick={() => setCreateOpen(true)}>
-              {t('board.moreOptions')}
-            </Button>
-          </>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+            {t('board.newTask')}
+          </Button>
         }
         end={
           <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
@@ -325,7 +418,7 @@ export default function BoardView(): React.ReactElement {
         <ViewEmptyHint>
           <span>{t('board.emptyAll')}</span>
           <div style={{ marginTop: 12 }}>
-            <Button type="primary" onClick={() => setCreateOpen(true)}>
+            <Button type="primary" onClick={handleOpenCreate}>
               {t('board.newTask')}
             </Button>
           </div>
@@ -351,6 +444,7 @@ export default function BoardView(): React.ReactElement {
                 onDeleteTask={(id) => void handleDelete(id)}
                 onDiscuss={handleDiscuss}
                 onMoveTo={handleMoveTo}
+                onEdit={setEditTask}
                 getMemberDisplayName={getMemberDisplayName}
                 isTaskHighlighted={isTaskHighlighted}
               />
@@ -402,6 +496,14 @@ export default function BoardView(): React.ReactElement {
             setPendingOther(null)
           })
         }}
+      />
+
+      <TaskEditModal
+        open={!!editTask}
+        groupId={gid}
+        task={editTaskLive}
+        onCancel={() => setEditTask(null)}
+        onSave={handleEditSave}
       />
     </div>
   )

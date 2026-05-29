@@ -67,7 +67,8 @@ function createWindow(): void {
     webPreferences: {
       preload: resolvePreloadPath(),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webviewTag: true
     }
   })
 
