@@ -37,11 +37,31 @@
 }
 
 .columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 10px 12px;
   font-weight: 600;
   font-size: var(--lanpm-font-body);
   border-bottom: 1px solid var(--lanpm-border);
   flex-shrink: 0;
+}
+
+.columnHeaderTitle {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.columnAddBtn {
+  flex-shrink: 0;
+  color: var(--lanpm-text-secondary);
+}
+
+.columnAddBtn:hover {
+  color: var(--lanpm-accent) !important;
+  background: var(--lanpm-accent-fill) !important;
 }
 
 .columnCount {

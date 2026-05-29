@@ -25,12 +25,11 @@ export function countUnreadMessages(
   return row.c
 }
 
-export function countRootTodoTasks(db: Database, groupId: string): number {
+export function countTodoTasks(db: Database, groupId: string): number {
   const row = db
     .prepare(
       `SELECT COUNT(*) AS c FROM tasks
-       WHERE group_id = ? AND status = 'todo'
-       AND parent_task_id IS NULL AND deleted_at IS NULL`
+       WHERE group_id = ? AND status = 'todo' AND deleted_at IS NULL`
     )
     .get(groupId) as { c: number }
   return row.c
@@ -44,6 +43,6 @@ export function getGroupTabBadges(db: Database, groupId: string): GroupTabBadges
   }
   return {
     chatUnread: countUnreadMessages(db, groupId, userId),
-    boardTodo: countRootTodoTasks(db, groupId)
+    boardTodo: countTodoTasks(db, groupId)
   }
 }

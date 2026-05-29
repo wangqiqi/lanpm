@@ -8,7 +8,11 @@ import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
-import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewToolbar, {
+  ViewToolbarGroup,
+  ViewToolbarHint,
+  ViewToolbarPair
+} from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
@@ -308,26 +312,36 @@ export default function TaskTreeView(): React.ReactElement {
       <ViewToolbar
         start={
           <ViewToolbarGroup>
-            <Input
-              placeholder={t('tree.rootPlaceholder')}
-              value={newRootTitle}
-              onChange={(e) => setNewRootTitle(e.target.value)}
-              onPressEnter={() => void handleCreateRoot()}
-              style={{ maxWidth: 280 }}
-            />
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreateRoot()}>
-              {t('tree.rootBtn')}
-            </Button>
-            <Input
-              placeholder={t('tree.childPlaceholder')}
-              value={childTitle}
-              onChange={(e) => setChildTitle(e.target.value)}
-              disabled={!selectedParentId}
-              style={{ maxWidth: 280 }}
-            />
-            <Button disabled={!selectedParentId} onClick={() => void handleCreateChild()}>
-              {t('tree.addChild')}
-            </Button>
+            <ViewToolbarPair>
+              <Input
+                placeholder={t('tree.rootPlaceholder')}
+                value={newRootTitle}
+                onChange={(e) => setNewRootTitle(e.target.value)}
+                onPressEnter={() => void handleCreateRoot()}
+                style={{ width: 220, maxWidth: 'min(280px, 42vw)' }}
+              />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreateRoot()}>
+                {t('tree.rootBtn')}
+              </Button>
+            </ViewToolbarPair>
+            <ViewToolbarPair>
+              <Input
+                placeholder={t('tree.childPlaceholder')}
+                value={childTitle}
+                onChange={(e) => setChildTitle(e.target.value)}
+                onPressEnter={() => void handleCreateChild()}
+                disabled={!selectedParentId}
+                style={{ width: 220, maxWidth: 'min(280px, 42vw)' }}
+              />
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                disabled={!selectedParentId}
+                onClick={() => void handleCreateChild()}
+              >
+                {t('tree.addChild')}
+              </Button>
+            </ViewToolbarPair>
           </ViewToolbarGroup>
         }
         end={

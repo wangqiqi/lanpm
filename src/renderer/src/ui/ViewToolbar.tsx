@@ -23,6 +23,11 @@ export function ViewToolbarGroup({ children }: { children: React.ReactNode }): R
   return <div className={styles.group}>{children}</div>
 }
 
+/** 工具栏内「输入框 + 操作按钮」成对分组，避免 flex 换行时按钮与输入框分离 */
+export function ViewToolbarPair({ children }: { children: React.ReactNode }): React.ReactElement {
+  return <div className={styles.pair}>{children}</div>
+}
+
 export function ViewToolbarHint({ children }: { children: React.ReactNode }): React.ReactElement {
   return <span className={styles.hint}>{children}</span>
 }

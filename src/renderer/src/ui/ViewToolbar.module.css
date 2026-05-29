@@ -15,6 +15,14 @@
   gap: 8px;
 }
 
+/** 输入 + 按钮成对排列，换行时不拆散 */
+.pair {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .hint {
   font-size: var(--lanpm-font-body);
   color: var(--lanpm-text-secondary);

@@ -27,7 +27,7 @@ import OtherReasonModal from './OtherReasonModal'
 import TaskEditModal from './TaskEditModal'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
-import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import {
   confirmDeleteParentTask,
@@ -86,6 +86,7 @@ function KanbanColumn({
   tasks,
   isOver,
   invalid,
+  onAddTask,
   onDeleteTask,
   onDiscuss,
   onMoveTo,
@@ -98,6 +99,7 @@ function KanbanColumn({
   tasks: Task[]
   isOver: boolean
   invalid: boolean
+  onAddTask?: () => void
   onDeleteTask?: (taskId: string) => void
   onDiscuss: (task: Task) => void
   onMoveTo: (taskId: string, status: TaskStatus) => void
@@ -114,8 +116,20 @@ function KanbanColumn({
       className={`${styles.column} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
     >
       <div className={styles.columnHeader}>
-        {t(COLUMN_TITLE_KEYS[status])}
-        <span className={styles.columnCount}>{tasks.length}</span>
+        <div className={styles.columnHeaderTitle}>
+          {t(COLUMN_TITLE_KEYS[status])}
+          <span className={styles.columnCount}>{tasks.length}</span>
+        </div>
+        {onAddTask ? (
+          <Button
+            type="text"
+            size="small"
+            icon={<PlusOutlined />}
+            className={styles.columnAddBtn}
+            aria-label={t('board.newTask')}
+            onClick={onAddTask}
+          />
+        ) : null}
       </div>
       <div className={styles.columnBody}>
         {tasks.length === 0 && (
@@ -175,11 +189,6 @@ export default function BoardView(): React.ReactElement {
   const boardReady = !loading || tasks.length > 0
   const { isHighlighted: isTaskHighlighted } = useSearchHighlight('task', boardReady)
 
-  const boardTasks = useMemo(
-    () => tasks.filter((t) => !t.parentTaskId),
-    [tasks]
-  )
-
   const tasksByColumn = useMemo(() => {
     const map: Record<TaskStatus, Task[]> = {
       todo: [],
@@ -187,14 +196,14 @@ export default function BoardView(): React.ReactElement {
       done: [],
       other: []
     }
-    for (const t of boardTasks) {
+    for (const t of tasks) {
       map[t.status].push(t)
     }
     for (const col of KANBAN_COLUMN_ORDER) {
       map[col].sort((a, b) => a.sortOrder - b.sortOrder)
     }
     return map
-  }, [boardTasks])
+  }, [tasks])
 
   useEffect(() => {
     if (!gid) return
@@ -216,7 +225,7 @@ export default function BoardView(): React.ReactElement {
   )
 
   const handleDragStart = (event: DragStartEvent): void => {
-    const task = boardTasks.find((t) => t.taskId === event.active.id)
+    const task = tasks.find((t) => t.taskId === event.active.id)
     setActiveTask(task ?? null)
   }
 
@@ -229,7 +238,7 @@ export default function BoardView(): React.ReactElement {
       setOverTrash(false)
       setOverColumn(overId)
     } else if (typeof overId === 'string') {
-      const overTask = boardTasks.find((t) => t.taskId === overId)
+      const overTask = tasks.find((t) => t.taskId === overId)
       setOverTrash(false)
       setOverColumn(overTask?.status ?? null)
     } else {
@@ -285,7 +294,7 @@ export default function BoardView(): React.ReactElement {
 
     if (isTaskStatus(String(overId))) {
       const targetStatus = String(overId) as TaskStatus
-      const task = boardTasks.find((t) => t.taskId === taskId)
+      const task = tasks.find((t) => t.taskId === taskId)
       if (!task || task.status === targetStatus) return
 
       if (targetStatus === 'other') {
@@ -297,8 +306,8 @@ export default function BoardView(): React.ReactElement {
       return
     }
 
-    const overTask = boardTasks.find((t) => t.taskId === String(overId))
-    const activeTaskItem = boardTasks.find((t) => t.taskId === taskId)
+    const overTask = tasks.find((t) => t.taskId === String(overId))
+    const activeTaskItem = tasks.find((t) => t.taskId === taskId)
     if (!overTask || !activeTaskItem) return
 
     if (activeTaskItem.status === overTask.status) {
@@ -316,7 +325,7 @@ export default function BoardView(): React.ReactElement {
 
   const handleMoveTo = useCallback(
     (taskId: string, status: TaskStatus) => {
-      const task = boardTasks.find((t) => t.taskId === taskId)
+      const task = tasks.find((t) => t.taskId === taskId)
       if (!task || task.status === status) return
       if (status === 'other') {
         setPendingOther({ taskId, title: task.title })
@@ -324,14 +333,14 @@ export default function BoardView(): React.ReactElement {
       }
       void finishMove(taskId, status)
     },
-    [boardTasks, finishMove]
+    [tasks, finishMove]
   )
 
   const handleDelete = useCallback(
     async (taskId: string) => {
-      const task = boardTasks.find((t) => t.taskId === taskId)
+      const task = tasks.find((t) => t.taskId === taskId)
       if (!task) return
-      const childCount = countTaskDescendants(boardTasks, taskId)
+      const childCount = countTaskDescendants(tasks, taskId)
       const mode =
         childCount > 0
           ? await confirmDeleteParentTask({ t, taskTitle: task.title, childCount })
@@ -345,7 +354,7 @@ export default function BoardView(): React.ReactElement {
         message.error(formatError(err, 'board.deleteFailed'))
       }
     },
-    [boardTasks, deleteTask, t]
+    [tasks, deleteTask, t]
   )
 
   const handleCreate = async (): Promise<void> => {
@@ -407,20 +416,17 @@ export default function BoardView(): React.ReactElement {
   )
 
   const editTaskLive = editTask
-    ? boardTasks.find((t) => t.taskId === editTask.taskId) ?? editTask
+    ? tasks.find((t) => t.taskId === editTask.taskId) ?? editTask
     : null
 
-  const isBoardEmpty = !loading && boardTasks.length === 0
+  const showBoardToolbar = !loading && tasks.length > 0
 
   return (
     <div className={styles.root}>
       <ViewToolbar
         start={
-          !isBoardEmpty ? (
+          showBoardToolbar ? (
             <ViewToolbarGroup>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
-                {t('board.newTask')}
-              </Button>
               <ViewToolbarHint>{t('board.toolbarHint')}</ViewToolbarHint>
             </ViewToolbarGroup>
           ) : undefined
@@ -434,15 +440,6 @@ export default function BoardView(): React.ReactElement {
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />
-      ) : !loading && boardTasks.length === 0 ? (
-        <ViewEmptyHint>
-          <span>{t('board.emptyAll')}</span>
-          <div style={{ marginTop: 12 }}>
-            <Button type="primary" onClick={handleOpenCreate}>
-              {t('board.newTask')}
-            </Button>
-          </div>
-        </ViewEmptyHint>
       ) : (
         <DndContext
           sensors={sensors}
@@ -461,6 +458,7 @@ export default function BoardView(): React.ReactElement {
                 tasks={tasksByColumn[status]}
                 isOver={overColumn === status}
                 invalid={false}
+                onAddTask={status === 'todo' ? handleOpenCreate : undefined}
                 onDeleteTask={(id) => void handleDelete(id)}
                 onDiscuss={handleDiscuss}
                 onMoveTo={handleMoveTo}

@@ -328,7 +328,7 @@ function stubGroupTabBadges(groupId: string): import('@shared/badge/types').Grou
     }
   }
   const tasks = readAllTasks()[groupId] ?? []
-  const boardTodo = tasks.filter((t) => !t.parentTaskId && t.status === 'todo').length
+  const boardTodo = tasks.filter((t) => t.status === 'todo').length
   return { chatUnread, boardTodo }
 }
 
