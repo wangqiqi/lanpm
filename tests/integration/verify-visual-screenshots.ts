@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readdirSync } from 'node:fs'
+import { createHash, existsSync, mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -68,5 +68,34 @@ const written = new Set(
 
 const missing = EXPECTED.filter((name) => !written.has(name))
 assert.equal(missing.length, 0, `missing screenshots: ${missing.join(', ')} → ${outDir}`)
+
+const MIN_BYTES = 8_000
+const THEME_PAGES = ['chat', 'board', 'tree', 'gantt', 'files', 'cockpit'] as const
+
+for (const name of EXPECTED) {
+  const path = join(outDir, `${name}.png`)
+  const size = statSync(path).size
+  assert.ok(size >= MIN_BYTES, `${name}.png too small (${size} B) — blank or error page?`)
+}
+
+for (const page of THEME_PAGES) {
+  const light = readFileSync(join(outDir, `light_${page}.png`))
+  const dark = readFileSync(join(outDir, `dark_${page}.png`))
+  const lightMd5 = createHash('md5').update(light).digest('hex')
+  const darkMd5 = createHash('md5').update(dark).digest('hex')
+  assert.notEqual(
+    lightMd5,
+    darkMd5,
+    `light_${page}.png and dark_${page}.png are identical — theme not applied`
+  )
+}
+
+const setupLight = readFileSync(join(outDir, 'light_setup.png'))
+const setupDark = readFileSync(join(outDir, 'dark_setup.png'))
+assert.notEqual(
+  createHash('md5').update(setupLight).digest('hex'),
+  createHash('md5').update(setupDark).digest('hex'),
+  'light_setup.png and dark_setup.png are identical'
+)
 
 console.log(`verify:visual-screenshots: ok (${EXPECTED.length} png → ${outDir})`)

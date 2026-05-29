@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.36] - 2026-05-29
+
+### Added
+- **`archive/` 分目录**：`audit/`、`todo/`、`milestone/`、`review/`、`plan/`、`docs-meta/` + `README.md` 命名约定
+- **`uiStore`**：监听 `lanpm-visual-theme`，无头截图同会话切换亮暗时同步 Ant 主题
+
+### Changed
+- **移除根目录** `视觉.md`、`代码文档差异.md`；审计报告迁至 `archive/audit/`，**`docs/`、`.cursor/` 不再引用 archive**
+- **`todo.md`**：未完成项 SSOT；去掉报告索引废话
+- **`visualCapture.ts`**：`applyTheme` + hash 导航减 full reload；隐藏窗用 `setTimeout` 轮询就绪；首屏后 `showInactive`
+- **`verify:docs-code`**：§1 写入 `archive/audit/docs-code/`，保留 §2 尾段
+- **Cursor skills / `docs/00–06`**：SSOT 仅 `docs/*` + `todo.md`
+
+### Tag
+- `v1.0.0-rc.36` — 归档目录整理、审计报告迁出根目录、视觉截图主题切换加固
+
 ## [1.0.0-rc.35] - 2026-05-29
 
 ### Added

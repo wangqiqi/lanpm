@@ -34,7 +34,22 @@ function themedPageUrl(theme: (typeof THEMES)[number], hashPath: string): string
   return `file://${rendererIndexHtml}?theme=${theme}${hash}`
 }
 
-async function waitForHealthyUi(win: BrowserWindow, timeoutMs = 30_000): Promise<void> {
+/** file:// 二次导航可能不重新执行 main.tsx，需显式写入 dataset */
+async function applyTheme(win: BrowserWindow, theme: (typeof THEMES)[number]): Promise<void> {
+  await win.webContents.executeJavaScript(`
+    (function() {
+      const theme = ${JSON.stringify(theme)};
+      localStorage.setItem('theme', theme);
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+      window.dispatchEvent(new CustomEvent('lanpm-visual-theme', { detail: theme }));
+    })()
+  `)
+  await wait(200)
+}
+
+async function waitForHealthyUi(win: BrowserWindow, timeoutMs = 25_000): Promise<void> {
+  /** 隐藏窗口时 rAF 可能永不触发，用 setTimeout 轮询 */
   await win.webContents.executeJavaScript(`
     new Promise((resolve, reject) => {
       const deadline = Date.now() + ${timeoutMs}
@@ -43,13 +58,18 @@ async function waitForHealthyUi(win: BrowserWindow, timeoutMs = 30_000): Promise
         const fatal = document.querySelector('pre.lanpm-fatal')
         const text = root?.innerText ?? ''
         if (fatal || /TypeError:|is not a function/.test(text)) {
-          return reject(new Error((fatal?.textContent ?? text).slice(0, 200)))
+          return reject(new Error((fatal?.textContent ?? text).slice(0, 240)))
         }
-        if (root && root.childElementCount > 0 && !text.includes('LanPM 加载中')) {
+        const booting = /加载|Loading/i.test(text) && !document.querySelector('nav')
+        const hasChrome =
+          !!document.querySelector('nav') ||
+          !!document.querySelector('header') ||
+          text.includes('欢迎')
+        if (root && root.childElementCount > 0 && !booting && hasChrome) {
           return resolve(true)
         }
-        if (Date.now() > deadline) return reject(new Error('UI not ready'))
-        requestAnimationFrame(tick)
+        if (Date.now() > deadline) return reject(new Error('UI not ready: ' + text.slice(0, 80)))
+        setTimeout(tick, 120)
       }
       tick()
     })
@@ -58,7 +78,7 @@ async function waitForHealthyUi(win: BrowserWindow, timeoutMs = 30_000): Promise
 
 function loadUrl(win: BrowserWindow, url: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`load timeout: ${url}`)), 45_000)
+    const timer = setTimeout(() => reject(new Error(`load timeout: ${url}`)), 40_000)
     win.webContents.once('did-finish-load', () => {
       clearTimeout(timer)
       resolve()
@@ -70,9 +90,21 @@ function loadUrl(win: BrowserWindow, url: string): Promise<void> {
   })
 }
 
+async function navigateHash(win: BrowserWindow, hashPath: string): Promise<void> {
+  const hash = hashPath.startsWith('#') ? hashPath : `#${hashPath}`
+  await win.webContents.executeJavaScript(`
+    (function() {
+      const next = ${JSON.stringify(hash)}
+      if (window.location.hash !== next) window.location.hash = next
+    })()
+  `)
+  await wait(800)
+  await waitForHealthyUi(win)
+}
+
 async function capture(win: BrowserWindow, outDir: string, fileName: string): Promise<void> {
   await waitForHealthyUi(win)
-  await wait(600)
+  await wait(350)
   if (!win.isVisible()) win.showInactive()
   const image = await win.capturePage()
   if (image.isEmpty()) {
@@ -84,7 +116,6 @@ async function capture(win: BrowserWindow, outDir: string, fileName: string): Pr
 
 /**
  * AUTO-20 / V-14b：无头截取亮暗主题七页（需 build + LANPM_VISUAL_CAPTURE_DIR）。
- * 每页整页 loadURL，避免 hash 懒加载触发 Rolldown CJS 循环依赖。
  */
 export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<boolean> {
   const outDir = process.env.LANPM_VISUAL_CAPTURE_DIR
@@ -93,14 +124,17 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
   mkdirSync(outDir, { recursive: true })
   win.setContentSize(1440, 900)
   win.setBounds({ width: 1440, height: 900 })
-  win.hide()
+  win.webContents.setBackgroundThrottling(false)
+  win.showInactive()
 
   const db = getDatabase()
+  console.info('[lanpm:visual-capture] waiting for initial UI…')
   await waitForHealthyUi(win)
 
   if (!getSetupStatus(db).configured) {
     for (const theme of THEMES) {
       await loadUrl(win, themedPageUrl(theme, '#/'))
+      await applyTheme(win, theme)
       await capture(win, outDir, `${theme}_setup.png`)
     }
     completeSetup(db, { baseName: 'Visual', department: 'QA' })
@@ -108,8 +142,13 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
   }
 
   for (const theme of THEMES) {
-    for (const page of APP_PAGES) {
-      await loadUrl(win, themedPageUrl(theme, page.hash))
+    const [first, ...rest] = APP_PAGES
+    await loadUrl(win, themedPageUrl(theme, first.hash))
+    await applyTheme(win, theme)
+    await capture(win, outDir, `${theme}_${first.slug}.png`)
+    for (const page of rest) {
+      await navigateHash(win, page.hash)
+      await applyTheme(win, theme)
       await capture(win, outDir, `${theme}_${page.slug}.png`)
     }
   }

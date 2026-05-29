@@ -34,3 +34,11 @@ export const useUiStore = create<UiState>((set, get) => ({
     set({ locale })
   }
 }))
+
+/** AUTO-20：无头截图在同一会话内切换主题时同步 Ant ConfigProvider */
+if (typeof window !== 'undefined') {
+  window.addEventListener('lanpm-visual-theme', (ev) => {
+    const theme = (ev as CustomEvent<ThemeMode>).detail
+    if (theme === 'dark' || theme === 'light') useUiStore.getState().setTheme(theme)
+  })
+}

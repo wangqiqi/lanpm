@@ -1,10 +1,10 @@
 /**
- * 文档 ↔ 代码可机读一致性检查；结果写入仓库根目录 代码文档差异.md
+ * 文档 ↔ 代码可机读一致性检查；§1 写入 archive/audit/docs-code/（见 DOCS_CODE_REPORT）
  * Run: npm run verify:docs-code
  * CI 门禁: npm run verify:docs-code -- --strict
  */
 import assert from 'node:assert/strict'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { projectRoot } from '../projectRoot.ts'
 
@@ -135,17 +135,7 @@ if (doc04.includes('16px') && !/\.main\s*\{[^}]*padding:\s*16px/s.test(mainLayou
 
 // --- 报告 ---
 const openCount = diffs.length
-const body = `# 代码与文档差异报告
-
-> **生成日期**：${now}（\`npm run verify:docs-code\`）  
-> **代码基线**：\`package.json\` → \`${version}\`  
-> **说明**：机读项见 §1；PRD 能力级差距需 Agent/人工审计见 §2。修复后重跑本脚本更新 §1。
-
----
-
-## 1. 自动化检测（${openCount === 0 ? '无差异 ✅' : `${openCount} 项待处理`}）
-
-${openCount === 0 ? '_当前机读检查未发现文档与代码冲突。_' : ''}
+const section1 = `## 1. 自动化检测（${openCount === 0 ? '无差异 ✅' : `${openCount} 项待处理`}）
 
 | ID | 严重 | 来源 | 文档 | 代码/实现 | 建议修复 |
 |----|------|------|------|-----------|----------|
@@ -155,51 +145,33 @@ ${diffs
       `| ${d.id} | ${d.severity} | ${d.source} | ${d.doc} | ${d.code} | ${d.fix} |`
   )
   .join('\n')}
-
 ${p0Note}
-
----
-
-## 2. 待人工 / Agent 审计（不自动生成）
-
-以下类型**不会**由本脚本判定，发版或大版本前应由 \`.cursor/skills/lanpm-docs-code-audit\` 补充：
-
-| 类型 | 对照文档 | 示例 |
-|------|----------|------|
-| PRD P0 能力 | \`docs/01\` | 任务详情面板、聊天附件、WebView 书签 |
-| 技术选型 post-RC | \`docs/01\` §1.3、\`docs/02\` | Yjs、WebRTC、IndexedDB 与依赖树 |
-| 验收勾选 | \`docs/06\` §2 | 手验项 vs \`todo.md\` |
-| 视觉细节 | \`docs/04\`、\`视觉.md\` | 令牌/圆角/语义色（见 \`verify:visual\`） |
-
-历史全量评估归档：[archive/20260529_095839_实现文档一致性评估_评估.md](./archive/20260529_095839_实现文档一致性评估_评估.md)
-
----
-
-## 3. 与专用守卫的分工
-
-| 命令 | 职责 |
-|------|------|
-| \`verify:docs-links\` | \`docs/*.md\` 相对链接存在 |
-| \`verify:rc-reality\` | RC 依赖与 PRD §1.3.1 关键词 |
-| \`verify:visual\` | UI 布局/令牌/七页视图 |
-| \`verify:docs-code\` | **本文件** — 版本号、脚本表、布局数字交叉 |
-
----
-
-## 4. 命令
-
-\`\`\`bash
-npm run verify:docs-code           # 更新本报告（默认 exit 0）
-npm run verify:docs-code -- --strict  # 有 §1 差异时 exit 1
-npm run verify:p0                  # 文档链接 + RC 等
-\`\`\`
 `
 
-const outPath = join(root, '代码文档差异.md')
+const DOCS_CODE_REPORT = join(
+  root,
+  'archive/audit/docs-code/20260529_170000_代码文档差异_rc36.md'
+)
+const outPath = DOCS_CODE_REPORT
+let tail = '\n## 2. 待办\n\n见根目录 `todo.md`。\n'
+if (existsSync(outPath)) {
+  const raw = readFileSync(outPath, 'utf8')
+  const idx = raw.indexOf('\n## 2.')
+  if (idx >= 0) tail = raw.slice(idx)
+}
+
+const body = `# 代码与文档差异
+
+> ${now} · \`${version}\` · \`npm run verify:docs-code\`
+
+${section1}
+${tail}
+`
+
 writeFileSync(outPath, body, 'utf8')
 
 console.log(`verify:docs-code: wrote ${outPath} (${openCount} diff(s))`)
 if (strict && openCount > 0) {
-  assert.fail(`strict mode: ${openCount} doc/code mismatch(es) — see 代码文档差异.md §1`)
+  assert.fail(`strict mode: ${openCount} doc/code mismatch(es) — see verify:docs-code report §1`)
 }
 console.log('verify:docs-code OK')

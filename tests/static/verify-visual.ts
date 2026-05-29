@@ -214,6 +214,11 @@ assert.match(
 const boardCss = readFileSync(join(renderer, 'features/board/board.module.css'), 'utf8')
 assert.match(boardCss, /\.priorityHigh/, 'board.module.css should define priorityHigh (VIS-FIX-03)')
 
+for (const rel of ['app/AppRouter.tsx', 'views/GroupView.tsx'] as const) {
+  const src = readFileSync(join(renderer, rel), 'utf8')
+  assert.ok(!/\blazy\s*\(/.test(src), `${rel} must not use React.lazy (Rolldown CJS chunk cycle)`)
+}
+
 const bottomNavCss = readFileSync(join(renderer, 'layout/BottomNav.module.css'), 'utf8')
 assert.match(
   bottomNavCss,
