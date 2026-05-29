@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.63] - 2026-05-29
+
+### Added
+- **驾驶舱返回项目**：TopBar / CockpitView「返回 {群名}」；`cockpitReturnPath` 恢复当前群上次视图
+- **i18n**：`cockpit.backToProject`（zh/en）
+
+### Changed
+- **根目录备忘迁出**：删除 `设计微调.md`、`微信借鉴.md`；全文仅保留于 `archive/plan/20260529_230349_*`、`20260529_224315_*`
+- **plan.md**：仅链至 `archive/plan/`，手验 SSOT 仍为 docs/06 §2.6
+
+### Tag
+- `v1.0.0-rc.63` — 驾驶舱返回项目、设计备忘移入 archive
+
 ## [1.0.0-rc.62] - 2026-05-29
 
 ### Changed

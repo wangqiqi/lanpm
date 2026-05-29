@@ -24,6 +24,21 @@ export function cockpitPath(): string {
   return '/cockpit'
 }
 
+const GROUP_VIEW_PATH_RE = /^\/g\/([^/]+)\/(\w+)/
+
+/** 驾驶舱返回：优先恢复当前群的上次视图，否则进入该群默认聊天页 */
+export function cockpitReturnPath(
+  activeGroupId: string,
+  lastNonCockpitPath: string | null,
+  fallbackView: AppView = 'chat'
+): string {
+  if (lastNonCockpitPath) {
+    const match = GROUP_VIEW_PATH_RE.exec(lastNonCockpitPath)
+    if (match && match[1] === activeGroupId) return lastNonCockpitPath
+  }
+  return groupViewPath(activeGroupId, fallbackView)
+}
+
 export interface ViewTabDef {
   view: AppView
   labelKey: 'nav.chat' | 'nav.board' | 'nav.tree' | 'nav.gantt' | 'nav.files'

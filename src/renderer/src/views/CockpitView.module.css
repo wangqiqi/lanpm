@@ -10,6 +10,21 @@
   max-width: 100%;
 }
 
+.headerActions {
+  justify-content: flex-end;
+}
+
+.backBtn {
+  flex-shrink: 0;
+  max-width: min(100%, 320px);
+}
+
+.backBtnLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .metrics {
   margin-bottom: 16px;
   margin-inline: 0 !important;
@@ -36,6 +51,10 @@
   gap: 8px;
   margin-bottom: 6px;
   min-width: 0;
+}
+
+.projectHead :global(.ant-space) {
+  flex-wrap: wrap;
 }
 
 .projectMeta {

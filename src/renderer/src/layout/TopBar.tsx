@@ -28,7 +28,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { isDmGroupId, getDmPeerUserId } from '@shared/chat/dmSession'
 import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
-import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
+import { cockpitPath, cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
 import DiscoverModal from '@renderer/features/discover/DiscoverModal'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
@@ -112,9 +112,12 @@ export default function TopBar(): React.ReactElement {
     navigate(groupViewPath(groupId, view))
   }
 
+  const isCockpitRoute = location.pathname.startsWith('/cockpit')
+  const cockpitReturnTarget = cockpitReturnPath(activeGroupId, lastNonCockpitPath)
+
   const handleLogoClick = (): void => {
-    if (location.pathname.startsWith('/cockpit')) {
-      navigate(lastNonCockpitPath ?? groupViewPath(activeGroupId, 'chat'))
+    if (isCockpitRoute) {
+      navigate(cockpitReturnTarget)
       return
     }
     if (isDmGroupId(activeGroupId)) {
@@ -286,10 +289,12 @@ export default function TopBar(): React.ReactElement {
               {t('group.dissolve')}
             </RegionButton>
           ) : null}
-          <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
-            <DashboardOutlined />
-            {t('topbar.cockpit')}
-          </RegionButton>
+          {!isCockpitRoute ? (
+            <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
+              <DashboardOutlined />
+              {t('topbar.cockpit')}
+            </RegionButton>
+          ) : null}
         </div>
       </div>
 

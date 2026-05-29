@@ -12,11 +12,11 @@ import {
   Typography
 } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
-import { groupViewPath } from '@renderer/routes/paths'
+import { cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
@@ -40,6 +40,10 @@ export default function CockpitView(): React.ReactElement {
   const location = useLocation()
   const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
+  const getActiveGroup = useNavigationStore((s) => s.getActiveGroup)
+  const activeGroup = getActiveGroup()
+  const returnToActiveProject = () =>
+    navigate(cockpitReturnPath(activeGroupId, lastNonCockpitPath))
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -121,19 +125,25 @@ export default function CockpitView(): React.ReactElement {
   }
 
   const summary = dashboard?.summary
+  const activeProjectName = activeGroup
+    ? resolveGroupDisplayNameById(activeGroup.groupId, activeGroup.name, t)
+    : activeGroupId
 
   return (
     <div className={styles.root}>
       <ViewHeader
         title={t('cockpit.title')}
         actions={
-          <Space wrap>
+          <Space wrap className={styles.headerActions}>
             <Button
-              onClick={() =>
-                navigate(lastNonCockpitPath ?? groupViewPath(activeGroupId, 'chat'))
-              }
+              type="primary"
+              icon={<ArrowLeftOutlined />}
+              className={styles.backBtn}
+              onClick={returnToActiveProject}
             >
-              {t('cockpit.resumeWork')}
+              <span className={styles.backBtnLabel}>
+                {t('cockpit.backToProject', { name: activeProjectName })}
+              </span>
             </Button>
             <Button loading={reportLoading} onClick={() => void runReport('weekly')}>
               {t('cockpit.weeklyReport')}
@@ -184,9 +194,18 @@ export default function CockpitView(): React.ReactElement {
                 <div className={styles.projectHead}>
                   <Text strong>{resolveGroupDisplayNameById(p.groupId, p.name, t)}</Text>
                   <Tag color={meta.color}>{meta.label}</Tag>
-                  <Button size="small" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
-                    {t('common.view')}
-                  </Button>
+                  <Space size="small">
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => navigate(groupViewPath(p.groupId, 'chat'))}
+                    >
+                      {t('cockpit.enterProject')}
+                    </Button>
+                    <Button size="small" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
+                      {t('cockpit.openBoard')}
+                    </Button>
+                  </Space>
                 </div>
                 <Progress percent={p.progressPercent} size="small" />
                 <Text type="secondary" className={styles.projectMeta}>

@@ -41,17 +41,40 @@
 @media (max-width: 1100px) {
   .bar {
     flex-wrap: wrap;
+    align-items: flex-start;
     height: auto;
-    padding: 8px 16px;
+    min-height: 56px;
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .barSection {
+    flex: 1 1 100%;
+    gap: 6px;
+  }
+
+  .barSection:last-child {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .barDivider {
+    display: none;
   }
 
   .projectSelect {
-    min-width: 140px;
-    max-width: min(100%, 220px);
+    min-width: 120px;
+    max-width: min(100%, 200px);
+    flex: 1 1 140px;
   }
 
   .localeSelect {
     width: 88px;
+  }
+
+  .search {
+    width: min(220px, 100%);
+    flex: 1 1 160px;
   }
 }
 
@@ -71,6 +94,7 @@
 
 .projectSelect {
   min-width: 180px;
+  max-width: min(280px, 36vw);
 }
 
 .projectSelect :global(.ant-select-selector) {
