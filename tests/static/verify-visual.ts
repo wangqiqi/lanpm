@@ -213,6 +213,26 @@ assert.match(
 
 const boardCss = readFileSync(join(renderer, 'features/board/board.module.css'), 'utf8')
 assert.match(boardCss, /\.priorityHigh/, 'board.module.css should define priorityHigh (VIS-FIX-03)')
+assert.match(boardCss, /priorityHigh[\s\S]*--lanpm-danger/, 'priorityHigh must use --lanpm-danger (V-14b-SEM)')
+assert.match(boardCss, /priorityMedium[\s\S]*--lanpm-warning/, 'priorityMedium must use --lanpm-warning')
+assert.match(boardCss, /priorityLow[\s\S]*--lanpm-text-secondary/, 'priorityLow must use secondary text token')
+
+const crashCss = readFileSync(join(renderer, 'app/crash.module.css'), 'utf8')
+assert.match(crashCss, /var\(--lanpm-bg\)/, 'crash page must use theme tokens')
+assert.match(crashCss, /var\(--lanpm-accent\)/, 'crash reload button must use accent token')
+
+const VIS07B_CSS = [
+  'features/board/board.module.css',
+  'features/gantt/gantt.module.css',
+  'features/chat/chat.module.css',
+  'features/tree/tree.module.css',
+  'features/files/files.module.css'
+] as const
+for (const rel of VIS07B_CSS) {
+  const css = readFileSync(join(renderer, rel), 'utf8')
+  const pxFonts = css.match(/font-size:\s*\d+px/g)
+  assert.ok(!pxFonts?.length, `${rel} must use --lanpm-font-* not ${pxFonts?.join(', ')} (VIS-07b)`)
+}
 
 for (const rel of ['app/AppRouter.tsx', 'views/GroupView.tsx'] as const) {
   const src = readFileSync(join(renderer, rel), 'utf8')

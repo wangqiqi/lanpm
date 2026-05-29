@@ -69,7 +69,7 @@
   flex-wrap: wrap;
   gap: 8px 16px;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   color: var(--lanpm-text-secondary);
 }
 
@@ -119,7 +119,7 @@
   border-radius: 6px;
   background: var(--lanpm-bg);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
@@ -157,7 +157,7 @@
 
 .bookmarkExternalLink {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   color: var(--lanpm-accent);
 }
 

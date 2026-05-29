@@ -39,14 +39,14 @@
 .columnHeader {
   padding: 10px 12px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   border-bottom: 1px solid var(--lanpm-border);
   flex-shrink: 0;
 }
 
 .columnCount {
   margin-left: 8px;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 10px;
@@ -74,7 +74,7 @@
   border: 1px dashed var(--lanpm-border);
   border-radius: 8px;
   color: var(--lanpm-text-secondary);
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   text-align: center;
 }
 
@@ -111,7 +111,7 @@
 }
 
 .cardTitle {
-  font-size: 14px;
+  font-size: var(--lanpm-font-body);
   word-break: break-word;
   flex: 1;
   min-width: 0;
@@ -151,7 +151,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   color: var(--lanpm-text-secondary);
 }
 
@@ -185,7 +185,7 @@
 
 .otherReason {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   color: var(--lanpm-danger-strong);
 }
 
@@ -217,7 +217,7 @@
   border-radius: 8px;
   border: 1px dashed var(--lanpm-border);
   color: var(--lanpm-text-secondary);
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   transition:
     border-color 0.15s ease,
     background-color 0.15s ease,

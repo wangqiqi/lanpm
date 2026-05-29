@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.37",
+  "version": "1.0.0-rc.38",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -67,6 +67,7 @@
     "verify:electron-smoke": "node --experimental-strip-types tests/integration/verify-electron-smoke.ts",
     "verify:visual-screenshots": "node --experimental-strip-types tests/integration/verify-visual-screenshots.ts",
     "verify:project": "node --experimental-strip-types tests/runners/verify-project.ts",
+    "verify:release-gate": "node --experimental-strip-types tests/runners/verify-release-gate.ts",
     "verify:m7-acceptance": "node --experimental-strip-types tests/static/verify-m7-acceptance.ts",
     "verify:m7-stability": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-m7-stability.ts",
     "verify:m7-perf": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-m7-perf.ts",

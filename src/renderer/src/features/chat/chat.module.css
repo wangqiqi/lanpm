@@ -131,7 +131,7 @@
 
 .dmHint {
   display: block;
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   margin: 0 8px 8px;
   padding-left: 4px;
 }
@@ -146,14 +146,14 @@
 
 .memberTitle {
   display: block;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   margin-bottom: 8px;
   padding-left: 4px;
 }
 
 .memberStats {
   display: block;
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   padding: 8px 4px 12px;
   border-top: 1px solid var(--lanpm-border);
   margin-top: 4px;
@@ -189,7 +189,7 @@
   padding: 6px 8px;
   border-radius: 8px;
   color: var(--lanpm-text-secondary);
-  font-size: 14px;
+  font-size: var(--lanpm-font-body);
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
@@ -221,12 +221,12 @@
 }
 
 .memberDot {
-  font-size: 10px;
+  font-size: var(--lanpm-font-caption);
   line-height: 1;
 }
 
 .memberName {
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -280,7 +280,7 @@
   padding: 8px 10px;
   cursor: pointer;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   color: inherit;
 }
 
@@ -290,7 +290,7 @@
 }
 
 .mentionOptionId {
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   opacity: 0.55;
   margin-left: 8px;
 }
@@ -313,7 +313,7 @@
 
 .dayLabel {
   align-self: center;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   color: var(--lanpm-text-secondary);
   padding: 4px 12px;
   border-radius: 999px;
@@ -395,7 +395,7 @@
 
 .langTag {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   flex-shrink: 0;
 }
 
@@ -403,7 +403,7 @@
   margin: 0;
   padding: 10px 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   line-height: 1.45;
   max-height: 360px;
   max-width: 100%;
@@ -416,13 +416,13 @@
 }
 
 .meta {
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   opacity: 0.85;
   margin-bottom: 4px;
 }
 
 .status {
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   margin-top: 4px;
   opacity: 0.75;
   text-align: right;
@@ -526,13 +526,13 @@
 
 .inputHint {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   padding: 0 0 4px 2px;
   color: var(--lanpm-text-secondary);
 }
 
 .taskRef {
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   line-height: 1.5;
 }
 
@@ -550,7 +550,7 @@
   max-width: 88px;
   height: auto !important;
   padding: 12px 10px !important;
-  font-size: 15px;
+  font-size: var(--lanpm-font-title);
   font-weight: 600;
   line-height: 1.35;
   white-space: normal;
@@ -573,6 +573,6 @@
 }
 
 .voiceHint {
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   text-align: center;
 }

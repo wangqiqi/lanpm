@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.38] - 2026-05-29
+
+### Added
+- **`verify:release-gate`**：发版聚合（`docs-code --strict` · visual · profile · project · m7 · 截图；Linux 自动 xvfb）
+- **`docs/08_post-RC规划与已知限制.md`**：post-RC backlog 索引（DOC-TECH-02 / DOC-F-*）
+- **CI** `visual-screenshots` job（ubuntu + xvfb）
+
+### Changed
+- **VIS-07b**：board/chat/gantt/tree/files/setup 业务 CSS 字号迁 `--lanpm-font-*`；`verify:visual` 守卫
+- **V-14b-SEM**：看板优先级语义色、崩溃页令牌；`verify:visual` 扩展
+- **`docs/05` §1.3** · **`docs/06` §2.5**：release-gate 与验收拆项
+- **`todo.md`**：AUTO-20 / SEM / GNT / VIS-07b 勾选同步
+
+### Tag
+- `v1.0.0-rc.38` — 发版聚合门禁、VIS-07b 与 CI 视觉截图
+
 ## [1.0.0-rc.37] - 2026-05-29
 
 ### Added

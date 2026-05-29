@@ -24,14 +24,14 @@
 }
 
 .tooltip {
-  font-size: 12px;
+  font-size: var(--lanpm-font-body);
   max-width: 240px;
 }
 
 .tooltipHint {
   margin-top: 6px;
   opacity: 0.7;
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
 }
 
 .chartWrap :global(.handleGroup) rect {
