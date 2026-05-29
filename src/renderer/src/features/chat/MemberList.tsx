@@ -52,7 +52,7 @@ export default function MemberList({
 
   return (
     <aside className={styles.memberList}>
-      <Text type="secondary" className={styles.memberTitle}>
+      <Text className={styles.memberTitle}>
         {isDm ? t('chat.dmPeer') : t('chat.members')}
       </Text>
       <List
@@ -95,7 +95,7 @@ export default function MemberList({
         }}
       />
       {members.length > 0 && (
-        <Text type="secondary" className={styles.memberStats}>
+        <Text className={styles.memberStats}>
           {t('chat.onlineStats', { online: onlineCount, total: members.length })}
         </Text>
       )}

@@ -6,7 +6,9 @@ import {
   CameraOutlined,
   CodeOutlined,
   EditOutlined,
+  MenuFoldOutlined,
   MenuOutlined,
+  MenuUnfoldOutlined,
   PaperClipOutlined,
   PlusSquareOutlined
 } from '@ant-design/icons'
@@ -38,10 +40,15 @@ import styles from './chat.module.css'
 const { Text } = Typography
 const { TextArea } = Input
 
-const COMPOSER_MIN = 88
-const COMPOSER_MAX = 320
-const COMPOSER_DEFAULT = 136
+const COMPOSER_MIN = 96
+const COMPOSER_MAX = 360
+const COMPOSER_DEFAULT = 176
 const MESSAGES_MIN = 96
+
+const SIDEBAR_MIN = 160
+const SIDEBAR_MAX = 400
+const SIDEBAR_DEFAULT = 240
+const SIDEBAR_WIDTH_KEY = 'lanpm-chat-sidebar-width'
 
 function formatTime(iso: string): string {
   try {
@@ -83,12 +90,23 @@ export default function ChatView(): React.ReactElement {
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isNarrow, setIsNarrow] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY))
+    if (Number.isFinite(saved) && saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX) return saved
+    return SIDEBAR_DEFAULT
+  })
+  const [sidebarResizing, setSidebarResizing] = useState(false)
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
+  const sidebarDragRef = useRef<{ startX: number; startW: number } | null>(null)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 900px)')
-    const sync = (): void => setSidebarOpen(!mq.matches)
+    const sync = (): void => {
+      setIsNarrow(mq.matches)
+      setSidebarOpen(!mq.matches)
+    }
     sync()
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
@@ -126,8 +144,10 @@ export default function ChatView(): React.ReactElement {
   useMarkRead(gid, messages, currentUserId)
 
   const groupType = gid ? getGroupType(gid) : 'project'
-  const taskAllowed = gid && !isDmGroupId(gid) && groupType === 'project'
-  const codeAllowed = gid && !isDmGroupId(gid) && groupType !== 'anonymous'
+  const isDm = Boolean(gid && isDmGroupId(gid))
+  const isMemoryOnlyAnonymous = Boolean(gid && !isDm && groupType === 'anonymous')
+  const taskAllowed = Boolean(gid && !isDm && groupType === 'project')
+  const codeAllowed = Boolean(gid && !isMemoryOnlyAnonymous)
   const fileAllowed = codeAllowed
   const [fileDragOver, setFileDragOver] = useState(false)
 
@@ -202,6 +222,46 @@ export default function ChatView(): React.ReactElement {
     e.preventDefault()
     dragRef.current = { startY: e.clientY, startH: composerHeight }
     setResizing(true)
+  }
+
+  useEffect(() => {
+    if (!sidebarResizing) {
+      document.body.classList.remove('lanpm-sidebar-resize')
+      return
+    }
+    document.body.classList.add('lanpm-sidebar-resize')
+    const onMove = (e: MouseEvent): void => {
+      if (!sidebarDragRef.current) return
+      const delta = e.clientX - sidebarDragRef.current.startX
+      const next = Math.min(
+        SIDEBAR_MAX,
+        Math.max(SIDEBAR_MIN, sidebarDragRef.current.startW + delta)
+      )
+      setSidebarWidth(next)
+    }
+
+    const onUp = (): void => {
+      sidebarDragRef.current = null
+      setSidebarResizing(false)
+      setSidebarWidth((w) => {
+        localStorage.setItem(SIDEBAR_WIDTH_KEY, String(w))
+        return w
+      })
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      document.body.classList.remove('lanpm-sidebar-resize')
+    }
+  }, [sidebarResizing])
+
+  const onSidebarResizeStart = (e: React.MouseEvent): void => {
+    e.preventDefault()
+    sidebarDragRef.current = { startX: e.clientX, startW: sidebarWidth }
+    setSidebarResizing(true)
   }
 
   const handleSend = useCallback(async () => {
@@ -286,7 +346,32 @@ export default function ChatView(): React.ReactElement {
       >
         <MenuOutlined />
       </button>
-      <div className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
+      {!isNarrow && !sidebarOpen && (
+        <button
+          type="button"
+          className={styles.sidebarExpandBtn}
+          aria-label={t('chat.openSidebar')}
+          onClick={() => setSidebarOpen(true)}
+        >
+          <MenuUnfoldOutlined />
+        </button>
+      )}
+      <div
+        className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''} ${!isNarrow && !sidebarOpen ? styles.sidebarCollapsed : ''}`}
+        style={!isNarrow && sidebarOpen ? { width: sidebarWidth } : undefined}
+      >
+        {!isNarrow && sidebarOpen && (
+          <div className={styles.sidebarHeader}>
+            <button
+              type="button"
+              className={styles.sidebarCollapseBtn}
+              aria-label={t('chat.closeSidebar')}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <MenuFoldOutlined />
+            </button>
+          </div>
+        )}
         <DmSessionBar activeGroupId={gid} />
         <MemberList
           groupId={gid}
@@ -294,9 +379,18 @@ export default function ChatView(): React.ReactElement {
           onRefresh={() => void loadMembers(gid)}
           onInsertMention={(name) => {
             insertMention(name)
-            if (window.matchMedia('(max-width: 900px)').matches) setSidebarOpen(false)
+            if (isNarrow) setSidebarOpen(false)
           }}
         />
+        {!isNarrow && sidebarOpen && (
+          <div
+            className={`${styles.sidebarResizeHandle} ${sidebarResizing ? styles.sidebarResizeHandleActive : ''}`}
+            onMouseDown={onSidebarResizeStart}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t('chat.resizeSidebar')}
+          />
+        )}
       </div>
 
       <div

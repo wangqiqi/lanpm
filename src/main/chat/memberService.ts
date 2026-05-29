@@ -103,6 +103,10 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
 }
 
 export function getMemberDisplayName(db: Database, groupId: string, userId: string): string {
+  if (isDmGroupId(groupId)) {
+    const user = getUserById(db, userId)
+    return user?.displayName ?? userId
+  }
   const groupType = resolveGroupType(db, groupId)
   if (isAnonymousGroupType(groupType)) {
     const alias = listDbGroupMembers(db, groupId).find((m) => m.userId === userId)?.displayAlias

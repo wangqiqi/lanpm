@@ -82,6 +82,32 @@
   padding: 0 4px;
 }
 
+.toolbarPrimary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbarSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbarSecondary :global(.ant-btn) {
+  font-size: var(--lanpm-font-body);
+}
+
+.toolbarDivider {
+  width: 1px;
+  height: 24px;
+  flex-shrink: 0;
+  background: var(--lanpm-border);
+  margin: 0 2px;
+}
+
 .searchInput {
   flex: 1;
   min-width: 160px;

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   assertGroupAllowsFiles,
   assertGroupAllowsTasks,
-  isAnonymousGroupType
+  isAnonymousGroupType,
+  isMemoryOnlyChatGroup
 } from '@shared/group/guards'
 
 describe('isAnonymousGroupType', () => {
@@ -24,12 +25,19 @@ describe('assertGroupAllowsTasks', () => {
 })
 
 describe('assertGroupAllowsFiles', () => {
-  it('allows project files', () => {
+  it('allows project and dm files', () => {
     expect(() => assertGroupAllowsFiles('project')).not.toThrow()
+    expect(() => assertGroupAllowsFiles('project', 'dm:alice__bob')).not.toThrow()
   })
 
-  it('blocks dm and anonymous', () => {
-    expect(() => assertGroupAllowsFiles('project', 'dm:alice__bob')).toThrow('私聊不支持文件')
+  it('blocks anonymous', () => {
     expect(() => assertGroupAllowsFiles('anonymous')).toThrow('匿名群不支持文件')
+  })
+})
+
+describe('isMemoryOnlyChatGroup', () => {
+  it('treats dm as persisted chat', () => {
+    expect(isMemoryOnlyChatGroup('dm:alice__bob', 'anonymous')).toBe(false)
+    expect(isMemoryOnlyChatGroup('demo-anonymous', 'anonymous')).toBe(true)
   })
 })

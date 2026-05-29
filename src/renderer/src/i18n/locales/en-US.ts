@@ -297,6 +297,7 @@ const enUS = {
   'chat.taskBtn': 'Task',
   'chat.codeBtn': 'Code',
   'chat.resizeComposer': 'Resize composer',
+  'chat.resizeSidebar': 'Resize sidebar',
   'chat.openSidebar': 'Open members & sessions',
   'chat.closeSidebar': 'Close sidebar',
   'chat.taskNotAllowed': 'Tasks cannot be created in this group',

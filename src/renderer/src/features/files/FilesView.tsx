@@ -20,7 +20,7 @@ import type { FileCategory, FileMeta } from '@shared/file/types'
 import { isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
+import ViewToolbar from '@renderer/ui/ViewToolbar'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -434,42 +434,47 @@ export default function FilesView(): React.ReactElement {
           />
         }
         end={
-          <ViewToolbarGroup>
-            <Space size="small" align="center">
-              <Text type="secondary">{t('files.rateLimitKbps')}</Text>
-              <InputNumber
-                min={0}
-                step={128}
-                value={transferSettings?.rateKbps ?? 0}
-                onChange={(v) => {
-                  if (v === null) return
-                  void setTransferRate(v).catch(() => undefined)
-                }}
-                style={{ width: 120 }}
-                aria-label={t('files.rateLimitKbps')}
-              />
-            </Space>
-            <Button
-              type="primary"
-              icon={<UploadOutlined />}
-              onClick={() =>
-                void upload(gid).catch((err: unknown) =>
-                  message.error(err instanceof Error ? err.message : t('files.uploadFailed'))
-                )
-              }
-            >
-              {t('files.upload')}
-            </Button>
-            <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
-              {t('files.addBookmark')}
-            </Button>
-            <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
-              {t('files.importBookmarks')}
-            </Button>
-            <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
-              {t('files.exportBookmarks')}
-            </Button>
-          </ViewToolbarGroup>
+          <>
+            <div className={styles.toolbarPrimary}>
+              <Space size="small" align="center">
+                <Text type="secondary">{t('files.rateLimitKbps')}</Text>
+                <InputNumber
+                  min={0}
+                  step={128}
+                  value={transferSettings?.rateKbps ?? 0}
+                  onChange={(v) => {
+                    if (v === null) return
+                    void setTransferRate(v).catch(() => undefined)
+                  }}
+                  style={{ width: 120 }}
+                  aria-label={t('files.rateLimitKbps')}
+                />
+              </Space>
+              <Button
+                type="primary"
+                icon={<UploadOutlined />}
+                onClick={() =>
+                  void upload(gid).catch((err: unknown) =>
+                    message.error(err instanceof Error ? err.message : t('files.uploadFailed'))
+                  )
+                }
+              >
+                {t('files.upload')}
+              </Button>
+            </div>
+            <span className={styles.toolbarDivider} aria-hidden />
+            <div className={styles.toolbarSecondary}>
+              <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
+                {t('files.addBookmark')}
+              </Button>
+              <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
+                {t('files.importBookmarks')}
+              </Button>
+              <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
+                {t('files.exportBookmarks')}
+              </Button>
+            </div>
+          </>
         }
       />
 

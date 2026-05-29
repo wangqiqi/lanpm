@@ -296,6 +296,7 @@ const zhCN = {
   'chat.taskBtn': '任务',
   'chat.codeBtn': '代码',
   'chat.resizeComposer': '调整输入框高度',
+  'chat.resizeSidebar': '调整侧栏宽度',
   'chat.openSidebar': '打开成员与会话侧栏',
   'chat.closeSidebar': '关闭侧栏',
   'chat.taskNotAllowed': '当前群组不支持创建任务',

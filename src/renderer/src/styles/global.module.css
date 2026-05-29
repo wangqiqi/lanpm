@@ -125,6 +125,12 @@
   user-select: none !important;
 }
 
+:global(body.lanpm-sidebar-resize),
+:global(body.lanpm-sidebar-resize *) {
+  cursor: ew-resize !important;
+  user-select: none !important;
+}
+
 :global(:focus-visible) {
   outline: 2px solid var(--lanpm-accent);
   outline-offset: 2px;

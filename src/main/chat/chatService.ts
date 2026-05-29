@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import type { BrowserWindow } from 'electron'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
-import { isAnonymousGroupType } from '../../shared/group/guards'
+import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
 import { parseMentions } from '../../shared/chat/mentions'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
@@ -39,7 +39,7 @@ import {
 const subscribedGroups = new Map<string, () => void>()
 
 function isAnonymousGroup(db: Database, groupId: string): boolean {
-  return isAnonymousGroupType(resolveGroupType(db, groupId))
+  return isMemoryOnlyChatGroup(groupId, resolveGroupType(db, groupId))
 }
 
 function handleIncoming(db: Database, envelope: SyncEnvelope): void {

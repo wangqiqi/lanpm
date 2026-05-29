@@ -10,7 +10,7 @@ import {
   offlineSyncCutoffIso
 } from '../../shared/chat/offlineSync'
 import type { SyncEnvelope } from '../../shared/network/types'
-import { isAnonymousGroupType } from '../../shared/group/guards'
+import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
@@ -45,7 +45,7 @@ export async function requestOfflineSync(db: Database): Promise<void> {
   const now = new Date().toISOString()
 
   for (const group of listUserGroups(db)) {
-    if (isAnonymousGroupType(resolveGroupType(db, group.groupId))) continue
+    if (isMemoryOnlyChatGroup(group.groupId, resolveGroupType(db, group.groupId))) continue
     const sinceLamportTs = getMaxLamportTs(db, group.groupId)
     const payload: ChatSyncRequestPayload = { sinceLamportTs, minCreatedAt }
     const envelope: SyncEnvelope = {
@@ -70,7 +70,7 @@ export async function handleChatSyncRequest(db: Database, envelope: SyncEnvelope
   if (!status.configured || !status.user || !status.device) return
   const localDeviceId = status.device.deviceId
   if (envelope.senderDeviceId === localDeviceId) return
-  if (isAnonymousGroupType(resolveGroupType(db, envelope.groupId))) return
+  if (isMemoryOnlyChatGroup(envelope.groupId, resolveGroupType(db, envelope.groupId))) return
 
   const payload = envelope.payload as ChatSyncRequestPayload
   if (!payload?.minCreatedAt) return
@@ -109,7 +109,7 @@ export function handleChatSyncBatch(db: Database, envelope: SyncEnvelope): void 
   const status = getSetupStatus(db)
   if (!status.configured || !status.device) return
   if (envelope.senderDeviceId === status.device.deviceId) return
-  if (isAnonymousGroupType(resolveGroupType(db, envelope.groupId))) return
+  if (isMemoryOnlyChatGroup(envelope.groupId, resolveGroupType(db, envelope.groupId))) return
 
   const payload = envelope.payload as ChatSyncBatchPayload
   if (!Array.isArray(payload?.messages)) return

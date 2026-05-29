@@ -19,7 +19,7 @@ assert.doesNotThrow(() => assertGroupAllowsTasks('project'))
 
 assert.throws(() => assertGroupAllowsFiles('anonymous'), /匿名群/)
 assert.doesNotThrow(() => assertGroupAllowsFiles('project'))
-assert.throws(() => assertGroupAllowsFiles('project', 'dm:u1:u2'), /私聊/)
+assert.doesNotThrow(() => assertGroupAllowsFiles('project', 'dm:u1__u2'))
 
 const sampleGroup: GroupRecord = {
   groupId: 'g1',

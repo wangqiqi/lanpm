@@ -295,6 +295,7 @@ export type MessageKey =
   | 'chat.taskBtn'
   | 'chat.codeBtn'
   | 'chat.resizeComposer'
+  | 'chat.resizeSidebar'
   | 'chat.openSidebar'
   | 'chat.closeSidebar'
   | 'chat.taskNotAllowed'

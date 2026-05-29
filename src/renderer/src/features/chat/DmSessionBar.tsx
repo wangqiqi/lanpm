@@ -56,9 +56,7 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
 
   return (
     <div className={styles.dmBar}>
-      <Text type="secondary" className={styles.memberTitle}>
-        {t('chat.dmSessions')}
-      </Text>
+      <Text className={styles.sidebarSectionTitle}>{t('chat.dmSessions')}</Text>
       <RegionTabBar items={tabItems} ariaLabel={t('chat.dmSessions')} />
       {inDm && localUserId && (
         <Text type="secondary" className={styles.dmHint}>

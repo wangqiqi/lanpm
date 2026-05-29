@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.42] - 2026-05-29
+
+### Added
+- **聊天侧栏**：可拖拽调宽（`lanpm-chat-sidebar-width`）、窄屏折叠；分区标题样式（`UX-CHAT-SIDEBAR`）
+- **`isMemoryOnlyChatGroup`**：DM 与内存匿名群区分，离线同步/匿名判定不误伤私聊
+
+### Changed
+- **看板**：卡片标题 `--lanpm-font-title`、padding 与 hover 描边（`UX-BOARD-DENSITY`）
+- **文件页**：上传/书签工具栏主次分层（`filesToolbar` / `filesToolbarSecondary`）
+- **`regionInteract`**：hover 时 accent 环（`UX-BRAND`）
+- **DM 成员显示名**：`getMemberDisplayName` 优先读本地用户资料
+- **`todo.md`**：UX-SETUP / CHAT / BOARD / FILES / BRAND 审图项标完成
+
+### Tag
+- `v1.0.0-rc.42` — UI/UX polish（聊天侧栏、看板、文件、regionInteract）与 DM 同步修复
+
 ## [1.0.0-rc.41] - 2026-05-29
 
 ### Added
