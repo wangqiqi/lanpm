@@ -6,15 +6,14 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { electronCiChromiumFlags } from './electron-ci-chromium-flags.mjs'
+import { resolveElectronBin } from './resolve-electron-bin.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const force = process.argv.includes('--force')
 const verbose = process.env.LANPM_NATIVE_VERBOSE === '1' || force
 
-const electronBin =
-  process.platform === 'win32'
-    ? join(root, 'node_modules', 'electron', 'dist', 'electron.exe')
-    : join(root, 'node_modules', 'electron', 'dist', 'electron')
+const electronBin = resolveElectronBin()
 
 const nativeMod = join(
   root,
@@ -26,7 +25,7 @@ const nativeMod = join(
 )
 
 function probe() {
-  if (!existsSync(electronBin)) {
+  if (!electronBin) {
     return { ok: false, reason: 'electron-missing' }
   }
   if (!existsSync(nativeMod)) {
@@ -34,7 +33,7 @@ function probe() {
   }
   const r = spawnSync(
     electronBin,
-    ['-e', "require('better-sqlite3')(':memory:')"],
+    [...electronCiChromiumFlags(), '-e', "require('better-sqlite3')(':memory:')"],
     {
       cwd: root,
       encoding: 'utf8',

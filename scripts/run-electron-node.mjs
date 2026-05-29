@@ -5,15 +5,13 @@
  * Usage: node scripts/run-electron-node.mjs [--experimental-strip-types] path/to/script.ts
  */
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { electronCiChromiumFlags } from './electron-ci-chromium-flags.mjs'
+import { resolveElectronBin } from './resolve-electron-bin.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const electronBin =
-  process.platform === 'win32'
-    ? join(root, 'node_modules', 'electron', 'dist', 'electron.exe')
-    : join(root, 'node_modules', 'electron', 'dist', 'electron')
+const electronBin = resolveElectronBin()
 
 const args = process.argv.slice(2)
 if (args.length === 0) {
@@ -21,12 +19,12 @@ if (args.length === 0) {
   process.exit(1)
 }
 
-if (!existsSync(electronBin)) {
+if (!electronBin) {
   console.error('[lanpm] electron not installed — run npm install')
   process.exit(1)
 }
 
-const r = spawnSync(electronBin, args, {
+const r = spawnSync(electronBin, [...electronCiChromiumFlags(), ...args], {
   cwd: root,
   stdio: 'inherit',
   env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }

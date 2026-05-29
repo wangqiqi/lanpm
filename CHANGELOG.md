@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.46] - 2026-05-29
+
+### Fixed
+- **CI 三平台 `verify:m7`**：`resolve-electron-bin.mjs` 用 `require('electron')` 解析二进制（macOS `Electron.app` 路径）；`electron-ci-chromium-flags.mjs` 为 Linux GHA 附加 `--no-sandbox` 等
+- **CI `verify:visual-screenshots`**：无头 Electron 与 `verify:electron-smoke` 共用路径解析与 CI Chromium 标志
+- **CI 生产构建**：`gantt-task-react` 精确别名至 CJS 入口，避免 Rolldown 解析 `index.modern.js` 子路径失败
+
+### Changed
+- **`udpDiscovery` / `NetworkStub`**：主进程 import 补全 `.ts` 扩展名（与 Node ESM 一致）
+
+### Tag
+- `v1.0.0-rc.46` — GitHub Actions 三平台回归与视觉截图门禁修复
+
 ## [1.0.0-rc.45] - 2026-05-29
 
 ### Added

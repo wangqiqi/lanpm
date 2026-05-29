@@ -7,23 +7,22 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { electronCiChromiumFlags } from '../../scripts/electron-ci-chromium-flags.mjs'
+import { resolveElectronBin } from '../../scripts/resolve-electron-bin.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
-const electronBin =
-  process.platform === 'win32'
-    ? join(root, 'node_modules', 'electron', 'dist', 'electron.exe')
-    : join(root, 'node_modules', 'electron', 'dist', 'electron')
+const electronBin = resolveElectronBin()
 const smokeApp = join(root, 'tests/integration/electron-smoke-app.mjs')
 const rendererHtml = join(root, 'out/renderer/index.html')
 
-assert.ok(existsSync(electronBin), 'electron binary missing — run npm install')
+assert.ok(electronBin, 'electron binary missing — run npm install')
 assert.ok(existsSync(rendererHtml), 'out/renderer/index.html missing — run npm run build first')
 assert.ok(existsSync(smokeApp), `missing ${smokeApp}`)
 
 const smokeEnv = { ...process.env }
 delete smokeEnv.ELECTRON_RUN_AS_NODE
 
-const r = spawnSync(electronBin, [smokeApp], {
+const r = spawnSync(electronBin, [...electronCiChromiumFlags(), smokeApp], {
   cwd: root,
   stdio: 'inherit',
   env: smokeEnv,

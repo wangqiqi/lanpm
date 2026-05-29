@@ -9,7 +9,7 @@ import {
   unlinkSync,
   writeFileSync
 } from 'fs'
-import type { DiscoveryPayload, HeartbeatPayload, NetworkTransport, SyncEnvelope } from '../../../shared/network'
+import type { DiscoveryPayload, HeartbeatPayload, NetworkTransport, SyncEnvelope } from '../../../shared/network/index.ts'
 import {
   STUB_BUS_DIR,
   STUB_BUS_FILE,
@@ -21,8 +21,8 @@ import {
 import { MessageDedup } from './dedup.ts'
 import { LamportClock } from './lamport.ts'
 import { join } from 'path'
-import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider'
-import { rememberPeerGroups } from '../../discover/discoverGroupRegistry'
+import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
+import { rememberPeerGroups } from '../../discover/discoverGroupRegistry.ts'
 import { readPeerRecords, refreshLanUserIds } from './peerRegistry.ts'
 import {
   touchDiscoveryPeer,

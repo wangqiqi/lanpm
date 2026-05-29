@@ -106,11 +106,16 @@ export default defineConfig({
   },
   renderer: {
     resolve: {
-      alias: {
-        '@renderer': resolve('src/renderer/src'),
-        '@shared': resolve('src/shared'),
-        '@resources': resolve('resources')
-      }
+      alias: [
+        { find: '@renderer', replacement: resolve('src/renderer/src') },
+        { find: '@shared', replacement: resolve('src/shared') },
+        { find: '@resources', replacement: resolve('resources') },
+        // Exact package id only; subpaths like dist/index.css stay on the package dir
+        {
+          find: /^gantt-task-react$/,
+          replacement: resolve('node_modules/gantt-task-react/dist/index.js')
+        }
+      ]
     },
     server: {
       host: 'localhost',

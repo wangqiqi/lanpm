@@ -9,12 +9,11 @@ import { existsSync, mkdtempSync, readFileSync, readdirSync, statSync } from 'no
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { electronCiChromiumFlags } from '../../scripts/electron-ci-chromium-flags.mjs'
+import { resolveElectronBin } from '../../scripts/resolve-electron-bin.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
-const electronBin =
-  process.platform === 'win32'
-    ? join(root, 'node_modules', 'electron', 'dist', 'electron.exe')
-    : join(root, 'node_modules', 'electron', 'dist', 'electron')
+const electronBin = resolveElectronBin()
 const mainJs = join(root, 'out/main/index.js')
 const outDir = process.env.LANPM_VISUAL_CAPTURE_DIR ?? join(root, '.lanpm/visual-screenshots')
 
@@ -35,7 +34,7 @@ const EXPECTED = [
   'light_cockpit'
 ] as const
 
-assert.ok(existsSync(electronBin), 'electron binary missing')
+assert.ok(electronBin, 'electron binary missing')
 assert.ok(existsSync(mainJs), 'out/main/index.js missing — run npm run build first')
 
 const userData = mkdtempSync(join(tmpdir(), 'lanpm-visual-cap-'))
@@ -46,7 +45,7 @@ env.LANPM_VISUAL_CAPTURE_DIR = outDir
 env.LANPM_USER_DATA = userData
 env.LANPM_NETWORK = 'stub'
 
-const r = spawnSync(electronBin, [mainJs], {
+const r = spawnSync(electronBin, [...electronCiChromiumFlags(), mainJs], {
   cwd: root,
   stdio: 'inherit',
   env,
