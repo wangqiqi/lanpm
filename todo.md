@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.10` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.11` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -132,7 +132,7 @@
 - [x] **UX-PATH-01** 驾驶舱 → 继续协作：1 步回到上次群/视图 — 同 **UX-W-05**
 - [x] **UX-PATH-02** 用户菜单「API Key」直接打开 `AiConfigModal`（免先跳驾驶舱）
 - [x] **UX-PATH-03** 看板 toolbar inline 快速建任务（对齐任务树输入 + 按钮）
-- [ ] **UX-PATH-04**（可选）任务树：行内 slider / 双击改进度，减少 toolbar 第二行步骤
+- [x] **UX-PATH-04**（可选）任务树：行内 slider / 双击改进度（`TaskTreeView` 双击进度条）
 - [x] **UX-PATH-05** DM 中点击 Logo：回 `lastOriginGroupId` 项目群（`TopBar`）
 - [x] **UX-PATH-06** Setup 完成后进入首个真实群 — 同 **UX-W-09**
 - [x] **UX-PATH-07** 匿名群进入时简要能力说明（仅聊天、无历史等）
@@ -140,12 +140,12 @@
 ### P3 — 跨视图协作链（UX 审查 §8）
 
 - [x] **UX-FLOW-01** 看板任务 →「在聊天中讨论 / 提及任务」反向链（`KanbanCard` → `composeDraft`）
-- [ ] **UX-FLOW-02** 文件 →「发送到群聊」
+- [x] **UX-FLOW-02** 文件 →「发送到群聊」（`FilesView` → `composeDraft`）
 - [x] **UX-FLOW-03** 甘特任务 ↔ 看板卡片互跳（单击甘特条 → 看板高亮）
 
 ### 其他（UX 审查 §3、§7）
 
-- [ ] **UX-DEV-01**（可选）浏览器 `:5173` stub 与 Electron 行为差异写入开发文档
+- [x] **UX-DEV-01**（可选）浏览器 `:5173` stub 与 Electron 行为差异 — `README` §浏览器 Stub
 
 ---
 
@@ -185,7 +185,7 @@
 - [ ] **ARCH-03** UDP 组播发现（跨子网；当前仅广播 `43123`）
 - [x] **ARCH-04** 文档说明：ECDH + AES-GCM authTag vs 文档「独立 HMAC」字段 — 同 **DOC-06**
 - [ ] **ARCH-05** IndexedDB 热缓存实现，或 PRD/README 降级为仅 SQLite
-- [ ] **ARCH-06** PRD/README 中 Yjs / WebRTC / IndexedDB 标为目标栈 vs RC 现状
+- [x] **ARCH-06** PRD/README 中 Yjs / WebRTC / IndexedDB 标为目标栈 vs RC 现状 — 同 **DOC-02/04**
 - [ ] **ARCH-07** 7 天离线补同步队列 — 与 **PRD-F-07** / **DOC-03**
 - [ ] **ARCH-08** SQLite 库级加密，或更新 plan 归档 / docs「可加密」表述
 - [ ] **ARCH-09**（可选）报文层独立 HMAC-SHA256 字段；若不做，在 **ARCH-04** / `docs/02` 明确以 AES-GCM authTag 为准
@@ -210,7 +210,7 @@
 - [x] **UX-F-09** 聊天消息日期分组（今日/昨日/完整日期）
 - [x] **UX-F-10** 看板整体空态 + 创建任务 CTA（四列皆空）
 - [x] **UX-F-11** 看板列内「拖放任务到此」dashed 占位 + i18n
-- [ ] **UX-F-12** 甘特：任务详情弹窗编辑日期（键盘改期替代）
+- [x] **UX-F-12** 甘特：任务详情弹窗编辑日期（单击任务条 → 日期 Modal）
 - [x] **UX-F-13** 文件 Table 空态：`locale.emptyText: t('files.empty')`
 - [x] **UX-F-14** 创建群组失败：`catch` + `message.error`（`CreateGroupModal`）— 同 **UX-W-01**
 - [x] **UX-F-15** 默认路由：重定向 `activeGroupId` 或首群，非写死 `demo-project` — 同 **UX-W-09**
@@ -244,7 +244,7 @@
 - [x] **UX-A-03** `@` 提及：↑↓ 选择、Enter/Tab 确认、Esc 关闭（`useMentionSuggest`）
 - [x] **UX-A-04** 全局 `:focus-visible` focus ring
 - [x] **UX-A-05** 禁用 Tab：`aria-disabled`（`BottomNav`）
-- [ ] **UX-A-06** 看板卡片「移动到列」菜单（键盘替代拖拽）
+- [x] **UX-A-06** 看板卡片「移动到列」菜单（键盘替代拖拽）
 - [x] **UX-A-07** DM chip `title` 改为 peer 显示名（`DmSessionBar`）
 - [x] **UX-A-08** Mention 候选勿默认展示完整 userId（仅 `displayName`）
 - [x] **UX-A-09** Setup Upload 避免嵌套 `<button>`（`SetupWizard`）
@@ -271,7 +271,7 @@
 - [ ] **UX-R-06** BottomNav 窄屏仅 icon 模式
 - [x] **UX-N-01** 驾驶舱返回群路径（与 BottomNav 对称性）— 同 **UX-W-05** / **UX-PATH-01**
 - [x] **UX-N-02** `GroupViewGuard` 非法视图 redirect 时 toast — 同 **UX-W-07**
-- [ ] **UX-N-03** 职能群禁用 Tab 首次引导（非仅 Tooltip）
+- [x] **UX-N-03** 职能群禁用 Tab 首次引导（`BottomNav` + `Modal.info`）
 - [x] **UX-N-04** 匿名群 `leaveAnonymous` 切换群时确认 UI — 同 **UX-W-06**
 
 ---

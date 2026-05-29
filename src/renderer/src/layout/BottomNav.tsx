@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { Tooltip } from 'antd'
+import { Modal, Tooltip } from 'antd'
 import {
   CommentOutlined,
   ProjectOutlined,
@@ -31,6 +31,8 @@ const DISABLED_HINT_KEYS: Record<GroupType, MessageKey> = {
   anonymous: 'nav.disabled.anonymous'
 }
 
+const FUNCTION_GUIDE_KEY = 'lanpm.guide.functionTabs'
+
 export default function BottomNav(): React.ReactElement {
   const navigate = useNavigate()
   const location = useLocation()
@@ -51,6 +53,17 @@ export default function BottomNav(): React.ReactElement {
 
   const groupType = getGroupType(groupId)
 
+  const maybeShowFunctionGuide = (): void => {
+    if (groupType !== 'function') return
+    if (localStorage.getItem(FUNCTION_GUIDE_KEY)) return
+    Modal.info({
+      title: t('nav.functionGuideTitle'),
+      content: t('nav.functionGuideBody'),
+      okText: t('common.confirm'),
+      onOk: () => localStorage.setItem(FUNCTION_GUIDE_KEY, '1')
+    })
+  }
+
   return (
     <nav className={styles.nav} aria-label={t('nav.ariaLabel')}>
       {VIEW_TABS.map((tab) => {
@@ -70,13 +83,21 @@ export default function BottomNav(): React.ReactElement {
             <span className={styles.label}>{t(VIEW_MESSAGE_KEYS[tab.view])}</span>
           </button>
         )
-        return allowed ? (
-          <span key={tab.view} className={styles.tabWrap}>
+        const wrap = (
+          <span
+            className={styles.tabWrap}
+            onClick={() => {
+              if (!allowed) maybeShowFunctionGuide()
+            }}
+          >
             {btn}
           </span>
+        )
+        return allowed ? (
+          <span key={tab.view}>{wrap}</span>
         ) : (
           <Tooltip key={tab.view} title={t(DISABLED_HINT_KEYS[groupType])}>
-            <span className={styles.tabWrap}>{btn}</span>
+            {wrap}
           </Tooltip>
         )
       })}

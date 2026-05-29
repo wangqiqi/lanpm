@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.10`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
+- **RC**：`1.0.0-rc.11`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
@@ -19,6 +19,17 @@ npm run typecheck
 npm run verify:m7   # 全量回归（含 rebuild:native + M0–M7）
 npm run build       # 生产构建
 ```
+
+### 浏览器 Stub 与 Electron 差异（`UX-DEV-01`）
+
+| 场景 | Electron（`npm run dev`） | 浏览器 Vite（`:5173`，若启用 stub） |
+|------|---------------------------|-------------------------------------|
+| IPC / SQLite | 主进程 `getLanpmApi()` 真实或 Stub | `browserLanpmStub.ts` 内存桩 |
+| 文件上传/预览 | 系统对话框 + 本地路径 | 受限或 mock |
+| 路由 | HashRouter `#/g/...` | 同 Hash，但无 Electron 窗口壳 |
+| 推荐验收 | **以 Electron 为准** | 仅 UI 快速预览 |
+
+Stub 错误文案仍为英文硬编码（见 todo **I18N-06** / **UX-I-07**）。
 
 ### 手动验收 M1 路由（需已完成首次配置）
 

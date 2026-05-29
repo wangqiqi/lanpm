@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Modal, Radio, Select, Space, Tag, Typography, message } from 'antd'
+import { Button, Input, Modal, Radio, Select, Space, Tag, Typography, message } from 'antd'
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
 import { useNavigate, useParams } from 'react-router-dom'
 import { groupViewPath } from '@renderer/routes/paths'
 import type { TaskDependencyType } from '@shared/task/dependency'
-import { tasksToGanttBars, ganttDatesToYmd } from '@shared/task/ganttAdapter'
+import { tasksToGanttBars, ganttDatesToYmd, defaultScheduleForTask } from '@shared/task/ganttAdapter'
 import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -37,6 +37,11 @@ export default function GanttView(): React.ReactElement {
   const [toId, setToId] = useState<string>()
   const [depType, setDepType] = useState<TaskDependencyType>('FS')
   const [exporting, setExporting] = useState(false)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [scheduleTask, setScheduleTask] = useState<Task | null>(null)
+  const [scheduleStart, setScheduleStart] = useState('')
+  const [scheduleEnd, setScheduleEnd] = useState('')
+  const [scheduleSaving, setScheduleSaving] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
   const themeMode = useUiStore((s) => s.theme)
   const [todayColor, setTodayColor] = useState(() =>
@@ -129,6 +134,32 @@ export default function GanttView(): React.ReactElement {
     }
   }
 
+  const openScheduleModal = (task: Task): void => {
+    const sched = defaultScheduleForTask(task)
+    setScheduleTask(task)
+    setScheduleStart(sched.startDate)
+    setScheduleEnd(sched.endDate)
+    setScheduleOpen(true)
+  }
+
+  const saveSchedule = async (): Promise<void> => {
+    if (!scheduleTask) return
+    setScheduleSaving(true)
+    try {
+      await updateSchedule({
+        taskId: scheduleTask.taskId,
+        startDate: scheduleStart,
+        endDate: scheduleEnd
+      })
+      message.success(t('gantt.scheduleSaved'))
+      setScheduleOpen(false)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('gantt.scheduleFailed'))
+    } finally {
+      setScheduleSaving(false)
+    }
+  }
+
   const exportChart = async (format: 'png' | 'pdf'): Promise<void> => {
     const el = chartRef.current
     if (!el) return
@@ -197,9 +228,8 @@ export default function GanttView(): React.ReactElement {
             viewMode={viewMode}
             onDateChange={onDateChange}
             onClick={(bar) => {
-              navigate(groupViewPath(gid, 'board'), {
-                state: { highlightTaskId: String(bar.id) }
-              })
+              const task = tasks.find((t) => t.taskId === bar.id)
+              if (task) openScheduleModal(task)
             }}
             onDoubleClick={(bar) => {
               const task = tasks.find((t) => t.taskId === bar.id)
@@ -227,6 +257,7 @@ export default function GanttView(): React.ReactElement {
                     </div>
                   )}
                   <div className={styles.tooltipHint}>{t('gantt.milestoneHint')}</div>
+                  <div className={styles.tooltipHint}>{t('gantt.clickEditHint')}</div>
                 </div>
               )
             }}
@@ -272,6 +303,58 @@ export default function GanttView(): React.ReactElement {
             />
           </div>
         </Space>
+      </Modal>
+
+      <Modal
+        title={t('gantt.scheduleModalTitle')}
+        open={scheduleOpen}
+        onCancel={() => setScheduleOpen(false)}
+        onOk={() => void saveSchedule()}
+        confirmLoading={scheduleSaving}
+        okText={t('common.save')}
+        destroyOnHidden
+        footer={(_, { OkBtn, CancelBtn }) => (
+          <>
+            <Button
+              type="link"
+              onClick={() => {
+                if (!scheduleTask) return
+                setScheduleOpen(false)
+                navigate(groupViewPath(gid, 'board'), {
+                  state: { highlightTaskId: scheduleTask.taskId }
+                })
+              }}
+            >
+              {t('gantt.openInBoard')}
+            </Button>
+            <CancelBtn />
+            <OkBtn />
+          </>
+        )}
+      >
+        {scheduleTask && (
+          <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            <Text strong>{scheduleTask.title}</Text>
+            <div>
+              <Text type="secondary">{t('gantt.scheduleStart')}</Text>
+              <Input
+                type="date"
+                value={scheduleStart}
+                onChange={(e) => setScheduleStart(e.target.value)}
+                style={{ width: '100%', marginTop: 4 }}
+              />
+            </div>
+            <div>
+              <Text type="secondary">{t('gantt.scheduleEnd')}</Text>
+              <Input
+                type="date"
+                value={scheduleEnd}
+                onChange={(e) => setScheduleEnd(e.target.value)}
+                style={{ width: '100%', marginTop: 4 }}
+              />
+            </div>
+          </Space>
+        )}
       </Modal>
     </div>
   )

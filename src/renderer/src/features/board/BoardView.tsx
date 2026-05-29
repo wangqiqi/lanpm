@@ -49,6 +49,7 @@ function KanbanColumn({
   invalid,
   onDeleteTask,
   onDiscuss,
+  onMoveTo,
   getMemberDisplayName,
   isTaskHighlighted
 }: {
@@ -59,6 +60,7 @@ function KanbanColumn({
   invalid: boolean
   onDeleteTask?: (taskId: string) => void
   onDiscuss: (task: Task) => void
+  onMoveTo: (taskId: string, status: TaskStatus) => void
   getMemberDisplayName: (groupId: string, userId: string) => string
   isTaskHighlighted: (taskId: string) => boolean
 }): React.ReactElement {
@@ -89,6 +91,7 @@ function KanbanColumn({
             }
             onDelete={onDeleteTask}
             onDiscuss={onDiscuss}
+            onMoveTo={onMoveTo}
             highlighted={isTaskHighlighted(task.taskId)}
           />
         ))}
@@ -210,6 +213,19 @@ export default function BoardView(): React.ReactElement {
     void finishMove(taskId, targetStatus)
   }
 
+  const handleMoveTo = useCallback(
+    (taskId: string, status: TaskStatus) => {
+      const task = boardTasks.find((t) => t.taskId === taskId)
+      if (!task || task.status === status) return
+      if (status === 'other') {
+        setPendingOther({ taskId, title: task.title })
+        return
+      }
+      void finishMove(taskId, status)
+    },
+    [boardTasks, finishMove]
+  )
+
   const handleDelete = useCallback(
     async (taskId: string) => {
       try {
@@ -292,6 +308,7 @@ export default function BoardView(): React.ReactElement {
                 invalid={false}
                 onDeleteTask={(id) => void handleDelete(id)}
                 onDiscuss={handleDiscuss}
+                onMoveTo={handleMoveTo}
                 getMemberDisplayName={getMemberDisplayName}
                 isTaskHighlighted={isTaskHighlighted}
               />

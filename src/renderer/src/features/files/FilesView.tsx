@@ -12,8 +12,8 @@ import {
   Typography,
   message
 } from 'antd'
-import { BookOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
-import { useParams } from 'react-router-dom'
+import { BookOutlined, CommentOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -21,6 +21,7 @@ import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { groupViewPath } from '@renderer/routes/paths'
 import styles from './files.module.css'
 
 const { Text } = Typography
@@ -50,6 +51,7 @@ function formatSize(n: number): string {
 
 export default function FilesView(): React.ReactElement {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const files = useFileStore((s) => s.filesByGroup[gid] ?? [])
@@ -123,6 +125,17 @@ export default function FilesView(): React.ReactElement {
         setPreviewError(!url)
       })
       .catch(() => setPreviewError(true))
+  }
+
+  const handleShareToChat = (): void => {
+    if (!selected || !gid) return
+    const draft = selected.isBookmark
+      ? t('files.shareBookmarkDraft', {
+          title: selected.bookmarkTitle ?? selected.name,
+          url: selected.bookmarkUrl ?? ''
+        })
+      : t('files.shareFileDraft', { name: selected.name })
+    navigate(groupViewPath(gid, 'chat'), { state: { composeDraft: draft } })
   }
 
   const saveBookmark = async (): Promise<void> => {
@@ -282,7 +295,19 @@ export default function FilesView(): React.ReactElement {
         <aside className={styles.previewPane}>
           {!selected ? (
             <Text type="secondary">{t('files.selectToPreview')}</Text>
-          ) : selected.isBookmark ? (
+          ) : (
+            <>
+              <div className={styles.previewActions}>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<CommentOutlined />}
+                  onClick={handleShareToChat}
+                >
+                  {t('files.shareToChat')}
+                </Button>
+              </div>
+              {selected.isBookmark ? (
             <div className={styles.bookmarkPreview}>
               <BookOutlined style={{ fontSize: 32, marginBottom: 12 }} />
               <Text strong>{selected.bookmarkTitle ?? selected.name}</Text>
@@ -290,7 +315,7 @@ export default function FilesView(): React.ReactElement {
                 {selected.bookmarkUrl}
               </a>
             </div>
-          ) : selected.previewStatus === 'converting' ? (
+              ) : selected.previewStatus === 'converting' ? (
             <Text>{t('files.convertingLocal')}</Text>
           ) : previewError ? (
             <ViewErrorCenter message={t('files.previewLoadFailed')} onRetry={retryPreview} />
@@ -304,6 +329,8 @@ export default function FilesView(): React.ReactElement {
             <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
           ) : (
             <Text type="secondary">{t('files.noInlinePreview', { name: selected.name })}</Text>
+          )}
+            </>
           )}
         </aside>
       </div>

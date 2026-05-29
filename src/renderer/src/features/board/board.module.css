@@ -110,6 +110,14 @@
   margin-bottom: 6px;
 }
 
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.cardMenu,
 .cardDelete {
   flex-shrink: 0;
   border: none;

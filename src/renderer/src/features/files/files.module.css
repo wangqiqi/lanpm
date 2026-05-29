@@ -45,6 +45,11 @@
   align-items: stretch;
 }
 
+.previewActions {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
 .previewImg {
   max-width: 100%;
   max-height: 100%;

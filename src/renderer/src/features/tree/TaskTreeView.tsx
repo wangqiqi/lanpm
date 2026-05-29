@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Input, InputNumber, Progress, Tree, message } from 'antd'
+import { Alert, Button, Input, Progress, Slider, Tree, message } from 'antd'
 import type { DataNode } from 'antd/es/tree'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -7,7 +7,7 @@ import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
-import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
+import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -15,7 +15,10 @@ import styles from './tree.module.css'
 
 function buildTreeData(
   tasks: Task[],
-  isTaskHighlighted: (taskId: string) => boolean
+  isTaskHighlighted: (taskId: string) => boolean,
+  inlineEditTaskId: string | null,
+  onStartInlineEdit: (taskId: string) => void,
+  onInlineProgressCommit: (taskId: string, value: number) => void
 ): DataNode[] {
   const byParent = new Map<string | undefined, Task[]>()
   for (const t of tasks) {
@@ -32,6 +35,7 @@ function buildTreeData(
     return children.map((task) => {
       const childNodes = build(task.taskId)
       const hasChildren = childNodes.length > 0
+      const isLeaf = !hasChildren
       return {
         key: task.taskId,
         title: (
@@ -40,12 +44,29 @@ function buildTreeData(
             data-task-id={task.taskId}
           >
             <span className={styles.nodeTitle}>{task.title}</span>
-            <div className={styles.nodeProgress}>
-              <Progress
-                percent={task.progressPercent}
-                size="small"
-                status={task.status === 'done' ? 'success' : 'active'}
-              />
+            <div
+              className={styles.nodeProgress}
+              onDoubleClick={(e) => {
+                e.stopPropagation()
+                if (isLeaf) onStartInlineEdit(task.taskId)
+              }}
+            >
+              {isLeaf && inlineEditTaskId === task.taskId ? (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Slider
+                    min={0}
+                    max={100}
+                    defaultValue={task.progressPercent}
+                    onAfterChange={(v) => onInlineProgressCommit(task.taskId, v)}
+                  />
+                </div>
+              ) : (
+                <Progress
+                  percent={task.progressPercent}
+                  size="small"
+                  status={task.status === 'done' ? 'success' : 'active'}
+                />
+              )}
             </div>
           </div>
         ),
@@ -73,16 +94,39 @@ export default function TaskTreeView(): React.ReactElement {
   const [newRootTitle, setNewRootTitle] = useState('')
   const [childTitle, setChildTitle] = useState('')
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
-  const [editingProgress, setEditingProgress] = useState<{
-    taskId: string
-    value: number
-  } | null>(null)
+  const [inlineEditTaskId, setInlineEditTaskId] = useState<string | null>(null)
   const [parentSelected, setParentSelected] = useState(false)
 
   const treeReady = !loading || tasks.length > 0
   const { highlightId, isHighlighted: isTaskHighlighted } = useSearchHighlight('task', treeReady)
 
-  const treeData = useMemo(() => buildTreeData(tasks, isTaskHighlighted), [tasks, isTaskHighlighted])
+  const commitInlineProgress = useCallback(
+    async (taskId: string, value: number) => {
+      try {
+        await updateTask({
+          taskId,
+          progressPercent: Math.min(100, Math.max(0, value))
+        })
+        message.success(t('tree.progressUpdated'))
+        setInlineEditTaskId(null)
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
+      }
+    },
+    [updateTask, t]
+  )
+
+  const treeData = useMemo(
+    () =>
+      buildTreeData(
+        tasks,
+        isTaskHighlighted,
+        inlineEditTaskId,
+        (taskId) => setInlineEditTaskId(taskId),
+        (taskId, value) => void commitInlineProgress(taskId, value)
+      ),
+    [tasks, isTaskHighlighted, inlineEditTaskId, commitInlineProgress]
+  )
 
   useEffect(() => {
     if (!gid) return
@@ -100,26 +144,24 @@ export default function TaskTreeView(): React.ReactElement {
     setExpandedKeys((keys) => [...new Set([...keys, ...ancestors])])
   }, [highlightId, tasks])
 
-  const onSelect = useCallback((keys: React.Key[]) => {
-    const id = keys[0]
-    if (typeof id !== 'string') {
-      setParentSelected(false)
-      setEditingProgress(null)
-      return
-    }
-    setSelectedParentId(id)
-    const task = tasks.find((t) => t.taskId === id)
-    if (task) {
-      const hasChildren = tasks.some((t) => t.parentTaskId === id)
-      if (!hasChildren) {
-        setEditingProgress({ taskId: id, value: task.progressPercent })
+  const onSelect = useCallback(
+    (keys: React.Key[]) => {
+      const id = keys[0]
+      if (typeof id !== 'string') {
         setParentSelected(false)
-      } else {
-        setEditingProgress(null)
-        setParentSelected(true)
+        setInlineEditTaskId(null)
+        return
       }
-    }
-  }, [tasks])
+      setSelectedParentId(id)
+      const task = tasks.find((t) => t.taskId === id)
+      if (task) {
+        const hasChildren = tasks.some((t) => t.parentTaskId === id)
+        setParentSelected(hasChildren)
+        if (hasChildren) setInlineEditTaskId(null)
+      }
+    },
+    [tasks]
+  )
 
   const handleCreateRoot = async (): Promise<void> => {
     const title = newRootTitle.trim()
@@ -145,20 +187,6 @@ export default function TaskTreeView(): React.ReactElement {
       message.success(t('tree.childAdded'))
     } catch (err) {
       message.error(err instanceof Error ? err.message : t('tree.createFailed'))
-    }
-  }
-
-  const saveProgress = async (): Promise<void> => {
-    if (!editingProgress) return
-    try {
-      await updateTask({
-        taskId: editingProgress.taskId,
-        progressPercent: Math.min(100, Math.max(0, editingProgress.value))
-      })
-      message.success(t('tree.progressUpdated'))
-      setEditingProgress(null)
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : t('tree.updateFailed'))
     }
   }
 
@@ -190,33 +218,17 @@ export default function TaskTreeView(): React.ReactElement {
           </ViewToolbarGroup>
         }
         end={
-          <Button type="link" onClick={() => navigate(groupViewPath(gid, 'board'))}>
-            {t('tree.boardViewLink')}
-          </Button>
+          <>
+            <ViewToolbarHint>{t('tree.progressHint')}</ViewToolbarHint>
+            <Button type="link" onClick={() => navigate(groupViewPath(gid, 'board'))}>
+              {t('tree.boardViewLink')}
+            </Button>
+          </>
         }
       />
 
-      {parentSelected && !editingProgress && (
+      {parentSelected && (
         <Alert type="info" showIcon message={t('tree.parentProgressHint')} className={styles.parentHint} />
-      )}
-
-      {editingProgress && (
-        <ViewToolbar>
-          <ViewToolbarGroup>
-            <span>{t('tree.leafProgress')}</span>
-            <InputNumber
-              min={0}
-              max={100}
-              value={editingProgress.value}
-              onChange={(v) =>
-                setEditingProgress((s) => (s ? { ...s, value: Number(v ?? 0) } : s))
-              }
-            />
-            <Button type="primary" size="small" onClick={() => void saveProgress()}>
-              {t('common.save')}
-            </Button>
-          </ViewToolbarGroup>
-        </ViewToolbar>
       )}
 
       <div className={styles.treeWrap}>
