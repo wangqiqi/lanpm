@@ -1,7 +1,7 @@
 import region from './regionInteract.module.css'
 import styles from './RegionButton.module.css'
 
-type RegionButtonVariant = 'icon' | 'pill' | 'text' | 'user'
+type RegionButtonVariant = 'icon' | 'pill' | 'text' | 'toolbar' | 'user'
 
 export interface RegionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: RegionButtonVariant
@@ -22,9 +22,11 @@ export default function RegionButton({
       ? styles.icon
       : variant === 'text'
         ? styles.text
-        : variant === 'user'
-          ? styles.user
-          : styles.pill
+        : variant === 'toolbar'
+          ? styles.toolbar
+          : variant === 'user'
+            ? styles.user
+            : styles.pill
 
   return (
     <button

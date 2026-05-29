@@ -22,6 +22,7 @@ import {
   ganttTimeStepForView
 } from './ganttDragConfig'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { readCssVar } from '@renderer/ui/cssVar'
@@ -245,6 +246,9 @@ export default function GanttView(): React.ReactElement {
         }
         end={
           <ViewToolbarGroup>
+            <ViewCrossLink onClick={() => navigate(groupViewPath(gid, 'board'))}>
+              {t('gantt.boardViewLink')}
+            </ViewCrossLink>
             <Button icon={<PlusOutlined />} onClick={() => setDepOpen(true)}>
               {t('gantt.addDependency')}
             </Button>

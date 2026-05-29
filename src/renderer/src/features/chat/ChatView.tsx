@@ -8,6 +8,7 @@ import {
   CodeOutlined,
   EditOutlined,
   FolderOutlined,
+  ProjectOutlined,
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
@@ -517,15 +518,26 @@ export default function ChatView(): React.ReactElement {
               {t('chat.onlineStats', { online: onlineCount, total: members.length })}
             </Text>
             {groupType === 'project' && (
-              <Button
-                type="link"
-                size="small"
-                icon={<FolderOutlined />}
-                className={styles.chatContextLink}
-                onClick={() => navigate(groupViewPath(gid, 'files'))}
-              >
-                {t('chat.openGroupFiles')}
-              </Button>
+              <>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<ProjectOutlined />}
+                  className={styles.chatContextLink}
+                  onClick={() => navigate(groupViewPath(gid, 'board'))}
+                >
+                  {t('chat.openBoard')}
+                </Button>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<FolderOutlined />}
+                  className={styles.chatContextLink}
+                  onClick={() => navigate(groupViewPath(gid, 'files'))}
+                >
+                  {t('chat.openGroupFiles')}
+                </Button>
+              </>
             )}
           </div>
         )}

@@ -1,13 +1,15 @@
+/* UISegmentedControl 风格：灰底轨道 + 选中块浮起（非强调色文字） */
+
 .bar {
   display: inline-flex;
   align-items: stretch;
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: thin;
-  border-radius: 8px;
+  border-radius: 9px;
   background: var(--lanpm-fill-secondary);
-  padding: 2px;
-  gap: 2px;
+  padding: 3px;
+  gap: 0;
 }
 
 .equalWidth {
@@ -25,28 +27,19 @@
   display: flex;
 }
 
-.slot:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 0;
-  width: 0.5px;
-  background: var(--lanpm-bar-border);
-  pointer-events: none;
-  z-index: 1;
-}
-
 .wrap {
-  composes: region regionSelectedIndicator from './regionInteract.module.css';
   flex: 1;
   display: flex;
   min-width: 0;
-  border-radius: 6px;
+  border-radius: 7px;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .wrapSelected {
-  composes: regionSelected from './regionInteract.module.css';
+  background: var(--lanpm-surface-solid);
+  box-shadow: var(--lanpm-segment-shadow);
 }
 
 .tab {
@@ -63,7 +56,7 @@
   font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text-secondary);
-  transition: color 0.15s ease;
+  transition: color 0.2s ease;
   white-space: nowrap;
 }
 
@@ -71,23 +64,14 @@
   color: var(--lanpm-text);
 }
 
-/* V-14b-HOV — 悬停分段时父级 region 环可见（子 button 填满 wrap） */
-.wrap:hover:not(:has(.tab:disabled)) {
-  background: var(--lanpm-hover-bg);
-  box-shadow: inset 0 0 0 1px var(--lanpm-accent-ring);
-}
-
-.wrapSelected:hover:not(:has(.tab:disabled)) {
-  background: var(--lanpm-accent-fill-strong);
-}
-
 .tabSelected {
-  color: var(--lanpm-accent);
+  color: var(--lanpm-text);
+  font-weight: 600;
 }
 
 .tab:disabled {
   cursor: not-allowed;
-  opacity: 0.32;
+  opacity: 0.4;
 }
 
 .scrollable .slot {

@@ -4,16 +4,17 @@ import { Badge, Tooltip } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   CommentOutlined,
+  LockOutlined,
   ProjectOutlined,
   ApartmentOutlined,
   BarChartOutlined,
   FolderOutlined
 } from '@ant-design/icons'
+import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { useI18n } from '@renderer/i18n/useI18n'
-import type { MessageKey } from '@renderer/i18n/messages'
-import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
+import { NAV_DISABLED_HINT_KEYS, VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
-import type { AppView, GroupType } from '@shared/navigation/types'
+import type { AppView } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { groupViewPath, VIEW_TABS } from '@renderer/routes/paths'
 import { useBadgeStore } from '@renderer/stores/badgeStore'
@@ -27,14 +28,6 @@ const VIEW_ICONS: Record<AppView, React.ReactNode> = {
   gantt: <BarChartOutlined />,
   files: <FolderOutlined />
 }
-
-const DISABLED_HINT_KEYS: Record<GroupType, MessageKey> = {
-  project: 'nav.disabled.project',
-  function: 'nav.disabled.function',
-  anonymous: 'nav.disabled.anonymous'
-}
-
-const FUNCTION_GUIDE_KEY = 'lanpm.guide.functionTabs'
 
 export default function BottomNav(): React.ReactElement {
   const navigate = useNavigate()
@@ -72,9 +65,17 @@ export default function BottomNav(): React.ReactElement {
     }
   }, [gid, refreshBadges])
 
-  if (!groupId) return <></>
+  const groupType = groupId ? getGroupType(groupId) : null
 
-  const groupType = getGroupType(groupId)
+  const visibleTabs = useMemo(() => {
+    if (!groupId || !groupType) return []
+    if (groupType === 'anonymous') {
+      return VIEW_TABS.filter((tab) => isViewAllowedForGroup(groupType, tab.view))
+    }
+    return VIEW_TABS
+  }, [groupId, groupType])
+
+  if (!groupId || !groupType) return <></>
 
   const tabBadgeCount = (view: AppView): number => {
     if (view === 'chat') return badges.chatUnread
@@ -84,18 +85,18 @@ export default function BottomNav(): React.ReactElement {
 
   const maybeShowFunctionGuide = (): void => {
     if (groupType !== 'function') return
-    if (localStorage.getItem(FUNCTION_GUIDE_KEY)) return
+    if (localStorage.getItem(FUNCTION_GUIDE_STORAGE_KEY)) return
     modal.info({
       title: t('nav.functionGuideTitle'),
       content: t('nav.functionGuideBody'),
       okText: t('common.confirm'),
-      onOk: () => localStorage.setItem(FUNCTION_GUIDE_KEY, '1')
+      onOk: () => localStorage.setItem(FUNCTION_GUIDE_STORAGE_KEY, '1')
     })
   }
 
   return (
     <nav className={styles.nav} aria-label={t('nav.ariaLabel')}>
-      {VIEW_TABS.map((tab) => {
+      {visibleTabs.map((tab) => {
         const allowed = isViewAllowedForGroup(groupType, tab.view)
         const active = activeView === tab.view
         const tabRegion = (
@@ -120,7 +121,10 @@ export default function BottomNav(): React.ReactElement {
                   {VIEW_ICONS[tab.view]}
                 </Badge>
               </span>
-              <span className={styles.label}>{t(VIEW_MESSAGE_KEYS[tab.view])}</span>
+              <span className={styles.label}>
+                {!allowed ? <LockOutlined className={styles.tabLock} aria-hidden /> : null}
+                {t(VIEW_MESSAGE_KEYS[tab.view])}
+              </span>
             </button>
           </span>
         )
@@ -134,7 +138,7 @@ export default function BottomNav(): React.ReactElement {
         return (
           <Tooltip
             key={tab.view}
-            title={t(DISABLED_HINT_KEYS[groupType])}
+            title={t(NAV_DISABLED_HINT_KEYS[groupType])}
             classNames={{ root: styles.tabSlot }}
           >
             {tabRegion}

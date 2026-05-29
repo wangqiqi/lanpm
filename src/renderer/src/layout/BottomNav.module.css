@@ -1,8 +1,11 @@
+/* iOS Tab Bar 风格：发丝顶线 + 毛玻璃，选中仅强调色，无槽位竖线/顶条/底色块 */
+
 .nav {
   display: flex;
   align-items: stretch;
   width: 100%;
-  height: 64px;
+  min-height: 49px;
+  height: calc(49px + env(safe-area-inset-bottom, 0));
   padding-bottom: env(safe-area-inset-bottom, 0);
   border-top: 0.5px solid var(--lanpm-bar-border);
   background: var(--lanpm-nav-bg);
@@ -14,36 +17,17 @@
   flex: 1 1 0;
   min-width: 0;
   display: flex;
-  position: relative;
-}
-
-.tabSlot:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  top: 14px;
-  bottom: 14px;
-  left: 0;
-  width: 0.5px;
-  background: var(--lanpm-bar-border);
-  pointer-events: none;
-  z-index: 1;
 }
 
 .tabWrap {
-  composes: region regionSelectedIndicator from '../ui/regionInteract.module.css';
   flex: 1;
   display: flex;
   min-width: 0;
-  position: relative;
   cursor: pointer;
-}
-
-.tabWrapActive {
-  composes: regionSelected from '../ui/regionInteract.module.css';
+  background: transparent;
 }
 
 .tabWrapDisabled {
-  composes: regionDisabled from '../ui/regionInteract.module.css';
   cursor: not-allowed;
 }
 
@@ -54,38 +38,47 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   border: none;
   background: transparent;
   cursor: inherit;
-  padding: 6px 4px 8px;
-  color: var(--lanpm-text-secondary);
-  font-size: var(--lanpm-font-caption);
+  padding: 4px 2px 5px;
+  color: var(--lanpm-text-tertiary);
+  font-size: var(--lanpm-font-tab);
   font-weight: 500;
   letter-spacing: 0.01em;
-  transition: color 0.15s ease;
+  transition: color 0.2s ease;
 }
 
 .tab:hover:not(:disabled) {
-  color: var(--lanpm-accent);
+  color: var(--lanpm-text-secondary);
 }
 
 .tabActive {
   color: var(--lanpm-accent);
+  font-weight: 600;
 }
 
 .tabDisabled {
   cursor: not-allowed;
-  opacity: 0.32;
+  opacity: 0.4;
 }
 
 .icon {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .label {
-  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.15;
+}
+
+.tabLock {
+  font-size: 9px;
+  opacity: 0.85;
 }
 
 @media (max-width: 720px) {
@@ -94,7 +87,7 @@
   }
 
   .tab {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 6px;
   }
 }

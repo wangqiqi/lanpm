@@ -30,6 +30,19 @@
   color: var(--lanpm-text);
 }
 
+/* macOS 工具栏文字按钮：无胶囊底，强调色文案 */
+.toolbar {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: var(--lanpm-font-body);
+  font-weight: 400;
+  color: var(--lanpm-accent);
+}
+
+.toolbar:hover:not(:disabled):not(.regionDisabled) {
+  color: var(--lanpm-accent-hover);
+}
+
 .text {
   padding: 6px 10px;
   border-radius: 10px;

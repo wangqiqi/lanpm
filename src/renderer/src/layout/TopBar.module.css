@@ -72,9 +72,47 @@
     width: 88px;
   }
 
-  .search {
-    width: min(220px, 100%);
-    flex: 1 1 160px;
+}
+
+.barWideActions {
+  display: contents;
+}
+
+.barOverflowTrigger {
+  display: none;
+}
+
+.searchWide {
+  display: block;
+}
+
+.searchNarrowTrigger {
+  display: none;
+}
+
+.searchPopoverBody {
+  width: min(320px, calc(100vw - 32px));
+}
+
+.searchPopoverField {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .barWideActions {
+    display: none;
+  }
+
+  .barOverflowTrigger {
+    display: inline-flex;
+  }
+
+  .searchWide {
+    display: none;
+  }
+
+  .searchNarrowTrigger {
+    display: inline-flex;
   }
 }
 
@@ -156,4 +194,12 @@
 .net_stub {
   background: var(--lanpm-warning);
   box-shadow: 0 0 0 2px var(--lanpm-warning-ring);
+}
+
+.toolbarDanger {
+  color: var(--lanpm-danger) !important;
+}
+
+.toolbarDanger:hover:not(:disabled) {
+  color: var(--lanpm-danger-strong) !important;
 }

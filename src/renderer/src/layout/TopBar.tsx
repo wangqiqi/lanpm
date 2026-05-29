@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Dropdown,
+  Popover,
   Select,
   Tooltip,
   Typography,
@@ -13,8 +14,10 @@ import {
   DashboardOutlined,
   DeleteOutlined,
   GlobalOutlined,
+  MoreOutlined,
   MoonOutlined,
   PlusOutlined,
+  SearchOutlined,
   SunOutlined,
   UserOutlined
 } from '@ant-design/icons'
@@ -82,6 +85,7 @@ export default function TopBar(): React.ReactElement {
   const connectManualPeer = useNetworkStore((s) => s.connectManualPeer)
   const networkLoading = useNetworkStore((s) => s.loading)
   const [manualPeerOpen, setManualPeerOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     void refreshNetwork()
@@ -208,6 +212,32 @@ export default function TopBar(): React.ReactElement {
     return opts
   }, [groups, activeGroupId, localUserId, getDmSession, getPeerDisplayName, t])
 
+  const barOverflowItems: MenuProps['items'] = [
+    {
+      key: 'discover',
+      label: t('topbar.discover'),
+      icon: <CompassOutlined />,
+      onClick: () => setDiscoverOpen(true)
+    },
+    {
+      key: 'create',
+      label: t('topbar.createGroup'),
+      icon: <PlusOutlined />,
+      onClick: () => setCreateOpen(true)
+    },
+    ...(canDissolveGroup
+      ? [
+          {
+            key: 'dissolve',
+            label: t('group.dissolve'),
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => handleDissolveGroup()
+          }
+        ]
+      : [])
+  ]
+
   const userMenu: MenuProps['items'] = [
     { key: 'profile', label: t('topbar.profile'), onClick: () => setProfileOpen(true) },
     {
@@ -275,22 +305,37 @@ export default function TopBar(): React.ReactElement {
         </div>
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
-          <RegionButton variant="pill" onClick={() => setDiscoverOpen(true)}>
-            <CompassOutlined />
-            {t('topbar.discover')}
-          </RegionButton>
-          <RegionButton variant="pill" onClick={() => setCreateOpen(true)}>
-            <PlusOutlined />
-            {t('topbar.createGroup')}
-          </RegionButton>
-          {canDissolveGroup ? (
-            <RegionButton variant="pill" onClick={handleDissolveGroup}>
-              <DeleteOutlined />
-              {t('group.dissolve')}
+          <div className={styles.barWideActions}>
+            <RegionButton variant="toolbar" onClick={() => setDiscoverOpen(true)}>
+              <CompassOutlined />
+              {t('topbar.discover')}
             </RegionButton>
-          ) : null}
+            <RegionButton variant="toolbar" onClick={() => setCreateOpen(true)}>
+              <PlusOutlined />
+              {t('topbar.createGroup')}
+            </RegionButton>
+            {canDissolveGroup ? (
+              <RegionButton
+                variant="toolbar"
+                className={styles.toolbarDanger}
+                onClick={handleDissolveGroup}
+              >
+                <DeleteOutlined />
+                {t('group.dissolve')}
+              </RegionButton>
+            ) : null}
+          </div>
+          <Dropdown menu={{ items: barOverflowItems }} trigger={['click']}>
+            <RegionButton
+              variant="icon"
+              className={styles.barOverflowTrigger}
+              aria-label={t('topbar.moreActions')}
+            >
+              <MoreOutlined />
+            </RegionButton>
+          </Dropdown>
           {!isCockpitRoute ? (
-            <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
+            <RegionButton variant="toolbar" onClick={() => navigate(cockpitPath())}>
               <DashboardOutlined />
               {t('topbar.cockpit')}
             </RegionButton>
@@ -356,7 +401,28 @@ export default function TopBar(): React.ReactElement {
             }
           }}
         />
-        <GlobalSearch />
+        <div className={styles.searchWide}>
+          <GlobalSearch className={styles.search} />
+        </div>
+        <Popover
+          open={searchOpen}
+          onOpenChange={setSearchOpen}
+          trigger="click"
+          placement="bottomRight"
+          content={
+            <div className={styles.searchPopoverBody}>
+              <GlobalSearch className={styles.searchPopoverField} />
+            </div>
+          }
+        >
+          <RegionButton
+            variant="icon"
+            className={styles.searchNarrowTrigger}
+            aria-label={t('topbar.searchPlaceholder')}
+          >
+            <SearchOutlined />
+          </RegionButton>
+        </Popover>
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
         <RegionButton

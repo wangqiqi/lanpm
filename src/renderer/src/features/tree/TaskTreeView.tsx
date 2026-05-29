@@ -9,6 +9,7 @@ import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
@@ -332,9 +333,9 @@ export default function TaskTreeView(): React.ReactElement {
         end={
           <>
             <ViewToolbarHint>{t('tree.progressHint')}</ViewToolbarHint>
-            <Button type="link" onClick={() => navigate(groupViewPath(gid, 'board'))}>
+            <ViewCrossLink onClick={() => navigate(groupViewPath(gid, 'board'))}>
               {t('tree.boardViewLink')}
-            </Button>
+            </ViewCrossLink>
           </>
         }
       />

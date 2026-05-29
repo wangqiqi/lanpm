@@ -8,7 +8,9 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import type { GlobalSearchHit } from '@shared/search/types'
 import { defaultViewForGroup, isViewAllowedForGroup } from '@shared/navigation/tabRules'
+import type { AppView, GroupType } from '@shared/navigation/types'
 import { groupViewPath } from '@renderer/routes/paths'
+import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import styles from './GlobalSearch.module.css'
 
@@ -20,7 +22,26 @@ interface SearchOption {
   hit: GlobalSearchHit
 }
 
-export default function GlobalSearch(): React.ReactElement {
+function destinationViewForHit(
+  hit: GlobalSearchHit,
+  getGroupType: (groupId: string) => GroupType
+): AppView {
+  const type = getGroupType(hit.groupId)
+  if (hit.kind === 'task') {
+    return isViewAllowedForGroup(type, 'board', hit.groupId) ? 'board' : 'tree'
+  }
+  if (hit.kind === 'message') {
+    const d = defaultViewForGroup(type)
+    return d === 'chat' ? 'chat' : d
+  }
+  return 'chat'
+}
+
+interface GlobalSearchProps {
+  className?: string
+}
+
+export default function GlobalSearch({ className }: GlobalSearchProps): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
@@ -41,43 +62,47 @@ export default function GlobalSearch(): React.ReactElement {
     try {
       const result = await getLanpmApi().search.query(q)
       setOptions(
-        result.hits.map((hit) => ({
-          value:
-            hit.kind === 'task'
-              ? `task:${hit.taskId}`
-              : hit.kind === 'message'
-                ? `msg:${hit.msgId}`
-                : `member:${hit.userId}:${hit.groupId}`,
-          hit,
-          label: (
-            <div className={styles.option}>
-              {hit.kind === 'task' ? (
-                <FileTextOutlined className={styles.optionIcon} />
-              ) : hit.kind === 'message' ? (
-                <MessageOutlined className={styles.optionIcon} />
-              ) : (
-                <UserOutlined className={styles.optionIcon} />
-              )}
-              <div className={styles.optionBody}>
-                <Text ellipsis className={styles.optionTitle}>
-                  {hit.kind === 'task'
-                    ? hit.title
-                    : hit.kind === 'message'
-                      ? hit.snippet
-                      : hit.displayName}
-                </Text>
-                <Text type="secondary" className={styles.optionMeta}>
-                  {hit.kind === 'task'
-                    ? t('search.kindTask')
-                    : hit.kind === 'message'
-                      ? t('search.kindMessage')
-                      : t('search.kindMember')}{' '}
-                  · {resolveGroupDisplayNameById(hit.groupId, hit.groupName, t)}
-                </Text>
+        result.hits.map((hit) => {
+          const destView = destinationViewForHit(hit, getGroupType)
+          return {
+            value:
+              hit.kind === 'task'
+                ? `task:${hit.taskId}`
+                : hit.kind === 'message'
+                  ? `msg:${hit.msgId}`
+                  : `member:${hit.userId}:${hit.groupId}`,
+            hit,
+            label: (
+              <div className={styles.option}>
+                {hit.kind === 'task' ? (
+                  <FileTextOutlined className={styles.optionIcon} />
+                ) : hit.kind === 'message' ? (
+                  <MessageOutlined className={styles.optionIcon} />
+                ) : (
+                  <UserOutlined className={styles.optionIcon} />
+                )}
+                <div className={styles.optionBody}>
+                  <Text ellipsis className={styles.optionTitle}>
+                    {hit.kind === 'task'
+                      ? hit.title
+                      : hit.kind === 'message'
+                        ? hit.snippet
+                        : hit.displayName}
+                  </Text>
+                  <Text type="secondary" className={styles.optionMeta}>
+                    {hit.kind === 'task'
+                      ? t('search.kindTask')
+                      : hit.kind === 'message'
+                        ? t('search.kindMessage')
+                        : t('search.kindMember')}{' '}
+                    · {resolveGroupDisplayNameById(hit.groupId, hit.groupName, t)} ·{' '}
+                    {t('search.openInView', { view: t(VIEW_MESSAGE_KEYS[destView]) })}
+                  </Text>
+                </div>
               </div>
-            </div>
-          )
-        }))
+            )
+          }
+        })
       )
     } catch {
       setOptions([])
@@ -85,7 +110,7 @@ export default function GlobalSearch(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, getGroupType])
 
   const debouncedSearch = useMemo(() => {
     let timer: ReturnType<typeof setTimeout> | null = null
@@ -117,9 +142,11 @@ export default function GlobalSearch(): React.ReactElement {
     setOptions([])
   }
 
+  const rootClass = [styles.root, className].filter(Boolean).join(' ')
+
   return (
     <AutoComplete
-      className={styles.root}
+      className={rootClass}
       value={query}
       options={options}
       onSearch={debouncedSearch}

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Alert } from 'antd'
 import { useParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
@@ -16,6 +17,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewHeader from '@renderer/ui/ViewHeader'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
+import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import styles from './GroupView.module.css'
 
 /** 聊天页标题为群名/DM 名；任务类视图为模块名（docs/05 §1.1） */
@@ -64,10 +66,27 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
 
   const pageTitle = view === 'chat' ? chatTitle : t(VIEW_MESSAGE_KEYS[view])
   const isChat = view === 'chat'
+  const showFunctionGuide =
+    groupId != null &&
+    !isDmGroupId(groupId) &&
+    getGroupType(groupId) === 'function' &&
+    isChat &&
+    !localStorage.getItem(FUNCTION_GUIDE_STORAGE_KEY)
 
   return (
     <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
       <ViewHeader title={pageTitle} />
+      {showFunctionGuide ? (
+        <Alert
+          type="info"
+          showIcon
+          closable
+          className={styles.functionGuide}
+          message={t('nav.functionGuideTitle')}
+          description={t('nav.functionGuideBody')}
+          onClose={() => localStorage.setItem(FUNCTION_GUIDE_STORAGE_KEY, '1')}
+        />
+      ) : null}
       <div className={isChat ? styles.chatBody : styles.taskBody}>
         {view === 'chat' && <ChatView />}
         {view === 'board' && <BoardView />}

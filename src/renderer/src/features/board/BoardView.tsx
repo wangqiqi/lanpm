@@ -26,6 +26,7 @@ import KanbanCard from './KanbanCard'
 import OtherReasonModal from './OtherReasonModal'
 import TaskEditModal from './TaskEditModal'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import {
@@ -425,9 +426,9 @@ export default function BoardView(): React.ReactElement {
           ) : undefined
         }
         end={
-          <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
+          <ViewCrossLink onClick={() => navigate(groupViewPath(gid, 'tree'))}>
             {t('board.treeViewLink')}
-          </Button>
+          </ViewCrossLink>
         }
       />
 

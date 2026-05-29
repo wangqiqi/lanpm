@@ -72,6 +72,8 @@
   --lanpm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --lanpm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --lanpm-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --lanpm-segment-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.12), 0 0.5px 1px rgba(0, 0, 0, 0.06);
+  --lanpm-font-tab: 10px;
 }
 
 /* 暗色 */
@@ -112,6 +114,8 @@
   --lanpm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
   --lanpm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
   --lanpm-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --lanpm-segment-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  --lanpm-font-tab: 10px;
 }
 
 :global(body) {

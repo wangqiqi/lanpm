@@ -1,4 +1,4 @@
-/* Shared hover / active / selected region feedback — see docs/05 §1.3 */
+/* 共享区域反馈 — 偏 macOS/iOS：轻 hover 底，无描边环（Tab 条见 BottomNav / ViewSegment） */
 
 .region {
   position: relative;
@@ -8,18 +8,16 @@
   color: inherit;
   border-radius: 8px;
   transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .region:hover:not(:disabled):not(.regionDisabled) {
   background: var(--lanpm-hover-bg);
-  box-shadow: inset 0 0 0 1px var(--lanpm-accent-ring);
 }
 
 .region:active:not(:disabled):not(.regionDisabled) {
-  background: var(--lanpm-accent-fill-strong);
+  background: var(--lanpm-accent-fill);
 }
 
 .regionSelected {
@@ -29,7 +27,6 @@
 
 .regionSelected:hover:not(:disabled):not(.regionDisabled) {
   background: var(--lanpm-accent-fill-strong);
-  box-shadow: inset 0 0 0 1px var(--lanpm-accent-ring);
 }
 
 .regionSelectedIndicator::after {
@@ -46,5 +43,5 @@
 
 .regionDisabled {
   cursor: not-allowed;
-  opacity: 0.32;
+  opacity: 0.4;
 }
