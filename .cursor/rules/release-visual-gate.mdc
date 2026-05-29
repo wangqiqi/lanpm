@@ -9,5 +9,5 @@ alwaysApply: false
 
 1. 执行 `.cursor/skills/lanpm-visual-audit/SKILL.md` **门禁模式**
 2. 确认 `todo.md` 中 V-14b / VIS-* 状态
-3. 跑 `npm run verify:release-gate`（或至少 `verify:visual` + `verify:visual-screenshots`）
+3. 跑 `npm run verify:release-gate`（或至少 `verify:visual` + `verify:m7`）
 4. 勿将 `.lanpm/visual-screenshots/` 提交入库

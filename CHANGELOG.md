@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.52] - 2026-05-29
+
+### Changed
+- **CI**：移除 `verify:visual-screenshots` job（无头甘特 PNG 在 GHA 不稳定）；`verify:release-gate` 不再串联截图步；保留 `npm run verify:visual-screenshots` 供本地 V-14b
+
+### Tag
+- `v1.0.0-rc.52` — CI 去掉视觉截图 job
+
 ## [1.0.0-rc.51] - 2026-05-29
 
 ### Fixed

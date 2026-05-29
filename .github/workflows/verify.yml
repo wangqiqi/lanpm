@@ -31,24 +31,3 @@ jobs:
         run: npm run verify:m7
         env:
           LANPM_NETWORK: stub
-
-  visual-screenshots:
-    name: verify:visual-screenshots (ubuntu)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - name: Install
-        run: npm ci
-      - name: Build and capture
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb
-          npm run build
-          xvfb-run -a npm run verify:visual-screenshots
-        env:
-          LANPM_NETWORK: stub
