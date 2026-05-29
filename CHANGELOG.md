@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.49] - 2026-05-29
+
+### Removed
+- **根目录 `视觉.md`**：视觉门禁以 `todo.md`、`docs/05` §2、`npm run verify:visual` 与 `.cursor/skills/lanpm-visual-audit` 为准（与 rc.36 归档策略一致）
+
+### Tag
+- `v1.0.0-rc.49` — 移除冗余视觉索引文件
+
 ## [1.0.0-rc.48] - 2026-05-29
 
 ### Fixed
