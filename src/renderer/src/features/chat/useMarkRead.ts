@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react'
+import { message } from 'antd'
 import type { ChatMessage } from '@shared/chat/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { translate } from '@renderer/i18n/messages'
+import { useUiStore } from '@renderer/stores/uiStore'
 
 /** 会话可见时标记他人消息已读（M2-06） */
 export function useMarkRead(groupId: string, messages: ChatMessage[], localUserId?: string): void {
@@ -27,7 +30,7 @@ export function useMarkRead(groupId: string, messages: ChatMessage[], localUserI
           for (const id of pending) markedRef.current.add(id)
         })
         .catch(() => {
-          /* ignore */
+          message.error(translate(useUiStore.getState().locale, 'chat.markReadFailed'))
         })
     }, 300)
 

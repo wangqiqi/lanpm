@@ -15,6 +15,7 @@ import {
 import { KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
@@ -35,6 +36,8 @@ export default function CockpitView(): React.ReactElement {
   const { t } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
+  const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
+  const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -122,6 +125,13 @@ export default function CockpitView(): React.ReactElement {
         title={t('cockpit.title')}
         actions={
           <Space wrap>
+            <Button
+              onClick={() =>
+                navigate(lastNonCockpitPath ?? groupViewPath(activeGroupId, 'chat'))
+              }
+            >
+              {t('cockpit.resumeWork')}
+            </Button>
             <Button loading={reportLoading} onClick={() => void runReport('weekly')}>
               {t('cockpit.weeklyReport')}
             </Button>

@@ -2,6 +2,30 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.9] - 2026-05-29
+
+### Added
+- **`ProfileModal`**：顶栏个人设置只读资料（**UX-X-06** / **PRD-F-08**）
+- **`HomeRedirect`** + **`pickDefaultGroupId`**：启动/Setup 后优先进入非 `demo-*` 真实群（**UX-W-09** / **UX-F-15**）
+- 驾驶舱 **「继续协作」** + `lastNonCockpitPath`；顶栏 Logo 从驾驶舱返回上次协作路径（**UX-W-05** / **UX-PATH-01**）
+- 看板列 i18n、列内拖放占位、整体空态与 toolbar 行内快速建任务（**UX-I-01** / **UX-F-10/11** / **UX-PATH-03**）
+
+### Fixed
+- **TopBar**：私聊会话在下拉显示「私聊：{name}」；切换群组时不再对 `dm:*` 误调 `leaveAnonymous`（**UX-X-07**）
+- **MessageBubble**：他人消息显示成员昵称（**UX-F-02**）
+- **CodeSendModal** / **AiConfigModal** 失败 toast；用户菜单 API Key 跳转驾驶舱并自动打开配置（**UX-W-02** / **UX-PATH-02**）
+- **ChatView**：消息加载失败重试；`markRead` 失败 toast；`ViewLoadingCenter` 加载态
+- **GroupViewGuard** 非法视图 redirect 提示；匿名群进入说明与离开确认（**UX-W-06/07**）
+- **`loadGroups` 失败** toast；`document.documentElement.lang` 随 locale 切换（**UX-I-06**）
+
+### Changed
+- **docs/01** §1.3.1 RC 实现现状表；**docs/03** §16.11 七天离线标 P1/post-RC
+- **README** 目标架构 vs RC 实现分栏；`verify:m7` ≠ 1.0.0 门禁表述（**DOC-02~05**）
+- **todo.md**：P0 断环全部完成；UX-W / 多项 polish 与文档项勾选
+
+### Tag
+- `v1.0.0-rc.9` — 个人设置/私聊顶栏 + P1 弱闭环 + 文档对齐 + 看板/i18n polish
+
 ## [1.0.0-rc.8] - 2026-05-29
 
 ### Added

@@ -3,6 +3,7 @@ import type { GroupType, NavGroup } from '@shared/navigation/types'
 import type { CreateGroupInput, GroupRecord } from '@shared/group/types'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { pickDefaultGroupId } from '@renderer/routes/paths'
 
 const FALLBACK_GROUPS: NavGroup[] = [
   { groupId: 'demo-project', name: '示例项目', type: 'project' },
@@ -18,19 +19,26 @@ interface NavigationState {
   groups: NavGroup[]
   activeGroupId: string
   groupsLoaded: boolean
+  groupsLoadFailed: boolean
+  lastNonCockpitPath: string | null
   setActiveGroupId: (groupId: string) => void
-  loadGroups: () => Promise<void>
+  rememberNonCockpitPath: (path: string) => void
+  loadGroups: () => Promise<boolean>
   createGroup: (input: CreateGroupInput) => Promise<NavGroup>
   getActiveGroup: () => NavGroup | undefined
   getGroupType: (groupId: string) => GroupType
   getGroupLabel: (groupId: string) => string
+  resolveDefaultGroupId: () => string
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   groups: FALLBACK_GROUPS,
   activeGroupId: FALLBACK_GROUPS[0].groupId,
   groupsLoaded: false,
+  groupsLoadFailed: false,
+  lastNonCockpitPath: null,
   setActiveGroupId: (groupId) => set({ activeGroupId: groupId }),
+  rememberNonCockpitPath: (path) => set({ lastNonCockpitPath: path }),
 
   loadGroups: async () => {
     try {
@@ -40,16 +48,22 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
         set((s) => ({
           groups,
           groupsLoaded: true,
-          activeGroupId: groups.some((g) => g.groupId === s.activeGroupId)
-            ? s.activeGroupId
-            : groups[0].groupId
+          groupsLoadFailed: false,
+          activeGroupId: pickDefaultGroupId(groups, s.activeGroupId)
         }))
       } else {
-        set({ groupsLoaded: true })
+        set({ groupsLoaded: true, groupsLoadFailed: false })
       }
+      return true
     } catch {
-      set({ groupsLoaded: true })
+      set({ groupsLoaded: true, groupsLoadFailed: true })
+      return false
     }
+  },
+
+  resolveDefaultGroupId: () => {
+    const { groups, activeGroupId } = get()
+    return pickDefaultGroupId(groups, activeGroupId)
   },
 
   createGroup: async (input) => {

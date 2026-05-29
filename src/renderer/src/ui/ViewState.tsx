@@ -5,9 +5,10 @@ import styles from './ViewState.module.css'
 const { Text } = Typography
 
 export function ViewLoadingCenter(): React.ReactElement {
+  const { t } = useI18n()
   return (
     <div className={styles.center}>
-      <Spin />
+      <Spin tip={t('common.loading')} />
     </div>
   )
 }

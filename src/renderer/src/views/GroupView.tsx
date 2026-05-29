@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { message } from 'antd'
 import type { AppView } from '@shared/navigation/types'
 import { formatDmTitle, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
 import ChatView from '@renderer/features/chat/ChatView'
@@ -33,14 +34,20 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     }
   }, [groupId, touchSession])
 
+  const anonymousHintShown = useRef<string | null>(null)
+
   useEffect(() => {
     if (!groupId || isDmGroupId(groupId)) return
     if (getGroupType(groupId) !== 'anonymous') return
     void getLanpmApi().group.enterAnonymous(groupId)
+    if (anonymousHintShown.current !== groupId) {
+      anonymousHintShown.current = groupId
+      message.info(t('group.anonymousHint'))
+    }
     return () => {
       void getLanpmApi().group.leaveAnonymous(groupId)
     }
-  }, [groupId, getGroupType])
+  }, [groupId, getGroupType, t])
 
   const chatTitle = (() => {
     if (!groupId) return '—'

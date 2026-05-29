@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.8` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.9` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -118,24 +118,24 @@
 
 - [x] **UX-W-01** 创建群组失败 toast — 同 **UX-F-14**
 - [x] **UX-W-02** 发代码 / AI 配置保存失败 toast（`CodeSendModal`、`AiConfigModal` 补 catch）
-- [ ] **UX-W-03** `markRead` 失败非静默（toast 或重试）
-- [ ] **UX-W-04** `loadMessages` / `loadGroups` 失败错误 UI（`ChatView`、群列表等）
-- [ ] **UX-W-05** 驾驶舱离开：「返回上次群」或 Logo 回 `lastNonCockpitPath` — 同 **UX-N-01** / **UX-PATH-01**
-- [ ] **UX-W-06** 匿名群：`enterAnonymous` / `leaveAnonymous` 进入说明或离开确认 + toast
-- [ ] **UX-W-07** 非法 Hash 视图：`GroupViewGuard` redirect 时 toast — 同 **UX-N-02**
-- [ ] **UX-W-08** 甘特里程碑：双击切换的 discoverability（toolbar 提示或 Tooltip）
-- [ ] **UX-W-09** 启动/Setup 后默认路由：首个真实群或刚创建群，非 `demo-project` — 同 **UX-F-15** / **UX-PATH-06**
-- [ ] **UX-W-10** 聊天消息加载失败态，与空消息列表区分 — 可随 **UX-W-04** 一并做
+- [x] **UX-W-03** `markRead` 失败非静默（toast 或重试）
+- [x] **UX-W-04** `loadMessages` / `loadGroups` 失败错误 UI（`ChatView`、群列表等）
+- [x] **UX-W-05** 驾驶舱离开：「返回上次群」或 Logo 回 `lastNonCockpitPath` — 同 **UX-N-01** / **UX-PATH-01**
+- [x] **UX-W-06** 匿名群：`enterAnonymous` / `leaveAnonymous` 进入说明或离开确认 + toast
+- [x] **UX-W-07** 非法 Hash 视图：`GroupViewGuard` redirect 时 toast — 同 **UX-N-02**
+- [x] **UX-W-08** 甘特里程碑：双击切换的 discoverability（toolbar 提示或 Tooltip）
+- [x] **UX-W-09** 启动/Setup 后默认路由：首个真实群或刚创建群，非 `demo-project` — 同 **UX-F-15** / **UX-PATH-06**
+- [x] **UX-W-10** 聊天消息加载失败态，与空消息列表区分 — 可随 **UX-W-04** 一并做
 
 ### P2 — 最短路径优化（UX 审查 §5.2、§9）
 
-- [ ] **UX-PATH-01** 驾驶舱 → 继续协作：1 步回到上次群/视图 — 同 **UX-W-05**
+- [x] **UX-PATH-01** 驾驶舱 → 继续协作：1 步回到上次群/视图 — 同 **UX-W-05**
 - [x] **UX-PATH-02** 用户菜单「API Key」直接打开 `AiConfigModal`（免先跳驾驶舱）
-- [ ] **UX-PATH-03** 看板 toolbar inline 快速建任务（对齐任务树输入 + 按钮）
+- [x] **UX-PATH-03** 看板 toolbar inline 快速建任务（对齐任务树输入 + 按钮）
 - [ ] **UX-PATH-04**（可选）任务树：行内 slider / 双击改进度，减少 toolbar 第二行步骤
 - [ ] **UX-PATH-05** DM 中点击 Logo：明确回 `lastOriginGroupId` 项目群或文档化当前行为
-- [ ] **UX-PATH-06** Setup 完成后进入首个真实群 — 同 **UX-W-09**
-- [ ] **UX-PATH-07** 匿名群进入时简要能力说明（仅聊天、无历史等）
+- [x] **UX-PATH-06** Setup 完成后进入首个真实群 — 同 **UX-W-09**
+- [x] **UX-PATH-07** 匿名群进入时简要能力说明（仅聊天、无历史等）
 
 ### P3 — 跨视图协作链（UX 审查 §8）
 
@@ -152,10 +152,10 @@
 ## 文档与版本对齐（来源：[评估归档](./archive/20260529_095839_实现文档一致性评估_评估.md) §2、§7、§9）
 
 - [x] **DOC-01** 统一 `README.md`、`docs/08` 文首、README 中 RC 号为当前 `package.json` 版本
-- [ ] **DOC-02** 在 `docs/01` §1.3 增加「RC 实现现状」子表（或指向 `docs/08`），区分目标栈与已落地栈
-- [ ] **DOC-03** 将 `docs/03` §16.11「7 天离线补同步」改为 P1/post-RC，或与 **ARCH-07** 合并排期
-- [ ] **DOC-04** `README` 技术选型改为「目标架构 / 当前 RC 实现」分栏（同 **ARCH-06**）
-- [ ] **DOC-05** 统一对外表述：「RC 自动化回归通过」≠「PRD P0 100%」≠「1.0.0 门禁已满足」
+- [x] **DOC-02** 在 `docs/01` §1.3 增加「RC 实现现状」子表（或指向 `docs/08`），区分目标栈与已落地栈
+- [x] **DOC-03** 将 `docs/03` §16.11「7 天离线补同步」改为 P1/post-RC，或与 **ARCH-07** 合并排期
+- [x] **DOC-04** `README` 技术选型改为「目标架构 / 当前 RC 实现」分栏（同 **ARCH-06**）
+- [x] **DOC-05** 统一对外表述：「RC 自动化回归通过」≠「PRD P0 100%」≠「1.0.0 门禁已满足」
 - [ ] **DOC-06** 文档对齐：传输安全文案（独立 HMAC 字段 vs AES-GCM authTag）见 **ARCH-04**
 - [x] **DOC-07** `plan.md` 迁出根目录 → [plan 概述归档](./archive/20260529_095839_plan概述_SSOT后归档.md)（2026-05-29）
 
@@ -208,30 +208,30 @@
 - [ ] **UX-F-07** 成员列表：提升到 store 或 ChatView 下发，避免 ChatView/MemberList 重复 IPC
 - [ ] **UX-F-08** 聊天 Enter 发送 / Shift+Enter 换行可配置，或强化输入区提示
 - [ ] **UX-F-09** 聊天消息日期分组（今日/昨日/完整日期）
-- [ ] **UX-F-10** 看板整体空态 + 创建任务 CTA（四列皆空）
-- [ ] **UX-F-11** 看板列内「拖放任务到此」dashed 占位 + i18n
+- [x] **UX-F-10** 看板整体空态 + 创建任务 CTA（四列皆空）
+- [x] **UX-F-11** 看板列内「拖放任务到此」dashed 占位 + i18n
 - [ ] **UX-F-12** 甘特：任务详情弹窗编辑日期（键盘改期替代）
-- [ ] **UX-F-13** 文件 Table 空态：`locale.emptyText: t('files.empty')`
+- [x] **UX-F-13** 文件 Table 空态：`locale.emptyText: t('files.empty')`
 - [x] **UX-F-14** 创建群组失败：`catch` + `message.error`（`CreateGroupModal`）— 同 **UX-W-01**
-- [ ] **UX-F-15** 默认路由：重定向 `activeGroupId` 或首群，非写死 `demo-project` — 同 **UX-W-09**
+- [x] **UX-F-15** 默认路由：重定向 `activeGroupId` 或首群，非写死 `demo-project` — 同 **UX-W-09**
 - [ ] **UX-F-16** `navigationStore` 演示群名 i18n 或 Skeleton
 - [ ] **UX-F-17** TopBar 连接状态点 + 重连（在线/离线/同步）
 - [ ] **UX-F-18** BottomNav 未读/待办角标（chat、board 等）
 - [ ] **UX-F-19** 驾驶舱 AI 报告：复制按钮、最大高度 + 展开
 - [x] **UX-F-20** 代码块右上角「复制代码」（`CodeBlock.tsx`）
-- [ ] **UX-F-21** 未知消息类型 i18n fallback，非 raw `[type]`
+- [x] **UX-F-21** 未知消息类型 i18n fallback，非 raw `[type]`
 - [ ] **UX-F-22** 文件预览失败：侧栏/预览区错误态 + 重试，与「不支持预览」区分（`FilesView`；UX 审查 §3.7）
 
 ---
 
 ## UI/UX — 国际化（来源：[UI 审查归档](./archive/20260529_095839_UI设计审查_ui.md) §3.2）
 
-- [ ] **UX-I-01** 看板列标题 i18n（`kanban.ts` TODO/IN PROGRESS/DONE/OTHER）
-- [ ] **UX-I-02** 任务优先级 Tag/Select i18n（`KanbanCard`、`BoardView`）
-- [ ] **UX-I-03** 任务引用气泡 i18n（`MessageBubble`「📋 任务：」）
+- [x] **UX-I-01** 看板列标题 i18n（`kanban.ts` TODO/IN PROGRESS/DONE/OTHER）
+- [x] **UX-I-02** 任务优先级 Tag/Select i18n（`KanbanCard`、`BoardView`）
+- [x] **UX-I-03** 任务引用气泡 i18n（`MessageBubble`「📋 任务：」）
 - [ ] **UX-I-04** 送达状态：i18n 文案 + aria（替代纯 emoji `deliveryLabel`）
 - [ ] **UX-I-05** 书签 URL placeholder i18n（`FilesView`）
-- [ ] **UX-I-06** 切换 locale 时更新 `document.documentElement.lang`（`index.html` 默认 zh-CN）
+- [x] **UX-I-06** 切换 locale 时更新 `document.documentElement.lang`（`index.html` 默认 zh-CN）
 - [ ] **UX-I-07** `browserLanpmStub.ts` 错误文案 i18n（开发桩）— 可并入 **I18N-06**
 - [ ] **UX-I-08** 收尾硬编码：FilesView / GanttView / TaskTreeView / CockpitView / KanbanCard 等（评估 §5）
 
@@ -255,10 +255,10 @@
 
 > 与已完成审计项 **V-01~V-14** 编号不同；此处 **UX-V-*** / **UX-R-*** / **UX-N-*** 来自 UI 审查。
 
-- [ ] **UX-V-01** 加载态统一：`ViewLoadingCenter` 带「加载中…」；App Spin 与之一致
-- [ ] **UX-V-02** `ChatView` 加载改用 `ViewLoadingCenter`
+- [x] **UX-V-01** 加载态统一：`ViewLoadingCenter` 带「加载中…」；App Spin 与之一致
+- [x] **UX-V-02** `ChatView` 加载改用 `ViewLoadingCenter`
 - [ ] **UX-V-03** 甘特 `gantt-task-react` 暗色主题覆盖与 `--lanpm-*` 对齐
-- [ ] **UX-V-04** 看板列头英文大写与中文 UI 统一 — 与 **UX-I-01**
+- [x] **UX-V-04** 看板列头英文大写与中文 UI 统一 — 与 **UX-I-01**
 - [ ] **UX-V-05** 看板卡片 assignee 显示昵称非 raw userId
 - [ ] **UX-V-06** Setup 图标使用 `resources/logo.svg` 替代字母「L」
 - [x] **UX-V-07** 驾驶舱失败 vs 真实 0 — 与 **UX-F-03**
@@ -269,10 +269,10 @@
 - [ ] **UX-R-04** 看板窄屏单列/stack 模式
 - [ ] **UX-R-05** 文件预览区窄屏单栏模式
 - [ ] **UX-R-06** BottomNav 窄屏仅 icon 模式
-- [ ] **UX-N-01** 驾驶舱返回群路径（与 BottomNav 对称性）— 同 **UX-W-05** / **UX-PATH-01**
-- [ ] **UX-N-02** `GroupViewGuard` 非法视图 redirect 时 toast — 同 **UX-W-07**
+- [x] **UX-N-01** 驾驶舱返回群路径（与 BottomNav 对称性）— 同 **UX-W-05** / **UX-PATH-01**
+- [x] **UX-N-02** `GroupViewGuard` 非法视图 redirect 时 toast — 同 **UX-W-07**
 - [ ] **UX-N-03** 职能群禁用 Tab 首次引导（非仅 Tooltip）
-- [ ] **UX-N-04** 匿名群 `leaveAnonymous` 切换群时确认 UI — 同 **UX-W-06**
+- [x] **UX-N-04** 匿名群 `leaveAnonymous` 切换群时确认 UI — 同 **UX-W-06**
 
 ---
 

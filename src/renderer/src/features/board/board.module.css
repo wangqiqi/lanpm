@@ -54,6 +54,20 @@
   min-height: 120px;
 }
 
+.columnDropHint {
+  flex: 1;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 1px dashed var(--lanpm-border);
+  border-radius: 8px;
+  color: var(--lanpm-text-secondary, rgba(0, 0, 0, 0.45));
+  font-size: 12px;
+  text-align: center;
+}
+
 .card {
   padding: 10px 12px;
   border-radius: 8px;

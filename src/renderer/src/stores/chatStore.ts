@@ -5,7 +5,9 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 interface ChatState {
   messagesByGroup: Record<string, ChatMessage[]>
   loading: Record<string, boolean>
+  loadError: Record<string, boolean>
   loadMessages: (groupId: string) => Promise<void>
+  clearLoadError: (groupId: string) => void
   sendText: (groupId: string, text: string) => Promise<void>
   sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
@@ -28,13 +30,21 @@ function mergeMessage(list: ChatMessage[], message: ChatMessage): ChatMessage[] 
 export const useChatStore = create<ChatState>((set, get) => ({
   messagesByGroup: {},
   loading: {},
+  loadError: {},
+  clearLoadError: (groupId) =>
+    set((s) => ({ loadError: { ...s.loadError, [groupId]: false } })),
   loadMessages: async (groupId) => {
-    set((s) => ({ loading: { ...s.loading, [groupId]: true } }))
+    set((s) => ({
+      loading: { ...s.loading, [groupId]: true },
+      loadError: { ...s.loadError, [groupId]: false }
+    }))
     try {
       const messages = await getLanpmApi().chat.listMessages(groupId)
       set((s) => ({
         messagesByGroup: { ...s.messagesByGroup, [groupId]: sortMessages(messages) }
       }))
+    } catch {
+      set((s) => ({ loadError: { ...s.loadError, [groupId]: true } }))
     } finally {
       set((s) => ({ loading: { ...s.loading, [groupId]: false } }))
     }

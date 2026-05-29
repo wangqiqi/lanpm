@@ -4,6 +4,7 @@ import {
   Avatar,
   Button,
   Dropdown,
+  Modal,
   Select,
   Space,
   Typography,
@@ -53,6 +54,7 @@ export default function TopBar(): React.ReactElement {
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
   const createGroup = useNavigationStore((s) => s.createGroup)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
   const [createOpen, setCreateOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const user = useIdentityStore((s) => s.user)
@@ -65,20 +67,7 @@ export default function TopBar(): React.ReactElement {
   const locale = useUiStore((s) => s.locale)
   const setLocale = useUiStore((s) => s.setLocale)
 
-  const handleLogoClick = (): void => {
-    navigate(groupViewPath(activeGroupId, 'chat'))
-  }
-
-  const handleGroupChange = (groupId: string): void => {
-    const prevType = getGroupType(activeGroupId)
-    if (
-      prevType === 'anonymous' &&
-      activeGroupId !== groupId &&
-      !isDmGroupId(activeGroupId)
-    ) {
-      void getLanpmApi().group.leaveAnonymous(activeGroupId)
-    }
-
+  const navigateToGroup = (groupId: string): void => {
     setActiveGroupId(groupId)
     const raw = VIEW_PATH_RE.exec(location.pathname)?.[1]
     const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'files']
@@ -88,6 +77,40 @@ export default function TopBar(): React.ReactElement {
       view = defaultViewForGroup(type)
     }
     navigate(groupViewPath(groupId, view))
+  }
+
+  const handleLogoClick = (): void => {
+    if (location.pathname.startsWith('/cockpit')) {
+      navigate(lastNonCockpitPath ?? groupViewPath(activeGroupId, 'chat'))
+      return
+    }
+    navigate(groupViewPath(activeGroupId, 'chat'))
+  }
+
+  const handleGroupChange = (groupId: string): void => {
+    if (groupId === activeGroupId) return
+
+    const leavingAnonymous =
+      getGroupType(activeGroupId) === 'anonymous' &&
+      !isDmGroupId(activeGroupId) &&
+      activeGroupId !== groupId
+
+    if (leavingAnonymous) {
+      Modal.confirm({
+        title: t('group.leaveAnonymousTitle'),
+        content: t('group.leaveAnonymousContent'),
+        okText: t('common.confirm'),
+        cancelText: t('common.cancel'),
+        onOk: () => {
+          void getLanpmApi().group.leaveAnonymous(activeGroupId).finally(() => {
+            navigateToGroup(groupId)
+          })
+        }
+      })
+      return
+    }
+
+    navigateToGroup(groupId)
   }
 
   const groupSelectOptions = useMemo(() => {

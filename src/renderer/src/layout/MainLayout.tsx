@@ -9,10 +9,17 @@ export default function MainLayout(): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
   const location = useLocation()
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
+  const rememberNonCockpitPath = useNavigationStore((s) => s.rememberNonCockpitPath)
 
   useEffect(() => {
     if (groupId) setActiveGroupId(groupId)
   }, [groupId, setActiveGroupId])
+
+  useEffect(() => {
+    if (/^\/g\/[^/]+\//.test(location.pathname)) {
+      rememberNonCockpitPath(location.pathname)
+    }
+  }, [location.pathname, rememberNonCockpitPath])
 
   const showBottomNav = /^\/g\/[^/]+\//.test(location.pathname)
   const isChatView = /\/g\/[^/]+\/chat$/.test(location.pathname)

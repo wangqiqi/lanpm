@@ -69,7 +69,15 @@ export default function KanbanCard({
         )}
       </div>
       <div className={styles.cardMeta}>
-        <Tag color={PRIORITY_COLOR[task.priority]}>{task.priority}</Tag>
+        <Tag color={PRIORITY_COLOR[task.priority]}>
+          {t(
+            task.priority === 'low'
+              ? 'board.priorityLow'
+              : task.priority === 'high'
+                ? 'board.priorityHigh'
+                : 'board.priorityMedium'
+          )}
+        </Tag>
         {task.assigneeUserId && <span>@{task.assigneeUserId}</span>}
         <span>{task.progressPercent}%</span>
       </div>

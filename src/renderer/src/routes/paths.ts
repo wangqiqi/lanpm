@@ -2,6 +2,20 @@ import type { AppView } from '@shared/navigation/types'
 
 export const DEFAULT_GROUP_ID = 'demo-project'
 
+export function isDemoGroupId(groupId: string): boolean {
+  return groupId.startsWith('demo-')
+}
+
+/** 优先真实群（非 demo-*），否则首群或 demo 占位 */
+export function pickDefaultGroupId(
+  groups: { groupId: string }[],
+  preferred?: string
+): string {
+  if (preferred && groups.some((g) => g.groupId === preferred)) return preferred
+  const real = groups.find((g) => !isDemoGroupId(g.groupId))
+  return real?.groupId ?? groups[0]?.groupId ?? DEFAULT_GROUP_ID
+}
+
 export function groupViewPath(groupId: string, view: AppView): string {
   return `/g/${groupId}/${view}`
 }

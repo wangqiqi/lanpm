@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react'
-import { Button, Spin, Typography } from 'antd'
+import { Button, Spin, Typography, message } from 'antd'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import SetupWizard from '@renderer/features/setup/SetupWizard'
@@ -29,7 +29,11 @@ export default function App(): React.ReactElement {
         .then((status) => {
           if (!cancelled) {
             setFromStatus(status.configured, status.user, status.device)
-            if (status.configured) void loadGroups()
+            if (status.configured) {
+              void loadGroups().then((ok) => {
+                if (!ok) message.error(t('nav.groupsLoadFailed'))
+              })
+            }
           }
         })
         .catch(() => {
@@ -41,7 +45,7 @@ export default function App(): React.ReactElement {
     return () => {
       cancelled = true
     }
-  }, [setFromStatus, setHydrated, setBootFailed, loadGroups])
+  }, [setFromStatus, setHydrated, setBootFailed, loadGroups, t])
 
   useEffect(() => {
     if (!configured) return
@@ -53,7 +57,9 @@ export default function App(): React.ReactElement {
 
   const handleSetupComplete = (status: SetupStatus): void => {
     setFromStatus(status.configured, status.user, status.device)
-    void loadGroups()
+    void loadGroups().then((ok) => {
+      if (!ok) message.error(t('nav.groupsLoadFailed'))
+    })
   }
 
   if (!hydrated) {

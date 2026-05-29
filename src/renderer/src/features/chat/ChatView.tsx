@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Input, Spin, Typography, message } from 'antd'
+import { Button, Input, Typography, message } from 'antd'
 import { CodeOutlined, PlusSquareOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
@@ -19,6 +19,7 @@ import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useMentionNotifications } from '@renderer/features/chat/useMentionNotifications'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
+import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
@@ -52,6 +53,7 @@ export default function ChatView(): React.ReactElement {
   const gid = groupId ?? ''
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
   const loading = useChatStore((s) => s.loading[gid])
+  const loadError = useChatStore((s) => s.loadError[gid])
   const loadMessages = useChatStore((s) => s.loadMessages)
   const sendText = useChatStore((s) => s.sendText)
   const sendCode = useChatStore((s) => s.sendCode)
@@ -230,7 +232,12 @@ export default function ChatView(): React.ReactElement {
       <div className={styles.root} ref={rootRef}>
         <div className={styles.messages} ref={listRef}>
           {loading && messages.length === 0 ? (
-            <Spin className={styles.empty} />
+            <ViewLoadingCenter />
+          ) : loadError && messages.length === 0 ? (
+            <ViewErrorCenter
+              message={t('chat.loadFailed')}
+              onRetry={() => void loadMessages(gid)}
+            />
           ) : messages.length === 0 ? (
             <Text className={styles.empty} type="secondary">
               {t('chat.noMessages')}

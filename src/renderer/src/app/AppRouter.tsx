@@ -3,12 +3,16 @@ import MainLayout from '@renderer/layout/MainLayout'
 import GroupViewGuard from '@renderer/routes/GroupViewGuard'
 import GroupView from '@renderer/views/GroupView'
 import CockpitView from '@renderer/views/CockpitView'
-import { DEFAULT_GROUP_ID, groupViewPath } from '@renderer/routes/paths'
+import HomeRedirect from '@renderer/routes/HomeRedirect'
+import { groupViewPath } from '@renderer/routes/paths'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
 import type { AppView } from '@shared/navigation/types'
 
 function GroupIndexRedirect(): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
-  return <Navigate to={groupViewPath(groupId ?? DEFAULT_GROUP_ID, 'chat')} replace />
+  const resolveDefaultGroupId = useNavigationStore((s) => s.resolveDefaultGroupId)
+  const gid = groupId ?? resolveDefaultGroupId()
+  return <Navigate to={groupViewPath(gid, 'chat')} replace />
 }
 
 function viewRoute(view: AppView): React.ReactElement {
@@ -25,10 +29,7 @@ export default function AppRouter(): React.ReactElement {
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <Routes>
-        <Route
-          path="/"
-          element={<Navigate to={groupViewPath(DEFAULT_GROUP_ID, 'chat')} replace />}
-        />
+        <Route path="/" element={<HomeRedirect />} />
         <Route element={<MainLayout />}>
           <Route path="/cockpit" element={<CockpitView />} />
           <Route path="/g/:groupId" element={<GroupIndexRedirect />} />

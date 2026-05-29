@@ -4,7 +4,8 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.8`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
+- **RC**：`1.0.0-rc.9`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
+- **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)
 
@@ -43,16 +44,20 @@ npm run build       # 生产构建
 | [todo.md](./todo.md) | **唯一任务真源**（RC / v1.1 / UI·UX·评估项） |
 | [archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md) | 执行计划概述（只读） |
 
-## 技术选型（已拍板）
+## 技术选型
+
+**目标架构（PRD）**
 
 - 桌面：Electron
 - 前端：React 18 + TypeScript + **Ant Design 5.x**
 - 样式：**CSS Modules**；状态：**Zustand**
 - 甘特图：**gantt-task-react**（M4）
-- 存储：SQLite + IndexedDB（热缓存可选）
-- 同步：Yjs（任务）+ P2P（消息/文件）
-- 传输加密：UDP 发现 + WebRTC DataChannel + 应用层 AES-GCM/DH/HMAC
+- 存储：SQLite + IndexedDB（热缓存）
+- 同步：Yjs（任务）+ P2P/WebRTC（消息/文件）
+- 传输加密：UDP 发现 + WebRTC DataChannel + 应用层 AES-GCM/DH（独立 HMAC 字段见 todo **ARCH-04**）
 - Office 预览：LibreOffice 本地转换（数据不出域）
+
+**当前 RC 实现**：主路径为 Electron + React + SQLite + TCP/Stub 联调；Yjs/WebRTC/IndexedDB 热缓存与 7 天离线补同步为 post-RC（见 [docs/01 §1.3.1](./docs/01_产品需求文档.md)）。
 
 ## 开发排期摘要
 

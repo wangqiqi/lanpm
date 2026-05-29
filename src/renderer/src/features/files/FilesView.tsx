@@ -246,6 +246,7 @@ export default function FilesView(): React.ReactElement {
               rowKey="fileId"
               columns={columns}
               dataSource={files}
+              locale={{ emptyText: t('files.empty') }}
               pagination={false}
               onRow={(record) => ({
                 onClick: () => setSelected(record)

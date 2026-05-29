@@ -14,7 +14,8 @@ import { Button, Input, Modal, Select, Tag, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
-import { KANBAN_COLUMN_LABELS, KANBAN_COLUMN_ORDER, isTaskStatus } from '@shared/task/kanban'
+import { KANBAN_COLUMN_ORDER, isTaskStatus } from '@shared/task/kanban'
+import type { MessageKey } from '@renderer/i18n/messages'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -22,9 +23,22 @@ import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
 import OtherReasonModal from './OtherReasonModal'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
-import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './board.module.css'
+
+const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
+  todo: 'board.columnTodo',
+  doing: 'board.columnDoing',
+  done: 'board.columnDone',
+  other: 'board.columnOther'
+}
+
+const PRIORITY_OPTIONS: { value: TaskPriority; key: MessageKey }[] = [
+  { value: 'low', key: 'board.priorityLow' },
+  { value: 'medium', key: 'board.priorityMedium' },
+  { value: 'high', key: 'board.priorityHigh' }
+]
 
 function KanbanColumn({
   status,
@@ -41,6 +55,7 @@ function KanbanColumn({
   onDeleteTask?: (taskId: string) => void
   isTaskHighlighted: (taskId: string) => boolean
 }): React.ReactElement {
+  const { t } = useI18n()
   const { setNodeRef } = useDroppable({ id: status })
 
   return (
@@ -49,10 +64,13 @@ function KanbanColumn({
       className={`${styles.column} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
     >
       <div className={styles.columnHeader}>
-        {KANBAN_COLUMN_LABELS[status]}
+        {t(COLUMN_TITLE_KEYS[status])}
         <Tag style={{ marginLeft: 8 }}>{tasks.length}</Tag>
       </div>
       <div className={styles.columnBody}>
+        {tasks.length === 0 && (
+          <div className={styles.columnDropHint}>{t('board.dropHere')}</div>
+        )}
         {tasks.map((task) => (
           <KanbanCard
             key={task.taskId}
@@ -186,7 +204,7 @@ export default function BoardView(): React.ReactElement {
     try {
       await createTask({ groupId: gid, title, priority: newPriority })
       setNewTitle('')
-      setCreateOpen(false)
+      if (createOpen) setCreateOpen(false)
       message.success(t('board.created'))
     } catch (err) {
       message.error(err instanceof Error ? err.message : t('board.createFailed'))
@@ -197,9 +215,21 @@ export default function BoardView(): React.ReactElement {
     <div className={styles.root}>
       <ViewToolbar
         start={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-            {t('board.newTask')}
-          </Button>
+          <>
+            <Input
+              placeholder={t('board.taskTitlePlaceholder')}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onPressEnter={() => void handleCreate()}
+              style={{ maxWidth: 280 }}
+            />
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => void handleCreate()}>
+              {t('board.newTask')}
+            </Button>
+            <Button type="link" onClick={() => setCreateOpen(true)}>
+              {t('board.moreOptions')}
+            </Button>
+          </>
         }
         end={
           <Button type="link" onClick={() => navigate(groupViewPath(gid, 'tree'))}>
@@ -210,6 +240,15 @@ export default function BoardView(): React.ReactElement {
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />
+      ) : !loading && boardTasks.length === 0 ? (
+        <ViewEmptyHint>
+          <span>{t('board.emptyAll')}</span>
+          <div style={{ marginTop: 12 }}>
+            <Button type="primary" onClick={() => setCreateOpen(true)}>
+              {t('board.newTask')}
+            </Button>
+          </div>
+        </ViewEmptyHint>
       ) : (
         <DndContext
           sensors={sensors}
@@ -257,11 +296,7 @@ export default function BoardView(): React.ReactElement {
             value={newPriority}
             onChange={setNewPriority}
             style={{ width: 120 }}
-            options={[
-              { value: 'low', label: 'low' },
-              { value: 'medium', label: 'medium' },
-              { value: 'high', label: 'high' }
-            ]}
+            options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: t(o.key) }))}
           />
         </div>
       </Modal>

@@ -21,6 +21,10 @@ export default function ThemeProvider({
     document.documentElement.style.colorScheme = themeMode
   }, [themeMode])
 
+  useEffect(() => {
+    document.documentElement.lang = locale === 'en-US' ? 'en' : 'zh-CN'
+  }, [locale])
+
   return (
     <ConfigProvider
       locale={locale === 'en-US' ? enUS : zhCN}
