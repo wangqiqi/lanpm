@@ -15,7 +15,7 @@ import { isMessageReadByOthers } from '@shared/chat/readReceipt'
 import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
 import { validateOtherReason } from '@shared/task/validation'
-import { stubError } from '@renderer/platform/stubTranslate'
+import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
 const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
@@ -563,9 +563,6 @@ export function createBrowserLanpmStub(): LanpmApi {
         void fileId
         throw stubError('stub.uploadElectronOnly')
       },
-      download: async () => {
-        throw stubError('stub.uploadElectronOnly')
-      },
       download: async (fileId) => {
         void fileId
         throw stubError('stub.uploadElectronOnly')
@@ -574,9 +571,30 @@ export function createBrowserLanpmStub(): LanpmApi {
     },
     group: {
       list: async () => [
-        { groupId: 'demo-project', name: '示例项目', type: 'project' as const, createdBy: 'stub', createdAt: '', autoDiscover: true },
-        { groupId: 'demo-function', name: '示例职能群', type: 'function' as const, createdBy: 'stub', createdAt: '', autoDiscover: true },
-        { groupId: 'demo-anonymous', name: '示例匿名群', type: 'anonymous' as const, createdBy: 'stub', createdAt: '', autoDiscover: true }
+        {
+          groupId: 'demo-project',
+          name: stubT('demo.groupProject'),
+          type: 'project' as const,
+          createdBy: 'stub',
+          createdAt: '',
+          autoDiscover: true
+        },
+        {
+          groupId: 'demo-function',
+          name: stubT('demo.groupFunction'),
+          type: 'function' as const,
+          createdBy: 'stub',
+          createdAt: '',
+          autoDiscover: true
+        },
+        {
+          groupId: 'demo-anonymous',
+          name: stubT('demo.groupAnonymous'),
+          type: 'anonymous' as const,
+          createdBy: 'stub',
+          createdAt: '',
+          autoDiscover: true
+        }
       ],
       create: async (input) => ({
         groupId: `stub_${Date.now()}`,
@@ -596,7 +614,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         projects: [
           {
             groupId: 'demo-project',
-            name: '示例项目',
+            name: stubT('demo.groupProject'),
             progressPercent: 50,
             status: 'normal' as const,
             inProgressCount: 2,
@@ -640,9 +658,9 @@ export function createBrowserLanpmStub(): LanpmApi {
         const lower = q.toLowerCase()
         if (!lower) return { query: q, hits: [] }
         const groupNames: Record<string, string> = {
-          'demo-project': '示例项目',
-          'demo-function': '示例职能群',
-          'demo-anonymous': '示例匿名群'
+          'demo-project': stubT('demo.groupProject'),
+          'demo-function': stubT('demo.groupFunction'),
+          'demo-anonymous': stubT('demo.groupAnonymous')
         }
         const hits: import('@shared/search/types').GlobalSearchHit[] = []
         for (const [groupId, tasks] of Object.entries(readAllTasks())) {

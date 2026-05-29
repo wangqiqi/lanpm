@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Typography } from 'antd'
-import { isDmGroupId, formatDmTitle, getDmPeerUserId } from '@shared/chat/dmSession'
+import { isDmGroupId, getDmPeerUserId } from '@shared/chat/dmSession'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { groupViewPath } from '@renderer/routes/paths'
@@ -45,7 +45,7 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
       const active = session.groupId === activeGroupId
       items.push({
         key: session.groupId,
-        label: formatDmTitle(session.peerDisplayName),
+        label: t('topbar.dmLabel', { name: session.peerDisplayName }),
         title: session.peerDisplayName,
         active,
         onClick: () => navigate(groupViewPath(session.groupId, 'chat'))

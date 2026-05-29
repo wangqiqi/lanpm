@@ -4,7 +4,6 @@
  */
 import {
   buildDmGroupId,
-  formatDmTitle,
   getDmPeerUserId,
   isDmGroupId,
   parseDmGroupId
@@ -30,10 +29,6 @@ if (!pair || pair[0] !== alice || pair[1] !== bob) {
 const peer = getDmPeerUserId(dmFromAlice, alice)
 if (peer !== bob) {
   throw new Error(`getDmPeerUserId failed: ${peer}`)
-}
-
-if (formatDmTitle('Bob') !== '私聊 · Bob') {
-  throw new Error('formatDmTitle failed')
 }
 
 try {

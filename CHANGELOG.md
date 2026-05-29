@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.24] - 2026-05-29
+
+### Added
+- **Vitest 单元测试**：`vitest.config.ts` + `tests/unit/`（chat / file / navigation / task，23 用例）
+- **`npm run test`** / `test:watch` / `test:coverage`；纳入 `verify:m7` 与 `verify:project`
+- **`docs/10_测试体系说明.md`**：单元 / 集成 / 全量 / 手验分层与命令索引
+- **`scripts/verify-format-file-type.ts`**：`formatFileTypeLabel` 冒烟脚本
+
+### Changed
+- **FilesView**：表头排序修复（`columnKey` 解析 + 取消排序时同列 ascend/descend 切换）；列 `dataIndex` + 客户端 `sorter`；默认按上传时间降序
+- **FilesView**：搜索框与结果计数；预览区展示类型/大小/时间；预览侧栏下载按钮
+- **I18N-05**：`resolveGroupDisplayNameById` — 演示群、私聊群名、崩溃页文案按 locale 解析；浏览器 stub 演示群名走 `stubT`
+- **`verify-dm`**：移除已废弃的 `formatDmTitle` 断言
+
+### Tag
+- `v1.0.0-rc.24` — Vitest 单元测试、FilesView 排序修复与 I18N 展示层
+
 ## [1.0.0-rc.23] - 2026-05-29
 
 ### Added

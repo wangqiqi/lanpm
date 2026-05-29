@@ -9,6 +9,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import type { GlobalSearchHit } from '@shared/search/types'
 import { defaultViewForGroup, isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import { groupViewPath } from '@renderer/routes/paths'
+import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import styles from './GlobalSearch.module.css'
 
 const { Text } = Typography
@@ -71,7 +72,7 @@ export default function GlobalSearch(): React.ReactElement {
                     : hit.kind === 'message'
                       ? t('search.kindMessage')
                       : t('search.kindMember')}{' '}
-                  · {hit.groupName}
+                  · {resolveGroupDisplayNameById(hit.groupId, hit.groupName, t)}
                 </Text>
               </div>
             </div>

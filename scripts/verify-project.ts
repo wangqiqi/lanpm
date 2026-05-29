@@ -32,6 +32,7 @@ assert.equal(
 const requiredScripts = [
   'lint',
   'typecheck',
+  'test',
   'build',
   'verify:m7',
   'verify:visual',
@@ -42,7 +43,12 @@ for (const s of requiredScripts) {
 }
 
 const docNav = readFileSync(join(root, 'docs/00_文档导航.md'), 'utf8')
-for (const doc of ['05_交互与UI约定.md', '08_M7_RC验收清单.md', '09_视觉手验清单.md']) {
+for (const doc of [
+  '05_交互与UI约定.md',
+  '08_M7_RC验收清单.md',
+  '09_视觉手验清单.md',
+  '10_测试体系说明.md'
+]) {
   assert.ok(docNav.includes(doc), `docs/00 missing index for ${doc}`)
   assert.ok(existsSync(join(root, 'docs', doc)), `missing docs/${doc}`)
 }
@@ -51,6 +57,9 @@ console.log('verify:project — static checks OK', `(v${pkg.version})`)
 
 console.log('\n=== verify:project / lint ===')
 run('npm run lint')
+
+console.log('\n=== verify:project / test ===')
+run('npm run test')
 
 console.log('\n=== verify:project / verify:search ===')
 run('npm run verify:search')

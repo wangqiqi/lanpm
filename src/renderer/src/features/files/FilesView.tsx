@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Collapse,
@@ -32,7 +32,6 @@ import {
   CATEGORY_I18N_KEYS,
   filterFiles,
   formatFileUploadedAt,
-  sortFiles,
   type FileSortField,
   type FileSortOrder
 } from '@renderer/features/files/fileListModel'
@@ -41,6 +40,17 @@ import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
 import styles from './files.module.css'
 
 const { Text } = Typography
+
+const SORTABLE_FIELDS = new Set<FileSortField>(['name', 'type', 'size', 'uploadedAt'])
+
+function resolveSortField(sorter: unknown): FileSortField | null {
+  if (!sorter || Array.isArray(sorter) || typeof sorter !== 'object') return null
+  const s = sorter as { columnKey?: string; field?: string | string[]; order?: string | null }
+  const raw = s.columnKey ?? s.field
+  const key = (Array.isArray(raw) ? raw[0] : raw) as string | undefined
+  if (!key || !SORTABLE_FIELDS.has(key as FileSortField)) return null
+  return key as FileSortField
+}
 
 const CATEGORY_KEYS: { key: MessageKey; value: FileCategory | 'all' }[] = [
   { key: 'files.categoryAll', value: 'all' },
@@ -122,9 +132,9 @@ export default function FilesView(): React.ReactElement {
     [t]
   )
 
-  const displayFiles = useMemo(
-    () => sortFiles(filterFiles(files, searchQuery), sortField, sortOrder, categoryLabels),
-    [files, searchQuery, sortField, sortOrder, categoryLabels]
+  const filteredFiles = useMemo(
+    () => filterFiles(files, searchQuery),
+    [files, searchQuery]
   )
 
   useEffect(() => {
@@ -232,23 +242,38 @@ export default function FilesView(): React.ReactElement {
       .catch(() => setPreviewError(true))
   }
 
-  const handleDownload = async (file: FileMeta): Promise<void> => {
-    if (file.isBookmark || isRemotePendingPath(file.storagePath)) return
-    setDownloading(true)
-    try {
-      const path = await download(file.fileId)
-      if (path) message.success(t('files.downloadSuccess', { path }))
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : t('files.downloadFailed'))
-    } finally {
-      setDownloading(false)
-    }
-  }
+  const handleDownload = useCallback(
+    async (file: FileMeta): Promise<void> => {
+      if (file.isBookmark || isRemotePendingPath(file.storagePath)) return
+      setDownloading(true)
+      try {
+        const path = await download(file.fileId)
+        if (path) message.success(t('files.downloadSuccess', { path }))
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t('files.downloadFailed'))
+      } finally {
+        setDownloading(false)
+      }
+    },
+    [download, message, t]
+  )
 
   const handleTableChange: TableProps<FileMeta>['onChange'] = (_pag, _filters, sorter) => {
-    if (Array.isArray(sorter) || !sorter?.field) return
-    setSortField(sorter.field as FileSortField)
-    setSortOrder((sorter.order as FileSortOrder | undefined) ?? 'ascend')
+    if (Array.isArray(sorter)) return
+    const s = sorter as { columnKey?: string; field?: string | string[]; order?: FileSortOrder | null }
+    const order = s.order
+    const field = resolveSortField(sorter)
+
+    if (!order) {
+      // Ant Design 第三次点击会「取消排序」且清空 field；改为同列升降序来回切换
+      if (field) setSortField(field)
+      setSortOrder((prev) => (prev === 'ascend' ? 'descend' : 'ascend'))
+      return
+    }
+
+    if (!field) return
+    setSortField(field)
+    setSortOrder(order)
   }
 
   const handleShareToChat = (): void => {
@@ -318,38 +343,46 @@ export default function FilesView(): React.ReactElement {
   }
 
   const columns = useMemo((): ColumnsType<FileMeta> => {
-    const sortIcon = (field: FileSortField) => (sortField === field ? sortOrder : null)
+    const activeOrder = (field: FileSortField) => (sortField === field ? sortOrder : null)
     return [
       {
         title: t('files.colName'),
         dataIndex: 'name',
         key: 'name',
         ellipsis: true,
-        sorter: true,
-        sortOrder: sortIcon('name')
+        sorter: (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+        sortOrder: activeOrder('name')
       },
       {
         title: t('files.colType'),
         key: 'type',
         width: 112,
-        sorter: true,
-        sortOrder: sortIcon('type'),
+        sorter: (a, b) =>
+          formatFileTypeLabel(a, categoryLabels).localeCompare(
+            formatFileTypeLabel(b, categoryLabels),
+            undefined,
+            { sensitivity: 'base' }
+          ),
+        sortOrder: activeOrder('type'),
         render: (_: unknown, r: FileMeta) => formatFileTypeLabel(r, categoryLabels)
       },
       {
         title: t('files.colSize'),
+        dataIndex: 'size',
         key: 'size',
         width: 88,
-        sorter: true,
-        sortOrder: sortIcon('size'),
+        sorter: (a, b) => a.size - b.size,
+        sortOrder: activeOrder('size'),
         render: (_: unknown, r: FileMeta) => (r.isBookmark ? '—' : formatSize(r.size))
       },
       {
         title: t('files.colUploaded'),
+        dataIndex: 'uploadedAt',
         key: 'uploadedAt',
         width: 148,
-        sorter: true,
-        sortOrder: sortIcon('uploadedAt'),
+        sorter: (a, b) => a.uploadedAt.localeCompare(b.uploadedAt),
+        sortOrder: activeOrder('uploadedAt'),
+        defaultSortOrder: 'descend',
         render: (_: unknown, r: FileMeta) => formatFileUploadedAt(r.uploadedAt, locale)
       },
       {
@@ -385,7 +418,7 @@ export default function FilesView(): React.ReactElement {
           )
       }
     ]
-  }, [t, locale, categoryLabels, sortField, sortOrder])
+  }, [t, locale, categoryLabels, sortField, sortOrder, handleDownload])
 
   return (
     <div className={styles.root}>
@@ -439,6 +472,19 @@ export default function FilesView(): React.ReactElement {
           </ViewToolbarGroup>
         }
       />
+
+      <div className={styles.searchRow}>
+        <Input.Search
+          className={styles.searchInput}
+          allowClear
+          placeholder={t('files.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery.trim() ? (
+          <Text type="secondary">{t('files.searchResultCount', { count: filteredFiles.length })}</Text>
+        ) : null}
+      </div>
 
       {activeTransfers.length > 0 && (
         <List
@@ -518,9 +564,11 @@ export default function FilesView(): React.ReactElement {
               size="small"
               rowKey="fileId"
               columns={columns}
-              dataSource={files}
+              dataSource={filteredFiles}
               locale={{ emptyText: t('files.empty') }}
               pagination={false}
+              sortDirections={['ascend', 'descend']}
+              onChange={handleTableChange}
               onRow={(record) => ({
                 onClick: () => setSelected(record)
               })}
@@ -535,10 +583,30 @@ export default function FilesView(): React.ReactElement {
             <Text type="secondary">{t('files.selectToPreview')}</Text>
           ) : (
             <>
+              <div className={styles.previewHeader}>
+                <Text strong ellipsis={{ tooltip: selected.name }}>
+                  {selected.name}
+                </Text>
+                <div className={styles.previewMeta}>
+                  <span>{formatFileTypeLabel(selected, categoryLabels)}</span>
+                  {!selected.isBookmark && <span>{formatSize(selected.size)}</span>}
+                  <span>{formatFileUploadedAt(selected.uploadedAt, locale)}</span>
+                </div>
+              </div>
               <div className={styles.previewActions}>
                 {selected && !selected.isBookmark && isRemotePendingPath(selected.storagePath) ? (
                   <Button type="primary" size="small" loading={pulling} onClick={() => void handlePullRemote()}>
                     {t('files.pullRemote')}
+                  </Button>
+                ) : null}
+                {!selected.isBookmark && !isRemotePendingPath(selected.storagePath) ? (
+                  <Button
+                    size="small"
+                    icon={<DownloadOutlined />}
+                    loading={downloading}
+                    onClick={() => void handleDownload(selected)}
+                  >
+                    {t('files.download')}
                   </Button>
                 ) : null}
                 <Button

@@ -22,6 +22,7 @@ import ViewHeader from '@renderer/ui/ViewHeader'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import styles from './CockpitView.module.css'
 
 const { Text, Paragraph } = Typography
@@ -181,7 +182,7 @@ export default function CockpitView(): React.ReactElement {
             return (
               <div key={p.groupId} className={styles.projectRow}>
                 <div className={styles.projectHead}>
-                  <Text strong>{p.name}</Text>
+                  <Text strong>{resolveGroupDisplayNameById(p.groupId, p.name, t)}</Text>
                   <Tag color={meta.color}>{meta.label}</Tag>
                   <Button size="small" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
                     {t('common.view')}

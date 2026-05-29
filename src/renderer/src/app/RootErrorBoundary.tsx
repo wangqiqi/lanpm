@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { translate, type LocaleId } from '@renderer/i18n/messages'
 
 interface Props {
   children: ReactNode
@@ -22,6 +23,8 @@ export default class RootErrorBoundary extends Component<Props, State> {
 
   render(): ReactNode {
     if (this.state.error) {
+      const locale = (localStorage.getItem('locale') as LocaleId | null) ?? 'zh-CN'
+      const t = (key: Parameters<typeof translate>[1]) => translate(locale, key)
       return (
         <div
           style={{
@@ -37,7 +40,7 @@ export default class RootErrorBoundary extends Component<Props, State> {
             color: '#1d1d1f'
           }}
         >
-          <h1 style={{ margin: 0, fontSize: 18 }}>LanPM 页面加载失败</h1>
+          <h1 style={{ margin: 0, fontSize: 18 }}>{t('app.crashTitle')}</h1>
           <pre
             style={{
               maxWidth: 720,
@@ -64,7 +67,7 @@ export default class RootErrorBoundary extends Component<Props, State> {
               cursor: 'pointer'
             }}
           >
-            重新加载
+            {t('app.crashReload')}
           </button>
         </div>
       )

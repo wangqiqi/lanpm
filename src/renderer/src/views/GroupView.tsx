@@ -2,7 +2,8 @@ import { lazy, Suspense, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
-import { formatDmTitle, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
+import { getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
+import { resolveGroupDisplayName, resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
@@ -25,7 +26,6 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
-  const getGroupLabel = useNavigationStore((s) => s.getGroupLabel)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const getPeerDisplayName = useDmStore((s) => s.getPeerDisplayName)
   const touchSession = useDmStore((s) => s.touchSession)
@@ -57,10 +57,11 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     if (isDmGroupId(groupId) && localUserId) {
       const peerId = getDmPeerUserId(groupId, localUserId)
       if (peerId) {
-        return formatDmTitle(getPeerDisplayName(groupId, peerId))
+        return t('topbar.dmLabel', { name: getPeerDisplayName(groupId, peerId) })
       }
     }
-    return group?.name ?? getGroupLabel(groupId)
+    if (group) return resolveGroupDisplayName(group, t)
+    return resolveGroupDisplayNameById(groupId, groupId, t)
   })()
 
   const pageTitle = view === 'chat' ? chatTitle : t(VIEW_MESSAGE_KEYS[view])

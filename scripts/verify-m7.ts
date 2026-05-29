@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process'
 
 const steps: { name: string; cmd: string; env?: Record<string, string> }[] = [
   { name: 'typecheck', cmd: 'npm run typecheck' },
+  { name: 'test', cmd: 'npm run test' },
   { name: 'visual', cmd: 'npm run verify:visual' },
   { name: 'search', cmd: 'npm run verify:search' },
   { name: 'i18n-en', cmd: 'npm run verify:i18n-en' },
