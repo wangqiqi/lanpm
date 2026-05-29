@@ -21,6 +21,7 @@ npm-debug.log*
 tmp/
 temp/
 .lanpm/
+.lanpm/visual-screenshots/
 
 # Test artifacts
 coverage/

@@ -222,6 +222,10 @@ assert.match(
 )
 assert.match(bottomNavCss, /var\(--lanpm-font-caption\)/, 'BottomNav tab label should use font caption token')
 
+const regionCss = readFileSync(join(renderer, 'ui/regionInteract.module.css'), 'utf8')
+assert.match(regionCss, /--lanpm-hover-bg/, 'regionInteract hover must use --lanpm-hover-bg (V-14b-HOV static)')
+assert.match(regionCss, /--lanpm-accent-fill/, 'regionInteract selected must use accent fill tokens')
+
 const sharedUiFontToken = /var\(--lanpm-font-(caption|body|title|display)\)/
 for (const rel of [
   'ui/ViewToolbar.module.css',

@@ -1,10 +1,14 @@
-import { lazy, Suspense, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
 import { getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
 import { resolveGroupDisplayName, resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
-import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import BoardView from '@renderer/features/board/BoardView'
+import ChatView from '@renderer/features/chat/ChatView'
+import FilesView from '@renderer/features/files/FilesView'
+import GanttView from '@renderer/features/gantt/GanttView'
+import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -13,12 +17,6 @@ import ViewHeader from '@renderer/ui/ViewHeader'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import styles from './GroupView.module.css'
-
-const ChatView = lazy(() => import('@renderer/features/chat/ChatView'))
-const BoardView = lazy(() => import('@renderer/features/board/BoardView'))
-const TaskTreeView = lazy(() => import('@renderer/features/tree/TaskTreeView'))
-const GanttView = lazy(() => import('@renderer/features/gantt/GanttView'))
-const FilesView = lazy(() => import('@renderer/features/files/FilesView'))
 
 /** 聊天页标题为群名/DM 名；任务类视图为模块名（docs/05 §1.1） */
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
@@ -71,13 +69,11 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
       <ViewHeader title={pageTitle} />
       <div className={isChat ? styles.chatBody : styles.taskBody}>
-        <Suspense fallback={<ViewLoadingCenter />}>
-          {view === 'chat' && <ChatView />}
-          {view === 'board' && <BoardView />}
-          {view === 'tree' && <TaskTreeView />}
-          {view === 'gantt' && <GanttView />}
-          {view === 'files' && <FilesView />}
-        </Suspense>
+        {view === 'chat' && <ChatView />}
+        {view === 'board' && <BoardView />}
+        {view === 'tree' && <TaskTreeView />}
+        {view === 'gantt' && <GanttView />}
+        {view === 'files' && <FilesView />}
       </div>
     </div>
   )

@@ -2,6 +2,24 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.35] - 2026-05-29
+
+### Added
+- **AUTO-18** GitHub Actions 三平台 CI（ubuntu / macos / windows · `verify:m7`）
+- **AUTO-20** `verify:visual-screenshots`：无头亮暗七页 PNG → `.lanpm/visual-screenshots/`（`visualCapture.ts` + `LANPM_VISUAL_CAPTURE_DIR`）
+
+### Changed
+- **VIS-08** 默认头像调色板与语义色 / accent 对齐（`setup/avatar.ts`）
+- **路由 eager import**：`AppRouter` / `GroupView` 去除 lazy，避免截图时 Rolldown CJS 循环依赖
+- **`main.tsx`**：`?theme=` 查询参数写入 localStorage（截图模式）
+- **`main/index.ts`**：Linux 无头禁用加速视频编解码；截图模式隐藏窗口
+- **`verify:visual`**：`regionInteract` hover/selected 令牌静态守卫
+- **`代码文档差异.md`** §2 Agent 审计初版 · **`todo.md`** 已完成项归档精简
+- **`docs/05`** · **`.gitignore`**：visual-screenshots 脚本说明与输出目录忽略
+
+### Tag
+- `v1.0.0-rc.35` — CI 矩阵、视觉截图自动化与 todo 归档
+
 ## [1.0.0-rc.34] - 2026-05-29
 
 ### Added

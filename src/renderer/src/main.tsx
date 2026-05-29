@@ -3,6 +3,13 @@ import { installDevPreviewClientGuards } from '@renderer/platform/devPreviewClie
 import './styles/global.module.css'
 
 function readThemeDataset(): void {
+  const fromQuery =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('theme')
+      : null
+  if (fromQuery === 'dark' || fromQuery === 'light') {
+    localStorage.setItem('theme', fromQuery)
+  }
   const theme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
   document.documentElement.dataset.theme = theme
   document.documentElement.style.colorScheme = theme
