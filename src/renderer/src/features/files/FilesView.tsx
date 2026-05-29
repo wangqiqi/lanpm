@@ -18,7 +18,7 @@ import type { FileCategory, FileMeta } from '@shared/file/types'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
-import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './files.module.css'
@@ -65,6 +65,7 @@ export default function FilesView(): React.ReactElement {
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
   const [selected, setSelected] = useState<FileMeta | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewError, setPreviewError] = useState(false)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [bookmarkUrl, setBookmarkUrl] = useState('')
   const [bookmarkTitle, setBookmarkTitle] = useState('')
@@ -91,17 +92,38 @@ export default function FilesView(): React.ReactElement {
   useEffect(() => {
     if (!selected) {
       setPreviewUrl(null)
+      setPreviewError(false)
       return
     }
     if (selected.isBookmark) {
       setPreviewUrl(null)
+      setPreviewError(false)
       return
     }
+    setPreviewError(false)
     void getLanpmApi()
       .file.getPreviewUrl(selected.fileId)
-      .then(setPreviewUrl)
-      .catch(() => setPreviewUrl(null))
+      .then((url) => {
+        setPreviewUrl(url)
+        setPreviewError(!url)
+      })
+      .catch(() => {
+        setPreviewUrl(null)
+        setPreviewError(true)
+      })
   }, [selected])
+
+  const retryPreview = (): void => {
+    if (!selected || selected.isBookmark) return
+    setPreviewError(false)
+    void getLanpmApi()
+      .file.getPreviewUrl(selected.fileId)
+      .then((url) => {
+        setPreviewUrl(url)
+        setPreviewError(!url)
+      })
+      .catch(() => setPreviewError(true))
+  }
 
   const saveBookmark = async (): Promise<void> => {
     if (!gid) return
@@ -270,6 +292,8 @@ export default function FilesView(): React.ReactElement {
             </div>
           ) : selected.previewStatus === 'converting' ? (
             <Text>{t('files.convertingLocal')}</Text>
+          ) : previewError ? (
+            <ViewErrorCenter message={t('files.previewLoadFailed')} onRetry={retryPreview} />
           ) : selected.previewStatus === 'failed' ? (
             <Text type="danger">{t('files.previewFailedDownload')}</Text>
           ) : previewUrl && selected.category === 'image' ? (
@@ -296,7 +320,7 @@ export default function FilesView(): React.ReactElement {
           <div>
             <Text type="secondary">{t('common.url')}</Text>
             <Input
-              placeholder="https://example.com"
+              placeholder={t('files.bookmarkUrlPlaceholder')}
               value={bookmarkUrl}
               onChange={(e) => setBookmarkUrl(e.target.value)}
               style={{ marginTop: 4 }}

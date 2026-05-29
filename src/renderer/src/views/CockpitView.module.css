@@ -53,10 +53,14 @@
   word-break: break-word;
   font-size: 13px;
   line-height: 1.5;
-  max-height: 360px;
+  max-height: 200px;
   overflow: auto;
   margin: 0;
   padding: 12px;
   border-radius: 8px;
   background: var(--lanpm-code-bg);
+}
+
+.reportPreExpanded {
+  max-height: min(70vh, 640px);
 }

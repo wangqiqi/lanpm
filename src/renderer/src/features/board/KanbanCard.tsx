@@ -1,4 +1,4 @@
-import { Popconfirm, Tag } from 'antd'
+import { Button, Popconfirm, Tag } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
@@ -14,13 +14,17 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
 
 interface KanbanCardProps {
   task: Task
+  assigneeName?: string
   onDelete?: (taskId: string) => void
+  onDiscuss?: (task: Task) => void
   highlighted?: boolean
 }
 
 export default function KanbanCard({
   task,
+  assigneeName,
   onDelete,
+  onDiscuss,
   highlighted = false
 }: KanbanCardProps): React.ReactElement {
   const { t } = useI18n()
@@ -78,9 +82,25 @@ export default function KanbanCard({
                 : 'board.priorityMedium'
           )}
         </Tag>
-        {task.assigneeUserId && <span>@{task.assigneeUserId}</span>}
+        {task.assigneeUserId && (
+          <span>@{assigneeName ?? task.assigneeUserId}</span>
+        )}
         <span>{task.progressPercent}%</span>
       </div>
+      {onDiscuss && (
+        <Button
+          type="link"
+          size="small"
+          className={styles.discussBtn}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDiscuss(task)
+          }}
+        >
+          {t('board.discussInChat')}
+        </Button>
+      )}
       {task.status === 'other' && task.otherReason && (
         <div className={styles.otherReason}>{task.otherReason}</div>
       )}

@@ -18,6 +18,7 @@ import { KANBAN_COLUMN_ORDER, isTaskStatus } from '@shared/task/kanban'
 import type { MessageKey } from '@renderer/i18n/messages'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
+import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
@@ -41,18 +42,24 @@ const PRIORITY_OPTIONS: { value: TaskPriority; key: MessageKey }[] = [
 ]
 
 function KanbanColumn({
+  groupId,
   status,
   tasks,
   isOver,
   invalid,
   onDeleteTask,
+  onDiscuss,
+  getMemberDisplayName,
   isTaskHighlighted
 }: {
+  groupId: string
   status: TaskStatus
   tasks: Task[]
   isOver: boolean
   invalid: boolean
   onDeleteTask?: (taskId: string) => void
+  onDiscuss: (task: Task) => void
+  getMemberDisplayName: (groupId: string, userId: string) => string
   isTaskHighlighted: (taskId: string) => boolean
 }): React.ReactElement {
   const { t } = useI18n()
@@ -75,7 +82,13 @@ function KanbanColumn({
           <KanbanCard
             key={task.taskId}
             task={task}
+            assigneeName={
+              task.assigneeUserId
+                ? getMemberDisplayName(groupId, task.assigneeUserId)
+                : undefined
+            }
             onDelete={onDeleteTask}
+            onDiscuss={onDiscuss}
             highlighted={isTaskHighlighted(task.taskId)}
           />
         ))}
@@ -95,6 +108,8 @@ export default function BoardView(): React.ReactElement {
   const createTask = useTaskStore((s) => s.createTask)
   const moveTask = useTaskStore((s) => s.moveTask)
   const deleteTask = useTaskStore((s) => s.deleteTask)
+  const loadMembers = useChatMembersStore((s) => s.loadMembers)
+  const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
 
   const [createOpen, setCreateOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -135,11 +150,21 @@ export default function BoardView(): React.ReactElement {
   useEffect(() => {
     if (!gid) return
     void loadTasks(gid)
+    void loadMembers(gid)
     const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
       if (changedGroupId === gid) void loadTasks(gid)
     })
     return unsub
-  }, [gid, loadTasks])
+  }, [gid, loadTasks, loadMembers])
+
+  const handleDiscuss = useCallback(
+    (task: Task) => {
+      navigate(groupViewPath(gid, 'chat'), {
+        state: { composeDraft: t('board.discussDraft', { title: task.title }) }
+      })
+    },
+    [gid, navigate, t]
+  )
 
   const handleDragStart = (event: DragStartEvent): void => {
     const task = boardTasks.find((t) => t.taskId === event.active.id)
@@ -260,11 +285,14 @@ export default function BoardView(): React.ReactElement {
             {KANBAN_COLUMN_ORDER.map((status) => (
               <KanbanColumn
                 key={status}
+                groupId={gid}
                 status={status}
                 tasks={tasksByColumn[status]}
                 isOver={overColumn === status}
                 invalid={false}
                 onDeleteTask={(id) => void handleDelete(id)}
+                onDiscuss={handleDiscuss}
+                getMemberDisplayName={getMemberDisplayName}
                 isTaskHighlighted={isTaskHighlighted}
               />
             ))}

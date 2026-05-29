@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.9` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.10` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -133,15 +133,15 @@
 - [x] **UX-PATH-02** 用户菜单「API Key」直接打开 `AiConfigModal`（免先跳驾驶舱）
 - [x] **UX-PATH-03** 看板 toolbar inline 快速建任务（对齐任务树输入 + 按钮）
 - [ ] **UX-PATH-04**（可选）任务树：行内 slider / 双击改进度，减少 toolbar 第二行步骤
-- [ ] **UX-PATH-05** DM 中点击 Logo：明确回 `lastOriginGroupId` 项目群或文档化当前行为
+- [x] **UX-PATH-05** DM 中点击 Logo：回 `lastOriginGroupId` 项目群（`TopBar`）
 - [x] **UX-PATH-06** Setup 完成后进入首个真实群 — 同 **UX-W-09**
 - [x] **UX-PATH-07** 匿名群进入时简要能力说明（仅聊天、无历史等）
 
 ### P3 — 跨视图协作链（UX 审查 §8）
 
-- [ ] **UX-FLOW-01** 看板任务 →「在聊天中讨论 / 提及任务」反向链
+- [x] **UX-FLOW-01** 看板任务 →「在聊天中讨论 / 提及任务」反向链（`KanbanCard` → `composeDraft`）
 - [ ] **UX-FLOW-02** 文件 →「发送到群聊」
-- [ ] **UX-FLOW-03** 甘特任务 ↔ 看板卡片互跳（不经搜索/树绕路）
+- [x] **UX-FLOW-03** 甘特任务 ↔ 看板卡片互跳（单击甘特条 → 看板高亮）
 
 ### 其他（UX 审查 §3、§7）
 
@@ -156,7 +156,7 @@
 - [x] **DOC-03** 将 `docs/03` §16.11「7 天离线补同步」改为 P1/post-RC，或与 **ARCH-07** 合并排期
 - [x] **DOC-04** `README` 技术选型改为「目标架构 / 当前 RC 实现」分栏（同 **ARCH-06**）
 - [x] **DOC-05** 统一对外表述：「RC 自动化回归通过」≠「PRD P0 100%」≠「1.0.0 门禁已满足」
-- [ ] **DOC-06** 文档对齐：传输安全文案（独立 HMAC 字段 vs AES-GCM authTag）见 **ARCH-04**
+- [x] **DOC-06** 文档对齐：传输安全文案（独立 HMAC 字段 vs AES-GCM authTag）— `docs/02` RC 实现说明
 - [x] **DOC-07** `plan.md` 迁出根目录 → [plan 概述归档](./archive/20260529_095839_plan概述_SSOT后归档.md)（2026-05-29）
 
 ---
@@ -183,7 +183,7 @@
 - [ ] **ARCH-01** 群组密钥 24h 轮换：主进程处理 `group_key_rotate`
 - [ ] **ARCH-02** 手动添加节点（IP:端口）UI/IPC
 - [ ] **ARCH-03** UDP 组播发现（跨子网；当前仅广播 `43123`）
-- [ ] **ARCH-04** 文档说明：ECDH + AES-GCM authTag vs 文档「独立 HMAC」字段
+- [x] **ARCH-04** 文档说明：ECDH + AES-GCM authTag vs 文档「独立 HMAC」字段 — 同 **DOC-06**
 - [ ] **ARCH-05** IndexedDB 热缓存实现，或 PRD/README 降级为仅 SQLite
 - [ ] **ARCH-06** PRD/README 中 Yjs / WebRTC / IndexedDB 标为目标栈 vs RC 现状
 - [ ] **ARCH-07** 7 天离线补同步队列 — 与 **PRD-F-07** / **DOC-03**
@@ -205,22 +205,22 @@
 
 ### 第二批（体验 polish）
 
-- [ ] **UX-F-07** 成员列表：提升到 store 或 ChatView 下发，避免 ChatView/MemberList 重复 IPC
-- [ ] **UX-F-08** 聊天 Enter 发送 / Shift+Enter 换行可配置，或强化输入区提示
-- [ ] **UX-F-09** 聊天消息日期分组（今日/昨日/完整日期）
+- [x] **UX-F-07** 成员列表：提升到 store 或 ChatView 下发，避免 ChatView/MemberList 重复 IPC
+- [x] **UX-F-08** 聊天 Enter 发送 / Shift+Enter 换行 + 输入区提示（`chat.inputHintEnter`）
+- [x] **UX-F-09** 聊天消息日期分组（今日/昨日/完整日期）
 - [x] **UX-F-10** 看板整体空态 + 创建任务 CTA（四列皆空）
 - [x] **UX-F-11** 看板列内「拖放任务到此」dashed 占位 + i18n
 - [ ] **UX-F-12** 甘特：任务详情弹窗编辑日期（键盘改期替代）
 - [x] **UX-F-13** 文件 Table 空态：`locale.emptyText: t('files.empty')`
 - [x] **UX-F-14** 创建群组失败：`catch` + `message.error`（`CreateGroupModal`）— 同 **UX-W-01**
 - [x] **UX-F-15** 默认路由：重定向 `activeGroupId` 或首群，非写死 `demo-project` — 同 **UX-W-09**
-- [ ] **UX-F-16** `navigationStore` 演示群名 i18n 或 Skeleton
+- [x] **UX-F-16** `navigationStore` 演示群名 i18n（`groupLabels.ts` / `resolveGroupDisplayName`）
 - [ ] **UX-F-17** TopBar 连接状态点 + 重连（在线/离线/同步）
 - [ ] **UX-F-18** BottomNav 未读/待办角标（chat、board 等）
-- [ ] **UX-F-19** 驾驶舱 AI 报告：复制按钮、最大高度 + 展开
+- [x] **UX-F-19** 驾驶舱 AI 报告：复制按钮、最大高度 + 展开（`CockpitView`）
 - [x] **UX-F-20** 代码块右上角「复制代码」（`CodeBlock.tsx`）
 - [x] **UX-F-21** 未知消息类型 i18n fallback，非 raw `[type]`
-- [ ] **UX-F-22** 文件预览失败：侧栏/预览区错误态 + 重试，与「不支持预览」区分（`FilesView`；UX 审查 §3.7）
+- [x] **UX-F-22** 文件预览失败：侧栏/预览区错误态 + 重试（`FilesView` + `ViewErrorCenter`）
 
 ---
 
@@ -229,8 +229,8 @@
 - [x] **UX-I-01** 看板列标题 i18n（`kanban.ts` TODO/IN PROGRESS/DONE/OTHER）
 - [x] **UX-I-02** 任务优先级 Tag/Select i18n（`KanbanCard`、`BoardView`）
 - [x] **UX-I-03** 任务引用气泡 i18n（`MessageBubble`「📋 任务：」）
-- [ ] **UX-I-04** 送达状态：i18n 文案 + aria（替代纯 emoji `deliveryLabel`）
-- [ ] **UX-I-05** 书签 URL placeholder i18n（`FilesView`）
+- [x] **UX-I-04** 送达状态：i18n 文案 + aria（`deliveryStatusMeta`）
+- [x] **UX-I-05** 书签 URL placeholder i18n（`FilesView`）
 - [x] **UX-I-06** 切换 locale 时更新 `document.documentElement.lang`（`index.html` 默认 zh-CN）
 - [ ] **UX-I-07** `browserLanpmStub.ts` 错误文案 i18n（开发桩）— 可并入 **I18N-06**
 - [ ] **UX-I-08** 收尾硬编码：FilesView / GanttView / TaskTreeView / CockpitView / KanbanCard 等（评估 §5）
@@ -239,15 +239,15 @@
 
 ## UI/UX — 无障碍（来源：[UI 审查归档](./archive/20260529_095839_UI设计审查_ui.md) §3.3）
 
-- [ ] **UX-A-01** Logo `alt` 文案（`TopBar`）
-- [ ] **UX-A-02** 用户菜单按钮 `aria-label={t('topbar.userMenu')}`
-- [ ] **UX-A-03** `@` 提及：↑↓ 选择、Enter/Tab 确认、Esc 关闭（`MentionSuggest`）
-- [ ] **UX-A-04** 全局 `:focus-visible` focus ring
-- [ ] **UX-A-05** 禁用 Tab：`aria-disabled` + 可聚焦 wrapper（`BottomNav`）
+- [x] **UX-A-01** Logo `alt` 文案（`TopBar`）
+- [x] **UX-A-02** 用户菜单按钮 `aria-label={t('topbar.userMenu')}`
+- [x] **UX-A-03** `@` 提及：↑↓ 选择、Enter/Tab 确认、Esc 关闭（`useMentionSuggest`）
+- [x] **UX-A-04** 全局 `:focus-visible` focus ring
+- [x] **UX-A-05** 禁用 Tab：`aria-disabled`（`BottomNav`）
 - [ ] **UX-A-06** 看板卡片「移动到列」菜单（键盘替代拖拽）
-- [ ] **UX-A-07** DM chip `title` 改为 peer 显示名（`DmSessionBar`）
-- [ ] **UX-A-08** Mention 候选勿默认展示完整 userId
-- [ ] **UX-A-09** Setup Upload 避免嵌套 `<button>`（`SetupWizard`）
+- [x] **UX-A-07** DM chip `title` 改为 peer 显示名（`DmSessionBar`）
+- [x] **UX-A-08** Mention 候选勿默认展示完整 userId（仅 `displayName`）
+- [x] **UX-A-09** Setup Upload 避免嵌套 `<button>`（`SetupWizard`）
 
 ---
 
@@ -257,12 +257,12 @@
 
 - [x] **UX-V-01** 加载态统一：`ViewLoadingCenter` 带「加载中…」；App Spin 与之一致
 - [x] **UX-V-02** `ChatView` 加载改用 `ViewLoadingCenter`
-- [ ] **UX-V-03** 甘特 `gantt-task-react` 暗色主题覆盖与 `--lanpm-*` 对齐
+- [x] **UX-V-03** 甘特 `gantt-task-react` 暗色主题覆盖与 `--lanpm-*` 对齐（`gantt.module.css`）
 - [x] **UX-V-04** 看板列头英文大写与中文 UI 统一 — 与 **UX-I-01**
-- [ ] **UX-V-05** 看板卡片 assignee 显示昵称非 raw userId
-- [ ] **UX-V-06** Setup 图标使用 `resources/logo.svg` 替代字母「L」
+- [x] **UX-V-05** 看板卡片 assignee 显示昵称非 raw userId（`chatMembersStore`）
+- [x] **UX-V-06** Setup 图标使用 `resources/logo.svg` 替代字母「L」
 - [x] **UX-V-07** 驾驶舱失败 vs 真实 0 — 与 **UX-F-03**
-- [ ] **UX-V-08**（文档）Hash 路由 `#/g/...` 深链说明（Electron 可接受）
+- [x] **UX-V-08**（文档）Hash 路由 `#/g/...` 深链说明 — `docs/05` §2
 - [ ] **UX-R-01**（可选）小窗口 `@media` 断点设计
 - [ ] **UX-R-02** TopBar 窄窗 flex-wrap / 折叠菜单
 - [ ] **UX-R-03** 聊天侧栏窄窗宽度策略（当前固定 240px）

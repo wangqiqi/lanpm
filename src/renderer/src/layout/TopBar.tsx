@@ -31,6 +31,7 @@ import { cockpitPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
 import { useDmStore } from '@renderer/stores/dmStore'
+import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
@@ -84,6 +85,11 @@ export default function TopBar(): React.ReactElement {
       navigate(lastNonCockpitPath ?? groupViewPath(activeGroupId, 'chat'))
       return
     }
+    if (isDmGroupId(activeGroupId)) {
+      const origin = useDmStore.getState().lastOriginGroupId
+      navigate(groupViewPath(origin, 'chat'))
+      return
+    }
     navigate(groupViewPath(activeGroupId, 'chat'))
   }
 
@@ -118,7 +124,7 @@ export default function TopBar(): React.ReactElement {
       value: g.groupId,
       label: (
         <span>
-          {g.name}{' '}
+          {resolveGroupDisplayName(g, t)}{' '}
           <Text type="secondary" className={styles.groupType}>
             {t(GROUP_TYPE_KEYS[g.type])}
           </Text>
@@ -157,7 +163,13 @@ export default function TopBar(): React.ReactElement {
     <header className={styles.bar}>
       <Space size="middle" align="center">
         <button type="button" className={styles.logo} onClick={handleLogoClick}>
-          <img src={logoUrl} alt="" className={styles.logoMark} width={24} height={24} />
+          <img
+            src={logoUrl}
+            alt={t('topbar.logoAlt')}
+            className={styles.logoMark}
+            width={24}
+            height={24}
+          />
           <span>{t('topbar.logo')}</span>
         </button>
         <Select
@@ -197,7 +209,11 @@ export default function TopBar(): React.ReactElement {
           suffixIcon={<GlobalOutlined />}
         />
         <Dropdown menu={{ items: userMenu }} trigger={['click']}>
-          <button type="button" className={styles.userBtn}>
+          <button
+            type="button"
+            className={styles.userBtn}
+            aria-label={t('topbar.userMenu')}
+          >
             <Avatar size="small" icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
             <span className={styles.userName}>{user?.displayName ?? t('topbar.userFallback')}</span>
           </button>

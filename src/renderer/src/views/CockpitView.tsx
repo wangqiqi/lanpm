@@ -12,7 +12,7 @@ import {
   Typography,
   message
 } from 'antd'
-import { KeyOutlined, RobotOutlined } from '@ant-design/icons'
+import { CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -45,6 +45,7 @@ export default function CockpitView(): React.ReactElement {
   const [aiConfigOpen, setAiConfigOpen] = useState(false)
   const [report, setReport] = useState<AiReportResult | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
+  const [reportExpanded, setReportExpanded] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -214,14 +215,40 @@ export default function CockpitView(): React.ReactElement {
       </Card>
 
       {report && (
-        <Card title={t('cockpit.reportOutput')} className={styles.section}>
+        <Card
+          title={t('cockpit.reportOutput')}
+          className={styles.section}
+          extra={
+            <Space>
+              <Button
+                size="small"
+                icon={<CopyOutlined />}
+                onClick={() => {
+                  void navigator.clipboard.writeText(report.content).then(
+                    () => message.success(t('cockpit.reportCopied')),
+                    () => message.error(t('cockpit.reportCopyFailed'))
+                  )
+                }}
+              >
+                {t('cockpit.reportCopy')}
+              </Button>
+              <Button size="small" type="link" onClick={() => setReportExpanded((v) => !v)}>
+                {reportExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
+              </Button>
+            </Space>
+          }
+        >
           <Paragraph>
             <Text type="secondary">
               {report.generatedAt} ·{' '}
               {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
             </Text>
           </Paragraph>
-          <pre className={styles.reportPre}>{report.content}</pre>
+          <pre
+            className={`${styles.reportPre} ${reportExpanded ? styles.reportPreExpanded : ''}`}
+          >
+            {report.content}
+          </pre>
         </Card>
       )}
 

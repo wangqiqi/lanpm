@@ -140,6 +140,13 @@
   color: #cf1322;
 }
 
+.discussBtn {
+  padding: 0;
+  height: auto;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
 .overlayCard {
   padding: 10px 12px;
   border-radius: 8px;

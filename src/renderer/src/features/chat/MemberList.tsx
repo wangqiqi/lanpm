@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { List, Typography } from 'antd'
 import { MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { presenceEmoji } from '@shared/presence'
-import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { groupViewPath } from '@renderer/routes/paths'
@@ -19,32 +18,28 @@ const PRESENCE_POLL_MS = 3_000
 
 interface MemberListProps {
   groupId: string
+  members: GroupMemberView[]
+  onRefresh: () => void
   onInsertMention: (displayName: string) => void
 }
 
 export default function MemberList({
   groupId,
+  members,
+  onRefresh,
   onInsertMention
 }: MemberListProps): React.ReactElement {
   const { t } = useI18n()
-  const [members, setMembers] = useState<GroupMemberView[]>([])
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const openSession = useDmStore((s) => s.openSession)
   const navigate = useNavigate()
   const isDm = isDmGroupId(groupId)
 
-  const refreshMembers = useCallback(() => {
-    void getLanpmApi()
-      .chat.listMembers(groupId)
-      .then(setMembers)
-      .catch(() => setMembers([]))
-  }, [groupId])
-
   useEffect(() => {
-    refreshMembers()
-    const timer = window.setInterval(refreshMembers, PRESENCE_POLL_MS)
+    onRefresh()
+    const timer = window.setInterval(onRefresh, PRESENCE_POLL_MS)
     return () => window.clearInterval(timer)
-  }, [refreshMembers])
+  }, [groupId, onRefresh])
 
   const startDm = (member: GroupMemberView): void => {
     if (!currentUserId || member.userId === currentUserId) return

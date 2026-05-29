@@ -54,3 +54,19 @@
 :global(html[data-theme='dark']) .chartWrap :global(.gridRow:nth-child(even)) {
   fill: var(--lanpm-bubble-bg);
 }
+
+:global(html[data-theme='dark']) .chartWrap :global(.calendarHeader) {
+  fill: var(--lanpm-surface-solid);
+}
+
+:global(html[data-theme='dark']) .chartWrap :global(.calendarHeader text) {
+  fill: var(--lanpm-text-secondary);
+}
+
+:global(html[data-theme='dark']) .chartWrap :global(.gridTick) {
+  stroke: var(--lanpm-border);
+}
+
+:global(html[data-theme='dark']) .chartWrap :global(.arrow) {
+  fill: var(--lanpm-text-secondary);
+}

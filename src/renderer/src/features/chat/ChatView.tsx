@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Input, Typography, message } from 'antd'
 import { CodeOutlined, PlusSquareOutlined } from '@ant-design/icons'
-import { useParams } from 'react-router-dom'
-import type { GroupMemberView } from '@shared/chat/members'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import { deliveryStatusMeta, groupMessagesByDay } from '@renderer/features/chat/chatDateGroups'
+import { useMentionSuggest } from '@renderer/features/chat/mentionKeyboard'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import CodeSendModal from '@renderer/features/chat/CodeSendModal'
 import DmSessionBar from '@renderer/features/chat/DmSessionBar'
@@ -31,13 +33,6 @@ const COMPOSER_MAX = 320
 const COMPOSER_DEFAULT = 120
 const MESSAGES_MIN = 96
 
-function deliveryLabel(status: 'sending' | 'sent' | 'read'): string {
-  if (status === 'sending') return '⏳'
-  if (status === 'sent') return '✅'
-  if (status === 'read') return '✅✅'
-  return ''
-}
-
 function formatTime(iso: string): string {
   try {
     const d = new Date(iso)
@@ -48,7 +43,9 @@ function formatTime(iso: string): string {
 }
 
 export default function ChatView(): React.ReactElement {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
@@ -64,7 +61,8 @@ export default function ChatView(): React.ReactElement {
   const listRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
-  const [members, setMembers] = useState<GroupMemberView[]>([])
+  const members = useChatMembersStore((s) => s.membersByGroup[gid] ?? [])
+  const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
@@ -74,6 +72,27 @@ export default function ChatView(): React.ReactElement {
 
   const messagesReady = !loading || messages.length > 0
   const { isHighlighted: isMsgHighlighted } = useSearchHighlight('msg', messagesReady)
+  const dayGroups = useMemo(() => groupMessagesByDay(messages, locale), [messages, locale])
+
+  const insertMention = useCallback((displayName: string) => {
+    setDraft((prev) => {
+      const replaced = prev.replace(/(?:^|\s)@([^\s@]*)$/, ` @${displayName} `)
+      if (replaced !== prev) return replaced.trimStart()
+      const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
+      return `${prev}${sep}@${displayName} `
+    })
+  }, [])
+
+  const dismissMention = useCallback(() => {
+    setDraft((prev) => prev.replace(/(?:^|\s)@([^\s@]*)$/, '').trimEnd())
+  }, [])
+
+  const { candidates, activeIndex, handleKeyDown: handleMentionKeyDown } = useMentionSuggest(
+    draft,
+    members,
+    insertMention,
+    dismissMention
+  )
 
   useMentionNotifications(gid)
   useMarkRead(gid, messages, currentUserId)
@@ -85,15 +104,19 @@ export default function ChatView(): React.ReactElement {
   useEffect(() => {
     if (!gid) return
     void loadMessages(gid)
-    void getLanpmApi()
-      .chat.listMembers(gid)
-      .then(setMembers)
-      .catch(() => setMembers([]))
+    void loadMembers(gid)
     const unsub = getLanpmApi().chat.onMessage((msg) => {
       if (msg.groupId === gid) upsertMessage(msg)
     })
     return unsub
-  }, [gid, loadMessages, upsertMessage])
+  }, [gid, loadMessages, loadMembers, upsertMessage])
+
+  useEffect(() => {
+    const state = location.state as { composeDraft?: string } | null
+    if (!state?.composeDraft) return
+    setDraft(state.composeDraft)
+    navigate(location.pathname, { replace: true, state: {} })
+  }, [location.pathname, location.state, navigate])
 
   useEffect(() => {
     const el = listRef.current
@@ -151,15 +174,6 @@ export default function ChatView(): React.ReactElement {
     setResizing(true)
   }
 
-  const insertMention = useCallback((displayName: string) => {
-    setDraft((prev) => {
-      const replaced = prev.replace(/(?:^|\s)@([^\s@]*)$/, ` @${displayName} `)
-      if (replaced !== prev) return replaced.trimStart()
-      const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
-      return `${prev}${sep}@${displayName} `
-    })
-  }, [])
-
   const handleSend = useCallback(async () => {
     const text = draft.trim()
     if (!text || !gid) return
@@ -216,7 +230,8 @@ export default function ChatView(): React.ReactElement {
   )
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (handleMentionKeyDown(e)) return
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       void handleSend()
     }
@@ -226,7 +241,12 @@ export default function ChatView(): React.ReactElement {
     <div className={styles.chatLayout}>
       <div className={styles.sidebar}>
         <DmSessionBar activeGroupId={gid} />
-        <MemberList groupId={gid} onInsertMention={insertMention} />
+        <MemberList
+          groupId={gid}
+          members={members}
+          onRefresh={() => void loadMembers(gid)}
+          onInsertMention={insertMention}
+        />
       </div>
 
       <div className={styles.root} ref={rootRef}>
@@ -244,16 +264,25 @@ export default function ChatView(): React.ReactElement {
             </Text>
           ) : (
             <div className={styles.messageList}>
-              {messages.map((msg) => (
-                <MessageBubble
-                  key={msg.msgId}
-                  message={msg}
-                  own={msg.senderUserId === currentUserId}
-                  members={members}
-                  deliveryLabel={deliveryLabel(msg.deliveryStatus)}
-                  formatTime={formatTime}
-                  highlighted={isMsgHighlighted(msg.msgId)}
-                />
+              {dayGroups.map((group) => (
+                <div key={group.dayKey} className={styles.dayGroup}>
+                  <div className={styles.dayLabel}>{group.label}</div>
+                  {group.messages.map((msg) => {
+                    const delivery = deliveryStatusMeta(msg.deliveryStatus, t)
+                    return (
+                      <MessageBubble
+                        key={msg.msgId}
+                        message={msg}
+                        own={msg.senderUserId === currentUserId}
+                        members={members}
+                        deliveryLabel={delivery.text}
+                        deliveryAriaLabel={delivery.ariaLabel}
+                        formatTime={formatTime}
+                        highlighted={isMsgHighlighted(msg.msgId)}
+                      />
+                    )
+                  })}
+                </div>
               ))}
             </div>
           )}
@@ -270,11 +299,15 @@ export default function ChatView(): React.ReactElement {
           <div className={styles.inputRow}>
             <div className={styles.inputMain}>
               <Text type="secondary" className={styles.inputHint}>
-                {t('chat.inputHint')}
+                {t('chat.inputHintEnter')}
                 {taskAllowed ? t('chat.inputHintTask') : ''}
               </Text>
               <div className={styles.inputWrap}>
-                <MentionSuggest draft={draft} members={members} onPick={insertMention} />
+                <MentionSuggest
+                  candidates={candidates}
+                  activeIndex={activeIndex}
+                  onPick={insertMention}
+                />
                 <TextArea
                   className={styles.inputTextarea}
                   placeholder={taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')}

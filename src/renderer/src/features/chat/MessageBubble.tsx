@@ -14,6 +14,7 @@ interface MessageBubbleProps {
   own: boolean
   members: GroupMemberView[]
   deliveryLabel: string
+  deliveryAriaLabel: string
   formatTime: (iso: string) => string
   highlighted?: boolean
 }
@@ -23,6 +24,7 @@ export default function MessageBubble({
   own,
   members,
   deliveryLabel,
+  deliveryAriaLabel,
   formatTime,
   highlighted = false
 }: MessageBubbleProps): React.ReactElement {
@@ -79,7 +81,10 @@ export default function MessageBubble({
 
       {own && (
         <div className={styles.status}>
-          {formatTime(message.createdAt)} {deliveryLabel}
+          {formatTime(message.createdAt)}{' '}
+          <span aria-label={deliveryAriaLabel} title={deliveryAriaLabel}>
+            {deliveryLabel}
+          </span>
         </div>
       )}
     </div>

@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- **RC**：`1.0.0-rc.9`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
+- **RC**：`1.0.0-rc.10`（M0–M7 已闭环；UX/文档补丁见 [todo.md](./todo.md)）
 - **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
 - 全量回归：`npm run verify:m7`
 - 验收清单：[docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md)

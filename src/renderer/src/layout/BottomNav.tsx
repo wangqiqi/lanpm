@@ -61,6 +61,7 @@ export default function BottomNav(): React.ReactElement {
             type="button"
             className={`${styles.tab} ${active ? styles.tabActive : ''} ${!allowed ? styles.tabDisabled : ''}`}
             disabled={!allowed}
+            aria-disabled={!allowed}
             onClick={() => {
               if (allowed) navigate(groupViewPath(groupId, tab.view))
             }}

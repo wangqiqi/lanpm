@@ -3,7 +3,8 @@ import { Button, Modal, Radio, Select, Space, Tag, Typography, message } from 'a
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { groupViewPath } from '@renderer/routes/paths'
 import type { TaskDependencyType } from '@shared/task/dependency'
 import { tasksToGanttBars, ganttDatesToYmd } from '@shared/task/ganttAdapter'
 import type { Task } from '@shared/task/types'
@@ -21,6 +22,7 @@ const { Text } = Typography
 
 export default function GanttView(): React.ReactElement {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const tasks = useTaskStore((s) => s.tasksByGroup[gid] ?? [])
@@ -194,6 +196,11 @@ export default function GanttView(): React.ReactElement {
             tasks={ganttTasks}
             viewMode={viewMode}
             onDateChange={onDateChange}
+            onClick={(bar) => {
+              navigate(groupViewPath(gid, 'board'), {
+                state: { highlightTaskId: String(bar.id) }
+              })
+            }}
             onDoubleClick={(bar) => {
               const task = tasks.find((t) => t.taskId === bar.id)
               if (task) void toggleMilestone(task)

@@ -2,6 +2,36 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.10] - 2026-05-29
+
+### Added
+- **`chatMembersStore`**：群成员集中加载；看板 assignee / 聊天昵称复用（**UX-F-07** / **UX-V-05**）
+- **`groupLabels.ts`**：演示群 `demo-*` 显示名 i18n（**UX-F-16**）
+- **`useMentionSuggest`** + **`mentionKeyboard.ts`**：@ 提及 ↑↓ / Enter·Tab / Esc（**UX-A-03**）
+- **`chatDateGroups.ts`**：消息按日分组（今天/昨天/日期）；送达状态 i18n + aria（**UX-F-09** / **UX-I-04**）
+- 看板 **「在聊天中讨论」** → 聊天预填 `composeDraft`（**UX-FLOW-01**）
+- 甘特单击任务条 → 看板 `highlightTaskId` 高亮（**UX-FLOW-03**）
+- 驾驶舱报告 **复制 / 展开·收起**（**UX-F-19**）
+- 全局 `:focus-visible` focus ring；TopBar Logo `alt`、用户菜单 `aria-label`（**UX-A-01/02/04**）
+
+### Fixed
+- **ChatView**：Enter 发送 / Shift+Enter 换行 + 输入提示（**UX-F-08**）；`composeDraft` 路由预填
+- **FilesView**：预览加载失败 `ViewErrorCenter` 重试，与「不支持预览」区分（**UX-F-22**）
+- **SetupWizard**：`logo.svg` 替代字母 L；Upload 去嵌套 `<button>`（**UX-V-06** / **UX-A-09**）
+- **DmSessionBar**：DM chip `title` 用 peer 显示名（**UX-A-07**）
+- **TopBar**：DM 中 Logo 回 `lastOriginGroupId` 项目群（**UX-PATH-05**）
+- **BottomNav**：禁用 Tab 增加 `aria-disabled`（**UX-A-05**）
+- **MentionSuggest**：候选仅展示 `displayName`（**UX-A-08**）
+
+### Changed
+- **docs/02**：DOC-06 / ARCH-04 — RC 以 AES-GCM `authTag` 为完整性校验，独立 HMAC 标 post-RC
+- **docs/05**：Hash 路由 `#/g/...` 深链说明（**UX-V-08**）
+- 甘特暗色主题 CSS 与 `--lanpm-*` 对齐（**UX-V-03**）
+- i18n +29 键（送达状态、演示群名、报告复制、书签 URL 等）；**todo.md** 第三批 polish 勾选
+
+### Tag
+- `v1.0.0-rc.10` — 聊天 polish、跨视图协作链、无障碍与 DOC-06
+
 ## [1.0.0-rc.9] - 2026-05-29
 
 ### Added

@@ -56,7 +56,7 @@ export default function DmSessionBar({ activeGroupId }: DmSessionBarProps): Reac
               type="button"
               className={`${styles.dmChip} ${active ? styles.dmChipActive : ''}`}
               onClick={() => navigate(groupViewPath(session.groupId, 'chat'))}
-              title={session.groupId}
+              title={session.peerDisplayName}
             >
               {label}
             </button>

@@ -5,6 +5,7 @@ import type { SetupStatus } from '@shared/identity'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { fileToDataUrl, randomAvatarDataUrl } from './avatar'
 import { useI18n } from '@renderer/i18n/useI18n'
+import logoUrl from '@resources/logo.svg'
 import styles from './SetupWizard.module.css'
 
 interface SetupWizardProps {
@@ -91,9 +92,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     <div className={styles.wrap}>
       <div className={styles.sheet}>
         <header className={styles.hero}>
-          <div className={styles.appIcon} aria-hidden>
-            L
-          </div>
+          <img src={logoUrl} alt="" className={styles.appIcon} width={64} height={64} />
           <h1 className={styles.title}>{t('setup.welcome')}</h1>
           <p className={styles.subtitle}>{t('setup.subtitle')}</p>
         </header>
@@ -106,10 +105,10 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
               {t('setup.randomAvatar')}
             </button>
             <Upload accept="image/*" showUploadList={false} beforeUpload={beforeUpload}>
-              <button type="button" className={styles.linkBtn}>
+              <span className={styles.linkBtn} role="button" tabIndex={0}>
                 <UploadOutlined />
                 {t('setup.uploadPhoto')}
-              </button>
+              </span>
             </Upload>
           </div>
         </section>
