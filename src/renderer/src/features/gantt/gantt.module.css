@@ -23,6 +23,10 @@
   background: var(--lanpm-surface-solid);
 }
 
+.chartWrap :global(svg) {
+  background-color: var(--lanpm-surface-solid);
+}
+
 .tooltip {
   font-size: var(--lanpm-font-body);
   max-width: 240px;

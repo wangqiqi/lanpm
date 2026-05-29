@@ -80,6 +80,10 @@ function createWindow(): BrowserWindow {
     minWidth: 1280,
     minHeight: 720,
     show: false,
+    /** 无头截图：Linux 默认不绘制隐藏窗；透明区 capture 易变黑底 */
+    ...(visualCaptureDir
+      ? { backgroundColor: '#f5f5f7', paintWhenInitiallyHidden: true, show: true }
+      : {}),
     title: LANPM_MAIN_WINDOW_TITLE,
     ...(iconPath ? { icon: iconPath } : {}),
     /** Linux/Windows：不显示 File/Edit/View 等原生菜单栏（应用内 TopBar 已承担导航） */

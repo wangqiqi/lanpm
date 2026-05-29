@@ -23,6 +23,12 @@ const APP_PAGES = [
 
 const THEMES = ['light', 'dark'] as const
 
+/** 与 global.module.css --lanpm-bg 一致；无头 capturePage 透明区否则会呈黑底 */
+const THEME_WINDOW_BG: Record<(typeof THEMES)[number], string> = {
+  light: '#f5f5f7',
+  dark: '#000000'
+}
+
 const rendererIndexHtml = join(
   dirname(fileURLToPath(import.meta.url)),
   '../renderer/index.html'
@@ -191,16 +197,27 @@ function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
   console.info('[lanpm:visual-capture] seeded', rows.length, 'tasks for gantt/board')
 }
 
+async function flushPaint(win: BrowserWindow): Promise<void> {
+  await win.webContents.executeJavaScript(`
+    new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)))
+    })
+  `)
+}
+
 async function capture(
   win: BrowserWindow,
   outDir: string,
   fileName: string,
+  theme: (typeof THEMES)[number],
   opts?: { waitForText?: string }
 ): Promise<void> {
   await waitForHealthyUi(win)
   if (opts?.waitForText) await waitForSeededTaskChrome(win, opts.waitForText)
-  await wait(350)
-  if (!win.isVisible()) win.showInactive()
+  win.setBackgroundColor(THEME_WINDOW_BG[theme])
+  if (!win.isVisible()) win.show()
+  await flushPaint(win)
+  await wait(400)
   const image = await win.capturePage()
   if (image.isEmpty()) {
     throw new Error(`empty capture: ${fileName}`)
@@ -220,7 +237,7 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
   win.setContentSize(1440, 900)
   win.setBounds({ width: 1440, height: 900 })
   win.webContents.setBackgroundThrottling(false)
-  win.showInactive()
+  if (!win.isVisible()) win.show()
 
   const db = getDatabase()
   console.info('[lanpm:visual-capture] waiting for initial UI…')
@@ -230,7 +247,7 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     for (const theme of THEMES) {
       await loadUrl(win, themedPageUrl(theme, '#/'))
       await applyTheme(win, theme)
-      await capture(win, outDir, `${theme}_setup.png`)
+      await capture(win, outDir, `${theme}_setup.png`, theme)
     }
     completeSetup(db, { baseName: 'Visual', department: 'QA' })
     ensureSeedGroups(db)
@@ -242,13 +259,13 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     const [first, ...rest] = APP_PAGES
     await loadUrl(win, themedPageUrl(theme, first.hash))
     await applyTheme(win, theme)
-    await capture(win, outDir, `${theme}_${first.slug}.png`)
+    await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
     for (const page of rest) {
       await navigateHash(win, page.hash)
       await applyTheme(win, theme)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
-      await capture(win, outDir, `${theme}_${page.slug}.png`, { waitForText })
+      await capture(win, outDir, `${theme}_${page.slug}.png`, theme, { waitForText })
     }
   }
 

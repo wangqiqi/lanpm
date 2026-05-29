@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.39] - 2026-05-29
+
+### Added
+- **`archive/todo/20260529_174310_todo已完成项_rc37短期归档.md`**：已完成 todo 迁出
+- **`archive/review/20260529_173500_V14b设计还原度审图_rc37.md`**：V-14b 七页审图报告
+- **`视觉.md`**：视觉门禁索引（链向 `todo.md` / `archive/`）
+
+### Changed
+- **`todo.md`**：根目录仅保留未勾项（HOV / DOC-02 / 真机手验 / 1.0.0）
+- **`visualCapture.ts`**：按主题 `setBackgroundColor`、`flushPaint`、截图前 `show()`
+- **`main/index.ts`**：无头窗 `backgroundColor` + `paintWhenInitiallyHidden`
+- **甘特**：`chartWrap` SVG 背景 `--lanpm-surface-solid`；`data-lanpm-visual="gantt-chart"`
+- **`docs/05` §2.2–2.3**：审图勾选、甘特 PNG 与 `dev` 差异说明
+
+### Tag
+- `v1.0.0-rc.39` — todo 归档精简、V-14b 审图与截图管线加固
+
 ## [1.0.0-rc.38] - 2026-05-29
 
 ### Added

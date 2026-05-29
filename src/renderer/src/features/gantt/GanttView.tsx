@@ -255,7 +255,7 @@ export default function GanttView(): React.ReactElement {
       ) : ganttTasks.length === 0 ? (
         <ViewEmptyHint>{t('gantt.empty')}</ViewEmptyHint>
       ) : (
-        <div className={styles.chartWrap} ref={chartRef}>
+        <div className={styles.chartWrap} ref={chartRef} data-lanpm-visual="gantt-chart">
           <Gantt
             key={locale}
             tasks={ganttTasks}
