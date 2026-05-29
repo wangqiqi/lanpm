@@ -27,6 +27,8 @@ const api: LanpmApi = {
       ipcRenderer.invoke('chat:sendCode', groupId, code, languageHint, theme),
     listMembers: (groupId) => ipcRenderer.invoke('chat:listMembers', groupId),
     markRead: (groupId, msgIds) => ipcRenderer.invoke('chat:markRead', groupId, msgIds),
+    pickAndSendFile: (groupId) => ipcRenderer.invoke('chat:pickAndSendFile', groupId),
+    sendFile: (groupId, filePath) => ipcRenderer.invoke('chat:sendFile', groupId, filePath),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)
@@ -97,7 +99,8 @@ const api: LanpmApi = {
   },
   network: {
     getStatus: () => ipcRenderer.invoke('network:getStatus'),
-    reconnect: () => ipcRenderer.invoke('network:reconnect')
+    reconnect: () => ipcRenderer.invoke('network:reconnect'),
+    connectManualPeer: (address) => ipcRenderer.invoke('network:connectManualPeer', address)
   },
   badge: {
     getGroupTabBadges: (groupId) => ipcRenderer.invoke('badge:getGroupTabBadges', groupId)

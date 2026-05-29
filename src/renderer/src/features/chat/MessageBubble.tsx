@@ -9,6 +9,12 @@ import CodeBlock from '@renderer/features/chat/CodeBlock'
 import MentionText from '@renderer/features/chat/MentionText'
 import styles from './chat.module.css'
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 interface MessageBubbleProps {
   message: ChatMessage
   own: boolean
@@ -62,6 +68,20 @@ export default function MessageBubble({
         />
       )}
 
+      {message.content.kind === 'file' && groupId && (
+        <Button
+          type="link"
+          size="small"
+          style={{ padding: 0, height: 'auto' }}
+          onClick={() => navigate(groupViewPath(groupId, 'files'))}
+        >
+          {t('chat.fileMessage', {
+            name: message.content.fileName,
+            size: formatFileSize(message.content.size)
+          })}
+        </Button>
+      )}
+
       {message.content.kind === 'task_ref' && groupId && (
         <Button
           type="link"
@@ -75,7 +95,8 @@ export default function MessageBubble({
 
       {message.content.kind !== 'text' &&
         message.content.kind !== 'code' &&
-        message.content.kind !== 'task_ref' && (
+        message.content.kind !== 'task_ref' &&
+        message.content.kind !== 'file' && (
           <div>{t('chat.unknownMessage', { type: message.type })}</div>
         )}
 

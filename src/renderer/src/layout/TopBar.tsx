@@ -33,6 +33,7 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
 import { useNetworkStore } from '@renderer/stores/networkStore'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
+import ManualPeerModal from '@renderer/features/network/ManualPeerModal'
 import RegionButton from '@renderer/ui/RegionButton'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
@@ -51,7 +52,7 @@ export default function TopBar(): React.ReactElement {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useI18n()
-  const { modal } = useLanpmApp()
+  const { modal, message } = useLanpmApp()
   const groups = useNavigationStore((s) => s.groups)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
@@ -72,7 +73,9 @@ export default function TopBar(): React.ReactElement {
   const networkStatus = useNetworkStore((s) => s.status)
   const refreshNetwork = useNetworkStore((s) => s.refresh)
   const reconnectNetwork = useNetworkStore((s) => s.reconnect)
+  const connectManualPeer = useNetworkStore((s) => s.connectManualPeer)
   const networkLoading = useNetworkStore((s) => s.loading)
+  const [manualPeerOpen, setManualPeerOpen] = useState(false)
 
   useEffect(() => {
     void refreshNetwork()
@@ -212,22 +215,63 @@ export default function TopBar(): React.ReactElement {
       </div>
 
       <div className={styles.barSection}>
-        <Tooltip title={networkTooltip}>
-          <RegionButton
-            variant="icon"
-            className={styles.netBtn}
-            aria-label={networkTooltip}
-            disabled={networkLoading}
-            onClick={() => {
-              if (networkStatus?.linkState === 'offline') void reconnectNetwork()
-              else void refreshNetwork()
-            }}
-          >
-            <span
-              className={`${styles.netDot} ${styles[`net_${networkStatus?.linkState ?? 'offline'}`]}`}
-            />
-          </RegionButton>
-        </Tooltip>
+        <Dropdown
+          trigger={['click']}
+          menu={{
+            items: [
+              {
+                key: 'refresh',
+                label: t('topbar.networkRefresh'),
+                onClick: () => void refreshNetwork()
+              },
+              {
+                key: 'reconnect',
+                label: t('topbar.networkOffline'),
+                disabled: networkLoading,
+                onClick: () => void reconnectNetwork()
+              },
+              {
+                key: 'manual',
+                label: t('topbar.addManualPeer'),
+                onClick: () => setManualPeerOpen(true)
+              }
+            ]
+          }}
+        >
+          <Tooltip title={networkTooltip}>
+            <RegionButton
+              variant="icon"
+              className={styles.netBtn}
+              aria-label={networkTooltip}
+              disabled={networkLoading}
+              onClick={() => {
+                if (networkStatus?.linkState === 'offline') void reconnectNetwork()
+                else void refreshNetwork()
+              }}
+            >
+              <span
+                className={`${styles.netDot} ${styles[`net_${networkStatus?.linkState ?? 'offline'}`]}`}
+              />
+            </RegionButton>
+          </Tooltip>
+        </Dropdown>
+        <ManualPeerModal
+          open={manualPeerOpen}
+          loading={networkLoading}
+          onClose={() => setManualPeerOpen(false)}
+          onSubmit={async (address) => {
+            try {
+              await connectManualPeer(address)
+              modal.success({ content: t('topbar.manualPeerSuccess') })
+              setManualPeerOpen(false)
+            } catch (err) {
+              message.error(
+                err instanceof Error ? err.message : t('topbar.manualPeerFailed')
+              )
+              throw err
+            }
+          }}
+        />
         <GlobalSearch />
         <RegionButton
           variant="icon"

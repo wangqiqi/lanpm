@@ -40,5 +40,5 @@
 }
 
 .emojiBtn:active {
-  background: var(--lanpm-accent-fill, rgba(22, 119, 255, 0.12));
+  background: var(--lanpm-accent-fill);
 }

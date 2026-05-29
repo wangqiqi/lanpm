@@ -101,4 +101,19 @@ export function reconnectNetwork(db: Database): void {
   refreshNetworkIdentity(db)
 }
 
+export async function connectManualPeer(host: string, port: number): Promise<void> {
+  const transport = getNetworkTransport()
+  if (!transport) throw new Error('网络未就绪')
+
+  if (transport instanceof RealNetworkTransport) {
+    await transport.connectManualHost(host, port)
+    return
+  }
+  if (transport instanceof NetworkStub) {
+    transport.registerManualPeer(host, port)
+    return
+  }
+  throw new Error('当前网络模式不支持手动添加节点')
+}
+
 export { getKnownLanUserIds, NetworkStub, RealNetworkTransport }

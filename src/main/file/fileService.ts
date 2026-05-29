@@ -10,8 +10,7 @@ import { getSetupStatus } from '../identity/setup'
 import {
   getFileById,
   insertFile,
-  listFilesByGroup,
-  updateFilePreview
+  listFilesByGroup
 } from '../storage/repositories/fileRepository'
 import {
   countActiveTransfers,

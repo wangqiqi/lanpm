@@ -10,5 +10,6 @@ export interface NetworkStatusView {
 
 export const NETWORK_IPC = {
   getStatus: 'network:getStatus',
-  reconnect: 'network:reconnect'
+  reconnect: 'network:reconnect',
+  connectManualPeer: 'network:connectManualPeer'
 } as const

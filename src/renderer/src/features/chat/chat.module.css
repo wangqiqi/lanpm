@@ -7,6 +7,21 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  position: relative;
+}
+
+.fileDropOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--lanpm-accent-fill) 35%, transparent);
+  border: 2px dashed var(--lanpm-accent);
+  pointer-events: none;
+  font-weight: 500;
+  color: var(--lanpm-text);
 }
 
 .chatLayout {

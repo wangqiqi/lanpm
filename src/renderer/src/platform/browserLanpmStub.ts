@@ -4,6 +4,7 @@ import { parseMentions } from '@shared/chat/mentions'
 import { detectLanguage } from '@shared/chat/detectLanguage'
 import { isDmGroupId, parseDmGroupId } from '@shared/chat/dmSession'
 import type { UserPresence } from '@shared/network/types'
+import { parseHostPort } from '@shared/network/manualPeer'
 import type { SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
 
@@ -416,6 +417,12 @@ export function createBrowserLanpmStub(): LanpmApi {
         return msg
       },
       listMembers: async (groupId) => listStubMembers(groupId),
+      pickAndSendFile: async () => {
+        throw stubError('stub.uploadElectronOnly')
+      },
+      sendFile: async () => {
+        throw stubError('stub.uploadElectronOnly')
+      },
       markRead: async (groupId, msgIds) => {
         const status = readStatus()
         if (!status.configured || !status.user) return
@@ -680,7 +687,11 @@ export function createBrowserLanpmStub(): LanpmApi {
     },
     network: {
       getStatus: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 }),
-      reconnect: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 })
+      reconnect: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 }),
+      connectManualPeer: async (address) => {
+        parseHostPort(address)
+        return { mode: 'stub' as const, linkState: 'stub' as const, peerCount: 1 }
+      }
     },
     badge: {
       getGroupTabBadges: async (groupId) => stubGroupTabBadges(groupId)

@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.18` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.20` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -51,13 +51,10 @@
 
 ### PRD 与架构缺口
 
-- [ ] **PRD-F-02** 聊天文件发送（拖拽/点击，P2P）（`01` §6.3）
 - [ ] **PRD-F-07** 离线 7 天内消息补同步 — 与 **ARCH-07**
 - [ ] **PRD-F-10** 文件断点续传（中断后续传逻辑）
 - [ ] **PRD-F-11** 传输限速可配置（`01` §10.4）
 - [ ] **PRD-F-12** 传输历史可查（完整历史归档 UI）
-- [ ] **ARCH-01** 群组密钥 24h 轮换：主进程处理 `group_key_rotate`
-- [ ] **ARCH-02** 手动添加节点（IP:端口）UI/IPC
 - [ ] **ARCH-03** UDP 组播发现（跨子网；当前仅广播 `43123`）
 - [ ] **ARCH-05** IndexedDB 热缓存实现，或 PRD/README 降级为仅 SQLite
 - [ ] **ARCH-07** 7 天离线补同步队列 — 与 **PRD-F-07** / **DOC-03**
@@ -226,9 +223,12 @@
 - [x] **PRD-F-06** 看板卡片展示截止日期/标签；支持拖入垃圾桶删除（`01` §7.2–7.3）— RC 完成（里程碑 Tag；独立「标签」字段待 PRD 数据模型）
 - [x] **PRD-F-08** 顶栏个人信息配置面板（`TopBar` profile 非 disabled）（`01` §5.2）— 与 **UX-F-06**（RC：只读资料弹窗）
 - [x] **PRD-F-09** 驾驶舱部门完成率视图（`01` §12.1）— `CockpitView` `deptCompletion` 卡片（已有）
+- [x] **PRD-F-02** 聊天文件发送（拖拽/点击 + 上传至群文件；P2P 分片传输沿用 `fileService` 本地模拟）
 
 #### P1 — 架构演进项
 
+- [x] **ARCH-01** 群组密钥 24h 轮换：`groupKeyService` 处理 `group_key_rotate` + 定时发布（`sync_meta` keyVersion）
+- [x] **ARCH-02** 手动添加节点：`network:connectManualPeer` + TopBar `ManualPeerModal`（`RealNetworkTransport.connectManualHost`）
 - [x] **ARCH-04** 文档说明：ECDH + AES-GCM authTag vs 文档「独立 HMAC」字段 — 同 **DOC-06**
 - [x] **ARCH-06** PRD/README 中 Yjs / WebRTC / IndexedDB 标为目标栈 vs RC 现状 — 同 **DOC-02/04**
 - [x] **ARCH-09**（可选）报文层独立 HMAC — 不实现；以 AES-GCM authTag 为准（**ARCH-04** / `docs/02`）

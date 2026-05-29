@@ -20,6 +20,7 @@ import {
 } from './constants.ts'
 import { MessageDedup } from './dedup.ts'
 import { LamportClock } from './lamport.ts'
+import { join } from 'path'
 import { readPeerRecords, refreshLanUserIds } from './peerRegistry.ts'
 import {
   touchDiscoveryPeer,
@@ -239,6 +240,24 @@ export class NetworkStub implements NetworkTransport {
     if (!this.started) this.start()
     this.writePeerRecord()
     return readPeerRecords(this.deviceId)
+  }
+
+  /** Stub：登记手动节点，供 discoverPeers 与联调脚本使用 */
+  registerManualPeer(host: string, port: number, displayName?: string): void {
+    if (!this.started) this.start()
+    mkdirSync(STUB_PEERS_DIR, { recursive: true })
+    const deviceId = `manual-${host.replace(/[^a-zA-Z0-9._-]/g, '_')}-${port}`
+    const payload: DiscoveryPayload = {
+      deviceId,
+      userId: 'manual-peer',
+      displayName: displayName ?? `${host}:${port}`,
+      listenPort: port,
+      host,
+      capabilities: this.capabilities
+    }
+    writeFileSync(join(STUB_PEERS_DIR, `${deviceId}.json`), JSON.stringify(payload), 'utf8')
+    touchDiscoveryPeer(payload)
+    refreshLanUserIds([payload])
   }
 
   getLamportValue(): number {

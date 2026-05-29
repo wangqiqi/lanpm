@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
+import { dialog } from 'electron'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
@@ -9,6 +10,8 @@ import { getSetupStatus } from '../identity/setup'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { listGroupMembers } from './memberService'
 import { notifyIfMentioned } from './notificationService'
+import { handleGroupKeyRotate, initGroupKeyService, shutdownGroupKeyService } from '../crypto/groupKeyService'
+import { uploadFileFromPath } from '../file/fileService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import { broadcastMessage } from './chatBroadcast'
 import { getNetworkTransport } from '../network'
@@ -31,6 +34,10 @@ function isAnonymousGroup(db: Database, groupId: string): boolean {
 }
 
 function handleIncoming(db: Database, envelope: SyncEnvelope): void {
+  if (envelope.type === 'group_key_rotate') {
+    handleGroupKeyRotate(db, envelope)
+    return
+  }
   if (envelope.type !== 'chat' || !envelope.groupId) return
   const payload = envelope.payload as { message?: ChatMessage }
   const incoming = payload?.message
@@ -81,9 +88,11 @@ export function initChatService(db: Database): void {
 
   refreshGroupSubscriptions(db, transport)
   initReadReceiptService(db)
+  initGroupKeyService(db)
 }
 
 export function shutdownChatService(): void {
+  shutdownGroupKeyService()
   shutdownReadReceiptService()
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
@@ -203,6 +212,32 @@ export async function sendTextMessage(
 }
 
 export { listGroupMembers }
+
+export async function pickAndSendFileMessage(
+  db: Database,
+  groupId: string
+): Promise<ChatMessage | null> {
+  const result = await dialog.showOpenDialog({ properties: ['openFile'] })
+  if (result.canceled || !result.filePaths[0]) return null
+  return sendFileMessage(db, groupId, result.filePaths[0])
+}
+
+export async function sendFileMessage(
+  db: Database,
+  groupId: string,
+  sourcePath: string
+): Promise<ChatMessage> {
+  if (isAnonymousGroup(db, groupId)) {
+    throw new Error('匿名群不支持发送文件')
+  }
+  const meta = await uploadFileFromPath(db, groupId, sourcePath)
+  return publishChatMessage(db, groupId, 'file', {
+    kind: 'file',
+    fileId: meta.fileId,
+    fileName: meta.name,
+    size: meta.size
+  })
+}
 
 export async function sendCodeMessage(
   db: Database,

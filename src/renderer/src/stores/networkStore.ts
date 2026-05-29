@@ -7,6 +7,7 @@ interface NetworkStore {
   loading: boolean
   refresh: (options?: { silent?: boolean }) => Promise<void>
   reconnect: () => Promise<void>
+  connectManualPeer: (address: string) => Promise<void>
 }
 
 export const useNetworkStore = create<NetworkStore>((set) => ({
@@ -30,6 +31,15 @@ export const useNetworkStore = create<NetworkStore>((set) => ({
       set({ status })
     } catch {
       /* 同上 */
+    } finally {
+      set({ loading: false })
+    }
+  },
+  connectManualPeer: async (address) => {
+    set({ loading: true })
+    try {
+      const status = await getLanpmApi().network.connectManualPeer(address)
+      set({ status })
     } finally {
       set({ loading: false })
     }

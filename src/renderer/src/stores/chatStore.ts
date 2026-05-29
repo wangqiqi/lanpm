@@ -10,6 +10,8 @@ interface ChatState {
   clearLoadError: (groupId: string) => void
   sendText: (groupId: string, text: string) => Promise<void>
   sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
+  pickAndSendFile: (groupId: string) => Promise<void>
+  sendFile: (groupId: string, filePath: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
 }
 
@@ -56,6 +58,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendCode: async (groupId, code, languageHint) => {
     const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
     const message = await getLanpmApi().chat.sendCode(groupId, code, languageHint, theme)
+    get().upsertMessage(message)
+  },
+  pickAndSendFile: async (groupId) => {
+    const message = await getLanpmApi().chat.pickAndSendFile(groupId)
+    if (message) get().upsertMessage(message)
+  },
+  sendFile: async (groupId, filePath) => {
+    const message = await getLanpmApi().chat.sendFile(groupId, filePath)
     get().upsertMessage(message)
   },
   upsertMessage: (message) => {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Input, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { CodeOutlined, MenuOutlined, PlusSquareOutlined } from '@ant-design/icons'
+import { CodeOutlined, MenuOutlined, PaperClipOutlined, PlusSquareOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
@@ -57,6 +57,8 @@ export default function ChatView(): React.ReactElement {
   const loadMessages = useChatStore((s) => s.loadMessages)
   const sendText = useChatStore((s) => s.sendText)
   const sendCode = useChatStore((s) => s.sendCode)
+  const pickAndSendFile = useChatStore((s) => s.pickAndSendFile)
+  const sendFile = useChatStore((s) => s.sendFile)
   const upsertMessage = useChatStore((s) => s.upsertMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
@@ -116,6 +118,8 @@ export default function ChatView(): React.ReactElement {
   const groupType = gid ? getGroupType(gid) : 'project'
   const taskAllowed = gid && !isDmGroupId(gid) && groupType === 'project'
   const codeAllowed = gid && !isDmGroupId(gid) && groupType !== 'anonymous'
+  const fileAllowed = codeAllowed
+  const [fileDragOver, setFileDragOver] = useState(false)
 
   useEffect(() => {
     if (!gid) return
@@ -285,7 +289,34 @@ export default function ChatView(): React.ReactElement {
         />
       </div>
 
-      <div className={styles.root} ref={rootRef}>
+      <div
+        className={styles.root}
+        ref={rootRef}
+        onDragOver={(e) => {
+          if (!fileAllowed) return
+          e.preventDefault()
+          setFileDragOver(true)
+        }}
+        onDragLeave={() => setFileDragOver(false)}
+        onDrop={(e) => {
+          if (!fileAllowed || !gid) return
+          e.preventDefault()
+          setFileDragOver(false)
+          const file = e.dataTransfer?.files?.[0]
+          if (!file) return
+          const path = (file as File & { path?: string }).path
+          if (!path) {
+            message.warning(t('chat.fileNoPath'))
+            return
+          }
+          void sendFile(gid, path).catch((err: unknown) =>
+            message.error(err instanceof Error ? err.message : t('chat.fileSendFailed'))
+          )
+        }}
+      >
+        {fileDragOver && fileAllowed && (
+          <div className={styles.fileDropOverlay}>{t('chat.fileDropHint')}</div>
+        )}
         <div className={styles.messages} ref={listRef}>
           {loading && messages.length === 0 ? (
             <ViewLoadingCenter />
@@ -367,6 +398,20 @@ export default function ChatView(): React.ReactElement {
               {codeAllowed && (
                 <Button icon={<CodeOutlined />} onClick={() => setCodeModalOpen(true)}>
                   {t('chat.codeBtn')}
+                </Button>
+              )}
+              {fileAllowed && (
+                <Button
+                  icon={<PaperClipOutlined />}
+                  onClick={() =>
+                    void pickAndSendFile(gid).catch((err: unknown) =>
+                      message.error(
+                        err instanceof Error ? err.message : t('chat.fileSendFailed')
+                      )
+                    )
+                  }
+                >
+                  {t('chat.fileBtn')}
                 </Button>
               )}
               <Button type="primary" onClick={() => void handleSend()}>

@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.20] - 2026-05-29
+
+### Added
+- **ARCH-02** 手动添加节点：`network:connectManualPeer` IPC + 顶栏网络菜单 `ManualPeerModal`（`host:port` 建链；Stub 登记 peer 文件）
+- **ARCH-01** 群组密钥 24h 轮换：`groupKeyService` 处理 `group_key_rotate` 报文并按群定时发布轮换通知（`sync_meta` 存 `keyVersion`）
+- **PRD-F-02** 聊天文件发送：`chat:pickAndSendFile` / `chat:sendFile`；`ChatView` 附件按钮 + 拖拽上传；`MessageBubble` 文件消息展示
+- **`verify:network-manual`**：`parseHostPort` 单元脚本
+
+### Fixed
+- **`verify:visual`**：`emojiPicker.module.css` 移除硬编码 Ant Design 蓝色 fallback
+
+### Tag
+- `v1.0.0-rc.20` — 手动节点、群组密钥轮换协议、聊天发文件
+
 ## [1.0.0-rc.19] - 2026-05-29
 
 ### Added

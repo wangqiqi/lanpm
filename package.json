@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.19",
+  "version": "1.0.0-rc.20",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -15,6 +15,7 @@
     "verify:storage": "node scripts/verify-storage.mjs",
     "verify:suffix": "node --experimental-strip-types scripts/verify-suffix.ts",
     "verify:network-stub": "LANPM_NETWORK=stub node --experimental-strip-types scripts/verify-network-stub.ts",
+    "verify:network-manual": "node --experimental-strip-types scripts/verify-network-manual.ts",
     "verify:m0": "npm run verify:storage && npm run verify:suffix && npm run verify:network-stub",
     "verify:routes": "node --experimental-strip-types scripts/verify-routes.ts",
     "verify:topbar": "node --experimental-strip-types scripts/verify-topbar.ts",

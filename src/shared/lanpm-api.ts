@@ -41,6 +41,8 @@ export interface LanpmApi {
     ) => Promise<ChatMessage>
     listMembers: (groupId: string) => Promise<GroupMemberView[]>
     markRead: (groupId: string, msgIds: string[]) => Promise<void>
+    pickAndSendFile: (groupId: string) => Promise<ChatMessage | null>
+    sendFile: (groupId: string, filePath: string) => Promise<ChatMessage>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
   task: {
@@ -94,6 +96,7 @@ export interface LanpmApi {
   network: {
     getStatus: () => Promise<import('./network/status').NetworkStatusView>
     reconnect: () => Promise<import('./network/status').NetworkStatusView>
+    connectManualPeer: (address: string) => Promise<import('./network/status').NetworkStatusView>
   }
   badge: {
     getGroupTabBadges: (groupId: string) => Promise<import('./badge/types').GroupTabBadges>
