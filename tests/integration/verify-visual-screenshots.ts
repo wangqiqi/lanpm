@@ -70,9 +70,7 @@ const missing = EXPECTED.filter((name) => !written.has(name))
 assert.equal(missing.length, 0, `missing screenshots: ${missing.join(', ')} → ${outDir}`)
 
 const MIN_BYTES = 8_000
-/** 亮主题 PNG 压缩率更高；以「至少一侧 ≥41KB」+ 双侧下限 保证有条 */
-const MIN_GANTT_SUBSTANTIVE = 12_000
-const MIN_GANTT_FULL_CHART = 41_000
+const MIN_GANTT_TASK_BARS = 2
 const THEME_PAGES = ['chat', 'board', 'tree', 'gantt', 'files', 'cockpit'] as const
 
 for (const name of EXPECTED) {
@@ -81,16 +79,18 @@ for (const name of EXPECTED) {
   assert.ok(size >= MIN_BYTES, `${name}.png too small (${size} B) — blank or error page?`)
 }
 
-const lightGanttSize = statSync(join(outDir, 'light_gantt.png')).size
-const darkGanttSize = statSync(join(outDir, 'dark_gantt.png')).size
-assert.ok(
-  lightGanttSize >= MIN_GANTT_SUBSTANTIVE && darkGanttSize >= MIN_GANTT_SUBSTANTIVE,
-  `gantt png too small (light=${lightGanttSize} B dark=${darkGanttSize} B) — chart may be empty`
-)
-assert.ok(
-  Math.max(lightGanttSize, darkGanttSize) >= MIN_GANTT_FULL_CHART,
-  `gantt chart likely empty (light=${lightGanttSize} B dark=${darkGanttSize} B, need max ≥ ${MIN_GANTT_FULL_CHART})`
-)
+const metaPath = join(outDir, 'capture-meta.json')
+assert.ok(existsSync(metaPath), `missing ${metaPath} — visual capture meta`)
+const meta = JSON.parse(readFileSync(metaPath, 'utf8')) as {
+  ganttTaskBars?: Record<string, number>
+}
+for (const theme of ['light', 'dark'] as const) {
+  const bars = meta.ganttTaskBars?.[theme]
+  assert.ok(
+    typeof bars === 'number' && bars >= MIN_GANTT_TASK_BARS,
+    `${theme} gantt task bars=${bars ?? 'missing'} (need ≥${MIN_GANTT_TASK_BARS})`
+  )
+}
 
 for (const page of THEME_PAGES) {
   const light = readFileSync(join(outDir, `light_${page}.png`))

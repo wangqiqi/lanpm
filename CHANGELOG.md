@@ -2,10 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.51] - 2026-05-29
+
+### Fixed
+- **CI `verify:visual-screenshots`**：等待甘特 `.bar` 任务条（非日历 grid rect）；种子任务后 `task:changed` 广播；甘特页整页 `loadUrl`；门禁改读 `capture-meta.json` 条数（放弃 PNG 体积阈值）
+
+### Tag
+- `v1.0.0-rc.51` — 视觉截图甘特条 DOM 门禁
+
 ## [1.0.0-rc.50] - 2026-05-29
 
 ### Fixed
-- **CI `verify:visual-screenshots`**：截图前等待甘特 SVG 条绘制；PNG 体积改为 `max(light,dark)≥41KB` 且双侧 `≥12KB`（亮主题压缩更小，避免误杀）
+- **CI `verify:visual-screenshots`**：截图前等待甘特 SVG 条绘制；PNG 体积改为 `max(light,dark)≥41KB` 且双侧 `≥12KB`（亮主题压缩更小，避免误杀；rc.51 已废弃体积阈值）
 
 ### Tag
 - `v1.0.0-rc.50` — 视觉截图甘特 CI 门禁

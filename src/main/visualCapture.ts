@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { BrowserWindow } from 'electron'
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
+import { TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { completeSetup, getSetupStatus } from './identity/setup'
 import { ensureSeedGroups } from './group/groupService'
 import { getDatabase } from './storage'
@@ -107,8 +107,14 @@ async function navigateHash(win: BrowserWindow, hashPath: string): Promise<void>
       if (window.location.hash !== next) window.location.hash = next
     })()
   `)
-  await wait(800)
+  await wait(hashPath.includes('gantt') ? 1_400 : 800)
   await waitForHealthyUi(win)
+}
+
+function broadcastTasksChanged(groupId: string): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send(TASK_PUSH_CHANNEL, groupId)
+  }
 }
 
 async function waitForSeededTaskChrome(win: BrowserWindow, marker: string): Promise<void> {
@@ -129,25 +135,31 @@ async function waitForSeededTaskChrome(win: BrowserWindow, marker: string): Prom
   `)
 }
 
-/** 任务名列可见 ≠ 甘特条已绘制；无头窗需等 SVG 条再截图 */
-async function waitForGanttChartPainted(win: BrowserWindow): Promise<void> {
-  await win.webContents.executeJavaScript(`
-    new Promise((resolve, reject) => {
-      const deadline = Date.now() + 25_000
-      const tick = () => {
-        const wrap = document.querySelector('[data-lanpm-visual="gantt-chart"]')
-        const shapes = wrap?.querySelectorAll('svg rect, svg path') ?? []
-        if (wrap && shapes.length >= 4) return resolve(true)
-        if (Date.now() > deadline) {
-          return reject(
-            new Error('gantt bars not painted (svg shapes=' + shapes.length + ')')
-          )
-        }
-        setTimeout(tick, 200)
+/** 日历网格也有大量 rect；须等 gantt-task-react 的 .bar 条（宽≥24px） */
+async function countGanttTaskBars(win: BrowserWindow): Promise<number> {
+  return win.webContents.executeJavaScript(`
+    (function () {
+      const wrap = document.querySelector('[data-lanpm-visual="gantt-chart"]')
+      if (!wrap) return 0
+      let n = 0
+      for (const el of wrap.querySelectorAll('.bar')) {
+        const r = el.getBoundingClientRect()
+        if (r.width >= 24 && r.height >= 6) n++
       }
-      tick()
-    })
+      return n
+    })()
   `)
+}
+
+async function waitForGanttTaskBars(win: BrowserWindow, minBars = 2): Promise<number> {
+  const deadline = Date.now() + 30_000
+  while (Date.now() < deadline) {
+    const n = await countGanttTaskBars(win)
+    if (n >= minBars) return n
+    await wait(250)
+  }
+  const last = await countGanttTaskBars(win)
+  throw new Error(`gantt task bars not painted (wide .bar count=${last}, need ≥${minBars})`)
 }
 
 function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
@@ -232,12 +244,14 @@ async function capture(
   fileName: string,
   theme: (typeof THEMES)[number],
   opts?: { waitForText?: string; waitForGanttBars?: boolean }
-): Promise<void> {
+): Promise<number | undefined> {
   await waitForHealthyUi(win)
   if (opts?.waitForText) await waitForSeededTaskChrome(win, opts.waitForText)
+  let ganttBars: number | undefined
   if (opts?.waitForGanttBars) {
-    await waitForGanttChartPainted(win)
-    await wait(600)
+    ganttBars = await waitForGanttTaskBars(win)
+    console.info(`[lanpm:visual-capture] gantt task bars ready (${ganttBars})`)
+    await wait(800)
   }
   win.setBackgroundColor(THEME_WINDOW_BG[theme])
   if (!win.isVisible()) win.show()
@@ -249,6 +263,7 @@ async function capture(
   }
   writeFileSync(join(outDir, fileName), image.toPNG())
   console.info('[lanpm:visual-capture] wrote', join(outDir, fileName))
+  return ganttBars
 }
 
 /**
@@ -272,13 +287,15 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     for (const theme of THEMES) {
       await loadUrl(win, themedPageUrl(theme, '#/'))
       await applyTheme(win, theme)
-      await capture(win, outDir, `${theme}_setup.png`, theme)
+      void (await capture(win, outDir, `${theme}_setup.png`, theme))
     }
     completeSetup(db, { baseName: 'Visual', department: 'QA' })
     ensureSeedGroups(db)
   }
   seedVisualCaptureTasks(db)
+  broadcastTasksChanged(GROUP_ID)
   const taskMarker = '截图·设计评审'
+  const ganttMeta: Record<string, number> = {}
 
   for (const theme of THEMES) {
     const [first, ...rest] = APP_PAGES
@@ -286,18 +303,27 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     await applyTheme(win, theme)
     await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
     for (const page of rest) {
-      await navigateHash(win, page.hash)
+      if (page.slug === 'gantt') {
+        await loadUrl(win, themedPageUrl(theme, page.hash))
+      } else {
+        await navigateHash(win, page.hash)
+      }
       await applyTheme(win, theme)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
       const waitForGanttBars = page.slug === 'gantt'
-      await capture(win, outDir, `${theme}_${page.slug}.png`, theme, {
+      const bars = await capture(win, outDir, `${theme}_${page.slug}.png`, theme, {
         waitForText,
         waitForGanttBars
       })
+      if (bars !== undefined) ganttMeta[theme] = bars
     }
   }
 
+  writeFileSync(
+    join(outDir, 'capture-meta.json'),
+    JSON.stringify({ ganttTaskBars: ganttMeta, groupId: GROUP_ID }, null, 2)
+  )
   console.info('[lanpm:visual-capture] done →', outDir)
   app.exit(0)
   return true
