@@ -1,0 +1,34 @@
+---
+description: LanPM renderer UI must use --lanpm-* design tokens and shared view shells (editing styles/themes)
+globs: src/renderer/**/*.{css,tsx,ts}
+alwaysApply: false
+---
+
+# Renderer 视觉令牌
+
+编辑 `src/renderer` 样式或主题时遵守 [docs/04_交互与UI约定.md](../../docs/04_交互与UI约定.md)。
+
+## 颜色
+
+- 使用 `var(--lanpm-accent|text|border|hover-bg|…)`，禁止 `#1677ff` / Ant 旧蓝
+- 语义色优先 `--lanpm-success|warning|danger`（若尚未定义，见 `todo.md` VIS-01）
+- 禁止 `var(--lanpm-*, rgba(0, 0, 0, …))` 作 fallback
+
+## 布局
+
+- 顶栏 56px、底栏 64px、主区内边距 16px
+- 模块间距 12px；内容卡片圆角 8px
+
+## 组件
+
+- 区域交互：复用 `regionInteract.module.css`（hover / selected / disabled）
+- 新视图： `ViewHeader` + `ViewToolbar` + `ViewState` 空态/加载
+- Ant 主色与 `global.module.css` / `ThemeProvider.tsx` 一致
+
+## 改后自检
+
+```bash
+npm run verify:visual
+```
+
+发版或大范围 UI 改动：读取 `.cursor/skills/lanpm-visual-audit/SKILL.md` 跑完整审计。

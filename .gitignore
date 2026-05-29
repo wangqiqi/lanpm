@@ -22,6 +22,9 @@ tmp/
 temp/
 .lanpm/
 
+# Test artifacts
+coverage/
+
 # Dependencies
 node_modules/
 dist/

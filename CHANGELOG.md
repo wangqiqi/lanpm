@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.31] - 2026-05-29
+
+### Added
+- **Cursor 视觉门禁**：`.cursor/skills/lanpm-visual-audit` · `.cursor/rules/renderer-visual-tokens.mdc` · `release-visual-gate.mdc`
+
+### Changed
+- **`.gitignore`**：忽略 Vitest 临时目录 `coverage/`
+- **`视觉.md`** · **`todo.md`**：补充 Cursor Agent 视觉审计说明
+
+### Tag
+- `v1.0.0-rc.31` — coverage 忽略与 Cursor 视觉门禁配置
+
 ## [1.0.0-rc.30] - 2026-05-29
 
 ### Added

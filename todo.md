@@ -21,7 +21,8 @@
 
 > **审计**：[视觉.md](./视觉.md)（2026-05-29）  
 > **基线**：V-01~V-13 ✅ · V-14a / **AUTO-17** `verify:visual` ✅  
-> **发版前最低**：完成 **阶段 A** 全部 + **V-14b** 手验截图。
+> **发版前最低**：完成 **阶段 A** 全部 + **V-14b** 手验截图。  
+> **Cursor**：`.cursor/skills/lanpm-visual-audit`（发版 / 主动「视觉检测」）· `.cursor/rules/renderer-visual-tokens.mdc`
 
 ### 阶段 A — 发版阻断（P2，建议 1 个 PR）
 

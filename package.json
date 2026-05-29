@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.30",
+  "version": "1.0.0-rc.31",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",

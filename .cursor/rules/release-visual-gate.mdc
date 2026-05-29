@@ -1,0 +1,14 @@
+---
+description: Before LanPM major release or RC, run visual gate (verify:visual, todo.md §视觉阶段 A, 视觉.md)
+alwaysApply: false
+---
+
+# 发版视觉门禁
+
+当用户提到 **发版、RC、1.0.0、release、准备发布** 且涉及 UI 或全量回归时：
+
+1. 执行 `.cursor/skills/lanpm-visual-audit/SKILL.md` 中的**门禁模式**
+2. 确认 `todo.md` §视觉一致性计划 **阶段 A**（VIS-01~03、V-14b）状态
+3. 未做全量审计时至少跑 `npm run verify:visual` 并汇报失败项
+
+完整审计或更新报告：遵循同一 skill 的**全量审计**流程并更新 `视觉.md`。
