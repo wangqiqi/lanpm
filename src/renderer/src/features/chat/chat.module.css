@@ -865,7 +865,7 @@
   min-height: 0;
   overflow: hidden;
   background: var(--lanpm-surface-solid);
-  border-top: 1px solid var(--lanpm-border);
+  border-top: 0.5px solid var(--lanpm-separator);
 }
 
 .resizeHandle {
@@ -883,12 +883,12 @@
   width: 40px;
   height: 3px;
   border-radius: 2px;
-  background: var(--lanpm-border);
+  background: var(--lanpm-separator);
 }
 
 .resizeHandle:hover::after,
 .resizeHandleActive::after {
-  background: var(--lanpm-text-secondary);
+  background: var(--lanpm-text-tertiary);
 }
 
 .inputRow {
@@ -908,7 +908,7 @@
   gap: 8px;
   min-height: 32px;
   padding: 2px 0 0;
-  border-bottom: 1px solid var(--lanpm-border);
+  border-bottom: 0.5px solid var(--lanpm-separator);
 }
 
 .toolbarActions {
@@ -978,10 +978,12 @@
   max-width: 88px;
   height: auto !important;
   padding: 12px 10px !important;
-  font-size: var(--lanpm-font-title);
+  font-size: var(--lanpm-font-body);
   font-weight: 600;
   line-height: 1.35;
   white-space: normal;
+  border-radius: 10px;
+  box-shadow: none !important;
 }
 
 .voicePanel {

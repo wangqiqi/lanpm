@@ -42,6 +42,7 @@ import { useNewMessageScroll } from '@renderer/features/chat/useNewMessageScroll
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import RegionButton from '@renderer/ui/RegionButton'
+import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
@@ -613,27 +614,23 @@ export default function ChatView(): React.ReactElement {
               <div className={styles.toolbarActions}>
                 <EmojiPicker onPick={insertEmoji} />
                 {taskAllowed && (
-                  <Button
-                    type="text"
+                  <ComposerIconButton
                     icon={<PlusSquareOutlined />}
+                    label={t('chat.taskBtn')}
                     onClick={() => setTaskModalOpen(true)}
-                    title={t('chat.taskBtn')}
-                    aria-label={t('chat.taskBtn')}
                   />
                 )}
                 {codeAllowed && (
-                  <Button
-                    type="text"
+                  <ComposerIconButton
                     icon={<CodeOutlined />}
+                    label={t('chat.codeBtn')}
                     onClick={() => setCodeModalOpen(true)}
-                    title={t('chat.codeBtn')}
-                    aria-label={t('chat.codeBtn')}
                   />
                 )}
                 {fileAllowed && (
-                  <Button
-                    type="text"
+                  <ComposerIconButton
                     icon={<PaperClipOutlined />}
+                    label={t('chat.fileBtn')}
                     onClick={() =>
                       void pickAndSendFile(gid).catch((err: unknown) =>
                         message.error(
@@ -641,14 +638,12 @@ export default function ChatView(): React.ReactElement {
                         )
                       )
                     }
-                    title={t('chat.fileBtn')}
-                    aria-label={t('chat.fileBtn')}
                   />
                 )}
                 {fileAllowed && (
-                  <Button
-                    type="text"
+                  <ComposerIconButton
                     icon={<CameraOutlined />}
+                    label={t('chat.screenshotBtn')}
                     onClick={() =>
                       void captureAndSendScreenshot(gid).catch((err: unknown) =>
                         message.error(
@@ -656,8 +651,6 @@ export default function ChatView(): React.ReactElement {
                         )
                       )
                     }
-                    title={t('chat.screenshotBtn')}
-                    aria-label={t('chat.screenshotBtn')}
                   />
                 )}
               </div>

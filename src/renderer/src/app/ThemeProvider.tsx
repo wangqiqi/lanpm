@@ -75,7 +75,13 @@ export default function ThemeProvider({
           Button: {
             primaryShadow: 'none',
             defaultShadow: 'none',
-            fontWeight: 500
+            defaultBorderColor: 'transparent',
+            defaultBg: 'transparent',
+            fontWeight: 500,
+            textTextColor: palette.textSecondary,
+            textTextHoverColor: palette.text,
+            textTextActiveColor: palette.text,
+            colorText: palette.textSecondary
           },
           Input: {
             activeBorderColor: isDark ? '#0a84ff' : '#0071e3',

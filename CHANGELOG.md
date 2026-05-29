@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.67] - 2026-05-29
+
+### Added
+- **`ComposerIconButton`**：聊天输入区工具栏统一图标按钮
+
+### Changed
+- **聊天 composer**：工具栏 Ant `text` → `ComposerIconButton`；顶/内分隔改为 `0.5px` `--lanpm-separator`；发送钮圆角与字号收敛
+- **代码块复制**：`caption` 样式
+- **ThemeProvider**：Ant 默认/文字按钮透明底，贴近 macOS 工具栏
+
+### Tag
+- `v1.0.0-rc.67` — 聊天输入区 Apple 化
+
 ## [1.0.0-rc.66] - 2026-05-29
 
 ### Added

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Tag } from 'antd'
+import { Tag } from 'antd'
 import RegionButton from '@renderer/ui/RegionButton'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { CopyOutlined } from '@ant-design/icons'
@@ -53,15 +53,13 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
         <Tag color="default" className={styles.langTag}>
           {language}
         </Tag>
-        <Button
-          type="text"
-          size="small"
-          icon={<CopyOutlined />}
-          aria-label={t('chat.copyCode')}
+        <RegionButton
+          variant="caption"
           onClick={() => void copyCode()}
         >
+          <CopyOutlined />
           {t('chat.copyCode')}
-        </Button>
+        </RegionButton>
         {code.split('\n').length > 12 && (
           <RegionButton variant="caption" onClick={() => setExpanded((v) => !v)}>
             {expanded ? t('chat.codeCollapse') : t('chat.codeExpand')}

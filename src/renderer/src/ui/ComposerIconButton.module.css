@@ -1,0 +1,9 @@
+.btn {
+  width: 32px;
+  height: 32px;
+  color: var(--lanpm-text-secondary);
+}
+
+.btn:hover:not(:disabled) {
+  color: var(--lanpm-text);
+}

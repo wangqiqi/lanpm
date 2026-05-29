@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Button, Popover } from 'antd'
+import { Popover } from 'antd'
+import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { SmileOutlined } from '@ant-design/icons'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { EMOJI_GROUPS } from './emojiData'
@@ -49,12 +50,7 @@ export default function EmojiPicker({ onPick }: EmojiPickerProps): React.ReactEl
       placement="topLeft"
       destroyOnHidden
     >
-      <Button
-        type="text"
-        icon={<SmileOutlined />}
-        title={t('chat.emojiBtn')}
-        aria-label={t('chat.emojiBtn')}
-      />
+      <ComposerIconButton icon={<SmileOutlined />} label={t('chat.emojiBtn')} />
     </Popover>
   )
 }
