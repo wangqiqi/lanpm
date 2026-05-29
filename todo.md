@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.11` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.12` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -49,7 +49,7 @@
 
 ### P1 — PRD 后续（评估 §4.2，非 RC 阻断）
 
-- [ ] **P1-R-06** 顶栏全局搜索扩展**成员**（`01` §5.2 P1；`searchService` + UI）
+- [x] **P1-R-06** 顶栏全局搜索扩展**成员**（`searchService` + `GlobalSearch` → 聊天 @提及）
 - [ ] **P1-CHAT-01** 聊天**表情**（`03` §15.1 P1）
 - [ ] **P1-FILES-01** 书签**导入/导出**增强（`03` §15.1 P1；toolbar 已有基础能力时补全 PRD 条款）
 
@@ -188,7 +188,7 @@
 - [x] **ARCH-06** PRD/README 中 Yjs / WebRTC / IndexedDB 标为目标栈 vs RC 现状 — 同 **DOC-02/04**
 - [ ] **ARCH-07** 7 天离线补同步队列 — 与 **PRD-F-07** / **DOC-03**
 - [ ] **ARCH-08** SQLite 库级加密，或更新 plan 归档 / docs「可加密」表述
-- [ ] **ARCH-09**（可选）报文层独立 HMAC-SHA256 字段；若不做，在 **ARCH-04** / `docs/02` 明确以 AES-GCM authTag 为准
+- [x] **ARCH-09**（可选）报文层独立 HMAC — 不实现；以 AES-GCM authTag 为准（**ARCH-04** / `docs/02`）
 
 ---
 
@@ -215,8 +215,8 @@
 - [x] **UX-F-14** 创建群组失败：`catch` + `message.error`（`CreateGroupModal`）— 同 **UX-W-01**
 - [x] **UX-F-15** 默认路由：重定向 `activeGroupId` 或首群，非写死 `demo-project` — 同 **UX-W-09**
 - [x] **UX-F-16** `navigationStore` 演示群名 i18n（`groupLabels.ts` / `resolveGroupDisplayName`）
-- [ ] **UX-F-17** TopBar 连接状态点 + 重连（在线/离线/同步）
-- [ ] **UX-F-18** BottomNav 未读/待办角标（chat、board 等）
+- [x] **UX-F-17** TopBar 连接状态点 + 重连（`networkStore` / `network:getStatus`）
+- [x] **UX-F-18** BottomNav 未读/待办角标（chat 未读、board 待办 `todo` 根任务）
 - [x] **UX-F-19** 驾驶舱 AI 报告：复制按钮、最大高度 + 展开（`CockpitView`）
 - [x] **UX-F-20** 代码块右上角「复制代码」（`CodeBlock.tsx`）
 - [x] **UX-F-21** 未知消息类型 i18n fallback，非 raw `[type]`
@@ -268,7 +268,7 @@
 - [ ] **UX-R-03** 聊天侧栏窄窗宽度策略（当前固定 240px）
 - [ ] **UX-R-04** 看板窄屏单列/stack 模式
 - [ ] **UX-R-05** 文件预览区窄屏单栏模式
-- [ ] **UX-R-06** BottomNav 窄屏仅 icon 模式
+- [x] **UX-R-06** BottomNav 窄屏仅 icon 模式（`@media max-width: 720px`）
 - [x] **UX-N-01** 驾驶舱返回群路径（与 BottomNav 对称性）— 同 **UX-W-05** / **UX-PATH-01**
 - [x] **UX-N-02** `GroupViewGuard` 非法视图 redirect 时 toast — 同 **UX-W-07**
 - [x] **UX-N-03** 职能群禁用 Tab 首次引导（`BottomNav` + `Modal.info`）

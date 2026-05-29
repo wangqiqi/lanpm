@@ -6,6 +6,8 @@ export type {
   SyncMessageType,
   UserPresence
 } from './types'
+export type { NetworkMode, NetworkLinkState, NetworkStatusView } from './status'
+export { NETWORK_IPC } from './status'
 export {
   UDP_DISCOVERY_PORT,
   DEFAULT_TCP_LISTEN_PORT,

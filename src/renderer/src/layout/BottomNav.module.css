@@ -55,3 +55,14 @@
 .label {
   line-height: 1.2;
 }
+
+@media (max-width: 720px) {
+  .label {
+    display: none;
+  }
+
+  .tab {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}

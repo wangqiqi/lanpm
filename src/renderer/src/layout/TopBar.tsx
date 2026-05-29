@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Button,
@@ -7,6 +7,7 @@ import {
   Modal,
   Select,
   Space,
+  Tooltip,
   Typography,
   type MenuProps
 } from 'antd'
@@ -32,6 +33,7 @@ import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
+import { useNetworkStore } from '@renderer/stores/networkStore'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
@@ -67,6 +69,27 @@ export default function TopBar(): React.ReactElement {
   const toggleTheme = useUiStore((s) => s.toggleTheme)
   const locale = useUiStore((s) => s.locale)
   const setLocale = useUiStore((s) => s.setLocale)
+  const networkStatus = useNetworkStore((s) => s.status)
+  const refreshNetwork = useNetworkStore((s) => s.refresh)
+  const reconnectNetwork = useNetworkStore((s) => s.reconnect)
+  const networkLoading = useNetworkStore((s) => s.loading)
+
+  useEffect(() => {
+    void refreshNetwork()
+    const timer = setInterval(() => void refreshNetwork(), 8000)
+    return () => clearInterval(timer)
+  }, [refreshNetwork])
+
+  const networkTooltip = networkStatus
+    ? t(
+        networkStatus.linkState === 'stub'
+          ? 'topbar.networkStub'
+          : networkStatus.linkState === 'online'
+            ? 'topbar.networkOnline'
+            : 'topbar.networkOffline',
+        { count: networkStatus.peerCount }
+      )
+    : t('topbar.networkUnknown')
 
   const navigateToGroup = (groupId: string): void => {
     setActiveGroupId(groupId)
@@ -191,6 +214,22 @@ export default function TopBar(): React.ReactElement {
       </Space>
 
       <Space size="middle" align="center">
+        <Tooltip title={networkTooltip}>
+          <button
+            type="button"
+            className={styles.netBtn}
+            aria-label={networkTooltip}
+            disabled={networkLoading}
+            onClick={() => {
+              if (networkStatus?.linkState === 'offline') void reconnectNetwork()
+              else void refreshNetwork()
+            }}
+          >
+            <span
+              className={`${styles.netDot} ${styles[`net_${networkStatus?.linkState ?? 'offline'}`]}`}
+            />
+          </button>
+        </Tooltip>
         <GlobalSearch />
         <Button
           type="text"

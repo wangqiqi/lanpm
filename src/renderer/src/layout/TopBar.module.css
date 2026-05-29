@@ -94,3 +94,47 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+.netBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.netBtn:hover:not(:disabled) {
+  background: var(--lanpm-hover-bg);
+}
+
+.netBtn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.netDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+}
+
+.net_online {
+  background: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.25);
+}
+
+.net_offline {
+  background: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+.net_stub {
+  background: #faad14;
+  box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.25);
+}

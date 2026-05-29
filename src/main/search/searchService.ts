@@ -2,6 +2,8 @@ import type { Database } from 'better-sqlite3'
 import type { GlobalSearchHit, GlobalSearchResult } from '../../shared/search/types'
 import { getGroupById } from '../storage/repositories/groupRepository'
 import { searchMessagesByContent, searchTasksByTitle } from '../storage/repositories/searchRepository'
+import { listUserGroups } from '../group/groupService'
+import { listGroupMembers } from '../chat/memberService'
 
 function groupLabel(db: Database, groupId: string): string {
   const g = getGroupById(db, groupId)
@@ -10,7 +12,43 @@ function groupLabel(db: Database, groupId: string): string {
   return groupId
 }
 
-export function globalSearch(db: Database, query: string, limitPerKind = 8): GlobalSearchResult {
+async function searchMembersGlobal(
+  db: Database,
+  query: string,
+  limit: number
+): Promise<GlobalSearchHit[]> {
+  const q = query.toLowerCase()
+  const hits: GlobalSearchHit[] = []
+  const seen = new Set<string>()
+
+  for (const group of listUserGroups(db)) {
+    const members = await listGroupMembers(db, group.groupId)
+    for (const member of members) {
+      const key = `${group.groupId}:${member.userId}`
+      if (seen.has(key)) continue
+      const nameMatch = member.displayName.toLowerCase().includes(q)
+      const idMatch = member.userId.toLowerCase().includes(q)
+      const mentionMatch = member.mentionKeys?.some((k) => k.toLowerCase().includes(q))
+      if (!nameMatch && !idMatch && !mentionMatch) continue
+      seen.add(key)
+      hits.push({
+        kind: 'member',
+        groupId: group.groupId,
+        userId: member.userId,
+        displayName: member.displayName,
+        groupName: groupLabel(db, group.groupId)
+      })
+      if (hits.length >= limit) return hits
+    }
+  }
+  return hits
+}
+
+export async function globalSearch(
+  db: Database,
+  query: string,
+  limitPerKind = 8
+): Promise<GlobalSearchResult> {
   const q = query.trim()
   if (!q) return { query: q, hits: [] }
 
@@ -34,6 +72,10 @@ export function globalSearch(db: Database, query: string, limitPerKind = 8): Glo
       snippet: m.snippet,
       groupName: groupLabel(db, m.groupId)
     })
+  }
+
+  for (const member of await searchMembersGlobal(db, q, limitPerKind)) {
+    hits.push(member)
   }
 
   return { query: q, hits }

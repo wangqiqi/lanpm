@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { AutoComplete, Typography, message } from 'antd'
-import { FileTextOutlined, MessageOutlined } from '@ant-design/icons'
+import { FileTextOutlined, MessageOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -39,22 +39,37 @@ export default function GlobalSearch(): React.ReactElement {
       const result = await getLanpmApi().search.query(q)
       setOptions(
         result.hits.map((hit) => ({
-          value: hit.kind === 'task' ? `task:${hit.taskId}` : `msg:${hit.msgId}`,
+          value:
+            hit.kind === 'task'
+              ? `task:${hit.taskId}`
+              : hit.kind === 'message'
+                ? `msg:${hit.msgId}`
+                : `member:${hit.userId}:${hit.groupId}`,
           hit,
           label: (
             <div className={styles.option}>
               {hit.kind === 'task' ? (
                 <FileTextOutlined className={styles.optionIcon} />
-              ) : (
+              ) : hit.kind === 'message' ? (
                 <MessageOutlined className={styles.optionIcon} />
+              ) : (
+                <UserOutlined className={styles.optionIcon} />
               )}
               <div className={styles.optionBody}>
                 <Text ellipsis className={styles.optionTitle}>
-                  {hit.kind === 'task' ? hit.title : hit.snippet}
+                  {hit.kind === 'task'
+                    ? hit.title
+                    : hit.kind === 'message'
+                      ? hit.snippet
+                      : hit.displayName}
                 </Text>
                 <Text type="secondary" className={styles.optionMeta}>
-                  {hit.kind === 'task' ? t('search.kindTask') : t('search.kindMessage')} ·{' '}
-                  {hit.groupName}
+                  {hit.kind === 'task'
+                    ? t('search.kindTask')
+                    : hit.kind === 'message'
+                      ? t('search.kindMessage')
+                      : t('search.kindMember')}{' '}
+                  · {hit.groupName}
                 </Text>
               </div>
             </div>
@@ -85,10 +100,14 @@ export default function GlobalSearch(): React.ReactElement {
       navigate(groupViewPath(hit.groupId, view), {
         state: { highlightTaskId: hit.taskId }
       })
-    } else {
+    } else if (hit.kind === 'message') {
       const view = defaultViewForGroup(type)
       navigate(groupViewPath(hit.groupId, view === 'chat' ? 'chat' : view), {
         state: { highlightMsgId: hit.msgId }
+      })
+    } else {
+      navigate(groupViewPath(hit.groupId, 'chat'), {
+        state: { composeDraft: `@${hit.displayName} ` }
       })
     }
     setQuery('')

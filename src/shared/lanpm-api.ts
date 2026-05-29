@@ -90,4 +90,11 @@ export interface LanpmApi {
     getAiConfig: () => Promise<AiConfigView | null>
     saveAiConfig: (input: AiConfigInput) => Promise<AiConfigView>
   }
+  network: {
+    getStatus: () => Promise<import('./network/status').NetworkStatusView>
+    reconnect: () => Promise<import('./network/status').NetworkStatusView>
+  }
+  badge: {
+    getGroupTabBadges: (groupId: string) => Promise<import('./badge/types').GroupTabBadges>
+  }
 }

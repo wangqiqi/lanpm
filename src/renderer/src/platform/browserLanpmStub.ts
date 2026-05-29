@@ -250,6 +250,40 @@ function previewDeviceName(): string {
   return resolveDeviceName('', BROWSER_PREVIEW_DEVICE)
 }
 
+function readReadReceipts(): Record<string, string[]> {
+  try {
+    const raw = localStorage.getItem(READ_RECEIPT_KEY)
+    return raw ? (JSON.parse(raw) as Record<string, string[]>) : {}
+  } catch {
+    return {}
+  }
+}
+
+function stubGroupTabBadges(groupId: string): import('@shared/badge/types').GroupTabBadges {
+  const status = readStatus()
+  const userId = status.user?.userId
+  let chatUnread = 0
+  if (userId) {
+    try {
+      const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+      const store = raw
+        ? (JSON.parse(raw) as Record<string, import('@shared/chat/types').ChatMessage[]>)
+        : {}
+      const receipts = readReadReceipts()
+      for (const m of store[groupId] ?? []) {
+        if (m.senderUserId === userId) continue
+        const readers = receipts[m.msgId] ?? []
+        if (!readers.includes(userId)) chatUnread++
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  const tasks = readAllTasks()[groupId] ?? []
+  const boardTodo = tasks.filter((t) => !t.parentTaskId && t.status === 'todo').length
+  return { chatUnread, boardTodo }
+}
+
 export function createBrowserLanpmStub(): LanpmApi {
   return {
     platform: 'browser',
@@ -591,8 +625,34 @@ export function createBrowserLanpmStub(): LanpmApi {
         } catch {
           /* ignore */
         }
+        const groupIds = ['demo-project', 'demo-function', 'demo-anonymous']
+        const seenMembers = new Set<string>()
+        for (const groupId of groupIds) {
+          for (const member of listStubMembers(groupId)) {
+            const key = `${groupId}:${member.userId}`
+            if (seenMembers.has(key)) continue
+            const nameMatch = member.displayName.toLowerCase().includes(lower)
+            const mentionMatch = member.mentionKeys?.some((k) => k.toLowerCase().includes(lower))
+            if (!nameMatch && !mentionMatch) continue
+            seenMembers.add(key)
+            hits.push({
+              kind: 'member',
+              groupId,
+              userId: member.userId,
+              displayName: member.displayName,
+              groupName: groupNames[groupId] ?? groupId
+            })
+          }
+        }
         return { query: q, hits: hits.slice(0, 16) }
       }
+    },
+    network: {
+      getStatus: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 }),
+      reconnect: async () => ({ mode: 'stub' as const, linkState: 'stub' as const, peerCount: 0 })
+    },
+    badge: {
+      getGroupTabBadges: async (groupId) => stubGroupTabBadges(groupId)
     }
   }
 }

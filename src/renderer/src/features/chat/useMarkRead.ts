@@ -4,6 +4,7 @@ import type { ChatMessage } from '@shared/chat/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { translate } from '@renderer/i18n/messages'
 import { useUiStore } from '@renderer/stores/uiStore'
+import { useBadgeStore } from '@renderer/stores/badgeStore'
 
 /** 会话可见时标记他人消息已读（M2-06） */
 export function useMarkRead(groupId: string, messages: ChatMessage[], localUserId?: string): void {
@@ -28,6 +29,7 @@ export function useMarkRead(groupId: string, messages: ChatMessage[], localUserI
         .chat.markRead(groupId, pending)
         .then(() => {
           for (const id of pending) markedRef.current.add(id)
+          void useBadgeStore.getState().refresh(groupId)
         })
         .catch(() => {
           message.error(translate(useUiStore.getState().locale, 'chat.markReadFailed'))

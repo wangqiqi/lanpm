@@ -13,6 +13,13 @@ export type GlobalSearchHit =
       snippet: string
       groupName: string
     }
+  | {
+      kind: 'member'
+      groupId: string
+      userId: string
+      displayName: string
+      groupName: string
+    }
 
 export interface GlobalSearchResult {
   query: string

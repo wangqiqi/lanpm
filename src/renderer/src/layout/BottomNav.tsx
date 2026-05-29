@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { Modal, Tooltip } from 'antd'
+import { Badge, Modal, Tooltip } from 'antd'
 import {
   CommentOutlined,
   ProjectOutlined,
@@ -15,6 +15,8 @@ import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { groupViewPath, VIEW_TABS } from '@renderer/routes/paths'
+import { useBadgeStore } from '@renderer/stores/badgeStore'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import styles from './BottomNav.module.css'
 
 const VIEW_ICONS: Record<AppView, React.ReactNode> = {
@@ -49,9 +51,34 @@ export default function BottomNav(): React.ReactElement {
     return null
   }, [location.pathname])
 
+  const gid = groupId ?? ''
+  const badges = useBadgeStore((s) => s.badges)
+  const refreshBadges = useBadgeStore((s) => s.refresh)
+
+  useEffect(() => {
+    if (!gid) return
+    void refreshBadges(gid)
+    const unsubChat = getLanpmApi().chat.onMessage((msg) => {
+      if (msg.groupId === gid) void refreshBadges(gid)
+    })
+    const unsubTasks = getLanpmApi().task.onTasksChanged((g) => {
+      if (g === gid) void refreshBadges(gid)
+    })
+    return () => {
+      unsubChat()
+      unsubTasks()
+    }
+  }, [gid, refreshBadges])
+
   if (!groupId) return <></>
 
   const groupType = getGroupType(groupId)
+
+  const tabBadgeCount = (view: AppView): number => {
+    if (view === 'chat') return badges.chatUnread
+    if (view === 'board') return badges.boardTodo
+    return 0
+  }
 
   const maybeShowFunctionGuide = (): void => {
     if (groupType !== 'function') return
@@ -79,7 +106,11 @@ export default function BottomNav(): React.ReactElement {
               if (allowed) navigate(groupViewPath(groupId, tab.view))
             }}
           >
-            <span className={styles.icon}>{VIEW_ICONS[tab.view]}</span>
+            <span className={styles.icon}>
+              <Badge count={tabBadgeCount(tab.view)} size="small" offset={[-2, 2]}>
+                {VIEW_ICONS[tab.view]}
+              </Badge>
+            </span>
             <span className={styles.label}>{t(VIEW_MESSAGE_KEYS[tab.view])}</span>
           </button>
         )

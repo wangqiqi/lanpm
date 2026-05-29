@@ -93,6 +93,13 @@ const api: LanpmApi = {
   },
   search: {
     query: (query) => ipcRenderer.invoke('search:query', query)
+  },
+  network: {
+    getStatus: () => ipcRenderer.invoke('network:getStatus'),
+    reconnect: () => ipcRenderer.invoke('network:reconnect')
+  },
+  badge: {
+    getGroupTabBadges: (groupId) => ipcRenderer.invoke('badge:getGroupTabBadges', groupId)
   }
 }
 

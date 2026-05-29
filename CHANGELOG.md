@@ -2,6 +2,27 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.12] - 2026-05-29
+
+### Added
+- **TopBar 连接状态点**：在线 / 离线 / Stub 三色指示；离线点击重连（**UX-F-17**）
+- **`network:getStatus` / `network:reconnect`** IPC + `networkStore`
+- **BottomNav 角标**：当前群聊天未读、看板待办根任务数（**UX-F-18**）
+- **`badge:getGroupTabBadges`** IPC + `badgeStore`；`markRead` 成功后刷新角标
+- **全局搜索成员**（**P1-R-06**）：命中后跳转聊天并预填 `@昵称`
+- BottomNav 窄屏仅 icon（**UX-R-06**，`@media max-width: 720px`）
+
+### Fixed
+- **ThemeProvider**：Ant Design Token 改用实色 palette（Table/Tag/Select 暗色下不再因 CSS 变量运算异常）
+- 看板列头任务数改用 `.columnCount`，避免 Tag 在暗色主题对比度问题
+
+### Changed
+- **ARCH-09** 勾选：不实现独立 HMAC，以 AES-GCM authTag 为准
+- i18n +5 键（网络状态、搜索成员）；**todo.md** 第五批勾选
+
+### Tag
+- `v1.0.0-rc.12` — 连接感知、Tab 角标与成员搜索
+
 ## [1.0.0-rc.11] - 2026-05-29
 
 ### Added

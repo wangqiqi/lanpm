@@ -10,7 +10,7 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { Button, Input, Modal, Select, Tag, message } from 'antd'
+import { Button, Input, Modal, Select, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
@@ -74,7 +74,7 @@ function KanbanColumn({
     >
       <div className={styles.columnHeader}>
         {t(COLUMN_TITLE_KEYS[status])}
-        <Tag style={{ marginLeft: 8 }}>{tasks.length}</Tag>
+        <span className={styles.columnCount}>{tasks.length}</span>
       </div>
       <div className={styles.columnBody}>
         {tasks.length === 0 && (

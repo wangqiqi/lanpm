@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { NetworkTransport } from '../../shared/network'
+import type { NetworkMode, NetworkStatusView } from '../../shared/network/status'
 import { initChatService } from '../chat/chatService'
 import { getSetupStatus } from '../identity/setup'
 import { RealNetworkTransport } from './real/RealNetworkTransport'
@@ -12,7 +13,7 @@ import {
 } from './stub/index'
 import { getKnownLanUserIds } from './peerDirectory'
 
-export type NetworkMode = 'stub' | 'real'
+export type { NetworkMode } from '../../shared/network/status'
 
 let realTransport: RealNetworkTransport | null = null
 
@@ -76,6 +77,28 @@ export function shutdownNetwork(): void {
   realTransport?.stop()
   realTransport = null
   shutdownNetworkStub()
+}
+
+export async function fetchNetworkStatus(): Promise<NetworkStatusView> {
+  const mode = resolveNetworkMode()
+  const transport = getNetworkTransport()
+  if (!transport) {
+    return { mode, linkState: 'offline', peerCount: 0 }
+  }
+  try {
+    const peers = await transport.discoverPeers()
+    const peerCount = peers.filter((p) => p.userId && p.userId !== '__lanpm_probe__').length
+    if (mode === 'stub') {
+      return { mode: 'stub', linkState: 'stub', peerCount }
+    }
+    return { mode: 'real', linkState: peerCount > 0 ? 'online' : 'offline', peerCount }
+  } catch {
+    return { mode, linkState: 'offline', peerCount: 0 }
+  }
+}
+
+export function reconnectNetwork(db: Database): void {
+  refreshNetworkIdentity(db)
 }
 
 export { getKnownLanUserIds, NetworkStub, RealNetworkTransport }
