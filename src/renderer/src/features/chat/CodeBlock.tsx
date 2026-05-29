@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button, Tag } from 'antd'
+import githubCssUrl from 'highlight.js/styles/github.css?url'
+import githubDarkCssUrl from 'highlight.js/styles/github-dark.css?url'
 import type { ThemeMode } from '@renderer/stores/uiStore'
 import { highlightCode } from '@renderer/features/chat/highlightSetup'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -22,13 +24,7 @@ function useHighlightTheme(theme: ThemeMode): void {
       link.rel = 'stylesheet'
       document.head.appendChild(link)
     }
-    void import(
-      theme === 'dark'
-        ? 'highlight.js/styles/github-dark.css'
-        : 'highlight.js/styles/github.css'
-    ).then((mod) => {
-      link!.href = mod.default
-    })
+    link.href = theme === 'dark' ? githubDarkCssUrl : githubCssUrl
   }, [theme])
 }
 

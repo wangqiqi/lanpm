@@ -2,6 +2,29 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.7] - 2026-05-29
+
+### Added
+- **`todo.md` 唯一任务真源（SSOT）**：合并 `ui` / `ux` / `评估` / `plan` 全部可执行项（UX-X/W/PATH/FLOW、DOC/PRD-F/ARCH、P1 backlog、去重索引）
+- **审查文档归档**（根目录不再保留）：
+  - `archive/20260529_095839_plan概述_SSOT后归档.md`
+  - `archive/20260529_095839_UI设计审查_ui.md`
+  - `archive/20260529_095839_UX操作路径审查_ux.md`
+  - `archive/20260529_095839_实现文档一致性评估_评估.md`
+  - `archive/20260529_093804_plan详细章节迁todo后归档.md`
+
+### Changed
+- **Electron 工具链升级**：`electron` ^41.7、`electron-vite` ^5、`vite` ^8、`electron-builder` ^26；`better-sqlite3` ^12.10
+- **`electron.vite.config.ts`**：preload 显式 `ssr.external: ['electron']`，避免沙箱下 preload 打包失败导致窗口空白
+- **`CodeBlock.tsx`**：highlight.js 主题 CSS 改用 `?url` 静态导入（兼容 Vite 8）
+- **`README.md` / `docs/00` / `docs/03` / `docs/05`**：执行入口改为 `todo.md`，计划概述指向 archive
+
+### Removed
+- 根目录 `plan.md`、`评估.md`（内容已迁 archive；任务仅在 `todo.md` 维护）
+
+### Tag
+- `v1.0.0-rc.7` — todo SSOT + 审查归档 + Electron/Vite 8 升级
+
 ## [1.0.0-rc.5] - 2026-05-29
 
 ### Added

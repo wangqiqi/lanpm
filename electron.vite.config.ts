@@ -26,8 +26,15 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin()]
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    /**
+     * electron-vite 预设 ssr.noExternal=true 会把 npm 包 electron/index.js 打进 preload（含 require('fs')），
+     * 沙箱下 preload 失败、窗口空白。须显式 externalize 运行时模块 electron。
+     */
+    ssr: {
+      external: ['electron']
+    },
     build: {
+      externalizeDeps: false,
       rollupOptions: {
         output: {
           /** preload 在 Electron 沙箱中必须以 CJS 运行，ESM 会报 import outside module */

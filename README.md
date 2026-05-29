@@ -40,7 +40,8 @@ npm run build       # 生产构建
 | [docs/06_测试与联调手册.md](./docs/06_测试与联调手册.md) | Stub/真网/性能测试 |
 | [docs/07_M3_看板与任务树实现说明.md](./docs/07_M3_看板与任务树实现说明.md) | M3 看板/任务树实现与 IPC |
 | [docs/08_M7_RC验收清单.md](./docs/08_M7_RC验收清单.md) | M7 RC 验收 |
-| [plan.md](./plan.md) | 执行计划（M0–M7） |
+| [todo.md](./todo.md) | **唯一任务真源**（RC / v1.1 / UI·UX·评估项） |
+| [archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md) | 执行计划概述（只读） |
 
 ## 技术选型（已拍板）
 
@@ -62,7 +63,7 @@ npm run build       # 生产构建
 | M6 | 真实 UDP/WebRTC 替换 Stub |
 | M7 | 验收、性能、发布 |
 
-详见 [plan.md](./plan.md)。
+待办与排期见 [todo.md](./todo.md)；计划背景见 [archive/plan 概述](./archive/20260529_095839_plan概述_SSOT后归档.md)。
 
 ## 查看历史原型（可选）
 
