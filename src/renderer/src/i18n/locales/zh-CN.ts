@@ -42,6 +42,11 @@ const zhCN = {
   'topbar.device': '设备',
   'topbar.deviceWithName': '设备：{name}',
   'topbar.apiKey': 'API Key（M5）',
+  'topbar.resetIdentity': '注销身份',
+  'topbar.resetIdentityTitle': '注销本机身份？',
+  'topbar.resetIdentityContent':
+    '将清除本机身份绑定并返回 Setup 页，可重新设置用户名与头像。群组与任务数据仍保留在本机数据库中。',
+  'topbar.resetIdentityConfirm': '注销',
   'topbar.createGroup': '创建群组',
   'topbar.localeZh': '中文',
   'topbar.localeEn': 'English',

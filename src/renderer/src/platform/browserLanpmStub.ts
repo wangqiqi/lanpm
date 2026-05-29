@@ -378,6 +378,14 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         writeStatus(next)
         return next
+      },
+      resetIdentity: async () => {
+        const status: SetupStatus = {
+          configured: false,
+          suggestedDeviceName: previewDeviceName()
+        }
+        writeStatus(status)
+        return status
       }
     },
     chat: {

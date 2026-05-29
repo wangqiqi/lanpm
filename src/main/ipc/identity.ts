@@ -3,18 +3,20 @@ import {
   completeSetup,
   getSetupStatus,
   getSuggestedDeviceName,
+  resetIdentity,
   updateProfile,
   type ProfileUpdateInput,
   type SetupInput
 } from '../identity/setup'
 import { ensureSeedGroups } from '../group/groupService'
-import { refreshNetworkIdentity } from '../network'
+import { initNetwork, refreshNetworkIdentity, shutdownNetwork } from '../network'
 import { getDatabase } from '../storage'
 
 export const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
   complete: 'identity:completeSetup',
   updateProfile: 'identity:updateProfile',
+  reset: 'identity:resetIdentity',
   getSuggestedDeviceNameSync: 'identity:getSuggestedDeviceNameSync'
 } as const
 
@@ -39,6 +41,14 @@ export function registerIdentityIpc(): void {
     const db = getDatabase()
     const status = updateProfile(db, input)
     refreshNetworkIdentity(db)
+    return status
+  })
+
+  ipcMain.handle(IDENTITY_CHANNELS.reset, () => {
+    const db = getDatabase()
+    shutdownNetwork()
+    const status = resetIdentity(db)
+    initNetwork(db)
     return status
   })
 }

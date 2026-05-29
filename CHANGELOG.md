@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.41] - 2026-05-29
+
+### Added
+- **`identity:resetIdentity`**：顶栏用户菜单「注销身份」，清除本机设备绑定并回到 Setup（库内数据保留）
+
+### Changed
+- **Setup 向导**：表单行 `focus-within` 高亮；默认头像按亮/暗主题使用 accent（`defaultAvatarDataUrl`）
+- **Setup 视觉**：Logo/头像 accent 描边环（`UX-SETUP-AVATAR` / `UX-SETUP-FORM` 部分落地）
+- **`todo.md`**：UI/UX 审图评分与 UX 待办清单（`UX-RESET` 已勾）
+
+### Tag
+- `v1.0.0-rc.41` — 注销身份回 Setup、Setup 表单/头像 UX 加固
+
 ## [1.0.0-rc.40] - 2026-05-29
 
 ### Added

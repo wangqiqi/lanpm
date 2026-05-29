@@ -42,6 +42,11 @@ const enUS = {
   'topbar.device': 'Device',
   'topbar.deviceWithName': 'Device: {name}',
   'topbar.apiKey': 'API Key (M5)',
+  'topbar.resetIdentity': 'Sign out identity',
+  'topbar.resetIdentityTitle': 'Sign out this device?',
+  'topbar.resetIdentityContent':
+    'Clears the local identity binding and returns to Setup. Groups and tasks remain in the local database.',
+  'topbar.resetIdentityConfirm': 'Sign out',
   'topbar.createGroup': 'Create group',
   'topbar.localeZh': '中文',
   'topbar.localeEn': 'English',

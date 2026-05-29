@@ -4,7 +4,8 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ReloadOutlined, UploadOutlined } from '@ant-design/icons'
 import type { SetupStatus } from '@shared/identity'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import { fileToDataUrl, randomAvatarDataUrl } from './avatar'
+import { fileToDataUrl, defaultAvatarDataUrl, randomAvatarDataUrl } from './avatar'
+import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import logoUrl from '@resources/logo.svg'
 import styles from './SetupWizard.module.css'
@@ -21,8 +22,9 @@ interface FormValues {
 export default function SetupWizard({ onComplete }: SetupWizardProps): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
+  const theme = useUiStore((s) => s.theme)
   const [form] = Form.useForm<FormValues>()
-  const [avatarUrl, setAvatarUrl] = useState(() => randomAvatarDataUrl('LP'))
+  const [avatarUrl, setAvatarUrl] = useState(() => defaultAvatarDataUrl('LP', theme))
   const [submitting, setSubmitting] = useState(false)
   const [deviceName, setDeviceName] = useState('')
 

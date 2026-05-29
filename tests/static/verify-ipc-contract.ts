@@ -19,6 +19,7 @@ const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
   complete: 'identity:completeSetup',
   updateProfile: 'identity:updateProfile',
+  reset: 'identity:resetIdentity',
   getSuggestedDeviceNameSync: 'identity:getSuggestedDeviceNameSync'
 } as const
 

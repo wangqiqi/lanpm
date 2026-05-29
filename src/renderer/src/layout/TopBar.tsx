@@ -182,6 +182,27 @@ export default function TopBar(): React.ReactElement {
       key: 'api',
       label: t('topbar.apiKey'),
       onClick: () => navigate(cockpitPath(), { state: { openAiConfig: true } })
+    },
+    { type: 'divider' },
+    {
+      key: 'reset',
+      label: t('topbar.resetIdentity'),
+      danger: true,
+      onClick: () => {
+        modal.confirm({
+          title: t('topbar.resetIdentityTitle'),
+          content: t('topbar.resetIdentityContent'),
+          okText: t('topbar.resetIdentityConfirm'),
+          cancelText: t('common.cancel'),
+          okButtonProps: { danger: true },
+          onOk: async () => {
+            const status = await getLanpmApi().identity.resetIdentity()
+            useIdentityStore
+              .getState()
+              .setFromStatus(status.configured, status.user, status.device)
+          }
+        })
+      }
     }
   ]
 

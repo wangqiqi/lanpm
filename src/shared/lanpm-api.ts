@@ -30,6 +30,7 @@ export interface LanpmApi {
     getSetupStatus: () => Promise<SetupStatus>
     completeSetup: (input: SetupInput) => Promise<SetupStatus>
     updateProfile: (input: ProfileUpdateInput) => Promise<SetupStatus>
+    resetIdentity: () => Promise<SetupStatus>
   }
   chat: {
     listMessages: (groupId: string) => Promise<ChatMessage[]>

@@ -8,7 +8,7 @@ import {
   upsertDevice,
   upsertUser
 } from '../storage'
-import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
+import { deleteMeta, getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 import type { LocalDevice, UserProfile } from '../storage/types'
 import { newDeviceId } from './idGen'
 import { allocateUserIdWithLanCheck } from './suffixValidation'
@@ -123,4 +123,10 @@ export function updateProfile(db: Database, input: ProfileUpdateInput): SetupSta
 
   upsertUser(db, profile)
   return { configured: true, user: profileToSetupUser(profile), device: status.device }
+}
+
+/** 清除本机身份绑定，回到 Setup 向导（用户/设备记录保留于库中） */
+export function resetIdentity(db: Database): SetupStatus {
+  deleteMeta(db, LOCAL_DEVICE_ID_KEY)
+  return getSetupStatus(db)
 }

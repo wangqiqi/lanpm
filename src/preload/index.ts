@@ -20,7 +20,8 @@ const api: LanpmApi = {
     getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),
     completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input),
     updateProfile: (input: ProfileUpdateInput) =>
-      ipcRenderer.invoke('identity:updateProfile', input)
+      ipcRenderer.invoke('identity:updateProfile', input),
+    resetIdentity: () => ipcRenderer.invoke('identity:resetIdentity')
   },
   chat: {
     listMessages: (groupId) => ipcRenderer.invoke('chat:listMessages', groupId),

@@ -26,12 +26,9 @@
   height: 64px;
   margin-bottom: 16px;
   border-radius: 14px;
-  font-size: var(--lanpm-font-display);
-  font-weight: 600;
-  color: var(--lanpm-on-accent);
-  background: var(--lanpm-accent);
-  box-shadow: var(--lanpm-shadow);
-  letter-spacing: -0.03em;
+  box-shadow:
+    var(--lanpm-shadow-lg),
+    0 0 0 3px var(--lanpm-accent-fill);
 }
 
 .title {
@@ -61,7 +58,9 @@
 
 .avatar {
   margin-bottom: 12px;
-  box-shadow: var(--lanpm-shadow-lg);
+  box-shadow:
+    var(--lanpm-shadow-lg),
+    0 0 0 3px var(--lanpm-accent-fill);
 }
 
 .avatarLinks {
@@ -115,6 +114,14 @@
   min-height: 48px;
   padding: 0 16px;
   gap: 12px;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.row:focus-within {
+  background: var(--lanpm-accent-fill);
+  box-shadow: inset 3px 0 0 var(--lanpm-accent);
 }
 
 .rowLabel {
@@ -167,14 +174,33 @@
   font-weight: 600 !important;
   border-radius: 12px !important;
   border: none !important;
+  color: var(--lanpm-on-accent) !important;
   background: var(--lanpm-accent) !important;
-  box-shadow: none !important;
+  box-shadow: var(--lanpm-shadow-sm) !important;
 }
 
 .submitBtn:hover:not(:disabled) {
+  color: var(--lanpm-on-accent) !important;
   background: var(--lanpm-accent-hover) !important;
 }
 
-.form :global(.ant-btn-primary:active) {
+.submitBtn:active:not(:disabled) {
+  color: var(--lanpm-on-accent) !important;
+  background: var(--lanpm-accent-hover) !important;
+}
+
+.submitBtn:disabled {
+  color: var(--lanpm-on-accent) !important;
+  background: var(--lanpm-accent) !important;
+  opacity: 0.55 !important;
+}
+
+.form :global(.ant-btn-primary.submitBtn),
+.form :global(.ant-btn-primary).submitBtn {
+  color: var(--lanpm-on-accent) !important;
+  background: var(--lanpm-accent) !important;
+}
+
+.form :global(.ant-btn-primary.submitBtn:active:not(:disabled)) {
   transform: scale(0.98);
 }
