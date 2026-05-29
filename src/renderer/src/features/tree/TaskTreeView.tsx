@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Input, Progress, Slider, Tree } from 'antd'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Alert, Button, Input, Progress, Slider, Tree, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { DataNode } from 'antd/es/tree'
 import { PlusOutlined } from '@ant-design/icons'
@@ -19,6 +19,27 @@ import {
   countTaskDescendants
 } from '@renderer/features/task/confirmDeleteParentTask'
 import styles from './tree.module.css'
+
+const { Text } = Typography
+
+/** First root task in tree order (matches buildTreeData). */
+function firstRootTaskId(tasks: Task[]): string | null {
+  const taskIds = new Set(tasks.map((t) => t.taskId))
+  const roots = tasks.filter((t) => {
+    const parentMissing = t.parentTaskId != null && !taskIds.has(t.parentTaskId)
+    return t.parentTaskId == null || parentMissing
+  })
+  roots.sort((a, b) => a.sortOrder - b.sortOrder)
+  return roots[0]?.taskId ?? null
+}
+
+function applyTaskSelection(
+  taskId: string,
+  tasks: Task[]
+): { parentSelected: boolean } {
+  const hasChildren = tasks.some((t) => t.parentTaskId === taskId)
+  return { parentSelected: hasChildren }
+}
 
 function buildTreeData(
   tasks: Task[],
@@ -109,6 +130,7 @@ export default function TaskTreeView(): React.ReactElement {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [inlineEditTaskId, setInlineEditTaskId] = useState<string | null>(null)
   const [parentSelected, setParentSelected] = useState(false)
+  const initialSelectDoneRef = useRef(false)
 
   const treeReady = !loading || tasks.length > 0
   const { highlightId, isHighlighted: isTaskHighlighted } = useSearchHighlight('task', treeReady)
@@ -152,6 +174,10 @@ export default function TaskTreeView(): React.ReactElement {
   )
 
   useEffect(() => {
+    initialSelectDoneRef.current = false
+  }, [gid])
+
+  useEffect(() => {
     if (!gid) return
     void loadTasks(gid)
     const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
@@ -167,7 +193,21 @@ export default function TaskTreeView(): React.ReactElement {
     setExpandedKeys((keys) => [...new Set([...keys, ...ancestors])])
     setSelectedTaskId(highlightId)
     setSelectedParentId(highlightId)
+    const { parentSelected: isParent } = applyTaskSelection(highlightId, tasks)
+    setParentSelected(isParent)
+    initialSelectDoneRef.current = true
   }, [highlightId, tasks])
+
+  useEffect(() => {
+    if (highlightId || selectedTaskId || initialSelectDoneRef.current) return
+    if (!treeReady || tasks.length === 0) return
+    const id = firstRootTaskId(tasks)
+    if (!id) return
+    setSelectedTaskId(id)
+    setSelectedParentId(id)
+    setParentSelected(applyTaskSelection(id, tasks).parentSelected)
+    initialSelectDoneRef.current = true
+  }, [highlightId, selectedTaskId, treeReady, tasks])
 
   const onSelect = useCallback(
     (keys: React.Key[]) => {
@@ -180,12 +220,9 @@ export default function TaskTreeView(): React.ReactElement {
       }
       setSelectedParentId(id)
       setSelectedTaskId(id)
-      const task = tasks.find((t) => t.taskId === id)
-      if (task) {
-        const hasChildren = tasks.some((t) => t.parentTaskId === id)
-        setParentSelected(hasChildren)
-        if (hasChildren) setInlineEditTaskId(null)
-      }
+      const { parentSelected: isParent } = applyTaskSelection(id, tasks)
+      setParentSelected(isParent)
+      if (isParent) setInlineEditTaskId(null)
     },
     [tasks]
   )
@@ -223,8 +260,11 @@ export default function TaskTreeView(): React.ReactElement {
         const ok = await deleteTask(taskId, mode)
         if (ok) {
           message.success(t('tree.detailDeleted'))
-          setSelectedTaskId(null)
-          setSelectedParentId(null)
+          const remaining = tasks.filter((t) => t.taskId !== taskId)
+          const nextId = firstRootTaskId(remaining)
+          setSelectedTaskId(nextId)
+          setSelectedParentId(nextId)
+          setParentSelected(nextId ? applyTaskSelection(nextId, remaining).parentSelected : false)
         } else {
           message.warning(t('board.notFound'))
         }
@@ -321,16 +361,26 @@ export default function TaskTreeView(): React.ReactElement {
             />
           )}
         </div>
-        {selectedTask && (
-          <TaskDetailPanel
-            groupId={gid}
-            task={selectedTask}
-            tasks={tasks}
-            onClose={() => setSelectedTaskId(null)}
-            onSave={handleDetailSave}
-            onDelete={handleDetailDelete}
-          />
-        )}
+        <aside className={styles.detailPanel}>
+          {selectedTask ? (
+            <TaskDetailPanel
+              groupId={gid}
+              task={selectedTask}
+              tasks={tasks}
+              onClose={() => {
+                setSelectedTaskId(null)
+                setSelectedParentId(null)
+                setParentSelected(false)
+              }}
+              onSave={handleDetailSave}
+              onDelete={handleDetailDelete}
+            />
+          ) : (
+            <div className={styles.detailPanelPlaceholder}>
+              <Text type="secondary">{t('tree.selectToViewDetail')}</Text>
+            </div>
+          )}
+        </aside>
       </div>
     </div>
   )

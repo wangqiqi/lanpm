@@ -18,12 +18,31 @@ import {
   insertMessage,
   listDistinctDmGroupIds,
   listMessagesSince,
-  messageExists
+  listRecalledMessagesInGroup,
+  messageExists,
+  getMessageById,
+  updateMessage
 } from '../storage/repositories/messageRepository'
 import { broadcastMessage } from './chatBroadcast'
 
-function storeIncomingMessage(db: Database, incoming: ChatMessage, groupId: string): void {
-  if (messageExists(db, incoming.msgId)) return
+function upsertIncomingChatMessage(db: Database, incoming: ChatMessage, groupId: string): void {
+  if (messageExists(db, incoming.msgId)) {
+    const existing = getMessageById(db, incoming.msgId)
+    if (
+      existing &&
+      incoming.content.kind === 'recalled' &&
+      existing.content.kind !== 'recalled'
+    ) {
+      const stored: ChatMessage = {
+        ...incoming,
+        groupId,
+        deliveryStatus: existing.deliveryStatus
+      }
+      updateMessage(db, stored)
+      broadcastMessage(stored)
+    }
+    return
+  }
   const stored: ChatMessage = { ...incoming, groupId, deliveryStatus: 'sent' }
   insertMessage(db, stored)
   broadcastMessage(stored)
@@ -76,13 +95,23 @@ export async function handleChatSyncRequest(db: Database, envelope: SyncEnvelope
   const payload = envelope.payload as ChatSyncRequestPayload
   if (!payload?.minCreatedAt) return
 
-  const messages = listMessagesSince(
+  const newMessages = listMessagesSince(
     db,
     envelope.groupId,
     payload.sinceLamportTs ?? 0,
     payload.minCreatedAt,
     OFFLINE_SYNC_BATCH_LIMIT
   ).filter((m) => m.senderDeviceId !== localDeviceId)
+
+  const recalledMessages = listRecalledMessagesInGroup(
+    db,
+    envelope.groupId,
+    payload.minCreatedAt
+  ).filter((m) => m.senderDeviceId !== localDeviceId)
+
+  const merged = new Map<string, ChatMessage>()
+  for (const m of [...newMessages, ...recalledMessages]) merged.set(m.msgId, m)
+  const messages = [...merged.values()]
 
   if (messages.length === 0) return
 
@@ -118,6 +147,6 @@ export function handleChatSyncBatch(db: Database, envelope: SyncEnvelope): void 
   const cutoff = offlineSyncCutoffIso(SYNC_WINDOW_DAYS)
   for (const incoming of payload.messages) {
     if (!incoming?.msgId || incoming.createdAt < cutoff) continue
-    storeIncomingMessage(db, incoming, envelope.groupId)
+    upsertIncomingChatMessage(db, incoming, envelope.groupId)
   }
 }

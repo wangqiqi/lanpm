@@ -39,6 +39,7 @@ import {
   messageExists,
   updateDeliveryStatus
 } from '../storage/repositories/messageRepository'
+import { handleChatRecall, recallMessage } from './recallMessageService'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -57,6 +58,10 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'chat_sync_batch') {
     handleChatSyncBatch(db, envelope)
+    return
+  }
+  if (envelope.type === 'chat_recall') {
+    handleChatRecall(db, envelope)
     return
   }
   if (envelope.type !== 'chat' || !envelope.groupId) return
@@ -235,7 +240,7 @@ export async function sendTextMessage(
   )
 }
 
-export { listGroupMembers }
+export { listGroupMembers, recallMessage }
 
 export async function pickAndSendFileMessage(
   db: Database,

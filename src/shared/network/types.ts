@@ -5,6 +5,7 @@ export type SyncMessageType =
   | 'discovery'
   | 'heartbeat'
   | 'chat'
+  | 'chat_recall'
   | 'read_receipt'
   | 'task_patch'
   | 'task_crdt'

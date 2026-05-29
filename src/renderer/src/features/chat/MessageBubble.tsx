@@ -4,7 +4,9 @@ import { UserOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
+import { canRecallMessage } from '@shared/chat/recall'
 import { groupViewPath } from '@renderer/routes/paths'
+import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
@@ -36,6 +38,7 @@ interface MessageBubbleProps {
   onMentionSender?: (displayName: string) => void
   onViewSender?: (member: GroupMemberView) => void
   onDmSender?: (member: GroupMemberView) => void
+  onRecall?: (msgId: string) => void
 }
 
 export default function MessageBubble({
@@ -50,14 +53,18 @@ export default function MessageBubble({
   dmAllowed = false,
   onMentionSender,
   onViewSender,
-  onDmSender
+  onDmSender,
+  onRecall
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const theme = useUiStore((s) => s.theme)
+  const currentUserId = useIdentityStore((s) => s.user?.userId)
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
+  const isRecalled = message.content.kind === 'recalled'
   const isCode = message.content.kind === 'code'
-  const isSystem = message.type === 'system' || message.content.kind === 'system'
+  const isSystem =
+    !isRecalled && (message.type === 'system' || message.content.kind === 'system')
 
   const sender = useMemo(
     () => members.find((m) => m.userId === message.senderUserId),
@@ -68,6 +75,14 @@ export default function MessageBubble({
     userId: message.senderUserId,
     displayName: senderName
   }
+
+  const recallActorName = useMemo(() => {
+    if (message.content.kind !== 'recalled') return ''
+    const { recalledBy } = message.content
+    if (recalledBy === currentUserId) return t('chat.recalledYou')
+    const actor = members.find((m) => m.userId === recalledBy)
+    return actor?.displayName ?? recalledBy
+  }, [message.content, members, currentUserId, t])
 
   const senderMenu: MenuProps = useMemo(() => {
     if (own) return { items: [] }
@@ -92,6 +107,21 @@ export default function MessageBubble({
     }
     return { items }
   }, [own, senderName, senderMember, dmAllowed, onDmSender, onMentionSender, onViewSender, t])
+
+  const ownMenu: MenuProps = useMemo(() => {
+    if (!own || !currentUserId || !onRecall || !canRecallMessage(message, currentUserId)) {
+      return { items: [] }
+    }
+    return {
+      items: [
+        {
+          key: 'recall',
+          label: t('chat.recallMessage'),
+          onClick: () => onRecall(message.msgId)
+        }
+      ]
+    }
+  }, [own, currentUserId, onRecall, message, t])
 
   const bubbleBody = (
     <>
@@ -140,13 +170,24 @@ export default function MessageBubble({
       {message.content.kind !== 'text' &&
         message.content.kind !== 'code' &&
         message.content.kind !== 'task_ref' &&
-        message.content.kind !== 'file' && (
+        message.content.kind !== 'file' &&
+        message.content.kind !== 'recalled' && (
           <div>{t('chat.unknownMessage', { type: message.type })}</div>
         )}
     </>
   )
 
   const bubbleClass = `${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted ? styles.searchHighlight : ''}`
+
+  if (isRecalled) {
+    return (
+      <div className={styles.systemMessageRow} data-msg-id={message.msgId}>
+        <span className={styles.systemMessageText}>
+          {t('chat.recalledMessage', { name: recallActorName })}
+        </span>
+      </div>
+    )
+  }
 
   if (isSystem) {
     const event =
@@ -162,7 +203,9 @@ export default function MessageBubble({
     return (
       <div className={styles.messageRowOwn} data-own="1" data-msg-id={message.msgId}>
         <div className={styles.messageColOwn}>
-          <div className={bubbleClass}>{bubbleBody}</div>
+          <Dropdown menu={ownMenu} trigger={['contextMenu']}>
+            <div className={bubbleClass}>{bubbleBody}</div>
+          </Dropdown>
           <div className={styles.status}>
             {formatTime(message.createdAt)}{' '}
             <span aria-label={deliveryAriaLabel} title={deliveryAriaLabel}>

@@ -13,6 +13,8 @@ export function extractMessageText(content: MessageContent): string {
       return content.fileName
     case 'system':
       return content.event
+    case 'recalled':
+      return ''
     default:
       return ''
   }

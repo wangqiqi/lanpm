@@ -97,7 +97,7 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
     const active = session.groupId === activeGroupId
     const thread = messagesByGroup[session.groupId] ?? []
     const last = lastChatMessage(thread)
-    const preview = last ? messagePreviewText(last) : ''
+    const preview = last ? messagePreviewText(last, t('chat.recalledPreview')) : ''
     const timeLabel = last
       ? formatSessionTime(last.createdAt, locale, sessionTimeLabels)
       : ''

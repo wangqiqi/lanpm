@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
+
+const { Text } = Typography
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
@@ -27,7 +29,8 @@ import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './gantt.module.css'
 
-const { Text } = Typography
+const GANTT_ROW_HEIGHT = 44
+const GANTT_HEADER_HEIGHT = 50
 
 export default function GanttView(): React.ReactElement {
   const { locale, t } = useI18n()
@@ -216,7 +219,11 @@ export default function GanttView(): React.ReactElement {
       patchGanttCalendarLabels(el, timelineDates, viewMode, columnWidth, locale)
       const stamp = new Date().toISOString().slice(0, 10)
       const base = `gantt-${gid || 'group'}-${stamp}`
-      await exportGanttChart(el, `${base}.${format}`, format)
+      await exportGanttChart(el, `${base}.${format}`, format, {
+        taskCount: ganttTasks.length,
+        rowHeight: GANTT_ROW_HEIGHT,
+        headerHeight: GANTT_HEADER_HEIGHT
+      })
       message.success(format === 'png' ? t('gantt.exportPngDone') : t('gantt.exportPdfDone'))
     } catch {
       message.error(t('gantt.exportFailed'))
@@ -287,7 +294,7 @@ export default function GanttView(): React.ReactElement {
             }}
             listCellWidth=""
             columnWidth={columnWidth}
-            rowHeight={44}
+            rowHeight={GANTT_ROW_HEIGHT}
             barFill={56}
             todayColor={todayColor}
             barBackgroundColor={ganttBarColors.barBackgroundColor}

@@ -91,6 +91,7 @@ export default function ChatView(): React.ReactElement {
   const sendFile = useChatStore((s) => s.sendFile)
   const captureAndSendScreenshot = useChatStore((s) => s.captureAndSendScreenshot)
   const upsertMessage = useChatStore((s) => s.upsertMessage)
+  const recallMessage = useChatStore((s) => s.recallMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
@@ -389,6 +390,18 @@ export default function ChatView(): React.ReactElement {
     }
   }
 
+  const handleRecall = useCallback(
+    async (msgId: string) => {
+      if (!gid) return
+      try {
+        await recallMessage(gid, msgId)
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t('chat.recallFailed'))
+      }
+    },
+    [gid, recallMessage, message, t]
+  )
+
   return (
     <div className={styles.chatLayout}>
       {sidebarOpen && (
@@ -556,6 +569,7 @@ export default function ChatView(): React.ReactElement {
                         onMentionSender={insertMention}
                         onViewSender={viewSenderProfile}
                         onDmSender={startDmWithMember}
+                        onRecall={(msgId) => void handleRecall(msgId)}
                       />
                     )
                   })}

@@ -10,6 +10,7 @@ export type MessageContent =
   | { kind: 'file'; fileId: string; fileName: string; size: number }
   | { kind: 'task_ref'; taskId: string; title: string }
   | { kind: 'system'; event: string; payload?: Record<string, unknown> }
+  | { kind: 'recalled'; recalledBy: string; recalledAt: string }
 
 export interface ChatMessage {
   msgId: string

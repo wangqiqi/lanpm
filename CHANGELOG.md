@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.60] - 2026-05-29
+
+### Added
+- **WX-04b 消息撤回**：右键自己的消息撤回；`chat:recallMessage` IPC + `chat_recall` 网络同步；离线补同步含已撤回消息
+- **shared/chat/recall**：撤回规则、`recalled` 内容类型；单测 `recall.test.ts`
+
+### Changed
+- **甘特导出**：PNG/PDF 导出按任务行数裁剪画布，避免空白过长（`ganttExport` / `GanttView`）
+- **plan.md / 微信借鉴.md**：WX-04b 完成态同步
+
+### Tag
+- `v1.0.0-rc.60` — 消息撤回与甘特导出裁剪
+
 ## [1.0.0-rc.59] - 2026-05-29
 
 ### Added

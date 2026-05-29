@@ -36,6 +36,7 @@ const api: LanpmApi = {
       ipcRenderer.invoke('chat:sendExistingFile', groupId, fileId),
     captureAndSendScreenshot: (groupId) =>
       ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
+    recallMessage: (groupId, msgId) => ipcRenderer.invoke('chat:recallMessage', groupId, msgId),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)

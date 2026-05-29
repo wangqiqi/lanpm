@@ -13,6 +13,15 @@ export function appendAnonymousMessage(groupId: string, message: ChatMessage): v
   sessions.set(groupId, list)
 }
 
+export function replaceAnonymousMessage(groupId: string, message: ChatMessage): void {
+  const list = sessions.get(groupId) ?? []
+  const idx = list.findIndex((m) => m.msgId === message.msgId)
+  if (idx < 0) return
+  const next = [...list]
+  next[idx] = message
+  sessions.set(groupId, next)
+}
+
 export function clearAnonymousSession(groupId: string): void {
   sessions.delete(groupId)
 }

@@ -1,5 +1,6 @@
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
+import { canRecallMessage, toRecalledMessage } from '@shared/chat/recall'
 import { parseMentions } from '@shared/chat/mentions'
 import { detectLanguage } from '@shared/chat/detectLanguage'
 import { isDmGroupId, parseDmGroupId } from '@shared/chat/dmSession'
@@ -477,6 +478,25 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       captureAndSendScreenshot: async () => {
         throw stubError('stub.screenshotElectronOnly')
+      },
+      recallMessage: async (groupId, msgId) => {
+        const status = readStatus()
+        if (!status.configured || !status.user) {
+          throw stubError('stub.identityRequired')
+        }
+        const prev = readChatMessages(groupId)
+        const existing = prev.find((m) => m.msgId === msgId)
+        if (!existing) throw stubError('stub.messageNotFound')
+        if (!canRecallMessage(existing, status.user.userId)) {
+          throw stubError('stub.recallNotAllowed')
+        }
+        const updated = toRecalledMessage(existing, status.user.userId, new Date().toISOString())
+        writeChatMessages(
+          groupId,
+          prev.map((m) => (m.msgId === msgId ? updated : m))
+        )
+        for (const fn of chatListeners) fn(updated)
+        return updated
       },
       markRead: async (groupId, msgIds) => {
         const status = readStatus()

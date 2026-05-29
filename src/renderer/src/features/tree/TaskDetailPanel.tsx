@@ -137,7 +137,7 @@ export default function TaskDetailPanel({
   const saveDisabled = !title.trim() || (status === 'other' && !otherReason.trim())
 
   return (
-    <aside className={styles.detailPanel}>
+    <div className={styles.detailPanelBody}>
       <div className={styles.detailHeader}>
         <Text strong>{t('tree.detailTitle')}</Text>
         <Button type="text" size="small" onClick={onClose}>
@@ -261,6 +261,6 @@ export default function TaskDetailPanel({
           {t('common.delete')}
         </Button>
       </div>
-    </aside>
+    </div>
   )
 }

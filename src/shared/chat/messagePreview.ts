@@ -4,7 +4,8 @@ import { extractMessageText } from '../search/extractMessageText'
 const PREVIEW_MAX = 80
 
 /** Plain-text preview for DM session rows and notifications. */
-export function messagePreviewText(message: ChatMessage): string {
+export function messagePreviewText(message: ChatMessage, recalledLabel = '[Recalled]'): string {
+  if (message.content.kind === 'recalled') return recalledLabel
   const raw = extractMessageText(message.content)
   if (raw.trim()) return truncatePreview(raw)
   if (message.content.kind === 'code') return `[${message.content.language}]`

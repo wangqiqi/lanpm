@@ -128,6 +128,38 @@ export function listDistinctDmGroupIds(db: Database): string[] {
   return rows.map((r) => r.groupId)
 }
 
+export function updateMessage(db: Database, message: ChatMessage): void {
+  db.prepare(
+    `UPDATE messages SET
+      type = @type,
+      content_json = @contentJson,
+      delivery_status = @deliveryStatus
+     WHERE msg_id = @msgId`
+  ).run({
+    msgId: message.msgId,
+    type: message.type,
+    contentJson: serializePayload(message),
+    deliveryStatus: message.deliveryStatus
+  })
+}
+
+export function listRecalledMessagesInGroup(
+  db: Database,
+  groupId: string,
+  minCreatedAt: string
+): ChatMessage[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM messages
+       WHERE group_id = ?
+         AND created_at >= ?
+         AND content_json LIKE '%"kind":"recalled"%'
+       ORDER BY lamport_ts ASC, created_at ASC`
+    )
+    .all(groupId, minCreatedAt) as MessageRow[]
+  return rows.map(rowToMessage)
+}
+
 export function deleteMessagesOlderThan(db: Database, cutoffIso: string, groupId?: string): number {
   if (groupId) {
     return db

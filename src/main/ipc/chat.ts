@@ -4,6 +4,7 @@ import {
   listGroupMessages,
   sendCodeMessage,
   pickAndSendFileMessage,
+  recallMessage,
   sendExistingFileMessage,
   sendFileMessage,
   sendTextMessage
@@ -88,5 +89,15 @@ export function registerChatIpc(): void {
       throw new Error('msgIds required')
     }
     return markMessagesRead(getDatabase(), groupId, msgIds)
+  })
+
+  ipcMain.handle(CHAT_IPC.recallMessage, (_event, groupId: string, msgId: string) => {
+    if (typeof groupId !== 'string' || !groupId) {
+      throw new Error('groupId required')
+    }
+    if (typeof msgId !== 'string' || !msgId) {
+      throw new Error('msgId required')
+    }
+    return recallMessage(getDatabase(), groupId, msgId)
   })
 }
