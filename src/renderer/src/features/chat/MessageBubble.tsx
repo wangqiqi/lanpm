@@ -1,3 +1,6 @@
+import { useMemo } from 'react'
+import { Avatar, Dropdown, type MenuProps } from 'antd'
+import { UserOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
@@ -14,6 +17,12 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function avatarLabel(name: string): string {
+  const trimmed = name.trim()
+  if (!trimmed) return '?'
+  return trimmed.slice(0, 1).toUpperCase()
+}
+
 interface MessageBubbleProps {
   message: ChatMessage
   own: boolean
@@ -22,6 +31,11 @@ interface MessageBubbleProps {
   deliveryAriaLabel: string
   formatTime: (iso: string) => string
   highlighted?: boolean
+  showSender?: boolean
+  dmAllowed?: boolean
+  onMentionSender?: (displayName: string) => void
+  onViewSender?: (member: GroupMemberView) => void
+  onDmSender?: (member: GroupMemberView) => void
 }
 
 export default function MessageBubble({
@@ -31,28 +45,55 @@ export default function MessageBubble({
   deliveryLabel,
   deliveryAriaLabel,
   formatTime,
-  highlighted = false
+  highlighted = false,
+  showSender = true,
+  dmAllowed = false,
+  onMentionSender,
+  onViewSender,
+  onDmSender
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const theme = useUiStore((s) => s.theme)
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
   const isCode = message.content.kind === 'code'
-  const senderName =
-    members.find((m) => m.userId === message.senderUserId)?.displayName ?? message.senderUserId
 
-  return (
-    <div
-      className={`${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted ? styles.searchHighlight : ''}`}
-      data-own={own ? '1' : '0'}
-      data-msg-id={message.msgId}
-    >
-      {!own && (
-        <div className={styles.meta}>
-          {senderName} · {formatTime(message.createdAt)}
-        </div>
-      )}
+  const sender = useMemo(
+    () => members.find((m) => m.userId === message.senderUserId),
+    [members, message.senderUserId]
+  )
+  const senderName = sender?.displayName ?? message.senderUserId
+  const senderMember: GroupMemberView = sender ?? {
+    userId: message.senderUserId,
+    displayName: senderName
+  }
 
+  const senderMenu: MenuProps = useMemo(() => {
+    if (own) return { items: [] }
+    const items: MenuProps['items'] = [
+      {
+        key: 'mention',
+        label: t('chat.mentionMember', { name: senderName }),
+        onClick: () => onMentionSender?.(senderName)
+      },
+      {
+        key: 'profile',
+        label: t('chat.viewMemberProfile'),
+        onClick: () => onViewSender?.(senderMember)
+      }
+    ]
+    if (dmAllowed && onDmSender) {
+      items.push({
+        key: 'dm',
+        label: t('chat.startDm'),
+        onClick: () => onDmSender(senderMember)
+      })
+    }
+    return { items }
+  }, [own, senderName, senderMember, dmAllowed, onDmSender, onMentionSender, onViewSender, t])
+
+  const bubbleBody = (
+    <>
       {message.content.kind === 'text' && (
         <div>
           <MentionText text={message.content.text} members={members} own={own} />
@@ -101,15 +142,68 @@ export default function MessageBubble({
         message.content.kind !== 'file' && (
           <div>{t('chat.unknownMessage', { type: message.type })}</div>
         )}
+    </>
+  )
 
-      {own && (
-        <div className={styles.status}>
-          {formatTime(message.createdAt)}{' '}
-          <span aria-label={deliveryAriaLabel} title={deliveryAriaLabel}>
-            {deliveryLabel}
-          </span>
+  const bubbleClass = `${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted ? styles.searchHighlight : ''}`
+
+  if (own) {
+    return (
+      <div className={styles.messageRowOwn} data-own="1" data-msg-id={message.msgId}>
+        <div className={styles.messageColOwn}>
+          <div className={bubbleClass}>{bubbleBody}</div>
+          <div className={styles.status}>
+            {formatTime(message.createdAt)}{' '}
+            <span aria-label={deliveryAriaLabel} title={deliveryAriaLabel}>
+              {deliveryLabel}
+            </span>
+          </div>
         </div>
-      )}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={`${styles.messageRow} ${showSender ? styles.messageRowNewSender : styles.messageRowCompact}`}
+      data-own="0"
+      data-msg-id={message.msgId}
+    >
+      <div className={styles.senderCol}>
+        {showSender ? (
+          <Dropdown menu={senderMenu} trigger={['contextMenu']}>
+            <button
+              type="button"
+              className={styles.avatarBtn}
+              aria-label={t('chat.viewMemberProfile')}
+              onClick={() => onViewSender?.(senderMember)}
+            >
+              <Avatar size={36} icon={<UserOutlined />}>
+                {avatarLabel(senderName)}
+              </Avatar>
+            </button>
+          </Dropdown>
+        ) : (
+          <div className={styles.avatarSpacer} aria-hidden />
+        )}
+      </div>
+      <div className={`${styles.messageCol} ${isCode ? styles.messageColWide : ''}`}>
+        {showSender ? (
+          <Dropdown menu={senderMenu} trigger={['contextMenu']}>
+            <div className={styles.messageHeader}>
+              <button
+                type="button"
+                className={styles.senderNameBtn}
+                onClick={() => onViewSender?.(senderMember)}
+              >
+                {senderName}
+              </button>
+              <span className={styles.messageTime}>{formatTime(message.createdAt)}</span>
+            </div>
+          </Dropdown>
+        ) : null}
+        <div className={bubbleClass}>{bubbleBody}</div>
+      </div>
     </div>
   )
 }

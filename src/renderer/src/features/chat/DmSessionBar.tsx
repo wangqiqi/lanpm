@@ -8,7 +8,7 @@ import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import type { MessageKey } from '@renderer/i18n/messages'
 import type { TranslateParams } from '@renderer/i18n/messages'
-import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
+import { resolveGroupDisplayName, resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import type { NavGroup } from '@shared/navigation/types'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -120,14 +120,12 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
       {layout === 'main' && inDm && localUserId && (
         <Text type="secondary" className={styles.dmPanelFooter}>
           {t('chat.dmFromProject', {
-            name: resolveGroupDisplayName(
-              groups.find((g) => g.groupId === contextProjectId) ?? {
-                groupId: contextProjectId,
-                name: contextProjectId,
-                type: 'project'
-              },
-              t
-            )
+            name: (() => {
+              const g = groups.find((gr) => gr.groupId === contextProjectId)
+              return g
+                ? resolveGroupDisplayName(g, t)
+                : resolveGroupDisplayNameById(contextProjectId, contextProjectId, t)
+            })()
           })}
         </Text>
       )}

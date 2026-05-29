@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { GroupMemberView } from '@shared/chat/members'
 import { Button, Input, Segmented, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
@@ -14,6 +15,7 @@ import {
 } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
+import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
@@ -30,6 +32,7 @@ import DmSessionBar from '@renderer/features/chat/DmSessionBar'
 import MemberList from '@renderer/features/chat/MemberList'
 import MentionSuggest from '@renderer/features/chat/MentionSuggest'
 import MessageBubble from '@renderer/features/chat/MessageBubble'
+import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
@@ -109,6 +112,7 @@ export default function ChatView(): React.ReactElement {
   })
   const [sidebarResizing, setSidebarResizing] = useState(false)
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
+  const [profileMember, setProfileMember] = useState<GroupMemberView | null>(null)
   const chatChannel: 'group' | 'dm' = dmPickerOpen || inDm ? 'dm' : 'group'
   const showDmPicker = dmPickerOpen
 
@@ -140,6 +144,14 @@ export default function ChatView(): React.ReactElement {
   const { isHighlighted: isMsgHighlighted } = useSearchHighlight('msg', messagesReady)
   const dayGroups = useMemo(() => groupMessagesByDay(messages, locale), [messages, locale])
 
+  const groupType = gid ? getGroupType(gid) : 'project'
+  const originGroupId = inDm ? (dmSession?.originGroupId ?? lastOriginGroupId) : gid
+  const dmAllowed = groupAllowsDirectMessage(getGroupType(originGroupId))
+  const isMemoryOnlyAnonymous = Boolean(gid && !inDm && groupType === 'anonymous')
+  const taskAllowed = Boolean(gid && !inDm && groupType === 'project')
+  const codeAllowed = Boolean(gid && !isMemoryOnlyAnonymous)
+  const fileAllowed = codeAllowed
+
   const insertMention = useCallback((displayName: string) => {
     setDraft((prev) => {
       const replaced = prev.replace(/(?:^|\s)@([^\s@]*)$/, ` @${displayName} `)
@@ -147,6 +159,28 @@ export default function ChatView(): React.ReactElement {
       const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
       return `${prev}${sep}@${displayName} `
     })
+  }, [])
+
+  const openSession = useDmStore((s) => s.openSession)
+
+  const startDmWithMember = useCallback(
+    (member: GroupMemberView) => {
+      if (!currentUserId || member.userId === currentUserId || !dmAllowed || inDm) return
+      const dmGroupId = openSession(
+        member.userId,
+        member.displayName,
+        currentUserId,
+        originGroupId,
+        getGroupType(originGroupId)
+      )
+      if (!dmGroupId) return
+      navigate(groupViewPath(dmGroupId, 'chat'))
+    },
+    [currentUserId, dmAllowed, inDm, openSession, originGroupId, getGroupType, navigate]
+  )
+
+  const viewSenderProfile = useCallback((member: GroupMemberView) => {
+    setProfileMember(member)
   }, [])
 
   const insertEmoji = useCallback((emoji: string) => {
@@ -167,12 +201,6 @@ export default function ChatView(): React.ReactElement {
   useMentionNotifications(gid)
   useMarkRead(gid, messages, currentUserId)
 
-  const groupType = gid ? getGroupType(gid) : 'project'
-  const isDm = Boolean(gid && isDmGroupId(gid))
-  const isMemoryOnlyAnonymous = Boolean(gid && !isDm && groupType === 'anonymous')
-  const taskAllowed = Boolean(gid && !isDm && groupType === 'project')
-  const codeAllowed = Boolean(gid && !isMemoryOnlyAnonymous)
-  const fileAllowed = codeAllowed
   const [fileDragOver, setFileDragOver] = useState(false)
 
   useEffect(() => {
@@ -477,7 +505,12 @@ export default function ChatView(): React.ReactElement {
               {dayGroups.map((group) => (
                 <div key={group.dayKey} className={styles.dayGroup}>
                   <div className={styles.dayLabel}>{group.label}</div>
-                  {group.messages.map((msg) => {
+                  {group.messages.map((msg, msgIndex) => {
+                    const prev = msgIndex > 0 ? group.messages[msgIndex - 1] : null
+                    const showSender =
+                      !prev ||
+                      prev.senderUserId !== msg.senderUserId ||
+                      msg.createdAt.slice(0, 16) !== prev.createdAt.slice(0, 16)
                     const delivery = deliveryStatusMeta(msg.deliveryStatus, t)
                     return (
                       <MessageBubble
@@ -489,6 +522,11 @@ export default function ChatView(): React.ReactElement {
                         deliveryAriaLabel={delivery.ariaLabel}
                         formatTime={formatTime}
                         highlighted={isMsgHighlighted(msg.msgId)}
+                        showSender={showSender}
+                        dmAllowed={dmAllowed && !inDm}
+                        onMentionSender={insertMention}
+                        onViewSender={viewSenderProfile}
+                        onDmSender={startDmWithMember}
                       />
                     )
                   })}
@@ -648,6 +686,16 @@ export default function ChatView(): React.ReactElement {
             }}
           />
         )}
+
+        <MemberProfileModal
+          open={profileMember != null}
+          member={profileMember}
+          isSelf={profileMember?.userId === currentUserId}
+          dmAllowed={dmAllowed && !inDm}
+          onClose={() => setProfileMember(null)}
+          onMention={insertMention}
+          onStartDm={startDmWithMember}
+        />
       </div>
     </div>
   )

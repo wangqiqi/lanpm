@@ -561,9 +561,114 @@
 .messageList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   width: 100%;
   min-width: 0;
+}
+
+.messageRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.messageRowNewSender {
+  margin-top: 10px;
+}
+
+.messageRowNewSender:first-child {
+  margin-top: 0;
+}
+
+.messageRowCompact {
+  margin-top: 2px;
+}
+
+.messageRowOwn {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.senderCol {
+  flex-shrink: 0;
+  width: 36px;
+}
+
+.avatarSpacer {
+  width: 36px;
+  height: 36px;
+}
+
+.avatarBtn {
+  display: block;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  line-height: 0;
+}
+
+.avatarBtn:hover {
+  opacity: 0.88;
+}
+
+.messageCol {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: min(72%, 36rem);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messageColWide {
+  flex: 1;
+  max-width: 100%;
+}
+
+.messageColOwn {
+  max-width: min(72%, 36rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 2px;
+  user-select: none;
+}
+
+.senderNameBtn {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: var(--lanpm-font-body);
+  font-weight: 600;
+  color: var(--lanpm-text-primary);
+  cursor: pointer;
+}
+
+.senderNameBtn:hover {
+  color: var(--lanpm-accent);
+}
+
+.messageTime {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  flex-shrink: 0;
 }
 
 .empty {
@@ -572,7 +677,7 @@
 }
 
 .bubble {
-  max-width: min(72%, 36rem);
+  max-width: 100%;
   width: fit-content;
   min-width: 0;
   padding: 8px 12px;
@@ -582,13 +687,11 @@
 }
 
 .bubbleOwn {
-  align-self: flex-end;
   background: var(--lanpm-accent);
   color: var(--lanpm-on-accent);
 }
 
 .bubbleOther {
-  align-self: flex-start;
   background: var(--lanpm-bubble-bg);
 }
 
@@ -608,8 +711,6 @@
 }
 
 .codeBubble {
-  align-self: stretch;
-  max-width: 100%;
   width: 100%;
   box-sizing: border-box;
   padding: 8px;
@@ -653,15 +754,8 @@
   max-height: none;
 }
 
-.meta {
-  font-size: var(--lanpm-font-body);
-  opacity: 0.85;
-  margin-bottom: 4px;
-}
-
 .status {
   font-size: var(--lanpm-font-caption);
-  margin-top: 4px;
   opacity: 0.75;
   text-align: right;
 }

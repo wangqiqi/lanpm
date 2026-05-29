@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.58] - 2026-05-29
+
+### Added
+- **聊天成员资料**：`MemberProfileModal`（用户 ID、在线态、@提及、发起私聊）
+- **消息气泡**：发送者头像/菜单（查看资料、@提及、私聊）；气泡与附件样式增强
+
+### Changed
+- **todo.md**：非手验项归档至 `archive/todo/20260529_221500_todo非手验项全量归档_rc57.md`，仅保留 §手验
+- **文档**：README、`docs/01` §1.3.1、`docs/02` RC 号与 `package.json` 对齐（`verify:docs-code --strict`）
+- **i18n**：`chat.memberProfile*` / `mentionMember` / `viewMemberProfile`（zh/en）
+- **DmSessionBar**：`resolveGroupDisplayNameById` 兜底，修复 typecheck
+- **eslint**：忽略 `coverage/`，避免覆盖率报告触发 lint
+
+### Tag
+- `v1.0.0-rc.58` — 成员资料弹窗、todo 归档、发版门禁收尾
+
 ## [1.0.0-rc.57] - 2026-05-29
 
 ### Added
