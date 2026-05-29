@@ -8,6 +8,8 @@ const steps: { name: string; cmd: string; env?: Record<string, string> }[] = [
   { name: 'typecheck', cmd: 'npm run typecheck' },
   { name: 'visual', cmd: 'npm run verify:visual' },
   { name: 'search', cmd: 'npm run verify:search' },
+  { name: 'i18n-en', cmd: 'npm run verify:i18n-en' },
+  { name: 'network-multicast', cmd: 'npm run verify:network-multicast' },
   { name: 'm7-acceptance', cmd: 'npm run verify:m7-acceptance' },
   { name: 'm7-stability', cmd: 'npm run verify:m7-stability' },
   { name: 'm7-perf', cmd: 'npm run verify:m7-perf' },

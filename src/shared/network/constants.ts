@@ -1,5 +1,7 @@
 /** 网络参数 — 对齐 docs/02 §13.5、docs/04 §6.3 */
 export const UDP_DISCOVERY_PORT = 43123
+/** ARCH-03 — 跨子网组播地址（与端口 43123 共用） */
+export const UDP_MULTICAST_ADDR = '239.255.43.123'
 export const DEFAULT_TCP_LISTEN_PORT = 43124
 
 export const DISCOVERY_INTERVAL_MS = 3_000

@@ -81,20 +81,60 @@ is_running() {
   pid_alive "$p"
 }
 
+lanpm_vite_running() {
+  pgrep -af "electron-vite dev" 2>/dev/null | grep -Fq "$ROOT"
+}
+
+port_listener_summary() {
+  local port="$1"
+  if ! command -v lsof >/dev/null 2>&1; then
+    echo "未知"
+    return 0
+  fi
+  lsof -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR==2 { print $1, "(pid", $2 ")" }'
+}
+
 vite_ports_status() {
-  need_cmd lsof
+  local brief="${1:-}"
+  if ! command -v lsof >/dev/null 2>&1; then
+    echo "  (未安装 lsof，跳过端口检测)"
+    return 0
+  fi
   local ports="5173 5174"
   local found=0
+  local lanpm_proc="no"
+  lanpm_vite_running && lanpm_proc="yes"
+
   for port in $ports; do
-    local lines
-    lines="$(lsof -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
-    if [[ -n "$lines" ]]; then
-      found=1
-      echo "  :$port LISTEN"
-      echo "$lines" | awk 'NR==1 || /LISTEN/ {print "    "$0}' | head -6
+    local who
+    who="$(port_listener_summary "$port")"
+    [[ -n "$who" ]] || continue
+    found=1
+    if [[ "$lanpm_proc" == "yes" && "$who" =~ ^(node|electron) ]]; then
+      echo "  :$port  LanPM · $who"
+    elif [[ "$brief" == "brief" ]]; then
+      echo "  :$port  其他占用 · $who（非本脚本 dev，start 可能换端口）"
+    else
+      echo "  :$port  监听 · $who"
+      if [[ "$lanpm_proc" != "yes" ]]; then
+        echo "    提示: 若为 Cursor/其他 Vite，与 LanPM 无冲突时可忽略"
+      fi
     fi
   done
-  [[ $found -eq 0 ]] && echo "  (5173/5174 无监听)"
+  [[ $found -eq 0 ]] && echo "  5173/5174 无监听"
+}
+
+menu_status_brief() {
+  if is_running; then
+    local p mode
+    p="$(read_pid)"
+    mode="electron"
+    [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
+    ok "dev: 运行中  pid=$p  mode=$mode"
+  else
+    warn "dev: 未运行（由本脚本 start/web 启动）"
+  fi
+  vite_ports_status brief
 }
 
 cmd_status() {
@@ -112,8 +152,11 @@ cmd_status() {
     warn "开发服务: 未运行"
   fi
   echo ""
-  info "Vite 端口:"
+  info "Vite 端口（5173/5174）:"
   vite_ports_status
+  if ! is_running && lanpm_vite_running; then
+    warn "检测到 electron-vite 在运行但未登记 pid，可执行 stop 清理"
+  fi
   echo ""
   if [[ -f "$LOG_FILE" ]]; then
     info "最近日志 ($LOG_FILE):"
@@ -141,17 +184,14 @@ start_dev() {
   local npm_script="dev"
   [[ "$mode" == "web" ]] && npm_script="dev:web"
 
-  # setsid：独立会话，stop 时可一次结束子进程树
-  (
-    cd "$ROOT"
-    export LANPM_ONEKEY=1
-    if [[ "$mode" == "web" ]]; then
-      setsid npm run dev:web >>"$LOG_FILE" 2>&1
-    else
-      setsid npm run dev >>"$LOG_FILE" 2>&1
-    fi
-  ) &
-
+  # setsid：npm 为 session leader，stop 时 kill -TERM -$pid 可结束整棵 dev 树
+  cd "$ROOT"
+  export LANPM_ONEKEY=1
+  if [[ "$mode" == "web" ]]; then
+    setsid npm run dev:web >>"$LOG_FILE" 2>&1 &
+  else
+    setsid npm run dev >>"$LOG_FILE" 2>&1 &
+  fi
   local pid=$!
   echo "$pid" >"$PID_FILE"
   sleep 2
@@ -190,9 +230,11 @@ cmd_stop() {
 }
 
 cmd_restart() {
+  local mode="electron"
+  [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
   cmd_stop || true
   sleep 1
-  cmd_start
+  start_dev "$mode"
 }
 
 cmd_logs() {
@@ -255,8 +297,24 @@ cmd_verify() {
   ok "verify:m7 通过"
 }
 
+cmd_pack() {
+  need_cmd npm
+  need_cmd npx
+  if [[ ! -d "$ROOT/out/main" ]]; then
+    warn "未找到 out/，先执行 build …"
+    cmd_build
+  fi
+  info "打包安装包 (electron-builder) …"
+  npx electron-builder --config electron-builder.yml
+  ok "打包完成 → dist/"
+}
+
 cmd_clean() {
   local deep="${1:-}"
+  if is_running 2>/dev/null; then
+    warn "检测到开发服务在运行，先停止 …"
+    cmd_stop || true
+  fi
   info "清理构建产物 …"
   rm -rf "$ROOT/out" "$ROOT/dist"
   rm -f "$ROOT"/*.tsbuildinfo
@@ -277,11 +335,12 @@ cmd_clean() {
 show_menu() {
   clear 2>/dev/null || true
   echo ""
-  echo -e "${CYAN}╔══════════════════════════════════════╗${NC}"
-  echo -e "${CYAN}║${NC}  LanPM 一键运维  ${GREEN}v${VERSION}${NC}              ${CYAN}║${NC}"
-  echo -e "${CYAN}╚══════════════════════════════════════╝${NC}"
+  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  printf "${CYAN}  LanPM 一键运维${NC}  ${GREEN}v%s${NC}\n" "$VERSION"
+  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo ""
-  cmd_status 2>/dev/null || true
+  info "目录: $ROOT"
+  menu_status_brief 2>/dev/null || true
   echo ""
   echo "  1) start      启动 Electron 开发"
   echo "  2) web        仅渲染进程 (浏览器预览)"
@@ -298,6 +357,7 @@ show_menu() {
   echo " 13) install     npm install"
   echo " 14) clean       清理 out/dist"
   echo " 15) clean deep  含 node_modules"
+  echo " 16) pack        安装包 (electron-builder)"
   echo "  0) exit"
   echo ""
 }
@@ -305,12 +365,12 @@ show_menu() {
 menu_loop() {
   while true; do
     show_menu
-    read -r -p "请选择 [0-15]: " choice
+    read -r -p "请选择 [0-16]: " choice
     echo ""
     case "$choice" in
       1)  start_dev electron || true ;;
       2)  start_dev web || true ;;
-      3)  cmd_stop || true; sleep 1; start_dev electron || true ;;
+      3)  cmd_restart || true ;;
       4)  cmd_stop || true ;;
       5)  cmd_status ;;
       6)  read -r -p "日志行数 [50]: " n; cmd_logs "${n:-50}" ;;
@@ -323,6 +383,7 @@ menu_loop() {
       13) cmd_install ;;
       14) cmd_clean ;;
       15) cmd_clean deep ;;
+      16) cmd_pack ;;
       0|q|Q|exit) ok "再见"; exit 0 ;;
       *) warn "无效选项: $choice" ;;
     esac
@@ -348,6 +409,7 @@ usage() {
   check [quick]             typecheck + lint [+ verify:m0]
   verify                    npm run verify:m7
   clean [deep]              清理 out/dist [.lanpm] [node_modules]
+  pack                      构建安装包 (electron-builder, 需先 build)
   menu                      交互菜单 (默认)
   help                      本帮助
 
@@ -377,6 +439,7 @@ main() {
     check)        cmd_check "${1:-}" ;;
     verify|verify:m7) cmd_verify ;;
     clean)        cmd_clean "${1:-}" ;;
+    pack|dist)    cmd_pack ;;
     menu|"")      menu_loop ;;
     help|-h|--help) usage ;;
     *)

@@ -1,7 +1,7 @@
 # LanPM Todo
 
 > **唯一任务真源（SSOT）**：本文件。根目录不再保留 `plan.md` / `ui.md` / `ux.md` / `评估.md`；审查原文在 `archive/`，新增、勾选、排期**只改本文件**。  
-> **当前版本**：`1.0.0-rc.21` · M0–M7 已归档（`1.0.0-rc.1`）  
+> **当前版本**：`1.0.0-rc.22` · M0–M7 已归档（`1.0.0-rc.1`）  
 > **计划概述（只读）**：[archive/20260529_095839_plan概述_SSOT后归档.md](./archive/20260529_095839_plan概述_SSOT后归档.md)
 
 ### 来源追溯（审查归档 → todo ID）
@@ -32,30 +32,20 @@
 
 ### RC → 正式版（手验）
 
-- [ ] 三平台冒烟（Win / macOS / Linux）
-- [ ] 性能手测填表（docs/06 §3：冷启动 / 内存 / Tab P95）
+- [ ] 三平台冒烟（Win / macOS / Linux；Linux 自动化见已完成）
+- [ ] 性能手测填表（docs/06 §3：冷启动 / 内存 / Tab P95 — §16.11 已填自动化项）
 - [ ] 局域网双机真网联调（docs/06 §4）
-- [ ] 回填 `docs/08` §16.11 性能表（手验后）
 - [ ] 发布 **`1.0.0`**
 
 ### v1.1+ backlog
 
 - [ ] **B-01** 任务 P2P / Yjs 同步（评估 §3.1；`docs/08` post-RC）
 - [ ] **B-02** 远端文件 P2P 下载（评估 §3.1、`03` §16.7）
-- [ ] **B-04** WebRTC DataChannel 消息/文件通道（或决策维持 TCP + 更新 `docs/01`/`08`，与 **ARCH-06** 联动）
 
 ### 视觉 / i18n 手验
 
-- [ ] **V-14b** 亮/暗手验截图（[docs/09](./docs/09_视觉手验清单.md)）
-- [ ] **I18N-05** 手验：顶栏切 English，七页 + 驾驶舱 + Setup 全英文
-
-### PRD 与架构缺口
-
-- [ ] **ARCH-03** UDP 组播发现（跨子网；当前仅广播 `43123`）
-
-### UI/UX 可选
-
-- [ ] **UX-R-01**（可选）小窗口 `@media` 断点设计 — 部分已落 **UX-R-02~06**
+- [ ] **V-14b** 亮/暗手验截图（[docs/09](./docs/09_视觉手验清单.md)；V-14a 自动化已纳入 `verify:m7`）
+- [ ] **I18N-05** 手验：顶栏切 English，七页 + 驾驶舱 + Setup 全英文 UI 走查
 
 ---
 
@@ -94,14 +84,16 @@
 
 ### RC → 正式版（手验）
 
-- [x] Linux 自动化回归：`npm run verify:m7`（含 visual / search，2026-05-28 本机）
+- [x] Linux 自动化回归：`npm run verify:m7`（含 visual / search / i18n-en，2026-05-29 本机）
 - [x] Linux 项目检查：`npm run verify:project` + `npm run build` + ESLint 全绿
+- [x] **回填 `docs/08` §16.11** 性能表（自动化项：`verify:m7-perf` 2026-05-29；冷启动/内存/Tab P95 待手测）
 
 ### v1.1+ backlog
 
 - [x] 顶栏全局搜索（任务 + 消息）（`search:query` + `GlobalSearch` + `verify:search`）
 - [x] 看板删除任务 UI（`task:deleteTask` 软删除 + `KanbanCard` Popconfirm）
 - [x] **B-03** 看板列内 Sortable 排序（`@dnd-kit/core` 卡片落点 + `sortOrder` 持久化；评估 §4.2）
+- [x] **B-04** WebRTC 决策：v1.0 维持 TCP+UDP 加密通道；WebRTC 为 v1.1 可选（`docs/01` §1.3.1、`docs/08` 已知限制）
 
 ### P1 — PRD 后续（评估 §4.2，非 RC 阻断）
 
@@ -145,6 +137,7 @@
 - [x] **I18N-02** 壳层 + 群组页 + 驾驶舱 + 看板/树/甘特/文件
 - [x] **I18N-03** 聊天 + 成员/私聊 + 弹窗 + Setup 向导
 - [x] **I18N-04** `translate` 插值 + `verify:topbar` 键 parity
+- [x] **I18N-05a** `verify:i18n-en`：en-US 值无 CJK（纳入 `verify:m7`）；全页 UI 走查仍见待办 **I18N-05**
 - [x] **I18N-06**（可选）主进程/Stub 错误消息与 demo 数据名 i18n — Stub：`stubTranslate` + `stub.*` 键（**UX-I-07**）
 
 ### UX 操作路径与闭环（来源：[UX 审查归档](./archive/20260529_095839_UX操作路径审查_ux.md)）
@@ -229,6 +222,7 @@
 - [x] **ARCH-05** IndexedDB 热缓存 — RC 文档降级：持久化以 SQLite 为准（`docs/01` §1.3.1 / README）
 - [x] **ARCH-07** 7 天离线补同步：`offlineSyncService` + TTL 7 天（**PRD-F-07**）
 - [x] **ARCH-08** SQLite 库级加密 — RC 文档说明：传输层加密已落地，库级加密 post-RC（`docs/01` §1.3.1）
+- [x] **ARCH-03** UDP 组播发现：`239.255.43.123:43123` 与广播并用（`LANPM_DISABLE_MULTICAST=1` 可关）
 - [x] **ARCH-04** 文档说明：ECDH + AES-GCM authTag vs 文档「独立 HMAC」字段 — 同 **DOC-06**
 - [x] **ARCH-06** PRD/README 中 Yjs / WebRTC / IndexedDB 标为目标栈 vs RC 现状 — 同 **DOC-02/04**
 - [x] **ARCH-09**（可选）报文层独立 HMAC — 不实现；以 AES-GCM authTag 为准（**ARCH-04** / `docs/02`）
@@ -303,6 +297,7 @@
 - [x] **UX-R-04** 看板窄屏单列/stack 模式（`board.module.css` `@media max-width: 1100px`）
 - [x] **UX-R-05** 文件预览区窄屏单栏模式（`files.module.css` `@media max-width: 960px`）
 - [x] **UX-R-06** BottomNav 窄屏仅 icon 模式（`@media max-width: 720px`）
+- [x] **UX-R-01** 窄窗口断点设计文档化（`docs/05` §1.5；实现见 **UX-R-02~06**）
 - [x] **UX-N-01** 驾驶舱返回群路径（与 BottomNav 对称性）— 同 **UX-W-05** / **UX-PATH-01**
 - [x] **UX-N-02** `GroupViewGuard` 非法视图 redirect 时 toast — 同 **UX-W-07**
 - [x] **UX-N-03** 职能群禁用 Tab 首次引导（`BottomNav` + `Modal.info`）

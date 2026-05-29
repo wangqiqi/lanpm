@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.21",
+  "version": "1.0.0-rc.22",
   "description": "分布式局域网协作客户端 — Electron",
   "private": true,
   "type": "module",
@@ -20,6 +20,8 @@
     "verify:network-stub": "LANPM_NETWORK=stub node --experimental-strip-types scripts/verify-network-stub.ts",
     "verify:network-manual": "node --experimental-strip-types scripts/verify-network-manual.ts",
     "verify:offline-sync": "node --experimental-strip-types scripts/verify-offline-sync.ts",
+    "verify:i18n-en": "node --experimental-strip-types scripts/verify-i18n-en.ts",
+    "verify:network-multicast": "node --experimental-strip-types scripts/verify-network-multicast.ts",
     "verify:m0": "npm run verify:storage && npm run verify:suffix && npm run verify:network-stub",
     "verify:routes": "node --experimental-strip-types scripts/verify-routes.ts",
     "verify:topbar": "node --experimental-strip-types scripts/verify-topbar.ts",

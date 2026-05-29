@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.22] - 2026-05-29
+
+### Added
+- **ARCH-03** UDP 组播发现：`239.255.43.123:43123` 与广播并用（`LANPM_DISABLE_MULTICAST=1` 可关）
+- **`verify:network-multicast`** / **`verify:i18n-en`**（en-US 无 CJK），纳入 `verify:m7`
+
+### Changed
+- **B-04** 决策文档化：v1.0 维持 TCP+UDP，WebRTC 为 v1.1 可选（`docs/01`、`docs/08`）
+- **UX-R-01** `docs/05` §1.5 窄窗口断点表（UX-R-02~06 汇总）
+- **`docs/08` §16.11** 回填 `verify:m7-perf` 自动化指标；更新已知限制表
+
+### Tag
+- `v1.0.0-rc.22` — 组播发现、B-04 决策、RC 文档回填
+
 ## [1.0.0-rc.21] - 2026-05-29
 
 ### Added

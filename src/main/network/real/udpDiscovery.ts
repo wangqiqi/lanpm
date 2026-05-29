@@ -1,6 +1,6 @@
 import dgram from 'node:dgram'
 import type { DiscoveryPayload } from '../../../shared/network/types'
-import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT } from '../../../shared/network/constants.ts'
+import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR } from '../../../shared/network/constants.ts'
 
 export interface UdpDiscoveryOptions {
   deviceId: string
@@ -19,12 +19,14 @@ interface PeerCacheEntry {
 export class UdpDiscovery {
   private readonly opts: UdpDiscoveryOptions
   private readonly peers = new Map<string, PeerCacheEntry>()
+  private readonly disableMulticast: boolean
   private socket: dgram.Socket | null = null
   private broadcastTimer: ReturnType<typeof setInterval> | null = null
   private pruneTimer: ReturnType<typeof setInterval> | null = null
 
   constructor(opts: UdpDiscoveryOptions) {
     this.opts = opts
+    this.disableMulticast = process.env.LANPM_DISABLE_MULTICAST === '1'
   }
 
   start(): void {
@@ -53,6 +55,14 @@ export class UdpDiscovery {
 
     socket.bind(UDP_DISCOVERY_PORT, () => {
       socket.setBroadcast(true)
+      if (!this.disableMulticast) {
+        try {
+          socket.addMembership(UDP_MULTICAST_ADDR)
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err)
+          console.warn('[lanpm] UDP multicast join failed (broadcast only):', msg)
+        }
+      }
     })
 
     this.broadcastTimer = setInterval(() => this.broadcast(), DISCOVERY_INTERVAL_MS)
@@ -92,6 +102,11 @@ export class UdpDiscovery {
     this.socket.send(buf, UDP_DISCOVERY_PORT, '255.255.255.255', (err) => {
       if (err) console.warn('[lanpm] UDP broadcast failed:', err.message)
     })
+    if (!this.disableMulticast) {
+      this.socket.send(buf, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR, (err) => {
+        if (err) console.warn('[lanpm] UDP multicast send failed:', err.message)
+      })
+    }
   }
 
   private remember(peer: DiscoveryPayload): void {
