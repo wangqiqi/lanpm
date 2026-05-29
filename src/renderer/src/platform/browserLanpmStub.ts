@@ -21,6 +21,23 @@ const STORAGE_KEY = 'lanpm.dev.identity'
 const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
 const TASK_STORAGE_KEY = 'lanpm.dev.tasks'
 const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
+const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
+
+const stubDissolvedGroups = new Set<string>(
+  (() => {
+    try {
+      const raw = localStorage.getItem(STUB_DISSOLVED_GROUPS_KEY)
+      if (!raw) return []
+      return JSON.parse(raw) as string[]
+    } catch {
+      return []
+    }
+  })()
+)
+
+function persistStubDissolvedGroups(): void {
+  localStorage.setItem(STUB_DISSOLVED_GROUPS_KEY, JSON.stringify([...stubDissolvedGroups]))
+}
 
 const taskListeners = new Set<(groupId: string) => void>()
 
@@ -188,12 +205,14 @@ function applyReadStatus(messages: ChatMessage[], localUserId?: string): ChatMes
 
 const STUB_MEMBERS: GroupMemberView[] = [
   { userId: 'demo-alice', displayName: 'Alice', mentionKeys: ['alice'] },
-  { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] }
+  { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] },
+  { userId: 'demo-carol', displayName: 'Carol', mentionKeys: ['carol'] }
 ]
 
 const STUB_PRESENCE: Record<string, UserPresence> = {
   'demo-alice': 'away',
-  'demo-bob': 'offline'
+  'demo-bob': 'offline',
+  'demo-carol': 'online'
 }
 
 function stubPresence(userId: string, localUserId?: string): UserPresence {
@@ -604,32 +623,36 @@ export function createBrowserLanpmStub(): LanpmApi {
       onTransfersChanged: () => () => undefined
     },
     group: {
-      list: async () => [
-        {
-          groupId: 'demo-project',
-          name: stubT('demo.groupProject'),
-          type: 'project' as const,
-          createdBy: 'stub',
-          createdAt: '',
-          autoDiscover: true
-        },
-        {
-          groupId: 'demo-function',
-          name: stubT('demo.groupFunction'),
-          type: 'function' as const,
-          createdBy: 'stub',
-          createdAt: '',
-          autoDiscover: true
-        },
-        {
-          groupId: 'demo-anonymous',
-          name: stubT('demo.groupAnonymous'),
-          type: 'anonymous' as const,
-          createdBy: 'stub',
-          createdAt: '',
-          autoDiscover: true
-        }
-      ],
+      list: async () => {
+        const status = readStatus()
+        const ownerId = status.user?.userId ?? 'stub'
+        return [
+          {
+            groupId: 'demo-project',
+            name: stubT('demo.groupProject'),
+            type: 'project' as const,
+            createdBy: ownerId,
+            createdAt: '',
+            autoDiscover: true
+          },
+          {
+            groupId: 'demo-function',
+            name: stubT('demo.groupFunction'),
+            type: 'function' as const,
+            createdBy: ownerId,
+            createdAt: '',
+            autoDiscover: true
+          },
+          {
+            groupId: 'demo-anonymous',
+            name: stubT('demo.groupAnonymous'),
+            type: 'anonymous' as const,
+            createdBy: ownerId,
+            createdAt: '',
+            autoDiscover: true
+          }
+        ].filter((g) => !stubDissolvedGroups.has(g.groupId))
+      },
       create: async (input) => ({
         groupId: `stub_${Date.now()}`,
         type: input.type,
@@ -648,6 +671,10 @@ export function createBrowserLanpmStub(): LanpmApi {
       }),
       enterAnonymous: async () => undefined,
       leaveAnonymous: async () => undefined,
+      dissolve: async (groupId) => {
+        stubDissolvedGroups.add(groupId)
+        persistStubDissolvedGroups()
+      },
       onListChanged: () => () => undefined
     },
     cockpit: {

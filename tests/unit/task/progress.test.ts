@@ -37,4 +37,10 @@ describe('applyAggregatedProgress', () => {
     const out = applyAggregatedProgress([parent, c1, c2])
     expect(out.find((t) => t.taskId === 'p1')?.progressPercent).toBe(75)
   })
+
+  it('leaves parent unchanged when it has no children', () => {
+    const parent = task({ taskId: 'p1', progressPercent: 42 })
+    const out = applyAggregatedProgress([parent])
+    expect(out[0]?.progressPercent).toBe(42)
+  })
 })

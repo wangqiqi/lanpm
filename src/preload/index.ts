@@ -95,6 +95,7 @@ const api: LanpmApi = {
     join: (groupId) => ipcRenderer.invoke('group:join', groupId),
     enterAnonymous: (groupId) => ipcRenderer.invoke('group:enterAnonymous', groupId),
     leaveAnonymous: (groupId) => ipcRenderer.invoke('group:leaveAnonymous', groupId),
+    dissolve: (groupId) => ipcRenderer.invoke('group:dissolve', groupId),
     onListChanged: (handler) => {
       const listener = () => handler()
       ipcRenderer.on(GROUP_PUSH_CHANNEL, listener)

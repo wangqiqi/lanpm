@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.57] - 2026-05-29
+
+### Added
+- **解散群组**：仅群主、非 DM；`group:dissolve` IPC + `deleteGroupCascade`；解散时清理群密钥、匿名会话与磁盘文件副本
+- **TopBar**：当前群「解散群组」确认对话框（i18n zh/en）
+- **Mock 目录 v2**：`mockCatalog` / `seedMockData` 注入演示任务、聊天、书签与虚拟成员；`MOCK_CATALOG_VERSION` 可重播升级
+- **单元测试扩面**：`tests/unit` 增至 152 项（app/data/ipc/search/presence/identity/group/mock 等）
+
+### Changed
+- 演示群种子从 `groupService` 内联迁至 `src/main/mock/` + `shared/group/mock.ts`
+- **`browserLanpmStub`**：对齐 `dissolve` 与 mock 群列表行为
+
+### Tag
+- `v1.0.0-rc.57` — 解散群组、Mock v2、单元测试扩面
+
 ## [1.0.0-rc.56] - 2026-05-29
 
 ### Added

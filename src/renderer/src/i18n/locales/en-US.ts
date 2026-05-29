@@ -94,6 +94,12 @@ const enUS = {
   'group.anonymousHint': 'Anonymous groups support chat only (no task/file history)',
   'group.leaveAnonymousTitle': 'Leave anonymous group?',
   'group.leaveAnonymousContent': 'You will end the current anonymous session',
+  'group.dissolve': 'Dissolve group',
+  'group.dissolveTitle': 'Dissolve this group?',
+  'group.dissolveContent':
+    'This permanently deletes "{name}" and its chat, tasks, and files. This cannot be undone.',
+  'group.dissolveConfirm': 'Dissolve',
+  'group.dissolveFailed': 'Failed to dissolve group',
   'cockpit.title': 'Cockpit',
   'cockpit.weeklyReport': 'Weekly report',
   'cockpit.monthlyReport': 'Monthly report',

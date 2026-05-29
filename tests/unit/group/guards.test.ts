@@ -42,6 +42,10 @@ describe('assertGroupAllowsFiles', () => {
   it('blocks anonymous', () => {
     expect(() => assertGroupAllowsFiles('anonymous')).toThrow('匿名群不支持文件')
   })
+
+  it('allows function group files', () => {
+    expect(() => assertGroupAllowsFiles('function')).not.toThrow()
+  })
 })
 
 describe('isMemoryOnlyChatGroup', () => {

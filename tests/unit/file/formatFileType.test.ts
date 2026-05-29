@@ -37,4 +37,19 @@ describe('formatFileTypeLabel', () => {
       )
     ).toBe('其他')
   })
+
+  it('labels bookmarks and .env variants', () => {
+    expect(
+      formatFileTypeLabel(
+        { name: 'link', ext: 'bin', category: 'document', isBookmark: true },
+        labels
+      )
+    ).toBe('书签')
+    expect(
+      formatFileTypeLabel(
+        { name: '.env.local', ext: 'bin', category: 'code', isBookmark: false },
+        labels
+      )
+    ).toBe('.env')
+  })
 })

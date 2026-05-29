@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildDmGroupId,
+  formatDmTitle,
   getDmPeerUserId,
   isDmGroupId,
   parseDmGroupId
@@ -24,6 +25,18 @@ describe('parseDmGroupId', () => {
 
   it('returns null for non-dm id', () => {
     expect(parseDmGroupId('demo-project')).toBeNull()
+  })
+
+  it('returns null for malformed dm id', () => {
+    expect(parseDmGroupId('dm:alice')).toBeNull()
+    expect(parseDmGroupId('dm:__bob')).toBeNull()
+    expect(parseDmGroupId('dm:alice__')).toBeNull()
+  })
+})
+
+describe('formatDmTitle', () => {
+  it('prefixes peer display name', () => {
+    expect(formatDmTitle('Bob')).toBe('私聊 · Bob')
   })
 })
 

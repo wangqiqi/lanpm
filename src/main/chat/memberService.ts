@@ -12,7 +12,8 @@ import { getUserById } from '../storage/repositories/userRepository'
 /** 非匿名群占位成员，便于 @提及联调 */
 const STUB_MEMBERS: GroupMemberView[] = [
   { userId: 'demo-alice', displayName: 'Alice', mentionKeys: ['alice'] },
-  { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] }
+  { userId: 'demo-bob', displayName: 'Bob', mentionKeys: ['bob'] },
+  { userId: 'demo-carol', displayName: 'Carol', mentionKeys: ['carol'] }
 ]
 
 function resolvePresence(userId: string, localUserId?: string): UserPresence {

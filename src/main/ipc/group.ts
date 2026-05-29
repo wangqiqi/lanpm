@@ -11,6 +11,7 @@ import {
 } from '../cockpit/cockpitService'
 import {
   createUserGroup,
+  dissolveGroup,
   enterAnonymousGroup,
   getGroupById,
   joinDiscoverableGroup,
@@ -48,6 +49,11 @@ export function registerGroupIpc(): void {
   ipcMain.handle(GROUP_IPC.enterAnonymous, (_event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
     enterAnonymousGroup(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(GROUP_IPC.dissolve, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    dissolveGroup(getDatabase(), groupId)
   })
 }
 

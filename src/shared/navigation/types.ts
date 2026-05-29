@@ -7,4 +7,5 @@ export interface NavGroup {
   groupId: string
   name: string
   type: GroupType
+  createdBy: string
 }

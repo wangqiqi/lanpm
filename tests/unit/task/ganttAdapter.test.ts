@@ -59,6 +59,26 @@ describe('tasksToGanttBars', () => {
     )
     expect(bars).toHaveLength(0)
   })
+
+  it('ignores non-FS dependency types', () => {
+    const tasks = [task({ taskId: 'a' }), task({ taskId: 'b' })]
+    const deps: TaskDependency[] = [{ fromTaskId: 'a', toTaskId: 'b', type: 'SS' }]
+    expect(tasksToGanttBars(tasks, deps).find((b) => b.id === 'b')?.dependencies).toBeUndefined()
+  })
+
+  it('extends end date when schedule end is not after start', () => {
+    const bars = tasksToGanttBars(
+      [task({ taskId: 't1', startDate: '2026-02-01', endDate: '2026-02-01' })],
+      []
+    )
+    const bar = bars[0]!
+    expect(bar.end.getTime()).toBeGreaterThan(bar.start.getTime())
+  })
+
+  it('clamps progress to 0–1', () => {
+    const bars = tasksToGanttBars([task({ taskId: 't1', progressPercent: 150 })], [])
+    expect(bars[0]?.progress).toBe(1)
+  })
 })
 
 describe('ganttDatesToYmd', () => {
@@ -67,6 +87,15 @@ describe('ganttDatesToYmd', () => {
     expect(ganttDatesToYmd(start, start, true)).toEqual({
       startDate: '2026-01-15',
       endDate: '2026-01-15'
+    })
+  })
+
+  it('formats start and end for normal tasks', () => {
+    const start = new Date(2026, 0, 15)
+    const end = new Date(2026, 0, 20)
+    expect(ganttDatesToYmd(start, end, false)).toEqual({
+      startDate: '2026-01-15',
+      endDate: '2026-01-20'
     })
   })
 })

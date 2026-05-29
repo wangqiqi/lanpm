@@ -123,6 +123,7 @@ export interface LanpmApi {
     join: (groupId: string) => Promise<GroupRecord>
     enterAnonymous: (groupId: string) => Promise<void>
     leaveAnonymous: (groupId: string) => Promise<void>
+    dissolve: (groupId: string) => Promise<void>
     onListChanged: (handler: () => void) => () => void
   }
   cockpit: {

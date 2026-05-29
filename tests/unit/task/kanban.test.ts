@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isKanbanTrashDropId,
   isTaskStatus,
+  KANBAN_COLUMN_LABELS,
   KANBAN_COLUMN_ORDER,
   KANBAN_TRASH_DROP_ID
 } from '@shared/task/kanban'
@@ -22,5 +23,13 @@ describe('isKanbanTrashDropId', () => {
   it('matches trash droppable id', () => {
     expect(isKanbanTrashDropId(KANBAN_TRASH_DROP_ID)).toBe(true)
     expect(isKanbanTrashDropId('todo')).toBe(false)
+  })
+})
+
+describe('KANBAN_COLUMN_LABELS', () => {
+  it('labels every column status', () => {
+    for (const status of KANBAN_COLUMN_ORDER) {
+      expect(KANBAN_COLUMN_LABELS[status]).toBeTruthy()
+    }
   })
 })

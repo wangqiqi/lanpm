@@ -11,6 +11,7 @@ import {
 import {
   CompassOutlined,
   DashboardOutlined,
+  DeleteOutlined,
   GlobalOutlined,
   MoonOutlined,
   PlusOutlined,
@@ -60,6 +61,7 @@ export default function TopBar(): React.ReactElement {
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
   const createGroup = useNavigationStore((s) => s.createGroup)
+  const dissolveGroup = useNavigationStore((s) => s.dissolveGroup)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
   const [createOpen, setCreateOpen] = useState(false)
@@ -147,6 +149,34 @@ export default function TopBar(): React.ReactElement {
     }
 
     navigateToGroup(groupId)
+  }
+
+  const activeGroup = groups.find((g) => g.groupId === activeGroupId)
+  const canDissolveGroup =
+    Boolean(localUserId) &&
+    Boolean(activeGroup) &&
+    activeGroup?.createdBy === localUserId &&
+    !isDmGroupId(activeGroupId)
+
+  const handleDissolveGroup = (): void => {
+    if (!activeGroup || !canDissolveGroup) return
+    modal.confirm({
+      title: t('group.dissolveTitle'),
+      content: t('group.dissolveContent', { name: resolveGroupDisplayName(activeGroup, t) }),
+      okText: t('group.dissolveConfirm'),
+      cancelText: t('common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await dissolveGroup(activeGroupId)
+          const nextId = useNavigationStore.getState().activeGroupId
+          const nextType = useNavigationStore.getState().getGroupType(nextId)
+          navigate(groupViewPath(nextId, defaultViewForGroup(nextType)))
+        } catch (err) {
+          message.error(err instanceof Error ? err.message : t('group.dissolveFailed'))
+        }
+      }
+    })
   }
 
   const groupSelectOptions = useMemo(() => {
@@ -246,6 +276,12 @@ export default function TopBar(): React.ReactElement {
           <PlusOutlined />
           {t('topbar.createGroup')}
         </RegionButton>
+        {canDissolveGroup ? (
+          <RegionButton variant="pill" onClick={handleDissolveGroup}>
+            <DeleteOutlined />
+            {t('group.dissolve')}
+          </RegionButton>
+        ) : null}
         <RegionButton variant="pill" onClick={() => navigate(cockpitPath())}>
           <DashboardOutlined />
           {t('topbar.cockpit')}

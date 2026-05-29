@@ -6,13 +6,18 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { pickDefaultGroupId } from '@renderer/routes/paths'
 
 const FALLBACK_GROUPS: NavGroup[] = [
-  { groupId: 'demo-project', name: '示例项目', type: 'project' },
-  { groupId: 'demo-function', name: '示例职能群', type: 'function' },
-  { groupId: 'demo-anonymous', name: '示例匿名群', type: 'anonymous' }
+  { groupId: 'demo-project', name: '示例项目', type: 'project', createdBy: 'system' },
+  { groupId: 'demo-function', name: '示例职能群', type: 'function', createdBy: 'system' },
+  { groupId: 'demo-anonymous', name: '示例匿名群', type: 'anonymous', createdBy: 'system' }
 ]
 
 function toNavGroup(record: GroupRecord): NavGroup {
-  return { groupId: record.groupId, name: record.name, type: record.type }
+  return {
+    groupId: record.groupId,
+    name: record.name,
+    type: record.type,
+    createdBy: record.createdBy
+  }
 }
 
 interface NavigationState {
@@ -26,6 +31,7 @@ interface NavigationState {
   loadGroups: () => Promise<boolean>
   createGroup: (input: CreateGroupInput) => Promise<NavGroup>
   joinGroup: (groupId: string) => Promise<NavGroup>
+  dissolveGroup: (groupId: string) => Promise<void>
   getActiveGroup: () => NavGroup | undefined
   getGroupType: (groupId: string) => GroupType
   getGroupLabel: (groupId: string) => string
@@ -86,6 +92,17 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
       }
     })
     return nav
+  },
+
+  dissolveGroup: async (groupId) => {
+    await getLanpmApi().group.dissolve(groupId)
+    set((s) => {
+      const groups = s.groups.filter((g) => g.groupId !== groupId)
+      return {
+        groups,
+        activeGroupId: pickDefaultGroupId(groups, s.activeGroupId)
+      }
+    })
   },
 
   getActiveGroup: () => {

@@ -108,6 +108,26 @@ export function removeGroupMember(db: Database, groupId: string, userId: string)
   db.prepare(`DELETE FROM group_members WHERE group_id = ? AND user_id = ?`).run(groupId, userId)
 }
 
+export function updateGroupCreatedBy(db: Database, groupId: string, userId: string): void {
+  db.prepare(`UPDATE groups SET created_by = ? WHERE group_id = ?`).run(userId, groupId)
+}
+
+/** 删除群组及关联数据（不含磁盘文件，由调用方先清理） */
+export function deleteGroupCascade(db: Database, groupId: string): void {
+  db.prepare(`DELETE FROM read_receipts WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM messages WHERE group_id = ?`).run(groupId)
+  db.prepare(
+    `DELETE FROM task_dependencies
+     WHERE from_task_id IN (SELECT task_id FROM tasks WHERE group_id = ?)
+        OR to_task_id IN (SELECT task_id FROM tasks WHERE group_id = ?)`
+  ).run(groupId, groupId)
+  db.prepare(`DELETE FROM tasks WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM file_transfers WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM files WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM group_members WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM groups WHERE group_id = ?`).run(groupId)
+}
+
 export function listProjectGroups(db: Database): GroupRecord[] {
   const rows = db
     .prepare(`SELECT * FROM groups WHERE type = 'project' ORDER BY name ASC`)

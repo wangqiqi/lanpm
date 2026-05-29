@@ -1,14 +1,18 @@
 import { randomUUID } from 'crypto'
+import { unlinkSync } from 'fs'
 import type { Database } from 'better-sqlite3'
 import { BrowserWindow } from 'electron'
 import type { CreateGroupInput, GroupRecord } from '../../shared/group/types'
 import type { GroupType } from '../../shared/navigation/types'
 import { GROUP_PUSH_CHANNEL } from '../../shared/group/channels'
+import { MOCK_GROUPS } from '../../shared/group/mock'
+import { LOCAL_REMOVED_PREFIX, REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import { getCachedGroup } from '../discover/discoverGroupRegistry'
 import { getSetupStatus } from '../identity/setup'
+import { ensureMockCatalog } from '../mock/seedMockData'
 import {
   countAnonymousAliases,
-  countGroups,
+  deleteGroupCascade,
   getGroupById,
   insertGroup,
   insertGroupMember,
@@ -16,14 +20,9 @@ import {
   listGroupMembers,
   removeGroupMember
 } from '../storage/repositories/groupRepository'
+import { listFilesByGroup } from '../storage/repositories/fileRepository'
 import { clearAnonymousSession } from '../chat/anonymousChatStore'
 import { purgeGroupKeyMeta } from '../crypto/groupKeyService'
-
-const SEED_GROUPS: { groupId: string; name: string; type: GroupType }[] = [
-  { groupId: 'demo-project', name: '示例项目', type: 'project' },
-  { groupId: 'demo-function', name: '示例职能群', type: 'function' },
-  { groupId: 'demo-anonymous', name: '示例匿名群', type: 'anonymous' }
-]
 
 function broadcastGroupsChanged(): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -32,37 +31,7 @@ function broadcastGroupsChanged(): void {
 }
 
 export function ensureSeedGroups(db: Database): void {
-  if (countGroups(db) > 0) {
-    ensureUserInSeedGroups(db)
-    return
-  }
-  const status = getSetupStatus(db)
-  const creator = status.configured && status.user ? status.user.userId : 'system'
-  const now = new Date().toISOString()
-
-  for (const seed of SEED_GROUPS) {
-    insertGroup(db, {
-      groupId: seed.groupId,
-      type: seed.type,
-      name: seed.name,
-      createdBy: creator,
-      createdAt: now,
-      autoDiscover: true
-    })
-    if (status.configured && status.user) {
-      joinGroupMember(db, seed.groupId, status.user.userId, seed.type === 'anonymous')
-    }
-  }
-}
-
-function ensureUserInSeedGroups(db: Database): void {
-  const status = getSetupStatus(db)
-  if (!status.configured || !status.user) return
-  for (const seed of SEED_GROUPS) {
-    if (getGroupById(db, seed.groupId)) {
-      joinGroupMember(db, seed.groupId, status.user.userId, seed.type === 'anonymous')
-    }
-  }
+  ensureMockCatalog(db)
 }
 
 function nextAnonymousAlias(db: Database, groupId: string): string {
@@ -83,6 +52,26 @@ function joinGroupMember(db: Database, groupId: string, userId: string, anonymou
     joinedAt: new Date().toISOString(),
     displayAlias: anonymous ? nextAnonymousAlias(db, groupId) : undefined
   })
+}
+
+function purgeGroupFilesFromDisk(db: Database, groupId: string): void {
+  for (const meta of listFilesByGroup(db, groupId)) {
+    if (meta.isBookmark) continue
+    for (const path of [meta.storagePath, meta.previewPath]) {
+      if (
+        !path ||
+        path.startsWith(REMOTE_PENDING_PREFIX) ||
+        path.startsWith(LOCAL_REMOVED_PREFIX)
+      ) {
+        continue
+      }
+      try {
+        unlinkSync(path)
+      } catch {
+        /* disk may already be gone */
+      }
+    }
+  }
 }
 
 export function listUserGroups(db: Database): GroupRecord[] {
@@ -158,12 +147,36 @@ export function createUserGroup(db: Database, input: CreateGroupInput): GroupRec
   return group
 }
 
+export function dissolveGroup(db: Database, groupId: string): void {
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user) {
+    throw new Error('请先完成身份配置')
+  }
+  if (groupId.startsWith('dm:')) {
+    throw new Error('无法解散私信会话')
+  }
+
+  const group = getGroupById(db, groupId)
+  if (!group) {
+    throw new Error('群组不存在')
+  }
+  if (group.createdBy !== status.user.userId) {
+    throw new Error('仅群主可解散群组')
+  }
+
+  purgeGroupFilesFromDisk(db, groupId)
+  purgeGroupKeyMeta(db, groupId)
+  clearAnonymousSession(groupId)
+  deleteGroupCascade(db, groupId)
+  broadcastGroupsChanged()
+}
+
 export function resolveGroupType(db: Database, groupId: string): GroupType {
   if (groupId.startsWith('dm:')) return 'anonymous'
   const group = getGroupById(db, groupId)
   if (group) return group.type
-  const seed = SEED_GROUPS.find((g) => g.groupId === groupId)
-  return seed?.type ?? 'project'
+  const mock = MOCK_GROUPS.find((g) => g.groupId === groupId)
+  return mock?.type ?? 'project'
 }
 
 export function leaveAnonymousGroup(db: Database, groupId: string): void {

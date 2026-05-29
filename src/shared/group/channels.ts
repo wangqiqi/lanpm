@@ -6,5 +6,6 @@ export const GROUP_IPC = {
   get: 'group:get',
   join: 'group:join',
   enterAnonymous: 'group:enterAnonymous',
-  leaveAnonymous: 'group:leaveAnonymous'
+  leaveAnonymous: 'group:leaveAnonymous',
+  dissolve: 'group:dissolve'
 } as const
