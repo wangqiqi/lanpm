@@ -71,7 +71,12 @@ export default function MessageBubble({
         <button
           type="button"
           className={styles.bubbleAttachLink}
-          onClick={() => navigate(groupViewPath(groupId, 'files'))}
+          onClick={() => {
+            if (message.content.kind !== 'file') return
+            navigate(groupViewPath(groupId, 'files'), {
+              state: { selectFileId: message.content.fileId }
+            })
+          }}
         >
           {t('chat.fileMessage', {
             name: message.content.fileName,

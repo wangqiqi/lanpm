@@ -1,5 +1,4 @@
 import dgram from 'node:dgram'
-import type { DiscoverableGroupAdvert } from '../../../shared/discover/types.ts'
 import type { DiscoveryPayload } from '../../../shared/network/types.ts'
 import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR } from '../../../shared/network/constants.ts'
 import { getLocalLanIp, resolvePeerHost } from '../localIp.ts'

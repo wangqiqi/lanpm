@@ -44,6 +44,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly dedup = new MessageDedup()
   private readonly lamport = new LamportClock()
   private readonly subscriptions = new Map<string, Set<EnvelopeHandler>>()
+  private readonly globalHandlers = new Set<EnvelopeHandler>()
   private readonly links = new Map<string, PeerLink>()
   private readonly reconnectAttempt = new Map<string, number>()
   private readonly reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
@@ -102,6 +103,7 @@ export class RealNetworkTransport implements NetworkTransport {
     this.tcpServer?.close()
     this.tcpServer = null
     this.subscriptions.clear()
+    this.globalHandlers.clear()
   }
 
   async publish(envelope: SyncEnvelope): Promise<void> {
@@ -129,6 +131,12 @@ export class RealNetworkTransport implements NetworkTransport {
       set?.delete(handler)
       if (set && set.size === 0) this.subscriptions.delete(groupId)
     }
+  }
+
+  /** 全局订阅（如 read_receipt）— 与 NetworkStub.subscribeAll 对齐 */
+  subscribeAll(handler: (envelope: SyncEnvelope) => void): () => void {
+    this.globalHandlers.add(handler)
+    return () => this.globalHandlers.delete(handler)
   }
 
   async discoverPeers(): Promise<DiscoveryPayload[]> {
@@ -332,9 +340,15 @@ export class RealNetworkTransport implements NetworkTransport {
     if (!this.dedup.remember(envelope.senderDeviceId, envelope.msgId)) return
     this.lamport.observe(envelope.lamportTs)
 
-    if (!envelope.groupId) return
-    const handlers = this.subscriptions.get(envelope.groupId)
-    if (!handlers) return
+    const handlers = new Set<EnvelopeHandler>()
+    if (envelope.groupId) {
+      const groupHandlers = this.subscriptions.get(envelope.groupId)
+      if (groupHandlers) {
+        for (const h of groupHandlers) handlers.add(h)
+      }
+    }
+    for (const h of this.globalHandlers) handlers.add(h)
+
     for (const handler of handlers) handler(envelope)
   }
 }

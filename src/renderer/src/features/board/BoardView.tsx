@@ -28,6 +28,10 @@ import TaskEditModal from './TaskEditModal'
 import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
+import {
+  confirmDeleteParentTask,
+  countTaskDescendants
+} from '@renderer/features/task/confirmDeleteParentTask'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -324,15 +328,23 @@ export default function BoardView(): React.ReactElement {
 
   const handleDelete = useCallback(
     async (taskId: string) => {
+      const task = boardTasks.find((t) => t.taskId === taskId)
+      if (!task) return
+      const childCount = countTaskDescendants(boardTasks, taskId)
+      const mode =
+        childCount > 0
+          ? await confirmDeleteParentTask({ t, taskTitle: task.title, childCount })
+          : 'promote'
+      if (!mode) return
       try {
-        const ok = await deleteTask(taskId)
+        const ok = await deleteTask(taskId, mode)
         if (ok) message.success(t('board.deleted'))
         else message.warning(t('board.notFound'))
       } catch (err) {
         message.error(err instanceof Error ? err.message : t('board.deleteFailed'))
       }
     },
-    [deleteTask, t]
+    [boardTasks, deleteTask, t]
   )
 
   const handleCreate = async (): Promise<void> => {

@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, UpdateTaskInput } from '../../shared/task/types'
 import type { UpsertDependencyInput } from '../../shared/task/dependency'
+import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { TASK_IPC } from '../../shared/task/channels'
 import {
   createGroupTask,
@@ -57,8 +58,14 @@ export function registerTaskIpc(): void {
     }
   )
 
-  ipcMain.handle(TASK_IPC.deleteTask, (_event, taskId: string) => {
-    if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
-    return deleteGroupTask(getDatabase(), taskId)
-  })
+  ipcMain.handle(
+    TASK_IPC.deleteTask,
+    (_event, taskId: string, mode?: DeleteTaskMode) => {
+      if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
+      if (mode !== undefined && mode !== 'cascade' && mode !== 'promote') {
+        throw new Error('mode must be cascade or promote')
+      }
+      return deleteGroupTask(getDatabase(), taskId, mode ?? 'promote')
+    }
+  )
 }

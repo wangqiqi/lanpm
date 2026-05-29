@@ -22,6 +22,12 @@ export interface FileChunkPayload {
 
 export const REMOTE_PENDING_PREFIX = 'remote-pending:'
 
+export const LOCAL_REMOVED_PREFIX = 'local-removed:'
+
 export function isRemotePendingPath(storagePath: string): boolean {
   return storagePath.startsWith(REMOTE_PENDING_PREFIX)
+}
+
+export function isLocalRemovedPath(storagePath: string): boolean {
+  return storagePath.startsWith(LOCAL_REMOVED_PREFIX)
 }

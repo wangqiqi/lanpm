@@ -5,7 +5,7 @@ import { isMessageReadByOthers } from '../../shared/chat/readReceipt'
 import type { SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
-import { NetworkStub } from '../network/stub/NetworkStub'
+import type { NetworkTransport } from '../../shared/network'
 import {
   getMessageById,
   updateDeliveryStatus
@@ -93,9 +93,11 @@ export function initReadReceiptService(db: Database): void {
   const transport = getNetworkTransport()
   if (!transport) return
 
-  const stub = transport as NetworkStub
-  if (typeof stub.subscribeAll === 'function') {
-    readReceiptUnsub = stub.subscribeAll((env) => handleIncomingReadReceipt(db, env))
+  const withGlobal = transport as NetworkTransport & {
+    subscribeAll?: (handler: (envelope: SyncEnvelope) => void) => () => void
+  }
+  if (typeof withGlobal.subscribeAll === 'function') {
+    readReceiptUnsub = withGlobal.subscribeAll((env) => handleIncomingReadReceipt(db, env))
   }
 }
 

@@ -14,7 +14,8 @@ export const FILE_IPC = {
   importBookmarks: 'file:importBookmarks',
   exportBookmarks: 'file:exportBookmarks',
   pullRemote: 'file:pullRemote',
-  download: 'file:download'
+  download: 'file:download',
+  deleteLocal: 'file:deleteLocal'
 } as const
 
 export const FILE_CHUNK_SIZE = 256 * 1024

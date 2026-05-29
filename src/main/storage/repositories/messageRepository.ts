@@ -119,6 +119,33 @@ export function listMessagesByGroup(
 }
 
 /** ARCH-07 — 离线补同步：拉取 lamport 之后且未过 TTL 的消息 */
+export function listDistinctDmGroupIds(db: Database): string[] {
+  const rows = db
+    .prepare(
+      `SELECT DISTINCT group_id AS groupId FROM messages WHERE group_id LIKE 'dm:%'`
+    )
+    .all() as { groupId: string }[]
+  return rows.map((r) => r.groupId)
+}
+
+export function deleteMessagesOlderThan(db: Database, cutoffIso: string, groupId?: string): number {
+  if (groupId) {
+    return db
+      .prepare(`DELETE FROM messages WHERE group_id = ? AND created_at < ?`)
+      .run(groupId, cutoffIso).changes
+  }
+  return db.prepare(`DELETE FROM messages WHERE created_at < ?`).run(cutoffIso).changes
+}
+
+export function deleteAllMessagesInGroup(db: Database, groupId: string): number {
+  return db.prepare(`DELETE FROM messages WHERE group_id = ?`).run(groupId).changes
+}
+
+export function countMessages(db: Database): number {
+  const row = db.prepare(`SELECT COUNT(*) AS c FROM messages`).get() as { c: number }
+  return row.c
+}
+
 export function listMessagesSince(
   db: Database,
   groupId: string,

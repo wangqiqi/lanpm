@@ -16,5 +16,8 @@ export const STUB_BUS_DIR = join(tmpdir(), 'lanpm-stub')
 export const STUB_PEERS_DIR = join(STUB_BUS_DIR, 'peers')
 export const STUB_BUS_FILE = join(STUB_BUS_DIR, 'bus.jsonl')
 
+/** bus.jsonl 超过此大小时截断保留尾部（DATA-STUB-BUS） */
+export const STUB_BUS_MAX_BYTES = 8 * 1024 * 1024
+
 /** Placeholder listen port until M6 WebRTC */
 export const STUB_LISTEN_PORT = 43123

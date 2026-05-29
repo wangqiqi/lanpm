@@ -17,6 +17,7 @@ import {
   removeGroupMember
 } from '../storage/repositories/groupRepository'
 import { clearAnonymousSession } from '../chat/anonymousChatStore'
+import { purgeGroupKeyMeta } from '../crypto/groupKeyService'
 
 const SEED_GROUPS: { groupId: string; name: string; type: GroupType }[] = [
   { groupId: 'demo-project', name: '示例项目', type: 'project' },
@@ -172,6 +173,7 @@ export function leaveAnonymousGroup(db: Database, groupId: string): void {
   const status = getSetupStatus(db)
   if (status.configured && status.user) {
     removeGroupMember(db, groupId, status.user.userId)
+    purgeGroupKeyMeta(db, groupId)
   }
   clearAnonymousSession(groupId)
 }

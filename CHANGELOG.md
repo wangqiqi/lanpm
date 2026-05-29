@@ -2,6 +2,48 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.56] - 2026-05-29
+
+### Added
+- **DATA-SCHEMA-FK**：`referentialCleanup` + `verify:schema-fk`（孤儿依赖/传输清理）
+- **Bundle 设置 UI**：个人设置 → 数据与存储 · 加密导出/导入向导（含口令、含文件本体、冲突模式）
+- **文件页**：本机移除副本、传输队列「本地队列」标签
+
+### Changed
+- **V-14b-HOV**：`ViewSegment` / `RegionButton` hover 加强；`verify:visual` 断言
+- **文档**：删除 `docs/08_post-RC`；post-RC / 已知限制并入 `docs/06` §2.3、§6；`docs/03` §12、`数据.md` 同步
+- **docs/06 §2.5**：DOC-02 自动化项勾选
+
+### Tag
+- `v1.0.0-rc.56` — SCHEMA-FK、Bundle UI、V-14b-HOV、文档 01–06
+
+## [1.0.0-rc.55] - 2026-05-29
+
+### Added
+- **个人设置 · 数据与存储**：保留天数、占用、立即清理、单群清空（`DataStoragePanel` + `data:*` IPC）
+- **删父任务确认**：无默认项，级联删除 / 子任务上浮（看板、任务树）
+- **单群加密备份**：`bundleService` + `data:exportGroupBundle` / `importGroupBundle`（AES-256-GCM + scrypt）
+- **DM 双轨对齐**：`dmStore.syncWithDatabase` + `data:listDmGroupIds`
+
+### Changed
+- **docs/03**：§12 数据生命周期、§12.1 DM、§12.2 退群策略
+- **文件上传**：本机 `runChunkedUpload` 标注为本地队列模拟（`files.transferLocalQueue`）
+
+### Tag
+- `v1.0.0-rc.55` — 数据设置 UI、删父确认、bundle IO、DM 对齐
+
+## [1.0.0-rc.54] - 2026-05-29
+
+### Added
+- **数据产销闭环（P0/P1 核心）**：`RealNetworkTransport.subscribeAll` 真网已读回执；`localRetentionDays`（7～365，默认 90）+ 启动/每日 prune；固定 **7 天** P2P 补拉；`data:*` IPC（存储设置、清理、单群清空）；多账号 `profiles/{userId}/` 迁移；删父任务级联/上浮；本机删文件保留元数据；`file_transfers` 30 天 purge；`verify:real-subscribe-all`
+
+### Changed
+- **offlineSync**：`requestOfflineSync` 纳入 DM `group_id`；badge 未读仅计保留窗内消息
+- **TaskTreeView**：父已删子任务挂 `__root__`；退匿名群清理 `group_key_*` meta
+
+### Tag
+- `v1.0.0-rc.54` — 数据闭环 P0/P1 与 retention IPC
+
 ## [1.0.0-rc.53] - 2026-05-29
 
 ### Added

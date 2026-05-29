@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Checkbox, Input, InputNumber, Popconfirm, Select, Typography } from 'antd'
+import { Button, Checkbox, Input, InputNumber, Select, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
@@ -257,15 +257,9 @@ export default function TaskDetailPanel({
         >
           {t('common.save')}
         </Button>
-        <Popconfirm
-          title={t('board.deleteConfirmTitle')}
-          description={t('board.deleteConfirmDesc')}
-          okText={t('common.delete')}
-          cancelText={t('common.cancel')}
-          onConfirm={() => void onDelete(task.taskId)}
-        >
-          <Button danger>{t('common.delete')}</Button>
-        </Popconfirm>
+        <Button danger onClick={() => void onDelete(task.taskId)}>
+          {t('common.delete')}
+        </Button>
       </div>
     </aside>
   )

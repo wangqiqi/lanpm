@@ -35,6 +35,8 @@ export interface FileTransferView {
   fileId: string
   groupId: string
   direction: 'upload' | 'download'
+  fromDeviceId: string
+  toDeviceId: string
   status: FileTransferStatus
   totalBytes: number
   transferredBytes: number

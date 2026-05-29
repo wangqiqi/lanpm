@@ -16,6 +16,12 @@
   border-radius: 10px;
 }
 
+.icon:hover:not(:disabled):not(.regionDisabled),
+.pill:hover:not(:disabled):not(.regionDisabled),
+.user:hover:not(:disabled):not(.regionDisabled) {
+  color: var(--lanpm-text);
+}
+
 .pill {
   padding: 6px 12px;
   border-radius: 10px;

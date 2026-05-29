@@ -20,6 +20,7 @@ import {
   uploadFileFromPath,
   downloadFileToDisk
 } from '../file/fileService'
+import { deleteFileLocally } from '../data/dataService'
 import { getDatabase } from '../storage'
 
 export function registerFileIpc(): void {
@@ -99,5 +100,10 @@ export function registerFileIpc(): void {
     if (typeof fileId !== 'string' || !fileId) throw new Error('fileId required')
     const parent = BrowserWindow.fromWebContents(event.sender)
     return downloadFileToDisk(getDatabase(), fileId, parent)
+  })
+
+  ipcMain.handle(FILE_IPC.deleteLocal, (_event, fileId: string) => {
+    if (typeof fileId !== 'string' || !fileId) throw new Error('fileId required')
+    return deleteFileLocally(getDatabase(), fileId)
   })
 }

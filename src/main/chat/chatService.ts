@@ -14,10 +14,15 @@ import { handleGroupKeyRotate, initGroupKeyService, shutdownGroupKeyService } fr
 import {
   handleChatSyncBatch,
   handleChatSyncRequest,
-  initOfflineSyncMeta,
   requestOfflineSync
 } from './offlineSyncService'
+import { ensureLocalRetentionMeta } from '../data/retentionMeta'
+import {
+  initMessageRetentionScheduler,
+  shutdownMessageRetentionScheduler
+} from '../data/messageRetentionService'
 import { uploadFileFromPath } from '../file/fileService'
+import { getFileById } from '../storage/repositories/fileRepository'
 import { showOpenDialog } from '../systemDialog'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
@@ -106,13 +111,15 @@ export function initChatService(db: Database): void {
   refreshGroupSubscriptions(db, transport)
   initReadReceiptService(db)
   initGroupKeyService(db)
-  initOfflineSyncMeta(db)
+  ensureLocalRetentionMeta(db)
+  initMessageRetentionScheduler(db)
   initTaskSyncService(db)
   initFileSyncService(db)
   void requestOfflineSync(db).catch(() => undefined)
 }
 
 export function shutdownChatService(): void {
+  shutdownMessageRetentionScheduler()
   shutdownTaskSyncService()
   shutdownFileSyncService()
   shutdownGroupKeyService()
@@ -255,6 +262,20 @@ export async function sendFileMessage(
     throw new Error('匿名群不支持发送文件')
   }
   const meta = await uploadFileFromPath(db, groupId, sourcePath)
+  return sendExistingFileMessage(db, groupId, meta.fileId)
+}
+
+export async function sendExistingFileMessage(
+  db: Database,
+  groupId: string,
+  fileId: string
+): Promise<ChatMessage> {
+  if (isAnonymousGroup(db, groupId)) {
+    throw new Error('匿名群不支持发送文件')
+  }
+  const meta = getFileById(db, fileId)
+  if (!meta) throw new Error('文件不存在')
+  if (meta.groupId !== groupId) throw new Error('文件不属于当前群组')
   return publishChatMessage(db, groupId, 'file', {
     kind: 'file',
     fileId: meta.fileId,

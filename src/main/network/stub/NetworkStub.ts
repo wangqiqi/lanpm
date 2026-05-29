@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   openSync,
+  readFileSync,
   readSync,
   statSync,
   unlinkSync,
@@ -13,6 +14,7 @@ import type { DiscoveryPayload, HeartbeatPayload, NetworkTransport, SyncEnvelope
 import {
   STUB_BUS_DIR,
   STUB_BUS_FILE,
+  STUB_BUS_MAX_BYTES,
   STUB_DISCOVERY_INTERVAL_MS,
   STUB_HEARTBEAT_INTERVAL_MS,
   STUB_LISTEN_PORT,
@@ -178,6 +180,17 @@ export class NetworkStub implements NetworkTransport {
         this.deliver(record.envelope)
       } catch {
         // skip malformed line
+      }
+    }
+
+    if (size > STUB_BUS_MAX_BYTES) {
+      const full = readFileSync(STUB_BUS_FILE)
+      const tail = full.subarray(Math.max(0, full.length - STUB_BUS_MAX_BYTES / 2))
+      writeFileSync(STUB_BUS_FILE, tail)
+      this.busOffset = tail.length
+      if (this.busFd !== null) {
+        closeSync(this.busFd)
+        this.busFd = openSync(STUB_BUS_FILE, 'r')
       }
     }
   }

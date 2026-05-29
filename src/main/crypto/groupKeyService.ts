@@ -4,7 +4,7 @@ import type { SyncEnvelope } from '../../shared/network/types'
 import { listUserGroups } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
-import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
+import { deleteMeta, getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 
 const ROTATE_INTERVAL_MS = 24 * 60 * 60 * 1000
 const CHECK_INTERVAL_MS = 60 * 60 * 1000
@@ -94,4 +94,10 @@ export function initGroupKeyService(db: Database): void {
 export function shutdownGroupKeyService(): void {
   if (checkTimer) clearInterval(checkTimer)
   checkTimer = null
+}
+
+/** 退群/离开匿名群时清理 sync_meta 中的群密钥元数据 */
+export function purgeGroupKeyMeta(db: Database, groupId: string): void {
+  deleteMeta(db, versionKey(groupId))
+  deleteMeta(db, rotatedAtKey(groupId))
 }

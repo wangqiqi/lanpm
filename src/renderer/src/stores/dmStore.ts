@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { buildDmGroupId } from '@shared/chat/dmSession'
+import { buildDmGroupId, getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
 import type { GroupType } from '@shared/navigation/types'
 import { DEFAULT_GROUP_ID } from '@renderer/routes/paths'
@@ -27,6 +28,8 @@ interface DmState {
   getSession: (groupId: string) => DmSession | undefined
   getPeerDisplayName: (groupId: string, peerUserId: string) => string
   pruneDisallowedOrigins: (resolveType: (groupId: string) => GroupType) => void
+  /** DATA-DM-DUAL — 与 SQLite messages 中 dm:% 会话对齐 */
+  syncWithDatabase: (localUserId: string) => Promise<void>
 }
 
 export const useDmStore = create<DmState>()(
@@ -80,6 +83,35 @@ export const useDmStore = create<DmState>()(
             groupAllowsDirectMessage(resolveType(s.originGroupId))
           )
         }))
+      },
+      syncWithDatabase: async (localUserId) => {
+        const dbIds = await getLanpmApi().data.listDmGroupIds()
+        const fromDb = new Set(dbIds)
+        const staleCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000
+        set((state) => {
+          const sessions = [...state.sessions]
+          for (const groupId of dbIds) {
+            if (sessions.some((s) => s.groupId === groupId)) continue
+            const peerUserId = getDmPeerUserId(groupId, localUserId)
+            if (!peerUserId) continue
+            sessions.unshift({
+              groupId,
+              peerUserId,
+              peerDisplayName: peerUserId,
+              originGroupId: state.lastOriginGroupId,
+              updatedAt: new Date().toISOString()
+            })
+          }
+          return {
+            sessions: sessions
+              .filter((s) => {
+                if (!isDmGroupId(s.groupId)) return true
+                if (fromDb.has(s.groupId)) return true
+                return new Date(s.updatedAt).getTime() >= staleCutoff
+              })
+              .slice(0, 20)
+          }
+        })
       }
     }),
     { name: 'lanpm.dm.sessions' }

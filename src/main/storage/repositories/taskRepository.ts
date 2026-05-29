@@ -199,6 +199,38 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
   return next
 }
 
+export function listActiveChildTasks(
+  db: Database,
+  groupId: string,
+  parentTaskId: string
+): Task[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM tasks
+       WHERE group_id = ? AND parent_task_id = ? AND deleted_at IS NULL`
+    )
+    .all(groupId, parentTaskId) as TaskRow[]
+  return rows.map(rowToTask)
+}
+
+export function promoteChildrenToRoot(db: Database, groupId: string, parentTaskId: string): Task[] {
+  const children = listActiveChildTasks(db, groupId, parentTaskId)
+  if (children.length === 0) return []
+  const now = new Date().toISOString()
+  db.prepare(
+    `UPDATE tasks SET parent_task_id = NULL, updated_at = ?
+     WHERE group_id = ? AND parent_task_id = ? AND deleted_at IS NULL`
+  ).run(now, groupId, parentTaskId)
+  return children.map((c) => ({ ...c, parentTaskId: undefined, updatedAt: now }))
+}
+
+export function clearTaskDependencies(db: Database, taskId: string): void {
+  db.prepare(`DELETE FROM task_dependencies WHERE from_task_id = ? OR to_task_id = ?`).run(
+    taskId,
+    taskId
+  )
+}
+
 export function softDeleteTask(db: Database, taskId: string): boolean {
   const now = new Date().toISOString()
   const result = db

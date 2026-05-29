@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Avatar, Form, Input, Modal, Typography } from 'antd'
+import { Avatar, Form, Input, Modal, Tabs, Typography } from 'antd'
+import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
 import { UserOutlined } from '@ant-design/icons'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -29,6 +30,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const [form] = Form.useForm<ProfileFormValues>()
   const [saving, setSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState('profile')
 
   useEffect(() => {
     if (!open) return
@@ -75,11 +77,21 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
       title={t('profile.title')}
       open={open}
       onCancel={onClose}
-      onOk={() => void submit()}
-      confirmLoading={saving}
+      onOk={() => (activeTab === 'profile' ? void submit() : onClose())}
+      okText={activeTab === 'profile' ? undefined : t('common.cancel')}
+      confirmLoading={activeTab === 'profile' ? saving : false}
       destroyOnHidden
-      width={480}
+      width={520}
     >
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={[
+          {
+            key: 'profile',
+            label: t('profile.tabProfile'),
+            children: (
+              <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <Avatar size={48} icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
         <div>
@@ -117,6 +129,16 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
           </div>
         </Form.Item>
       </Form>
+              </>
+            )
+          },
+          {
+            key: 'data',
+            label: t('profile.tabData'),
+            children: <DataStoragePanel />
+          }
+        ]}
+      />
     </Modal>
   )
 }

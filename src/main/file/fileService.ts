@@ -30,6 +30,7 @@ import {
 import { chunkDelayMs, getFileTransferSettings } from './transferSettings.ts'
 import { generatePreview } from './previewService.ts'
 import { previewUrlForFileId } from './previewProtocol.ts'
+import { resolveFileDiskPath, resolvePreviewDiskPath } from './storagePathResolver.ts'
 import { assertFileWritable } from './fileServiceHelpers'
 import { showOpenDialog, showSaveDialog } from '../systemDialog'
 import { publishFileMeta, pullRemoteFile } from './fileSyncService'
@@ -70,6 +71,7 @@ function sha256File(path: string): string {
   return createHash('sha256').update(buf).digest('hex')
 }
 
+/** DATA-XFER-SIM — 本机 fromDevice=toDevice 仅模拟进度条；真网走 file_chunk */
 async function runChunkedUpload(
   db: Database,
   meta: FileMeta,
@@ -193,13 +195,14 @@ export function readPreviewText(db: Database, fileId: string): string | null {
   const meta = getFileById(db, fileId)
   if (!meta || meta.isBookmark) return null
   if (!isTextPreviewFile(meta.name, meta.ext)) return null
-  if (!existsSync(meta.storagePath)) return null
-  const size = statSync(meta.storagePath).size
+  const diskPath = resolveFileDiskPath(meta)
+  if (!diskPath) return null
+  const size = statSync(diskPath).size
   if (size > TEXT_PREVIEW_MAX_BYTES) {
-    const buf = readFileSync(meta.storagePath)
+    const buf = readFileSync(diskPath)
     return buf.subarray(0, TEXT_PREVIEW_MAX_BYTES).toString('utf8')
   }
-  return readFileSync(meta.storagePath, 'utf8')
+  return readFileSync(diskPath, 'utf8')
 }
 
 export async function pickAndUploadFile(
@@ -218,10 +221,10 @@ export function resolvePreviewUrl(db: Database, fileId: string): string | null {
   const meta = getFileById(db, fileId)
   if (!meta || meta.isBookmark) return null
 
-  if (meta.previewStatus === 'ready' && meta.previewPath && existsSync(meta.previewPath)) {
+  if (meta.previewStatus === 'ready' && resolvePreviewDiskPath(meta)) {
     return previewUrlForFileId(fileId)
   }
-  if (supportsInlinePreview(meta) && existsSync(meta.storagePath)) {
+  if (supportsInlinePreview(meta) && resolveFileDiskPath(meta)) {
     return previewUrlForFileId(fileId)
   }
   return null
@@ -238,10 +241,11 @@ export async function downloadFileToDisk(
   if (isRemotePendingPath(meta.storagePath)) {
     throw new Error('请先通过「从局域网下载」获取文件')
   }
-  if (!existsSync(meta.storagePath)) throw new Error('本地文件不存在')
+  const diskPath = resolveFileDiskPath(meta)
+  if (!diskPath) throw new Error('本地文件不存在')
 
   const result = await showSaveDialog(parent, { defaultPath: meta.name })
   if (result.canceled || !result.filePath) return null
-  copyFileSync(meta.storagePath, result.filePath)
+  copyFileSync(diskPath, result.filePath)
   return result.filePath
 }

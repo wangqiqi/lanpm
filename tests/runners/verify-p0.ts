@@ -13,7 +13,8 @@ const steps = [
   'verify:router-views',
   'verify:stub-parity',
   'verify:sync-handlers',
-  'verify:schema-repo'
+  'verify:schema-repo',
+  'verify:schema-fk'
 ] as const
 
 for (const step of steps) {

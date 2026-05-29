@@ -12,3 +12,8 @@ export const TASK_IPC = {
   removeDependency: 'task:removeDependency',
   deleteTask: 'task:deleteTask'
 } as const
+
+export type TaskDeleteIpcArgs = {
+  taskId: string
+  mode?: import('./deleteMode').DeleteTaskMode
+}

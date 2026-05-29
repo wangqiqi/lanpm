@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
   Collapse,
@@ -10,15 +10,25 @@ import {
   Progress,
   Space,
   Table,
+  Tag,
   Typography
 } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { ColumnsType, TableProps } from 'antd/es/table'
-import { CommentOutlined, DownloadOutlined, ExportOutlined, ImportOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
-import { useNavigate, useParams } from 'react-router-dom'
+import {
+  CommentOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  ExportOutlined,
+  ImportOutlined,
+  PlusOutlined,
+  UploadOutlined
+} from '@ant-design/icons'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta } from '@shared/file/types'
-import { isRemotePendingPath } from '@shared/file/sync'
+import { isLocalRemovedPath, isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
+import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
 import ViewSegment from '@renderer/ui/ViewSegment'
@@ -76,10 +86,16 @@ function formatSize(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
+/** 仅当预览相关字段变化时才刷新 selected，避免 files 列表重载导致预览反复取消 */
+function previewMetaKey(meta: FileMeta): string {
+  return `${meta.fileId}:${meta.previewStatus}:${meta.storagePath}:${meta.name}:${meta.ext}`
+}
+
 export default function FilesView(): React.ReactElement {
   const { t, locale } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
+  const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const files = useFileStore((s) => s.filesByGroup[gid] ?? [])
@@ -99,6 +115,7 @@ export default function FilesView(): React.ReactElement {
   const exportBookmarks = useFileStore((s) => s.exportBookmarks)
   const pullRemote = useFileStore((s) => s.pullRemote)
   const download = useFileStore((s) => s.download)
+  const sendExistingFile = useChatStore((s) => s.sendExistingFile)
 
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -110,10 +127,14 @@ export default function FilesView(): React.ReactElement {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewText, setPreviewText] = useState<string | null>(null)
   const [previewError, setPreviewError] = useState(false)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const consumedSelectFileIdRef = useRef<string | null>(null)
+  const previewRequestRef = useRef(0)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [bookmarkUrl, setBookmarkUrl] = useState('')
   const [bookmarkTitle, setBookmarkTitle] = useState('')
   const [bookmarkSaving, setBookmarkSaving] = useState(false)
+  const [sharingToChat, setSharingToChat] = useState(false)
 
   const categories = useMemo(
     () => CATEGORY_KEYS.map((c) => ({ label: t(c.key), value: c.value })),
@@ -138,6 +159,30 @@ export default function FilesView(): React.ReactElement {
   )
 
   useEffect(() => {
+    consumedSelectFileIdRef.current = null
+  }, [gid])
+
+  useEffect(() => {
+    const state = location.state as { selectFileId?: string } | null
+    const targetId = state?.selectFileId
+    if (!targetId || !gid) return
+    if (consumedSelectFileIdRef.current === targetId) return
+    const match = files.find((f) => f.fileId === targetId)
+    if (!match) return
+    consumedSelectFileIdRef.current = targetId
+    setSelected(match)
+    navigate(location.pathname, { replace: true, state: {} })
+  }, [location.pathname, location.state, navigate, files, gid])
+
+  useEffect(() => {
+    if (!selected) return
+    const fresh = files.find((f) => f.fileId === selected.fileId)
+    if (!fresh) return
+    if (previewMetaKey(fresh) === previewMetaKey(selected)) return
+    setSelected(fresh)
+  }, [files, selected])
+
+  useEffect(() => {
     if (!gid) return
     void loadFiles(gid, category === 'all' ? undefined : category)
     void loadTransfers(gid)
@@ -158,50 +203,91 @@ export default function FilesView(): React.ReactElement {
       setPreviewUrl(null)
       setPreviewText(null)
       setPreviewError(false)
+      setPreviewLoading(false)
       return
     }
     if (selected.isBookmark) {
       setPreviewUrl(null)
       setPreviewText(null)
       setPreviewError(false)
+      setPreviewLoading(false)
       return
     }
     if (isRemotePendingPath(selected.storagePath)) {
       setPreviewUrl(null)
       setPreviewText(null)
       setPreviewError(false)
+      setPreviewLoading(false)
+      return
+    }
+    if (isLocalRemovedPath(selected.storagePath)) {
+      setPreviewUrl(null)
+      setPreviewText(null)
+      setPreviewError(false)
+      setPreviewLoading(false)
+      return
+    }
+    if (selected.previewStatus === 'converting') {
+      setPreviewUrl(null)
+      setPreviewText(null)
+      setPreviewError(false)
+      setPreviewLoading(false)
       return
     }
 
+    const fileId = selected.fileId
     const isTextPreview = isTextPreviewFile(selected.name, selected.ext)
+    const requestId = ++previewRequestRef.current
 
+    setPreviewUrl(null)
+    setPreviewText(null)
     setPreviewError(false)
+    setPreviewLoading(true)
+
     if (isTextPreview) {
-      setPreviewUrl(null)
-      void loadPreviewText(selected.fileId)
+      void loadPreviewText(fileId)
         .then((text) => {
+          if (previewRequestRef.current !== requestId) return
           setPreviewText(text)
           setPreviewError(text === null)
         })
         .catch(() => {
+          if (previewRequestRef.current !== requestId) return
           setPreviewText(null)
           setPreviewError(true)
+        })
+        .finally(() => {
+          if (previewRequestRef.current !== requestId) return
+          setPreviewLoading(false)
         })
       return
     }
 
-    setPreviewText(null)
     void getLanpmApi()
-      .file.getPreviewUrl(selected.fileId)
+      .file.getPreviewUrl(fileId)
       .then((url) => {
+        if (previewRequestRef.current !== requestId) return
         setPreviewUrl(url)
         setPreviewError(!url)
       })
       .catch(() => {
+        if (previewRequestRef.current !== requestId) return
         setPreviewUrl(null)
         setPreviewError(true)
       })
-  }, [selected])
+      .finally(() => {
+        if (previewRequestRef.current !== requestId) return
+        setPreviewLoading(false)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅随预览相关字段变化重载
+  }, [
+    selected?.fileId,
+    selected?.previewStatus,
+    selected?.storagePath,
+    selected?.name,
+    selected?.ext,
+    selected?.isBookmark
+  ])
 
   const handlePullRemote = async (): Promise<void> => {
     if (!selected || !gid || !isRemotePendingPath(selected.storagePath)) return
@@ -223,24 +309,69 @@ export default function FilesView(): React.ReactElement {
       void handlePullRemote()
       return
     }
+    const fileId = selected.fileId
+    const requestId = ++previewRequestRef.current
+    setPreviewUrl(null)
+    setPreviewText(null)
     setPreviewError(false)
+    setPreviewLoading(true)
     if (isTextPreviewFile(selected.name, selected.ext)) {
-      void loadPreviewText(selected.fileId)
+      void loadPreviewText(fileId)
         .then((text) => {
+          if (previewRequestRef.current !== requestId) return
           setPreviewText(text)
           setPreviewError(text === null)
         })
-        .catch(() => setPreviewError(true))
+        .catch(() => {
+          if (previewRequestRef.current !== requestId) return
+          setPreviewError(true)
+        })
+        .finally(() => {
+          if (previewRequestRef.current !== requestId) return
+          setPreviewLoading(false)
+        })
       return
     }
     void getLanpmApi()
-      .file.getPreviewUrl(selected.fileId)
+      .file.getPreviewUrl(fileId)
       .then((url) => {
+        if (previewRequestRef.current !== requestId) return
         setPreviewUrl(url)
         setPreviewError(!url)
       })
-      .catch(() => setPreviewError(true))
+      .catch(() => {
+        if (previewRequestRef.current !== requestId) return
+        setPreviewError(true)
+      })
+      .finally(() => {
+        if (previewRequestRef.current !== requestId) return
+        setPreviewLoading(false)
+      })
   }
+
+  const handleDeleteLocal = useCallback(
+    async (file: FileMeta): Promise<void> => {
+      if (file.isBookmark || isRemotePendingPath(file.storagePath)) return
+      Modal.confirm({
+        title: t('files.deleteLocalConfirmTitle'),
+        content: t('files.deleteLocalConfirmBody'),
+        okText: t('files.deleteLocalRun'),
+        cancelText: t('common.cancel'),
+        okButtonProps: { danger: true },
+        onOk: async () => {
+          const ok = await getLanpmApi().file.deleteLocal(file.fileId)
+          if (!ok) {
+            message.warning(t('files.deleteLocalFailed'))
+            return
+          }
+          message.success(t('files.deleteLocalDone'))
+          if (selected?.fileId === file.fileId) setSelected(null)
+          void loadFiles(gid, category === 'all' ? undefined : category)
+        }
+      })
+    },
+    [gid, category, loadFiles, message, selected, t]
+  )
 
   const handleDownload = useCallback(
     async (file: FileMeta): Promise<void> => {
@@ -278,13 +409,16 @@ export default function FilesView(): React.ReactElement {
 
   const handleShareToChat = (): void => {
     if (!selected || !gid) return
-    const draft = selected.isBookmark
-      ? t('files.shareBookmarkDraft', {
-          title: selected.bookmarkTitle ?? selected.name,
-          url: selected.bookmarkUrl ?? ''
-        })
-      : t('files.shareFileDraft', { name: selected.name })
-    navigate(groupViewPath(gid, 'chat'), { state: { composeDraft: draft } })
+    setSharingToChat(true)
+    void sendExistingFile(gid, selected.fileId)
+      .then(() => {
+        message.success(t('files.sharedToChat'))
+        navigate(groupViewPath(gid, 'chat'))
+      })
+      .catch((err: unknown) => {
+        message.error(err instanceof Error ? err.message : t('chat.fileSendFailed'))
+      })
+      .finally(() => setSharingToChat(false))
   }
 
   const saveBookmark = async (): Promise<void> => {
@@ -391,6 +525,7 @@ export default function FilesView(): React.ReactElement {
         width: 72,
         render: (_: unknown, r: FileMeta) => {
           if (r.isBookmark) return t('common.link')
+          if (isLocalRemovedPath(r.storagePath)) return t('files.localRemoved')
           if (isRemotePendingPath(r.storagePath)) return t('files.remotePending')
           if (r.previewStatus === 'ready') return t('files.previewReady')
           if (r.previewStatus === 'converting') return t('files.previewConverting')
@@ -401,24 +536,34 @@ export default function FilesView(): React.ReactElement {
       {
         title: t('files.colActions'),
         key: 'actions',
-        width: 56,
+        width: 88,
         render: (_: unknown, r: FileMeta) =>
           r.isBookmark || isRemotePendingPath(r.storagePath) ? null : (
-            <Button
-              type="text"
-              size="small"
-              icon={<DownloadOutlined />}
-              aria-label={t('files.download')}
-              title={t('files.download')}
-              onClick={(e) => {
-                e.stopPropagation()
-                void handleDownload(r)
-              }}
-            />
+            <Space size={4} onClick={(e) => e.stopPropagation()}>
+              {!isLocalRemovedPath(r.storagePath) ? (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<DownloadOutlined />}
+                  aria-label={t('files.download')}
+                  title={t('files.download')}
+                  onClick={() => void handleDownload(r)}
+                />
+              ) : null}
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                aria-label={t('files.deleteLocalRun')}
+                title={t('files.deleteLocalRun')}
+                onClick={() => void handleDeleteLocal(r)}
+              />
+            </Space>
           )
       }
     ]
-  }, [t, locale, categoryLabels, sortField, sortOrder, handleDownload])
+  }, [t, locale, categoryLabels, sortField, sortOrder, handleDownload, handleDeleteLocal])
 
   return (
     <div className={styles.root}>
@@ -506,6 +651,9 @@ export default function FilesView(): React.ReactElement {
                   size="small"
                   style={{ flex: 1, margin: '0 12px' }}
                 />
+                {tr.fromDeviceId === tr.toDeviceId ? (
+                  <Tag color="default">{t('files.transferLocalQueue')}</Tag>
+                ) : null}
                 <TagStatus status={tr.status} label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')} />
               </div>
             </List.Item>
@@ -618,6 +766,7 @@ export default function FilesView(): React.ReactElement {
                   type="primary"
                   size="small"
                   icon={<CommentOutlined />}
+                  loading={sharingToChat}
                   onClick={handleShareToChat}
                 >
                   {t('files.shareToChat')}
@@ -640,9 +789,13 @@ export default function FilesView(): React.ReactElement {
                 </div>
               ) : isRemotePendingPath(selected.storagePath) ? (
                 <Text type="secondary">{t('files.remotePending')}</Text>
+              ) : isLocalRemovedPath(selected.storagePath) ? (
+                <Text type="secondary">{t('files.localRemoved')}</Text>
               ) : selected.previewStatus === 'converting' ? (
-            <Text>{t('files.convertingLocal')}</Text>
-          ) : previewError ? (
+                <Text>{t('files.convertingLocal')}</Text>
+              ) : previewLoading ? (
+                <ViewLoadingCenter />
+              ) : previewError ? (
             <ViewErrorCenter message={t('files.previewLoadFailed')} onRetry={retryPreview} />
           ) : selected.previewStatus === 'failed' ? (
             <Text type="danger">{t('files.previewFailedDownload')}</Text>

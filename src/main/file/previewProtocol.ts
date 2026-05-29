@@ -1,8 +1,8 @@
 import { net, protocol } from 'electron'
-import { existsSync } from 'fs'
 import { pathToFileURL } from 'node:url'
 import type { Database } from 'better-sqlite3'
 import { getFileById } from '../storage/repositories/fileRepository'
+import { resolvePreviewDiskPath } from './storagePathResolver'
 
 export const LANPM_PREVIEW_SCHEME = 'lanpm-preview'
 
@@ -24,12 +24,8 @@ export function registerPreviewScheme(): void {
 
 function resolveDiskPath(db: Database, fileId: string): string | null {
   const meta = getFileById(db, fileId)
-  if (!meta || meta.isBookmark) return null
-  if (meta.previewStatus === 'ready' && meta.previewPath && existsSync(meta.previewPath)) {
-    return meta.previewPath
-  }
-  if (existsSync(meta.storagePath)) return meta.storagePath
-  return null
+  if (!meta) return null
+  return resolvePreviewDiskPath(meta)
 }
 
 export function registerPreviewProtocol(getDb: () => Database): void {

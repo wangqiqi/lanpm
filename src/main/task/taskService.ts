@@ -16,6 +16,9 @@ import {
   getTaskById,
   insertTask,
   listTasksByGroup,
+  clearTaskDependencies,
+  listActiveChildTasks,
+  promoteChildrenToRoot,
   softDeleteTask,
   updateTaskRow
 } from '../storage/repositories/taskRepository'
@@ -25,6 +28,7 @@ import {
   upsertDependency
 } from '../storage/repositories/taskDependencyRepository'
 import { publishChatMessage } from '../chat/chatService'
+import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { publishTaskDelete, publishTaskUpsert } from './taskSyncService'
 
 function assertTaskWritable(db: Database, groupId: string): void {
@@ -160,16 +164,35 @@ export function upsertTaskDependency(db: Database, input: UpsertDependencyInput)
   return dep
 }
 
-export function deleteGroupTask(db: Database, taskId: string): boolean {
+function deleteTaskRecursive(db: Database, task: Task, mode: DeleteTaskMode): void {
+  const children = listActiveChildTasks(db, task.groupId, task.taskId)
+  if (mode === 'cascade') {
+    for (const child of children) {
+      deleteTaskRecursive(db, child, mode)
+    }
+  } else {
+    const promoted = promoteChildrenToRoot(db, task.groupId, task.taskId)
+    for (const child of promoted) {
+      publishTaskUpsert(db, child)
+    }
+  }
+  clearTaskDependencies(db, task.taskId)
+  if (softDeleteTask(db, task.taskId)) {
+    publishTaskDelete(db, task)
+  }
+}
+
+export function deleteGroupTask(
+  db: Database,
+  taskId: string,
+  mode: DeleteTaskMode = 'promote'
+): boolean {
   const existing = getTaskById(db, taskId)
   if (!existing) return false
   assertTaskWritable(db, existing.groupId)
-  const ok = softDeleteTask(db, taskId)
-  if (ok) {
-    publishTaskDelete(db, existing)
-    broadcastTasksChanged(existing.groupId)
-  }
-  return ok
+  deleteTaskRecursive(db, existing, mode)
+  broadcastTasksChanged(existing.groupId)
+  return true
 }
 
 export function deleteTaskDependency(

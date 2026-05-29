@@ -14,6 +14,10 @@ import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSear
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import TaskDetailPanel, { type TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPanel'
 import { useI18n } from '@renderer/i18n/useI18n'
+import {
+  confirmDeleteParentTask,
+  countTaskDescendants
+} from '@renderer/features/task/confirmDeleteParentTask'
 import styles from './tree.module.css'
 
 function buildTreeData(
@@ -23,9 +27,11 @@ function buildTreeData(
   onStartInlineEdit: (taskId: string) => void,
   onInlineProgressCommit: (taskId: string, value: number) => void
 ): DataNode[] {
+  const taskIds = new Set(tasks.map((t) => t.taskId))
   const byParent = new Map<string | undefined, Task[]>()
   for (const t of tasks) {
-    const key = t.parentTaskId ?? '__root__'
+    const parentMissing = t.parentTaskId != null && !taskIds.has(t.parentTaskId)
+    const key = parentMissing ? '__root__' : (t.parentTaskId ?? '__root__')
     const list = byParent.get(key) ?? []
     list.push(t)
     byParent.set(key, list)
@@ -205,8 +211,16 @@ export default function TaskTreeView(): React.ReactElement {
 
   const handleDetailDelete = useCallback(
     async (taskId: string) => {
+      const task = tasks.find((t) => t.taskId === taskId)
+      if (!task) return
+      const childCount = countTaskDescendants(tasks, taskId)
+      const mode =
+        childCount > 0
+          ? await confirmDeleteParentTask({ t, taskTitle: task.title, childCount })
+          : 'promote'
+      if (!mode) return
       try {
-        const ok = await deleteTask(taskId)
+        const ok = await deleteTask(taskId, mode)
         if (ok) {
           message.success(t('tree.detailDeleted'))
           setSelectedTaskId(null)
@@ -218,7 +232,7 @@ export default function TaskTreeView(): React.ReactElement {
         message.error(err instanceof Error ? err.message : t('board.deleteFailed'))
       }
     },
-    [deleteTask, t, message]
+    [tasks, deleteTask, t, message]
   )
 
   const handleCreateRoot = async (): Promise<void> => {

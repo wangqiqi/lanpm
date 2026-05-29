@@ -453,6 +453,9 @@ export function createBrowserLanpmStub(): LanpmApi {
       sendFile: async () => {
         throw stubError('stub.uploadElectronOnly')
       },
+      sendExistingFile: async () => {
+        throw stubError('stub.uploadElectronOnly')
+      },
       captureAndSendScreenshot: async () => {
         throw stubError('stub.screenshotElectronOnly')
       },
@@ -597,6 +600,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         void fileId
         throw stubError('stub.uploadElectronOnly')
       },
+      deleteLocal: async () => false,
       onTransfersChanged: () => () => undefined
     },
     group: {
@@ -809,6 +813,30 @@ export function createBrowserLanpmStub(): LanpmApi {
           ]
         }
       }
+    },
+    data: {
+      getStorageSettings: async () => ({
+        localRetentionDays: 90,
+        syncWindowDays: 7,
+        messageCount: 0
+      }),
+      getStorageUsage: async () => ({ messageCount: 0, fileCount: 0 }),
+      setLocalRetentionDays: async (days) => days,
+      runCleanup: async () => ({
+        messagesDeleted: 0,
+        receiptsDeleted: 0,
+        transfersDeleted: 0,
+        tasksDeleted: 0
+      }),
+      clearGroupMessages: async () => 0,
+      listDmGroupIds: async () => [],
+      exportGroupBundle: async () => null,
+      importGroupBundle: async () => ({
+        messagesImported: 0,
+        tasksImported: 0,
+        filesImported: 0,
+        skipped: 0
+      })
     }
   }
 }

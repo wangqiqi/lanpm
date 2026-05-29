@@ -32,6 +32,8 @@ const api: LanpmApi = {
     markRead: (groupId, msgIds) => ipcRenderer.invoke('chat:markRead', groupId, msgIds),
     pickAndSendFile: (groupId) => ipcRenderer.invoke('chat:pickAndSendFile', groupId),
     sendFile: (groupId, filePath) => ipcRenderer.invoke('chat:sendFile', groupId, filePath),
+    sendExistingFile: (groupId, fileId) =>
+      ipcRenderer.invoke('chat:sendExistingFile', groupId, fileId),
     captureAndSendScreenshot: (groupId) =>
       ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
     onMessage: (handler: (message: ChatMessage) => void) => {
@@ -53,7 +55,7 @@ const api: LanpmApi = {
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>
       ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),
-    deleteTask: (taskId) => ipcRenderer.invoke('task:deleteTask', taskId),
+    deleteTask: (taskId, mode) => ipcRenderer.invoke('task:deleteTask', taskId, mode),
     onTasksChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)
@@ -78,6 +80,7 @@ const api: LanpmApi = {
     exportBookmarks: (groupId) => ipcRenderer.invoke('file:exportBookmarks', groupId),
     pullRemote: (fileId) => ipcRenderer.invoke('file:pullRemote', fileId),
     download: (fileId) => ipcRenderer.invoke('file:download', fileId),
+    deleteLocal: (fileId) => ipcRenderer.invoke('file:deleteLocal', fileId),
     onTransfersChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)
@@ -119,6 +122,19 @@ const api: LanpmApi = {
   },
   discover: {
     snapshot: () => ipcRenderer.invoke('discover:snapshot')
+  },
+  data: {
+    getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
+    getStorageUsage: () => ipcRenderer.invoke('data:getStorageUsage'),
+    setLocalRetentionDays: (days) => ipcRenderer.invoke('data:setLocalRetentionDays', days),
+    runCleanup: (options) => ipcRenderer.invoke('data:runCleanup', options),
+    clearGroupMessages: (groupId, mode) =>
+      ipcRenderer.invoke('data:clearGroupMessages', groupId, mode),
+    listDmGroupIds: () => ipcRenderer.invoke('data:listDmGroupIds'),
+    exportGroupBundle: (groupId, password, includeFileBodies) =>
+      ipcRenderer.invoke('data:exportGroupBundle', groupId, password, includeFileBodies),
+    importGroupBundle: (password, conflictMode) =>
+      ipcRenderer.invoke('data:importGroupBundle', password, conflictMode)
   }
 }
 

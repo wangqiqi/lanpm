@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { DeleteTaskMode } from '@shared/task/deleteMode'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '@shared/task/types'
 import type { UpsertDependencyInput } from '@shared/task/dependency'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -12,7 +13,7 @@ interface TaskState {
   updateSchedule: (input: GanttScheduleInput) => Promise<Task>
   upsertDependency: (input: UpsertDependencyInput) => Promise<void>
   moveTask: (input: MoveTaskInput) => Promise<Task>
-  deleteTask: (taskId: string) => Promise<boolean>
+  deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>
   createFromChat: (groupId: string, title: string) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
   setTasks: (groupId: string, tasks: Task[]) => void
 }
@@ -87,12 +88,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     return task
   },
 
-  deleteTask: async (taskId) => {
+  deleteTask: async (taskId, mode) => {
     const existing = get().tasksByGroup
     const groupId = Object.keys(existing).find((gid) =>
       existing[gid]?.some((t) => t.taskId === taskId)
     )
-    const ok = await getLanpmApi().task.deleteTask(taskId)
+    const ok = await getLanpmApi().task.deleteTask(taskId, mode)
     if (ok && groupId) await get().loadTasks(groupId)
     return ok
   },

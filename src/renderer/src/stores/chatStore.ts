@@ -12,8 +12,11 @@ interface ChatState {
   sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
   pickAndSendFile: (groupId: string) => Promise<void>
   sendFile: (groupId: string, filePath: string) => Promise<void>
+  sendExistingFile: (groupId: string, fileId: string) => Promise<void>
   captureAndSendScreenshot: (groupId: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
+  /** DATA-CHATSTORE-EVICT — 本机清理后丢弃内存缓存 */
+  evictGroup: (groupId: string) => void
 }
 
 function sortMessages(list: ChatMessage[]): ChatMessage[] {
@@ -69,9 +72,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const message = await getLanpmApi().chat.sendFile(groupId, filePath)
     get().upsertMessage(message)
   },
+  sendExistingFile: async (groupId, fileId) => {
+    const message = await getLanpmApi().chat.sendExistingFile(groupId, fileId)
+    get().upsertMessage(message)
+  },
   captureAndSendScreenshot: async (groupId) => {
     const message = await getLanpmApi().chat.captureAndSendScreenshot(groupId)
     if (message) get().upsertMessage(message)
+  },
+  evictGroup: (groupId) => {
+    set((s) => {
+      const rest = { ...s.messagesByGroup }
+      delete rest[groupId]
+      return { messagesByGroup: rest }
+    })
   },
   upsertMessage: (message) => {
     set((s) => {

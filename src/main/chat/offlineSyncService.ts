@@ -3,31 +3,24 @@ import { randomUUID } from 'crypto'
 import type { ChatMessage } from '../../shared/chat/types'
 import {
   OFFLINE_SYNC_BATCH_LIMIT,
-  OFFLINE_SYNC_META_KEY,
-  OFFLINE_SYNC_TTL_DAYS,
   type ChatSyncBatchPayload,
   type ChatSyncRequestPayload,
   offlineSyncCutoffIso
 } from '../../shared/chat/offlineSync'
+import { SYNC_WINDOW_DAYS } from '../../shared/data/retention'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
-import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 import {
   getMaxLamportTs,
   insertMessage,
+  listDistinctDmGroupIds,
   listMessagesSince,
   messageExists
 } from '../storage/repositories/messageRepository'
 import { broadcastMessage } from './chatBroadcast'
-
-function ttlDays(db: Database): number {
-  const raw = getMeta(db, OFFLINE_SYNC_META_KEY)
-  const n = raw ? Number(raw) : OFFLINE_SYNC_TTL_DAYS
-  return Number.isFinite(n) && n > 0 ? n : OFFLINE_SYNC_TTL_DAYS
-}
 
 function storeIncomingMessage(db: Database, incoming: ChatMessage, groupId: string): void {
   if (messageExists(db, incoming.msgId)) return
@@ -41,20 +34,28 @@ export async function requestOfflineSync(db: Database): Promise<void> {
   const status = getSetupStatus(db)
   if (!transport || !status.configured || !status.user || !status.device) return
 
-  const minCreatedAt = offlineSyncCutoffIso(ttlDays(db))
+  const minCreatedAt = offlineSyncCutoffIso(SYNC_WINDOW_DAYS)
   const now = new Date().toISOString()
 
+  const groupIds = new Set<string>()
   for (const group of listUserGroups(db)) {
     if (isMemoryOnlyChatGroup(group.groupId, resolveGroupType(db, group.groupId))) continue
-    const sinceLamportTs = getMaxLamportTs(db, group.groupId)
+    groupIds.add(group.groupId)
+  }
+  for (const dmGroupId of listDistinctDmGroupIds(db)) {
+    groupIds.add(dmGroupId)
+  }
+
+  for (const groupId of groupIds) {
+    const sinceLamportTs = getMaxLamportTs(db, groupId)
     const payload: ChatSyncRequestPayload = { sinceLamportTs, minCreatedAt }
     const envelope: SyncEnvelope = {
       version: 1,
       type: 'chat_sync_request',
-      msgId: `sync_req_${group.groupId}_${Date.now()}`,
+      msgId: `sync_req_${groupId}_${Date.now()}`,
       senderUserId: status.user.userId,
       senderDeviceId: status.device.deviceId,
-      groupId: group.groupId,
+      groupId,
       ts: now,
       payload,
       nonce: '',
@@ -114,15 +115,9 @@ export function handleChatSyncBatch(db: Database, envelope: SyncEnvelope): void 
   const payload = envelope.payload as ChatSyncBatchPayload
   if (!Array.isArray(payload?.messages)) return
 
-  const cutoff = offlineSyncCutoffIso(ttlDays(db))
+  const cutoff = offlineSyncCutoffIso(SYNC_WINDOW_DAYS)
   for (const incoming of payload.messages) {
     if (!incoming?.msgId || incoming.createdAt < cutoff) continue
     storeIncomingMessage(db, incoming, envelope.groupId)
-  }
-}
-
-export function initOfflineSyncMeta(db: Database): void {
-  if (!getMeta(db, OFFLINE_SYNC_META_KEY)) {
-    setMeta(db, OFFLINE_SYNC_META_KEY, String(OFFLINE_SYNC_TTL_DAYS))
   }
 }

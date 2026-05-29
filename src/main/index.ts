@@ -8,13 +8,16 @@ import { registerIdentityIpc } from './ipc/identity'
 import { registerTaskIpc } from './ipc/task'
 import { registerFileIpc } from './ipc/file'
 import { repairFilePreviewPaths } from './storage/repositories/fileRepository'
+import { repairFileStoragePaths } from './file/storagePathResolver'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
 import { registerSearchIpc } from './ipc/search'
 import { registerDiscoverIpc } from './ipc/discover'
+import { registerDataIpc } from './ipc/data'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
+import { ensureProfileUserDataPath } from './storage/profilePaths'
 import { resolveAppIconPath } from './appIcon'
 import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
 import { initScreenshotService, shutdownScreenshotService } from './screenshot/screenshotService'
@@ -72,6 +75,7 @@ function registerAllIpcHandlers(): void {
   registerNetworkIpc()
   registerBadgeIpc()
   registerDiscoverIpc()
+  registerDataIpc()
 }
 
 function createWindow(): BrowserWindow {
@@ -141,8 +145,12 @@ app.whenReady().then(() => {
   try {
     Menu.setApplicationMenu(null)
 
+    if (!visualCaptureDir) {
+      ensureProfileUserDataPath()
+    }
     initDatabase()
     repairFilePreviewPaths(getDatabase())
+    repairFileStoragePaths(getDatabase())
     registerPreviewProtocol(getDatabase)
     ensureSeedGroups(getDatabase())
     initNetwork(getDatabase())

@@ -17,6 +17,14 @@ import type {
   AiReportResult,
   CockpitDashboard
 } from './cockpit/types'
+import type { DeleteTaskMode } from './task/deleteMode'
+import type { BundleConflictMode, GroupBundleImportResult } from './data/bundle'
+import type {
+  ClearGroupMessagesMode,
+  DataCleanupOptions,
+  DataCleanupResult,
+  DataStorageSettingsView
+} from './data/types'
 
 export interface LanpmApi {
   platform: NodeJS.Platform | 'browser'
@@ -46,6 +54,8 @@ export interface LanpmApi {
     markRead: (groupId: string, msgIds: string[]) => Promise<void>
     pickAndSendFile: (groupId: string) => Promise<ChatMessage | null>
     sendFile: (groupId: string, filePath: string) => Promise<ChatMessage>
+    /** 引用已上传文件发送群聊消息（文件视图「发送到群聊」） */
+    sendExistingFile: (groupId: string, fileId: string) => Promise<ChatMessage>
     /** 区域截图 + 标注，确认后作为图片文件发送到群聊（仅 Electron） */
     captureAndSendScreenshot: (groupId: string) => Promise<ChatMessage | null>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
@@ -62,7 +72,7 @@ export interface LanpmApi {
     updateSchedule: (input: GanttScheduleInput) => Promise<Task>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
-    deleteTask: (taskId: string) => Promise<boolean>
+    deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>
     onTasksChanged: (handler: (groupId: string) => void) => () => void
   }
   search: {
@@ -87,7 +97,25 @@ export interface LanpmApi {
     exportBookmarks: (groupId: string) => Promise<string | null>
     pullRemote: (fileId: string) => Promise<import('./file/types').FileMeta>
     download: (fileId: string) => Promise<string | null>
+    deleteLocal: (fileId: string) => Promise<boolean>
     onTransfersChanged: (handler: (groupId: string) => void) => () => void
+  }
+  data: {
+    getStorageSettings: () => Promise<DataStorageSettingsView>
+    getStorageUsage: () => Promise<{ messageCount: number; fileCount: number }>
+    setLocalRetentionDays: (days: number) => Promise<number>
+    runCleanup: (options: DataCleanupOptions) => Promise<DataCleanupResult>
+    clearGroupMessages: (groupId: string, mode: ClearGroupMessagesMode) => Promise<number>
+    listDmGroupIds: () => Promise<string[]>
+    exportGroupBundle: (
+      groupId: string,
+      password: string,
+      includeFileBodies?: boolean
+    ) => Promise<string | null>
+    importGroupBundle: (
+      password: string,
+      conflictMode: BundleConflictMode
+    ) => Promise<GroupBundleImportResult | null>
   }
   group: {
     list: () => Promise<GroupRecord[]>

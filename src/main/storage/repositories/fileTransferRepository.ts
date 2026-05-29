@@ -6,6 +6,8 @@ interface TransferRow {
   file_id: string
   group_id: string
   direction: string
+  from_device_id: string
+  to_device_id: string
   status: string
   total_bytes: number
   transferred_bytes: number
@@ -99,6 +101,8 @@ export function listTransfersByGroup(db: Database, groupId: string): FileTransfe
     fileId: r.file_id,
     groupId: r.group_id,
     direction: r.direction as 'upload' | 'download',
+    fromDeviceId: r.from_device_id,
+    toDeviceId: r.to_device_id,
     status: r.status as FileTransferStatus,
     totalBytes: r.total_bytes,
     transferredBytes: r.transferred_bytes,
@@ -133,6 +137,8 @@ export function getTransferById(db: Database, transferId: string): FileTransferV
     fileId: row.file_id,
     groupId: row.group_id,
     direction: row.direction as 'upload' | 'download',
+    fromDeviceId: row.from_device_id,
+    toDeviceId: row.to_device_id,
     status: row.status as FileTransferStatus,
     totalBytes: row.total_bytes,
     transferredBytes: row.transferred_bytes,
@@ -159,6 +165,8 @@ export function listTransferHistory(db: Database, groupId: string, limit = 100):
     fileId: r.file_id,
     groupId: r.group_id,
     direction: r.direction as 'upload' | 'download',
+    fromDeviceId: r.from_device_id,
+    toDeviceId: r.to_device_id,
     status: r.status as FileTransferStatus,
     totalBytes: r.total_bytes,
     transferredBytes: r.transferred_bytes,
@@ -167,6 +175,19 @@ export function listTransferHistory(db: Database, groupId: string, limit = 100):
     finishedAt: r.finished_at ?? undefined,
     errorMessage: r.error_message ?? undefined
   }))
+}
+
+/** 清理已完成/失败且超过 maxAgeDays 的传输历史 */
+export function purgeOldTransfers(db: Database, maxAgeDays: number): number {
+  const cutoff = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000).toISOString()
+  const result = db
+    .prepare(
+      `DELETE FROM file_transfers
+       WHERE status IN ('completed', 'failed', 'cancelled', 'paused')
+         AND COALESCE(finished_at, started_at) < ?`
+    )
+    .run(cutoff)
+  return result.changes
 }
 
 export function listResumableTransfers(db: Database, groupId: string): FileTransferView[] {
@@ -186,6 +207,8 @@ export function listResumableTransfers(db: Database, groupId: string): FileTrans
     fileId: r.file_id,
     groupId: r.group_id,
     direction: r.direction as 'upload' | 'download',
+    fromDeviceId: r.from_device_id,
+    toDeviceId: r.to_device_id,
     status: r.status as FileTransferStatus,
     totalBytes: r.total_bytes,
     transferredBytes: r.transferred_bytes,

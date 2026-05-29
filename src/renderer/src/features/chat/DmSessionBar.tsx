@@ -42,10 +42,15 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
   const groups = useNavigationStore((s) => s.groups)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const pruneDisallowedOrigins = useDmStore((s) => s.pruneDisallowedOrigins)
+  const syncWithDatabase = useDmStore((s) => s.syncWithDatabase)
 
   useEffect(() => {
     pruneDisallowedOrigins(getGroupType)
   }, [pruneDisallowedOrigins, getGroupType])
+
+  useEffect(() => {
+    if (localUserId) void syncWithDatabase(localUserId)
+  }, [localUserId, syncWithDatabase])
 
   const inDm = isDmGroupId(activeGroupId)
   const contextProjectId = inDm

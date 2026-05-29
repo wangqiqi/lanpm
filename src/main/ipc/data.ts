@@ -1,0 +1,77 @@
+import { ipcMain } from 'electron'
+import { DATA_IPC } from '../../shared/data/channels'
+import type { BundleConflictMode } from '../../shared/data/bundle'
+import type { ClearGroupMessagesMode, DataCleanupOptions } from '../../shared/data/types'
+import { exportGroupBundle, importGroupBundle } from '../data/bundleService'
+import {
+  clearGroupMessagesLocal,
+  getStorageSettings,
+  getStorageUsage,
+  runDataCleanup,
+  updateLocalRetentionDays
+} from '../data/dataService'
+import { listDistinctDmGroupIds } from '../storage/repositories/messageRepository'
+import { getDatabase } from '../storage'
+import { showOpenDialog, showSaveDialog } from '../systemDialog'
+
+export function registerDataIpc(): void {
+  ipcMain.handle(DATA_IPC.getStorageSettings, () => getStorageSettings(getDatabase()))
+
+  ipcMain.handle(DATA_IPC.getStorageUsage, () => getStorageUsage(getDatabase()))
+
+  ipcMain.handle(DATA_IPC.setLocalRetentionDays, (_event, days: number) => {
+    if (typeof days !== 'number') throw new Error('days required')
+    return updateLocalRetentionDays(getDatabase(), days)
+  })
+
+  ipcMain.handle(DATA_IPC.runCleanup, (_event, options: DataCleanupOptions) => {
+    if (!options || typeof options !== 'object') throw new Error('options required')
+    return runDataCleanup(getDatabase(), options)
+  })
+
+  ipcMain.handle(
+    DATA_IPC.clearGroupMessages,
+    (_event, groupId: string, mode: ClearGroupMessagesMode) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (mode !== 'older_than_retention' && mode !== 'all_local') {
+        throw new Error('invalid mode')
+      }
+      return clearGroupMessagesLocal(getDatabase(), groupId, mode)
+    }
+  )
+
+  ipcMain.handle(DATA_IPC.listDmGroupIds, () => listDistinctDmGroupIds(getDatabase()))
+
+  ipcMain.handle(
+    DATA_IPC.exportGroupBundle,
+    async (
+      _event,
+      groupId: string,
+      password: string,
+      includeFileBodies?: boolean
+    ) => {
+      if (!groupId || !password) throw new Error('groupId and password required')
+      const result = await showSaveDialog(null, {
+        defaultPath: `${groupId}.lanpm-bundle.json`
+      })
+      if (result.canceled || !result.filePath) return null
+      const path = result.filePath
+      exportGroupBundle(getDatabase(), groupId, password, path, !!includeFileBodies)
+      return path
+    }
+  )
+
+  ipcMain.handle(
+    DATA_IPC.importGroupBundle,
+    async (_event, password: string, conflictMode: BundleConflictMode) => {
+      if (!password) throw new Error('password required')
+      const picked = await showOpenDialog(null, {
+        filters: [{ name: 'LanPM Bundle', extensions: ['json'] }],
+        properties: ['openFile']
+      })
+      if (picked.canceled || !picked.filePaths[0]) return null
+      const path = picked.filePaths[0]
+      return importGroupBundle(getDatabase(), path, password, conflictMode ?? 'skip')
+    }
+  )
+}

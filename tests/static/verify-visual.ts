@@ -251,6 +251,9 @@ const regionCss = readFileSync(join(renderer, 'ui/regionInteract.module.css'), '
 assert.match(regionCss, /--lanpm-hover-bg/, 'regionInteract hover must use --lanpm-hover-bg (V-14b-HOV static)')
 assert.match(regionCss, /--lanpm-accent-fill/, 'regionInteract selected must use accent fill tokens')
 
+const viewSegmentCss = readFileSync(join(renderer, 'ui/ViewSegment.module.css'), 'utf8')
+assert.match(viewSegmentCss, /\.wrap:hover/, 'ViewSegment wrap hover ring (V-14b-HOV)')
+
 const sharedUiFontToken = /var\(--lanpm-font-(caption|body|title|display)\)/
 for (const rel of [
   'ui/ViewToolbar.module.css',
@@ -265,7 +268,7 @@ for (const rel of [
 for (const [rel, token] of [
   ['features/files/FilesView.tsx', 'ViewSegment'],
   ['features/gantt/GanttView.tsx', 'ViewSegment'],
-  ['features/chat/DmSessionBar.tsx', 'RegionTabBar'],
+  ['features/chat/DmSessionBar.tsx', 'dmSessionItem'],
   ['layout/TopBar.tsx', 'RegionButton']
 ] as const) {
   const src = readFileSync(join(renderer, rel), 'utf8')
