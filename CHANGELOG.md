@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.81] - 2026-05-30
+
+### Added
+- **代码文档审计**：完善 `archive/audit/docs-code/` 归档，记录 DOC-PRD/DOC-TECH/DOC-ACC/DOC-VIS/DOC-F 系列审计结论
+- **Blockmap 说明**：`.blockmap` 文件用于 electron-builder 差量更新，必须随安装包发布
+
+### Changed
+- **文档修正**：`docs/05_测试与联调发布.md` 更新部分描述
+
+### Tag
+- `v1.0.0-rc.81` — 代码文档审计 + Blockmap 说明
+
 ## [1.0.0-rc.80] - 2026-05-30
 
 ### Added
