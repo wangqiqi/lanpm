@@ -1,11 +1,11 @@
-import assert from 'node:assert/strict'
+import { describe, expect, it } from 'vitest'
 import {
   buildBoardRelationMap,
   collectRelatedTaskIds,
   getDependencyBlockersForStatus,
   getRootTaskId
-} from '../../../src/shared/task/boardRelations.ts'
-import type { Task } from '../../../src/shared/task/types.ts'
+} from '@shared/task/boardRelations'
+import type { Task } from '@shared/task/types'
 
 function task(partial: Partial<Task> & Pick<Task, 'taskId' | 'title'>): Task {
   return {
@@ -33,29 +33,39 @@ const tasks: Task[] = [
 
 const byId = new Map(tasks.map((t) => [t.taskId, t]))
 
-assert.equal(getRootTaskId('child', byId), 'root')
-
-const related = collectRelatedTaskIds('child', tasks, byId)
-assert.ok(related.includes('root'))
-assert.ok(related.includes('child'))
-
-const blockers = getDependencyBlockersForStatus(tasks[2]!, byId, 'done')
-assert.equal(blockers.length, 1)
-assert.equal(blockers[0]!.taskId, 'root')
-
-const ssTasks: Task[] = [
-  task({ taskId: 'a', title: 'A', status: 'todo' }),
-  task({
-    taskId: 'b',
-    title: 'B',
-    dependencies: [{ fromTaskId: 'a', toTaskId: 'b', type: 'SS' }]
+describe('boardRelations', () => {
+  it('resolves root task id', () => {
+    expect(getRootTaskId('child', byId)).toBe('root')
   })
-]
-const ssById = new Map(ssTasks.map((t) => [t.taskId, t]))
-assert.equal(getDependencyBlockersForStatus(ssTasks[1]!, ssById, 'doing').length, 1)
 
-const map = buildBoardRelationMap(tasks)
-assert.equal(map.get('blocked')?.blockedBy.length, 1)
-assert.ok((map.get('child')?.familyIndex ?? -1) >= 0)
+  it('collects related task ids', () => {
+    const related = collectRelatedTaskIds('child', tasks, byId)
+    expect(related).toContain('root')
+    expect(related).toContain('child')
+  })
 
-console.log('boardRelations.test: ok')
+  it('blocks FS dependency until predecessor is done', () => {
+    const blockers = getDependencyBlockersForStatus(tasks[2]!, byId, 'done')
+    expect(blockers).toHaveLength(1)
+    expect(blockers[0]!.taskId).toBe('root')
+  })
+
+  it('blocks SS dependency until predecessor starts', () => {
+    const ssTasks: Task[] = [
+      task({ taskId: 'a', title: 'A', status: 'todo' }),
+      task({
+        taskId: 'b',
+        title: 'B',
+        dependencies: [{ fromTaskId: 'a', toTaskId: 'b', type: 'SS' }]
+      })
+    ]
+    const ssById = new Map(ssTasks.map((t) => [t.taskId, t]))
+    expect(getDependencyBlockersForStatus(ssTasks[1]!, ssById, 'doing')).toHaveLength(1)
+  })
+
+  it('builds board relation map', () => {
+    const map = buildBoardRelationMap(tasks)
+    expect(map.get('blocked')?.blockedBy).toHaveLength(1)
+    expect(map.get('child')?.familyIndex ?? -1).toBeGreaterThanOrEqual(0)
+  })
+})

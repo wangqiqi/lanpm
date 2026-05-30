@@ -1,4 +1,4 @@
-import { BOARD_FAMILY_COUNT } from './boardRelations'
+import { BOARD_FAMILY_COUNT } from './boardRelations.ts'
 
 /** 看板 / 任务树 / 甘特 共用任务族色（与 `taskFamily.module.css` 一致） */
 export const TASK_FAMILY_COLORS: readonly string[] = [

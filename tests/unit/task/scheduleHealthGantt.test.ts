@@ -1,10 +1,10 @@
-import assert from 'node:assert/strict'
+import { describe, expect, it } from 'vitest'
 import {
   countScheduleHealth,
   mergeGanttBarStyles,
   GANTT_OVERDUE_BAR
-} from '../../../src/shared/task/scheduleHealth.ts'
-import type { Task } from '../../../src/shared/task/types.ts'
+} from '@shared/task/scheduleHealth'
+import type { Task } from '@shared/task/types'
 
 function task(partial: Partial<Task> & Pick<Task, 'taskId' | 'title'>): Task {
   return {
@@ -23,56 +23,74 @@ function task(partial: Partial<Task> & Pick<Task, 'taskId' | 'title'>): Task {
 const jan3 = new Date(2026, 0, 3)
 const jan5 = new Date(2026, 0, 5)
 
-const overdueStyles = mergeGanttBarStyles(
-  task({
-    taskId: 't1',
-    title: 'Late',
-    endDate: '2026-01-04',
-    progressPercent: 10
-  }),
-  { backgroundColor: '#0071e3', backgroundSelectedColor: '#0071e3', progressColor: '#0071e3', progressSelectedColor: '#0071e3' },
-  jan5
-)
-assert.equal(overdueStyles?.backgroundColor, GANTT_OVERDUE_BAR.backgroundColor)
+const baseBarStyles = {
+  backgroundColor: '#0071e3',
+  backgroundSelectedColor: '#0071e3',
+  progressColor: '#0071e3',
+  progressSelectedColor: '#0071e3'
+}
 
-const behindStyles = mergeGanttBarStyles(
-  task({
-    taskId: 't2',
-    title: 'Behind',
-    startDate: '2026-01-01',
-    endDate: '2026-01-04',
-    progressPercent: 25
-  }),
-  { backgroundColor: '#0071e3', backgroundSelectedColor: '#0071e3', progressColor: '#0071e3', progressSelectedColor: '#0071e3' },
-  jan3
-)
-assert.equal(behindStyles?.progressColor, '#c99700')
-assert.equal(behindStyles?.backgroundColor, '#0071e3')
-
-const onTrackStyles = mergeGanttBarStyles(
-  task({
-    taskId: 't3',
-    title: 'OK',
-    startDate: '2026-01-01',
-    endDate: '2026-01-04',
-    progressPercent: 80
-  }),
-  { backgroundColor: '#0071e3', backgroundSelectedColor: '#0071e3', progressColor: '#0071e3', progressSelectedColor: '#0071e3' },
-  jan3
-)
-assert.equal(onTrackStyles?.progressColor, '#34c759')
-
-const counts = countScheduleHealth([
-  task({ taskId: 'a', title: 'A', endDate: '2026-01-04', progressPercent: 0 }),
-  task({
-    taskId: 'b',
-    title: 'B',
-    startDate: '2026-01-01',
-    endDate: '2026-01-04',
-    progressPercent: 25
+describe('scheduleHealth gantt styles', () => {
+  it('applies overdue bar color', () => {
+    const overdueStyles = mergeGanttBarStyles(
+      task({
+        taskId: 't1',
+        title: 'Late',
+        endDate: '2026-01-04',
+        progressPercent: 10
+      }),
+      baseBarStyles,
+      jan5
+    )
+    expect(overdueStyles?.backgroundColor).toBe(GANTT_OVERDUE_BAR.backgroundColor)
   })
-], jan5)
-assert.equal(counts.overdue, 2)
-assert.equal(counts.behind, 0)
 
-console.log('scheduleHealthGantt.test.ts: ok')
+  it('applies behind progress color while keeping family background', () => {
+    const behindStyles = mergeGanttBarStyles(
+      task({
+        taskId: 't2',
+        title: 'Behind',
+        startDate: '2026-01-01',
+        endDate: '2026-01-04',
+        progressPercent: 25
+      }),
+      baseBarStyles,
+      jan3
+    )
+    expect(behindStyles?.progressColor).toBe('#c99700')
+    expect(behindStyles?.backgroundColor).toBe('#0071e3')
+  })
+
+  it('applies on-track progress color', () => {
+    const onTrackStyles = mergeGanttBarStyles(
+      task({
+        taskId: 't3',
+        title: 'OK',
+        startDate: '2026-01-01',
+        endDate: '2026-01-04',
+        progressPercent: 80
+      }),
+      baseBarStyles,
+      jan3
+    )
+    expect(onTrackStyles?.progressColor).toBe('#34c759')
+  })
+
+  it('counts schedule health across tasks', () => {
+    const counts = countScheduleHealth(
+      [
+        task({ taskId: 'a', title: 'A', endDate: '2026-01-04', progressPercent: 0 }),
+        task({
+          taskId: 'b',
+          title: 'B',
+          startDate: '2026-01-01',
+          endDate: '2026-01-04',
+          progressPercent: 25
+        })
+      ],
+      jan5
+    )
+    expect(counts.overdue).toBe(2)
+    expect(counts.behind).toBe(0)
+  })
+})

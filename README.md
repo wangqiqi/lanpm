@@ -1,106 +1,238 @@
-# LanPM
+<p align="center">
+  <img src="resources/logo.svg" alt="LanPM" width="96" height="96" />
+</p>
 
-分布式局域网/VPN 协作客户端（Electron）— 即时通讯 + 项目管理 + 文件共享。
+<h1 align="center">LanPM</h1>
 
-## 当前状态
+<p align="center">
+  <strong>Chat like FeiQ. Plan like a PM. Keep everything on your LAN.</strong>
+</p>
 
-- **RC**：`1.0.0-rc.75`（M0–M7 已闭环；发布门禁见 [docs/06](./docs/06_验收与里程碑计划.md) §2）
-- **说明**：`verify:m7` 通过表示自动化回归达标，不等于 PRD P0 全部完成或已达 1.0.0 发布门禁
-- 全量回归：`npm run verify:m7`
-- 验收清单：[docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md)
+<p align="center">
+  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="#-screenshots">Screenshots</a> ·
+  <a href="#-why-lanpm">Why LanPM</a> ·
+  <a href="#-features">Features</a> ·
+  <a href="#-quick-start">Quick Start</a> ·
+  <a href="#-documentation">Docs</a>
+</p>
 
-## 本地开发
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.0--rc.76-blue" alt="version" />
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
+  <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
+  <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
+</p>
+
+---
+
+## ✨ One line
+
+**LanPM** is a **decentralized LAN/VPN collaboration desktop app** — instant messaging, project management (Kanban / task tree / Gantt), and file sharing in **one window**, with **no central server** and **data that stays on your network**.
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="assets/chat.png" alt="LanPM chat — member list, messages, and bottom navigation" width="920" />
+</p>
+<p align="center"><sub><b>Chat</b> — group &amp; DM, members, code highlights, five-tab shell</sub></p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="assets/kanban.png" alt="KanPM Kanban board with columns and task cards" width="100%" /></td>
+    <td width="50%"><img src="assets/gantt.png" alt="LanPM Gantt chart timeline" width="100%" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Board</b> — drag columns, family colors, schedule health</sub></td>
+    <td align="center"><sub><b>Gantt</b> — timeline, dependencies, milestones</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/task-tree.png" alt="LanPM hierarchical task tree" width="100%" /></td>
+    <td width="50%"><img src="assets/file.png" alt="LanPM group file library" width="100%" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Task tree</b> — hierarchy, progress, cross-view locate</sub></td>
+    <td align="center"><sub><b>Files</b> — uploads, bookmarks, local preview</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="assets/export-gantt.png" alt="LanPM Gantt export to PNG or PDF" width="720" />
+</p>
+<p align="center"><sub><b>Gantt export</b> — PNG / PDF from the chart view</sub></p>
+
+---
+
+## 🎯 Why LanPM
+
+| Pain today | LanPM answer |
+|------------|----------------|
+| IM tools don’t do real project views | **5 views in one shell**: Chat · Board · Tree · Gantt · Files |
+| Project tools need cloud & accounts | **Peer-to-peer in the group** — discover nodes on the LAN, sync in-group |
+| Sensitive files forced through SaaS | **Local-first SQLite**, encrypted transport, **LibreOffice preview on device** |
+| “FeiQ / Feige” feel but no tasks | **Familiar IM UX** plus boards, dependencies, cockpit for leads |
+
+```
+   ┌──────────────────────────────────────────────────────────────┐
+   │  IM (FeiQ-style)  +  PM (Board / Tree / Gantt)  +  Files   │
+   │              +  Leadership cockpit  +  AI assist (opt-in)   │
+   │                                                              │
+   │     Core business data syncs inside the LAN — not to cloud   │
+   └──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Features
+
+### 💬 Communication that teams actually use
+
+- Group & DM, **@mentions**, read receipts, desktop notifications  
+- **Syntax-highlighted code** blocks, attachments, **`/task`** to create work from chat  
+- **7-day offline catch-up** sync for messages (RC)  
+- LAN **Discover** panel: join groups, ping online members, start DMs  
+
+### 📋 Project management — three lenses, one truth
+
+- **Kanban**: drag columns, family colors, FS/SS/FF/SF dependency rules when moving cards  
+- **Task tree**: parent/child hierarchy, progress roll-up, cross-view “locate in board/Gantt”  
+- **Gantt**: timeline, milestones, dependency lines, cross-view highlight & scroll-to-task  
+- **Schedule health** (on track / behind / overdue) consistent across board, tree, Gantt, and cockpit  
+
+### 📁 Files without leaving the building
+
+- Upload/download over the group network, **resumable transfers** & queue (RC)  
+- **LibreOffice local preview** for Office docs — preview stays on your machine  
+- Bookmarks & in-app WebView for team URLs  
+
+### 🏢 Built for real org shapes
+
+- **Project**, **functional**, and **anonymous** group types — tabs adapt to what each group allows  
+- **Leadership cockpit**: portfolio view, reports, API keys for optional AI workflows  
+- **Multi-device identity**: one person, many machines; online if any device is up; optional **suffix** for duplicate display names  
+- **Light / dark** theme and **zh / en** UI  
+
+### 🔒 Security & sovereignty (RC)
+
+- **AES-GCM** on the wire with ECDH key agreement (see [technical notes](./docs/02_技术实现建议.md))  
+- No mandatory cloud; optional AI can use **redacted** outbound calls  
+- Automated **verify:m7** regression suite for release confidence  
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+
+- **Node.js** 20+ (22 LTS recommended)  
+- **npm** 10+  
+- **Git**  
+
+### Run in 30 seconds (Linux / macOS / Git Bash)
 
 ```bash
-chmod +x onekey_run.sh   # 首次（Linux / macOS / Git Bash）
-./onekey_run.sh          # 交互菜单：start / stop / status / build / check …
-./onekey_run.sh start    # 后台启动 dev，日志见 .lanpm/dev.log
+git clone <your-repo-url> lanpm && cd lanpm
+chmod +x onekey_run.sh    # first time only
+./onekey_run.sh start     # dev in background → .lanpm/dev.log
 ```
 
-**Windows** 三套脚本**互不调用**，按终端选用：
-
-| 终端 | 脚本 |
-|------|------|
-| CMD | `onekey_run.bat` |
-| PowerShell | `.\onekey_run.ps1` |
-| Git Bash / WSL | `./onekey_run.sh` |
-
-```bat
-onekey_run.bat start
-```
-
-```powershell
-.\onekey_run.ps1 start
-```
+Or classic:
 
 ```bash
-npm install      # postinstall 会自动将 better-sqlite3 对齐到 Electron ABI
-npm run dev      # 启动前也会自动检测并重编（若 ABI 不一致）
-npm run lint     # ESLint
-npm run typecheck
-npm run test        # Vitest 单元（tests/unit，见 docs/05 §1）
-npm run verify:p0       # P0 一致性守卫（IPC / i18n / docs …）
-npm run verify:m7   # 全量回归（含 test + verify:* 集成）
-npm run build       # 生产构建
+npm install    # postinstall aligns better-sqlite3 to Electron ABI
+npm run dev    # Electron dev shell
 ```
 
-### 浏览器 Stub 与 Electron 差异（`UX-DEV-01`）
+### Windows
 
-| 场景 | Electron（`npm run dev`） | 浏览器 Vite（`:5173`，若启用 stub） |
-|------|---------------------------|-------------------------------------|
-| IPC / SQLite | 主进程 `getLanpmApi()` 真实或 Stub | `browserLanpmStub.ts` 内存桩 |
-| 文件上传/预览 | 系统对话框 + 本地路径 | 受限或 mock |
-| 路由 | HashRouter `#/g/...` | 同 Hash，但无 Electron 窗口壳 |
-| 推荐验收 | **以 Electron 为准** | 仅 UI 快速预览 |
+| Terminal | Command |
+|----------|---------|
+| CMD | `onekey_run.bat start` |
+| PowerShell | `.\onekey_run.ps1 start` |
+| Git Bash / WSL | `./onekey_run.sh start` |
 
-Stub 错误文案走 i18n（`verify:i18n-en` 守卫）；浏览器桩与 Electron 行为差异见上表。
+First launch runs a short **setup wizard** (display name, device name, optional department & avatar). Then you land in the main shell — default demo route `#/g/demo-project/chat`.
 
-### 手动验收 M1 路由（需已完成首次配置）
+---
 
-1. `npm run dev`，进入主壳后默认 `#/g/demo-project/chat`。
-2. 底部 5 个 Tab 切换，地址栏 hash 依次为 `.../chat|board|tree|gantt|files`，主区标题对应变化。
-3. 顶栏下拉选「示例职能群」：看板/任务树/甘特置灰，仅聊天与文件可点。
-4. 选「示例匿名群」：仅聊天可点；手动访问 `#/g/demo-anonymous/board` 应重定向到 `.../chat`。
-5. 浏览器地址输入 `#/cockpit` 进入驾驶舱占位页（无底栏）。
+## 🛠️ For contributors
 
-## 文档（开发必读）
+```bash
+npm run lint && npm run typecheck
+npm run test              # Vitest unit tests
+npm run verify:p0         # IPC / i18n / docs guards
+npm run verify:m7         # full RC regression (recommended before release)
+npm run build             # production Electron build
+```
 
-| 文档 | 说明 |
-|------|------|
-| [docs/00_文档导航.md](./docs/00_文档导航.md) | 索引、追溯矩阵、已拍板决策 |
-| [docs/01_产品需求文档.md](./docs/01_产品需求文档.md) | 产品需求（PRD） |
-| [docs/02_技术实现建议.md](./docs/02_技术实现建议.md) | 架构、网络（§13.6 手动添加节点）、非功能 |
-| [docs/03_数据模型与协议草案.md](./docs/03_数据模型与协议草案.md) | 实体、协议、SQLite（v0.2 基线） |
-| [docs/04_交互与UI约定.md](./docs/04_交互与UI约定.md) | 布局、主题、组件约定 |
-| [docs/05_测试与联调发布.md](./docs/05_测试与联调发布.md) | Vitest、verify:*、联调、视觉手验 |
-| [docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md) | P0 验收、里程碑、RC 发布门禁 |
+| Topic | Command / note |
+|-------|----------------|
+| Browser UI stub only | `npm run dev:web` — **Electron is the source of truth** for IPC & SQLite |
+| Visual consistency gate | `npm run verify:visual` (see [docs/06](./docs/06_验收与里程碑计划.md) §2.6) |
+| One-key menu | `./onekey_run.sh` → start / stop / status / build / check … |
 
-## 技术选型
+### Browser stub vs Electron
 
-**目标架构（PRD）**
+| Scenario | Electron (`npm run dev`) | Browser Vite (`:5173`) |
+|----------|----------------------------|-------------------------|
+| IPC / SQLite | Main-process API (real or stub) | In-memory `browserLanpmStub` |
+| File upload / preview | System dialog + local paths | Limited or mocked |
+| Acceptance | ✅ **Source of truth** | UI preview only |
 
-- 桌面：Electron
-- 前端：React 18 + TypeScript + **Ant Design 5.x**
-- 样式：**CSS Modules**；状态：**Zustand**
-- 甘特图：**gantt-task-react**（M4）
-- 存储：SQLite + IndexedDB（热缓存）
-- 同步：Yjs（任务）+ P2P/WebRTC（消息/文件）
-- 传输加密：UDP/TCP 发现 + 应用层 AES-GCM/DH（字段说明见 [docs/02](./docs/02_技术实现建议.md)）
-- Office 预览：LibreOffice 本地转换（数据不出域）
+Stub error strings go through i18n (`verify:i18n-en` guard).
 
-**当前 RC 实现**：主路径为 Electron + React + **SQLite（唯一持久化层）** + TCP/Stub 联调；Yjs/WebRTC/IndexedDB 热缓存为 post-RC；**7 天离线补同步**与文件断点续传/限速已落地 RC（见 [docs/01 §1.3.1](./docs/01_产品需求文档.md)）。
+---
 
-## 开发排期摘要
+## 🧱 Tech stack
 
-| 阶段 | 内容 |
-|------|------|
-| M0–M1 | 工程骨架、首次配置、主框架 5 视图 |
-| M2–M5 | 业务模块（聊天/任务/文件/群组/驾驶舱），**NetworkStub 联调** |
-| M6 | 真实 UDP/WebRTC 替换 Stub |
-| M7 | 验收、性能、发布（见 [docs/06](./docs/06_验收与里程碑计划.md) §2） |
+| Layer | Choice |
+|-------|--------|
+| Desktop | **Electron** |
+| UI | **React 18** + **TypeScript** + **Ant Design 5** |
+| State | **Zustand** · styling **CSS Modules** |
+| Gantt | **gantt-task-react** |
+| Persistence (RC) | **SQLite** (single source of truth) |
+| Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
+| Roadmap | Yjs CRDT · WebRTC · IndexedDB hot cache (post-RC) |
 
-发布前手验与联调步骤见 [docs/05](./docs/05_测试与联调发布.md)。
+---
 
-## 版本
+## 📚 Documentation
 
-当前 RC 号见 `package.json`；验收状态见 [docs/06_验收与里程碑计划.md](./docs/06_验收与里程碑计划.md) §2。
+| Doc | Contents |
+|-----|----------|
+| [docs/00 — Index](./docs/00_文档导航.md) | Navigation, traceability, decisions |
+| [docs/01 — PRD](./docs/01_产品需求文档.md) | Product requirements |
+| [docs/02 — Architecture](./docs/02_技术实现建议.md) | System design, networking |
+| [docs/04 — UI](./docs/04_交互与UI约定.md) | Layout, themes, components |
+| [docs/05 — Testing](./docs/05_测试与联调发布.md) | Vitest, verify:*, release QA |
+| [docs/06 — Milestones](./docs/06_验收与里程碑计划.md) | P0 acceptance & RC release gate |
+
+---
+
+## 🗺️ Status & roadmap
+
+| Milestone | Scope |
+|-----------|--------|
+| **M0–M1** | Scaffold, first-run setup, 5-view shell |
+| **M2–M5** | Chat, tasks, files, groups, cockpit |
+| **M6–M7** | Real network paths, perf & release gates |
+
+**Current:** `1.0.0-rc.76` — M0–M7 closed in automation; **`verify:m7` green ≠ every PRD P0 item ≠ 1.0.0 ship gate**. See [acceptance plan](./docs/06_验收与里程碑计划.md) §2.
+
+**Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
+
+---
+
+## 🌐 Languages
+
+- **English** — this file  
+- **简体中文** — [README.zh-CN.md](./README.zh-CN.md)
+
+---
+
+<p align="center">
+  <sub>Built for teams who want FeiQ-speed chat and real PM tooling — without shipping their IP to someone else's cloud.</sub>
+</p>

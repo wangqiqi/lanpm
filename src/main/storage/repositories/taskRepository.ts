@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { CreateTaskInput, Task, TaskPriority, TaskStatus, UpdateTaskInput } from '../../../shared/task/types'
-import { clampProgressPercent } from '../../../shared/task/validation'
+import { clampProgressPercent } from '../../../shared/task/validation.ts'
 
 interface TaskRow {
   task_id: string

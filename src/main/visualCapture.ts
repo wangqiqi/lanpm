@@ -121,14 +121,21 @@ async function waitForSeededTaskChrome(win: BrowserWindow, marker: string): Prom
   await win.webContents.executeJavaScript(`
     new Promise((resolve, reject) => {
       const marker = ${JSON.stringify(marker)}
-      const deadline = Date.now() + 20_000
-      const tick = () => {
+      const deadline = Date.now() + 35_000
+      const hasMarker = () => {
         const text = document.body?.innerText ?? ''
-        if (text.includes(marker)) return resolve(true)
+        if (text.includes(marker)) return true
+        for (const el of document.querySelectorAll('[class*="cardTitle"]')) {
+          if ((el.textContent ?? '').includes(marker)) return true
+        }
+        return false
+      }
+      const tick = () => {
+        if (hasMarker()) return resolve(true)
         if (Date.now() > deadline) {
           return reject(new Error('seed task not visible: ' + marker))
         }
-        setTimeout(tick, 200)
+        setTimeout(tick, 250)
       }
       tick()
     })
@@ -294,6 +301,7 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
   }
   seedVisualCaptureTasks(db)
   broadcastTasksChanged(GROUP_ID)
+  await wait(1_500)
   const taskMarker = '截图·设计评审'
   const ganttMeta: Record<string, number> = {}
 

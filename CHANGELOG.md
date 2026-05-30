@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.76] - 2026-05-30
+
+### Fixed
+- **CI `verify:m7` / Vitest**：`boardRelations`、`scheduleHealth`、`scheduleHealthGantt` 单测改为 `describe`/`it`（消除 `No test suite found`）
+- **Node `--experimental-strip-types`**：`taskRepository` 引入 `validation.ts`；`ganttAdapter` / `taskFamilyColors` 链式 import 补 `.ts` 后缀（修复 `task-sync`、`verify:m4` ESM 解析）
+- **`tsconfig.web.json`**：启用 `allowImportingTsExtensions`，与 node 侧及静态 verify 脚本一致
+
+### Added
+- **README**：中英双语产品页（截图、特性表、快速开始）；`README.zh-CN.md`；`assets/` 产品截图（聊天/看板/甘特/任务树/文件/导出）
+
+### Changed
+- **`visualCapture`**：种子任务等待延长至 35s、匹配 `cardTitle` 节点、广播后 1.5s 缓冲，提升 CI 截图稳定性
+
+### Tag
+- `v1.0.0-rc.76` — CI 单测与 ESM 回归修复 + README 产品页
+
 ## [1.0.0-rc.75] - 2026-05-29
 
 ### Fixed
