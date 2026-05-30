@@ -220,7 +220,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M2–M5** | Chat, tasks, files, groups, cockpit |
 | **M6–M7** | Real network paths, perf & release gates |
 
-**Current:** `1.0.0-rc.76` — M0–M7 closed in automation; **`verify:m7` green ≠ every PRD P0 item ≠ 1.0.0 ship gate**. See [acceptance plan](./docs/06_验收与里程碑计划.md) §2.
+**Current:** `1.0.0-rc.77` — M0–M7 closed in automation; **`verify:m7` green ≠ every PRD P0 item ≠ 1.0.0 ship gate**. See [acceptance plan](./docs/06_验收与里程碑计划.md) §2.
 
 **Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 
