@@ -3,7 +3,7 @@
 # 触发：push 标签 v*（仅 B 档「发布二进制」，见 .cursor/skills/lanpm-release）
 # 产物：Windows NSIS · macOS DMG · Linux AppImage（electron-builder.yml）
 #
-# Immutable Releases：先 draft 上传资产，再 publish（见 publish job）
+# Immutable Releases：先 draft 上传资产，再 publish（GitHub REST API，无需 checkout）
 # 权限：GITHUB_TOKEN 写 Release；无需 Apple 签名即可产出未签名包（本地/内网分发）
 
 name: Release
@@ -15,9 +15,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to build/publish (e.g. v1.0.0-rc.77)'
+        description: 'Release tag (e.g. v1.0.0-rc.78)'
         required: true
         type: string
+      publish_only:
+        description: 'Skip build — only publish existing draft release'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: release-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
@@ -50,6 +55,7 @@ jobs:
   build:
     name: Build (${{ matrix.label }})
     needs: resolve-tag
+    if: github.event_name != 'workflow_dispatch' || inputs.publish_only != true
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
     strategy:
@@ -103,7 +109,6 @@ jobs:
 
       - name: Package installer
         env:
-          # 无开发者证书时仍可产出未签名安装包
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npx electron-builder --publish never
 
@@ -129,6 +134,11 @@ jobs:
   publish:
     name: Publish GitHub Release
     needs: [build, resolve-tag]
+    if: >-
+      always() &&
+      needs.resolve-tag.result == 'success' &&
+      needs.build.result == 'success' &&
+      (github.event_name != 'workflow_dispatch' || inputs.publish_only != true)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -145,7 +155,6 @@ jobs:
           find release-assets -type f | sort
           ls -lah release-assets/
 
-      # Immutable Releases：prerelease 若先 publish 再上传会失败，必须先 draft
       - name: Upload release assets (draft)
         uses: softprops/action-gh-release@v2
         with:
@@ -169,15 +178,27 @@ jobs:
           files: release-assets/**/*
           fail_on_unmatched_files: false
 
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: true
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ needs.resolve-tag.outputs.tag }}
-          IS_PRERELEASE: ${{ needs.resolve-tag.outputs.is_prerelease }}
-        run: |
-          if [ "$IS_PRERELEASE" = "true" ]; then
-            gh release edit "$TAG" --repo "$GH_REPO" --draft=false --prerelease
-          else
-            gh release edit "$TAG" --repo "$GH_REPO" --draft=false --latest
-          fi
+        run: .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
+
+  publish-only:
+    name: Publish draft release (no rebuild)
+    needs: resolve-tag
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_only == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
