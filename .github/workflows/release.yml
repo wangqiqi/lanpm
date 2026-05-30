@@ -145,6 +145,7 @@ jobs:
           ls -lah release-assets/
 
       - name: Upload release assets (draft)
+        id: draft_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.resolve-tag.outputs.tag }}
@@ -175,13 +176,18 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
+          ref: master
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: true
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
+        run: >-
+          bash .github/scripts/publish-github-release.sh
+          "${{ needs.resolve-tag.outputs.tag }}"
+          "${{ needs.resolve-tag.outputs.is_prerelease }}"
+          "${{ steps.draft_release.outputs.id }}"
 
   publish-only:
     name: Publish draft release (no rebuild)
@@ -191,6 +197,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: master
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: true
 
