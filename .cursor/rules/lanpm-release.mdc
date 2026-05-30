@@ -1,0 +1,42 @@
+---
+description: 打版(频繁 CHANGELOG+rc 提交)与发布二进制(偶尔 push tag 出安装包)分两档；发版、打版、release、发版并提交、发布二进制
+alwaysApply: false
+---
+
+# LanPM 发版：打版 vs 发布二进制
+
+## 核心区分（必读 skill）
+
+| 档位 | 频率 | 做什么 | **禁止** |
+|------|------|--------|----------|
+| **A 打版** | 一天可很多次（每次提交） | CHANGELOG、`package.json` rc+1、commit | **不得** push `v*` tag、**不得**触发 GitHub Release / R2、**不得** `electron-builder --publish` |
+| **B 发布二进制** | 一天通常 0～1 次 | 在 A 就绪且用户**明确**要求后，push `v*` tag → CI 打 Win/Mac/Linux 包 | 不得因随口提到 `release` 就自动进入 B |
+
+完整步骤：`.cursor/skills/lanpm-release/SKILL.md`。
+
+## 何时启用本规则
+
+- **A 打版**：**发版**、**打版**、**release**（默认按打版理解）、**发版并提交**、**提交并打版**
+- **B 二进制**：**发布二进制**、**发布安装包**、**release 二进制**、**push release**、**发版并发布二进制**、**发 binary**
+
+单独出现 **release**、**发布** → 只走 **A**；若用户要 B，必须出现上表 B 类口令之一。
+
+## A 打版 — 硬性约束
+
+1. 先 `CHANGELOG.md`（顶栏新节），再 `package.json` version（`1.0.0-rc.N`，N+1）。
+2. 日常门禁：`npm run verify:m7`（与 CI `verify.yml` 一致）。**不要**每次打版都跑 `verify:release-gate`（过重）。
+3. 用户说「并提交」才 `git commit`；**默认不打 tag、不 push**。
+4. 若用户坚持打版也要 tag：仅 **本地** `git tag`，且**不 push tag**（避免误触发 Release workflow）。
+
+## B 发布二进制 — 硬性约束
+
+1. 必须先完成当次 **A**（或当前 HEAD 已是刚打版的 rc）。
+2. **必须** `npm run verify:release-gate` 通过（出包前全量门禁）。
+3. **必须**用户明确 B 类口令；Agent 用一句话确认版本号后再 `git push origin v…`。
+4. push 的 tag = `v` + `package.json` version；由 `.github/workflows/release.yml` 构建 NSIS/DMG/AppImage；可选 `sync-r2.yml` 同步 R2。
+
+## 禁止
+
+- 把每次打版当成 GitHub Release
+- 一天内未经用户要求多次 push release tag
+- 提交 `.lanpm/visual-screenshots/`、`.env`、密钥

@@ -31,4 +31,8 @@ alwaysApply: false
 npm run verify:visual
 ```
 
-发版或大范围 UI 改动：读取 `.cursor/skills/lanpm-visual-audit/SKILL.md` 跑完整审计。
+## 发版
+
+- **A 打版**（频繁，无二进制）：改样式后 `npm run verify:visual`；打版流程见 `lanpm-release` rule/skill。
+- **B 发布二进制**（偶尔）：`verify:release-gate` 前读 `lanpm-visual-audit` **门禁模式**。
+- 大范围 UI：跑 visual-audit 全量或至少 `verify:visual`。

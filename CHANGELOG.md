@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.77] - 2026-05-30
+
+### Added
+- **CI 发布**：`.github/workflows/release.yml` — push `v*` 标签触发三平台 Electron 安装包 → GitHub Release
+- **CI R2 同步（可选）**：`.github/workflows/sync-r2.yml` — Release 成功后同步至 Cloudflare R2 独立下载页
+- **R2 下载页生成**：`.github/scripts/generate-r2-download-index.py`
+- **发版两档 SSOT**：`.cursor/rules/lanpm-release.mdc` + `.cursor/skills/lanpm-release/SKILL.md`（A 打版 / B 发布二进制）
+
+### Changed
+- **Cursor 发版文档**：`lanpm-visual-audit`、`lanpm-docs-code-audit`、`release-visual-gate`、`renderer-visual-tokens` 对齐 A/B 两档模型
+- **`docs/05`**：补充 `verify.yml` / `release.yml` / `sync-r2.yml` 触发说明
+
+### Tag
+- `v1.0.0-rc.77` — CI 三平台发布 + R2 可选同步 + 发版两档 SSOT
+
 ## [1.0.0-rc.76] - 2026-05-30
 
 ### Fixed

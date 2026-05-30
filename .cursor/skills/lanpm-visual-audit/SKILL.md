@@ -3,16 +3,28 @@ name: lanpm-visual-audit
 description: >-
   Runs LanPM renderer visual consistency checks: npm run verify:visual,
   static CSS/token audit, and tracks docs/06 §2.6. Use for visual/UI consistency,
-  视觉一致性, V-14b, verify:visual, theme audit, or before major release.
+  视觉一致性, V-14b, verify:visual, theme audit, 打版, 发布二进制.
 ---
 
 # LanPM 视觉一致性审计
+
+## 与发版两档的关系
+
+发版 SSOT：`.cursor/rules/lanpm-release.mdc` + `.cursor/skills/lanpm-release/SKILL.md`。
+
+| 档位 | 何时用本 skill | 深度 |
+|------|----------------|------|
+| **A 打版**（频繁） | 改过 `src/renderer` 样式后打版 / `verify:m7` 前 | `verify:visual`；大 UI 改动再扫 §2.6 |
+| **B 发布二进制**（偶尔） | `verify:release-gate` / 出安装包前 | **门禁模式**全做 + `docs/06` §2.6 / V-14b |
+
+A 档**不要**每次打版跑全量归档审计；B 档必须视觉门禁通过后再 push `v*` tag。
 
 ## 何时执行
 
 | 模式 | 触发 | 深度 |
 |------|------|------|
-| **门禁** | 发版 / RC / `verify:m7` 前 | `verify:visual` + `docs/06` §2.6 未完成项 |
+| **门禁** | B 档发布二进制 / `verify:release-gate` / RC 出包 | `verify:visual` + `docs/06` §2.6 未完成项 |
+| **打版自检** | A 档打版、改过 renderer 样式 | `verify:visual`（`verify:m7` 已含部分检查） |
 | **全量审计** | 用户要求视觉校验 / 更新报告 | 静态扫描 + 可选写入归档（见下） |
 | **修复后** | 改过 `src/renderer` 样式 | `verify:visual` + 相关 VIS-* |
 
@@ -25,9 +37,10 @@ description: >-
 ## 工作流
 
 ```bash
-cd /home/saida/workspace/lanpm
+cd <仓库根目录>
 npm run verify:visual
-npm run verify:m7                # 发版前
+npm run verify:m7                # A 档打版（日常）
+npm run verify:release-gate      # B 档发布二进制（含 verify:visual）
 ```
 
 全量审计时在 `src/renderer` grep：禁止 `#1677ff`；警惕 Ant 语义色硬编码与 `var(--lanpm-*, rgba(0,0,0,*)` fallback。
@@ -44,9 +57,17 @@ npm run verify:m7                # 发版前
 
 文档差异用 `lanpm-docs-code-audit`（`docs/01–06` + `verify:docs-code`）。
 
-## 发版前
+## 发版检查清单
 
-- [ ] `verify:project` && `verify:m7` 绿
+**A 打版**（commit、不出二进制）：
+
+- [ ] `verify:visual`（若本轮改过 renderer）
+- [ ] `verify:m7` 绿
+
+**B 发布二进制**（push `v*` tag 前）：
+
+- [ ] 已完成当次 A 或等价 rc commit
+- [ ] `verify:release-gate` 绿（内含 visual / project / m7）
 - [ ] `docs/06` §2.6 / V-14b / VIS-* 已处理或注明豁免
 - [ ] 无新增禁止色
 

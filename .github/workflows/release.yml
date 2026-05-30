@@ -1,0 +1,135 @@
+# LanPM — 三平台安装包（Electron Builder）
+#
+# 触发：push 标签 v*（仅 B 档「发布二进制」，见 .cursor/skills/lanpm-release）
+# 产物：Windows NSIS · macOS DMG · Linux AppImage（electron-builder.yml）
+#
+# 权限：GITHUB_TOKEN 写 Release；无需 Apple 签名即可产出未签名包（本地/内网分发）
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (${{ matrix.label }})
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Windows x86_64
+            platform: windows-latest
+            artifact: windows
+          - label: macOS Apple Silicon
+            platform: macos-latest
+            artifact: macos
+          - label: Linux x86_64
+            platform: ubuntu-22.04
+            artifact: linux
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            python3 \
+            libgtk-3-0 \
+            libnotify4 \
+            libnss3 \
+            libxss1 \
+            libxtst6 \
+            xdg-utils \
+            libatspi2.0-0 \
+            libgbm1 \
+            libasound2 \
+            libfuse2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Package installer
+        env:
+          # 无开发者证书时仍可产出未签名安装包
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --publish never
+
+      - name: List dist output
+        shell: bash
+        run: |
+          echo "=== dist/ ==="
+          ls -lah dist/ || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.artifact }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.blockmap
+            dist/*.yml
+            dist/*.yaml
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: List release files
+        run: |
+          echo "=== release-assets ==="
+          find release-assets -type f | sort
+          ls -lah release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: LanPM ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref_name, '-rc.') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          generate_release_notes: false
+          body: |
+            ## LanPM ${{ github.ref_name }}
+
+            分布式局域网协作客户端 — Windows / macOS / Linux 安装包。
+
+            详见 [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)。
+
+            | 平台 | 文件 |
+            |------|------|
+            | Windows | `*.exe`（NSIS） |
+            | macOS | `*.dmg` |
+            | Linux | `*.AppImage` |
+          files: release-assets/**/*
+          fail_on_unmatched_files: false
