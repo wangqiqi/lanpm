@@ -3,6 +3,7 @@
 # 触发：push 标签 v*（仅 B 档「发布二进制」，见 .cursor/skills/lanpm-release）
 # 产物：Windows NSIS · macOS DMG · Linux AppImage（electron-builder.yml）
 #
+# Immutable Releases：先 draft 上传资产，再 publish（见 publish job）
 # 权限：GITHUB_TOKEN 写 Release；无需 Apple 签名即可产出未签名包（本地/内网分发）
 
 name: Release
@@ -11,14 +12,44 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build/publish (e.g. v1.0.0-rc.77)'
+        required: true
+        type: string
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  resolve-tag:
+    name: Resolve release tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.out.outputs.tag }}
+      is_prerelease: ${{ steps.out.outputs.is_prerelease }}
+    steps:
+      - id: out
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          TAG="${TAG#v}"
+          TAG="v${TAG#v}"
+          IS_PRERELEASE=false
+          case "$TAG" in
+            *-rc.*|*-beta*|*-alpha*) IS_PRERELEASE=true ;;
+          esac
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build (${{ matrix.label }})
+    needs: resolve-tag
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
     strategy:
@@ -37,6 +68,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve-tag.outputs.tag }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
@@ -95,7 +128,7 @@ jobs:
 
   publish:
     name: Publish GitHub Release
-    needs: build
+    needs: [build, resolve-tag]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -112,15 +145,17 @@ jobs:
           find release-assets -type f | sort
           ls -lah release-assets/
 
-      - name: Create GitHub Release
+      # Immutable Releases：prerelease 若先 publish 再上传会失败，必须先 draft
+      - name: Upload release assets (draft)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: LanPM ${{ github.ref_name }}
-          prerelease: ${{ contains(github.ref_name, '-rc.') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          tag_name: ${{ needs.resolve-tag.outputs.tag }}
+          name: LanPM ${{ needs.resolve-tag.outputs.tag }}
+          draft: true
+          prerelease: ${{ needs.resolve-tag.outputs.is_prerelease == 'true' }}
           generate_release_notes: false
           body: |
-            ## LanPM ${{ github.ref_name }}
+            ## LanPM ${{ needs.resolve-tag.outputs.tag }}
 
             分布式局域网协作客户端 — Windows / macOS / Linux 安装包。
 
@@ -133,3 +168,15 @@ jobs:
             | Linux | `*.AppImage` |
           files: release-assets/**/*
           fail_on_unmatched_files: false
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.resolve-tag.outputs.tag }}
+          IS_PRERELEASE: ${{ needs.resolve-tag.outputs.is_prerelease }}
+        run: |
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            gh release edit "$TAG" --draft=false --prerelease
+          else
+            gh release edit "$TAG" --draft=false --latest
+          fi

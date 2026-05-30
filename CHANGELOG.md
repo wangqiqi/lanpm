@@ -2,6 +2,15 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.78] - 2026-05-30
+
+### Fixed
+- **CI Release（Immutable Releases）**：`release.yml` 先 `draft: true` 上传资产，再用 `gh release edit` 发布；修复 prerelease 在 immutable 仓库上「先 publish 后 upload」失败
+- **CI Release**：新增 `workflow_dispatch`，可指定 tag 重跑发布（如修复 `v1.0.0-rc.77` 半成品 Release）
+
+### Tag
+- `v1.0.0-rc.78` — 修复 GitHub Release immutable 上传顺序
+
 ## [1.0.0-rc.77] - 2026-05-30
 
 ### Added
