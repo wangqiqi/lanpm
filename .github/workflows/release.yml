@@ -1,13 +1,9 @@
 # LanPM — 三平台安装包（Electron Builder）
 #
-# 触发：push 标签 v* · workflow_dispatch
-# Immutable Releases：draft 上传 → REST API publish（见 .github/scripts/publish-github-release.sh）
+# B 档推荐：Actions → Run workflow · tag=v* · ref=master（勿先 push tag）
+# 流程：构建 → draft 上传 → REST API 自动 Publish → 补打 git tag（若缺失）
 #
-# 重跑指南（勿 Re-run failed jobs，会沿用旧 YAML）：
-#   1. verify：Actions → verify → Run workflow
-#   2. release 全量：Run workflow · tag=v* · publish_only=false
-#   3. 仅发布 draft：Run workflow · tag=v* · publish_only=true
-#   4. R2：Release 成功后自动触发；或 Sync Release to R2 手动指定 tag
+# 勿 Re-run failed jobs（会沿用旧 YAML）；失败请 Run workflow 重跑。
 
 name: Release
 
@@ -18,11 +14,15 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v1.0.0-rc.78)'
+        description: 'Release tag (e.g. v1.0.0-rc.80)'
         required: true
         type: string
+      ref:
+        description: 'Git ref to build (default master — 含最新 CI 脚本与 deb)'
+        required: false
+        default: master
       publish_only:
-        description: 'Skip build — only publish existing draft release'
+        description: 'Skip build — only publish existing draft (recovery)'
         required: false
         type: boolean
         default: false
@@ -41,26 +41,38 @@ jobs:
     outputs:
       tag: ${{ steps.out.outputs.tag }}
       is_prerelease: ${{ steps.out.outputs.is_prerelease }}
+      build_ref: ${{ steps.meta.outputs.build_ref }}
+      commit_sha: ${{ steps.out.outputs.commit_sha }}
     steps:
+      - id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BR="${{ github.event.inputs.ref }}"
+            [ -z "$BR" ] && BR=master
+            RAW="${{ github.event.inputs.tag }}"
+          else
+            BR="${{ github.ref_name }}"
+            RAW="${{ github.ref_name }}"
+          fi
+          echo "build_ref=$BR" >> "$GITHUB_OUTPUT"
+          echo "raw_tag=$RAW" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: .github/scripts
-          sparse-checkout-cone-mode: true
+          ref: ${{ steps.meta.outputs.build_ref }}
+          fetch-depth: 0
 
       - id: out
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            RAW="${{ github.event.inputs.tag }}"
-          else
-            RAW="${{ github.ref_name }}"
-          fi
-          TAG=$(bash .github/scripts/normalize-tag.sh "$RAW")
+          TAG=$(bash .github/scripts/normalize-tag.sh "${{ steps.meta.outputs.raw_tag }}")
           IS_PRERELEASE=false
           case "$TAG" in
             *-rc.*|*-beta*|*-alpha*) IS_PRERELEASE=true ;;
           esac
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=$TAG build_ref=${{ steps.meta.outputs.build_ref }} sha=$(git rev-parse HEAD)"
 
   build:
     name: Build (${{ matrix.label }})
@@ -85,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.resolve-tag.outputs.tag }}
+          ref: ${{ needs.resolve-tag.outputs.build_ref }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
@@ -150,6 +162,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.resolve-tag.outputs.tag }}
+          target_commitish: ${{ needs.resolve-tag.outputs.commit_sha }}
           name: LanPM ${{ needs.resolve-tag.outputs.tag }}
           draft: true
           prerelease: ${{ needs.resolve-tag.outputs.is_prerelease == 'true' }}
@@ -183,6 +196,7 @@ jobs:
           sparse-checkout-cone-mode: true
 
       - name: Publish release
+        id: publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
@@ -190,6 +204,11 @@ jobs:
           "${{ needs.resolve-tag.outputs.tag }}"
           "${{ needs.resolve-tag.outputs.is_prerelease }}"
           "${{ steps.draft_release.outputs.id }}"
+
+      - name: Ensure git tag on commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/ensure-release-tag.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.commit_sha }}"
 
   publish-only:
     name: Publish draft release (no rebuild)
@@ -207,3 +226,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
+
+      - name: Ensure git tag on commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/ensure-release-tag.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.commit_sha }}"

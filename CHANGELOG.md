@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.80] - 2026-05-30
+
+### Added
+- **Linux `.deb`**：`electron-builder.yml` + CI 上传/发布
+- **CI 全自动 Release**：`target_commitish` 绑定构建 commit · Publish 后 `ensure-release-tag.sh` 补打 git tag
+- **workflow_dispatch `ref`**：默认从 `master` 构建（含最新 CI 脚本），**勿先 push tag**
+
+### Changed
+- **B 档发布二进制**：推荐 Actions → Run workflow（tag + ref=master），无需手点 Publish
+
+### Tag
+- `v1.0.0-rc.80` — Linux deb + CI 全自动发布
+
 ## [1.0.0-rc.79] - 2026-05-30
 
 ### Added

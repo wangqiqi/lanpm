@@ -81,19 +81,25 @@ npm run verify:release-gate
 
 2. 确保 A 的 commit 已在当前分支（未提交则先完成 A）。
 
-3. 打 tag（若 A 未打）并 **push tag**（这是唯一应触发 CI 出包的 git 操作）：
+3. **触发 Release workflow**（构建 + 自动 Publish + 补打 git tag；**勿手点 Publish**）：
 
-```bash
-git tag -a v1.0.0-rc.N -m "v1.0.0-rc.N — <摘要>"
-git push origin HEAD          # 仅用户要求推分支时
-git push origin v1.0.0-rc.N   # 触发 release.yml
-```
+   **推荐**（先 push `master`，**勿先 push tag**）：
 
-4. 产物：Windows NSIS · macOS DMG · Linux AppImage + DEB（`electron-builder.yml`）。
+   ```text
+   Actions → Release → Run workflow
+     tag: v1.0.0-rc.N
+     ref: master
+     publish_only: false
+   ```
+
+   或 push tag（兼容旧流程，易遇 untagged draft，优先用 Run workflow）：
 
    ```bash
-   git push origin v1.0.0-rc.N   # 触发 .github/workflows/release.yml
+   git push origin HEAD
+   git push origin v1.0.0-rc.N
    ```
+
+4. 产物：Windows NSIS · macOS DMG · Linux AppImage + DEB（`electron-builder.yml`）。
 
    - `release.yml`：三平台 matrix 构建 → `softprops/action-gh-release` 上传
    - `sync-r2.yml`：**可选**（独立下载页 / R2）；默认不用配，在 GitHub Releases 下载安装包即可
