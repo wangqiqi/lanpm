@@ -89,7 +89,7 @@ git push origin HEAD          # 仅用户要求推分支时
 git push origin v1.0.0-rc.N   # 触发 release.yml
 ```
 
-4. 产物：Windows NSIS · macOS DMG · Linux AppImage（`electron-builder.yml`）。
+4. 产物：Windows NSIS · macOS DMG · Linux AppImage + DEB（`electron-builder.yml`）。
 
    ```bash
    git push origin v1.0.0-rc.N   # 触发 .github/workflows/release.yml

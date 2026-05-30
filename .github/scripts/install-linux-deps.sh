@@ -21,6 +21,8 @@ RELEASE_EXTRA=(
   xdg-utils
   libatspi2.0-0
   libfuse2
+  fakeroot
+  dpkg
 )
 
 # Ubuntu 24.04 (noble): libasound2 → libasound2t64

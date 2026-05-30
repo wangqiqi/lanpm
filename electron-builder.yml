@@ -20,6 +20,8 @@ mac:
 linux:
   target:
     - AppImage
+    - deb
+  category: Office
 extraResources:
   - from: resources/icon.png
     to: icon.png
