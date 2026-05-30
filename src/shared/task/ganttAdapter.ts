@@ -1,7 +1,7 @@
 import { buildBoardRelationMap } from './boardRelations'
 import type { Task } from './types'
 import type { TaskDependency } from './dependency'
-import { mergeGanttBarStyles } from './scheduleHealthGantt'
+import { mergeGanttBarStyles } from './scheduleHealth'
 import { taskFamilyBarColors } from './taskFamilyColors'
 
 /** gantt-task-react 任务条（与库类型对齐的最小集） */

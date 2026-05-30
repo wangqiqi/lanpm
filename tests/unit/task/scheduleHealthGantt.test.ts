@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
-import { mergeGanttBarStyles, GANTT_OVERDUE_BAR } from '../../../src/shared/task/scheduleHealthGantt.ts'
-import { countScheduleHealth } from '../../../src/shared/task/scheduleHealth.ts'
+import {
+  countScheduleHealth,
+  mergeGanttBarStyles,
+  GANTT_OVERDUE_BAR
+} from '../../../src/shared/task/scheduleHealth.ts'
 import type { Task } from '../../../src/shared/task/types.ts'
 
 function task(partial: Partial<Task> & Pick<Task, 'taskId' | 'title'>): Task {

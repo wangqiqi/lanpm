@@ -5,7 +5,7 @@
 ## [1.0.0-rc.75] - 2026-05-29
 
 ### Fixed
-- **CI typecheck**：`useLocateTask` 从 `@shared/navigation/types` 导入 `AppView`；`scheduleHealthGantt` 去掉 `.ts` 扩展名导入
+- **CI typecheck**：`useLocateTask` 从 `@shared/navigation/types` 导入 `AppView`；甘特条样式合并进 `scheduleHealth.ts`（避免 `.ts` 扩展名与 Node 单测冲突）
 
 ### Added
 - **工期健康度（三视图统一）**：`scheduleHealth.ts` — 绿 `on_track` / 深黄 `behind` / 纯红 `overdue`；`scheduleHealthUi.ts` + `scheduleHealth.module.css`
