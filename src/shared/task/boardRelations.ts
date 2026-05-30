@@ -1,4 +1,4 @@
-import type { TaskDependency, TaskDependencyType } from './dependency'
+import type { TaskDependencyType } from './dependency'
 import type { Task, TaskStatus } from './types'
 
 export const BOARD_FAMILY_COUNT = 8
