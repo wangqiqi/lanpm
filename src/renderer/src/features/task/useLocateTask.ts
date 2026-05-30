@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { groupViewPath, type AppView } from '@renderer/routes/paths'
+import type { AppView } from '@shared/navigation/types'
+import { groupViewPath } from '@renderer/routes/paths'
 
 export type TaskLocateView = Extract<AppView, 'board' | 'tree' | 'gantt'>
 

@@ -4,6 +4,9 @@
 
 ## [1.0.0-rc.75] - 2026-05-29
 
+### Fixed
+- **CI typecheck**：`useLocateTask` 从 `@shared/navigation/types` 导入 `AppView`；`scheduleHealthGantt` 去掉 `.ts` 扩展名导入
+
 ### Added
 - **工期健康度（三视图统一）**：`scheduleHealth.ts` — 绿 `on_track` / 深黄 `behind` / 纯红 `overdue`；`scheduleHealthUi.ts` + `scheduleHealth.module.css`
 - **看板**：卡片工期色、截止/进度字色、图例（绿·黄·红）；**任务树**：行左缘色条 + 进度条；**甘特**：条进度色合并族色；tooltip 期望/当前 %

@@ -1,5 +1,5 @@
-import type { ScheduleHealth } from './scheduleHealth.ts'
-import { getTaskScheduleHealth } from './scheduleHealth.ts'
+import type { ScheduleHealth } from './scheduleHealth'
+import { getTaskScheduleHealth } from './scheduleHealth'
 import type { Task } from './types'
 
 /** 甘特条：进度正常（绿） */
