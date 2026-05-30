@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.0.0-rc.79] - 2026-05-30
+
+### Added
+- **LICENSE**：GNU **AGPL-3.0-or-later** 全文（`Copyright (C) 2026 LanPM contributors`）
+
+### Changed
+- **package.json**：声明 `license: AGPL-3.0-or-later`
+- **CI workflows**：`verify` / `release` / `sync-r2` 审查加固（REST API 发布 draft、tag 解析脚本、`publish_only` dispatch、排除 debug 产物）
+
+### Tag
+- `v1.0.0-rc.79` — AGPL-3.0 许可证 + CI workflow 加固
+
 ## [1.0.0-rc.78] - 2026-05-30
 
 ### Fixed

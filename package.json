@@ -1,7 +1,8 @@
 {
   "name": "lanpm",
-  "version": "1.0.0-rc.78",
+  "version": "1.0.0-rc.79",
   "description": "分布式局域网协作客户端 — Electron",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
   "main": "./out/main/index.js",
