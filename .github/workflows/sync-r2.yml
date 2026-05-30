@@ -1,9 +1,8 @@
-# 将最新 GitHub Release 产物同步到 Cloudflare R2（仅 B 档发布后，非每次打版）
+# 将 GitHub Release 产物同步到 Cloudflare R2（可选独立下载页）
 #
-# 触发：Release workflow 成功完成 · 或 workflow_dispatch 指定 tag
-#
+# 触发：Release workflow 成功 · workflow_dispatch 指定 tag
 # Secrets：R2_ACCESS_KEY_ID · R2_SECRET_ACCESS_KEY
-# Variables：R2_ACCOUNT_ID · R2_BUCKET · BASE_URL（公开下载域名，如 https://download.example.com）
+# Variables：R2_ACCOUNT_ID · R2_BUCKET · BASE_URL
 
 name: Sync Release to R2
 
@@ -14,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag（留空则使用最新 Release）'
+        description: 'Release tag（留空：tag 触发取 head_branch，否则取最新 Release）'
         required: false
         default: ''
 
@@ -24,7 +23,6 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    # R2 未配置时跳过（避免 fork/私有环境误失败）
     if: >-
       vars.R2_BUCKET != '' &&
       vars.R2_ACCOUNT_ID != '' &&
@@ -46,13 +44,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          INPUT_TAG="${{ github.event.inputs.tag }}"
-          if [ -n "$INPUT_TAG" ]; then
-            echo "tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
-          else
-            LATEST=$(gh release view --repo "${{ github.repository }}" --json tagName -q .tagName)
-            echo "tag=$LATEST" >> "$GITHUB_OUTPUT"
-          fi
+          TAG=$(bash .github/scripts/resolve-sync-tag.sh \
+            "${{ github.event.inputs.tag }}" \
+            "${{ github.event_name }}" \
+            "${{ github.event.workflow_run.head_branch || '' }}")
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag: $TAG"
 
       - name: Download release assets
         env:
@@ -71,9 +68,6 @@ jobs:
           BASE_URL: ${{ vars.BASE_URL }}
           REPO: ${{ github.repository }}
         run: python3 .github/scripts/generate-r2-download-index.py
-
-      - name: Configure AWS CLI for R2
-        run: aws --version
 
       - name: Sync to Cloudflare R2
         env:

@@ -1,10 +1,13 @@
 # LanPM — 三平台安装包（Electron Builder）
 #
-# 触发：push 标签 v*（仅 B 档「发布二进制」，见 .cursor/skills/lanpm-release）
-# 产物：Windows NSIS · macOS DMG · Linux AppImage（electron-builder.yml）
+# 触发：push 标签 v* · workflow_dispatch
+# Immutable Releases：draft 上传 → REST API publish（见 .github/scripts/publish-github-release.sh）
 #
-# Immutable Releases：先 draft 上传资产，再 publish（GitHub REST API，无需 checkout）
-# 权限：GITHUB_TOKEN 写 Release；无需 Apple 签名即可产出未签名包（本地/内网分发）
+# 重跑指南（勿 Re-run failed jobs，会沿用旧 YAML）：
+#   1. verify：Actions → verify → Run workflow
+#   2. release 全量：Run workflow · tag=v* · publish_only=false
+#   3. 仅发布 draft：Run workflow · tag=v* · publish_only=true
+#   4. R2：Release 成功后自动触发；或 Sync Release to R2 手动指定 tag
 
 name: Release
 
@@ -24,8 +27,11 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: write
+
 concurrency:
-  group: release-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+  group: release-${{ github.event_name == 'workflow_dispatch' && format('dispatch-{0}', github.event.inputs.tag) || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -36,15 +42,19 @@ jobs:
       tag: ${{ steps.out.outputs.tag }}
       is_prerelease: ${{ steps.out.outputs.is_prerelease }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: true
+
       - id: out
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ github.event.inputs.tag }}"
+            RAW="${{ github.event.inputs.tag }}"
           else
-            TAG="${{ github.ref_name }}"
+            RAW="${{ github.ref_name }}"
           fi
-          TAG="${TAG#v}"
-          TAG="v${TAG#v}"
+          TAG=$(bash .github/scripts/normalize-tag.sh "$RAW")
           IS_PRERELEASE=false
           case "$TAG" in
             *-rc.*|*-beta*|*-alpha*) IS_PRERELEASE=true ;;
@@ -95,8 +105,7 @@ jobs:
             libasound2 \
             libfuse2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
@@ -114,9 +123,7 @@ jobs:
 
       - name: List dist output
         shell: bash
-        run: |
-          echo "=== dist/ ==="
-          ls -lah dist/ || true
+        run: ls -lah dist/ || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -127,21 +134,18 @@ jobs:
             dist/*.dmg
             dist/*.AppImage
             dist/*.blockmap
-            dist/*.yml
-            dist/*.yaml
+            dist/latest*.yml
+            dist/latest-*.yml
           if-no-files-found: error
 
   publish:
     name: Publish GitHub Release
     needs: [build, resolve-tag]
     if: >-
-      always() &&
       needs.resolve-tag.result == 'success' &&
       needs.build.result == 'success' &&
       (github.event_name != 'workflow_dispatch' || inputs.publish_only != true)
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Download all platform artifacts
         uses: actions/download-artifact@v4
@@ -151,7 +155,6 @@ jobs:
 
       - name: List release files
         run: |
-          echo "=== release-assets ==="
           find release-assets -type f | sort
           ls -lah release-assets/
 
@@ -168,14 +171,20 @@ jobs:
 
             分布式局域网协作客户端 — Windows / macOS / Linux 安装包。
 
-            详见 [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)。
+            详见 [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md)。
 
             | 平台 | 文件 |
             |------|------|
             | Windows | `*.exe`（NSIS） |
             | macOS | `*.dmg` |
             | Linux | `*.AppImage` |
-          files: release-assets/**/*
+          files: |
+            release-assets/**/*.exe
+            release-assets/**/*.dmg
+            release-assets/**/*.AppImage
+            release-assets/**/*.blockmap
+            release-assets/latest*.yml
+            release-assets/latest-*.yml
           fail_on_unmatched_files: false
 
       - uses: actions/checkout@v4
@@ -186,19 +195,20 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
+        run: bash .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
 
   publish-only:
     name: Publish draft release (no rebuild)
     needs: resolve-tag
     if: github.event_name == 'workflow_dispatch' && inputs.publish_only == true
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: true
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
+        run: bash .github/scripts/publish-github-release.sh "${{ needs.resolve-tag.outputs.tag }}" "${{ needs.resolve-tag.outputs.is_prerelease }}"
