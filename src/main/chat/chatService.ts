@@ -44,6 +44,22 @@ import { handleChatRecall, recallMessage } from './recallMessageService'
 
 const subscribedGroups = new Map<string, () => void>()
 
+function buildEnvelope(msg: ChatMessage, payload?: Record<string, unknown>): SyncEnvelope {
+  return {
+    version: 1,
+    type: 'chat',
+    msgId: msg.msgId,
+    senderUserId: msg.senderUserId,
+    senderDeviceId: msg.senderDeviceId,
+    groupId: msg.groupId,
+    ts: msg.createdAt,
+    lamportTs: msg.lamportTs,
+    payload: payload ?? { message: msg },
+    nonce: '',
+    authTag: ''
+  }
+}
+
 function isAnonymousGroup(db: Database, groupId: string): boolean {
   return isMemoryOnlyChatGroup(groupId, resolveGroupType(db, groupId))
 }
@@ -181,41 +197,14 @@ export async function publishChatMessage(
     appendAnonymousMessage(groupId, sent)
     broadcastMessage(sent)
 
-    const envelope: SyncEnvelope = {
-      version: 1,
-      type: 'chat',
-      msgId: msg.msgId,
-      senderUserId: msg.senderUserId,
-      senderDeviceId: msg.senderDeviceId,
-      groupId,
-      ts: now,
-      lamportTs,
-      payload: { message: sent },
-      nonce: '',
-      authTag: ''
-    }
-    await transport.publish(envelope)
+    await transport.publish(buildEnvelope(sent))
     return sent
   }
 
   insertMessage(db, msg)
   broadcastMessage(msg)
 
-  const envelope: SyncEnvelope = {
-    version: 1,
-    type: 'chat',
-    msgId: msg.msgId,
-    senderUserId: msg.senderUserId,
-    senderDeviceId: msg.senderDeviceId,
-    groupId,
-    ts: now,
-    lamportTs,
-    payload: { message: msg },
-    nonce: '',
-    authTag: ''
-  }
-
-  await transport.publish(envelope)
+  await transport.publish(buildEnvelope(msg))
 
   updateDeliveryStatus(db, msg.msgId, 'sent')
   const sent: ChatMessage = { ...msg, deliveryStatus: 'sent' }

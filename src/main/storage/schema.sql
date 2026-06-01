@@ -84,6 +84,7 @@ CREATE TABLE tasks (
   deleted_at TEXT
 );
 CREATE INDEX idx_tasks_group_parent ON tasks(group_id, parent_task_id);
+CREATE INDEX idx_tasks_group_status ON tasks(group_id, status) WHERE deleted_at IS NULL;
 
 CREATE TABLE task_dependencies (
   from_task_id TEXT NOT NULL,
@@ -132,6 +133,8 @@ CREATE TABLE file_transfers (
 );
 
 -- AI 配置（本地加密字段由应用层处理）
+CREATE INDEX idx_file_transfers_group ON file_transfers(group_id, status);
+
 CREATE TABLE ai_config (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   provider TEXT NOT NULL,
