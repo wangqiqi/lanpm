@@ -36,7 +36,7 @@ import {
 import { publishChatMessage } from '../chat/chatService'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { publishTaskDelete, publishTaskUpsert } from './taskSyncService'
-import { broadcastToAllWindows } from '../../shared/utils/broadcast'
+import { broadcastToAllWindows } from './utils/broadcast'
 
 function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throwLanpm('stub.dmNoTask')

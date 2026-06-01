@@ -35,7 +35,7 @@ import { resolveFileDiskPath, resolvePreviewDiskPath } from './storagePathResolv
 import { assertFileWritable } from './fileServiceHelpers'
 import { showOpenDialog, showSaveDialog } from '../systemDialog'
 import { publishFileMeta, pullRemoteFile } from './fileSyncService'
-import { broadcastToAllWindows } from '../../shared/utils/broadcast'
+import { broadcastToAllWindows } from './utils/broadcast'
 
 function filesRootDir(): string {
   const dir = join(app.getPath('userData'), 'files')
