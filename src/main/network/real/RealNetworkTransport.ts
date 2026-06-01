@@ -64,6 +64,24 @@ export class RealNetworkTransport implements NetworkTransport {
     this.disableUdp = options.disableUdp ?? false
   }
 
+  private createPeerLink(options: {
+    onEnvelope: (env: SyncEnvelope) => void
+    onReady?: (remoteDeviceId: string) => void
+    onClose: () => void
+  }): PeerLink {
+    return new PeerLink({
+      local: {
+        deviceId: this.deviceId,
+        userId: this.userId,
+        displayName: this.displayName
+      },
+      keys: generateDhKeyPair(),
+      onEnvelope: options.onEnvelope,
+      onReady: options.onReady,
+      onClose: options.onClose
+    })
+  }
+
   start(): void {
     if (this.started) return
     this.started = true
@@ -163,13 +181,7 @@ export class RealNetworkTransport implements NetworkTransport {
   async connectManualHost(host: string, port: number): Promise<void> {
     if (!this.started) this.start()
 
-    const link = new PeerLink({
-      local: {
-        deviceId: this.deviceId,
-        userId: this.userId,
-        displayName: this.displayName
-      },
-      keys: generateDhKeyPair(),
+    const link = this.createPeerLink({
       onEnvelope: (env) => this.deliver(env),
       onReady: (remoteDeviceId) => {
         const prev = this.links.get(remoteDeviceId)
@@ -203,13 +215,7 @@ export class RealNetworkTransport implements NetworkTransport {
   }
 
   private onIncomingSocket(socket: import('node:net').Socket): void {
-    const link = new PeerLink({
-      local: {
-        deviceId: this.deviceId,
-        userId: this.userId,
-        displayName: this.displayName
-      },
-      keys: generateDhKeyPair(),
+    const link = this.createPeerLink({
       onEnvelope: (env) => this.deliver(env),
       onReady: (remoteDeviceId) => {
         const prev = this.links.get(remoteDeviceId)
@@ -240,13 +246,7 @@ export class RealNetworkTransport implements NetworkTransport {
     if (existing?.isReady()) return
     if (existing) existing.close()
 
-    const link = new PeerLink({
-      local: {
-        deviceId: this.deviceId,
-        userId: this.userId,
-        displayName: this.displayName
-      },
-      keys: generateDhKeyPair(),
+    const link = this.createPeerLink({
       onEnvelope: (env) => this.deliver(env),
       onClose: () => {
         this.links.delete(peer.deviceId)

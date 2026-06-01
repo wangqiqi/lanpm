@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
 import { extname, join } from 'path'
-import { app, BrowserWindow } from 'electron'
+import { app } from 'electron'
 import type { FileCategory, FileMeta, FileTransferView } from '../../shared/file/types'
 import { inferCategory } from '../../shared/file/types'
 import {
@@ -35,6 +35,7 @@ import { resolveFileDiskPath, resolvePreviewDiskPath } from './storagePathResolv
 import { assertFileWritable } from './fileServiceHelpers'
 import { showOpenDialog, showSaveDialog } from '../systemDialog'
 import { publishFileMeta, pullRemoteFile } from './fileSyncService'
+import { broadcastToAllWindows } from './utils/broadcast'
 
 function filesRootDir(): string {
   const dir = join(app.getPath('userData'), 'files')
@@ -43,9 +44,7 @@ function filesRootDir(): string {
 }
 
 function broadcastTransfers(groupId: string): void {
-  for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.send(FILE_TRANSFER_PUSH_CHANNEL, groupId)
-  }
+  broadcastToAllWindows(FILE_TRANSFER_PUSH_CHANNEL, groupId)
 }
 
 export function listGroupFiles(
@@ -198,12 +197,9 @@ export function readPreviewText(db: Database, fileId: string): string | null {
   if (!isTextPreviewFile(meta.name, meta.ext)) return null
   const diskPath = resolveFileDiskPath(meta)
   if (!diskPath) return null
-  const size = statSync(diskPath).size
-  if (size > TEXT_PREVIEW_MAX_BYTES) {
-    const buf = readFileSync(diskPath)
-    return buf.subarray(0, TEXT_PREVIEW_MAX_BYTES).toString('utf8')
-  }
-  return readFileSync(diskPath, 'utf8')
+  
+  const buf = readFileSync(diskPath)
+  return buf.subarray(0, TEXT_PREVIEW_MAX_BYTES).toString('utf8')
 }
 
 export async function pickAndUploadFile(

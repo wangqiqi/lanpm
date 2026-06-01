@@ -106,11 +106,23 @@ export function repairFilePreviewPaths(db: Database): void {
     )
     .all() as Pick<FileRow, 'file_id' | 'name' | 'ext' | 'storage_path' | 'preview_status'>[]
 
-  for (const row of rows) {
-    if (!isDirectPreviewReady({ name: row.name, ext: row.ext })) continue
-    if (row.preview_status === 'ready') continue
-    updateFilePreview(db, row.file_id, 'ready', row.storage_path)
-  }
+  const toUpdate = rows.filter(
+    (r) => isDirectPreviewReady({ name: r.name, ext: r.ext }) && r.preview_status !== 'ready'
+  )
+
+  if (toUpdate.length === 0) return
+
+  const stmt = db.prepare(
+    `UPDATE files SET preview_status = ?, preview_path = ?, updated_at = ? WHERE file_id = ?`
+  )
+  
+  const transaction = db.transaction((items: typeof toUpdate) => {
+    for (const item of items) {
+      stmt.run('ready', item.storage_path, now, item.file_id)
+    }
+  })
+  
+  transaction(toUpdate)
 }
 
 export function listFilesByGroup(

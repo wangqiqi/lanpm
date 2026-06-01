@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto'
-import { BrowserWindow } from 'electron'
 import type { Database } from 'better-sqlite3'
 import type { ChatMessage } from '../../shared/chat/types'
 import { TASK_PUSH_CHANNEL } from '../../shared/task/channels'
@@ -37,6 +36,7 @@ import {
 import { publishChatMessage } from '../chat/chatService'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { publishTaskDelete, publishTaskUpsert } from './taskSyncService'
+import { broadcastToAllWindows } from './utils/broadcast'
 
 function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throwLanpm('stub.dmNoTask')
@@ -44,9 +44,7 @@ function assertTaskWritable(db: Database, groupId: string): void {
 }
 
 function broadcastTasksChanged(groupId: string): void {
-  for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.send(TASK_PUSH_CHANNEL, groupId)
-  }
+  broadcastToAllWindows(TASK_PUSH_CHANNEL, groupId)
 }
 
 export function listGroupTasks(db: Database, groupId: string): Task[] {
