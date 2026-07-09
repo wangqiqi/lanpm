@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **文件页抛光（P1）**：工具栏以上传为主 CTA；书签导入/导出收入「更多」；限速移入传输面板；书签预览主次（外开为主、内嵌降级）；空态分场景文案与引导；`docs/04` §6.4（`SPRINT-FILES-P1`）
+
 ### Added
 - **看板 FS 依赖连线**：悬停/固定高亮关联卡时，SVG 叠加层绘制前置/后继 FS 连线（`listFocusDependencyEdges` · `BoardDependencyLines`）；工具栏图例补充连线色说明（`SPRINT-BOARD-DEPS`）
 

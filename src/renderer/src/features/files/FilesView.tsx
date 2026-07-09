@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
   Collapse,
+  Dropdown,
   Image,
   Input,
   InputNumber,
@@ -13,6 +14,7 @@ import {
   Tag,
   Typography
 } from 'antd'
+import type { MenuProps } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import {
@@ -21,6 +23,8 @@ import {
   DownloadOutlined,
   ExportOutlined,
   ImportOutlined,
+  LinkOutlined,
+  MoreOutlined,
   PlusOutlined,
   UploadOutlined
 } from '@ant-design/icons'
@@ -581,49 +585,45 @@ export default function FilesView(): React.ReactElement {
           />
         }
         end={
-          <>
-            <div className={styles.toolbarPrimary}>
-              <Space size="small" align="center">
-                <Text type="secondary">
-                  {t('files.rateLimitKbps')} · {t('files.rateLimitHint')}
-                </Text>
-                <InputNumber
-                  min={0}
-                  step={128}
-                  value={transferSettings?.rateKbps ?? 0}
-                  onChange={(v) => {
-                    if (v === null) return
-                    void setTransferRate(v).catch(() => undefined)
-                  }}
-                  style={{ width: 120 }}
-                  aria-label={t('files.rateLimitKbps')}
-                />
-              </Space>
-              <Button
-                type="primary"
-                icon={<UploadOutlined />}
-                onClick={() =>
-                  void upload(gid).catch((err: unknown) =>
-                    message.error(formatError(err, 'files.uploadFailed'))
-                  )
-                }
-              >
-                {t('files.upload')}
+          <div className={styles.toolbarPrimary}>
+            <Button
+              type="primary"
+              icon={<UploadOutlined />}
+              onClick={() =>
+                void upload(gid).catch((err: unknown) =>
+                  message.error(formatError(err, 'files.uploadFailed'))
+                )
+              }
+            >
+              {t('files.upload')}
+            </Button>
+            <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
+              {t('files.addBookmark')}
+            </Button>
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 'import',
+                    icon: <ImportOutlined />,
+                    label: t('files.importBookmarks'),
+                    onClick: () => void handleImportBookmarks()
+                  },
+                  {
+                    key: 'export',
+                    icon: <ExportOutlined />,
+                    label: t('files.exportBookmarks'),
+                    onClick: () => void handleExportBookmarks()
+                  }
+                ] satisfies MenuProps['items']
+              }}
+              trigger={['click']}
+            >
+              <Button icon={<MoreOutlined />} aria-label={t('files.bookmarkMoreAria')}>
+                {t('files.bookmarkMore')}
               </Button>
-            </div>
-            <span className={styles.toolbarDivider} aria-hidden />
-            <div className={styles.toolbarSecondary}>
-              <Button icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
-                {t('files.addBookmark')}
-              </Button>
-              <Button icon={<ImportOutlined />} onClick={() => void handleImportBookmarks()}>
-                {t('files.importBookmarks')}
-              </Button>
-              <Button icon={<ExportOutlined />} onClick={() => void handleExportBookmarks()}>
-                {t('files.exportBookmarks')}
-              </Button>
-            </div>
-          </>
+            </Dropdown>
+          </div>
         }
       />
 
@@ -640,76 +640,96 @@ export default function FilesView(): React.ReactElement {
         ) : null}
       </div>
 
-      {activeTransfers.length > 0 && (
-        <List
-          size="small"
-          className={styles.transferList}
-          header={<Text type="secondary">{t('files.transferQueue')}</Text>}
-          dataSource={activeTransfers}
-          renderItem={(tr) => (
-            <List.Item>
-              <div className={styles.transferRow}>
-                <span>{tr.fileName}</span>
-                <Progress
-                  percent={Math.round((tr.transferredBytes / Math.max(1, tr.totalBytes)) * 100)}
-                  size="small"
-                  style={{ flex: 1, margin: '0 12px' }}
-                />
-                {tr.fromDeviceId === tr.toDeviceId ? (
-                  <Tag color="default">{t('files.transferLocalQueue')}</Tag>
-                ) : null}
-                <TagStatus status={tr.status} label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')} />
-              </div>
-            </List.Item>
-          )}
-        />
-      )}
-
-      {transferHistory.length > 0 && (
-        <Collapse
-          className={styles.transferHistory}
-          items={[
-            {
-              key: 'history',
-              label: `${t('files.transferHistory')} (${transferHistory.length})`,
-              children: (
-                <List
-                  size="small"
-                  dataSource={transferHistory}
-                  renderItem={(tr) => (
-                    <List.Item
-                      actions={
-                        tr.status === 'failed' || tr.status === 'paused'
-                          ? [
-                              <RegionButton
-                                key="resume"
-                                variant="caption"
-                                onClick={() => handleResume(tr.transferId)}
-                              >
-                                {t('files.transferResume')}
-                              </RegionButton>
-                            ]
-                          : undefined
-                      }
-                    >
-                      <div className={styles.transferRow}>
-                        <span>{tr.fileName}</span>
-                        <Text type="secondary" style={{ flex: 1, margin: '0 12px' }}>
-                          {formatSize(tr.transferredBytes)} / {formatSize(tr.totalBytes)}
-                        </Text>
-                        <TagStatus
-                          status={tr.status}
-                          label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
-                        />
-                      </div>
-                    </List.Item>
-                  )}
-                />
-              )
-            }
-          ]}
-        />
-      )}
+      <div className={styles.transferPanel}>
+        <div className={styles.rateLimitRow}>
+          <Text type="secondary">
+            {t('files.rateLimitKbps')} · {t('files.rateLimitHint')}
+          </Text>
+          <InputNumber
+            min={0}
+            step={128}
+            value={transferSettings?.rateKbps ?? 0}
+            onChange={(v) => {
+              if (v === null) return
+              void setTransferRate(v).catch(() => undefined)
+            }}
+            style={{ width: 120 }}
+            aria-label={t('files.rateLimitKbps')}
+          />
+        </div>
+        {activeTransfers.length > 0 && (
+          <List
+            size="small"
+            className={styles.transferList}
+            header={<Text type="secondary">{t('files.transferQueue')}</Text>}
+            dataSource={activeTransfers}
+            renderItem={(tr) => (
+              <List.Item>
+                <div className={styles.transferRow}>
+                  <span>{tr.fileName}</span>
+                  <Progress
+                    percent={Math.round((tr.transferredBytes / Math.max(1, tr.totalBytes)) * 100)}
+                    size="small"
+                    style={{ flex: 1, margin: '0 12px' }}
+                  />
+                  {tr.fromDeviceId === tr.toDeviceId ? (
+                    <Tag color="default">{t('files.transferLocalQueue')}</Tag>
+                  ) : null}
+                  <TagStatus
+                    status={tr.status}
+                    label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
+                  />
+                </div>
+              </List.Item>
+            )}
+          />
+        )}
+        {transferHistory.length > 0 && (
+          <Collapse
+            className={styles.transferHistory}
+            items={[
+              {
+                key: 'history',
+                label: `${t('files.transferHistory')} (${transferHistory.length})`,
+                children: (
+                  <List
+                    size="small"
+                    dataSource={transferHistory}
+                    renderItem={(tr) => (
+                      <List.Item
+                        actions={
+                          tr.status === 'failed' || tr.status === 'paused'
+                            ? [
+                                <RegionButton
+                                  key="resume"
+                                  variant="caption"
+                                  onClick={() => handleResume(tr.transferId)}
+                                >
+                                  {t('files.transferResume')}
+                                </RegionButton>
+                              ]
+                            : undefined
+                        }
+                      >
+                        <div className={styles.transferRow}>
+                          <span>{tr.fileName}</span>
+                          <Text type="secondary" style={{ flex: 1, margin: '0 12px' }}>
+                            {formatSize(tr.transferredBytes)} / {formatSize(tr.totalBytes)}
+                          </Text>
+                          <TagStatus
+                            status={tr.status}
+                            label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
+                          />
+                        </div>
+                      </List.Item>
+                    )}
+                  />
+                )
+              }
+            ]}
+          />
+        )}
+      </div>
 
       <div className={styles.body}>
         <div className={styles.listPane}>
@@ -721,7 +741,36 @@ export default function FilesView(): React.ReactElement {
               rowKey="fileId"
               columns={columns}
               dataSource={filteredFiles}
-              locale={{ emptyText: t('files.empty') }}
+              locale={{
+                emptyText: (
+                  <div className={styles.emptyState}>
+                    <Text type="secondary">
+                      {searchQuery.trim()
+                        ? t('files.emptySearch')
+                        : category !== 'all'
+                          ? t('files.emptyCategory')
+                          : t('files.empty')}
+                    </Text>
+                    <Space wrap className={styles.emptyActions}>
+                      <Button
+                        type="primary"
+                        size="small"
+                        icon={<UploadOutlined />}
+                        onClick={() =>
+                          void upload(gid).catch((err: unknown) =>
+                            message.error(formatError(err, 'files.uploadFailed'))
+                          )
+                        }
+                      >
+                        {t('files.upload')}
+                      </Button>
+                      <Button size="small" icon={<PlusOutlined />} onClick={() => setBookmarkOpen(true)}>
+                        {t('files.addBookmark')}
+                      </Button>
+                    </Space>
+                  </div>
+                )
+              }}
               pagination={false}
               sortDirections={['ascend', 'descend']}
               onChange={handleTableChange}
@@ -748,46 +797,81 @@ export default function FilesView(): React.ReactElement {
                   {!selected.isBookmark && <span>{formatSize(selected.size)}</span>}
                   <span>{formatFileUploadedAt(selected.uploadedAt, locale)}</span>
                 </div>
+                {selected.isBookmark && selected.bookmarkUrl ? (
+                  <Text
+                    className={styles.bookmarkUrl}
+                    type="secondary"
+                    copyable
+                    ellipsis={{ tooltip: selected.bookmarkUrl }}
+                  >
+                    {selected.bookmarkUrl}
+                  </Text>
+                ) : null}
               </div>
               <div className={styles.previewActions}>
-                {selected && !selected.isBookmark && isRemotePendingPath(selected.storagePath) ? (
-                  <Button type="primary" size="small" loading={pulling} onClick={() => void handlePullRemote()}>
-                    {t('files.pullRemote')}
-                  </Button>
-                ) : null}
-                {!selected.isBookmark && !isRemotePendingPath(selected.storagePath) ? (
-                  <Button
-                    size="small"
-                    icon={<DownloadOutlined />}
-                    loading={downloading}
-                    onClick={() => void handleDownload(selected)}
-                  >
-                    {t('files.download')}
-                  </Button>
-                ) : null}
-                <Button
-                  size="small"
-                  icon={<CommentOutlined />}
-                  loading={sharingToChat}
-                  onClick={handleShareToChat}
-                >
-                  {t('files.shareToChat')}
-                </Button>
+                {selected.isBookmark ? (
+                  <>
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<LinkOutlined />}
+                      href={selected.bookmarkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t('files.openBookmarkExternal')}
+                    </Button>
+                    <Button
+                      size="small"
+                      icon={<CommentOutlined />}
+                      loading={sharingToChat}
+                      onClick={handleShareToChat}
+                    >
+                      {t('files.shareToChat')}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {isRemotePendingPath(selected.storagePath) ? (
+                      <Button
+                        type="primary"
+                        size="small"
+                        loading={pulling}
+                        onClick={() => void handlePullRemote()}
+                      >
+                        {t('files.pullRemote')}
+                      </Button>
+                    ) : null}
+                    {!isRemotePendingPath(selected.storagePath) ? (
+                      <Button
+                        size="small"
+                        icon={<DownloadOutlined />}
+                        loading={downloading}
+                        onClick={() => void handleDownload(selected)}
+                      >
+                        {t('files.download')}
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="small"
+                      icon={<CommentOutlined />}
+                      loading={sharingToChat}
+                      onClick={handleShareToChat}
+                    >
+                      {t('files.shareToChat')}
+                    </Button>
+                  </>
+                )}
               </div>
               {selected.isBookmark ? (
                 <div className={styles.bookmarkPreviewWrap}>
+                  <Text type="secondary" className={styles.bookmarkPreviewHint}>
+                    {t('files.bookmarkPreviewHint')}
+                  </Text>
                   <BookmarkWebView
                     url={selected.bookmarkUrl ?? ''}
                     title={selected.bookmarkTitle ?? selected.name}
                   />
-                  <a
-                    className={styles.bookmarkExternalLink}
-                    href={selected.bookmarkUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {t('files.openBookmarkExternal')}
-                  </a>
                 </div>
               ) : isRemotePendingPath(selected.storagePath) ? (
                 <Text type="secondary">{t('files.remotePending')}</Text>

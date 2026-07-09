@@ -1,14 +1,35 @@
 /**
- * M5 group guards + cockpit types smoke.
+ * M5 group guards + cockpit types smoke + FilesView P1 layout guards.
  * Run: npm run verify:m5
  */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   assertGroupAllowsFiles,
   assertGroupAllowsTasks,
   isAnonymousGroupType
 } from '../../src/shared/group/guards.ts'
 import type { GroupRecord } from '../../src/shared/group/types.ts'
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
+const filesView = readFileSync(
+  join(root, 'src/renderer/src/features/files/FilesView.tsx'),
+  'utf8'
+)
+assert.match(filesView, /styles\.transferPanel/)
+assert.match(filesView, /styles\.rateLimitRow/)
+assert.match(filesView, /files\.bookmarkMore/)
+assert.match(filesView, /files\.emptySearch/)
+assert.match(filesView, /files\.bookmarkPreviewHint/)
+const toolbarEnd = filesView.indexOf('end={')
+const transferPanel = filesView.indexOf('styles.transferPanel')
+const rateInToolbarWindow = filesView.slice(toolbarEnd, transferPanel)
+assert.ok(
+  !rateInToolbarWindow.includes('rateLimitKbps'),
+  'rate limit must not live in ViewToolbar end (SPRINT-FILES-P1)'
+)
 
 assert.equal(isAnonymousGroupType('anonymous'), true)
 assert.equal(isAnonymousGroupType('project'), false)

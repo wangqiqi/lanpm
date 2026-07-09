@@ -7,18 +7,37 @@
   gap: 12px;
 }
 
-.transferList {
+.transferPanel {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 4px;
+  padding: 10px 12px;
   border: 0.5px solid var(--lanpm-separator);
   border-radius: 10px;
-  padding: 0 8px;
-  margin: 0;
   background: var(--lanpm-surface-solid);
+}
+
+.rateLimitRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.transferList {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
 }
 
 .transferHistory {
   flex-shrink: 0;
-  margin: 0 16px 8px;
+  margin: 0;
 }
 
 .transferRow {
@@ -98,23 +117,29 @@
   gap: 8px;
 }
 
-.toolbarSecondary {
+.emptyState {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  padding: 28px 16px;
+  text-align: center;
 }
 
-.toolbarSecondary :global(.ant-btn) {
+.emptyActions {
+  justify-content: center;
+}
+
+.bookmarkUrl {
+  display: block;
+  margin-top: 8px;
+  max-width: 100%;
   font-size: var(--lanpm-font-body);
 }
 
-.toolbarDivider {
-  width: 0.5px;
-  height: 24px;
+.bookmarkPreviewHint {
   flex-shrink: 0;
-  background: var(--lanpm-separator);
-  margin: 0 4px;
+  font-size: var(--lanpm-font-caption);
 }
 
 .searchInput {
@@ -179,21 +204,17 @@
   flex: 1;
   min-height: 0;
   gap: 8px;
+  margin-top: 4px;
 }
 
 .bookmarkWebview {
   flex: 1;
-  min-height: 320px;
+  min-height: 200px;
+  max-height: 280px;
   width: 100%;
   border: 1px solid var(--lanpm-border);
   border-radius: 6px;
   background: var(--lanpm-bg);
-}
-
-.bookmarkExternalLink {
-  flex-shrink: 0;
-  font-size: var(--lanpm-font-body);
-  color: var(--lanpm-accent);
 }
 
 @media (max-width: 960px) {
