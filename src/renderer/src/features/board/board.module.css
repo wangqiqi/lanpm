@@ -301,7 +301,7 @@
 }
 
 .dependencyLineIn {
-  stroke: var(--lanpm-warning, #d97706);
+  stroke: var(--lanpm-warning);
 }
 
 .dependencyLineOut {
@@ -309,7 +309,7 @@
 }
 
 .dependencyArrow {
-  fill: context-stroke;
+  fill: var(--lanpm-accent);
 }
 
 .trashZone {
@@ -359,7 +359,7 @@
 }
 
 .legendDepIn {
-  background: var(--lanpm-warning, #d97706);
+  background: var(--lanpm-warning);
 }
 
 .legendDepOut {
