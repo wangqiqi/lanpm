@@ -3,8 +3,7 @@
  * Run: npm run verify:file-sync
  */
 import { createHash, randomUUID } from 'crypto'
-import { mkdtempSync, readFileSync, writeFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { readFileSync, writeFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
@@ -23,9 +22,11 @@ import {
   upsertRemoteFileMeta
 } from '../../src/main/storage/repositories/fileRepository.ts'
 import type { FileMeta } from '../../src/shared/file/types.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 const GROUP = 'demo-project'
 
 function seedDb(db: Database.Database, userId: string, deviceId: string): void {
@@ -128,7 +129,8 @@ function assembleChunks(
 }
 
 function openDb(label: string, userId: string, deviceId: string): { db: Database.Database; dir: string } {
-  const dir = mkdtempSync(join(tmpdir(), `lanpm-file-sync-${label}-`))
+  const dir = mkLanpmTemp(`lanpm-file-sync-${label}-`)
+  _tempDirs.push(dir)
   const db = new Database(join(dir, 'test.db'))
   db.exec(schemaSql)
   seedDb(db, userId, deviceId)
@@ -233,6 +235,7 @@ try {
   stubB.stop()
   dbA.close()
   dbB.close()
+  for (const d of _tempDirs) rmLanpmTemp(d)
 }
 
 console.log('verify:file-sync OK')

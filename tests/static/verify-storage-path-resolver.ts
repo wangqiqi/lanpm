@@ -2,13 +2,13 @@
  * Profile 迁移后 storage_path 回退解析
  * Run: node --experimental-strip-types tests/static/verify-storage-path-resolver.ts
  */
-import { existsSync, mkdtempSync, mkdirSync, writeFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import Database from 'better-sqlite3'
 import assert from 'node:assert/strict'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
-const dir = mkdtempSync(join(tmpdir(), 'lanpm-storage-path-'))
+const dir = mkLanpmTemp('lanpm-storage-path-')
 process.env.LANPM_USER_DATA = dir
 
 const groupId = 'demo-project'
@@ -18,7 +18,7 @@ const canonical = join(dir, 'files', groupId, `${fileId}_${name}`)
 mkdirSync(join(dir, 'files', groupId), { recursive: true })
 writeFileSync(canonical, 'hello preview', 'utf8')
 
-const stalePath = join(tmpdir(), 'stale', `${fileId}_${name}`)
+const stalePath = join(dir, 'stale', `${fileId}_${name}`)
 const dbPath = join(dir, 'lanpm.db')
 const db = new Database(dbPath)
 db.exec(`
@@ -67,4 +67,5 @@ assert.equal(after.storagePath, canonical)
 assert.equal(after.previewPath, canonical)
 
 db.close()
+rmLanpmTemp(dir)
 console.log('verify:storage-path-resolver OK')

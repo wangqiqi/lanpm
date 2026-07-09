@@ -2,8 +2,7 @@
  * AUTO-10 — 单机双 NetworkStub + 双库：chat → read_receipt → task_patch 闭环。
  * Run: npm run verify:dual-stub
  */
-import { mkdtempSync, readFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
@@ -25,6 +24,7 @@ import {
   listReaderUserIds,
   upsertReadReceipt
 } from '../../src/main/storage/repositories/readReceiptRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 import {
   buildTaskFromInput,
   getMaxSortOrderInColumn,
@@ -35,10 +35,12 @@ import {
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 const GROUP = 'demo-dual-stub'
 
 function openDb(): Database.Database {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-dual-'))
+  const dir = mkLanpmTemp('lanpm-dual-')
+  _tempDirs.push(dir)
   const db = new Database(join(dir, 'test.db'))
   db.exec(schemaSql)
   return db
@@ -207,6 +209,7 @@ try {
   stubB.stop()
   dbA.close()
   dbB.close()
+  for (const d of _tempDirs) rmLanpmTemp(d)
 }
 
 console.log('verify:dual-stub OK (discover + chat + read_receipt + task_patch)')

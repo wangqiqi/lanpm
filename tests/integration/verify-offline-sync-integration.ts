@@ -2,8 +2,7 @@
  * AUTO-13 — 离线补同步集成：chat_sync_request → chat_sync_batch → SQLite 落库 + TTL 过滤。
  * Run: npm run verify:offline-sync-integration
  */
-import { mkdtempSync, readFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
@@ -21,6 +20,7 @@ import { insertGroup } from '../../src/main/storage/repositories/groupRepository
 import { setMeta } from '../../src/main/storage/repositories/syncMetaRepository.ts'
 import { upsertDevice } from '../../src/main/storage/repositories/deviceRepository.ts'
 import { upsertUser } from '../../src/main/storage/repositories/userRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 import {
   insertMessage,
   listMessagesByGroup,
@@ -30,6 +30,7 @@ import {
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 const GROUP = 'demo-offline-sync'
 const DEVICE_A = 'dev_off_a'
 const DEVICE_B = 'dev_off_b'
@@ -39,7 +40,8 @@ const USER_B = 'user_off_b'
 const USER_REMOTE = 'user_remote'
 
 function openDb(userId: string, deviceId: string): Database.Database {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-offline-sync-'))
+  const dir = mkLanpmTemp('lanpm-offline-sync-')
+  _tempDirs.push(dir)
   const db = new Database(join(dir, 'test.db'))
   db.exec(schemaSql)
   const now = new Date().toISOString()
@@ -226,6 +228,7 @@ try {
   stubA.stop()
   dbA.close()
   dbB.close()
+  for (const d of _tempDirs) rmLanpmTemp(d)
 }
 
 console.log('verify:offline-sync-integration OK (request → batch → TTL)')

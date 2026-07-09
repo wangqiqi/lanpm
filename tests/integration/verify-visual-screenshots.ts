@@ -5,12 +5,12 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { electronCiChromiumFlags } from '../../scripts/electron-ci-chromium-flags.mjs'
 import { resolveElectronBin } from '../../scripts/resolve-electron-bin.mjs'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const electronBin = resolveElectronBin()
@@ -37,7 +37,11 @@ const EXPECTED = [
 assert.ok(electronBin, 'electron binary missing')
 assert.ok(existsSync(mainJs), 'out/main/index.js missing — run npm run build first')
 
-const userData = mkdtempSync(join(tmpdir(), 'lanpm-visual-cap-'))
+const userData = mkLanpmTemp('lanpm-visual-cap-')
+
+process.on('exit', () => {
+  try { rmLanpmTemp(userData) } catch { /* ignore */ }
+})
 
 const env = { ...process.env }
 delete env.ELECTRON_RUN_AS_NODE

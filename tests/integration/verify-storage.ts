@@ -3,11 +3,10 @@
  * Run: npm run verify:storage
  */
 import Database from 'better-sqlite3'
-import { mkdtempSync, rmSync } from 'fs'
-import { tmpdir } from 'os'
 import { join } from 'path'
 import { applyMigrations, MIGRATIONS } from '../../src/main/storage/migrate.ts'
 import { EXPECTED_TABLES, SCHEMA_VERSION } from '../../src/main/storage/schema.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 function assertTables(db: Database.Database): void {
   const tables = (
@@ -26,7 +25,7 @@ function assertTables(db: Database.Database): void {
 }
 
 function withTempDb(fn: (db: Database.Database, dbPath: string) => void): void {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-db-'))
+  const dir = mkLanpmTemp('lanpm-db-')
   const dbPath = join(dir, 'lanpm.db')
   try {
     const db = new Database(dbPath)
@@ -34,7 +33,7 @@ function withTempDb(fn: (db: Database.Database, dbPath: string) => void): void {
     fn(db, dbPath)
     db.close()
   } finally {
-    rmSync(dir, { recursive: true, force: true })
+    rmLanpmTemp(dir)
   }
 }
 

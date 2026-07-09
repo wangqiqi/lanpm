@@ -2,8 +2,7 @@
  * M2-06 read receipt aggregation smoke.
  * Run: npm run verify:read-receipt
  */
-import { mkdtempSync, readFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
@@ -16,6 +15,7 @@ import {
   insertMessage,
   updateDeliveryStatus
 } from '../../src/main/storage/repositories/messageRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 import {
   listReaderUserIds,
   upsertReadReceipt
@@ -23,10 +23,12 @@ import {
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 const GROUP = 'verify-read-group'
 
 function openDb(): Database.Database {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-read-'))
+  const dir = mkLanpmTemp('lanpm-read-')
+  _tempDirs.push(dir)
   const db = new Database(join(dir, 'test.db'))
   db.exec(schemaSql)
   return db
@@ -151,6 +153,7 @@ try {
   stubB.stop()
   dbA.close()
   dbB.close()
+  for (const d of _tempDirs) rmLanpmTemp(d)
 }
 
 console.log('OK: read receipt userId aggregation + NetworkStub sync')

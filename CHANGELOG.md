@@ -7,6 +7,7 @@
 ### Changed
 - **正式版 `1.0.0`**：`package.json` / README 中英 badge·正文 / `docs/00`·`01`·`02`·`06` 版本指针自 `1.0.0-rc.81` 升至 `1.0.0`（`TASK-061`）
 - **验收 SSOT**：`docs/06` §2.6「发布 1.0.0」勾选；真机 UI / 真网双机 / 冷启动内存 / 英文折行肉眼仍延期并**显式接受风险**（`TASK-062`）
+- **磁盘卫生**：集成测试临时目录改仓库 `.lanpm/tmp/`（测完删除）；Stub 总线默认 `.lanpm/stub-bus/`；截图暂存改 `userData/tmp`；`docs/05` 路径约定（避免堆满 `/tmp`）
 
 ### Added（自 rc.81 审阅跟进，随正式版一并交付）
 - SQLite 增量 migration 骨架；AI Key / WebView 安全加固；协议空转 `publish` 守卫；ACC 自动化闭合；浏览器桩假成功修复；执行面板仅 `.cursorGrowth/plan.md`

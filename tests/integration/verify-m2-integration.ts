@@ -2,8 +2,7 @@
  * M2-07 / M2-08 integration smoke (read receipt + /task + task persist).
  * Run: npm run verify:m2-integration
  */
-import { mkdtempSync, readFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
@@ -24,6 +23,7 @@ import {
   listReaderUserIds,
   upsertReadReceipt
 } from '../../src/main/storage/repositories/readReceiptRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 import {
   buildTaskFromInput,
   getMaxSortOrderInColumn,
@@ -33,10 +33,12 @@ import {
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 const GROUP = 'demo-project'
 
 function openDb(): Database.Database {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-m2-int-'))
+  const dir = mkLanpmTemp('lanpm-m2-int-')
+  _tempDirs.push(dir)
   const db = new Database(join(dir, 'test.db'))
   db.exec(schemaSql)
   return db
@@ -192,6 +194,7 @@ try {
   stubB.stop()
   dbA.close()
   dbB.close()
+  for (const d of _tempDirs) rmLanpmTemp(d)
 }
 
 console.log('OK: M2 integration chat + read receipt + task')

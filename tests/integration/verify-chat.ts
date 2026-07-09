@@ -2,8 +2,6 @@
  * M2-01 chat send/receive smoke (in-process dual stub + SQLite).
  * Run: npm run verify:chat
  */
-import { mkdtempSync } from 'fs'
-import { tmpdir } from 'os'
 import { join } from 'path'
 import Database from 'better-sqlite3'
 import { readFileSync } from 'fs'
@@ -18,14 +16,17 @@ import {
 } from '../../src/main/storage/repositories/messageRepository.ts'
 import type { ChatMessage, ChatPayload } from '../../src/shared/chat/types.ts'
 import { detectLanguage } from '../../src/shared/chat/detectLanguage.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 
 const GROUP = 'verify-chat-group'
 
 function openTestDb(): Database.Database {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-chat-'))
+  const dir = mkLanpmTemp('lanpm-chat-')
+  _tempDirs.push(dir)
   const dbPath = join(dir, 'test.db')
   const db = new Database(dbPath)
   db.exec(schemaSql)
@@ -166,6 +167,7 @@ async function runChatVerify(): Promise<void> {
     stubB.stop()
     dbA.close()
     dbB.close()
+    for (const d of _tempDirs) rmLanpmTemp(d)
   }
 }
 

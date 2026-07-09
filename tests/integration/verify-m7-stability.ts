@@ -4,10 +4,10 @@
  */
 import assert from 'node:assert/strict'
 import Database from 'better-sqlite3'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
@@ -28,7 +28,7 @@ function reopenDb(path: string): Database.Database {
   return db
 }
 
-const dir = mkdtempSync(join(tmpdir(), 'lanpm-m7-stab-'))
+const dir = mkLanpmTemp('lanpm-m7-stab-')
 const dbPath = join(dir, 'lanpm.db')
 
 try {
@@ -76,5 +76,5 @@ try {
 
   console.log('verify-m7-stability: ok')
 } finally {
-  rmSync(dir, { recursive: true, force: true })
+  rmLanpmTemp(dir)
 }

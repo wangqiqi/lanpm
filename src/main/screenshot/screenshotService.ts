@@ -1,8 +1,7 @@
-import { BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { throwLanpm } from '../../shared/errors/lanpmError'
 import Screenshots from 'electron-screenshots'
-import { writeFile } from 'fs/promises'
-import { tmpdir } from 'os'
+import { mkdir, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { sendFileMessage } from '../chat/chatService'
 import { getMainWindow, LANPM_MAIN_WINDOW_TITLE } from '../mainWindow'
@@ -101,9 +100,14 @@ export function initScreenshotService(): void {
       pending = null
       showAppWindows()
       try {
-        const filePath = join(tmpdir(), `lanpm-screenshot-${Date.now()}.png`)
+        // Prefer userData (stable, app-owned) over OS /tmp — avoid cluttering system temp
+        const shotDir = join(app.getPath('userData'), 'tmp')
+        await mkdir(shotDir, { recursive: true })
+        const filePath = join(shotDir, `lanpm-screenshot-${Date.now()}.png`)
         await writeFile(filePath, buffer)
         const msg = await sendFileMessage(getDatabase(), groupId, filePath)
+        // Best-effort: file may already be copied into files/; ignore if still needed
+        await unlink(filePath).catch(() => undefined)
         resolve(msg)
       } catch (err) {
         reject(err instanceof Error ? err : new Error(String(err)))

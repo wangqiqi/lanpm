@@ -2,8 +2,7 @@
  * B-01 — task_patch LWW 同步冒烟（repository + Stub 双实例）。
  * Run: npm run verify:task-sync
  */
-import { mkdtempSync, readFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
@@ -16,6 +15,7 @@ import { insertGroup } from '../../src/main/storage/repositories/groupRepository
 import { setMeta } from '../../src/main/storage/repositories/syncMetaRepository.ts'
 import { upsertDevice } from '../../src/main/storage/repositories/deviceRepository.ts'
 import { upsertUser } from '../../src/main/storage/repositories/userRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 import {
   applyRemoteTaskDelete,
   buildTaskFromInput,
@@ -27,6 +27,7 @@ import {
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
+const _tempDirs: string[] = []
 const GROUP = 'demo-project'
 
 function seedDb(db: Database.Database, userId: string, deviceId: string): void {
@@ -62,7 +63,8 @@ function applyTaskPatch(db: Database.Database, localDeviceId: string, envelope: 
 }
 
 function openDb(userId: string, deviceId: string): Database.Database {
-  const dir = mkdtempSync(join(tmpdir(), 'lanpm-task-sync-'))
+  const dir = mkLanpmTemp('lanpm-task-sync-')
+  _tempDirs.push(dir)
   const db = new Database(join(dir, 'test.db'))
   db.exec(schemaSql)
   seedDb(db, userId, deviceId)
@@ -142,6 +144,7 @@ try {
   stubB.stop()
   dbA.close()
   dbB.close()
+  for (const d of _tempDirs) rmLanpmTemp(d)
 }
 
 console.log('verify:task-sync OK')

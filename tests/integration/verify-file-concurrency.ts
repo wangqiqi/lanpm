@@ -3,14 +3,14 @@
  * Run: npm run verify:file-concurrency
  */
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Database from 'better-sqlite3'
 import { randomUUID } from 'crypto'
 import { FILE_MAX_CONCURRENT } from '../../src/shared/file/channels.ts'
 import { countActiveTransfers, insertTransfer } from '../../src/main/storage/repositories/fileTransferRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
@@ -23,7 +23,7 @@ assert.match(
   'fileService must wait when active transfers >= FILE_MAX_CONCURRENT'
 )
 
-const dir = mkdtempSync(join(tmpdir(), 'lanpm-file-conc-'))
+const dir = mkLanpmTemp('lanpm-file-conc-')
 const db = new Database(join(dir, 'test.db'))
 db.exec(schemaSql)
 
@@ -80,6 +80,7 @@ try {
   )
 } finally {
   db.close()
+  rmLanpmTemp(dir)
 }
 
 console.log(`verify:file-concurrency OK (limit=${FILE_MAX_CONCURRENT})`)

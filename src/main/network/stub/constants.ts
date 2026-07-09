@@ -1,5 +1,5 @@
+import { mkdirSync } from 'fs'
 import { join } from 'path'
-import { tmpdir } from 'os'
 
 /** docs/04 §6.3 — offline timeout for peer records */
 export const STUB_PEER_TTL_MS = 15_000
@@ -10,8 +10,20 @@ export const STUB_DISCOVERY_INTERVAL_MS = 3_000
 /** docs/04 §6.3 — heartbeat interval */
 export const STUB_HEARTBEAT_INTERVAL_MS = 5_000
 
-/** Stub bus directory (shared across instances on same host) */
-export const STUB_BUS_DIR = join(tmpdir(), 'lanpm-stub')
+/**
+ * Stub 总线目录（同机多实例共享）。
+ * 默认仓库内 `.lanpm/stub-bus`（gitignore），避免堆满 `/tmp`；
+ * 可用 `LANPM_STUB_BUS_DIR` 覆盖。
+ */
+function resolveStubBusDir(): string {
+  const fromEnv = process.env.LANPM_STUB_BUS_DIR?.trim()
+  if (fromEnv) return fromEnv
+  const dir = join(process.cwd(), '.lanpm', 'stub-bus')
+  mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+export const STUB_BUS_DIR = resolveStubBusDir()
 
 export const STUB_PEERS_DIR = join(STUB_BUS_DIR, 'peers')
 export const STUB_BUS_FILE = join(STUB_BUS_DIR, 'bus.jsonl')

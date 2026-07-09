@@ -1,6 +1,5 @@
 import { app, BrowserWindow, Menu, shell, dialog } from 'electron'
-import { existsSync, mkdtempSync } from 'fs'
-import { tmpdir } from 'os'
+import { existsSync, mkdirSync, mkdtempSync } from 'fs'
 import { join } from 'path'
 import { initChatService, shutdownChatService } from './chat/chatService'
 import { registerChatIpc } from './ipc/chat'
@@ -30,8 +29,11 @@ const isDev = !app.isPackaged
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
 
 if (visualCaptureDir) {
+  // Prefer repo-local temp (gitignore) over OS /tmp — avoids disk clutter across CI/dev runs
+  const fallbackRoot = join(process.cwd(), '.lanpm', 'tmp')
+  mkdirSync(fallbackRoot, { recursive: true })
   const userData =
-    process.env.LANPM_USER_DATA ?? mkdtempSync(join(tmpdir(), 'lanpm-visual-cap-'))
+    process.env.LANPM_USER_DATA ?? mkdtempSync(join(fallbackRoot, 'lanpm-visual-cap-'))
   process.env.LANPM_USER_DATA = userData
   app.setPath('userData', userData)
   process.env.LANPM_NETWORK = process.env.LANPM_NETWORK ?? 'stub'

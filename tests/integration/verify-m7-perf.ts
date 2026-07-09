@@ -4,8 +4,7 @@
  */
 import assert from 'node:assert/strict'
 import Database from 'better-sqlite3'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
@@ -14,6 +13,7 @@ import { sealEnvelope, openEnvelope } from '../../src/main/crypto/envelopeCrypto
 import { groupViewPath } from '../../src/renderer/src/routes/paths.ts'
 import type { SyncEnvelope } from '../../src/shared/network/types.ts'
 import { listMessagesByGroup } from '../../src/main/storage/repositories/messageRepository.ts'
+import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 function p95(samples: number[]): number {
   const sorted = [...samples].sort((a, b) => a - b)
@@ -24,7 +24,7 @@ function p95(samples: number[]): number {
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
 
-const dir = mkdtempSync(join(tmpdir(), 'lanpm-m7-perf-'))
+const dir = mkLanpmTemp('lanpm-m7-perf-')
 const dbPath = join(dir, 'lanpm.db')
 
 try {
@@ -112,5 +112,5 @@ try {
     `verify-m7-perf: ok (db=${dbInitMs.toFixed(1)}ms cryptoP95=${cryptoP95.toFixed(2)}ms routeP95=${routeP95.toFixed(3)}ms msgP95=${msgP95.toFixed(2)}ms)`
   )
 } finally {
-  rmSync(dir, { recursive: true, force: true })
+  rmLanpmTemp(dir)
 }
