@@ -20,6 +20,7 @@
 ### Added
 - **SQLite 增量 migration 骨架**：`applyMigrations`（v0 全量 DDL · v≥1 步进 · 版本过高抛错）；`verify:storage` 覆盖 bootstrap/幂等/拒新版本（`SPIKE-SCHEMA-01` · `TASK-010` · `TASK-011`）
 - **安全加固**：正式版禁止 AI Key `dev:` 回退加密（须 OS safeStorage）；书签 WebView 仅 http(s) 导航 + 主进程 `will-attach-webview` 守卫；`verify:sec-hardening`（`TASK-020` · `TASK-021`）
+- **协议空转守卫**：`task_crdt` / `member_event` 由 `UNIMPLEMENTED_SYNC_TYPES` 在 Stub/Real `publish` 拒绝发送；文档 §2.3 / `03` 同步（`TASK-030` · `TASK-031`）
 
 ### Tag
 - `v1.0.0-rc.81` — 代码文档审计 + Blockmap 说明

@@ -33,6 +33,9 @@ const POST_RC_OR_TRANSPORT = new Set<string>([
   'member_event'
 ])
 
+/** Must be refused by publish (SPRINT-PROTOCOL-DOCS) */
+const UNIMPLEMENTED_PUBLISH = new Set<string>(['task_crdt', 'member_event'])
+
 const HANDLER_FILES = [
   'src/main/chat/chatService.ts',
   'src/main/chat/readReceiptService.ts',
@@ -44,17 +47,38 @@ const HANDLER_FILES = [
   'src/main/network/real/RealNetworkTransport.ts'
 ]
 
+const unimplementedSrc = readFileSync(
+  join(root, 'src/shared/network/unimplementedSync.ts'),
+  'utf8'
+)
+assert.match(unimplementedSrc, /UNIMPLEMENTED_SYNC_TYPES/, 'unimplementedSync.ts required')
+assert.match(unimplementedSrc, /assertPublishableSyncType/, 'assertPublishableSyncType required')
+
+const stubPublish = readFileSync(join(root, 'src/main/network/stub/NetworkStub.ts'), 'utf8')
+const realPublish = readFileSync(
+  join(root, 'src/main/network/real/RealNetworkTransport.ts'),
+  'utf8'
+)
+assert.match(stubPublish, /assertPublishableSyncType/, 'NetworkStub.publish must guard')
+assert.match(realPublish, /assertPublishableSyncType/, 'RealNetworkTransport.publish must guard')
+
+for (const type of UNIMPLEMENTED_PUBLISH) {
+  assert.ok(
+    unimplementedSrc.includes(`'${type}'`),
+    `UNIMPLEMENTED_SYNC_TYPES must include ${type}`
+  )
+}
+
 const corpus = HANDLER_FILES.map((rel) => readFileSync(join(root, rel), 'utf8')).join('\n')
 
 for (const type of SYNC_TYPES) {
   const pattern = new RegExp(`['"]${type}['"]|type === '${type}'|type !== '${type}'`)
   if (POST_RC_OR_TRANSPORT.has(type)) {
     const inTransport =
-      readFileSync(join(root, 'src/main/network/stub/NetworkStub.ts'), 'utf8').includes(type) ||
-      readFileSync(join(root, 'src/main/network/real/RealNetworkTransport.ts'), 'utf8').includes(
-        type
-      ) ||
-      readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8').includes(`'${type}'`)
+      stubPublish.includes(type) ||
+      realPublish.includes(type) ||
+      readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8').includes(`'${type}'`) ||
+      unimplementedSrc.includes(`'${type}'`)
     assert.ok(inTransport, `transport/doc reference missing for ${type}`)
     continue
   }
