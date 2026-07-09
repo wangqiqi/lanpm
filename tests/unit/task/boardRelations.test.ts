@@ -3,7 +3,8 @@ import {
   buildBoardRelationMap,
   collectRelatedTaskIds,
   getDependencyBlockersForStatus,
-  getRootTaskId
+  getRootTaskId,
+  listFocusDependencyEdges
 } from '@shared/task/boardRelations'
 import type { Task } from '@shared/task/types'
 
@@ -67,5 +68,44 @@ describe('boardRelations', () => {
     const map = buildBoardRelationMap(tasks)
     expect(map.get('blocked')?.blockedBy).toHaveLength(1)
     expect(map.get('child')?.familyIndex ?? -1).toBeGreaterThanOrEqual(0)
+  })
+
+  it('lists FS focus edges for predecessor and successor', () => {
+    const fromBlocked = listFocusDependencyEdges('blocked', tasks, { types: ['FS'] })
+    expect(fromBlocked).toEqual([
+      {
+        fromTaskId: 'root',
+        toTaskId: 'blocked',
+        type: 'FS',
+        direction: 'incoming'
+      }
+    ])
+
+    const fromRoot = listFocusDependencyEdges('root', tasks, { types: ['FS'] })
+    expect(fromRoot).toEqual([
+      {
+        fromTaskId: 'root',
+        toTaskId: 'blocked',
+        type: 'FS',
+        direction: 'outgoing'
+      }
+    ])
+  })
+
+  it('filters non-FS types when types is FS-only', () => {
+    const mixed: Task[] = [
+      task({ taskId: 'a', title: 'A' }),
+      task({
+        taskId: 'b',
+        title: 'B',
+        dependencies: [
+          { fromTaskId: 'a', toTaskId: 'b', type: 'FS' },
+          { fromTaskId: 'a', toTaskId: 'b', type: 'SS' }
+        ]
+      })
+    ]
+    const edges = listFocusDependencyEdges('b', mixed, { types: ['FS'] })
+    expect(edges).toHaveLength(1)
+    expect(edges[0]!.type).toBe('FS')
   })
 })

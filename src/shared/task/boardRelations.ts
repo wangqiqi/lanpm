@@ -21,6 +21,68 @@ export interface BoardTaskRelation {
   relatedIds: string[]
 }
 
+/** 看板悬停/固定高亮时绘制依赖连线用的边（与甘特 `TaskDependency` 同源） */
+export interface BoardDependencyEdge {
+  fromTaskId: string
+  toTaskId: string
+  type: TaskDependencyType
+  /** 焦点是后继（入边）或前置（出边） */
+  direction: 'incoming' | 'outgoing'
+}
+
+const DEFAULT_EDGE_TYPES: readonly TaskDependencyType[] = ['FS', 'SS', 'FF', 'SF']
+
+/**
+ * 焦点任务相关的依赖边列表。
+ * `types` 默认全部；看板 MVP 可传 `['FS']` 只画完成-开始。
+ */
+export function listFocusDependencyEdges(
+  focusTaskId: string,
+  tasks: Task[],
+  options?: { types?: readonly TaskDependencyType[] }
+): BoardDependencyEdge[] {
+  const byId = new Map(tasks.map((t) => [t.taskId, t]))
+  if (!byId.has(focusTaskId)) return []
+
+  const allow = new Set(options?.types ?? DEFAULT_EDGE_TYPES)
+  const edges: BoardDependencyEdge[] = []
+  const seen = new Set<string>()
+
+  const push = (edge: BoardDependencyEdge): void => {
+    if (!allow.has(edge.type)) return
+    const key = `${edge.fromTaskId}>${edge.toTaskId}:${edge.type}:${edge.direction}`
+    if (seen.has(key)) return
+    seen.add(key)
+    edges.push(edge)
+  }
+
+  const focus = byId.get(focusTaskId)!
+  for (const dep of focus.dependencies ?? []) {
+    if (!byId.has(dep.fromTaskId)) continue
+    push({
+      fromTaskId: dep.fromTaskId,
+      toTaskId: dep.toTaskId || focusTaskId,
+      type: dep.type,
+      direction: 'incoming'
+    })
+  }
+
+  for (const t of tasks) {
+    for (const dep of t.dependencies ?? []) {
+      if (dep.fromTaskId !== focusTaskId) continue
+      if (!byId.has(t.taskId)) continue
+      push({
+        fromTaskId: focusTaskId,
+        toTaskId: dep.toTaskId || t.taskId,
+        type: dep.type,
+        direction: 'outgoing'
+      })
+    }
+  }
+
+  return edges
+}
+
 function stableFamilyIndex(rootTaskId: string): number {
   let h = 0
   for (let i = 0; i < rootTaskId.length; i++) {
