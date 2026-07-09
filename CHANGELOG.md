@@ -11,6 +11,8 @@
 ### Changed
 - **文档修正**：`docs/05_测试与联调发布.md` 更新部分描述
 - **版本门面对齐**：README 中英 badge/正文、`docs/01` §1.3.1、`docs/02` RC 说明与 `package.json` 一致为 `1.0.0-rc.81`（`TASK-001`）
+- **验收文档**：`docs/06` 标明 RC `1.0.0-rc.81`；§2.3 补充匿名群内存会话边界；`docs/00` 增加 RC 对外表述与 `.cursorGrowth/plan.md` 指针（`TASK-002`）
+- **根 plan.md**：改为历史备忘，执行面板指向 `.cursorGrowth/plan.md`（`TASK-006`）
 
 ### Fixed
 - **主进程 broadcast 导入路径**：`taskService` / `fileService` 改为 `../utils/broadcast`，修复 `electron-vite build` 无法解析模块（`TASK-001` 验收阻断）
