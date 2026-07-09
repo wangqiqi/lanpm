@@ -469,6 +469,7 @@ export type MessageKey =
   | 'err.apiKeyRequired'
   | 'err.apiKeySafeStorageRequired'
   | 'err.apiKeyDevFallbackForbidden'
+  | 'err.syncTypeUnimplemented'
   | 'files.bookmarkUrlInvalid'
   | 'err.dependencySelf'
   | 'err.dmSelf'

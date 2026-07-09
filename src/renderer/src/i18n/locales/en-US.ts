@@ -475,6 +475,7 @@ const enUS = {
     'OS secure storage is unavailable; cannot save API key. Enable the system keyring or use a development build.',
   'err.apiKeyDevFallbackForbidden':
     'Packaged builds reject development-only key encryption. Re-enter your API key (OS secure storage).',
+  'err.syncTypeUnimplemented': 'This sync message type is not implemented yet and cannot be sent',
   'files.bookmarkUrlInvalid': 'Invalid bookmark URL; only http(s) is allowed',
   'err.dependencySelf': 'A task cannot depend on itself',
   'err.dmSelf': 'You cannot start a DM with yourself',

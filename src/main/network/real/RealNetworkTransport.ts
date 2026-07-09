@@ -5,6 +5,7 @@ import type {
   NetworkTransport,
   SyncEnvelope
 } from '../../../shared/network/types'
+import { assertPublishableSyncType } from '../../../shared/network/unimplementedSync.ts'
 import {
   DISCOVERY_INTERVAL_MS,
   HEARTBEAT_INTERVAL_MS,
@@ -125,6 +126,7 @@ export class RealNetworkTransport implements NetworkTransport {
   }
 
   async publish(envelope: SyncEnvelope): Promise<void> {
+    assertPublishableSyncType(envelope.type)
     if (!this.started) this.start()
     const withClock: SyncEnvelope = {
       ...envelope,

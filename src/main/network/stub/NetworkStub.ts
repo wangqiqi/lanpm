@@ -11,6 +11,7 @@ import {
   writeFileSync
 } from 'fs'
 import type { DiscoveryPayload, HeartbeatPayload, NetworkTransport, SyncEnvelope } from '../../../shared/network/index.ts'
+import { assertPublishableSyncType } from '../../../shared/network/unimplementedSync.ts'
 import {
   STUB_BUS_DIR,
   STUB_BUS_FILE,
@@ -223,6 +224,7 @@ export class NetworkStub implements NetworkTransport {
   }
 
   async publish(envelope: SyncEnvelope): Promise<void> {
+    assertPublishableSyncType(envelope.type)
     if (!this.started) this.start()
     const withClock: SyncEnvelope = {
       ...envelope,

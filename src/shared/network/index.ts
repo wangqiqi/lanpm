@@ -9,6 +9,12 @@ export type {
 export type { NetworkMode, NetworkLinkState, NetworkStatusView } from './status'
 export { NETWORK_IPC } from './status'
 export {
+  UNIMPLEMENTED_SYNC_TYPES,
+  assertPublishableSyncType,
+  isUnimplementedSyncType
+} from './unimplementedSync'
+export type { UnimplementedSyncType } from './unimplementedSync'
+export {
   UDP_DISCOVERY_PORT,
   DEFAULT_TCP_LISTEN_PORT,
   DISCOVERY_INTERVAL_MS,
