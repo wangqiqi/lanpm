@@ -17,6 +17,9 @@
 ### Fixed
 - **主进程 broadcast 导入路径**：`taskService` / `fileService` 改为 `../utils/broadcast`，修复 `electron-vite build` 无法解析模块（`TASK-001` 验收阻断）
 
+### Added
+- **SQLite 增量 migration 骨架**：`applyMigrations`（v0 全量 DDL · v≥1 步进 · 版本过高抛错）；`verify:storage` 覆盖 bootstrap/幂等/拒新版本（`SPIKE-SCHEMA-01` · `TASK-010` · `TASK-011`）
+
 ### Tag
 - `v1.0.0-rc.81` — 代码文档审计 + Blockmap 说明
 
