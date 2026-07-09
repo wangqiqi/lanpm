@@ -439,6 +439,9 @@ const enUS = {
   'stub.taskNotFound': 'Task not found',
   'stub.ganttDepsUnsupported': 'Gantt dependencies are not supported in browser preview',
   'stub.uploadElectronOnly': 'Use the Electron app to upload files in browser preview',
+  'stub.importBundleElectronOnly':
+    'Importing group bundles requires the Electron app in browser preview',
+  'stub.manualPeerPreviewOnly': 'Manual peers are not supported in browser preview',
   'stub.exportBookmarksElectronOnly': 'Use the Electron app to export bookmarks in browser preview',
   'stub.messageNotFound': 'Message not found',
   'stub.recallNotAllowed': 'You can only recall your own messages',

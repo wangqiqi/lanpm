@@ -12,6 +12,7 @@ const steps = [
   'verify:rc-reality',
   'verify:router-views',
   'verify:stub-parity',
+  'verify:stub-behavior',
   'verify:sync-handlers',
   'verify:schema-repo',
   'verify:schema-fk',

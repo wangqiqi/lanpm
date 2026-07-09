@@ -437,6 +437,8 @@ const zhCN = {
   'stub.taskNotFound': '任务不存在',
   'stub.ganttDepsUnsupported': '浏览器预览暂不支持甘特依赖',
   'stub.uploadElectronOnly': '浏览器预览请使用 Electron 客户端上传文件',
+  'stub.importBundleElectronOnly': '浏览器预览无法导入群组包，请使用 Electron 客户端',
+  'stub.manualPeerPreviewOnly': '浏览器预览不支持手动添加节点',
   'stub.exportBookmarksElectronOnly': '浏览器预览请使用 Electron 客户端导出书签',
   'stub.messageNotFound': '消息不存在',
   'stub.recallNotAllowed': '只能撤回自己发送的消息',

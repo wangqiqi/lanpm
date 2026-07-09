@@ -435,6 +435,8 @@ export type MessageKey =
   | 'stub.taskNotFound'
   | 'stub.ganttDepsUnsupported'
   | 'stub.uploadElectronOnly'
+  | 'stub.importBundleElectronOnly'
+  | 'stub.manualPeerPreviewOnly'
   | 'stub.exportBookmarksElectronOnly'
   | 'stub.messageNotFound'
   | 'stub.recallNotAllowed'

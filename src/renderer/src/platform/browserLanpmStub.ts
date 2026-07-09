@@ -13,6 +13,7 @@ const BROWSER_PREVIEW_DEVICE = '开发预览'
 import type { LanpmApi } from '@shared/lanpm-api'
 import { randomAvatarDataUrl } from '@renderer/features/setup/avatar'
 import { isMessageReadByOthers } from '@shared/chat/readReceipt'
+import type { FileMeta } from '@shared/file/types'
 import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
 import {
@@ -28,6 +29,7 @@ const STORAGE_KEY = 'lanpm.dev.identity'
 const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
 const TASK_STORAGE_KEY = 'lanpm.dev.tasks'
 const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
+const FILE_STORAGE_KEY = 'lanpm.dev.files'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
 
 const stubDissolvedGroups = new Set<string>(
@@ -191,6 +193,26 @@ function writeChatMessages(groupId: string, messages: ChatMessage[]): void {
     const all = raw ? (JSON.parse(raw) as Record<string, ChatMessage[]>) : {}
     all[groupId] = messages
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(all))
+  } catch {
+    /* ignore */
+  }
+}
+
+function readAllFiles(): Record<string, FileMeta[]> {
+  try {
+    const raw = localStorage.getItem(FILE_STORAGE_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, FileMeta[]>
+  } catch {
+    return {}
+  }
+}
+
+function writeGroupFiles(groupId: string, files: FileMeta[]): void {
+  try {
+    const all = readAllFiles()
+    all[groupId] = files
+    localStorage.setItem(FILE_STORAGE_KEY, JSON.stringify(all))
   } catch {
     /* ignore */
   }
@@ -615,7 +637,11 @@ export function createBrowserLanpmStub(): LanpmApi {
       }
     },
     file: {
-      listFiles: async () => [],
+      listFiles: async (groupId, category) => {
+        const files = readAllFiles()[groupId] ?? []
+        if (!category) return files
+        return files.filter((f) => f.category === category)
+      },
       upload: async () => {
         throw stubError('stub.uploadElectronOnly')
       },
@@ -629,23 +655,29 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       getTransferSettings: async () => ({ rateKbps: 0 }),
       setTransferRate: async (rateKbps) => ({ rateKbps }),
-      addBookmark: async (groupId, url, title) => ({
-        fileId: `stub_${Date.now()}`,
-        groupId,
-        name: title || url,
-        ext: 'url',
-        category: 'bookmark' as const,
-        size: 0,
-        uploadedBy: 'stub',
-        uploadedAt: new Date().toISOString(),
-        sha256: '',
-        storagePath: '',
-        previewStatus: 'ready' as const,
-        isBookmark: true,
-        bookmarkUrl: url,
-        bookmarkTitle: title || url,
-        updatedAt: new Date().toISOString()
-      }),
+      addBookmark: async (groupId, url, title) => {
+        const now = new Date().toISOString()
+        const meta: FileMeta = {
+          fileId: `stub_bm_${Date.now()}`,
+          groupId,
+          name: title || url,
+          ext: 'url',
+          category: 'bookmark',
+          size: 0,
+          uploadedBy: 'stub',
+          uploadedAt: now,
+          sha256: '',
+          storagePath: '',
+          previewStatus: 'ready',
+          isBookmark: true,
+          bookmarkUrl: url,
+          bookmarkTitle: title || url,
+          updatedAt: now
+        }
+        const files = readAllFiles()[groupId] ?? []
+        writeGroupFiles(groupId, [...files, meta])
+        return meta
+      },
       importBookmarks: async () => [],
       exportBookmarks: async () => {
         throw stubError('stub.exportBookmarksElectronOnly')
@@ -658,7 +690,17 @@ export function createBrowserLanpmStub(): LanpmApi {
         void fileId
         throw stubError('stub.uploadElectronOnly')
       },
-      deleteLocal: async () => false,
+      deleteLocal: async (fileId) => {
+        const all = readAllFiles()
+        for (const [groupId, files] of Object.entries(all)) {
+          const next = files.filter((f) => f.fileId !== fileId)
+          if (next.length !== files.length) {
+            writeGroupFiles(groupId, next)
+            return true
+          }
+        }
+        return false
+      },
       onTransfersChanged: () => () => undefined
     },
     group: {
@@ -751,14 +793,18 @@ export function createBrowserLanpmStub(): LanpmApi {
         usedExternalAi: false
       }),
       getAiConfig: async () => null,
-      saveAiConfig: async (input) => ({
-        provider: input.provider,
-        baseUrl: input.baseUrl,
-        model: input.model,
-        enabled: input.enabled,
-        dataPolicy: 'desensitized-only' as const,
-        hasApiKey: true
-      })
+      saveAiConfig: async (input) => {
+        const key = input.apiKey?.trim() ?? ''
+        if (!key) throw stubError('err.apiKeyRequired')
+        return {
+          provider: input.provider,
+          baseUrl: input.baseUrl,
+          model: input.model,
+          enabled: input.enabled,
+          dataPolicy: 'desensitized-only' as const,
+          hasApiKey: true
+        }
+      }
     },
     search: {
       query: async (query) => {
@@ -847,7 +893,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       }),
       connectManualPeer: async (address) => {
         parseHostPort(address)
-        return { mode: 'stub' as const, linkState: 'stub' as const, peerCount: 1, localIp: null }
+        throw stubError('stub.manualPeerPreviewOnly')
       }
     },
     badge: {
@@ -894,15 +940,25 @@ export function createBrowserLanpmStub(): LanpmApi {
         transfersDeleted: 0,
         tasksDeleted: 0
       }),
-      clearGroupMessages: async () => 0,
-      listDmGroupIds: async () => [],
+      clearGroupMessages: async (groupId) => {
+        const before = readChatMessages(groupId).length
+        writeChatMessages(groupId, [])
+        return before
+      },
+      listDmGroupIds: async () => {
+        try {
+          const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+          if (!raw) return []
+          const store = JSON.parse(raw) as Record<string, ChatMessage[]>
+          return Object.keys(store).filter((id) => isDmGroupId(id))
+        } catch {
+          return []
+        }
+      },
       exportGroupBundle: async () => null,
-      importGroupBundle: async () => ({
-        messagesImported: 0,
-        tasksImported: 0,
-        filesImported: 0,
-        skipped: 0
-      })
+      importGroupBundle: async () => {
+        throw stubError('stub.importBundleElectronOnly')
+      }
     }
   }
 }
