@@ -35,3 +35,6 @@ out/
 
 # Archive (local only unless explicitly committed)
 # archive/
+
+# Super Cursor 项目特化（plan / learn / archive）— 本地 only
+.cursorGrowth/
