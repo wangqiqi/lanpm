@@ -358,6 +358,14 @@
   flex-shrink: 0;
 }
 
+.legendDepIn {
+  background: var(--lanpm-warning, #d97706);
+}
+
+.legendDepOut {
+  background: var(--lanpm-accent);
+}
+
 .legendHint {
   min-width: 160px;
   line-height: var(--lanpm-line-body);

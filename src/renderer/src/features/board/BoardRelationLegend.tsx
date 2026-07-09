@@ -25,6 +25,20 @@ export default function BoardRelationLegend(): React.ReactElement {
       </span>
       <div className={styles.legendSwatches} role="presentation">
         <span
+          className={`${styles.legendSwatch} ${styles.legendDepIn}`}
+          title={t('board.legendDepIn')}
+        />
+        <span
+          className={`${styles.legendSwatch} ${styles.legendDepOut}`}
+          title={t('board.legendDepOut')}
+        />
+      </div>
+      <span className={styles.legendHint}>{t('board.legendDepLines')}</span>
+      <span className={styles.legendDivider} aria-hidden>
+        ·
+      </span>
+      <div className={styles.legendSwatches} role="presentation">
+        <span
           className={`${styles.legendSwatch} ${scheduleStyles.legendSwatchOnTrack}`}
           title={t('board.scheduleOnTrackHint')}
         />
