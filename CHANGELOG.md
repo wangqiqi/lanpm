@@ -2,6 +2,11 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [Unreleased]
+
+### Added
+- **看板 FS 依赖连线**：悬停/固定高亮关联卡时，SVG 叠加层绘制前置/后继 FS 连线（`listFocusDependencyEdges` · `BoardDependencyLines`）；工具栏图例补充连线色说明（`SPRINT-BOARD-DEPS`）
+
 ## [1.0.1] - 2026-07-09
 
 ### Changed
