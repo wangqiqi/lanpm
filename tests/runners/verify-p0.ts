@@ -14,7 +14,8 @@ const steps = [
   'verify:stub-parity',
   'verify:sync-handlers',
   'verify:schema-repo',
-  'verify:schema-fk'
+  'verify:schema-fk',
+  'verify:sec-hardening'
 ] as const
 
 for (const step of steps) {
