@@ -1,0 +1,91 @@
+import type Database from 'better-sqlite3'
+import { SCHEMA_SQL, SCHEMA_VERSION } from './schema.ts'
+
+/**
+ * One step: apply DDL/DML that advances user_version from `fromVersion` to `fromVersion + 1`.
+ * Keep steps pure SQL / better-sqlite3 calls; no Electron APIs.
+ */
+export interface MigrationStep {
+  /** Current user_version before this step runs (0-based after bootstrap is separate). */
+  fromVersion: number
+  description: string
+  up: (db: Database.Database) => void
+}
+
+/**
+ * Incremental steps for versions ≥ 1.
+ * SCHEMA_VERSION === 1 → empty (v0 bootstrap uses full SCHEMA_SQL).
+ * Adding v2: push `{ fromVersion: 1, description: '…', up }` and bump SCHEMA_VERSION.
+ */
+export const MIGRATIONS: readonly MigrationStep[] = [
+  // Example (do not enable without SCHEMA_VERSION bump):
+  // {
+  //   fromVersion: 1,
+  //   description: 'add example_column to tasks',
+  //   up: (db) => {
+  //     db.exec(`ALTER TABLE tasks ADD COLUMN example_column TEXT`)
+  //   }
+  // }
+]
+
+function setUserVersion(db: Database.Database, version: number): void {
+  db.pragma(`user_version = ${version}`)
+}
+
+function getUserVersion(db: Database.Database): number {
+  return db.pragma('user_version', { simple: true }) as number
+}
+
+/**
+ * Bring DB to SCHEMA_VERSION.
+ * - 0 → exec full SCHEMA_SQL, set version
+ * - 1..SCHEMA_VERSION-1 → run MIGRATIONS in order
+ * - SCHEMA_VERSION → no-op
+ * - > SCHEMA_VERSION → throw
+ */
+export function applyMigrations(db: Database.Database): void {
+  let version = getUserVersion(db)
+
+  if (version > SCHEMA_VERSION) {
+    throw new Error(
+      `SQLite user_version=${version} is newer than app SCHEMA_VERSION=${SCHEMA_VERSION}. ` +
+        `Upgrade the app or restore a compatible lanpm.db backup.`
+    )
+  }
+
+  if (version === 0) {
+    const bootstrap = db.transaction(() => {
+      db.exec(SCHEMA_SQL)
+      setUserVersion(db, SCHEMA_VERSION)
+    })
+    bootstrap()
+    return
+  }
+
+  if (version === SCHEMA_VERSION) {
+    return
+  }
+
+  const byFrom = new Map(MIGRATIONS.map((m) => [m.fromVersion, m]))
+  while (version < SCHEMA_VERSION) {
+    const step = byFrom.get(version)
+    if (!step) {
+      throw new Error(
+        `Missing migration step from user_version=${version} to ${version + 1} ` +
+          `(SCHEMA_VERSION=${SCHEMA_VERSION}). Add MIGRATIONS entry or restore backup.`
+      )
+    }
+    const next = version + 1
+    const run = db.transaction(() => {
+      step.up(db)
+      setUserVersion(db, next)
+    })
+    run()
+    version = getUserVersion(db)
+    if (version !== next) {
+      throw new Error(
+        `Migration "${step.description}" did not advance user_version to ${next} (got ${version})`
+      )
+    }
+  }
+}

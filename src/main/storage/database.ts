@@ -1,7 +1,8 @@
 import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'path'
-import { EXPECTED_TABLES, SCHEMA_SQL, SCHEMA_VERSION } from './schema'
+import { applyMigrations } from './migrate.ts'
+import { EXPECTED_TABLES } from './schema.ts'
 
 let dbInstance: Database.Database | null = null
 
@@ -17,14 +18,7 @@ export function initDatabase(): Database.Database {
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
 
-  const version = db.pragma('user_version', { simple: true }) as number
-  if (version < SCHEMA_VERSION) {
-    if (version === 0) {
-      db.exec(SCHEMA_SQL)
-    }
-    db.pragma(`user_version = ${SCHEMA_VERSION}`)
-  }
-
+  applyMigrations(db)
   verifySchema(db)
   dbInstance = db
   return db

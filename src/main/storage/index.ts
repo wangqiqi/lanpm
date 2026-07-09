@@ -1,5 +1,7 @@
-export { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './database'
-export { EXPECTED_TABLES, SCHEMA_VERSION } from './schema'
+export { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './database.ts'
+export { applyMigrations, MIGRATIONS } from './migrate.ts'
+export type { MigrationStep } from './migrate.ts'
+export { EXPECTED_TABLES, SCHEMA_VERSION } from './schema.ts'
 export type { LocalDevice, UserProfile } from './types'
 export {
   getDeviceById,
