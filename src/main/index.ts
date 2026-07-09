@@ -23,6 +23,8 @@ import { registerPreviewProtocol, registerPreviewScheme } from './file/previewPr
 import { initScreenshotService, shutdownScreenshotService } from './screenshot/screenshotService'
 import { LANPM_MAIN_WINDOW_TITLE, setMainWindow } from './mainWindow'
 import { runVisualCaptureIfRequested } from './visualCapture'
+import { attachWebviewGuards } from './webviewGuard'
+import { isAllowedHttpUrl } from '../shared/security/httpUrl'
 
 const isDev = !app.isPackaged
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
@@ -127,9 +129,12 @@ function createWindow(): BrowserWindow {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    if (isAllowedHttpUrl(details.url)) {
+      void shell.openExternal(details.url)
+    }
     return { action: 'deny' }
   })
+  attachWebviewGuards(mainWindow)
 
   if (isDev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])

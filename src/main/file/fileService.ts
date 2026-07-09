@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'fs'
 import { extname, join } from 'path'
-import { app } from 'electron'
+import { app, type BrowserWindow } from 'electron'
 import type { FileCategory, FileMeta, FileTransferView } from '../../shared/file/types'
 import { inferCategory } from '../../shared/file/types'
 import {

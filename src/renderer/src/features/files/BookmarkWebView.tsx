@@ -1,5 +1,6 @@
 import { isBrowserPreview } from '@renderer/platform/browserPreview'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { isAllowedHttpUrl } from '@shared/security/httpUrl'
 import { Typography } from 'antd'
 import styles from './files.module.css'
 
@@ -13,6 +14,16 @@ interface BookmarkWebViewProps {
 /** 书签内嵌浏览（PRD-F-03）；Electron `<webview>`，浏览器预览降级外链 */
 export default function BookmarkWebView({ url, title }: BookmarkWebViewProps): React.ReactElement {
   const { t } = useI18n()
+  const allowed = isAllowedHttpUrl(url)
+
+  if (!allowed) {
+    return (
+      <div className={styles.bookmarkPreview}>
+        <Text type="danger">{t('files.bookmarkUrlInvalid')}</Text>
+        <Text type="secondary">{url}</Text>
+      </div>
+    )
+  }
 
   if (isBrowserPreview()) {
     return (
