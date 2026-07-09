@@ -286,16 +286,27 @@ set "CLEAN_DEEP=%~1"
 if not defined CLEAN_DEEP if defined EXT set "CLEAN_DEEP=!EXT!"
 call :test_dev_running
 if not errorlevel 1 call :cmd_stop
-echo [lanpm] cleaning build artifacts ...
+echo [lanpm] cleaning rebuildable artifacts (keep userData) ...
 if exist "%ROOT%\out" rmdir /s /q "%ROOT%\out"
 if exist "%ROOT%\dist" rmdir /s /q "%ROOT%\dist"
+if exist "%ROOT%\coverage" rmdir /s /q "%ROOT%\coverage"
 del "%PID_FILE%" "%MODE_FILE%" 2>nul
 type nul >"%LOG_FILE%" 2>nul
-echo [lanpm] cleaned out/ dist/ .lanpm state
+if exist "%RUN_DIR%\tmp" rmdir /s /q "%RUN_DIR%\tmp"
+if exist "%RUN_DIR%\stub-bus" rmdir /s /q "%RUN_DIR%\stub-bus"
+if exist "%RUN_DIR%\visual-screenshots" rmdir /s /q "%RUN_DIR%\visual-screenshots"
+if exist "%RUN_DIR%\dev-a" rmdir /s /q "%RUN_DIR%\dev-a"
+if exist "%RUN_DIR%\dev-b" rmdir /s /q "%RUN_DIR%\dev-b"
+mkdir "%RUN_DIR%\tmp" 2>nul
+mkdir "%RUN_DIR%\stub-bus" 2>nul
+mkdir "%RUN_DIR%\visual-screenshots" 2>nul
+echo [lanpm] cleaned out/ dist/ coverage/ .lanpm rebuildables
 if /i "%CLEAN_DEEP%"=="deep" (
-  echo [lanpm] deep clean: node_modules ...
+  echo [lanpm] deep clean: node_modules + electron cache ...
   if exist "%ROOT%\node_modules" rmdir /s /q "%ROOT%\node_modules"
-  echo [lanpm] node_modules removed; run: onekey_run.bat install
+  if exist "%LOCALAPPDATA%\electron\Cache" rmdir /s /q "%LOCALAPPDATA%\electron\Cache"
+  if exist "%LOCALAPPDATA%\electron-builder\Cache" rmdir /s /q "%LOCALAPPDATA%\electron-builder\Cache"
+  echo [lanpm] deep clean done; run: onekey_run.bat install
 )
 exit /b 0
 :cmd_pack
@@ -330,8 +341,8 @@ call :print " 10) check       typecheck + lint + verify:m0"
 call :print " 11) check quick 跳过 verify:m0"
 call :print " 12) verify      全量 verify:m7"
 call :print " 13) install     npm install"
-call :print " 14) clean       清理 out/dist"
-call :print " 15) clean deep  含 node_modules"
+call :print " 14) clean       清理 out/dist/coverage/.lanpm 可重建项"
+call :print " 15) clean deep  含 node_modules + electron 缓存"
 call :print " 16) pack        安装包 (electron-builder)"
 call :print "  0) exit"
 echo.

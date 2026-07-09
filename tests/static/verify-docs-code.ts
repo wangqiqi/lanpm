@@ -1,10 +1,11 @@
 /**
- * 文档 ↔ 代码可机读一致性检查；§1 写入 archive/audit/docs-code/（见 DOCS_CODE_REPORT）
+ * 文档 ↔ 代码可机读一致性检查。
+ * 可选落盘：`.cursorGrowth/logs/verify-docs-code.md`（本地 only，非 archive、非入库文档）。
  * Run: npm run verify:docs-code
  * CI 门禁: npm run verify:docs-code -- --strict
  */
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { projectRoot } from '../projectRoot.ts'
 
@@ -148,29 +149,26 @@ ${diffs
 ${p0Note}
 `
 
-const DOCS_CODE_REPORT = join(
-  root,
-  'archive/audit/docs-code/20260529_170000_代码文档差异_rc38.md'
-)
-const outPath = DOCS_CODE_REPORT
-let tail = '\n## 2. 待办\n\n见 `docs/06` §2.6 手验待办。\n'
-if (existsSync(outPath)) {
-  const raw = readFileSync(outPath, 'utf8')
-  const idx = raw.indexOf('\n## 2.')
-  if (idx >= 0) tail = raw.slice(idx)
-}
-
 const body = `# 代码与文档差异
 
 > ${now} · \`${version}\` · \`npm run verify:docs-code\`
 
 ${section1}
-${tail}
+
+## 2. 待办
+
+见 \`docs/06\` §2.6 手验待办。
 `
 
-writeFileSync(outPath, body, 'utf8')
-
-console.log(`verify:docs-code: wrote ${outPath} (${openCount} diff(s))`)
+const growthLogs = join(root, '.cursorGrowth', 'logs')
+if (existsSync(join(root, '.cursorGrowth'))) {
+  mkdirSync(growthLogs, { recursive: true })
+  const outPath = join(growthLogs, 'verify-docs-code.md')
+  writeFileSync(outPath, body, 'utf8')
+  console.log(`verify:docs-code: wrote ${outPath} (${openCount} diff(s))`)
+} else {
+  console.log(`verify:docs-code: ${openCount} diff(s) (no .cursorGrowth; skip local log)`)
+}
 if (strict && openCount > 0) {
   assert.fail(`strict mode: ${openCount} doc/code mismatch(es) — see verify:docs-code report §1`)
 }

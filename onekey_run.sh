@@ -402,20 +402,27 @@ cmd_clean() {
     warn "检测到开发服务在运行，先停止 …"
     cmd_stop || true
   fi
-  info "清理构建产物 …"
-  rm -rf "$ROOT/out" "$ROOT/dist"
+  info "清理构建/测试可重建产物（保留 ~/.config/lanpm）…"
+  rm -rf "$ROOT/out" "$ROOT/dist" "$ROOT/coverage"
   rm -f "$ROOT"/*.tsbuildinfo
   find "$ROOT" -name '*.tsbuildinfo' -delete 2>/dev/null || true
+  # .lanpm：临时库、Stub 总线、视觉截图、双实例手验目录；保留目录骨架
   if [[ -d "$RUN_DIR" ]]; then
     rm -f "$PID_FILE" "$MODE_FILE"
     : >"$LOG_FILE" 2>/dev/null || rm -f "$LOG_FILE"
+    rm -rf "$RUN_DIR/tmp" "$RUN_DIR/stub-bus" "$RUN_DIR/visual-screenshots" \
+      "$RUN_DIR/dev-a" "$RUN_DIR/dev-b"
+    mkdir -p "$RUN_DIR/tmp" "$RUN_DIR/stub-bus" "$RUN_DIR/visual-screenshots"
   fi
-  ok "已清理 out/ dist/ .lanpm 运行状态"
+  # 系统 /tmp 残留（历史路径）
+  find /tmp -maxdepth 1 -user "$(id -un)" -name 'lanpm*' -exec rm -rf {} + 2>/dev/null || true
+  ok "已清理 out/ dist/ coverage/ .lanpm/{tmp,stub-bus,visual-screenshots,dev-*} 与 /tmp/lanpm*"
 
   if [[ "$deep" == "deep" || "$deep" == "--deep" ]]; then
-    warn "深度清理: node_modules …"
+    warn "深度清理: node_modules + Electron 工具链缓存（可重建）…"
     rm -rf "$ROOT/node_modules"
-    ok "已删除 node_modules，请执行: ./onekey_run.sh install"
+    rm -rf "${HOME}/.cache/electron" "${HOME}/.cache/electron-builder"
+    ok "已删除 node_modules 与 ~/.cache/electron*，请执行: ./onekey_run.sh install"
   fi
 }
 
@@ -445,8 +452,8 @@ show_menu() {
   echo " 11) check quick 跳过 verify:m0"
   echo " 12) verify      全量 verify:m7"
   echo " 13) install     npm install"
-  echo " 14) clean       清理 out/dist"
-  echo " 15) clean deep  含 node_modules"
+  echo " 14) clean       清理 out/dist/coverage/.lanpm 可重建项"
+  echo " 15) clean deep  含 node_modules + electron 缓存"
   echo " 16) pack        安装包 (electron-builder)"
   echo "  0) exit"
   echo ""
@@ -498,7 +505,7 @@ usage() {
   install                   npm install
   check [quick]             typecheck + lint [+ verify:m0]
   verify                    npm run verify:m7
-  clean [deep]              清理 out/dist [.lanpm] [node_modules]
+  clean [deep]              清理 out/dist/coverage/.lanpm 可重建项 [+ node_modules + electron 缓存]
   pack                      构建安装包 (electron-builder, 需先 build)
   menu                      交互菜单 (默认)
   help                      本帮助

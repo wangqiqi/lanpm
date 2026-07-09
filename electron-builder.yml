@@ -9,7 +9,7 @@ asarUnpack:
 files:
   - '!**/.vscode/*'
   - '!docs/**'
-  - '!archive/**'
+  - '!.cursorGrowth/**'
   - '!**/*.md'
 win:
   target:
