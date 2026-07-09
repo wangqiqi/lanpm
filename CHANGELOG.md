@@ -23,6 +23,7 @@
 - **协议空转守卫**：`task_crdt` / `member_event` 由 `UNIMPLEMENTED_SYNC_TYPES` 在 Stub/Real `publish` 拒绝发送；文档 §2.3 / `03` 同步（`TASK-030` · `TASK-031`）
 - **ACC 自动化闭合**：`docs/06` §2.5/§2.6 以 CI 三平台 `verify:m7`、`verify:dual-stub`、`verify:m7-perf`、`verify:i18n-en` 闭合可证层；真机 UI / 真网双机 / 冷启动内存 / 英文折行肉眼标延期；`1.0.0` 延至 `SPRINT-1.0-GATE`（`TASK-041`–`TASK-045`）
 - **浏览器桩假成功修复**：书签持久化、`connectManualPeer`/`importGroupBundle` 拒绝误导成功、`clearGroupMessages` 真清、`saveAiConfig` 校验 Key；`verify:stub-behavior` 入 `verify:p0`（`SPIKE-STUB-01` · `TASK-050`）
+- **执行面板单一来源**：删除根目录 `plan.md`；Sprint/TASK 仅 `.cursorGrowth/plan.md`；看板跨列依赖 backlog 迁入候选 `SPRINT-BOARD-DEPS`；`docs/00` 同步
 
 ### Tag
 - `v1.0.0-rc.81` — 代码文档审计 + Blockmap 说明
