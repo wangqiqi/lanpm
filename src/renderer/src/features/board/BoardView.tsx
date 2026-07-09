@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -24,6 +24,7 @@ import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
+import BoardDependencyLines from './BoardDependencyLines'
 import BoardRelationLegend from './BoardRelationLegend'
 import OtherReasonModal from './OtherReasonModal'
 import TaskEditModal from './TaskEditModal'
@@ -209,6 +210,7 @@ export default function BoardView(): React.ReactElement {
   const [editTask, setEditTask] = useState<Task | null>(null)
   const [relationFocusId, setRelationFocusId] = useState<string | null>(null)
   const [relationHoverId, setRelationHoverId] = useState<string | null>(null)
+  const boardBodyRef = useRef<HTMLDivElement>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -528,7 +530,7 @@ export default function BoardView(): React.ReactElement {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className={styles.boardBody}>
+          <div className={styles.boardBody} ref={boardBodyRef}>
             <TrashDropZone visible={!!activeTask} isOver={overTrash} />
             <div className={styles.columns}>
             {KANBAN_COLUMN_ORDER.map((status) => (
@@ -555,6 +557,11 @@ export default function BoardView(): React.ReactElement {
               />
             ))}
             </div>
+            <BoardDependencyLines
+              containerRef={boardBodyRef}
+              focusTaskId={activeRelationId}
+              tasks={tasks}
+            />
           </div>
           <DragOverlay>
             {activeTask ? (

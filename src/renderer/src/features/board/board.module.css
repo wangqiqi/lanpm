@@ -284,6 +284,34 @@
   flex-direction: column;
 }
 
+.dependencyOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.dependencyLineIn,
+.dependencyLineOut {
+  stroke-width: 2;
+  opacity: 0.9;
+}
+
+.dependencyLineIn {
+  stroke: var(--lanpm-warning, #d97706);
+}
+
+.dependencyLineOut {
+  stroke: var(--lanpm-accent);
+}
+
+.dependencyArrow {
+  fill: context-stroke;
+}
+
 .trashZone {
   flex-shrink: 0;
   display: flex;

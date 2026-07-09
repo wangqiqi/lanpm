@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { KANBAN_COLUMN_LABELS, KANBAN_COLUMN_ORDER } from '../../src/shared/task/kanban.ts'
+import { listFocusDependencyEdges } from '../../src/shared/task/boardRelations.ts'
 import { aggregateChildProgress, applyAggregatedProgress } from '../../src/shared/task/progress.ts'
 import { validateOtherReason } from '../../src/shared/task/validation.ts'
 import type { Task } from '../../src/shared/task/types.ts'
+import { projectRoot } from '../projectRoot.ts'
 
 assert.equal(KANBAN_COLUMN_ORDER.length, 4)
 assert.equal(KANBAN_COLUMN_LABELS.todo, 'TODO')
@@ -59,5 +63,45 @@ const tasks: Task[] = [
 const enriched = applyAggregatedProgress(tasks)
 const parent = enriched.find((t) => t.taskId === 'p1')
 assert.equal(parent?.progressPercent, 60)
+
+const depTasks: Task[] = [
+  {
+    taskId: 'a',
+    groupId: 'g1',
+    title: 'A',
+    status: 'todo',
+    priority: 'medium',
+    progressPercent: 0,
+    sortOrder: 0,
+    createdBy: 'u1',
+    createdAt: 't',
+    updatedAt: 't'
+  },
+  {
+    taskId: 'b',
+    groupId: 'g1',
+    title: 'B',
+    status: 'todo',
+    priority: 'medium',
+    progressPercent: 0,
+    sortOrder: 1,
+    createdBy: 'u1',
+    createdAt: 't',
+    updatedAt: 't',
+    dependencies: [{ fromTaskId: 'a', toTaskId: 'b', type: 'FS' }]
+  }
+]
+assert.equal(listFocusDependencyEdges('b', depTasks, { types: ['FS'] }).length, 1)
+
+const boardView = readFileSync(
+  join(projectRoot, 'src/renderer/src/features/board/BoardView.tsx'),
+  'utf8'
+)
+assert.match(boardView, /BoardDependencyLines/)
+const overlay = readFileSync(
+  join(projectRoot, 'src/renderer/src/features/board/BoardDependencyLines.tsx'),
+  'utf8'
+)
+assert.match(overlay, /listFocusDependencyEdges/)
 
 console.log('verify-m3: ok')
