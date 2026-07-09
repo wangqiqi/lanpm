@@ -306,6 +306,8 @@ const zhCN = {
   'files.addBookmark': '添加书签',
   'files.bookmarkMore': '更多',
   'files.bookmarkMoreAria': '书签更多操作',
+  'files.bookmarkRowTag': '书签',
+  'files.bookmarkTypeShort': '链接',
   'files.emptySearch': '没有匹配的文件或书签',
   'files.emptyCategory': '此分类下暂无内容',
   'files.bookmarkPreviewHint': '内嵌预览仅供参考，完整页面请用上方按钮打开',

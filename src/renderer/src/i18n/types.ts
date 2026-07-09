@@ -304,6 +304,8 @@ export type MessageKey =
   | 'files.addBookmark'
   | 'files.bookmarkMore'
   | 'files.bookmarkMoreAria'
+  | 'files.bookmarkRowTag'
+  | 'files.bookmarkTypeShort'
   | 'files.importBookmarks'
   | 'files.exportBookmarks'
   | 'files.transferQueue'

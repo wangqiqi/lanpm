@@ -189,6 +189,46 @@
   background: var(--lanpm-accent-fill) !important;
 }
 
+.rowBookmark :global(.ant-table-cell) {
+  background: color-mix(in srgb, var(--lanpm-accent) 4%, transparent);
+}
+
+.rowBookmark.rowSelected :global(.ant-table-cell) {
+  background: var(--lanpm-accent-fill) !important;
+}
+
+.nameCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.bookmarkNameIcon {
+  flex-shrink: 0;
+  color: var(--lanpm-accent);
+  font-size: var(--lanpm-font-body);
+}
+
+.nameText {
+  min-width: 0;
+  flex: 1;
+}
+
+.bookmarkTag {
+  flex-shrink: 0;
+  margin-inline-end: 0;
+  font-size: var(--lanpm-font-caption);
+  line-height: 1.2;
+  padding: 0 5px;
+  border-radius: 4px;
+}
+
+.typeMuted {
+  font-size: var(--lanpm-font-caption);
+}
+
 .bookmarkPreview {
   display: flex;
   flex-direction: column;

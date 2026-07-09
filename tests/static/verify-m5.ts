@@ -1,5 +1,5 @@
 /**
- * M5 group guards + cockpit types smoke + FilesView P1 layout guards.
+ * M5 group guards + cockpit types smoke + FilesView P1/P2 layout guards.
  * Run: npm run verify:m5
  */
 import assert from 'node:assert/strict'
@@ -29,6 +29,13 @@ const rateInToolbarWindow = filesView.slice(toolbarEnd, transferPanel)
 assert.ok(
   !rateInToolbarWindow.includes('rateLimitKbps'),
   'rate limit must not live in ViewToolbar end (SPRINT-FILES-P1)'
+)
+assert.match(filesView, /styles\.rowBookmark/)
+assert.match(filesView, /files\.bookmarkRowTag/)
+assert.match(filesView, /files\.bookmarkTypeShort/)
+assert.ok(
+  !filesView.includes("if (r.isBookmark) return t('common.link')"),
+  'bookmark preview column must not use common.link noise (SPRINT-FILES-BOOKMARK-UX)'
 )
 
 assert.equal(isAnonymousGroupType('anonymous'), true)

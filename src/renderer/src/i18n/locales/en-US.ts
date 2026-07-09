@@ -308,6 +308,8 @@ const enUS = {
   'files.addBookmark': 'Add bookmark',
   'files.bookmarkMore': 'More',
   'files.bookmarkMoreAria': 'More bookmark actions',
+  'files.bookmarkRowTag': 'Bookmark',
+  'files.bookmarkTypeShort': 'Link',
   'files.emptySearch': 'No matching files or bookmarks',
   'files.emptyCategory': 'Nothing in this category yet',
   'files.bookmarkPreviewHint': 'Inline preview is approximate — use the button above to open the full page',

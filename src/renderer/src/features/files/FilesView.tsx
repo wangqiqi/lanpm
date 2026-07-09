@@ -491,12 +491,24 @@ export default function FilesView(): React.ReactElement {
         key: 'name',
         ellipsis: true,
         sorter: (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
-        sortOrder: activeOrder('name')
+        sortOrder: activeOrder('name'),
+        render: (_: unknown, r: FileMeta) =>
+          r.isBookmark ? (
+            <span className={styles.nameCell}>
+              <LinkOutlined className={styles.bookmarkNameIcon} aria-hidden />
+              <Text ellipsis={{ tooltip: r.name }} className={styles.nameText}>
+                {r.name}
+              </Text>
+              <Tag className={styles.bookmarkTag}>{t('files.bookmarkRowTag')}</Tag>
+            </span>
+          ) : (
+            <Text ellipsis={{ tooltip: r.name }}>{r.name}</Text>
+          )
       },
       {
         title: t('files.colType'),
         key: 'type',
-        width: 112,
+        width: 96,
         sorter: (a, b) =>
           formatFileTypeLabel(a, categoryLabels).localeCompare(
             formatFileTypeLabel(b, categoryLabels),
@@ -504,13 +516,20 @@ export default function FilesView(): React.ReactElement {
             { sensitivity: 'base' }
           ),
         sortOrder: activeOrder('type'),
-        render: (_: unknown, r: FileMeta) => formatFileTypeLabel(r, categoryLabels)
+        render: (_: unknown, r: FileMeta) =>
+          r.isBookmark ? (
+            <Text type="secondary" className={styles.typeMuted}>
+              {t('files.bookmarkTypeShort')}
+            </Text>
+          ) : (
+            formatFileTypeLabel(r, categoryLabels)
+          )
       },
       {
         title: t('files.colSize'),
         dataIndex: 'size',
         key: 'size',
-        width: 88,
+        width: 72,
         sorter: (a, b) => a.size - b.size,
         sortOrder: activeOrder('size'),
         render: (_: unknown, r: FileMeta) => (r.isBookmark ? '—' : formatSize(r.size))
@@ -519,7 +538,7 @@ export default function FilesView(): React.ReactElement {
         title: t('files.colUploaded'),
         dataIndex: 'uploadedAt',
         key: 'uploadedAt',
-        width: 148,
+        width: 132,
         sorter: (a, b) => a.uploadedAt.localeCompare(b.uploadedAt),
         sortOrder: activeOrder('uploadedAt'),
         defaultSortOrder: 'descend',
@@ -528,9 +547,9 @@ export default function FilesView(): React.ReactElement {
       {
         title: t('files.colPreview'),
         key: 'preview',
-        width: 72,
+        width: 64,
         render: (_: unknown, r: FileMeta) => {
-          if (r.isBookmark) return t('common.link')
+          if (r.isBookmark) return '—'
           if (isLocalRemovedPath(r.storagePath)) return t('files.localRemoved')
           if (isRemotePendingPath(r.storagePath)) return t('files.remotePending')
           if (r.previewStatus === 'ready') return t('files.previewReady')
@@ -543,8 +562,25 @@ export default function FilesView(): React.ReactElement {
         title: t('files.colActions'),
         key: 'actions',
         width: 88,
-        render: (_: unknown, r: FileMeta) =>
-          r.isBookmark || isRemotePendingPath(r.storagePath) ? null : (
+        render: (_: unknown, r: FileMeta) => {
+          if (isRemotePendingPath(r.storagePath)) return null
+          if (r.isBookmark) {
+            return (
+              <Space size={4} onClick={(e) => e.stopPropagation()}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<LinkOutlined />}
+                  aria-label={t('files.openBookmarkExternal')}
+                  title={t('files.openBookmarkExternal')}
+                  href={r.bookmarkUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              </Space>
+            )
+          }
+          return (
             <Space size={4} onClick={(e) => e.stopPropagation()}>
               {!isLocalRemovedPath(r.storagePath) ? (
                 <Button
@@ -567,6 +603,7 @@ export default function FilesView(): React.ReactElement {
               />
             </Space>
           )
+        }
       }
     ]
   }, [t, locale, categoryLabels, sortField, sortOrder, handleDownload, handleDeleteLocal])
@@ -778,7 +815,12 @@ export default function FilesView(): React.ReactElement {
                 onClick: () => setSelected(record)
               })}
               rowClassName={(record) =>
-                record.fileId === selected?.fileId ? styles.rowSelected : ''
+                [
+                  record.isBookmark ? styles.rowBookmark : '',
+                  record.fileId === selected?.fileId ? styles.rowSelected : ''
+                ]
+                  .filter(Boolean)
+                  .join(' ')
               }
             />
           )}
