@@ -469,6 +469,11 @@ const zhCN = {
   'err.bookmarkExportEmpty': '当前群组没有书签可导出',
   'err.apiKeyDecryptFailed': '无法解密 API Key',
   'err.apiKeyRequired': '请填写 API Key',
+  'err.apiKeySafeStorageRequired':
+    '当前环境无法使用系统安全存储，无法保存 API Key。请升级系统密钥环或在开发模式重试。',
+  'err.apiKeyDevFallbackForbidden':
+    '正式版不支持开发用密钥加密。请重新填写 API Key（将使用系统安全存储）。',
+  'files.bookmarkUrlInvalid': '书签地址无效，仅支持 http(s) 链接',
   'err.dependencySelf': '任务不能依赖自身',
   'err.dmSelf': '不能与自己私聊',
   'err.usernameLength': '用户名须为 2–20 个字符',

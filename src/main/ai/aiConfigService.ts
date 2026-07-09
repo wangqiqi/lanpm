@@ -1,8 +1,8 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto'
-import { safeStorage } from 'electron'
+import { app, safeStorage } from 'electron'
 import type { Database } from 'better-sqlite3'
-import { throwLanpm } from '../../shared/errors/lanpmError'
-import type { AiConfigInput, AiConfigView, AiProvider } from '../../shared/cockpit/types'
+import { throwLanpm } from '../../shared/errors/lanpmError.ts'
+import type { AiConfigInput, AiConfigView, AiProvider } from '../../shared/cockpit/types.ts'
 
 interface AiConfigRow {
   provider: string
@@ -15,9 +15,17 @@ interface AiConfigRow {
 
 const DEV_FALLBACK_SECRET = createHash('sha256').update('lanpm-dev-ai-key').digest()
 
+/** Packaged builds must use OS safeStorage; hardcoded-dev cipher is development-only. */
+function allowDevKeyFallback(): boolean {
+  return !app.isPackaged
+}
+
 function encryptApiKey(plain: string): string {
   if (safeStorage.isEncryptionAvailable()) {
     return `safe:${safeStorage.encryptString(plain).toString('base64')}`
+  }
+  if (!allowDevKeyFallback()) {
+    throwLanpm('err.apiKeySafeStorageRequired')
   }
   const iv = randomBytes(12)
   const cipher = createCipheriv('aes-256-gcm', DEV_FALLBACK_SECRET, iv)
@@ -32,6 +40,9 @@ function decryptApiKey(stored: string): string {
     return safeStorage.decryptString(buf)
   }
   if (stored.startsWith('dev:')) {
+    if (!allowDevKeyFallback()) {
+      throwLanpm('err.apiKeyDevFallbackForbidden')
+    }
     const buf = Buffer.from(stored.slice(4), 'base64')
     const iv = buf.subarray(0, 12)
     const tag = buf.subarray(12, 28)

@@ -471,6 +471,11 @@ const enUS = {
   'err.bookmarkExportEmpty': 'No bookmarks to export in this group',
   'err.apiKeyDecryptFailed': 'Could not decrypt API key',
   'err.apiKeyRequired': 'API key is required',
+  'err.apiKeySafeStorageRequired':
+    'OS secure storage is unavailable; cannot save API key. Enable the system keyring or use a development build.',
+  'err.apiKeyDevFallbackForbidden':
+    'Packaged builds reject development-only key encryption. Re-enter your API key (OS secure storage).',
+  'files.bookmarkUrlInvalid': 'Invalid bookmark URL; only http(s) is allowed',
   'err.dependencySelf': 'A task cannot depend on itself',
   'err.dmSelf': 'You cannot start a DM with yourself',
   'err.usernameLength': 'Username must be 2–20 characters',
