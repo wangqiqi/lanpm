@@ -36,8 +36,8 @@ const POST_RC_OR_TRANSPORT = new Set<string>([
   'member_event'
 ])
 
-/** Must be refused by publish (SPRINT-PROTOCOL-DOCS) */
-const UNIMPLEMENTED_PUBLISH = new Set<string>(['task_crdt', 'member_event'])
+/** Must be refused by publish (SPRINT-PROTOCOL-DOCS) — task_crdt only after TASK-146 */
+const UNIMPLEMENTED_PUBLISH = new Set<string>(['task_crdt'])
 
 const HANDLER_FILES = [
   'src/main/chat/chatService.ts',
@@ -82,7 +82,8 @@ for (const type of SYNC_TYPES) {
       stubPublish.includes(type) ||
       realPublish.includes(type) ||
       readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8').includes(`'${type}'`) ||
-      unimplementedSrc.includes(`'${type}'`)
+      unimplementedSrc.includes(`'${type}'`) ||
+      readFileSync(join(root, 'src/shared/group/memberEvent.ts'), 'utf8').includes(type)
     assert.ok(inTransport, `transport/doc reference missing for ${type}`)
     continue
   }
