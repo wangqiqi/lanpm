@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { KANBAN_COLUMN_LABELS, KANBAN_COLUMN_ORDER } from '../../src/shared/task/kanban.ts'
-import { listFocusDependencyEdges } from '../../src/shared/task/boardRelations.ts'
+import { listFocusDependencyEdges, listAllDependencyEdges } from '../../src/shared/task/boardRelations.ts'
 import { aggregateChildProgress, applyAggregatedProgress } from '../../src/shared/task/progress.ts'
 import { validateOtherReason } from '../../src/shared/task/validation.ts'
 import type { Task } from '../../src/shared/task/types.ts'
@@ -92,16 +92,19 @@ const depTasks: Task[] = [
   }
 ]
 assert.equal(listFocusDependencyEdges('b', depTasks, { types: ['FS'] }).length, 1)
+assert.equal(listAllDependencyEdges(depTasks, { types: ['FS'] }).length, 1)
 
 const boardView = readFileSync(
   join(projectRoot, 'src/renderer/src/features/board/BoardView.tsx'),
   'utf8'
 )
 assert.match(boardView, /BoardDependencyLines/)
+assert.match(boardView, /showAllFsLines/)
 const overlay = readFileSync(
   join(projectRoot, 'src/renderer/src/features/board/BoardDependencyLines.tsx'),
   'utf8'
 )
 assert.match(overlay, /listFocusDependencyEdges/)
+assert.match(overlay, /listAllDependencyEdges/)
 
 console.log('verify-m3: ok')

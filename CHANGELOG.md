@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Changed
+- **看板常驻 FS 连线（P4）**：工具栏开关默认关，开启后绘制全板浅灰 FS 边，悬停/固定高亮仍加强黄/强调色；`listAllDependencyEdges` · `docs/04`（`SPRINT-BOARD-DEPS-FULL`）
 - **顶栏 IA（P4）**：主题/语言移入用户菜单；驾驶舱收入「更多」；驾驶舱路由时 Logo 显示返回当前群语义；`docs/04` §1 顶底职责（`SPRINT-IA-SHELL`）
 - **文件页窄屏预览（P3）**：≤960 预览改底部 Drawer（宽屏双栏不变）；预览内容复用；`docs/04` 响应式表与 §6.4（`SPRINT-FILES-RESPONSIVE`）
 - **文件列表书签行级区分（P2）**：「全部」混排时书签行图标+Tag+浅底；类型/预览/操作列收敛；`docs/04` §6.4（`SPRINT-FILES-BOOKMARK-UX`）
