@@ -350,21 +350,21 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: 6px 12px;
   font-size: var(--lanpm-font-caption);
   color: var(--lanpm-text-secondary);
 }
 
 .legendSwatches {
   display: flex;
-  gap: 3px;
+  gap: 4px;
   align-items: center;
 }
 
 .legendSwatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50% !important;
   flex-shrink: 0;
 }
 
@@ -382,13 +382,15 @@
 }
 
 .legendHint {
-  min-width: 160px;
   line-height: var(--lanpm-line-body);
+  opacity: 0.8;
 }
 
 .legendDivider {
   color: var(--lanpm-text-tertiary);
   user-select: none;
+  opacity: 0.6;
+  margin: 0 2px;
 }
 
 .fsLinesToggle {
