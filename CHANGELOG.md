@@ -7,6 +7,7 @@
 ### Added
 - **任务离线补拉 (TASK-134)**：`task_sync_request` / `task_sync_batch`；按 `updatedAt` 合并分页拉取任务与依赖（含软删）；`verify:task-offline-sync`。
 - **同步文档对齐 (TASK-135)**：`docs/03` 补 `task_sync_*` / `chat_sync_*` payload 与 §12 补拉/历史分页；`docs/06` §2.3 更新任务/聊天同步现状。
+- **SPRINT-SYNC-CONSISTENCY 收尾 (TASK-136)**：全量 verify 绿；README 同步能力一句化；归档 `20260711_002128_sync_consistency_summary.md`。
 - **聊天历史分页 (TASK-133)**：初始加载最近 200 条；`chat:loadOlderMessages` + 上滑续载；`ChatMessagePage.hasMore`；修复 ASC+LIMIT 只见最早消息的问题；补齐 `sendTaskRefMessage`（TASK-131 遗留未导出）。
 - **聊天离线补同步分页续传 (TASK-132)**：`chat_sync_batch.hasMore`；响应方按 100 条分页循环推送；请求方跟进下一页；`splitOfflineSyncPage` / `verify:offline-sync-integration` 覆盖 >100 条。
 - **task_dep_patch P2P 同步 (TASK-131)**：依赖边 upsert/delete 经 `task_dep_patch` 广播；SQLite `task_dependencies` 增 `updated_at`/`deleted_at`（schema v2）；远端 LWW 合并；`verify:task-dep-sync`。
