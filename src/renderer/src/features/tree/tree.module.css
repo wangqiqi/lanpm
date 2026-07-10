@@ -13,9 +13,10 @@
   flex-direction: column;
   overflow: auto;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-lg);
   background: var(--lanpm-surface-solid);
   border: 0.5px solid var(--lanpm-separator);
+  box-shadow: var(--lanpm-shadow-surface);
 }
 
 /* blockNode + full-width title so progress column aligns on the right */
@@ -117,9 +118,10 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-lg);
   background: var(--lanpm-surface-solid);
   border: 0.5px solid var(--lanpm-separator);
+  box-shadow: var(--lanpm-shadow-surface);
 }
 
 .detailPanelBody {

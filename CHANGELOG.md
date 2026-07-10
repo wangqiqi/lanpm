@@ -8,6 +8,7 @@
 - **Elevation 物理层级设计令牌 (TASK-124)**：新增 `--lanpm-shadow-surface`、`--lanpm-shadow-card`、`--lanpm-canvas-inset` 全局令牌；`UI优化.md` 补充布局接缝「不圆角」例外规范与 Canvas/Surface/Card 分层指引。
 - **聊天页 Canvas/Surface 三层分层 (TASK-125)**：消息滚动区退至 `--lanpm-bg` 画布层；附件卡片升级 `--lanpm-shadow-card` 双层投影；侧栏/模式条/输入区保持 Surface 白底。
 - **看板列容器与任务卡片层级 (TASK-126)**：列体 `--lanpm-shadow-surface` 浮于画布；列内 `--lanpm-bg` 槽位；任务卡白底 `--lanpm-shadow-card` 与列体分离。
+- **文件页与任务树 Surface 分层 (TASK-127)**：文件列表区 Canvas、预览区 Surface；任务树/详情面板 `--lanpm-shadow-surface` 浮起。
 - **顶栏、公共组件与全局搜索圆角大一统 (TASK-122)**：应用 `--lanpm-radius-md` (10px) 全面重构顶栏的项目选择、搜索框、全局搜索框（GlobalSearch），并与 ViewSegment 分类选择器滑块和 RegionButton 等公共核心组件建立几何严密契合的嵌套映射，扫除全站最后一处魔法圆角数值。
 - **看板容器与卡片几何同心圆角嵌套 (TASK-121)**：将看板列容器（.column）圆角升级至 `--lanpm-radius-lg` (14px)，与内部卡片的 `--lanpm-radius-md` (10px) 形成同心嵌套圆角比例，满足完美的物理容纳几何美感。
 - **聊天与文件板块几何圆角一统 (TASK-120)**：全面应用 `--lanpm-radius-md` (10px) 和 `--lanpm-radius-sm` (6px) 规范重构聊天流气泡、表情选择器和文件传输面板，实现物理层级圆角的优雅收拢。
