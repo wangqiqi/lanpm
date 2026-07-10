@@ -1,5 +1,5 @@
 /**
- * AUTO-13 — 离线补同步集成：chat_sync_request → chat_sync_batch → SQLite 落库 + TTL 过滤。
+ * AUTO-13 / TASK-132 — 离线补同步：request → batch → SQLite + TTL；>100 条分页续传。
  * Run: npm run verify:offline-sync-integration
  */
 import { readFileSync } from 'fs'
@@ -11,7 +11,9 @@ import type { SyncEnvelope } from '../../src/shared/network/types.ts'
 import type { ChatMessage } from '../../src/shared/chat/types.ts'
 import {
   OFFLINE_SYNC_BATCH_LIMIT,
+  maxLamportInMessages,
   offlineSyncCutoffIso,
+  splitOfflineSyncPage,
   type ChatSyncBatchPayload,
   type ChatSyncRequestPayload
 } from '../../src/shared/chat/offlineSync.ts'
@@ -86,7 +88,7 @@ function buildMessage(
   }
 }
 
-/** Mirrors offlineSyncService.handleChatSyncRequest (responder side). */
+/** Mirrors offlineSyncService.handleChatSyncRequest (multi-page). */
 async function respondToSyncRequest(
   db: Database.Database,
   stub: NetworkStub,
@@ -100,32 +102,37 @@ async function respondToSyncRequest(
   const payload = envelope.payload as ChatSyncRequestPayload
   if (!payload?.minCreatedAt) return
 
-  const messages = listMessagesSince(
-    db,
-    envelope.groupId,
-    payload.sinceLamportTs ?? 0,
-    payload.minCreatedAt,
-    OFFLINE_SYNC_BATCH_LIMIT
-  ).filter((m) => m.senderDeviceId !== localDeviceId)
-
-  if (messages.length === 0) return
-
-  const batchPayload: ChatSyncBatchPayload = { messages }
-  await stub.publish({
-    version: 1,
-    type: 'chat_sync_batch',
-    msgId: `sync_batch_${envelope.groupId}_${randomUUID()}`,
-    senderUserId: localUserId,
-    senderDeviceId: localDeviceId,
-    groupId: envelope.groupId,
-    ts: new Date().toISOString(),
-    payload: batchPayload,
-    nonce: '',
-    authTag: ''
-  })
+  let sinceLamportTs = payload.sinceLamportTs ?? 0
+  for (let page = 0; page < 50; page++) {
+    const raw = listMessagesSince(
+      db,
+      envelope.groupId,
+      sinceLamportTs,
+      payload.minCreatedAt,
+      OFFLINE_SYNC_BATCH_LIMIT + 1
+    )
+    const { messages: pageRows, hasMore } = splitOfflineSyncPage(raw, OFFLINE_SYNC_BATCH_LIMIT)
+    const messages = pageRows.filter((m) => m.senderDeviceId !== localDeviceId)
+    if (messages.length > 0) {
+      const batchPayload: ChatSyncBatchPayload = { messages, hasMore }
+      await stub.publish({
+        version: 1,
+        type: 'chat_sync_batch',
+        msgId: `sync_batch_${envelope.groupId}_${randomUUID()}`,
+        senderUserId: localUserId,
+        senderDeviceId: localDeviceId,
+        groupId: envelope.groupId,
+        ts: new Date().toISOString(),
+        payload: batchPayload,
+        nonce: '',
+        authTag: ''
+      })
+    }
+    if (!hasMore || pageRows.length === 0) break
+    sinceLamportTs = maxLamportInMessages(pageRows)
+  }
 }
 
-/** Mirrors offlineSyncService.handleChatSyncBatch (requester side). */
 function applySyncBatch(
   db: Database.Database,
   localDeviceId: string,
@@ -145,90 +152,169 @@ function applySyncBatch(
   }
 }
 
-const dbA = openDb(USER_A, DEVICE_A)
-const dbB = openDb(USER_B, DEVICE_B)
-
-const minCreatedAt = offlineSyncCutoffIso(7)
-const staleAt = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-const freshAt = new Date().toISOString()
-
-const freshMsg = buildMessage(`msg_fresh_${randomUUID()}`, USER_REMOTE, DEVICE_REMOTE, freshAt, 2)
-const staleMsg = buildMessage(`msg_stale_${randomUUID()}`, USER_REMOTE, DEVICE_REMOTE, staleAt, 1)
-const ownMsg = buildMessage(`msg_own_${randomUUID()}`, USER_A, DEVICE_A, freshAt, 3)
-
-insertMessage(dbA, freshMsg)
-insertMessage(dbA, staleMsg)
-insertMessage(dbA, ownMsg)
-
-const stubA = new NetworkStub({
-  deviceId: DEVICE_A,
-  userId: USER_A,
-  displayName: 'Offline A'
-})
-const stubB = new NetworkStub({
-  deviceId: DEVICE_B,
-  userId: USER_B,
-  displayName: 'Offline B'
-})
-
-stubA.start()
-stubB.start()
-
-stubA.subscribe(GROUP, (env) => {
-  void respondToSyncRequest(dbA, stubA, DEVICE_A, USER_A, env)
-})
-
-let batchReceived = false
-stubB.subscribe(GROUP, (env) => {
-  if (env.type === 'chat_sync_batch') {
-    applySyncBatch(dbB, DEVICE_B, env)
-    batchReceived = true
-  }
-})
-
-try {
-  const request: SyncEnvelope = {
-    version: 1,
-    type: 'chat_sync_request',
-    msgId: `sync_req_${randomUUID()}`,
-    senderUserId: USER_B,
-    senderDeviceId: DEVICE_B,
-    groupId: GROUP,
-    ts: freshAt,
-    payload: { sinceLamportTs: 0, minCreatedAt },
-    nonce: '',
-    authTag: ''
-  }
-
-  await stubB.publish(request)
-
-  const deadline = Date.now() + 3000
-  while (!batchReceived && Date.now() < deadline) {
+async function waitUntil(predicate: () => boolean, ms: number): Promise<boolean> {
+  const deadline = Date.now() + ms
+  while (!predicate() && Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 50))
   }
-  if (!batchReceived) {
-    throw new Error('chat_sync_batch not received on stub B within 3s')
-  }
-
-  const onB = listMessagesByGroup(dbB, GROUP)
-  if (onB.length !== 1) {
-    throw new Error(`expected 1 message on B, got ${onB.length}`)
-  }
-  if (onB[0]?.msgId !== freshMsg.msgId) {
-    throw new Error('B received wrong message (TTL filter failed)')
-  }
-  if (messageExists(dbB, staleMsg.msgId)) {
-    throw new Error('stale message should not sync to B')
-  }
-  if (messageExists(dbB, ownMsg.msgId)) {
-    throw new Error('responder must not echo own-device messages in sync batch')
-  }
-} finally {
-  stubB.stop()
-  stubA.stop()
-  dbA.close()
-  dbB.close()
-  for (const d of _tempDirs) rmLanpmTemp(d)
+  return predicate()
 }
 
-console.log('verify:offline-sync-integration OK (request → batch → TTL)')
+// --- Case 1: TTL + own-device filter ---
+{
+  const dbA = openDb(USER_A, DEVICE_A)
+  const dbB = openDb(USER_B, DEVICE_B)
+
+  const minCreatedAt = offlineSyncCutoffIso(7)
+  const staleAt = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  const freshAt = new Date().toISOString()
+
+  const freshMsg = buildMessage(`msg_fresh_${randomUUID()}`, USER_REMOTE, DEVICE_REMOTE, freshAt, 2)
+  const staleMsg = buildMessage(`msg_stale_${randomUUID()}`, USER_REMOTE, DEVICE_REMOTE, staleAt, 1)
+  const ownMsg = buildMessage(`msg_own_${randomUUID()}`, USER_A, DEVICE_A, freshAt, 3)
+
+  insertMessage(dbA, freshMsg)
+  insertMessage(dbA, staleMsg)
+  insertMessage(dbA, ownMsg)
+
+  const stubA = new NetworkStub({
+    deviceId: DEVICE_A,
+    userId: USER_A,
+    displayName: 'Offline A'
+  })
+  const stubB = new NetworkStub({
+    deviceId: DEVICE_B,
+    userId: USER_B,
+    displayName: 'Offline B'
+  })
+
+  stubA.start()
+  stubB.start()
+
+  stubA.subscribe(GROUP, (env) => {
+    void respondToSyncRequest(dbA, stubA, DEVICE_A, USER_A, env)
+  })
+
+  let batchReceived = false
+  stubB.subscribe(GROUP, (env) => {
+    if (env.type === 'chat_sync_batch') {
+      applySyncBatch(dbB, DEVICE_B, env)
+      batchReceived = true
+    }
+  })
+
+  try {
+    await stubB.publish({
+      version: 1,
+      type: 'chat_sync_request',
+      msgId: `sync_req_${randomUUID()}`,
+      senderUserId: USER_B,
+      senderDeviceId: DEVICE_B,
+      groupId: GROUP,
+      ts: freshAt,
+      payload: { sinceLamportTs: 0, minCreatedAt },
+      nonce: '',
+      authTag: ''
+    })
+
+    if (!(await waitUntil(() => batchReceived, 3000))) {
+      throw new Error('chat_sync_batch not received on stub B within 3s')
+    }
+
+    const onB = listMessagesByGroup(dbB, GROUP)
+    if (onB.length !== 1) {
+      throw new Error(`expected 1 message on B, got ${onB.length}`)
+    }
+    if (onB[0]?.msgId !== freshMsg.msgId) {
+      throw new Error('B received wrong message (TTL filter failed)')
+    }
+    if (messageExists(dbB, staleMsg.msgId)) {
+      throw new Error('stale message should not sync to B')
+    }
+    if (messageExists(dbB, ownMsg.msgId)) {
+      throw new Error('responder must not echo own-device messages in sync batch')
+    }
+    console.log('OK: TTL + own-device filter')
+  } finally {
+    stubB.stop()
+    stubA.stop()
+    dbA.close()
+    dbB.close()
+  }
+}
+
+// --- Case 2: >100 messages → multi-page ---
+{
+  const dbA = openDb(`${USER_A}_p`, `${DEVICE_A}_p`)
+  const dbB = openDb(`${USER_B}_p`, `${DEVICE_B}_p`)
+  const minCreatedAt = offlineSyncCutoffIso(7)
+  const freshAt = new Date().toISOString()
+  const TOTAL = OFFLINE_SYNC_BATCH_LIMIT + 50
+
+  for (let i = 1; i <= TOTAL; i++) {
+    insertMessage(
+      dbA,
+      buildMessage(`msg_page_${i}`, USER_REMOTE, DEVICE_REMOTE, freshAt, i)
+    )
+  }
+
+  const stubA = new NetworkStub({
+    deviceId: `${DEVICE_A}_p`,
+    userId: `${USER_A}_p`,
+    displayName: 'Page A'
+  })
+  const stubB = new NetworkStub({
+    deviceId: `${DEVICE_B}_p`,
+    userId: `${USER_B}_p`,
+    displayName: 'Page B'
+  })
+
+  stubA.start()
+  stubB.start()
+
+  stubA.subscribe(GROUP, (env) => {
+    void respondToSyncRequest(dbA, stubA, `${DEVICE_A}_p`, `${USER_A}_p`, env)
+  })
+
+  let batches = 0
+  stubB.subscribe(GROUP, (env) => {
+    if (env.type === 'chat_sync_batch') {
+      applySyncBatch(dbB, `${DEVICE_B}_p`, env)
+      batches += 1
+    }
+  })
+
+  try {
+    await stubB.publish({
+      version: 1,
+      type: 'chat_sync_request',
+      msgId: `sync_req_page_${randomUUID()}`,
+      senderUserId: `${USER_B}_p`,
+      senderDeviceId: `${DEVICE_B}_p`,
+      groupId: GROUP,
+      ts: freshAt,
+      payload: { sinceLamportTs: 0, minCreatedAt },
+      nonce: '',
+      authTag: ''
+    })
+
+    if (!(await waitUntil(() => listMessagesByGroup(dbB, GROUP, 10_000).length >= TOTAL, 8000))) {
+      throw new Error(
+        `pagination incomplete: got ${listMessagesByGroup(dbB, GROUP, 10_000).length}/${TOTAL} after ${batches} batches`
+      )
+    }
+    if (batches < 2) {
+      throw new Error(`expected ≥2 batches for ${TOTAL} msgs, got ${batches}`)
+    }
+    console.log(`OK: pagination ${TOTAL} msgs in ${batches} batches`)
+  } finally {
+    stubB.stop()
+    stubA.stop()
+    dbA.close()
+    dbB.close()
+  }
+}
+
+for (const d of _tempDirs) rmLanpmTemp(d)
+
+console.log('verify:offline-sync-integration OK (request → batch → TTL + pagination)')

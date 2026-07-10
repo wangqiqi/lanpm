@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **聊天离线补同步分页续传 (TASK-132)**：`chat_sync_batch.hasMore`；响应方按 100 条分页循环推送；请求方跟进下一页；`splitOfflineSyncPage` / `verify:offline-sync-integration` 覆盖 >100 条。
 - **task_dep_patch P2P 同步 (TASK-131)**：依赖边 upsert/delete 经 `task_dep_patch` 广播；SQLite `task_dependencies` 增 `updated_at`/`deleted_at`（schema v2）；远端 LWW 合并；`verify:task-dep-sync`。
 - **task_dep_patch 协议 (TASK-130)**：`SyncMessageType` 新增 `task_dep_patch`；`TaskDepPatchPayload` / `isTaskDepPatchPayload`（`shared/task/sync.ts`）；`docs/03` §6.2 payload 草案；`verify:task-dep-protocol`。
 

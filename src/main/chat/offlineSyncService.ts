@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto'
 import type { ChatMessage } from '../../shared/chat/types'
 import {
   OFFLINE_SYNC_BATCH_LIMIT,
+  maxLamportInMessages,
+  splitOfflineSyncPage,
   type ChatSyncBatchPayload,
   type ChatSyncRequestPayload,
   offlineSyncCutoffIso
@@ -24,6 +26,9 @@ import {
   updateMessage
 } from '../storage/repositories/messageRepository'
 import { broadcastMessage } from './chatBroadcast'
+
+/** Safety cap: max pages per sync request (100 × 50 = 5k msgs). */
+const OFFLINE_SYNC_MAX_PAGES = 50
 
 function upsertIncomingChatMessage(db: Database, incoming: ChatMessage, groupId: string): void {
   if (messageExists(db, incoming.msgId)) {
@@ -48,13 +53,37 @@ function upsertIncomingChatMessage(db: Database, incoming: ChatMessage, groupId:
   broadcastMessage(stored)
 }
 
+async function publishSyncRequest(
+  db: Database,
+  groupId: string,
+  sinceLamportTs: number,
+  minCreatedAt: string
+): Promise<void> {
+  const transport = getNetworkTransport()
+  const status = getSetupStatus(db)
+  if (!transport || !status.configured || !status.user || !status.device) return
+
+  const envelope: SyncEnvelope = {
+    version: 1,
+    type: 'chat_sync_request',
+    msgId: `sync_req_${groupId}_${Date.now()}_${sinceLamportTs}`,
+    senderUserId: status.user.userId,
+    senderDeviceId: status.device.deviceId,
+    groupId,
+    ts: new Date().toISOString(),
+    payload: { sinceLamportTs, minCreatedAt } satisfies ChatSyncRequestPayload,
+    nonce: '',
+    authTag: ''
+  }
+  await transport.publish(envelope)
+}
+
 export async function requestOfflineSync(db: Database): Promise<void> {
   const transport = getNetworkTransport()
   const status = getSetupStatus(db)
   if (!transport || !status.configured || !status.user || !status.device) return
 
   const minCreatedAt = offlineSyncCutoffIso(SYNC_WINDOW_DAYS)
-  const now = new Date().toISOString()
 
   const groupIds = new Set<string>()
   for (const group of listUserGroups(db)) {
@@ -67,20 +96,7 @@ export async function requestOfflineSync(db: Database): Promise<void> {
 
   for (const groupId of groupIds) {
     const sinceLamportTs = getMaxLamportTs(db, groupId)
-    const payload: ChatSyncRequestPayload = { sinceLamportTs, minCreatedAt }
-    const envelope: SyncEnvelope = {
-      version: 1,
-      type: 'chat_sync_request',
-      msgId: `sync_req_${groupId}_${Date.now()}`,
-      senderUserId: status.user.userId,
-      senderDeviceId: status.device.deviceId,
-      groupId,
-      ts: now,
-      payload,
-      nonce: '',
-      authTag: ''
-    }
-    await transport.publish(envelope)
+    await publishSyncRequest(db, groupId, sinceLamportTs, minCreatedAt)
   }
 }
 
@@ -95,43 +111,57 @@ export async function handleChatSyncRequest(db: Database, envelope: SyncEnvelope
   const payload = envelope.payload as ChatSyncRequestPayload
   if (!payload?.minCreatedAt) return
 
-  const newMessages = listMessagesSince(
-    db,
-    envelope.groupId,
-    payload.sinceLamportTs ?? 0,
-    payload.minCreatedAt,
-    OFFLINE_SYNC_BATCH_LIMIT
-  ).filter((m) => m.senderDeviceId !== localDeviceId)
-
-  const recalledMessages = listRecalledMessagesInGroup(
-    db,
-    envelope.groupId,
-    payload.minCreatedAt
-  ).filter((m) => m.senderDeviceId !== localDeviceId)
-
-  const merged = new Map<string, ChatMessage>()
-  for (const m of [...newMessages, ...recalledMessages]) merged.set(m.msgId, m)
-  const messages = [...merged.values()]
-
-  if (messages.length === 0) return
-
   const transport = getNetworkTransport()
   if (!transport) return
 
-  const batchPayload: ChatSyncBatchPayload = { messages }
-  const response: SyncEnvelope = {
-    version: 1,
-    type: 'chat_sync_batch',
-    msgId: `sync_batch_${envelope.groupId}_${randomUUID()}`,
-    senderUserId: status.user.userId,
-    senderDeviceId: status.device.deviceId,
-    groupId: envelope.groupId,
-    ts: new Date().toISOString(),
-    payload: batchPayload,
-    nonce: '',
-    authTag: ''
+  let sinceLamportTs = payload.sinceLamportTs ?? 0
+  let includeRecalled = sinceLamportTs === 0
+
+  for (let page = 0; page < OFFLINE_SYNC_MAX_PAGES; page++) {
+    const raw = listMessagesSince(
+      db,
+      envelope.groupId,
+      sinceLamportTs,
+      payload.minCreatedAt,
+      OFFLINE_SYNC_BATCH_LIMIT + 1
+    )
+    const { messages: pageRows, hasMore } = splitOfflineSyncPage(raw, OFFLINE_SYNC_BATCH_LIMIT)
+    const pageMessages = pageRows.filter((m) => m.senderDeviceId !== localDeviceId)
+
+    const merged = new Map<string, ChatMessage>()
+    for (const m of pageMessages) merged.set(m.msgId, m)
+
+    if (includeRecalled) {
+      const recalledMessages = listRecalledMessagesInGroup(
+        db,
+        envelope.groupId,
+        payload.minCreatedAt
+      ).filter((m) => m.senderDeviceId !== localDeviceId)
+      for (const m of recalledMessages) merged.set(m.msgId, m)
+      includeRecalled = false
+    }
+
+    const messages = [...merged.values()]
+    if (messages.length > 0) {
+      const batchPayload: ChatSyncBatchPayload = { messages, hasMore }
+      const response: SyncEnvelope = {
+        version: 1,
+        type: 'chat_sync_batch',
+        msgId: `sync_batch_${envelope.groupId}_${randomUUID()}`,
+        senderUserId: status.user.userId,
+        senderDeviceId: status.device.deviceId,
+        groupId: envelope.groupId,
+        ts: new Date().toISOString(),
+        payload: batchPayload,
+        nonce: '',
+        authTag: ''
+      }
+      await transport.publish(response)
+    }
+
+    if (!hasMore || pageRows.length === 0) break
+    sinceLamportTs = maxLamportInMessages(pageRows)
   }
-  await transport.publish(response)
 }
 
 export function handleChatSyncBatch(db: Database, envelope: SyncEnvelope): void {
@@ -148,5 +178,11 @@ export function handleChatSyncBatch(db: Database, envelope: SyncEnvelope): void 
   for (const incoming of payload.messages) {
     if (!incoming?.msgId || incoming.createdAt < cutoff) continue
     upsertIncomingChatMessage(db, incoming, envelope.groupId)
+  }
+
+  // Follow-up if peer only sent one page (or multi-peer partial); advance by batch cursor.
+  if (payload.hasMore && payload.messages.length > 0) {
+    const nextSince = maxLamportInMessages(payload.messages)
+    void publishSyncRequest(db, envelope.groupId, nextSince, cutoff).catch(() => undefined)
   }
 }
