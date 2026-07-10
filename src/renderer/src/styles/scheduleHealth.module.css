@@ -1,21 +1,27 @@
 /* 工期健康度：绿 = 正常，深黄 = 落后，纯红 = 延期 */
 
 .cardOnTrack {
-  background: color-mix(in srgb, #34c759 12%, var(--lanpm-bg));
-  border-color: #248a3d;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent);
+  background: color-mix(in srgb, var(--lanpm-success) 3%, var(--lanpm-bg)) !important;
+  border-top-color: color-mix(in srgb, var(--lanpm-success) 22%, var(--lanpm-border)) !important;
+  border-right-color: color-mix(in srgb, var(--lanpm-success) 22%, var(--lanpm-border)) !important;
+  border-bottom-color: color-mix(in srgb, var(--lanpm-success) 22%, var(--lanpm-border)) !important;
+  box-shadow: none !important;
 }
 
 .cardBehind {
-  background: color-mix(in srgb, #c99700 22%, var(--lanpm-bg));
-  border-color: #a67c00;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #8f6b00 35%, transparent);
+  background: color-mix(in srgb, var(--lanpm-warning) 3.5%, var(--lanpm-bg)) !important;
+  border-top-color: color-mix(in srgb, var(--lanpm-warning) 30%, var(--lanpm-border)) !important;
+  border-right-color: color-mix(in srgb, var(--lanpm-warning) 30%, var(--lanpm-border)) !important;
+  border-bottom-color: color-mix(in srgb, var(--lanpm-warning) 30%, var(--lanpm-border)) !important;
+  box-shadow: none !important;
 }
 
 .cardOverdue {
-  background: color-mix(in srgb, #ff0000 14%, var(--lanpm-bg));
-  border-color: #ff0000;
-  box-shadow: inset 0 0 0 1px #ff0000;
+  background: color-mix(in srgb, var(--lanpm-danger) 4%, var(--lanpm-bg)) !important;
+  border-top-color: color-mix(in srgb, var(--lanpm-danger) 35%, var(--lanpm-border)) !important;
+  border-right-color: color-mix(in srgb, var(--lanpm-danger) 35%, var(--lanpm-border)) !important;
+  border-bottom-color: color-mix(in srgb, var(--lanpm-danger) 35%, var(--lanpm-border)) !important;
+  box-shadow: none !important;
 }
 
 .dueOnTrack {
