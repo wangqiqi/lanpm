@@ -300,6 +300,12 @@
   opacity: 0.9;
 }
 
+.dependencyLineDim {
+  stroke-width: 1.5;
+  stroke: var(--lanpm-text-tertiary);
+  opacity: 0.45;
+}
+
 .dependencyLineIn {
   stroke: var(--lanpm-warning);
 }
@@ -310,6 +316,10 @@
 
 .dependencyArrow {
   fill: var(--lanpm-accent);
+}
+
+.dependencyArrowDim {
+  fill: var(--lanpm-text-tertiary);
 }
 
 .trashZone {
@@ -366,6 +376,11 @@
   background: var(--lanpm-accent);
 }
 
+.legendDepDim {
+  background: var(--lanpm-text-tertiary);
+  opacity: 0.55;
+}
+
 .legendHint {
   min-width: 160px;
   line-height: var(--lanpm-line-body);
@@ -373,6 +388,17 @@
 
 .legendDivider {
   color: var(--lanpm-text-tertiary);
+  user-select: none;
+}
+
+.fsLinesToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
   user-select: none;
 }
 
