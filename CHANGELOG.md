@@ -8,6 +8,7 @@
 - **头像实际可见**：TopBar / 个人资料 / 聊天气泡 / 成员列表 / 成员资料弹窗统一消费 `avatarUrl`；修复历史 SVG `;utf8` data URL 无法加载；缺省用按 userId 确定性色块兜底。
 
 ### Added
+- **解散 peer 通知 (TASK-147)**：dissolve 先 publish `member_event` 再本地清群；对端 handler 清群 + toast（`group.dissolvedRemotely`）；`verify:member-event` 双 stub 冒烟。
 - **member_event 协议解禁 (TASK-146)**：`MemberEventPayload`；从 `UNIMPLEMENTED_SYNC_TYPES` 移除 `member_event`（仅余 `task_crdt`）；`docs/03` / `verify:sync-handlers` 对齐。
 - **SPRINT-SYNC-RELIABILITY 收尾 (TASK-145)**：Sprint VERIFY 绿；归档 `20260711_005222_sync_reliability_summary.md`；handoff `/release` → v1.0.6。
 - **聊天建任务失败补偿 (TASK-144)**：`createTaskFromChat` 在消息 publish 失败时软删任务并撤回本地消息，保持消息/任务一致。

@@ -7,4 +7,6 @@ export type UserNotice = {
   level: UserNoticeLevel
   /** i18n MessageKey */
   messageKey: string
+  /** 可选插值，如 `{ name }` */
+  params?: Record<string, string | number>
 }

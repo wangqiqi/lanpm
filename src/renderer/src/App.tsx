@@ -67,7 +67,7 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     const unsub = getLanpmApi().onUserNotice((notice) => {
-      const text = translate(locale, notice.messageKey as MessageKey)
+      const text = translate(locale, notice.messageKey as MessageKey, notice.params)
       if (notice.level === 'error') {
         messageRef.current.error?.(text)
       } else {

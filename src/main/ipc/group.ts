@@ -56,7 +56,7 @@ export function registerGroupIpc(): void {
 
   ipcMain.handle(GROUP_IPC.dissolve, (_event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
-    dissolveGroup(getDatabase(), groupId)
+    return dissolveGroup(getDatabase(), groupId)
   })
 }
 

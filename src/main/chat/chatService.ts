@@ -32,6 +32,7 @@ import { showOpenDialog } from '../systemDialog'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import { initTaskSyncService, shutdownTaskSyncService } from '../task/taskSyncService'
+import { handleIncomingMemberEvent } from '../group/memberEventService'
 import { broadcastMessage } from './chatBroadcast'
 import { getNetworkTransport } from '../network'
 import {
@@ -87,6 +88,10 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'chat_recall') {
     handleChatRecall(db, envelope)
+    return
+  }
+  if (envelope.type === 'member_event') {
+    handleIncomingMemberEvent(db, envelope)
     return
   }
   if (envelope.type !== 'chat' || !envelope.groupId) return

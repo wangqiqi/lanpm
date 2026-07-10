@@ -99,6 +99,7 @@
 - `/task` from chat rolls back the local task if the chat publish fails  
 - LAN **Discover** panel: join groups, ping online members, start DMs  
 - TopBar **group switcher**: search by name/pinyin, local pins, sort by recent message activity; chat page no longer duplicates the group title  
+- Owner **dissolve** publishes `member_event` so peers clear the group locally and see a toast  
 
 ### 📋 Project management — three lenses, one truth
 

@@ -39,6 +39,7 @@
     "verify:schema-fk": "node --experimental-strip-types tests/static/verify-schema-fk.ts",
     "verify:sec-hardening": "node --experimental-strip-types tests/static/verify-sec-hardening.ts",
     "verify:dual-stub": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-dual-stub.ts",
+    "verify:member-event": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-member-event.ts",
     "verify:peer-registry": "node --experimental-strip-types tests/integration/verify-peer-registry.ts",
     "verify:storage": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-storage.ts",
     "verify:suffix": "node --experimental-strip-types tests/static/verify-suffix.ts",

@@ -29,12 +29,7 @@ const SYNC_TYPES = [
 ] as const
 
 /** post-RC / transport-level — 允许仅在文档或 transport 出现 */
-const POST_RC_OR_TRANSPORT = new Set<string>([
-  'discovery',
-  'heartbeat',
-  'task_crdt',
-  'member_event'
-])
+const POST_RC_OR_TRANSPORT = new Set<string>(['discovery', 'heartbeat', 'task_crdt'])
 
 /** Must be refused by publish (SPRINT-PROTOCOL-DOCS) — task_crdt only after TASK-146 */
 const UNIMPLEMENTED_PUBLISH = new Set<string>(['task_crdt'])
@@ -47,6 +42,7 @@ const HANDLER_FILES = [
   'src/main/task/taskOfflineSyncService.ts',
   'src/main/file/fileSyncService.ts',
   'src/main/crypto/groupKeyService.ts',
+  'src/main/group/memberEventService.ts',
   'src/main/network/stub/NetworkStub.ts',
   'src/main/network/real/RealNetworkTransport.ts'
 ]

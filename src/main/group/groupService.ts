@@ -25,11 +25,28 @@ import {
 import { listFilesByGroup } from '../storage/repositories/fileRepository'
 import { clearAnonymousSession } from '../chat/anonymousChatStore'
 import { purgeGroupKeyMeta } from '../crypto/groupKeyService'
+import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 function broadcastGroupsChanged(): void {
   for (const win of BrowserWindow.getAllWindows()) {
     win.webContents.send(GROUP_PUSH_CHANNEL)
   }
+}
+
+export function getGroupDisplayNameForNotice(db: Database, groupId: string): string {
+  return getGroupById(db, groupId)?.name ?? groupId
+}
+
+/** Peer 收到 dissolve：本地清群。返回是否实际删除。 */
+export function applyRemoteGroupDissolved(db: Database, groupId: string): boolean {
+  const group = getGroupById(db, groupId)
+  if (!group) return false
+  purgeGroupFilesFromDisk(db, groupId)
+  purgeGroupKeyMeta(db, groupId)
+  clearAnonymousSession(groupId)
+  deleteGroupCascade(db, groupId)
+  broadcastGroupsChanged()
+  return true
 }
 
 export function ensureSeedGroups(db: Database): void {
@@ -149,7 +166,7 @@ export function createUserGroup(db: Database, input: CreateGroupInput): GroupRec
   return group
 }
 
-export function dissolveGroup(db: Database, groupId: string): void {
+export async function dissolveGroup(db: Database, groupId: string): Promise<void> {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) {
     throwLanpm('stub.identityRequired')
@@ -164,6 +181,15 @@ export function dissolveGroup(db: Database, groupId: string): void {
   }
   if (group.createdBy !== status.user.userId) {
     throwLanpm('err.dissolveOwnerOnly')
+  }
+
+  try {
+    const { publishDissolveMemberEvent } = await import('./memberEventService')
+    await publishDissolveMemberEvent(db, groupId)
+  } catch (err) {
+    catchSyncFailure('group.dissolvePublish', {
+      messageKey: 'sync.memberEventPublishFailed'
+    })(err)
   }
 
   purgeGroupFilesFromDisk(db, groupId)
