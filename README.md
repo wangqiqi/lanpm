@@ -94,6 +94,7 @@
 - **7-day offline catch-up** for chat messages (paginated batches) and **tasks/dependencies**  
 - Chat history **load-more** beyond the initial 200 messages  
 - LAN **Discover** panel: join groups, ping online members, start DMs  
+- TopBar **group switcher**: search by name/pinyin, local pins, sort by recent message activity; chat page no longer duplicates the group title  
 
 ### 📋 Project management — three lenses, one truth
 

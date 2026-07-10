@@ -5,8 +5,8 @@
 ## [Unreleased]
 
 ### Added
-- **顶栏群切换搜索**：Select 支持关键字 / 拼音过滤（`matchesGroupSearch`）。
 - **群置顶与活跃排序 (TASK-139)**：本机置顶（localStorage）；下拉按置顶优先、其余按最后消息时间降序；`group:listLastActivity` 聚合查询。
+- **SPRINT-GROUP-SWITCHER 收尾 (TASK-140)**：Sprint VERIFY 绿；README 顶栏群切换能力一句化；归档 `20260711_003600_group_switcher_summary.md`。
 
 ## [1.0.5] - 2026-07-11
 
