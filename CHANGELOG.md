@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **顶栏、公共组件与全局搜索圆角大一统 (TASK-122)**：应用 `--lanpm-radius-md` (10px) 全面重构顶栏的项目选择、搜索框、全局搜索框（GlobalSearch），并与 ViewSegment 分类选择器滑块和 RegionButton 等公共核心组件建立几何严密契合的嵌套映射，扫除全站最后一处魔法圆角数值。
 - **看板容器与卡片几何同心圆角嵌套 (TASK-121)**：将看板列容器（.column）圆角升级至 `--lanpm-radius-lg` (14px)，与内部卡片的 `--lanpm-radius-md` (10px) 形成同心嵌套圆角比例，满足完美的物理容纳几何美感。
 - **聊天与文件板块几何圆角一统 (TASK-120)**：全面应用 `--lanpm-radius-md` (10px) 和 `--lanpm-radius-sm` (6px) 规范重构聊天流气泡、表情选择器和文件传输面板，实现物理层级圆角的优雅收拢。
 - **输入框焦点呼吸淡化 (TASK-112)**：移除输入框获得焦点时的硬生边框，升级为基于 `--lanpm-accent-ring` 的微光平滑呼吸晕染。

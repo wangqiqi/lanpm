@@ -14,7 +14,7 @@
   height: 32px;
   padding: 4px 11px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-fill-secondary);
   color: var(--lanpm-text);
   font-size: 14px;
