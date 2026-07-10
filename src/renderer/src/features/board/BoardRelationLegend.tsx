@@ -32,6 +32,10 @@ export default function BoardRelationLegend(): React.ReactElement {
           className={`${styles.legendSwatch} ${styles.legendDepOut}`}
           title={t('board.legendDepOut')}
         />
+        <span
+          className={`${styles.legendSwatch} ${styles.legendDepDim}`}
+          title={t('board.legendDepDim')}
+        />
       </div>
       <span className={styles.legendHint}>{t('board.legendDepLines')}</span>
       <span className={styles.legendDivider} aria-hidden>

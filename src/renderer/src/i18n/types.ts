@@ -194,6 +194,8 @@ export type MessageKey =
   | 'board.legendDepLines'
   | 'board.legendDepIn'
   | 'board.legendDepOut'
+  | 'board.showAllFsLines'
+  | 'board.legendDepDim'
   | 'task.relationsSection'
   | 'task.predecessors'
   | 'task.successors'
