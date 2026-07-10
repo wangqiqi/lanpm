@@ -4,21 +4,26 @@
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-07-11
+
 ### Fixed
 - **头像实际可见**：TopBar / 个人资料 / 聊天气泡 / 成员列表 / 成员资料弹窗统一消费 `avatarUrl`；修复历史 SVG `;utf8` data URL 无法加载；缺省用按 userId 确定性色块兜底。
 
 ### Added
-- **SPRINT-DISTRIBUTED-SEMANTICS 收尾 (TASK-150)**：`docs/06` §2.3 对齐 `member_event` dissolve / 撤回 `json_extract`；Sprint VERIFY 绿；归档 `20260711_010721_distributed_semantics_summary.md`；handoff `/release` → v1.0.6。
+- **SPRINT-DISTRIBUTED-SEMANTICS 收尾 (TASK-150)**：`docs/06` §2.3 对齐 `member_event` dissolve / 撤回 `json_extract`；Sprint VERIFY 绿；归档 `20260711_010721_distributed_semantics_summary.md`。
 - **撤回结构化查询 (TASK-149)**：`listRecalledMessagesInGroup` 改用 `json_extract`（兼容 content 包裹/顶层 kind），避免 `LIKE` 假阳性；offline-sync 集成覆盖。
 - **解散 peer 通知 (TASK-147)**：dissolve 先 publish `member_event` 再本地清群；对端 handler 清群 + toast（`group.dissolvedRemotely`）；`verify:member-event` 双 stub 冒烟。
 - **member_event 协议解禁 (TASK-146)**：`MemberEventPayload`；从 `UNIMPLEMENTED_SYNC_TYPES` 移除 `member_event`（仅余 `task_crdt`）；`docs/03` / `verify:sync-handlers` 对齐。
-- **SPRINT-SYNC-RELIABILITY 收尾 (TASK-145)**：Sprint VERIFY 绿；归档 `20260711_005222_sync_reliability_summary.md`；handoff `/release` → v1.0.6。
+- **SPRINT-SYNC-RELIABILITY 收尾 (TASK-145)**：Sprint VERIFY 绿；归档 `20260711_005222_sync_reliability_summary.md`。
 - **聊天建任务失败补偿 (TASK-144)**：`createTaskFromChat` 在消息 publish 失败时软删任务并撤回本地消息，保持消息/任务一致。
 - **LWW 平局决胜 (TASK-143)**：`updatedAt` 相等时用 `senderDeviceId` 字典序决胜；SQLite `last_writer_device_id`（schema v3）；`lwwShouldApply` 单测 + sync/dep 集成覆盖。
 - **任务/文件同步失败可观测 (TASK-142)**：去掉静默 `.catch`；主进程打日志；用户侧 publish 失败 toast（`app:userNotice`）；预期离线早退不误报。
 - **聊天发送失败可重试 (TASK-141)**：publish 失败标记 `failed`；有限次自动重试（退避）；气泡「重试」+ `chat:retryMessage` IPC。
 - **群置顶与活跃排序 (TASK-139)**：本机置顶（localStorage）；下拉按置顶优先、其余按最后消息时间降序；`group:listLastActivity` 聚合查询。
 - **SPRINT-GROUP-SWITCHER 收尾 (TASK-140)**：Sprint VERIFY 绿；README 顶栏群切换能力一句化；归档 `20260711_003600_group_switcher_summary.md`。
+
+### Release
+- `v1.0.6` — 同步可靠性 · 解散 peer 通知 · 头像可见 · 群置顶/活跃排序
 
 ## [1.0.5] - 2026-07-11
 
