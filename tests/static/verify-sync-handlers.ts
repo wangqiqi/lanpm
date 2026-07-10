@@ -39,6 +39,7 @@ const UNIMPLEMENTED_PUBLISH = new Set<string>(['task_crdt'])
 const HANDLER_FILES = [
   'src/main/chat/chatService.ts',
   'src/main/chat/readReceiptService.ts',
+  'src/main/chat/readReceiptOfflineSyncService.ts',
   'src/main/chat/offlineSyncService.ts',
   'src/main/task/taskSyncService.ts',
   'src/main/task/taskOfflineSyncService.ts',

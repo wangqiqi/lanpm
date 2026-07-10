@@ -17,7 +17,7 @@ import {
 } from '../storage/repositories/readReceiptRepository'
 import { broadcastMessage } from './chatBroadcast'
 
-/** TASK-151 — protocol types (handlers land in TASK-153) */
+/** Offline sync type names (handlers in readReceiptOfflineSyncService) */
 export const READ_RECEIPT_OFFLINE_SYNC_TYPES = [
   'read_receipt_sync_request',
   'read_receipt_sync_batch'
@@ -42,6 +42,11 @@ export function handleIncomingReadReceipt(db: Database, envelope: SyncEnvelope):
   const receipt = payload?.receipt
   if (!receipt?.msgId || !receipt.readerUserId) return
 
+  upsertReadReceipt(db, receipt)
+  applyReadStatusToMessage(db, receipt.msgId)
+}
+
+export function applyRemoteReadReceipt(db: Database, receipt: ReadReceipt): void {
   upsertReadReceipt(db, receipt)
   applyReadStatusToMessage(db, receipt.msgId)
 }

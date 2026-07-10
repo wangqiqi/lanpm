@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   isMessageReadByOthers,
   isReadReceiptSyncBatchPayload,
-  isReadReceiptSyncRequestPayload
+  isReadReceiptSyncRequestPayload,
+  maxReadAtInReceipts,
+  splitReadReceiptOfflineSyncPage
 } from '@shared/chat/readReceipt'
 
 describe('isMessageReadByOthers', () => {
@@ -56,5 +58,19 @@ describe('read_receipt offline sync payloads (TASK-151)', () => {
         receipts: [{ msgId: 'm1' }]
       })
     ).toBe(false)
+  })
+
+  it('splits pages and tracks max readAt', () => {
+    const rows = Array.from({ length: 3 }, (_, i) => ({
+      msgId: `m${i}`,
+      groupId: 'g1',
+      readerUserId: 'u2',
+      readerDeviceId: 'd2',
+      readAt: `2026-07-01T0${i}:00:00.000Z`
+    }))
+    const page = splitReadReceiptOfflineSyncPage(rows, 2)
+    expect(page.receipts).toHaveLength(2)
+    expect(page.hasMore).toBe(true)
+    expect(maxReadAtInReceipts(page.receipts)).toBe('2026-07-01T01:00:00.000Z')
   })
 })

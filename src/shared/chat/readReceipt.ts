@@ -27,6 +27,24 @@ export interface ReadReceiptSyncBatchPayload {
 /** Align with chat/task offline batch size */
 export const READ_RECEIPT_OFFLINE_SYNC_BATCH_LIMIT = 100
 
+export function splitReadReceiptOfflineSyncPage(
+  rows: ReadReceipt[],
+  limit = READ_RECEIPT_OFFLINE_SYNC_BATCH_LIMIT
+): { receipts: ReadReceipt[]; hasMore: boolean } {
+  if (rows.length > limit) {
+    return { receipts: rows.slice(0, limit), hasMore: true }
+  }
+  return { receipts: rows, hasMore: false }
+}
+
+export function maxReadAtInReceipts(receipts: ReadReceipt[]): string {
+  let max = ''
+  for (const r of receipts) {
+    if (r.readAt > max) max = r.readAt
+  }
+  return max
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }

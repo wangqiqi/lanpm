@@ -31,6 +31,11 @@ import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { showOpenDialog } from '../systemDialog'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
+import {
+  handleReadReceiptSyncBatch,
+  handleReadReceiptSyncRequest,
+  requestReadReceiptOfflineSync
+} from './readReceiptOfflineSyncService'
 import { initTaskSyncService, shutdownTaskSyncService } from '../task/taskSyncService'
 import { handleIncomingMemberEvent } from '../group/memberEventService'
 import { broadcastMessage } from './chatBroadcast'
@@ -90,6 +95,14 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     handleChatRecall(db, envelope)
     return
   }
+  if (envelope.type === 'read_receipt_sync_request') {
+    void handleReadReceiptSyncRequest(db, envelope).catch(() => undefined)
+    return
+  }
+  if (envelope.type === 'read_receipt_sync_batch') {
+    handleReadReceiptSyncBatch(db, envelope)
+    return
+  }
   if (envelope.type === 'member_event') {
     handleIncomingMemberEvent(db, envelope)
     return
@@ -145,6 +158,7 @@ export function initChatService(db: Database): void {
   initTaskSyncService(db)
   initFileSyncService(db)
   void requestOfflineSync(db).catch(() => undefined)
+  void requestReadReceiptOfflineSync(db).catch(() => undefined)
 }
 
 export function shutdownChatService(): void {
