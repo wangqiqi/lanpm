@@ -8,9 +8,9 @@ import type { Task, TaskStatus } from '@shared/task/types'
 import type { MessageKey } from '@renderer/i18n/messages'
 import scheduleStyles from '@renderer/styles/scheduleHealth.module.css'
 
-export const SCHEDULE_ON_TRACK_STROKE = '#34c759'
-export const SCHEDULE_BEHIND_STROKE = '#c99700'
-export const SCHEDULE_OVERDUE_STROKE = '#ff0000'
+export const SCHEDULE_ON_TRACK_STROKE = 'var(--lanpm-success)'
+export const SCHEDULE_BEHIND_STROKE = 'var(--lanpm-warning)'
+export const SCHEDULE_OVERDUE_STROKE = 'var(--lanpm-danger)'
 
 export interface TaskScheduleEvaluation {
   health: ScheduleHealth

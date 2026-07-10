@@ -61,6 +61,37 @@
   flex-shrink: 0;
 }
 
+/* Capsule-style Progress Customization */
+.nodeProgress :global(.ant-progress-bg) {
+  height: 5px !important;
+  border-radius: 100px !important;
+}
+
+.nodeProgress :global(.ant-progress-trail) {
+  height: 5px !important;
+  border-radius: 100px !important;
+  background-color: var(--lanpm-fill-secondary) !important;
+}
+
+/* 进度条高阶色彩变量化 */
+.nodeProgress :global(.ant-progress-status-success) :global(.ant-progress-bg) {
+  background-color: var(--lanpm-success) !important;
+}
+
+.nodeProgress :global(.ant-progress-status-exception) :global(.ant-progress-bg) {
+  background-color: var(--lanpm-danger) !important;
+}
+
+.nodeProgress :global(.ant-progress-status-active) :global(.ant-progress-bg) {
+  background-color: var(--lanpm-accent) !important;
+}
+
+.nodeProgress :global(.ant-progress-text) {
+  font-size: var(--lanpm-font-caption) !important;
+  color: var(--lanpm-text-secondary) !important;
+  font-weight: 500;
+}
+
 .searchHighlight {
   border-radius: 6px;
   box-shadow: 0 0 0 2px var(--lanpm-accent);
