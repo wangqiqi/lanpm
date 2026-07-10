@@ -10,10 +10,11 @@
 }
 
 .icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border-radius: var(--lanpm-radius-md);
+  box-sizing: border-box;
 }
 
 .icon:hover:not(:disabled):not(.regionDisabled),
@@ -57,11 +58,14 @@
 }
 
 .text {
-  padding: 6px 10px;
+  height: 32px;
+  padding: 0 10px;
+  box-sizing: border-box;
   border-radius: var(--lanpm-radius-md);
   font-size: var(--lanpm-font-title);
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--lanpm-text);
 }
 
@@ -70,9 +74,12 @@
 }
 
 .user {
-  padding: 4px 10px;
+  height: 32px;
+  padding: 0 10px;
+  box-sizing: border-box;
   border-radius: 980px;
   font-size: var(--lanpm-font-body);
   font-weight: 500;
+  line-height: 1.2;
   color: var(--lanpm-text);
 }

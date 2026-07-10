@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import { Avatar, Dropdown, type MenuProps } from 'antd'
-import { UserOutlined, FileOutlined, ProjectOutlined } from '@ant-design/icons'
+import { Dropdown, type MenuProps } from 'antd'
+import UserAvatar from '@renderer/ui/UserAvatar'
+import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
@@ -20,12 +21,6 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function avatarLabel(name: string): string {
-  const trimmed = name.trim()
-  if (!trimmed) return '?'
-  return trimmed.slice(0, 1).toUpperCase()
 }
 
 interface MessageBubbleProps {
@@ -282,9 +277,12 @@ export default function MessageBubble({
               aria-label={t('chat.viewMemberProfile')}
               onClick={() => onViewSender?.(senderMember)}
             >
-              <Avatar size={36} icon={<UserOutlined />}>
-                {avatarLabel(senderName)}
-              </Avatar>
+              <UserAvatar
+                size={36}
+                displayName={senderName}
+                userId={senderMember.userId}
+                avatarUrl={senderMember.avatarUrl}
+              />
             </button>
           </Dropdown>
         ) : (

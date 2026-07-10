@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Avatar, Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
+import { Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
 import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
-import { UserOutlined } from '@ant-design/icons'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNetworkStore } from '@renderer/stores/networkStore'
@@ -11,6 +10,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { ProfileUpdateInput } from '@shared/identity'
 import { LANPM_APP_VERSION } from '@shared/appVersion'
 import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
+import UserAvatar from '@renderer/ui/UserAvatar'
 
 interface ProfileModalProps {
   open: boolean
@@ -99,7 +99,12 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
             children: (
               <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <Avatar size={48} icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
+        <UserAvatar
+          size={48}
+          displayName={user?.displayName ?? '—'}
+          userId={user?.userId}
+          avatarUrl={user?.avatarUrl}
+        />
         <div>
           <Typography.Text type="secondary">{t('profile.userId')}</Typography.Text>
           <div>{user?.userId ?? '—'}</div>

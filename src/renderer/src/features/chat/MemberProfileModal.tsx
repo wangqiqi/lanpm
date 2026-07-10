@@ -1,10 +1,10 @@
-import { Avatar, Modal, Typography } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { Modal, Typography } from 'antd'
 import type { GroupMemberView } from '@shared/chat/members'
 import { presenceEmoji } from '@shared/presence'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { presenceMessageKey } from '@renderer/i18n/presence'
 import RegionButton from '@renderer/ui/RegionButton'
+import UserAvatar from '@renderer/ui/UserAvatar'
 
 const { Text } = Typography
 
@@ -16,12 +16,6 @@ interface MemberProfileModalProps {
   onClose: () => void
   onMention: (displayName: string) => void
   onStartDm?: (member: GroupMemberView) => void
-}
-
-function avatarLabel(name: string): string {
-  const trimmed = name.trim()
-  if (!trimmed) return '?'
-  return trimmed.slice(0, 1).toUpperCase()
 }
 
 export default function MemberProfileModal({
@@ -47,9 +41,12 @@ export default function MemberProfileModal({
       {member ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Avatar size={48} icon={<UserOutlined />}>
-              {avatarLabel(member.displayName)}
-            </Avatar>
+            <UserAvatar
+              size={48}
+              displayName={member.displayName}
+              userId={member.userId}
+              avatarUrl={member.avatarUrl}
+            />
             <div>
               <Text strong style={{ fontSize: 16 }}>
                 {member.displayName}

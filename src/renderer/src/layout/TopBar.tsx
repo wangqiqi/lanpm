@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Avatar,
   Dropdown,
   Popover,
   Select,
@@ -20,14 +19,14 @@ import {
   PushpinFilled,
   PushpinOutlined,
   SearchOutlined,
-  SunOutlined,
-  UserOutlined
+  SunOutlined
 } from '@ant-design/icons'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import UserAvatar from '@renderer/ui/UserAvatar'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { isDmGroupId, getDmPeerUserId } from '@shared/chat/dmSession'
@@ -543,7 +542,12 @@ export default function TopBar(): React.ReactElement {
         <div className={styles.barGroup}>
         <Dropdown menu={{ items: userMenu }} trigger={['click']}>
           <RegionButton variant="user" aria-label={t('topbar.userMenu')}>
-            <Avatar size="small" icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
+            <UserAvatar
+              size="small"
+              displayName={user?.displayName ?? t('topbar.userFallback')}
+              userId={user?.userId}
+              avatarUrl={user?.avatarUrl}
+            />
             <span className={styles.userName}>{user?.displayName ?? t('topbar.userFallback')}</span>
           </RegionButton>
         </Dropdown>

@@ -3,6 +3,7 @@ import { throwLanpm } from '../../shared/errors/lanpmError'
 import { hostname } from 'node:os'
 import { resolveDeviceName } from '../../shared/identity/deviceName'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from '../../shared/identity'
+import { normalizeAvatarDataUrl } from '../../shared/identity/avatar'
 import {
   getDeviceById,
   getUserById,
@@ -26,7 +27,7 @@ function profileToSetupUser(profile: UserProfile): SetupStatus['user'] {
     baseName: profile.baseName,
     suffix: profile.suffix,
     department: profile.department,
-    avatarUrl: profile.avatarUrl
+    avatarUrl: normalizeAvatarDataUrl(profile.avatarUrl)
   }
 }
 

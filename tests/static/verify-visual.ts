@@ -60,6 +60,31 @@ const UI_COMPONENTS = [
 const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
   { file: 'layout/TopBar.module.css', pattern: /height:\s*56px/, label: 'TopBar 56px' },
   {
+    file: 'layout/TopBar.module.css',
+    pattern: /\.barDivider\s*\{[^}]*height:\s*20px/s,
+    label: 'TopBar divider 20px centered'
+  },
+  {
+    file: 'ui/RegionButton.module.css',
+    pattern: /\.icon\s*\{[^}]*height:\s*32px/s,
+    label: 'RegionButton icon 32px'
+  },
+  {
+    file: 'ui/RegionButton.module.css',
+    pattern: /\.text\s*\{[^}]*height:\s*32px/s,
+    label: 'RegionButton text 32px'
+  },
+  {
+    file: 'ui/RegionButton.module.css',
+    pattern: /\.user\s*\{[^}]*height:\s*32px/s,
+    label: 'RegionButton user 32px'
+  },
+  {
+    file: 'layout/GlobalSearch.module.css',
+    pattern: /\.input\s*\{[^}]*height:\s*32px/s,
+    label: 'GlobalSearch input 32px'
+  },
+  {
     file: 'layout/BottomNav.module.css',
     pattern: /min-height:\s*49px/,
     label: 'BottomNav iOS tab bar min-height 49px'

@@ -13,6 +13,7 @@ import { groupViewPath } from '@renderer/routes/paths'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { presenceMessageKey } from '@renderer/i18n/presence'
+import UserAvatar from '@renderer/ui/UserAvatar'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -82,8 +83,14 @@ export default function MemberList({
                   onClick={() => onInsertMention(member.displayName)}
                   title={`@${displayLabel} · ${t(presenceMessageKey(presence))}`}
                 >
-                  <span className={styles.memberDot} aria-hidden>
-                    {presenceEmoji(presence)}
+                  <span className={styles.memberAvatarWrap} aria-hidden>
+                    <UserAvatar
+                      size={24}
+                      displayName={displayLabel}
+                      userId={member.userId}
+                      avatarUrl={member.avatarUrl}
+                    />
+                    <span className={styles.memberPresenceBadge}>{presenceEmoji(presence)}</span>
                   </span>
                   <span className={styles.memberName}>
                     {displayLabel}

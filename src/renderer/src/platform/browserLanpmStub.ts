@@ -271,6 +271,7 @@ function listStubMembers(groupId?: string): GroupMemberView[] {
     members.push({
       userId: status.user.userId,
       displayName: status.user.displayName,
+      avatarUrl: status.user.avatarUrl,
       mentionKeys: [status.user.baseName, status.user.userId]
     })
   }

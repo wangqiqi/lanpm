@@ -29,16 +29,28 @@ function withPresence(members: GroupMemberView[], localUserId?: string): GroupMe
   }))
 }
 
+/** 本地 users 表已知头像；peer 尚未同步时可为 undefined（UI 确定性兜底） */
+function avatarForUser(db: Database, userId: string): string | undefined {
+  return getUserById(db, userId)?.avatarUrl
+}
+
+function memberFromLocalUser(
+  user: NonNullable<ReturnType<typeof getSetupStatus>['user']>
+): GroupMemberView {
+  return {
+    userId: user.userId,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
+    mentionKeys: [user.baseName, user.userId]
+  }
+}
+
 async function collectPeerMembers(db: Database): Promise<Map<string, GroupMemberView>> {
   const status = getSetupStatus(db)
   const members = new Map<string, GroupMemberView>()
 
   if (status.configured && status.user) {
-    members.set(status.user.userId, {
-      userId: status.user.userId,
-      displayName: status.user.displayName,
-      mentionKeys: [status.user.baseName, status.user.userId]
-    })
+    members.set(status.user.userId, memberFromLocalUser(status.user))
   }
 
   const transport = getNetworkTransport()
@@ -50,6 +62,7 @@ async function collectPeerMembers(db: Database): Promise<Map<string, GroupMember
         members.set(peer.userId, {
           userId: peer.userId,
           displayName: peer.displayName,
+          avatarUrl: avatarForUser(db, peer.userId),
           mentionKeys: [peer.userId]
         })
       }
@@ -64,6 +77,7 @@ function anonymousMembers(db: Database, groupId: string): GroupMemberView[] {
   return records.map((m) => ({
     userId: m.userId,
     displayName: m.displayAlias ?? LANPM_GUEST_DISPLAY,
+    avatarUrl: avatarForUser(db, m.userId),
     mentionKeys: m.displayAlias ? [m.displayAlias] : []
   }))
 }
@@ -81,7 +95,12 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
     for (const userId of pair) {
       const found = members.get(userId)
       result.push(
-        found ?? { userId, displayName: userId, mentionKeys: [userId] }
+        found ?? {
+          userId,
+          displayName: userId,
+          avatarUrl: avatarForUser(db, userId),
+          mentionKeys: [userId]
+        }
       )
     }
     return withPresence(result, localUserId).sort((a, b) =>
