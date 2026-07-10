@@ -28,7 +28,7 @@
   height: 26px;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
   background: transparent;
   font-size: var(--lanpm-font-title);
   line-height: 1;
