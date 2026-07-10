@@ -27,6 +27,7 @@ import {
   LinkOutlined,
   MoreOutlined,
   PlusOutlined,
+  SettingOutlined,
   UploadOutlined
 } from '@ant-design/icons'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
@@ -101,6 +102,7 @@ function previewMetaKey(meta: FileMeta): string {
 
 export default function FilesView(): React.ReactElement {
   const { t, locale, formatError } = useI18n()
+  const [transferPanelExpanded, setTransferPanelExpanded] = useState(false)
   const { message } = useLanpmApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -489,6 +491,11 @@ export default function FilesView(): React.ReactElement {
     [transfers]
   )
 
+  const isExpanded = useMemo(
+    () => transferPanelExpanded || activeTransfers.length > 0,
+    [transferPanelExpanded, activeTransfers]
+  )
+
   const handleResume = (transferId: string): void => {
     void resumeTransfer(gid, transferId).catch((err: unknown) =>
       message.error(formatError(err, 'files.transferResumeFailed'))
@@ -808,96 +815,134 @@ export default function FilesView(): React.ReactElement {
         ) : null}
       </div>
 
-      <div className={styles.transferPanel}>
-        <div className={styles.rateLimitRow}>
-          <Text type="secondary">
-            {t('files.rateLimitKbps')} · {t('files.rateLimitHint')}
-          </Text>
-          <InputNumber
-            min={0}
-            step={128}
-            value={transferSettings?.rateKbps ?? 0}
-            onChange={(v) => {
-              if (v === null) return
-              void setTransferRate(v).catch(() => undefined)
-            }}
-            style={{ width: 120 }}
-            aria-label={t('files.rateLimitKbps')}
-          />
-        </div>
-        {activeTransfers.length > 0 && (
-          <List
-            size="small"
-            className={styles.transferList}
-            header={<Text type="secondary">{t('files.transferQueue')}</Text>}
-            dataSource={activeTransfers}
-            renderItem={(tr) => (
-              <List.Item>
-                <div className={styles.transferRow}>
-                  <span>{tr.fileName}</span>
-                  <Progress
-                    percent={Math.round((tr.transferredBytes / Math.max(1, tr.totalBytes)) * 100)}
-                    size="small"
-                    style={{ flex: 1, margin: '0 12px' }}
-                  />
-                  {tr.fromDeviceId === tr.toDeviceId ? (
-                    <Tag color="default">{t('files.transferLocalQueue')}</Tag>
-                  ) : null}
-                  <TagStatus
-                    status={tr.status}
-                    label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
-                  />
-                </div>
-              </List.Item>
+      {!isExpanded ? (
+        <div className={styles.transferPanelCompact} onClick={() => setTransferPanelExpanded(true)}>
+          <div className={styles.transferCompactContent}>
+            <SettingOutlined className={styles.transferCompactIcon} />
+            <span className={styles.transferCompactText}>
+              {t('files.transferHistory')} · {t('files.rateLimitKbps')}
+            </span>
+            {transferSettings?.rateKbps ? (
+              <Tag color="warning" bordered={false} className={styles.transferCompactTag}>
+                {t('files.rateLimitKbps')}: {transferSettings.rateKbps} KB/s
+              </Tag>
+            ) : (
+              <Tag color="default" bordered={false} className={styles.transferCompactTag}>
+                {t('files.rateLimitHint')}
+              </Tag>
             )}
-          />
-        )}
-        {transferHistory.length > 0 && (
-          <Collapse
-            className={styles.transferHistory}
-            items={[
-              {
-                key: 'history',
-                label: `${t('files.transferHistory')} (${transferHistory.length})`,
-                children: (
-                  <List
-                    size="small"
-                    dataSource={transferHistory}
-                    renderItem={(tr) => (
-                      <List.Item
-                        actions={
-                          tr.status === 'failed' || tr.status === 'paused'
-                            ? [
-                                <RegionButton
-                                  key="resume"
-                                  variant="caption"
-                                  onClick={() => handleResume(tr.transferId)}
-                                >
-                                  {t('files.transferResume')}
-                                </RegionButton>
-                              ]
-                            : undefined
-                        }
-                      >
-                        <div className={styles.transferRow}>
-                          <span>{tr.fileName}</span>
-                          <Text type="secondary" style={{ flex: 1, margin: '0 12px' }}>
-                            {formatSize(tr.transferredBytes)} / {formatSize(tr.totalBytes)}
-                          </Text>
-                          <TagStatus
-                            status={tr.status}
-                            label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
-                          />
-                        </div>
-                      </List.Item>
-                    )}
-                  />
-                )
-              }
-            ]}
-          />
-        )}
-      </div>
+          </div>
+          <RegionButton variant="caption" className={styles.transferCompactBtn}>
+            {t('files.transferExpand')}
+          </RegionButton>
+        </div>
+      ) : (
+        <div className={styles.transferPanel}>
+          <div className={styles.transferHeaderRow}>
+            <div className={styles.rateLimitRow}>
+              <Text type="secondary">
+                {t('files.rateLimitKbps')} · {t('files.rateLimitHint')}
+              </Text>
+              <InputNumber
+                min={0}
+                step={128}
+                value={transferSettings?.rateKbps ?? 0}
+                onChange={(v) => {
+                  if (v === null) return
+                  void setTransferRate(v).catch(() => undefined)
+                }}
+                style={{ width: 120 }}
+                size="small"
+                aria-label={t('files.rateLimitKbps')}
+              />
+            </div>
+            {activeTransfers.length === 0 && (
+              <RegionButton
+                variant="caption"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setTransferPanelExpanded(false)
+                }}
+                className={styles.transferCollapseBtn}
+              >
+                {t('files.transferCollapse')}
+              </RegionButton>
+            )}
+          </div>
+          {activeTransfers.length > 0 && (
+            <List
+              size="small"
+              className={styles.transferList}
+              header={<Text type="secondary">{t('files.transferQueue')}</Text>}
+              dataSource={activeTransfers}
+              renderItem={(tr) => (
+                <List.Item>
+                  <div className={styles.transferRow}>
+                    <span>{tr.fileName}</span>
+                    <Progress
+                      percent={Math.round((tr.transferredBytes / Math.max(1, tr.totalBytes)) * 100)}
+                      size="small"
+                      style={{ flex: 1, margin: '0 12px' }}
+                    />
+                    {tr.fromDeviceId === tr.toDeviceId ? (
+                      <Tag color="default">{t('files.transferLocalQueue')}</Tag>
+                    ) : null}
+                    <TagStatus
+                      status={tr.status}
+                      label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
+                    />
+                  </div>
+                </List.Item>
+              )}
+            />
+          )}
+          {transferHistory.length > 0 && (
+            <Collapse
+              className={styles.transferHistory}
+              items={[
+                {
+                  key: 'history',
+                  label: `${t('files.transferHistory')} (${transferHistory.length})`,
+                  children: (
+                    <List
+                      size="small"
+                      dataSource={transferHistory}
+                      renderItem={(tr) => (
+                        <List.Item
+                          actions={
+                            tr.status === 'failed' || tr.status === 'paused'
+                              ? [
+                                  <RegionButton
+                                    key="resume"
+                                    variant="caption"
+                                    onClick={() => handleResume(tr.transferId)}
+                                  >
+                                    {t('files.transferResume')}
+                                  </RegionButton>
+                                ]
+                              : undefined
+                          }
+                        >
+                          <div className={styles.transferRow}>
+                            <span>{tr.fileName}</span>
+                            <Text type="secondary" style={{ flex: 1, margin: '0 12px' }}>
+                              {formatSize(tr.transferredBytes)} / {formatSize(tr.totalBytes)}
+                            </Text>
+                            <TagStatus
+                              status={tr.status}
+                              label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
+                            />
+                          </div>
+                        </List.Item>
+                      )}
+                    />
+                  )
+                }
+              ]}
+            />
+          )}
+        </div>
+      )}
 
       <div className={isNarrow ? `${styles.body} ${styles.bodyNarrow}` : styles.body}>
         <div className={styles.listPane}>

@@ -19,6 +19,55 @@
   background: var(--lanpm-surface-solid);
 }
 
+.transferPanelCompact {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 0.5px solid var(--lanpm-separator);
+  border-radius: 10px;
+  background: var(--lanpm-fill-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.transferPanelCompact:hover {
+  background: var(--lanpm-fill-secondary-hover);
+  border-color: color-mix(in srgb, var(--lanpm-accent) 25%, var(--lanpm-separator));
+}
+
+.transferCompactContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transferCompactIcon {
+  font-size: 14px;
+  color: var(--lanpm-text-secondary);
+}
+
+.transferCompactText {
+  font-size: var(--lanpm-font-body-secondary);
+  color: var(--lanpm-text-secondary);
+  font-weight: 500;
+}
+
+.transferCompactTag {
+  margin-left: 4px;
+}
+
+.transferHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
 .rateLimitRow {
   display: flex;
   flex-wrap: wrap;

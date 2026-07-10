@@ -350,6 +350,8 @@ const zhCN = {
   'files.transferFailed': '失败',
   'files.transferPaused': '已暂停',
   'files.transferHistory': '传输历史',
+  'files.transferExpand': '展开设置',
+  'files.transferCollapse': '收起面板',
   'files.transferResume': '续传',
   'files.transferResumeFailed': '续传失败',
   'files.rateLimitKbps': '限速 (KB/s)',

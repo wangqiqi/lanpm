@@ -352,6 +352,8 @@ const enUS = {
   'files.transferFailed': 'Failed',
   'files.transferPaused': 'Paused',
   'files.transferHistory': 'Transfer history',
+  'files.transferExpand': 'Expand Settings',
+  'files.transferCollapse': 'Collapse Panel',
   'files.transferResume': 'Resume',
   'files.transferResumeFailed': 'Resume failed',
   'files.rateLimitKbps': 'Rate limit (KB/s)',
