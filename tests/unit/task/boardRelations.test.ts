@@ -4,6 +4,7 @@ import {
   collectRelatedTaskIds,
   getDependencyBlockersForStatus,
   getRootTaskId,
+  listAllDependencyEdges,
   listFocusDependencyEdges
 } from '@shared/task/boardRelations'
 import type { Task } from '@shared/task/types'
@@ -107,5 +108,33 @@ describe('boardRelations', () => {
     const edges = listFocusDependencyEdges('b', mixed, { types: ['FS'] })
     expect(edges).toHaveLength(1)
     expect(edges[0]!.type).toBe('FS')
+  })
+
+  it('lists all FS edges across the board', () => {
+    const all = listAllDependencyEdges(tasks, { types: ['FS'] })
+    expect(all).toEqual([
+      {
+        fromTaskId: 'root',
+        toTaskId: 'blocked',
+        type: 'FS',
+        direction: 'outgoing'
+      }
+    ])
+    expect(listAllDependencyEdges([], { types: ['FS'] })).toEqual([])
+  })
+
+  it('dedupes duplicate FS declarations on listAllDependencyEdges', () => {
+    const dup: Task[] = [
+      task({ taskId: 'a', title: 'A' }),
+      task({
+        taskId: 'b',
+        title: 'B',
+        dependencies: [
+          { fromTaskId: 'a', toTaskId: 'b', type: 'FS' },
+          { fromTaskId: 'a', toTaskId: 'b', type: 'FS' }
+        ]
+      })
+    ]
+    expect(listAllDependencyEdges(dup, { types: ['FS'] })).toHaveLength(1)
   })
 })

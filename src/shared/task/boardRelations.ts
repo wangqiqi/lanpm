@@ -83,6 +83,39 @@ export function listFocusDependencyEdges(
   return edges
 }
 
+/**
+ * 看板「显示全部连线」模式：板上所有 FS（等）依赖边，去重后每条 from→to 一条。
+ */
+export function listAllDependencyEdges(
+  tasks: Task[],
+  options?: { types?: readonly TaskDependencyType[] }
+): BoardDependencyEdge[] {
+  const byId = new Map(tasks.map((t) => [t.taskId, t]))
+  const allow = new Set(options?.types ?? DEFAULT_EDGE_TYPES)
+  const edges: BoardDependencyEdge[] = []
+  const seen = new Set<string>()
+
+  for (const task of tasks) {
+    for (const dep of task.dependencies ?? []) {
+      if (!allow.has(dep.type)) continue
+      const fromTaskId = dep.fromTaskId
+      const toTaskId = dep.toTaskId || task.taskId
+      if (!byId.has(fromTaskId) || !byId.has(toTaskId)) continue
+      const key = `${fromTaskId}>${toTaskId}:${dep.type}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      edges.push({
+        fromTaskId,
+        toTaskId,
+        type: dep.type,
+        direction: 'outgoing'
+      })
+    }
+  }
+
+  return edges
+}
+
 function stableFamilyIndex(rootTaskId: string): number {
   let h = 0
   for (let i = 0; i < rootTaskId.length; i++) {
