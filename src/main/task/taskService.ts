@@ -34,9 +34,15 @@ import {
   upsertDependency
 } from '../storage/repositories/taskDependencyRepository'
 import { publishChatMessage, sendTaskRefMessage } from '../chat/chatService'
+import { broadcastMessage } from '../chat/chatBroadcast'
+import { replaceAnonymousMessage } from '../chat/anonymousChatStore'
+import { toRecalledMessage } from '../../shared/chat/recall'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
+import { shouldCompensateCreateTaskFromChat } from '../../shared/task/createFromChatCompensation'
 import { publishTaskDelete, publishTaskDepDelete, publishTaskDepUpsert, publishTaskUpsert } from './taskSyncService'
 import { broadcastToAllWindows } from '../utils/broadcast'
+import { updateMessage } from '../storage/repositories/messageRepository'
+import { isAnonymousGroupType } from '../../shared/group/guards'
 
 function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throwLanpm('stub.dmNoTask')
@@ -161,13 +167,51 @@ export async function createTaskFromChat(
   title: string
 ): Promise<{ task: Task; message: ChatMessage }> {
   const task = createGroupTask(db, { groupId, title, status: 'todo' })
-  const message = await publishChatMessage(db, groupId, 'task_ref', {
-    kind: 'task_ref',
-    taskId: task.taskId,
-    title: task.title
-  })
+  let message: ChatMessage | undefined
+  try {
+    message = await publishChatMessage(db, groupId, 'task_ref', {
+      kind: 'task_ref',
+      taskId: task.taskId,
+      title: task.title
+    })
+  } catch (err) {
+    compensateCreateTaskFromChat(db, task, undefined)
+    throw err
+  }
+  if (
+    shouldCompensateCreateTaskFromChat({
+      kind: 'message',
+      deliveryStatus: message.deliveryStatus
+    })
+  ) {
+    compensateCreateTaskFromChat(db, task, message)
+    throwLanpm('err.chatTaskCreateFailed')
+  }
   return { task, message }
 }
+
+function compensateCreateTaskFromChat(
+  db: Database,
+  task: Task,
+  message: ChatMessage | undefined
+): void {
+  const now = new Date().toISOString()
+  softDeleteTask(db, task.taskId)
+  publishTaskDelete(db, { ...task, deletedAt: now, updatedAt: now })
+  broadcastTasksChanged(task.groupId)
+
+  if (!message) return
+  const status = getSetupStatus(db)
+  const recalledBy = status.user?.userId ?? message.senderUserId
+  const recalled = toRecalledMessage(message, recalledBy, now)
+  if (isAnonymousGroupType(resolveGroupType(db, task.groupId))) {
+    replaceAnonymousMessage(task.groupId, recalled)
+  } else {
+    updateMessage(db, recalled)
+  }
+  broadcastMessage(recalled)
+}
+
 
 export async function referenceTaskFromChat(
   db: Database,

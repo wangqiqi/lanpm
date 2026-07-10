@@ -479,6 +479,7 @@ const enUS = {
   'stub.recallNotAllowed': 'You can only recall your own messages',
   'err.chatRetryNotOwner': 'You can only retry your own messages',
   'err.chatRetryInvalidStatus': 'Only failed or sending messages can be retried',
+  'err.chatTaskCreateFailed': 'Could not create task from chat; local task was rolled back',
   'err.anonymousTextOnly': 'Anonymous groups only support text messages',
   'err.networkNotReady': 'Network is not ready',
   'err.anonymousNoFile': 'Anonymous groups do not support file messages',

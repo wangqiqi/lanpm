@@ -474,6 +474,7 @@ export type MessageKey =
   | 'stub.recallNotAllowed'
   | 'err.chatRetryNotOwner'
   | 'err.chatRetryInvalidStatus'
+  | 'err.chatTaskCreateFailed'
   | 'err.anonymousTextOnly'
   | 'err.networkNotReady'
   | 'err.anonymousNoFile'

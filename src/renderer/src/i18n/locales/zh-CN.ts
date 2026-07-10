@@ -476,6 +476,7 @@ const zhCN = {
   'stub.recallNotAllowed': '只能撤回自己发送的消息',
   'err.chatRetryNotOwner': '只能重试自己发送的消息',
   'err.chatRetryInvalidStatus': '仅失败或发送中的消息可重试',
+  'err.chatTaskCreateFailed': '聊天建任务失败，已撤销本地任务',
   'err.anonymousTextOnly': '匿名群仅支持文本消息',
   'err.networkNotReady': '网络未就绪',
   'err.anonymousNoFile': '匿名群不支持发送文件',
