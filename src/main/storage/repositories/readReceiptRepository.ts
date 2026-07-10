@@ -43,3 +43,48 @@ export function hasUserReadMessage(db: Database, msgId: string, readerUserId: st
     .get(msgId, readerUserId)
   return row !== undefined
 }
+
+/**
+ * Offline pull: receipts with read_at > sinceReadAt and >= minReadAt.
+ * Ordered ASC for pagination cursor (sinceReadAt = last page max).
+ */
+export function listReadReceiptsSince(
+  db: Database,
+  groupId: string,
+  sinceReadAt: string,
+  minReadAt: string,
+  limit = 100
+): ReadReceipt[] {
+  const rows = db
+    .prepare(
+      `SELECT msg_id, group_id, reader_user_id, reader_device_id, read_at
+       FROM read_receipts
+       WHERE group_id = ?
+         AND read_at > ?
+         AND read_at >= ?
+       ORDER BY read_at ASC, msg_id ASC, reader_user_id ASC
+       LIMIT ?`
+    )
+    .all(groupId, sinceReadAt, minReadAt, limit) as {
+    msg_id: string
+    group_id: string
+    reader_user_id: string
+    reader_device_id: string
+    read_at: string
+  }[]
+
+  return rows.map((r) => ({
+    msgId: r.msg_id,
+    groupId: r.group_id,
+    readerUserId: r.reader_user_id,
+    readerDeviceId: r.reader_device_id,
+    readAt: r.read_at
+  }))
+}
+
+export function getMaxReadAtInGroup(db: Database, groupId: string): string {
+  const row = db
+    .prepare(`SELECT MAX(read_at) AS max_at FROM read_receipts WHERE group_id = ?`)
+    .get(groupId) as { max_at: string | null } | undefined
+  return row?.max_at ?? ''
+}

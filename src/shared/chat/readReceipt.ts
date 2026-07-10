@@ -24,6 +24,9 @@ export interface ReadReceiptSyncBatchPayload {
   hasMore?: boolean
 }
 
+/** Align with chat/task offline batch size */
+export const READ_RECEIPT_OFFLINE_SYNC_BATCH_LIMIT = 100
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
