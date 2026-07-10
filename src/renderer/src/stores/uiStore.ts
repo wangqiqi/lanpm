@@ -10,17 +10,24 @@ function readInitialTheme(): ThemeMode {
   return prefersDark ? 'dark' : 'light'
 }
 
+function readBoardShowAllFsLines(): boolean {
+  return localStorage.getItem('board.showAllFsLines') === 'true'
+}
+
 interface UiState {
   theme: ThemeMode
   locale: 'zh-CN' | 'en-US'
+  boardShowAllFsLines: boolean
   setTheme: (theme: ThemeMode) => void
   toggleTheme: () => void
   setLocale: (locale: 'zh-CN' | 'en-US') => void
+  setBoardShowAllFsLines: (on: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
   theme: readInitialTheme(),
   locale: (localStorage.getItem('locale') as 'zh-CN' | 'en-US') || 'zh-CN',
+  boardShowAllFsLines: readBoardShowAllFsLines(),
   setTheme: (theme) => {
     localStorage.setItem('theme', theme)
     set({ theme })
@@ -32,6 +39,10 @@ export const useUiStore = create<UiState>((set, get) => ({
   setLocale: (locale) => {
     localStorage.setItem('locale', locale)
     set({ locale })
+  },
+  setBoardShowAllFsLines: (on) => {
+    localStorage.setItem('board.showAllFsLines', on ? 'true' : 'false')
+    set({ boardShowAllFsLines: on })
   }
 }))
 

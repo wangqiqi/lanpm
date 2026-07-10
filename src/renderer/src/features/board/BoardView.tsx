@@ -10,7 +10,7 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { Button, Form, Input, Modal, Select } from 'antd'
+import { Button, Form, Input, Modal, Select, Switch } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -32,6 +32,7 @@ import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { useUiStore } from '@renderer/stores/uiStore'
 import {
   confirmDeleteParentTask,
   countTaskDescendants
@@ -211,6 +212,8 @@ export default function BoardView(): React.ReactElement {
   const [relationFocusId, setRelationFocusId] = useState<string | null>(null)
   const [relationHoverId, setRelationHoverId] = useState<string | null>(null)
   const boardBodyRef = useRef<HTMLDivElement>(null)
+  const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
+  const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -511,6 +514,15 @@ export default function BoardView(): React.ReactElement {
           showBoardToolbar ? (
             <ViewToolbarGroup>
               <BoardRelationLegend />
+              <label className={styles.fsLinesToggle}>
+                <span>{t('board.showAllFsLines')}</span>
+                <Switch
+                  size="small"
+                  checked={boardShowAllFsLines}
+                  onChange={setBoardShowAllFsLines}
+                  aria-label={t('board.showAllFsLines')}
+                />
+              </label>
             </ViewToolbarGroup>
           ) : undefined
         }
@@ -560,6 +572,7 @@ export default function BoardView(): React.ReactElement {
             <BoardDependencyLines
               containerRef={boardBodyRef}
               focusTaskId={activeRelationId}
+              showAllFsLines={boardShowAllFsLines}
               tasks={tasks}
             />
           </div>
