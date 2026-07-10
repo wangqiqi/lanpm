@@ -9,6 +9,8 @@ export type SyncMessageType =
   | 'read_receipt'
   | 'task_patch'
   | 'task_dep_patch'
+  | 'task_sync_request'
+  | 'task_sync_batch'
   | 'task_crdt'
   | 'file_meta'
   | 'file_pull_request'

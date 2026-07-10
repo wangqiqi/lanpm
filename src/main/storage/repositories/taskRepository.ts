@@ -57,6 +57,38 @@ export function listTasksByGroup(db: Database, groupId: string): Task[] {
   return rows.map(rowToTask)
 }
 
+/** Max updated_at in group (including soft-deleted); empty when none. */
+export function getMaxTaskUpdatedAt(db: Database, groupId: string): string {
+  const row = db
+    .prepare(`SELECT MAX(updated_at) AS max_ts FROM tasks WHERE group_id = ?`)
+    .get(groupId) as { max_ts: string | null } | undefined
+  return row?.max_ts ?? ''
+}
+
+/**
+ * Offline pull: tasks with updated_at > sinceUpdatedAt and >= minUpdatedAt
+ * (includes soft-deleted). Ordered ASC for pagination cursor.
+ */
+export function listTasksSince(
+  db: Database,
+  groupId: string,
+  sinceUpdatedAt: string,
+  minUpdatedAt: string,
+  limit = 100
+): Task[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM tasks
+       WHERE group_id = ?
+         AND updated_at > ?
+         AND updated_at >= ?
+       ORDER BY updated_at ASC, task_id ASC
+       LIMIT ?`
+    )
+    .all(groupId, sinceUpdatedAt, minUpdatedAt, limit) as TaskRow[]
+  return rows.map(rowToTask)
+}
+
 export function getTaskById(db: Database, taskId: string): Task | null {
   const row = db
     .prepare(`SELECT * FROM tasks WHERE task_id = ? AND deleted_at IS NULL`)

@@ -15,6 +15,11 @@ import {
   applyRemoteTaskDelete,
   upsertTaskFromRemote
 } from '../storage/repositories/taskRepository'
+import {
+  handleTaskSyncBatch,
+  handleTaskSyncRequest,
+  requestTaskOfflineSync
+} from './taskOfflineSyncService'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -68,6 +73,14 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'task_dep_patch') {
     handleTaskDepPatch(db, envelope)
+    return
+  }
+  if (envelope.type === 'task_sync_request') {
+    void handleTaskSyncRequest(db, envelope).catch(() => undefined)
+    return
+  }
+  if (envelope.type === 'task_sync_batch') {
+    handleTaskSyncBatch(db, envelope, broadcastTasksChanged)
   }
 }
 
@@ -133,6 +146,7 @@ async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Prom
 
 export function initTaskSyncService(db: Database): void {
   refreshSubscriptions(db)
+  void requestTaskOfflineSync(db).catch(() => undefined)
 }
 
 export function shutdownTaskSyncService(): void {
@@ -185,3 +199,5 @@ export {
   handleTaskPatch as handleTaskPatchForTest,
   handleTaskDepPatch as handleTaskDepPatchForTest
 }
+
+export { requestTaskOfflineSync, handleTaskSyncRequest, handleTaskSyncBatch }

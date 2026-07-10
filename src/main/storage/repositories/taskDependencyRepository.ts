@@ -30,6 +30,52 @@ export function listDependenciesByGroup(db: Database, groupId: string): TaskDepe
   }))
 }
 
+/** Max dependency updated_at in group (including soft-deleted); empty when none. */
+export function getMaxDepUpdatedAt(db: Database, groupId: string): string {
+  const row = db
+    .prepare(
+      `SELECT MAX(d.updated_at) AS max_ts
+       FROM task_dependencies d
+       INNER JOIN tasks tf ON tf.task_id = d.from_task_id AND tf.group_id = ?`
+    )
+    .get(groupId) as { max_ts: string | null } | undefined
+  return row?.max_ts ?? ''
+}
+
+/**
+ * Offline pull: dependency edges (incl. soft-delete) updated after sinceUpdatedAt.
+ */
+export function listDependenciesSince(
+  db: Database,
+  groupId: string,
+  sinceUpdatedAt: string,
+  minUpdatedAt: string,
+  limit = 100
+): TaskDepPatchPayload[] {
+  const rows = db
+    .prepare(
+      `SELECT d.from_task_id, d.to_task_id, d.dep_type, d.updated_at, d.deleted_at
+       FROM task_dependencies d
+       INNER JOIN tasks tf ON tf.task_id = d.from_task_id AND tf.group_id = ?
+       WHERE d.updated_at > ?
+         AND d.updated_at >= ?
+       ORDER BY d.updated_at ASC, d.from_task_id ASC, d.to_task_id ASC
+       LIMIT ?`
+    )
+    .all(groupId, sinceUpdatedAt, minUpdatedAt, limit) as DepRow[]
+
+  return rows.map((r) => ({
+    action: r.deleted_at ? ('delete' as const) : ('upsert' as const),
+    groupId,
+    dependency: {
+      fromTaskId: r.from_task_id,
+      toTaskId: r.to_task_id,
+      type: r.dep_type as TaskDependencyType
+    },
+    updatedAt: r.updated_at
+  }))
+}
+
 function getDepRow(
   db: Database,
   fromTaskId: string,
