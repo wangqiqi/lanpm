@@ -40,6 +40,10 @@
   --lanpm-line-body: 1.4;
   --lanpm-line-title: 1.35;
   --lanpm-line-display: 1.2;
+  /* Motion & transition easing */
+  --lanpm-motion-fast: 150ms;
+  --lanpm-motion-normal: 220ms;
+  --lanpm-ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* Apple HIG 风格令牌 — 亮色 */
@@ -51,20 +55,20 @@
   --lanpm-text: #1d1d1f;
   --lanpm-text-secondary: #86868b;
   --lanpm-text-tertiary: #aeaeb2;
-  --lanpm-accent: #0071e3;
-  --lanpm-accent-hover: #0077ed;
-  --lanpm-separator: rgba(60, 60, 67, 0.18);
+  --lanpm-accent: #0066cc; /* Sophisticated Premium Slate Blue */
+  --lanpm-accent-hover: #0077e6;
+  --lanpm-separator: rgba(60, 60, 67, 0.1); /* Lighter border line */
   --lanpm-nav-bg: rgba(255, 255, 255, 0.72);
-  --lanpm-bar-border: rgba(60, 60, 67, 0.18);
-  --lanpm-hover-bg: rgba(60, 60, 67, 0.06);
-  --lanpm-fill-secondary: rgba(120, 120, 128, 0.12);
-  --lanpm-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  --lanpm-bar-border: rgba(60, 60, 67, 0.12); /* Lighter border line */
+  --lanpm-hover-bg: rgba(60, 60, 67, 0.04); /* Premium hover background */
+  --lanpm-fill-secondary: rgba(120, 120, 128, 0.08); /* More subtle secondary fill */
+  --lanpm-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); /* Softer premium shadow */
   --lanpm-blur: saturate(180%) blur(20px);
-  --lanpm-border: rgba(60, 60, 67, 0.18);
-  --lanpm-bubble-bg: rgba(60, 60, 67, 0.06);
-  --lanpm-code-bg: rgba(0, 0, 0, 0.04);
-  --lanpm-accent-fill: rgba(0, 113, 227, 0.08);
-  --lanpm-accent-fill-strong: rgba(0, 113, 227, 0.12);
+  --lanpm-border: rgba(60, 60, 67, 0.1);
+  --lanpm-bubble-bg: rgba(60, 60, 67, 0.05);
+  --lanpm-code-bg: rgba(0, 0, 0, 0.03);
+  --lanpm-accent-fill: rgba(0, 102, 204, 0.06); /* Sophisticated subtle accent fill */
+  --lanpm-accent-fill-strong: rgba(0, 102, 204, 0.1);
   --lanpm-accent-ring: rgba(0, 113, 227, 0.2);
   --lanpm-success: #34c759;
   --lanpm-success-ring: rgba(52, 199, 89, 0.25);
@@ -95,18 +99,18 @@
   --lanpm-text-tertiary: #636366;
   --lanpm-accent: #0a84ff;
   --lanpm-accent-hover: #409cff;
-  --lanpm-separator: rgba(84, 84, 88, 0.65);
+  --lanpm-separator: rgba(84, 84, 88, 0.28); /* More premium, less stark lines */
   --lanpm-nav-bg: rgba(28, 28, 30, 0.72);
-  --lanpm-bar-border: rgba(84, 84, 88, 0.36);
-  --lanpm-hover-bg: rgba(255, 255, 255, 0.08);
-  --lanpm-fill-secondary: rgba(120, 120, 128, 0.24);
-  --lanpm-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+  --lanpm-bar-border: rgba(84, 84, 88, 0.2); /* Lighter borders */
+  --lanpm-hover-bg: rgba(255, 255, 255, 0.05); /* Softer hover indicator */
+  --lanpm-fill-secondary: rgba(120, 120, 128, 0.16); /* Softer secondary fill */
+  --lanpm-shadow: 0 4px 32px rgba(0, 0, 0, 0.35); /* Softer overlay dark shadow */
   --lanpm-blur: saturate(180%) blur(20px);
-  --lanpm-border: rgba(84, 84, 88, 0.36);
-  --lanpm-bubble-bg: rgba(255, 255, 255, 0.08);
-  --lanpm-code-bg: rgba(255, 255, 255, 0.06);
-  --lanpm-accent-fill: rgba(10, 132, 255, 0.12);
-  --lanpm-accent-fill-strong: rgba(10, 132, 255, 0.18);
+  --lanpm-border: rgba(84, 84, 88, 0.2);
+  --lanpm-bubble-bg: rgba(255, 255, 255, 0.06);
+  --lanpm-code-bg: rgba(255, 255, 255, 0.04);
+  --lanpm-accent-fill: rgba(10, 132, 255, 0.08);
+  --lanpm-accent-fill-strong: rgba(10, 132, 255, 0.14);
   --lanpm-accent-ring: rgba(10, 132, 255, 0.35);
   --lanpm-success: #30d158;
   --lanpm-success-ring: rgba(48, 209, 88, 0.3);

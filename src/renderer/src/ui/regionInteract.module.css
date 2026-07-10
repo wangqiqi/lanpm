@@ -8,8 +8,8 @@
   color: inherit;
   border-radius: 8px;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
 .region:hover:not(:disabled):not(.regionDisabled) {
