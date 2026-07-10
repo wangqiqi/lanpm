@@ -20,9 +20,12 @@ import {
 } from '../group/groupService'
 import { getAiConfig, saveAiConfig } from '../ai/aiConfigService'
 import { getDatabase } from '../storage'
+import { listLastMessageAtByGroup } from '../storage/repositories/messageRepository'
 
 export function registerGroupIpc(): void {
   ipcMain.handle(GROUP_IPC.list, () => listUserGroups(getDatabase()))
+
+  ipcMain.handle(GROUP_IPC.listLastActivity, () => listLastMessageAtByGroup(getDatabase()))
 
   ipcMain.handle(GROUP_IPC.get, (_event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')

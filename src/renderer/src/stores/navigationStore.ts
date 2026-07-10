@@ -16,7 +16,8 @@ function toNavGroup(record: GroupRecord): NavGroup {
     groupId: record.groupId,
     name: record.name,
     type: record.type,
-    createdBy: record.createdBy
+    createdBy: record.createdBy,
+    createdAt: record.createdAt
   }
 }
 

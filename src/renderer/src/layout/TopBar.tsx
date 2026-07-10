@@ -17,6 +17,8 @@ import {
   MoreOutlined,
   MoonOutlined,
   PlusOutlined,
+  PushpinFilled,
+  PushpinOutlined,
   SearchOutlined,
   SunOutlined,
   UserOutlined
@@ -41,8 +43,10 @@ import { useNetworkStore } from '@renderer/stores/networkStore'
 import GlobalSearch from '@renderer/layout/GlobalSearch'
 import ManualPeerModal from '@renderer/features/network/ManualPeerModal'
 import RegionButton from '@renderer/ui/RegionButton'
+import { useGroupPinStore } from '@renderer/stores/groupPinStore'
 import { LANPM_APP_VERSION } from '@shared/appVersion'
 import { matchesGroupSearch } from '@shared/group/matchGroupSearch'
+import { sortGroupsForSwitcher } from '@shared/group/sortGroups'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
 
@@ -86,11 +90,27 @@ export default function TopBar(): React.ReactElement {
   const networkLoading = useNetworkStore((s) => s.loading)
   const [manualPeerOpen, setManualPeerOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [lastActivity, setLastActivity] = useState<Record<string, string>>({})
+  const pinnedIds = useGroupPinStore((s) => s.pinnedIds)
+  const togglePin = useGroupPinStore((s) => s.togglePin)
+  const isPinned = useGroupPinStore((s) => s.isPinned)
+
+  const refreshGroupActivity = (): void => {
+    void getLanpmApi()
+      .group.listLastActivity()
+      .then(setLastActivity)
+      .catch(() => setLastActivity({}))
+  }
+
   useEffect(() => {
     void refreshNetwork()
     const timer = setInterval(() => void refreshNetwork({ silent: true }), 8000)
     return () => clearInterval(timer)
   }, [refreshNetwork])
+
+  useEffect(() => {
+    refreshGroupActivity()
+  }, [activeGroupId, groups])
 
   const networkTooltip = networkStatus
     ? t(
@@ -192,17 +212,29 @@ export default function TopBar(): React.ReactElement {
   }
 
   const groupSelectOptions = useMemo(() => {
-    const opts = groups.map((g) => {
+    const sorted = sortGroupsForSwitcher(
+      groups.map((g) => ({
+        groupId: g.groupId,
+        createdAt: g.createdAt,
+        lastMessageAt: lastActivity[g.groupId],
+        pinned: pinnedIds.includes(g.groupId),
+        group: g
+      }))
+    )
+    const opts = sorted.map(({ group: g, pinned }) => {
       const name = resolveGroupDisplayName(g, t)
       return {
         value: g.groupId,
         searchText: name,
+        pinned,
         label: (
-          <span>
-            {name}{' '}
-            <Text type="secondary" className={styles.groupType}>
-              {t(GROUP_TYPE_KEYS[g.type])}
-            </Text>
+          <span className={styles.groupOptionLabel}>
+            <span className={styles.groupOptionText}>
+              {name}{' '}
+              <Text type="secondary" className={styles.groupType}>
+                {t(GROUP_TYPE_KEYS[g.type])}
+              </Text>
+            </span>
           </span>
         )
       }
@@ -217,11 +249,21 @@ export default function TopBar(): React.ReactElement {
       opts.unshift({
         value: activeGroupId,
         searchText: label,
-        label: <span>{label}</span>
+        pinned: pinnedIds.includes(activeGroupId),
+        label: <span className={styles.groupOptionLabel}>{label}</span>
       })
     }
     return opts
-  }, [groups, activeGroupId, localUserId, getDmSession, getPeerDisplayName, t])
+  }, [
+    groups,
+    lastActivity,
+    pinnedIds,
+    activeGroupId,
+    localUserId,
+    getDmSession,
+    getPeerDisplayName,
+    t
+  ])
 
   const barOverflowItems: MenuProps['items'] = useMemo(() => {
     const items: MenuProps['items'] = []
@@ -368,6 +410,37 @@ export default function TopBar(): React.ReactElement {
               matchesGroupSearch(String(option?.searchText ?? ''), input)
             }
             notFoundContent={t('topbar.groupSearchEmpty')}
+            onDropdownVisibleChange={(open) => {
+              if (open) refreshGroupActivity()
+            }}
+            optionRender={(option) => {
+              const groupId = String(option.value ?? '')
+              const pinned = isPinned(groupId)
+              return (
+                <div className={styles.groupOptionRow}>
+                  <span className={styles.groupOptionText}>{option.data.label}</span>
+                  <button
+                    type="button"
+                    className={styles.groupPinBtn}
+                    aria-label={
+                      pinned ? t('topbar.unpinGroup') : t('topbar.pinGroup')
+                    }
+                    aria-pressed={pinned}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      togglePin(groupId)
+                    }}
+                  >
+                    {pinned ? <PushpinFilled /> : <PushpinOutlined />}
+                  </button>
+                </div>
+              )
+            }}
           />
         </div>
         <span className={styles.barDivider} aria-hidden />

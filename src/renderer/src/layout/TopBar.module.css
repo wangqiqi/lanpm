@@ -184,6 +184,47 @@
   letter-spacing: 0;
 }
 
+.groupOptionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.groupOptionLabel,
+.groupOptionText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupPinBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--lanpm-radius-sm);
+  background: transparent;
+  color: var(--lanpm-text-tertiary);
+  cursor: pointer;
+}
+
+.groupPinBtn:hover {
+  color: var(--lanpm-accent);
+  background: var(--lanpm-hover-bg);
+}
+
+.groupPinBtn[aria-pressed='true'] {
+  color: var(--lanpm-accent);
+}
+
 .search {
   width: 220px;
 }

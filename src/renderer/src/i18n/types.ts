@@ -24,6 +24,8 @@ export type MessageKey =
   | 'topbar.searchPlaceholder'
   | 'topbar.groupSearchPlaceholder'
   | 'topbar.groupSearchEmpty'
+  | 'topbar.pinGroup'
+  | 'topbar.unpinGroup'
   | 'topbar.moreActions'
   | 'topbar.networkOnline'
   | 'topbar.networkOffline'

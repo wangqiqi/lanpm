@@ -779,7 +779,7 @@ export function createBrowserLanpmStub(): LanpmApi {
             name: stubT('demo.groupProject'),
             type: 'project' as const,
             createdBy: ownerId,
-            createdAt: '',
+            createdAt: '2026-01-01T00:00:00.000Z',
             autoDiscover: true
           },
           {
@@ -787,7 +787,7 @@ export function createBrowserLanpmStub(): LanpmApi {
             name: stubT('demo.groupFunction'),
             type: 'function' as const,
             createdBy: ownerId,
-            createdAt: '',
+            createdAt: '2026-01-02T00:00:00.000Z',
             autoDiscover: true
           },
           {
@@ -795,10 +795,29 @@ export function createBrowserLanpmStub(): LanpmApi {
             name: stubT('demo.groupAnonymous'),
             type: 'anonymous' as const,
             createdBy: ownerId,
-            createdAt: '',
+            createdAt: '2026-01-03T00:00:00.000Z',
             autoDiscover: true
           }
         ].filter((g) => !stubDissolvedGroups.has(g.groupId))
+      },
+      listLastActivity: async () => {
+        const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+        if (!raw) return {}
+        try {
+          const all = JSON.parse(raw) as Record<string, { createdAt?: string }[]>
+          const out: Record<string, string> = {}
+          for (const [groupId, msgs] of Object.entries(all)) {
+            if (!Array.isArray(msgs) || msgs.length === 0) continue
+            let max = ''
+            for (const m of msgs) {
+              if (typeof m?.createdAt === 'string' && m.createdAt > max) max = m.createdAt
+            }
+            if (max) out[groupId] = max
+          }
+          return out
+        } catch {
+          return {}
+        }
       },
       create: async (input) => ({
         groupId: `stub_${Date.now()}`,

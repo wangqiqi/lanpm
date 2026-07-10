@@ -8,4 +8,6 @@ export interface NavGroup {
   name: string
   type: GroupType
   createdBy: string
+  /** ISO；排序回退用 */
+  createdAt?: string
 }

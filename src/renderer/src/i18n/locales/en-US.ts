@@ -24,6 +24,8 @@ const enUS = {
   'topbar.searchPlaceholder': 'Search tasks, messages, members…',
   'topbar.groupSearchPlaceholder': 'Search groups (name / pinyin)',
   'topbar.groupSearchEmpty': 'No matching groups',
+  'topbar.pinGroup': 'Pin group',
+  'topbar.unpinGroup': 'Unpin group',
   'topbar.moreActions': 'More actions',
   'topbar.networkOnline': 'Connected · {count} peer(s)',
   'topbar.networkOffline': 'Offline · click to reconnect',

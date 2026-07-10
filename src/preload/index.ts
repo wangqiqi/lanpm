@@ -97,6 +97,7 @@ const api: LanpmApi = {
   },
   group: {
     list: () => ipcRenderer.invoke('group:list'),
+    listLastActivity: () => ipcRenderer.invoke('group:listLastActivity'),
     create: (input) => ipcRenderer.invoke('group:create', input),
     join: (groupId) => ipcRenderer.invoke('group:join', groupId),
     enterAnonymous: (groupId) => ipcRenderer.invoke('group:enterAnonymous', groupId),

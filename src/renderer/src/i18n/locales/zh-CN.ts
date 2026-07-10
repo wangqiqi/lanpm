@@ -24,6 +24,8 @@ const zhCN = {
   'topbar.searchPlaceholder': '搜索任务、消息、成员…',
   'topbar.groupSearchPlaceholder': '搜索群组（汉字/拼音）',
   'topbar.groupSearchEmpty': '无匹配群组',
+  'topbar.pinGroup': '置顶群组',
+  'topbar.unpinGroup': '取消置顶',
   'topbar.moreActions': '更多操作',
   'topbar.networkOnline': '已连接 · {count} 个节点',
   'topbar.networkOffline': '未连接 · 点击重连',

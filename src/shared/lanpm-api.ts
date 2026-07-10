@@ -127,6 +127,8 @@ export interface LanpmApi {
   }
   group: {
     list: () => Promise<GroupRecord[]>
+    /** groupId → 最后一条消息 ISO 时间 */
+    listLastActivity: () => Promise<Record<string, string>>
     create: (input: CreateGroupInput) => Promise<GroupRecord>
     join: (groupId: string) => Promise<GroupRecord>
     enterAnonymous: (groupId: string) => Promise<void>

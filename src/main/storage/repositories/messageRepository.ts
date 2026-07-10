@@ -103,6 +103,22 @@ export function getMaxLamportTs(db: Database, groupId: string): number {
   return row?.max_ts ?? 0
 }
 
+/** 各群最后一条消息时间（ISO）；单次聚合，供顶栏排序 */
+export function listLastMessageAtByGroup(db: Database): Record<string, string> {
+  const rows = db
+    .prepare(
+      `SELECT group_id AS groupId, MAX(created_at) AS lastAt
+       FROM messages
+       GROUP BY group_id`
+    )
+    .all() as { groupId: string; lastAt: string }[]
+  const out: Record<string, string> = {}
+  for (const row of rows) {
+    if (row.groupId && row.lastAt) out[row.groupId] = row.lastAt
+  }
+  return out
+}
+
 export function listMessagesByGroup(
   db: Database,
   groupId: string,

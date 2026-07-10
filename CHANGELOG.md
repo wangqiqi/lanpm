@@ -6,6 +6,7 @@
 
 ### Added
 - **顶栏群切换搜索**：Select 支持关键字 / 拼音过滤（`matchesGroupSearch`）。
+- **群置顶与活跃排序 (TASK-139)**：本机置顶（localStorage）；下拉按置顶优先、其余按最后消息时间降序；`group:listLastActivity` 聚合查询。
 
 ## [1.0.5] - 2026-07-11
 
