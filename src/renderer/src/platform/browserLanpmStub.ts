@@ -496,6 +496,32 @@ export function createBrowserLanpmStub(): LanpmApi {
         for (const fn of chatListeners) fn(msg)
         return msg
       },
+      sendTaskRef: async (groupId, taskId) => {
+        const all = readAllTasks()
+        const list = all[groupId] ?? []
+        const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
+        if (!task) throw stubError('stub.taskNotFound')
+        const status = readStatus()
+        if (!status.configured || !status.user || !status.device) {
+          throw stubError('stub.identityRequired')
+        }
+        const prev = readChatMessages(groupId)
+        const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+        const msg = {
+          msgId: `msg_${crypto.randomUUID()}`,
+          groupId,
+          senderUserId: status.user.userId,
+          senderDeviceId: status.device.deviceId,
+          type: 'task_ref' as const,
+          content: { kind: 'task_ref' as const, taskId: task.taskId, title: task.title },
+          lamportTs,
+          createdAt: new Date().toISOString(),
+          deliveryStatus: 'sent' as const
+        }
+        writeChatMessages(groupId, [...prev, msg])
+        for (const fn of chatListeners) fn(msg)
+        return msg
+      },
       sendCode: async (groupId, code, languageHint, theme) => {
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
@@ -601,6 +627,32 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       createFromChat: async (groupId, title) => {
         const task = stubCreateTask({ groupId, title, status: 'todo' })
+        const status = readStatus()
+        if (!status.configured || !status.user || !status.device) {
+          throw stubError('stub.identityRequired')
+        }
+        const prev = readChatMessages(groupId)
+        const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+        const msg = {
+          msgId: `msg_${crypto.randomUUID()}`,
+          groupId,
+          senderUserId: status.user.userId,
+          senderDeviceId: status.device.deviceId,
+          type: 'task_ref' as const,
+          content: { kind: 'task_ref' as const, taskId: task.taskId, title: task.title },
+          lamportTs,
+          createdAt: new Date().toISOString(),
+          deliveryStatus: 'sent' as const
+        }
+        writeChatMessages(groupId, [...prev, msg])
+        for (const fn of chatListeners) fn(msg)
+        return { task, message: msg }
+      },
+      referenceFromChat: async (groupId, taskId) => {
+        const all = readAllTasks()
+        const list = all[groupId] ?? []
+        const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
+        if (!task) throw stubError('stub.taskNotFound')
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
           throw stubError('stub.identityRequired')

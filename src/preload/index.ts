@@ -39,6 +39,7 @@ const api: LanpmApi = {
     captureAndSendScreenshot: (groupId) =>
       ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
     recallMessage: (groupId, msgId) => ipcRenderer.invoke('chat:recallMessage', groupId, msgId),
+    sendTaskRef: (groupId, taskId) => ipcRenderer.invoke('chat:sendTaskRef', groupId, taskId),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)
@@ -54,6 +55,8 @@ const api: LanpmApi = {
     moveTask: (input) => ipcRenderer.invoke('task:moveTask', input),
     createFromChat: (groupId, title) =>
       ipcRenderer.invoke('task:createFromChat', groupId, title),
+    referenceFromChat: (groupId, taskId) =>
+      ipcRenderer.invoke('task:referenceFromChat', groupId, taskId),
     updateSchedule: (input) => ipcRenderer.invoke('task:updateSchedule', input),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>

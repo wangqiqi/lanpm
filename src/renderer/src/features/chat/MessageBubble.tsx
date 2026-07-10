@@ -4,6 +4,7 @@ import { UserOutlined, FileOutlined, ProjectOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
+import type { Task } from '@shared/task/types'
 import { canRecallMessage } from '@shared/chat/recall'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -12,6 +13,7 @@ import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import MentionText from '@renderer/features/chat/MentionText'
+import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import styles from './chat.module.css'
 
 function formatFileSize(bytes: number): string {
@@ -30,6 +32,7 @@ interface MessageBubbleProps {
   message: ChatMessage
   own: boolean
   members: GroupMemberView[]
+  tasks?: Task[]
   deliveryLabel: string
   deliveryAriaLabel: string
   formatTime: (iso: string) => string
@@ -46,6 +49,7 @@ export default function MessageBubble({
   message,
   own,
   members,
+  tasks = [],
   deliveryLabel,
   deliveryAriaLabel,
   formatTime,
@@ -62,6 +66,7 @@ export default function MessageBubble({
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
+  const locateTask = useLocateTask(groupId ?? '')
   const isRecalled = message.content.kind === 'recalled'
   const isCode = message.content.kind === 'code'
   const isSystem =
@@ -133,7 +138,13 @@ export default function MessageBubble({
     <>
       {message.content.kind === 'text' && (
         <div>
-          <MentionText text={message.content.text} members={members} own={own} />
+          <MentionText
+            text={message.content.text}
+            members={members}
+            tasks={tasks}
+            own={own}
+            onTaskRefClick={groupId ? (taskId) => locateTask(taskId, 'board') : undefined}
+          />
         </div>
       )}
 
@@ -173,7 +184,11 @@ export default function MessageBubble({
         <button
           type="button"
           className={styles.bubbleAttachCard}
-          onClick={() => navigate(groupViewPath(groupId, 'board'))}
+          aria-label={t('chat.viewTask')}
+          onClick={() => {
+            if (message.content.kind !== 'task_ref') return
+            locateTask(message.content.taskId, 'board')
+          }}
         >
           <div className={styles.attachIcon}>
             <ProjectOutlined />

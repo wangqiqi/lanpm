@@ -34,6 +34,35 @@
   gap: 0;
 }
 
+.chatWorkspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.chatWorkspaceDesktop {
+  border: 1px solid var(--lanpm-border);
+  border-radius: var(--lanpm-radius-lg);
+  overflow: hidden;
+  background: var(--lanpm-surface-solid);
+  box-shadow: var(--lanpm-shadow-surface);
+}
+
+.chatWorkspaceDesktop .sidebar {
+  border-right: 1px solid var(--lanpm-border);
+}
+
+.chatWorkspaceDesktop .sidebarCollapsed {
+  border-right-width: 0;
+}
+
+.chatWorkspaceDesktop .root {
+  background: transparent;
+  box-shadow: none;
+}
+
 .sidebar {
   position: relative;
   flex-shrink: 0;
@@ -41,7 +70,6 @@
   flex-direction: column;
   width: 240px;
   min-width: 160px;
-  border-right: 1px solid var(--lanpm-border);
   background: var(--lanpm-surface-solid);
   min-height: 0;
 }
@@ -85,12 +113,7 @@
 }
 
 .sidebarExpandBtn {
-  flex-shrink: 0;
-  align-self: flex-start;
-  margin: 8px 0 0 4px;
-  background: var(--lanpm-surface-solid);
-  border: 1px solid var(--lanpm-border);
-  color: var(--lanpm-text);
+  display: none;
 }
 
 .sidebarResizeHandle {
@@ -200,12 +223,47 @@
 
 .chatModeBar {
   flex-shrink: 0;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px 16px 8px;
-  border-bottom: 1px solid var(--lanpm-border);
+  border-bottom: 0.5px solid var(--lanpm-separator);
   background: var(--lanpm-surface-solid);
+}
+
+.chatModeBarExpandBtn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--lanpm-border);
+  border-radius: var(--lanpm-radius-md);
+  background: var(--lanpm-surface-solid);
+  color: var(--lanpm-text);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.chatModeBarExpandBtn:hover {
+  background: var(--lanpm-hover-bg);
+  color: var(--lanpm-text);
+}
+
+.chatStreamColumn {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 /* 仅包裹两个选项的胶囊宽度；勿 width:100%（会在右侧留出大块空白轨道） */
@@ -558,8 +616,49 @@
 .mentionOwn {
   color: var(--lanpm-on-accent);
   font-weight: 600;
+  background: var(--lanpm-accent);
+  border-radius: var(--lanpm-radius-sm);
+  padding: 0 4px;
+}
+
+.taskRef {
+  color: #007a3d;
+  font-weight: 600;
+  background: var(--lanpm-success-ring);
+  border-radius: var(--lanpm-radius-sm);
+  padding: 0 4px;
+}
+
+.taskRefLink {
+  border: none;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.taskRefLink:hover {
+  filter: brightness(0.95);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.taskRefLink:active {
+  transform: scale(0.98);
+}
+
+:global(html[data-theme='dark']) .taskRef {
+  color: var(--lanpm-success);
+}
+
+.taskRefOwn {
+  color: var(--lanpm-on-accent);
+  font-weight: 600;
+  background: var(--lanpm-success);
+  border-radius: var(--lanpm-radius-sm);
+  padding: 0 4px;
 }
 
 .inputWrap {
@@ -590,13 +689,13 @@
   right: 0;
   bottom: 100%;
   margin-bottom: 4px;
-  max-height: 160px;
+  max-height: min(240px, 40vh);
   overflow-y: auto;
   background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-border);
   border-radius: var(--lanpm-radius-md);
   box-shadow: var(--lanpm-shadow-md);
-  z-index: 10;
+  z-index: 30;
 }
 
 .mentionOption {
@@ -945,7 +1044,9 @@
   width: 100%;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  position: relative;
+  z-index: 6;
+  overflow: visible;
   background: var(--lanpm-surface-solid);
   border-top: 0.5px solid var(--lanpm-separator);
 }
@@ -996,8 +1097,63 @@
 .toolbarActions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
+}
+
+.toolbarGroupDivider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: var(--lanpm-separator);
+}
+
+.toolbarRefGroup,
+.toolbarAttachGroup {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border-radius: calc(var(--lanpm-radius-md) - 1px);
+}
+
+.toolbarRefGroup {
+  background: var(--lanpm-accent-fill);
+  border: 0.5px solid color-mix(in srgb, var(--lanpm-accent) 14%, transparent);
+}
+
+.toolbarAttachGroup {
+  background: var(--lanpm-fill-secondary);
+  border: 0.5px solid var(--lanpm-border);
+}
+
+.toolbarGlyphBtn {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.toolbarGlyphMention {
+  color: var(--lanpm-accent) !important;
+}
+
+.toolbarGlyphMention:hover:not(:disabled) {
+  color: var(--lanpm-accent-hover) !important;
+  background: var(--lanpm-accent-fill-strong) !important;
+}
+
+.toolbarGlyphTask {
+  color: #007a3d !important;
+}
+
+:global(html[data-theme='dark']) .toolbarGlyphTask {
+  color: var(--lanpm-success) !important;
+}
+
+.toolbarGlyphTask:hover:not(:disabled) {
+  background: var(--lanpm-success-ring) !important;
 }
 
 .inputModeToggle {
@@ -1018,6 +1174,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: visible;
 }
 
 .inputMain :global(.ant-input-textarea) {

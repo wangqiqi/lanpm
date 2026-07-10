@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **聊天引用任务 (#)**：输入 `#` 弹出任务建议；`chat:sendTaskRef` / `task:referenceFromChat`；气泡可点击跳转看板。
 - **任务离线补拉 (TASK-134)**：`task_sync_request` / `task_sync_batch`；按 `updatedAt` 合并分页拉取任务与依赖（含软删）；`verify:task-offline-sync`。
 - **同步文档对齐 (TASK-135)**：`docs/03` 补 `task_sync_*` / `chat_sync_*` payload 与 §12 补拉/历史分页；`docs/06` §2.3 更新任务/聊天同步现状。
 - **SPRINT-SYNC-CONSISTENCY 收尾 (TASK-136)**：全量 verify 绿；README 同步能力一句化；归档 `20260711_002128_sync_consistency_summary.md`。

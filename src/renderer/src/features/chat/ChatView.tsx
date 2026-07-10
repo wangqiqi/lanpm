@@ -22,6 +22,7 @@ import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
+import type { Task } from '@shared/task/types'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -29,11 +30,14 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { deliveryStatusMeta, groupMessagesByDay } from '@renderer/features/chat/chatDateGroups'
 import { useMentionSuggest } from '@renderer/features/chat/mentionKeyboard'
+import { activeComposerSuggest, resolveStandaloneTaskRefForSend } from '@shared/chat/taskRefs'
+import { useTaskSuggest } from '@renderer/features/chat/taskKeyboard'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import CodeSendModal from '@renderer/features/chat/CodeSendModal'
 import DmSessionBar from '@renderer/features/chat/DmSessionBar'
 import MemberList from '@renderer/features/chat/MemberList'
 import MentionSuggest from '@renderer/features/chat/MentionSuggest'
+import TaskSuggest, { taskStatusMessageKey } from '@renderer/features/chat/TaskSuggest'
 import MessageBubble from '@renderer/features/chat/MessageBubble'
 import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
@@ -100,10 +104,15 @@ export default function ChatView(): React.ReactElement {
   const upsertMessage = useChatStore((s) => s.upsertMessage)
   const recallMessage = useChatStore((s) => s.recallMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
+  const sendTaskRef = useChatStore((s) => s.sendTaskRef)
+  const loadTasks = useTaskStore((s) => s.loadTasks)
+  const tasks = useTaskStore((s) => s.tasksByGroup[projectGroupId] ?? [])
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const listRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
+  const draftInputRef = useRef<HTMLTextAreaElement>(null)
+  const pickedTaskRefIdRef = useRef<string | null>(null)
   const [draft, setDraft] = useState('')
   const members = useChatMembersStore((s) => s.membersByGroup[gid] ?? [])
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
@@ -196,9 +205,42 @@ export default function ChatView(): React.ReactElement {
     setDraft((prev) => `${prev}${emoji}`)
   }, [])
 
+  const appendComposerTrigger = useCallback((trigger: '@' | '#') => {
+    setDraft((prev) => {
+      const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
+      return `${prev}${sep}${trigger}`
+    })
+    requestAnimationFrame(() => {
+      const el = draftInputRef.current
+      if (!el) return
+      el.focus()
+      const len = el.value.length
+      el.setSelectionRange(len, len)
+    })
+  }, [])
+
   const dismissMention = useCallback(() => {
     setDraft((prev) => prev.replace(/(?:^|\s)@([^\s@]*)$/, '').trimEnd())
   }, [])
+
+  const insertTaskRef = useCallback((task: Task) => {
+    pickedTaskRefIdRef.current = task.taskId
+    setDraft((prev) => {
+      const replaced = prev.replace(/(?:^|\s)#([^#\n]*)$/, ` #${task.title} `)
+      if (replaced !== prev) return replaced.trimStart()
+      const sep = prev.length > 0 && !prev.endsWith(' ') ? ' ' : ''
+      return `${prev}${sep}#${task.title} `
+    })
+  }, [])
+
+  const dismissTaskRef = useCallback(() => {
+    setDraft((prev) => prev.replace(/(?:^|\s)#([^#\n]*)$/, '').trimEnd())
+  }, [])
+
+  const suggestMode = useMemo(
+    () => activeComposerSuggest(draft, taskAllowed),
+    [draft, taskAllowed]
+  )
 
   const { candidates, activeIndex, handleKeyDown: handleMentionKeyDown } = useMentionSuggest(
     draft,
@@ -206,6 +248,21 @@ export default function ChatView(): React.ReactElement {
     insertMention,
     dismissMention
   )
+
+  const {
+    candidates: taskCandidates,
+    activeIndex: taskActiveIndex,
+    handleKeyDown: handleTaskKeyDown
+  } = useTaskSuggest(draft, tasks, taskAllowed, insertTaskRef, dismissTaskRef)
+
+  useEffect(() => {
+    if (!projectGroupId || !taskAllowed) return
+    void loadTasks(projectGroupId)
+    const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
+      if (changedGroupId === projectGroupId) void loadTasks(projectGroupId)
+    })
+    return unsub
+  }, [projectGroupId, taskAllowed, loadTasks])
 
   useMarkRead(gid, messages, currentUserId)
 
@@ -377,6 +434,22 @@ export default function ChatView(): React.ReactElement {
       return
     }
 
+    const taskRef = taskAllowed
+      ? resolveStandaloneTaskRefForSend(text, tasks, pickedTaskRefIdRef.current)
+      : null
+    if (taskRef) {
+      setDraft('')
+      pickedTaskRefIdRef.current = null
+      try {
+        await sendTaskRef(gid, taskRef.taskId)
+      } catch (err) {
+        message.error(formatError(err, 'chat.taskRefFailed'))
+        setDraft(text)
+      }
+      return
+    }
+
+    pickedTaskRefIdRef.current = null
     const savedDraft = draft
     try {
       await sendText(gid, text)
@@ -385,7 +458,7 @@ export default function ChatView(): React.ReactElement {
       message.error(formatError(err, 'chat.sendFailed'))
       setDraft(savedDraft)
     }
-  }, [draft, gid, sendText, createFromChat, upsertMessage, taskAllowed, t])
+  }, [draft, gid, sendText, sendTaskRef, createFromChat, upsertMessage, taskAllowed, tasks, t, message, formatError])
 
   const handleCreateTask = useCallback(
     async (title: string) => {
@@ -406,7 +479,8 @@ export default function ChatView(): React.ReactElement {
   )
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
-    if (handleMentionKeyDown(e)) return
+    if (suggestMode === 'task' && handleTaskKeyDown(e)) return
+    if (suggestMode === 'mention' && handleMentionKeyDown(e)) return
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       void handleSend()
@@ -444,16 +518,7 @@ export default function ChatView(): React.ReactElement {
       >
         <MenuOutlined />
       </button>
-      {!isNarrow && !sidebarOpen && (
-        <button
-          type="button"
-          className={styles.sidebarExpandBtn}
-          aria-label={t('chat.openSidebar')}
-          onClick={() => setSidebarOpen(true)}
-        >
-          <MenuUnfoldOutlined />
-        </button>
-      )}
+      <div className={`${styles.chatWorkspace} ${!isNarrow ? styles.chatWorkspaceDesktop : ''}`}>
       <div
         className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''} ${!isNarrow && !sidebarOpen ? styles.sidebarCollapsed : ''}`}
         style={!isNarrow && sidebarOpen ? { width: sidebarWidth } : undefined}
@@ -519,6 +584,16 @@ export default function ChatView(): React.ReactElement {
           <div className={styles.fileDropOverlay}>{t('chat.fileDropHint')}</div>
         )}
         <div className={styles.chatModeBar}>
+          {!isNarrow && !sidebarOpen && (
+            <button
+              type="button"
+              className={styles.chatModeBarExpandBtn}
+              aria-label={t('chat.openSidebar')}
+              onClick={() => setSidebarOpen(true)}
+            >
+              <MenuUnfoldOutlined />
+            </button>
+          )}
           <Segmented
             className={styles.chatChannelToggle}
             size="small"
@@ -561,6 +636,7 @@ export default function ChatView(): React.ReactElement {
             )}
           </div>
         )}
+        <div className={styles.chatStreamColumn}>
         <div className={styles.messagesWrap}>
         <div className={styles.messages} ref={listRef} onScroll={handleMessagesScroll}>
           {loading && messages.length === 0 ? (
@@ -597,6 +673,7 @@ export default function ChatView(): React.ReactElement {
                         message={msg}
                         own={msg.senderUserId === currentUserId}
                         members={members}
+                        tasks={taskAllowed ? tasks : []}
                         deliveryLabel={delivery.text}
                         deliveryAriaLabel={delivery.ariaLabel}
                         formatTime={formatTime}
@@ -638,45 +715,65 @@ export default function ChatView(): React.ReactElement {
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>
                 <EmojiPicker onPick={insertEmoji} />
-                {taskAllowed && (
+                <div className={styles.toolbarGroupDivider} aria-hidden />
+                <div className={styles.toolbarRefGroup}>
                   <ComposerIconButton
-                    icon={<PlusSquareOutlined />}
-                    label={t('chat.taskBtn')}
-                    onClick={() => setTaskModalOpen(true)}
+                    icon={<span aria-hidden>@</span>}
+                    label={t('chat.mentionBtn')}
+                    className={`${styles.toolbarGlyphBtn} ${styles.toolbarGlyphMention}`}
+                    onClick={() => appendComposerTrigger('@')}
                   />
-                )}
-                {codeAllowed && (
-                  <ComposerIconButton
-                    icon={<CodeOutlined />}
-                    label={t('chat.codeBtn')}
-                    onClick={() => setCodeModalOpen(true)}
-                  />
-                )}
-                {fileAllowed && (
-                  <ComposerIconButton
-                    icon={<PaperClipOutlined />}
-                    label={t('chat.fileBtn')}
-                    onClick={() =>
-                      void pickAndSendFile(gid).catch((err: unknown) =>
-                        message.error(
-                          formatError(err, 'chat.fileSendFailed')
-                        )
-                      )
-                    }
-                  />
-                )}
-                {fileAllowed && (
-                  <ComposerIconButton
-                    icon={<CameraOutlined />}
-                    label={t('chat.screenshotBtn')}
-                    onClick={() =>
-                      void captureAndSendScreenshot(gid).catch((err: unknown) =>
-                        message.error(
-                          formatError(err, 'chat.screenshotFailed')
-                        )
-                      )
-                    }
-                  />
+                  {taskAllowed && (
+                    <>
+                      <ComposerIconButton
+                        icon={<span aria-hidden>#</span>}
+                        label={t('chat.taskRefBtn')}
+                        className={`${styles.toolbarGlyphBtn} ${styles.toolbarGlyphTask}`}
+                        onClick={() => appendComposerTrigger('#')}
+                      />
+                      <ComposerIconButton
+                        icon={<PlusSquareOutlined />}
+                        label={t('chat.taskBtn')}
+                        onClick={() => setTaskModalOpen(true)}
+                      />
+                    </>
+                  )}
+                </div>
+                {(codeAllowed || fileAllowed) && (
+                  <>
+                    <div className={styles.toolbarGroupDivider} aria-hidden />
+                    <div className={styles.toolbarAttachGroup}>
+                      {codeAllowed && (
+                        <ComposerIconButton
+                          icon={<CodeOutlined />}
+                          label={t('chat.codeBtn')}
+                          onClick={() => setCodeModalOpen(true)}
+                        />
+                      )}
+                      {fileAllowed && (
+                        <ComposerIconButton
+                          icon={<PaperClipOutlined />}
+                          label={t('chat.fileBtn')}
+                          onClick={() =>
+                            void pickAndSendFile(gid).catch((err: unknown) =>
+                              message.error(formatError(err, 'chat.fileSendFailed'))
+                            )
+                          }
+                        />
+                      )}
+                      {fileAllowed && (
+                        <ComposerIconButton
+                          icon={<CameraOutlined />}
+                          label={t('chat.screenshotBtn')}
+                          onClick={() =>
+                            void captureAndSendScreenshot(gid).catch((err: unknown) =>
+                              message.error(formatError(err, 'chat.screenshotFailed'))
+                            )
+                          }
+                        />
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
               <Segmented
@@ -702,12 +799,23 @@ export default function ChatView(): React.ReactElement {
               <div className={styles.inputMain}>
                 {inputMode === 'text' ? (
                   <div className={styles.inputWrap}>
-                    <MentionSuggest
-                      candidates={candidates}
-                      activeIndex={activeIndex}
-                      onPick={insertMention}
-                    />
+                    {suggestMode === 'mention' && (
+                      <MentionSuggest
+                        candidates={candidates}
+                        activeIndex={activeIndex}
+                        onPick={insertMention}
+                      />
+                    )}
+                    {suggestMode === 'task' && (
+                      <TaskSuggest
+                        candidates={taskCandidates}
+                        activeIndex={taskActiveIndex}
+                        onPick={insertTaskRef}
+                        statusLabel={(status) => t(taskStatusMessageKey(status))}
+                      />
+                    )}
                     <TextArea
+                      ref={draftInputRef}
                       className={styles.inputTextarea}
                       placeholder={
                         taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')
@@ -738,6 +846,7 @@ export default function ChatView(): React.ReactElement {
               />
             </div>
           </div>
+        </div>
         </div>
           </>
         )}
@@ -772,6 +881,7 @@ export default function ChatView(): React.ReactElement {
           onMention={insertMention}
           onStartDm={startDmWithMember}
         />
+      </div>
       </div>
     </div>
   )

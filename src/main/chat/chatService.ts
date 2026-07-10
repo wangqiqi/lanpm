@@ -5,7 +5,7 @@ import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat
 import type { ChatMessagePage } from '../../shared/chat/pagination'
 import { CHAT_HISTORY_PAGE_SIZE } from '../../shared/chat/pagination'
 import { throwLanpm } from '../../shared/errors/lanpmError'
-import { assertGroupAllowsTasks, isMemoryOnlyChatGroup } from '../../shared/group/guards'
+import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
 import { parseMentions } from '../../shared/chat/mentions'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
@@ -26,6 +26,7 @@ import {
 import { uploadFileFromPath } from '../file/fileService'
 import { getFileById } from '../storage/repositories/fileRepository'
 import { getTaskById } from '../storage/repositories/taskRepository'
+import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { showOpenDialog } from '../systemDialog'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
@@ -316,7 +317,6 @@ export async function sendCodeMessage(
   })
 }
 
-/** Send a task_ref chat message for an existing task (used by referenceTaskFromChat). */
 export async function sendTaskRefMessage(
   db: Database,
   groupId: string,

@@ -15,6 +15,7 @@ interface TaskState {
   moveTask: (input: MoveTaskInput) => Promise<Task>
   deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>
   createFromChat: (groupId: string, title: string) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
+  referenceFromChat: (groupId: string, taskId: string) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
   setTasks: (groupId: string, tasks: Task[]) => void
 }
 
@@ -100,6 +101,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createFromChat: async (groupId, title) => {
     const result = await getLanpmApi().task.createFromChat(groupId, title)
+    await get().loadTasks(groupId)
+    return result
+  },
+
+  referenceFromChat: async (groupId, taskId) => {
+    const result = await getLanpmApi().task.referenceFromChat(groupId, taskId)
     await get().loadTasks(groupId)
     return result
   }

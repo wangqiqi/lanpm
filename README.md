@@ -90,7 +90,7 @@
 ### 💬 Communication that teams actually use
 
 - Group & DM, **@mentions**, read receipts, desktop notifications  
-- **Syntax-highlighted code** blocks, attachments, **`/task`** to create work from chat  
+- **Syntax-highlighted code** blocks, attachments, **`/task`** to create work from chat, **`#`** to reference tasks  
 - **7-day offline catch-up** for chat messages (paginated batches) and **tasks/dependencies**  
 - Chat history **load-more** beyond the initial 200 messages  
 - LAN **Discover** panel: join groups, ping online members, start DMs  

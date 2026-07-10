@@ -12,5 +12,6 @@ export const CHAT_IPC = {
   sendExistingFile: 'chat:sendExistingFile',
   pickAndSendFile: 'chat:pickAndSendFile',
   captureAndSendScreenshot: 'chat:captureAndSendScreenshot',
-  recallMessage: 'chat:recallMessage'
+  recallMessage: 'chat:recallMessage',
+  sendTaskRef: 'chat:sendTaskRef'
 } as const

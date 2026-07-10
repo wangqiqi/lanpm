@@ -18,6 +18,7 @@ interface ChatState {
   sendExistingFile: (groupId: string, fileId: string) => Promise<void>
   captureAndSendScreenshot: (groupId: string) => Promise<void>
   recallMessage: (groupId: string, msgId: string) => Promise<void>
+  sendTaskRef: (groupId: string, taskId: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
   /** DATA-CHATSTORE-EVICT — 本机清理后丢弃内存缓存 */
   evictGroup: (groupId: string) => void
@@ -116,6 +117,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
   recallMessage: async (groupId, msgId) => {
     const message = await getLanpmApi().chat.recallMessage(groupId, msgId)
+    get().upsertMessage(message)
+  },
+  sendTaskRef: async (groupId, taskId) => {
+    const message = await getLanpmApi().chat.sendTaskRef(groupId, taskId)
     get().upsertMessage(message)
   },
   evictGroup: (groupId) => {

@@ -61,6 +61,7 @@ export interface LanpmApi {
     /** 区域截图 + 标注，确认后作为图片文件发送到群聊（仅 Electron） */
     captureAndSendScreenshot: (groupId: string) => Promise<ChatMessage | null>
     recallMessage: (groupId: string, msgId: string) => Promise<ChatMessage>
+    sendTaskRef: (groupId: string, taskId: string) => Promise<ChatMessage>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
   task: {
@@ -71,6 +72,10 @@ export interface LanpmApi {
     createFromChat: (
       groupId: string,
       title: string
+    ) => Promise<{ task: Task; message: ChatMessage }>
+    referenceFromChat: (
+      groupId: string,
+      taskId: string
     ) => Promise<{ task: Task; message: ChatMessage }>
     updateSchedule: (input: GanttScheduleInput) => Promise<Task>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>

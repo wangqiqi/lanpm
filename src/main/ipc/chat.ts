@@ -8,7 +8,8 @@ import {
   recallMessage,
   sendExistingFileMessage,
   sendFileMessage,
-  sendTextMessage
+  sendTextMessage,
+  sendTaskRefMessage
 } from '../chat/chatService'
 import { captureAndSendScreenshot } from '../screenshot/screenshotService'
 import { markMessagesRead } from '../chat/readReceiptService'
@@ -41,6 +42,12 @@ export function registerChatIpc(): void {
       throw new Error('groupId required')
     }
     return sendTextMessage(getDatabase(), groupId, text)
+  })
+
+  ipcMain.handle(CHAT_IPC.sendTaskRef, (_event, groupId: string, taskId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
+    return sendTaskRefMessage(getDatabase(), groupId, taskId)
   })
 
   ipcMain.handle(CHAT_IPC.listMembers, (_event, groupId: string) => {
