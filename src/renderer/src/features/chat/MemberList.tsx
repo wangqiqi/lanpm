@@ -107,11 +107,6 @@ export default function MemberList({
           )
         }}
       />
-      {members.length > 0 && (
-        <Text className={styles.memberStats}>
-          {t('chat.onlineStats', { online: onlineCount, total: members.length })}
-        </Text>
-      )}
     </aside>
   )
 }

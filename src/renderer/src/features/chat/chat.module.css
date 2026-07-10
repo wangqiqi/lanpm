@@ -694,7 +694,9 @@
 
 .chatContextMeta {
   font-size: var(--lanpm-font-caption);
+  font-weight: 400;
   color: var(--lanpm-text-secondary);
+  opacity: 0.82;
 }
 
 .systemMessageRow {
