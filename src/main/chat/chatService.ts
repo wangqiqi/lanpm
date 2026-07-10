@@ -8,6 +8,7 @@ import { throwLanpm } from '../../shared/errors/lanpmError'
 import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
 import { parseMentions } from '../../shared/chat/mentions'
+import { runWithPublishRetries } from '../../shared/chat/publishRetry'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
@@ -35,10 +36,12 @@ import { broadcastMessage } from './chatBroadcast'
 import { getNetworkTransport } from '../network'
 import {
   appendAnonymousMessage,
-  listAnonymousMessages
+  listAnonymousMessages,
+  replaceAnonymousMessage
 } from './anonymousChatStore'
 import {
   getMaxLamportTs,
+  getMessageById,
   insertMessage,
   listMessagesBeforePage,
   listRecentMessagesPage,
@@ -216,23 +219,76 @@ export async function publishChatMessage(
   }
 
   if (isAnonymousGroup(db, groupId)) {
-    const sent: ChatMessage = { ...msg, deliveryStatus: 'sent' }
-    appendAnonymousMessage(groupId, sent)
-    broadcastMessage(sent)
+    const sending: ChatMessage = { ...msg, deliveryStatus: 'sending' }
+    appendAnonymousMessage(groupId, sending)
+    broadcastMessage(sending)
 
-    await transport.publish(buildEnvelope(sent))
-    return sent
+    try {
+      await runWithPublishRetries(() => transport.publish(buildEnvelope(sending)))
+      const sent: ChatMessage = { ...sending, deliveryStatus: 'sent' }
+      replaceAnonymousMessage(groupId, sent)
+      broadcastMessage(sent)
+      return sent
+    } catch {
+      const failed: ChatMessage = { ...sending, deliveryStatus: 'failed' }
+      replaceAnonymousMessage(groupId, failed)
+      broadcastMessage(failed)
+      return failed
+    }
   }
 
   insertMessage(db, msg)
   broadcastMessage(msg)
 
-  await transport.publish(buildEnvelope(msg))
+  try {
+    await runWithPublishRetries(() => transport.publish(buildEnvelope(msg)))
+    updateDeliveryStatus(db, msg.msgId, 'sent')
+    const sent: ChatMessage = { ...msg, deliveryStatus: 'sent' }
+    broadcastMessage(sent)
+    return sent
+  } catch {
+    updateDeliveryStatus(db, msg.msgId, 'failed')
+    const failed: ChatMessage = { ...msg, deliveryStatus: 'failed' }
+    broadcastMessage(failed)
+    return failed
+  }
+}
 
-  updateDeliveryStatus(db, msg.msgId, 'sent')
-  const sent: ChatMessage = { ...msg, deliveryStatus: 'sent' }
-  broadcastMessage(sent)
-  return sent
+/** 手动重试：仅本机发送失败的消息 */
+export async function retryFailedMessage(db: Database, msgId: string): Promise<ChatMessage> {
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user || !status.device) {
+    throwLanpm('stub.identityRequired')
+  }
+
+  const existing = getMessageById(db, msgId)
+  if (!existing) throwLanpm('stub.messageNotFound')
+  if (existing.senderUserId !== status.user.userId) throwLanpm('err.chatRetryNotOwner')
+  if (existing.deliveryStatus !== 'failed' && existing.deliveryStatus !== 'sending') {
+    throwLanpm('err.chatRetryInvalidStatus')
+  }
+
+  const transport = getNetworkTransport()
+  if (!transport) throwLanpm('err.networkNotReady')
+
+  ensureSubscribed(db, transport, existing.groupId)
+
+  updateDeliveryStatus(db, msgId, 'sending')
+  const sending: ChatMessage = { ...existing, deliveryStatus: 'sending' }
+  broadcastMessage(sending)
+
+  try {
+    await runWithPublishRetries(() => transport.publish(buildEnvelope(sending)))
+    updateDeliveryStatus(db, msgId, 'sent')
+    const sent: ChatMessage = { ...sending, deliveryStatus: 'sent' }
+    broadcastMessage(sent)
+    return sent
+  } catch {
+    updateDeliveryStatus(db, msgId, 'failed')
+    const failed: ChatMessage = { ...sending, deliveryStatus: 'failed' }
+    broadcastMessage(failed)
+    return failed
+  }
 }
 
 export async function sendTextMessage(

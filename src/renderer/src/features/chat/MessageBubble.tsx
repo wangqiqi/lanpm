@@ -35,6 +35,7 @@ interface MessageBubbleProps {
   tasks?: Task[]
   deliveryLabel: string
   deliveryAriaLabel: string
+  deliveryFailed?: boolean
   formatTime: (iso: string) => string
   highlighted?: boolean
   showSender?: boolean
@@ -43,6 +44,7 @@ interface MessageBubbleProps {
   onViewSender?: (member: GroupMemberView) => void
   onDmSender?: (member: GroupMemberView) => void
   onRecall?: (msgId: string) => void
+  onRetrySend?: (msgId: string) => void
 }
 
 export default function MessageBubble({
@@ -52,6 +54,7 @@ export default function MessageBubble({
   tasks = [],
   deliveryLabel,
   deliveryAriaLabel,
+  deliveryFailed = false,
   formatTime,
   highlighted = false,
   showSender = true,
@@ -59,7 +62,8 @@ export default function MessageBubble({
   onMentionSender,
   onViewSender,
   onDmSender,
-  onRecall
+  onRecall,
+  onRetrySend
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const theme = useUiStore((s) => s.theme)
@@ -241,9 +245,22 @@ export default function MessageBubble({
           </Dropdown>
           <div className={styles.status}>
             {formatTime(message.createdAt)}{' '}
-            <span aria-label={deliveryAriaLabel} title={deliveryAriaLabel}>
+            <span
+              className={deliveryFailed ? styles.deliveryFailed : undefined}
+              aria-label={deliveryAriaLabel}
+              title={deliveryAriaLabel}
+            >
               {deliveryLabel}
             </span>
+            {deliveryFailed && onRetrySend ? (
+              <button
+                type="button"
+                className={styles.retrySendBtn}
+                onClick={() => onRetrySend(message.msgId)}
+              >
+                {t('chat.retrySend')}
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

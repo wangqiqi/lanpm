@@ -40,6 +40,7 @@ const api: LanpmApi = {
       ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
     recallMessage: (groupId, msgId) => ipcRenderer.invoke('chat:recallMessage', groupId, msgId),
     sendTaskRef: (groupId, taskId) => ipcRenderer.invoke('chat:sendTaskRef', groupId, taskId),
+    retryMessage: (msgId) => ipcRenderer.invoke('chat:retryMessage', msgId),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)

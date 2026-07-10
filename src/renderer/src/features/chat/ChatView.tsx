@@ -103,6 +103,7 @@ export default function ChatView(): React.ReactElement {
   const captureAndSendScreenshot = useChatStore((s) => s.captureAndSendScreenshot)
   const upsertMessage = useChatStore((s) => s.upsertMessage)
   const recallMessage = useChatStore((s) => s.recallMessage)
+  const retryMessage = useChatStore((s) => s.retryMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
   const sendTaskRef = useChatStore((s) => s.sendTaskRef)
   const loadTasks = useTaskStore((s) => s.loadTasks)
@@ -499,6 +500,20 @@ export default function ChatView(): React.ReactElement {
     [gid, recallMessage, message, t]
   )
 
+  const handleRetrySend = useCallback(
+    async (msgId: string) => {
+      try {
+        const result = await retryMessage(msgId)
+        if (result.deliveryStatus === 'failed') {
+          message.error(t('chat.retrySendFailed'))
+        }
+      } catch (err) {
+        message.error(formatError(err, 'chat.retrySendFailed'))
+      }
+    },
+    [retryMessage, message, t]
+  )
+
   return (
     <div className={styles.chatLayout}>
       {sidebarOpen && (
@@ -676,6 +691,7 @@ export default function ChatView(): React.ReactElement {
                         tasks={taskAllowed ? tasks : []}
                         deliveryLabel={delivery.text}
                         deliveryAriaLabel={delivery.ariaLabel}
+                        deliveryFailed={delivery.failed}
                         formatTime={formatTime}
                         highlighted={isMsgHighlighted(msg.msgId)}
                         showSender={showSender}
@@ -684,6 +700,7 @@ export default function ChatView(): React.ReactElement {
                         onViewSender={viewSenderProfile}
                         onDmSender={startDmWithMember}
                         onRecall={(msgId) => void handleRecall(msgId)}
+                        onRetrySend={(msgId) => void handleRetrySend(msgId)}
                       />
                     )
                   })}

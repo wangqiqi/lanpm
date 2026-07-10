@@ -579,6 +579,33 @@ export function createBrowserLanpmStub(): LanpmApi {
         for (const fn of chatListeners) fn(updated)
         return updated
       },
+      retryMessage: async (msgId) => {
+        const status = readStatus()
+        if (!status.configured || !status.user) {
+          throw stubError('stub.identityRequired')
+        }
+        for (const groupId of Object.keys(
+          JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) ?? '{}') as Record<string, unknown>
+        )) {
+          const prev = readChatMessages(groupId)
+          const existing = prev.find((m) => m.msgId === msgId)
+          if (!existing) continue
+          if (existing.senderUserId !== status.user.userId) {
+            throw stubError('err.chatRetryNotOwner')
+          }
+          if (existing.deliveryStatus !== 'failed' && existing.deliveryStatus !== 'sending') {
+            throw stubError('err.chatRetryInvalidStatus')
+          }
+          const sent = { ...existing, deliveryStatus: 'sent' as const }
+          writeChatMessages(
+            groupId,
+            prev.map((m) => (m.msgId === msgId ? sent : m))
+          )
+          for (const fn of chatListeners) fn(sent)
+          return sent
+        }
+        throw stubError('stub.messageNotFound')
+      },
       markRead: async (groupId, msgIds) => {
         const status = readStatus()
         if (!status.configured || !status.user) return

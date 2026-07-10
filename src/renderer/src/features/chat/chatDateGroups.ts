@@ -47,14 +47,17 @@ export function groupMessagesByDay(messages: ChatMessage[], locale: LocaleId): C
 }
 
 export function deliveryStatusMeta(
-  status: 'sending' | 'sent' | 'read',
+  status: 'sending' | 'sent' | 'read' | 'failed',
   t: (key: MessageKey) => string
-): { text: string; ariaLabel: string } {
+): { text: string; ariaLabel: string; failed: boolean } {
   if (status === 'sending') {
-    return { text: '…', ariaLabel: t('chat.deliverySending') }
+    return { text: '…', ariaLabel: t('chat.deliverySending'), failed: false }
+  }
+  if (status === 'failed') {
+    return { text: '!', ariaLabel: t('chat.deliveryFailed'), failed: true }
   }
   if (status === 'sent') {
-    return { text: '✓', ariaLabel: t('chat.deliverySent') }
+    return { text: '✓', ariaLabel: t('chat.deliverySent'), failed: false }
   }
-  return { text: '✓✓', ariaLabel: t('chat.deliveryRead') }
+  return { text: '✓✓', ariaLabel: t('chat.deliveryRead'), failed: false }
 }

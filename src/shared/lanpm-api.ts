@@ -62,6 +62,8 @@ export interface LanpmApi {
     captureAndSendScreenshot: (groupId: string) => Promise<ChatMessage | null>
     recallMessage: (groupId: string, msgId: string) => Promise<ChatMessage>
     sendTaskRef: (groupId: string, taskId: string) => Promise<ChatMessage>
+    /** 手动重试发送失败的本机消息 */
+    retryMessage: (msgId: string) => Promise<ChatMessage>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
   task: {

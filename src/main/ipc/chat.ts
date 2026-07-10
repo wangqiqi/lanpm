@@ -9,7 +9,8 @@ import {
   sendExistingFileMessage,
   sendFileMessage,
   sendTextMessage,
-  sendTaskRefMessage
+  sendTaskRefMessage,
+  retryFailedMessage
 } from '../chat/chatService'
 import { captureAndSendScreenshot } from '../screenshot/screenshotService'
 import { markMessagesRead } from '../chat/readReceiptService'
@@ -120,5 +121,12 @@ export function registerChatIpc(): void {
       throw new Error('msgId required')
     }
     return recallMessage(getDatabase(), groupId, msgId)
+  })
+
+  ipcMain.handle(CHAT_IPC.retryMessage, (_event, msgId: string) => {
+    if (typeof msgId !== 'string' || !msgId) {
+      throw new Error('msgId required')
+    }
+    return retryFailedMessage(getDatabase(), msgId)
   })
 }

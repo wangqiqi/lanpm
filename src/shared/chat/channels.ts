@@ -13,5 +13,6 @@ export const CHAT_IPC = {
   pickAndSendFile: 'chat:pickAndSendFile',
   captureAndSendScreenshot: 'chat:captureAndSendScreenshot',
   recallMessage: 'chat:recallMessage',
-  sendTaskRef: 'chat:sendTaskRef'
+  sendTaskRef: 'chat:sendTaskRef',
+  retryMessage: 'chat:retryMessage'
 } as const

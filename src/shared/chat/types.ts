@@ -2,7 +2,7 @@
 
 export type MessageType = 'text' | 'code' | 'file' | 'task_ref' | 'system'
 
-export type MessageDeliveryStatus = 'sending' | 'sent' | 'read'
+export type MessageDeliveryStatus = 'sending' | 'sent' | 'read' | 'failed'
 
 export type MessageContent =
   | { kind: 'text'; text: string }

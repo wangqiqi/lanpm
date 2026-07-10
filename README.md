@@ -93,6 +93,7 @@
 - **Syntax-highlighted code** blocks, attachments, **`/task`** to create work from chat, **`#`** to reference tasks  
 - **7-day offline catch-up** for chat messages (paginated batches) and **tasks/dependencies**  
 - Chat history **load-more** beyond the initial 200 messages  
+- Failed sends mark **`failed`**, auto-retry with backoff, and a bubble **Retry** action  
 - LAN **Discover** panel: join groups, ping online members, start DMs  
 - TopBar **group switcher**: search by name/pinyin, local pins, sort by recent message activity; chat page no longer duplicates the group title  
 
