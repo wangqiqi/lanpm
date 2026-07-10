@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **task_dep_patch 协议 (TASK-130)**：`SyncMessageType` 新增 `task_dep_patch`；`TaskDepPatchPayload` / `isTaskDepPatchPayload`（`shared/task/sync.ts`）；`docs/03` §6.2 payload 草案；`verify:task-dep-protocol`。
+
 ## [1.0.4] - 2026-07-10
 
 ### Added

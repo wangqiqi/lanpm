@@ -8,6 +8,7 @@ export type SyncMessageType =
   | 'chat_recall'
   | 'read_receipt'
   | 'task_patch'
+  | 'task_dep_patch'
   | 'task_crdt'
   | 'file_meta'
   | 'file_pull_request'

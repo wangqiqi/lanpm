@@ -24,6 +24,7 @@
     "verify:preview-extensions": "node --experimental-strip-types tests/static/verify-preview-extensions.ts",
     "verify:format-file-type": "node --experimental-strip-types tests/static/verify-format-file-type.ts",
     "verify:shared": "node --experimental-strip-types tests/runners/verify-shared.ts",
+    "verify:task-dep-protocol": "node --experimental-strip-types tests/static/verify-task-dep-protocol.ts",
     "verify:p0": "node --experimental-strip-types tests/runners/verify-p0.ts",
     "verify:ipc-contract": "node --experimental-strip-types tests/static/verify-ipc-contract.ts",
     "verify:i18n-keys": "node --experimental-strip-types tests/static/verify-i18n-keys.ts",

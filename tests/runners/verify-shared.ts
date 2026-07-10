@@ -10,6 +10,7 @@ const steps = [
   'verify:preview-extensions',
   'verify:format-file-type',
   'verify:offline-sync',
+  'verify:task-dep-protocol',
   'verify:network-manual',
   'verify:mentions',
   'verify:routes'
