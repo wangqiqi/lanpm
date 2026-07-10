@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **头像实际可见**：TopBar / 个人资料 / 聊天气泡 / 成员列表 / 成员资料弹窗统一消费 `avatarUrl`；修复历史 SVG `;utf8` data URL 无法加载；缺省用按 userId 确定性色块兜底。
+
 ### Added
 - **任务/文件同步失败可观测 (TASK-142)**：去掉静默 `.catch`；主进程打日志；用户侧 publish 失败 toast（`app:userNotice`）；预期离线早退不误报。
 - **聊天发送失败可重试 (TASK-141)**：publish 失败标记 `failed`；有限次自动重试（退避）；气泡「重试」+ `chat:retryMessage` IPC。

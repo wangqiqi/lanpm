@@ -28,6 +28,16 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `UPDATE task_dependencies SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE updated_at = ''`
       )
     }
+  },
+  {
+    fromVersion: 2,
+    description: 'LWW tie-break: last_writer_device_id on tasks and task_dependencies',
+    up: (db) => {
+      db.exec(`ALTER TABLE tasks ADD COLUMN last_writer_device_id TEXT NOT NULL DEFAULT ''`)
+      db.exec(
+        `ALTER TABLE task_dependencies ADD COLUMN last_writer_device_id TEXT NOT NULL DEFAULT ''`
+      )
+    }
   }
 ]
 

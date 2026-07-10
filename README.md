@@ -95,6 +95,7 @@
 - Chat history **load-more** beyond the initial 200 messages  
 - Failed sends mark **`failed`**, auto-retry with backoff, and a bubble **Retry** action  
 - Task/file sync publish failures log in main and show a light toast (offline early-return stays quiet)  
+- Task/dependency LWW ties break on `senderDeviceId` (schema v3 `last_writer_device_id`)  
 - LAN **Discover** panel: join groups, ping online members, start DMs  
 - TopBar **group switcher**: search by name/pinyin, local pins, sort by recent message activity; chat page no longer duplicates the group title  
 

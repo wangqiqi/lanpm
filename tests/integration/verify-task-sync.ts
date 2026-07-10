@@ -58,8 +58,8 @@ function applyTaskPatch(db: Database.Database, localDeviceId: string, envelope: 
   const payload = envelope.payload as TaskPatchPayload
   if (!payload?.task?.taskId) return
   const task: Task = { ...payload.task, groupId: envelope.groupId }
-  if (payload.action === 'delete') applyRemoteTaskDelete(db, task)
-  else upsertTaskFromRemote(db, task)
+  if (payload.action === 'delete') applyRemoteTaskDelete(db, task, envelope.senderDeviceId)
+  else upsertTaskFromRemote(db, task, envelope.senderDeviceId)
 }
 
 function openDb(userId: string, deviceId: string): Database.Database {
@@ -138,6 +138,30 @@ try {
 
   if (listTasksByGroup(dbB, GROUP).length !== 0) {
     throw new Error('task_patch delete did not replicate to B')
+  }
+
+  // LWW tie-break: equal updatedAt → higher senderDeviceId wins
+  const tieTs = '2026-07-11T12:00:00.000Z'
+  const tieTask = buildTaskFromInput(
+    { groupId: GROUP, title: 'tie-low', status: 'todo' },
+    'user_task_b',
+    `task_tie_${randomUUID()}`
+  )
+  tieTask.updatedAt = tieTs
+  insertTask(dbB, tieTask, 'dev_mid')
+  const lose: Task = { ...tieTask, title: 'tie-lose' }
+  if (upsertTaskFromRemote(dbB, lose, 'dev_low')) {
+    throw new Error('lower senderDeviceId must not win LWW tie')
+  }
+  if (listTasksByGroup(dbB, GROUP).find((t) => t.taskId === tieTask.taskId)?.title !== 'tie-low') {
+    throw new Error('LWW tie incorrectly applied lower device')
+  }
+  const win: Task = { ...tieTask, title: 'tie-win' }
+  if (!upsertTaskFromRemote(dbB, win, 'dev_zzz')) {
+    throw new Error('higher senderDeviceId must win LWW tie')
+  }
+  if (listTasksByGroup(dbB, GROUP).find((t) => t.taskId === tieTask.taskId)?.title !== 'tie-win') {
+    throw new Error('LWW tie did not apply higher device')
   }
 } finally {
   stubA.stop()

@@ -43,9 +43,9 @@ function handleTaskPatch(db: Database, envelope: SyncEnvelope): void {
   const task: Task = { ...payload.task, groupId: envelope.groupId }
   let changed = false
   if (payload.action === 'delete') {
-    changed = applyRemoteTaskDelete(db, task)
+    changed = applyRemoteTaskDelete(db, task, envelope.senderDeviceId)
   } else {
-    changed = upsertTaskFromRemote(db, task)
+    changed = upsertTaskFromRemote(db, task, envelope.senderDeviceId)
   }
   if (changed) broadcastTasksChanged(envelope.groupId)
 }
@@ -62,7 +62,7 @@ function handleTaskDepPatch(db: Database, envelope: SyncEnvelope): void {
     ...envelope.payload,
     groupId: envelope.groupId
   }
-  if (applyRemoteDepPatch(db, payload)) {
+  if (applyRemoteDepPatch(db, payload, envelope.senderDeviceId)) {
     broadcastTasksChanged(envelope.groupId)
   }
 }

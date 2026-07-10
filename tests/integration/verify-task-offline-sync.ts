@@ -159,12 +159,12 @@ function applyTaskSyncBatch(db: Database.Database, localDeviceId: string, envelo
   const cutoff = offlineSyncCutoffIso(SYNC_WINDOW_DAYS)
   for (const task of payload.tasks ?? []) {
     if (!task?.taskId || task.updatedAt < cutoff) continue
-    if (task.deletedAt) applyRemoteTaskDelete(db, { ...task, groupId: envelope.groupId })
-    else upsertTaskFromRemote(db, { ...task, groupId: envelope.groupId })
+    if (task.deletedAt) applyRemoteTaskDelete(db, { ...task, groupId: envelope.groupId }, envelope.senderDeviceId)
+    else upsertTaskFromRemote(db, { ...task, groupId: envelope.groupId }, envelope.senderDeviceId)
   }
   for (const dep of payload.dependencies ?? []) {
     if (!dep?.dependency || dep.updatedAt < cutoff) continue
-    applyRemoteDepPatch(db, { ...dep, groupId: envelope.groupId })
+    applyRemoteDepPatch(db, { ...dep, groupId: envelope.groupId }, envelope.senderDeviceId)
   }
 }
 

@@ -81,7 +81,8 @@ CREATE TABLE tasks (
   created_by TEXT NOT NULL,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
-  deleted_at TEXT
+  deleted_at TEXT,
+  last_writer_device_id TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX idx_tasks_group_parent ON tasks(group_id, parent_task_id);
 CREATE INDEX idx_tasks_group_status ON tasks(group_id, status) WHERE deleted_at IS NULL;
@@ -92,6 +93,7 @@ CREATE TABLE task_dependencies (
   dep_type TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   deleted_at TEXT,
+  last_writer_device_id TEXT NOT NULL DEFAULT '',
   PRIMARY KEY (from_task_id, to_task_id)
 );
 

@@ -2,6 +2,8 @@ import type { Database } from 'better-sqlite3'
 import { throwLanpm } from '../../../shared/errors/lanpmError.ts'
 import type { TaskDependency, TaskDependencyType, UpsertDependencyInput } from '../../../shared/task/dependency.ts'
 import type { TaskDepPatchPayload } from '../../../shared/task/sync.ts'
+import { lwwShouldApply } from '../../../shared/sync/lww.ts'
+import { getMeta } from './syncMetaRepository.ts'
 
 interface DepRow {
   from_task_id: string
@@ -9,6 +11,11 @@ interface DepRow {
   dep_type: string
   updated_at: string
   deleted_at: string | null
+  last_writer_device_id: string
+}
+
+function localWriterDeviceId(db: Database): string {
+  return getMeta(db, 'local_device_id') ?? ''
 }
 
 export function listDependenciesByGroup(db: Database, groupId: string): TaskDependency[] {
@@ -83,7 +90,7 @@ function getDepRow(
 ): DepRow | undefined {
   return db
     .prepare(
-      `SELECT from_task_id, to_task_id, dep_type, updated_at, deleted_at
+      `SELECT from_task_id, to_task_id, dep_type, updated_at, deleted_at, last_writer_device_id
        FROM task_dependencies
        WHERE from_task_id = ? AND to_task_id = ?`
     )
@@ -95,18 +102,21 @@ export function upsertDependency(db: Database, input: UpsertDependencyInput): Ta
     throwLanpm('err.dependencySelf')
   }
   const now = new Date().toISOString()
+  const writer = localWriterDeviceId(db)
   db.prepare(
-    `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type, updated_at, deleted_at)
-     VALUES (@fromTaskId, @toTaskId, @type, @updatedAt, NULL)
+    `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type, updated_at, deleted_at, last_writer_device_id)
+     VALUES (@fromTaskId, @toTaskId, @type, @updatedAt, NULL, @lastWriterDeviceId)
      ON CONFLICT(from_task_id, to_task_id) DO UPDATE SET
        dep_type = excluded.dep_type,
        updated_at = excluded.updated_at,
-       deleted_at = NULL`
+       deleted_at = NULL,
+       last_writer_device_id = excluded.last_writer_device_id`
   ).run({
     fromTaskId: input.fromTaskId,
     toTaskId: input.toTaskId,
     type: input.type,
-    updatedAt: now
+    updatedAt: now,
+    lastWriterDeviceId: writer
   })
   return {
     fromTaskId: input.fromTaskId,
@@ -127,10 +137,10 @@ export function removeDependency(
   const result = db
     .prepare(
       `UPDATE task_dependencies
-       SET deleted_at = ?, updated_at = ?
+       SET deleted_at = ?, updated_at = ?, last_writer_device_id = ?
        WHERE from_task_id = ? AND to_task_id = ? AND deleted_at IS NULL`
     )
-    .run(now, now, fromTaskId, toTaskId)
+    .run(now, now, localWriterDeviceId(db), fromTaskId, toTaskId)
   if (result.changes === 0) return null
   return {
     fromTaskId,
@@ -140,49 +150,80 @@ export function removeDependency(
 }
 
 /**
- * B-01 / TASK-131 — remote task_dep_patch LWW by updatedAt.
+ * B-01 / TASK-131 / TASK-143 — remote task_dep_patch LWW；平局用 senderDeviceId。
  * Returns true when local SQLite changed.
  */
-export function applyRemoteDepPatch(db: Database, payload: TaskDepPatchPayload): boolean {
+export function applyRemoteDepPatch(
+  db: Database,
+  payload: TaskDepPatchPayload,
+  remoteDeviceId: string
+): boolean {
   const { action, dependency, updatedAt } = payload
   const existing = getDepRow(db, dependency.fromTaskId, dependency.toTaskId)
 
-  if (existing && existing.updated_at > updatedAt) return false
-  if (existing && existing.updated_at === updatedAt) return false
+  if (
+    existing &&
+    !lwwShouldApply(
+      updatedAt,
+      existing.updated_at,
+      remoteDeviceId,
+      existing.last_writer_device_id
+    )
+  ) {
+    return false
+  }
 
   if (action === 'delete') {
     if (existing?.deleted_at) return false
     if (!existing) {
       db.prepare(
-        `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type, updated_at, deleted_at)
-         VALUES (?, ?, ?, ?, ?)`
-      ).run(dependency.fromTaskId, dependency.toTaskId, dependency.type, updatedAt, updatedAt)
+        `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type, updated_at, deleted_at, last_writer_device_id)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      ).run(
+        dependency.fromTaskId,
+        dependency.toTaskId,
+        dependency.type,
+        updatedAt,
+        updatedAt,
+        remoteDeviceId
+      )
       return true
     }
     db.prepare(
       `UPDATE task_dependencies
-       SET deleted_at = ?, updated_at = ?, dep_type = ?
+       SET deleted_at = ?, updated_at = ?, dep_type = ?, last_writer_device_id = ?
        WHERE from_task_id = ? AND to_task_id = ?`
-    ).run(updatedAt, updatedAt, dependency.type, dependency.fromTaskId, dependency.toTaskId)
+    ).run(
+      updatedAt,
+      updatedAt,
+      dependency.type,
+      remoteDeviceId,
+      dependency.fromTaskId,
+      dependency.toTaskId
+    )
     return true
   }
 
-  // upsert
+  // upsert — same type already present: still stamp writer if LWW said apply (timestamp/device won)
   if (existing && !existing.deleted_at && existing.dep_type === dependency.type) {
-    return false
+    if (existing.updated_at === updatedAt && existing.last_writer_device_id === remoteDeviceId) {
+      return false
+    }
   }
   db.prepare(
-    `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type, updated_at, deleted_at)
-     VALUES (@fromTaskId, @toTaskId, @type, @updatedAt, NULL)
+    `INSERT INTO task_dependencies (from_task_id, to_task_id, dep_type, updated_at, deleted_at, last_writer_device_id)
+     VALUES (@fromTaskId, @toTaskId, @type, @updatedAt, NULL, @lastWriterDeviceId)
      ON CONFLICT(from_task_id, to_task_id) DO UPDATE SET
        dep_type = excluded.dep_type,
        updated_at = excluded.updated_at,
-       deleted_at = NULL`
+       deleted_at = NULL,
+       last_writer_device_id = excluded.last_writer_device_id`
   ).run({
     fromTaskId: dependency.fromTaskId,
     toTaskId: dependency.toTaskId,
     type: dependency.type,
-    updatedAt
+    updatedAt,
+    lastWriterDeviceId: remoteDeviceId
   })
   return true
 }

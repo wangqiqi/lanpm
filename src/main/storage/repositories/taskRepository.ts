@@ -1,6 +1,8 @@
 import type { Database } from 'better-sqlite3'
 import type { CreateTaskInput, Task, TaskPriority, TaskStatus, UpdateTaskInput } from '../../../shared/task/types'
 import { clampProgressPercent } from '../../../shared/task/validation.ts'
+import { lwwShouldApply } from '../../../shared/sync/lww.ts'
+import { getMeta } from './syncMetaRepository.ts'
 
 interface TaskRow {
   task_id: string
@@ -21,6 +23,11 @@ interface TaskRow {
   created_at: string
   updated_at: string
   deleted_at: string | null
+  last_writer_device_id: string
+}
+
+function localWriterDeviceId(db: Database): string {
+  return getMeta(db, 'local_device_id') ?? ''
 }
 
 function rowToTask(row: TaskRow): Task {
@@ -111,18 +118,19 @@ export function getMaxSortOrderInColumn(
   return row.max_order
 }
 
-export function insertTask(db: Database, task: Task): void {
+export function insertTask(db: Database, task: Task, writerDeviceId?: string): void {
+  const writer = writerDeviceId ?? localWriterDeviceId(db)
   db.prepare(
     `INSERT INTO tasks (
       task_id, group_id, parent_task_id, title, description,
       status, other_reason, priority, assignee_user_id,
       progress_percent, start_date, end_date, milestone, sort_order,
-      created_by, created_at, updated_at, deleted_at
+      created_by, created_at, updated_at, deleted_at, last_writer_device_id
     ) VALUES (
       @taskId, @groupId, @parentTaskId, @title, @description,
       @status, @otherReason, @priority, @assigneeUserId,
       @progressPercent, @startDate, @endDate, @milestone, @sortOrder,
-      @createdBy, @createdAt, @updatedAt, @deletedAt
+      @createdBy, @createdAt, @updatedAt, @deletedAt, @lastWriterDeviceId
     )`
   ).run({
     taskId: task.taskId,
@@ -142,7 +150,8 @@ export function insertTask(db: Database, task: Task): void {
     createdBy: task.createdBy,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
-    deletedAt: task.deletedAt ?? null
+    deletedAt: task.deletedAt ?? null,
+    lastWriterDeviceId: writer
   })
 }
 
@@ -213,7 +222,8 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       start_date = @startDate,
       end_date = @endDate,
       milestone = @milestone,
-      updated_at = @updatedAt
+      updated_at = @updatedAt,
+      last_writer_device_id = @lastWriterDeviceId
      WHERE task_id = @taskId`
   ).run({
     taskId: next.taskId,
@@ -229,7 +239,8 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
     startDate: next.startDate ?? null,
     endDate: next.endDate ?? null,
     milestone: next.milestone ? 1 : 0,
-    updatedAt: next.updatedAt
+    updatedAt: next.updatedAt,
+    lastWriterDeviceId: localWriterDeviceId(db)
   })
 
   return next
@@ -253,10 +264,11 @@ export function promoteChildrenToRoot(db: Database, groupId: string, parentTaskI
   const children = listActiveChildTasks(db, groupId, parentTaskId)
   if (children.length === 0) return []
   const now = new Date().toISOString()
+  const writer = localWriterDeviceId(db)
   db.prepare(
-    `UPDATE tasks SET parent_task_id = NULL, updated_at = ?
+    `UPDATE tasks SET parent_task_id = NULL, updated_at = ?, last_writer_device_id = ?
      WHERE group_id = ? AND parent_task_id = ? AND deleted_at IS NULL`
-  ).run(now, groupId, parentTaskId)
+  ).run(now, writer, groupId, parentTaskId)
   return children.map((c) => ({ ...c, parentTaskId: undefined, updatedAt: now }))
 }
 
@@ -270,37 +282,64 @@ export function clearTaskDependencies(db: Database, taskId: string): void {
 export function softDeleteTask(db: Database, taskId: string): boolean {
   const now = new Date().toISOString()
   const result = db
-    .prepare(`UPDATE tasks SET deleted_at = ?, updated_at = ? WHERE task_id = ? AND deleted_at IS NULL`)
-    .run(now, now, taskId)
+    .prepare(
+      `UPDATE tasks SET deleted_at = ?, updated_at = ?, last_writer_device_id = ?
+       WHERE task_id = ? AND deleted_at IS NULL`
+    )
+    .run(now, now, localWriterDeviceId(db), taskId)
   return result.changes > 0
 }
 
-function getTaskRowById(db: Database, taskId: string): Task | null {
+function getTaskRowById(db: Database, taskId: string): TaskRow | null {
   const row = db.prepare(`SELECT * FROM tasks WHERE task_id = ?`).get(taskId) as TaskRow | undefined
-  return row ? rowToTask(row) : null
+  return row ?? null
 }
 
-/** B-01 — 远端 task_patch LWW 合并 */
-export function upsertTaskFromRemote(db: Database, task: Task): boolean {
+/** B-01 — 远端 task_patch LWW 合并（平局用 senderDeviceId） */
+export function upsertTaskFromRemote(db: Database, task: Task, remoteDeviceId: string): boolean {
   const existing = getTaskRowById(db, task.taskId)
+  if (
+    existing &&
+    !lwwShouldApply(
+      task.updatedAt,
+      existing.updated_at,
+      remoteDeviceId,
+      existing.last_writer_device_id
+    )
+  ) {
+    return false
+  }
   if (existing) {
-    if (existing.updatedAt > task.updatedAt) return false
-    if (existing.updatedAt === task.updatedAt) return false
     db.prepare(`DELETE FROM tasks WHERE task_id = ?`).run(task.taskId)
   }
-  insertTask(db, task)
+  insertTask(db, task, remoteDeviceId)
   return true
 }
 
-export function applyRemoteTaskDelete(db: Database, task: Task): boolean {
+export function applyRemoteTaskDelete(db: Database, task: Task, remoteDeviceId: string): boolean {
   const existing = getTaskRowById(db, task.taskId)
-  if (existing?.deletedAt) return false
-  if (existing && existing.updatedAt > task.updatedAt) return false
+  if (existing?.deleted_at) return false
+  if (
+    existing &&
+    !lwwShouldApply(
+      task.updatedAt,
+      existing.updated_at,
+      remoteDeviceId,
+      existing.last_writer_device_id
+    )
+  ) {
+    return false
+  }
   if (!existing) {
-    insertTask(db, { ...task, deletedAt: task.deletedAt ?? task.updatedAt })
+    insertTask(db, { ...task, deletedAt: task.deletedAt ?? task.updatedAt }, remoteDeviceId)
     return true
   }
-  return softDeleteTask(db, task.taskId)
+  const now = task.updatedAt
+  db.prepare(
+    `UPDATE tasks SET deleted_at = ?, updated_at = ?, last_writer_device_id = ?
+     WHERE task_id = ? AND deleted_at IS NULL`
+  ).run(now, now, remoteDeviceId, task.taskId)
+  return true
 }
 
 export function buildTaskFromInput(

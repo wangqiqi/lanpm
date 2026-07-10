@@ -58,7 +58,7 @@ function applyDepPatch(db: Database.Database, localDeviceId: string, envelope: S
   if (envelope.senderDeviceId === localDeviceId) return
   const payload = envelope.payload as TaskDepPatchPayload
   if (!payload?.dependency?.fromTaskId) return
-  applyRemoteDepPatch(db, { ...payload, groupId: envelope.groupId })
+  applyRemoteDepPatch(db, { ...payload, groupId: envelope.groupId }, envelope.senderDeviceId)
 }
 
 function openDb(userId: string, deviceId: string): Database.Database {
@@ -157,11 +157,32 @@ try {
     dependency: { fromTaskId: fromId, toTaskId: toId, type: 'SS' },
     updatedAt: '2000-01-01T00:00:00.000Z'
   }
-  if (applyRemoteDepPatch(dbB, older)) {
+  if (applyRemoteDepPatch(dbB, older, 'dev_ancient')) {
     throw new Error('older task_dep_patch must not win LWW')
   }
   if (listDependenciesByGroup(dbB, GROUP)[0]?.type !== 'FS') {
     throw new Error('LWW older upsert changed type')
+  }
+
+  // Equal updatedAt: higher senderDeviceId wins
+  const tieAt = upsertAt
+  const tieLose: TaskDepPatchPayload = {
+    action: 'upsert',
+    groupId: GROUP,
+    dependency: { fromTaskId: fromId, toTaskId: toId, type: 'SS' },
+    updatedAt: tieAt
+  }
+  if (applyRemoteDepPatch(dbB, tieLose, 'dev_aaa')) {
+    throw new Error('lower senderDeviceId must not win dep LWW tie')
+  }
+  if (listDependenciesByGroup(dbB, GROUP)[0]?.type !== 'FS') {
+    throw new Error('dep LWW tie incorrectly applied lower device')
+  }
+  if (!applyRemoteDepPatch(dbB, tieLose, 'dev_zzz')) {
+    throw new Error('higher senderDeviceId must win dep LWW tie')
+  }
+  if (listDependenciesByGroup(dbB, GROUP)[0]?.type !== 'SS') {
+    throw new Error('dep LWW tie did not apply higher device')
   }
 
   const deleteAt = new Date().toISOString()

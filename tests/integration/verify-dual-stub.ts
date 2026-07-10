@@ -77,7 +77,7 @@ function applyTaskPatch(db: Database.Database, localDeviceId: string, envelope: 
   const payload = envelope.payload as TaskPatchPayload
   if (!payload?.task?.taskId) return
   const task: Task = { ...payload.task, groupId: envelope.groupId }
-  upsertTaskFromRemote(db, task)
+  upsertTaskFromRemote(db, task, envelope.senderDeviceId)
 }
 
 const dbA = openDb()

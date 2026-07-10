@@ -153,12 +153,17 @@ export async function handleTaskSyncRequest(db: Database, envelope: SyncEnvelope
   }
 }
 
-function applyIncomingTask(db: Database, task: Task, groupId: string): boolean {
+function applyIncomingTask(
+  db: Database,
+  task: Task,
+  groupId: string,
+  remoteDeviceId: string
+): boolean {
   const normalized: Task = { ...task, groupId }
   if (normalized.deletedAt) {
-    return applyRemoteTaskDelete(db, normalized)
+    return applyRemoteTaskDelete(db, normalized, remoteDeviceId)
   }
-  return upsertTaskFromRemote(db, normalized)
+  return upsertTaskFromRemote(db, normalized, remoteDeviceId)
 }
 
 export function handleTaskSyncBatch(
@@ -178,16 +183,20 @@ export function handleTaskSyncBatch(
 
   for (const task of envelope.payload.tasks) {
     if (!task?.taskId || task.updatedAt < cutoff) continue
-    if (applyIncomingTask(db, task, envelope.groupId)) changed = true
+    if (applyIncomingTask(db, task, envelope.groupId, envelope.senderDeviceId)) changed = true
   }
 
   for (const dep of envelope.payload.dependencies) {
     if (!dep?.dependency?.fromTaskId || dep.updatedAt < cutoff) continue
     if (
-      applyRemoteDepPatch(db, {
-        ...dep,
-        groupId: envelope.groupId
-      })
+      applyRemoteDepPatch(
+        db,
+        {
+          ...dep,
+          groupId: envelope.groupId
+        },
+        envelope.senderDeviceId
+      )
     ) {
       changed = true
     }
