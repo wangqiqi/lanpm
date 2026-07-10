@@ -562,6 +562,20 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  background: var(--lanpm-fill-secondary);
+  border: 1.5px solid var(--lanpm-border);
+  border-radius: 12px;
+  padding: 4px 6px;
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    box-shadow var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.inputWrap:focus-within {
+  background: var(--lanpm-surface-solid);
+  border-color: var(--lanpm-accent);
+  box-shadow: 0 0 0 3px var(--lanpm-accent-ring);
 }
 
 .mentionSuggest {
@@ -1019,21 +1033,49 @@
   min-height: 0 !important;
   resize: none;
   font-family: inherit;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 4px 6px !important;
+  color: var(--lanpm-text) !important;
 }
 
-.sendBtn {
+.sendIconBtn {
   flex-shrink: 0;
-  align-self: stretch;
-  min-width: 72px;
-  max-width: 88px;
-  height: auto !important;
-  padding: 12px 10px !important;
-  font-size: var(--lanpm-font-body);
-  font-weight: 600;
-  line-height: 1.35;
-  white-space: normal;
-  border-radius: 10px;
+  align-self: center;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: var(--lanpm-accent) !important;
+  color: var(--lanpm-on-accent) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
   box-shadow: none !important;
+  transition:
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard) !important;
+}
+
+.sendIconBtn:hover:not(:disabled) {
+  background: var(--lanpm-accent-hover) !important;
+  transform: scale(1.08);
+}
+
+.sendIconBtn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.sendIconBtn:disabled {
+  background: var(--lanpm-fill-secondary) !important;
+  color: var(--lanpm-text-tertiary) !important;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
 }
 
 .voicePanel {

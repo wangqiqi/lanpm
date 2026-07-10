@@ -13,7 +13,8 @@ import {
   MenuOutlined,
   MenuUnfoldOutlined,
   PaperClipOutlined,
-  PlusSquareOutlined
+  PlusSquareOutlined,
+  SendOutlined
 } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
@@ -676,28 +677,22 @@ export default function ChatView(): React.ReactElement {
             <div className={styles.composerBody}>
               <div className={styles.inputMain}>
                 {inputMode === 'text' ? (
-                  <>
-                    <Text type="secondary" className={styles.inputHint}>
-                      {t('chat.inputHintEnter')}
-                      {taskAllowed ? t('chat.inputHintTask') : ''}
-                    </Text>
-                    <div className={styles.inputWrap}>
-                      <MentionSuggest
-                        candidates={candidates}
-                        activeIndex={activeIndex}
-                        onPick={insertMention}
-                      />
-                      <TextArea
-                        className={styles.inputTextarea}
-                        placeholder={
-                          taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')
-                        }
-                        value={draft}
-                        onChange={(e) => setDraft(e.target.value)}
-                        onKeyDown={onKeyDown}
-                      />
-                    </div>
-                  </>
+                  <div className={styles.inputWrap}>
+                    <MentionSuggest
+                      candidates={candidates}
+                      activeIndex={activeIndex}
+                      onPick={insertMention}
+                    />
+                    <TextArea
+                      className={styles.inputTextarea}
+                      placeholder={
+                        taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')
+                      }
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onKeyDown={onKeyDown}
+                    />
+                  </div>
                 ) : (
                   <div className={styles.voicePanel}>
                     <Button className={styles.voiceHoldBtn} disabled block>
@@ -711,12 +706,12 @@ export default function ChatView(): React.ReactElement {
               </div>
               <Button
                 type="primary"
-                className={styles.sendBtn}
-                disabled={inputMode === 'voice'}
+                shape="circle"
+                icon={<SendOutlined />}
+                className={styles.sendIconBtn}
+                disabled={inputMode === 'voice' || !draft.trim()}
                 onClick={() => void handleSend()}
-              >
-                {t('common.send')}
-              </Button>
+              />
             </div>
           </div>
         </div>
