@@ -69,7 +69,7 @@
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   background: transparent;
   color: var(--lanpm-text-secondary);
   cursor: pointer;
@@ -151,7 +151,7 @@
     width: 36px;
     height: 36px;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--lanpm-radius-md);
     background: var(--lanpm-surface-solid);
     border: 1px solid var(--lanpm-border);
     color: var(--lanpm-text);
@@ -289,7 +289,7 @@
   gap: 2px;
   width: 100%;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-fill-secondary);
   padding: 8px 10px;
   cursor: pointer;
@@ -364,7 +364,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-border);
   cursor: pointer;
@@ -396,7 +396,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
   background: var(--lanpm-fill-secondary);
   color: var(--lanpm-accent);
   font-size: 16px;
@@ -478,7 +478,7 @@
   align-items: center;
   gap: 2px;
   width: 100%;
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
   height: 38px; /* Precise premium density line height */
   transition:
     background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
@@ -499,7 +499,7 @@
   background: transparent;
   cursor: pointer;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
   color: var(--lanpm-text-secondary);
   font-size: var(--lanpm-font-body);
   transition:
@@ -526,7 +526,7 @@
   background: transparent;
   cursor: pointer;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
   text-align: left;
   color: inherit;
   font-size: var(--lanpm-font-body);
@@ -551,7 +551,7 @@
   color: var(--lanpm-accent);
   font-weight: 600;
   background: var(--lanpm-accent-fill-strong);
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
   padding: 0 2px;
 }
 
@@ -570,7 +570,7 @@
   flex-direction: column;
   background: var(--lanpm-fill-secondary);
   border: 1.5px solid var(--lanpm-border);
-  border-radius: 12px;
+  border-radius: var(--lanpm-radius-lg);
   padding: 4px 6px;
   transition:
     background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
@@ -594,7 +594,7 @@
   overflow-y: auto;
   background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-border);
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   box-shadow: var(--lanpm-shadow-md);
   z-index: 10;
 }
@@ -843,7 +843,7 @@
   width: fit-content;
   min-width: 0;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: var(--lanpm-radius-md);
   word-break: break-word;
   overflow-wrap: anywhere;
 }
@@ -915,7 +915,7 @@
   max-height: 360px;
   max-width: 100%;
   overflow: auto;
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
 }
 
 .codeBlockExpanded {

@@ -13,7 +13,7 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border-radius: 10px;
+  border-radius: var(--lanpm-radius-md);
 }
 
 .icon:hover:not(:disabled):not(.regionDisabled),
@@ -24,7 +24,7 @@
 
 .pill {
   padding: 6px 12px;
-  border-radius: 10px;
+  border-radius: var(--lanpm-radius-md);
   font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text);
@@ -33,7 +33,7 @@
 /* macOS 工具栏文字按钮：无胶囊底，强调色文案 */
 .toolbar {
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   font-size: var(--lanpm-font-body);
   font-weight: 400;
   color: var(--lanpm-accent);
@@ -46,7 +46,7 @@
 /* 表格行内 / 代码块折叠等小号强调链接 */
 .caption {
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
   font-size: var(--lanpm-font-caption);
   font-weight: 400;
   color: var(--lanpm-accent);
@@ -58,7 +58,7 @@
 
 .text {
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: var(--lanpm-radius-md);
   font-size: var(--lanpm-font-title);
   font-weight: 600;
   letter-spacing: -0.02em;

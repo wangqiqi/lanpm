@@ -6,7 +6,7 @@
   background: transparent;
   cursor: pointer;
   color: inherit;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   transition:
     background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
