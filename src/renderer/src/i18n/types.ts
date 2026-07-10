@@ -314,6 +314,7 @@ export type MessageKey =
   | 'files.emptyCategory'
   | 'files.bookmarkPreviewHint'
   | 'files.selectToPreview'
+  | 'files.previewDrawerTitle'
   | 'files.convertingLocal'
   | 'files.previewLoadFailed'
   | 'files.shareToChat'

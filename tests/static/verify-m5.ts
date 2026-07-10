@@ -1,5 +1,5 @@
 /**
- * M5 group guards + cockpit types smoke + FilesView P1/P2 layout guards.
+ * M5 group guards + cockpit types smoke + FilesView P1/P2/P3 layout guards.
  * Run: npm run verify:m5
  */
 import assert from 'node:assert/strict'
@@ -36,6 +36,14 @@ assert.match(filesView, /files\.bookmarkTypeShort/)
 assert.ok(
   !filesView.includes("if (r.isBookmark) return t('common.link')"),
   'bookmark preview column must not use common.link noise (SPRINT-FILES-BOOKMARK-UX)'
+)
+assert.ok(filesView.includes("useMediaQuery('(max-width: 960px)')"))
+assert.ok(filesView.includes('placement="bottom"'))
+assert.ok(filesView.includes('previewDrawerOpen'))
+assert.ok(filesView.includes('const previewBody ='))
+assert.ok(
+  filesView.includes('zIndex={1100}') && filesView.includes('zIndex={1200}'),
+  'Drawer below Modal z-index (modal-layering, SPRINT-FILES-RESPONSIVE)'
 )
 
 assert.equal(isAnonymousGroupType('anonymous'), true)

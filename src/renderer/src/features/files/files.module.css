@@ -59,6 +59,16 @@
   border: 0.5px solid var(--lanpm-separator);
 }
 
+.bodyNarrow {
+  grid-template-columns: 1fr;
+}
+
+.previewDrawer :global(.ant-drawer-body) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .listPane,
 .previewPane {
   min-height: 0;
@@ -257,20 +267,4 @@
   background: var(--lanpm-bg);
 }
 
-@media (max-width: 960px) {
-  .body {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(200px, 1fr) minmax(240px, auto);
-    overflow-y: auto;
-  }
-
-  .listPane {
-    max-height: 50vh;
-    border-right: none;
-    border-bottom: 0.5px solid var(--lanpm-separator);
-  }
-
-  .previewPane {
-    min-height: 240px;
-  }
-}
+/* ≤960：列表全宽；预览改走 Drawer（见 FilesView + matchMedia），不再上下堆叠抢高度 */

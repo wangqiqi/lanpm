@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
   Collapse,
+  Drawer,
   Dropdown,
   Image,
   Input,
@@ -40,6 +41,7 @@ import RegionButton from '@renderer/ui/RegionButton'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { groupViewPath } from '@renderer/routes/paths'
 import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
 import { formatFileTypeLabel } from '@shared/file/formatFileType'
@@ -141,6 +143,8 @@ export default function FilesView(): React.ReactElement {
   const [bookmarkTitle, setBookmarkTitle] = useState('')
   const [bookmarkSaving, setBookmarkSaving] = useState(false)
   const [sharingToChat, setSharingToChat] = useState(false)
+  const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false)
+  const isNarrow = useMediaQuery('(max-width: 960px)')
 
   const categories = useMemo(
     () => CATEGORY_KEYS.map((c) => ({ label: t(c.key), value: c.value })),
@@ -169,6 +173,14 @@ export default function FilesView(): React.ReactElement {
   }, [gid])
 
   useEffect(() => {
+    if (!isNarrow) setPreviewDrawerOpen(false)
+  }, [isNarrow])
+
+  useEffect(() => {
+    if (!selected) setPreviewDrawerOpen(false)
+  }, [selected])
+
+  useEffect(() => {
     const state = location.state as { selectFileId?: string } | null
     const targetId = state?.selectFileId
     if (!targetId || !gid) return
@@ -177,8 +189,9 @@ export default function FilesView(): React.ReactElement {
     if (!match) return
     consumedSelectFileIdRef.current = targetId
     setSelected(match)
+    if (isNarrow) setPreviewDrawerOpen(true)
     navigate(location.pathname, { replace: true, state: {} })
-  }, [location.pathname, location.state, navigate, files, gid])
+  }, [location.pathname, location.state, navigate, files, gid, isNarrow])
 
   useEffect(() => {
     if (!selected) return
@@ -608,6 +621,124 @@ export default function FilesView(): React.ReactElement {
     ]
   }, [t, locale, categoryLabels, sortField, sortOrder, handleDownload, handleDeleteLocal])
 
+  const previewBody = !selected ? null : (
+    <>
+      <div className={styles.previewHeader}>
+        <Text strong ellipsis={{ tooltip: selected.name }}>
+          {selected.name}
+        </Text>
+        <div className={styles.previewMeta}>
+          <span>{formatFileTypeLabel(selected, categoryLabels)}</span>
+          {!selected.isBookmark && <span>{formatSize(selected.size)}</span>}
+          <span>{formatFileUploadedAt(selected.uploadedAt, locale)}</span>
+        </div>
+        {selected.isBookmark && selected.bookmarkUrl ? (
+          <Text
+            className={styles.bookmarkUrl}
+            type="secondary"
+            copyable
+            ellipsis={{ tooltip: selected.bookmarkUrl }}
+          >
+            {selected.bookmarkUrl}
+          </Text>
+        ) : null}
+      </div>
+      <div className={styles.previewActions}>
+        {selected.isBookmark ? (
+          <>
+            <Button
+              type="primary"
+              size="small"
+              icon={<LinkOutlined />}
+              href={selected.bookmarkUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('files.openBookmarkExternal')}
+            </Button>
+            <Button
+              size="small"
+              icon={<CommentOutlined />}
+              loading={sharingToChat}
+              onClick={handleShareToChat}
+            >
+              {t('files.shareToChat')}
+            </Button>
+          </>
+        ) : (
+          <>
+            {isRemotePendingPath(selected.storagePath) ? (
+              <Button
+                type="primary"
+                size="small"
+                loading={pulling}
+                onClick={() => void handlePullRemote()}
+              >
+                {t('files.pullRemote')}
+              </Button>
+            ) : null}
+            {!isRemotePendingPath(selected.storagePath) ? (
+              <Button
+                size="small"
+                icon={<DownloadOutlined />}
+                loading={downloading}
+                onClick={() => void handleDownload(selected)}
+              >
+                {t('files.download')}
+              </Button>
+            ) : null}
+            <Button
+              size="small"
+              icon={<CommentOutlined />}
+              loading={sharingToChat}
+              onClick={handleShareToChat}
+            >
+              {t('files.shareToChat')}
+            </Button>
+          </>
+        )}
+      </div>
+      {selected.isBookmark ? (
+        <div className={styles.bookmarkPreviewWrap}>
+          <Text type="secondary" className={styles.bookmarkPreviewHint}>
+            {t('files.bookmarkPreviewHint')}
+          </Text>
+          <BookmarkWebView
+            url={selected.bookmarkUrl ?? ''}
+            title={selected.bookmarkTitle ?? selected.name}
+          />
+        </div>
+      ) : isRemotePendingPath(selected.storagePath) ? (
+        <Text type="secondary">{t('files.remotePending')}</Text>
+      ) : isLocalRemovedPath(selected.storagePath) ? (
+        <Text type="secondary">{t('files.localRemoved')}</Text>
+      ) : selected.previewStatus === 'converting' ? (
+        <Text>{t('files.convertingLocal')}</Text>
+      ) : previewLoading ? (
+        <ViewLoadingCenter />
+      ) : previewError ? (
+        <ViewErrorCenter message={t('files.previewLoadFailed')} onRetry={retryPreview} />
+      ) : selected.previewStatus === 'failed' ? (
+        <Text type="danger">{t('files.previewFailedDownload')}</Text>
+      ) : previewUrl && ['mp4', 'webm'].includes(selected.ext.toLowerCase()) ? (
+        <video
+          src={previewUrl}
+          controls
+          className={styles.previewVideo}
+          aria-label={selected.name}
+        />
+      ) : previewUrl && selected.category === 'image' ? (
+        <Image src={previewUrl} alt={selected.name} className={styles.previewImg} />
+      ) : previewUrl && selected.ext.toLowerCase() === 'pdf' ? (
+        <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
+      ) : previewText !== null ? (
+        <pre className={styles.previewText}>{previewText}</pre>
+      ) : (
+        <Text type="secondary">{t('files.noInlinePreview', { name: selected.name })}</Text>
+      )}
+    </>
+  )
+
   return (
     <div className={styles.root}>
       <ViewToolbar
@@ -768,7 +899,7 @@ export default function FilesView(): React.ReactElement {
         )}
       </div>
 
-      <div className={styles.body}>
+      <div className={isNarrow ? `${styles.body} ${styles.bodyNarrow}` : styles.body}>
         <div className={styles.listPane}>
           {loading && files.length === 0 ? (
             <ViewLoadingCenter />
@@ -812,7 +943,10 @@ export default function FilesView(): React.ReactElement {
               sortDirections={['ascend', 'descend']}
               onChange={handleTableChange}
               onRow={(record) => ({
-                onClick: () => setSelected(record)
+                onClick: () => {
+                  setSelected(record)
+                  if (isNarrow) setPreviewDrawerOpen(true)
+                }
               })}
               rowClassName={(record) =>
                 [
@@ -825,128 +959,30 @@ export default function FilesView(): React.ReactElement {
             />
           )}
         </div>
-        <aside className={styles.previewPane}>
-          {!selected ? (
-            <Text type="secondary">{t('files.selectToPreview')}</Text>
-          ) : (
-            <>
-              <div className={styles.previewHeader}>
-                <Text strong ellipsis={{ tooltip: selected.name }}>
-                  {selected.name}
-                </Text>
-                <div className={styles.previewMeta}>
-                  <span>{formatFileTypeLabel(selected, categoryLabels)}</span>
-                  {!selected.isBookmark && <span>{formatSize(selected.size)}</span>}
-                  <span>{formatFileUploadedAt(selected.uploadedAt, locale)}</span>
-                </div>
-                {selected.isBookmark && selected.bookmarkUrl ? (
-                  <Text
-                    className={styles.bookmarkUrl}
-                    type="secondary"
-                    copyable
-                    ellipsis={{ tooltip: selected.bookmarkUrl }}
-                  >
-                    {selected.bookmarkUrl}
-                  </Text>
-                ) : null}
-              </div>
-              <div className={styles.previewActions}>
-                {selected.isBookmark ? (
-                  <>
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<LinkOutlined />}
-                      href={selected.bookmarkUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {t('files.openBookmarkExternal')}
-                    </Button>
-                    <Button
-                      size="small"
-                      icon={<CommentOutlined />}
-                      loading={sharingToChat}
-                      onClick={handleShareToChat}
-                    >
-                      {t('files.shareToChat')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    {isRemotePendingPath(selected.storagePath) ? (
-                      <Button
-                        type="primary"
-                        size="small"
-                        loading={pulling}
-                        onClick={() => void handlePullRemote()}
-                      >
-                        {t('files.pullRemote')}
-                      </Button>
-                    ) : null}
-                    {!isRemotePendingPath(selected.storagePath) ? (
-                      <Button
-                        size="small"
-                        icon={<DownloadOutlined />}
-                        loading={downloading}
-                        onClick={() => void handleDownload(selected)}
-                      >
-                        {t('files.download')}
-                      </Button>
-                    ) : null}
-                    <Button
-                      size="small"
-                      icon={<CommentOutlined />}
-                      loading={sharingToChat}
-                      onClick={handleShareToChat}
-                    >
-                      {t('files.shareToChat')}
-                    </Button>
-                  </>
-                )}
-              </div>
-              {selected.isBookmark ? (
-                <div className={styles.bookmarkPreviewWrap}>
-                  <Text type="secondary" className={styles.bookmarkPreviewHint}>
-                    {t('files.bookmarkPreviewHint')}
-                  </Text>
-                  <BookmarkWebView
-                    url={selected.bookmarkUrl ?? ''}
-                    title={selected.bookmarkTitle ?? selected.name}
-                  />
-                </div>
-              ) : isRemotePendingPath(selected.storagePath) ? (
-                <Text type="secondary">{t('files.remotePending')}</Text>
-              ) : isLocalRemovedPath(selected.storagePath) ? (
-                <Text type="secondary">{t('files.localRemoved')}</Text>
-              ) : selected.previewStatus === 'converting' ? (
-                <Text>{t('files.convertingLocal')}</Text>
-              ) : previewLoading ? (
-                <ViewLoadingCenter />
-              ) : previewError ? (
-            <ViewErrorCenter message={t('files.previewLoadFailed')} onRetry={retryPreview} />
-          ) : selected.previewStatus === 'failed' ? (
-            <Text type="danger">{t('files.previewFailedDownload')}</Text>
-          ) : previewUrl && ['mp4', 'webm'].includes(selected.ext.toLowerCase()) ? (
-            <video
-              src={previewUrl}
-              controls
-              className={styles.previewVideo}
-              aria-label={selected.name}
-            />
-          ) : previewUrl && selected.category === 'image' ? (
-            <Image src={previewUrl} alt={selected.name} className={styles.previewImg} />
-          ) : previewUrl && selected.ext.toLowerCase() === 'pdf' ? (
-            <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
-          ) : previewText !== null ? (
-            <pre className={styles.previewText}>{previewText}</pre>
-          ) : (
-            <Text type="secondary">{t('files.noInlinePreview', { name: selected.name })}</Text>
-          )}
-            </>
-          )}
-        </aside>
+        {!isNarrow ? (
+          <aside className={styles.previewPane}>
+            {!selected ? (
+              <Text type="secondary">{t('files.selectToPreview')}</Text>
+            ) : (
+              previewBody
+            )}
+          </aside>
+        ) : null}
       </div>
+
+      <Drawer
+        title={selected?.name ?? t('files.previewDrawerTitle')}
+        placement="bottom"
+        height="78%"
+        open={isNarrow && previewDrawerOpen && selected !== null}
+        onClose={() => setPreviewDrawerOpen(false)}
+        destroyOnHidden={false}
+        className={styles.previewDrawer}
+        styles={{ body: { paddingTop: 12 } }}
+        zIndex={1100}
+      >
+        {selected ? previewBody : null}
+      </Drawer>
 
       <Modal
         title={t('files.bookmarkModalTitle')}
@@ -955,6 +991,7 @@ export default function FilesView(): React.ReactElement {
         onOk={() => void saveBookmark()}
         confirmLoading={bookmarkSaving}
         destroyOnHidden
+        zIndex={1200}
       >
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <div>

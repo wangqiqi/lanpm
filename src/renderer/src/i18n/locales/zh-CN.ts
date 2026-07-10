@@ -316,6 +316,7 @@ const zhCN = {
   'files.transferQueue': '传输队列（最多 3 路并发）',
   'files.empty': '暂无文件或书签',
   'files.selectToPreview': '选择文件查看预览',
+  'files.previewDrawerTitle': '预览',
   'files.convertingLocal': '本地转换中…（LibreOffice）',
   'files.previewLoadFailed': '预览加载失败',
   'files.shareToChat': '发送到群聊',

@@ -318,6 +318,7 @@ const enUS = {
   'files.transferQueue': 'Transfer queue (max 3 concurrent)',
   'files.empty': 'No files or bookmarks yet',
   'files.selectToPreview': 'Select a file to preview',
+  'files.previewDrawerTitle': 'Preview',
   'files.convertingLocal': 'Converting locally… (LibreOffice)',
   'files.previewLoadFailed': 'Failed to load preview',
   'files.shareToChat': 'Send to group chat',
