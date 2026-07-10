@@ -56,17 +56,17 @@
 
 .treeRowOnTrack {
   box-shadow: inset 3px 0 0 #34c759;
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
 }
 
 .treeRowBehind {
   box-shadow: inset 3px 0 0 #c99700;
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
 }
 
 .treeRowOverdue {
   box-shadow: inset 3px 0 0 #ff0000;
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
 }
 
 .legendSwatchOnTrack {

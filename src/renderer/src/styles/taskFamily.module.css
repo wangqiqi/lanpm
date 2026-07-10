@@ -35,5 +35,5 @@
 .nodeFamilyStripe {
   padding-left: 8px;
   margin-left: -4px;
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
 }

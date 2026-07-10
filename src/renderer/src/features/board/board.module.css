@@ -21,7 +21,7 @@
   display: flex;
   flex-direction: column;
   min-height: 200px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-surface-solid);
   border: 0.5px solid var(--lanpm-separator);
 }
@@ -69,7 +69,7 @@
   font-size: var(--lanpm-font-body);
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-fill-secondary);
   color: var(--lanpm-text-secondary);
 }
@@ -92,7 +92,7 @@
   justify-content: center;
   padding: 12px;
   border: 1px dashed var(--lanpm-border);
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   color: var(--lanpm-text-secondary);
   font-size: var(--lanpm-font-body);
   text-align: center;
@@ -100,7 +100,7 @@
 
 .card {
   padding: 12px 14px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-bg);
   border: 1px solid var(--lanpm-border);
   border-left-width: 3px;
@@ -213,7 +213,7 @@
   border: none;
   background: transparent;
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: var(--lanpm-radius-sm);
   color: var(--lanpm-text-tertiary);
   cursor: pointer;
   line-height: 1;
@@ -269,7 +269,7 @@
 
 .overlayCard {
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-accent);
   box-shadow: var(--lanpm-shadow-md);
@@ -330,7 +330,7 @@
   gap: 8px;
   margin-bottom: 8px;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-md);
   border: 1px dashed var(--lanpm-border);
   color: var(--lanpm-text-secondary);
   font-size: var(--lanpm-font-body);
