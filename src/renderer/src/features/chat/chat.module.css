@@ -580,7 +580,7 @@
 
 .inputWrap:focus-within {
   background: var(--lanpm-surface-solid);
-  border-color: var(--lanpm-accent);
+  border-color: color-mix(in srgb, var(--lanpm-accent) 36%, var(--lanpm-border));
   box-shadow: 0 0 0 3px var(--lanpm-accent-ring);
 }
 
