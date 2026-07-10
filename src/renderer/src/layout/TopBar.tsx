@@ -229,35 +229,34 @@ export default function TopBar(): React.ReactElement {
         onClick: () => navigate(cockpitPath())
       })
     }
-    if (isNarrowBar) {
-      items.push(
-        {
-          key: 'discover',
-          label: t('topbar.discover'),
-          icon: <CompassOutlined />,
-          onClick: () => setDiscoverOpen(true)
-        },
-        {
-          key: 'create',
-          label: t('topbar.createGroup'),
-          icon: <PlusOutlined />,
-          onClick: () => setCreateOpen(true)
-        }
-      )
-      if (canDissolveGroup) {
-        items.push({
-          key: 'dissolve',
-          label: t('group.dissolve'),
-          icon: <DeleteOutlined />,
-          danger: true,
-          onClick: () => handleDissolveGroup()
-        })
+    // Wide screen operations (Discover, Create Group, Dissolve) also nested inside "More" dropdown
+    // to provide "One Principal CTA" simplicity and reduce clutter in the TopBar.
+    items.push(
+      {
+        key: 'discover',
+        label: t('topbar.discover'),
+        icon: <CompassOutlined />,
+        onClick: () => setDiscoverOpen(true)
+      },
+      {
+        key: 'create',
+        label: t('topbar.createGroup'),
+        icon: <PlusOutlined />,
+        onClick: () => setCreateOpen(true)
       }
+    )
+    if (canDissolveGroup) {
+      items.push({
+        key: 'dissolve',
+        label: t('group.dissolve'),
+        icon: <DeleteOutlined />,
+        danger: true,
+        onClick: () => handleDissolveGroup()
+      })
     }
     return items
   }, [
     isCockpitRoute,
-    isNarrowBar,
     canDissolveGroup,
     t,
     navigate,
@@ -361,26 +360,6 @@ export default function TopBar(): React.ReactElement {
         </div>
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
-          <div className={styles.barWideActions}>
-            <RegionButton variant="toolbar" onClick={() => setDiscoverOpen(true)}>
-              <CompassOutlined />
-              {t('topbar.discover')}
-            </RegionButton>
-            <RegionButton variant="toolbar" onClick={() => setCreateOpen(true)}>
-              <PlusOutlined />
-              {t('topbar.createGroup')}
-            </RegionButton>
-            {canDissolveGroup ? (
-              <RegionButton
-                variant="toolbar"
-                className={styles.toolbarDanger}
-                onClick={handleDissolveGroup}
-              >
-                <DeleteOutlined />
-                {t('group.dissolve')}
-              </RegionButton>
-            ) : null}
-          </div>
           {barOverflowItems.length > 0 ? (
             <Dropdown menu={{ items: barOverflowItems }} trigger={['click']}>
               <RegionButton

@@ -119,14 +119,25 @@
   }
 }
 
+/* Logo back to project premium hover transition */
 .logo {
   gap: 8px;
   padding: 6px 10px;
+  transition: transform var(--lanpm-motion-fast) var(--lanpm-ease-standard) !important;
+}
+
+.logo:hover {
+  transform: scale(1.02);
 }
 
 .logoMark {
   flex-shrink: 0;
   display: block;
+  transition: transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.logo:hover .logoMark {
+  transform: rotate(-4deg) scale(1.05);
 }
 
 :global(html[data-theme='dark']) .logoMark {
