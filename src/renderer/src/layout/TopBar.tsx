@@ -22,7 +22,6 @@ import {
   UserOutlined
 } from '@ant-design/icons'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -86,8 +85,6 @@ export default function TopBar(): React.ReactElement {
   const networkLoading = useNetworkStore((s) => s.loading)
   const [manualPeerOpen, setManualPeerOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const isNarrowBar = useMediaQuery('(max-width: 1100px)')
-
   useEffect(() => {
     void refreshNetwork()
     const timer = setInterval(() => void refreshNetwork({ silent: true }), 8000)

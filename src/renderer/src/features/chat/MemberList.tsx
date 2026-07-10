@@ -60,8 +60,6 @@ export default function MemberList({
     navigate(groupViewPath(dmGroupId, 'chat'))
   }
 
-  const onlineCount = members.filter((m) => m.presence === 'online').length
-
   return (
     <aside className={styles.memberList}>
       <Text className={styles.memberTitle}>
