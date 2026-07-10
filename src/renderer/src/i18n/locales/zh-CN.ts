@@ -510,6 +510,8 @@ const zhCN = {
   'err.apiKeyDevFallbackForbidden':
     '正式版不支持开发用密钥加密。请重新填写 API Key（将使用系统安全存储）。',
   'err.syncTypeUnimplemented': '该同步报文类型尚未实现，无法发送',
+  'sync.taskPublishFailed': '任务同步发送失败，将在恢复连接后重试',
+  'sync.filePublishFailed': '文件元数据同步发送失败，将在恢复连接后重试',
   'files.bookmarkUrlInvalid': '书签地址无效，仅支持 http(s) 链接',
   'err.dependencySelf': '任务不能依赖自身',
   'err.dmSelf': '不能与自己私聊',

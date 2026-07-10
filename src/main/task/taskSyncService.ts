@@ -20,6 +20,7 @@ import {
   handleTaskSyncRequest,
   requestTaskOfflineSync
 } from './taskOfflineSyncService'
+import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -76,7 +77,9 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     return
   }
   if (envelope.type === 'task_sync_request') {
-    void handleTaskSyncRequest(db, envelope).catch(() => undefined)
+    void handleTaskSyncRequest(db, envelope).catch(
+      catchSyncFailure('taskSync.handleRequest', { notify: false })
+    )
     return
   }
   if (envelope.type === 'task_sync_batch') {
@@ -146,7 +149,9 @@ async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Prom
 
 export function initTaskSyncService(db: Database): void {
   refreshSubscriptions(db)
-  void requestTaskOfflineSync(db).catch(() => undefined)
+  void requestTaskOfflineSync(db).catch(
+    catchSyncFailure('taskSync.requestOffline', { notify: false })
+  )
 }
 
 export function shutdownTaskSyncService(): void {
@@ -155,7 +160,11 @@ export function shutdownTaskSyncService(): void {
 }
 
 export function publishTaskUpsert(db: Database, task: Task): void {
-  void publishPatch(db, { action: 'upsert', task }, task.groupId).catch(() => undefined)
+  void publishPatch(db, { action: 'upsert', task }, task.groupId).catch(
+    catchSyncFailure('taskSync.publishUpsert', {
+      messageKey: 'sync.taskPublishFailed'
+    })
+  )
 }
 
 export function publishTaskDelete(db: Database, task: Task): void {
@@ -164,7 +173,11 @@ export function publishTaskDelete(db: Database, task: Task): void {
     db,
     { action: 'delete', task: { ...task, deletedAt: now, updatedAt: now } },
     task.groupId
-  ).catch(() => undefined)
+  ).catch(
+    catchSyncFailure('taskSync.publishDelete', {
+      messageKey: 'sync.taskPublishFailed'
+    })
+  )
 }
 
 export function publishTaskDepUpsert(
@@ -178,7 +191,11 @@ export function publishTaskDepUpsert(
     groupId,
     dependency,
     updatedAt
-  }).catch(() => undefined)
+  }).catch(
+    catchSyncFailure('taskSync.publishDepUpsert', {
+      messageKey: 'sync.taskPublishFailed'
+    })
+  )
 }
 
 export function publishTaskDepDelete(
@@ -192,7 +209,11 @@ export function publishTaskDepDelete(
     groupId,
     dependency,
     updatedAt
-  }).catch(() => undefined)
+  }).catch(
+    catchSyncFailure('taskSync.publishDepDelete', {
+      messageKey: 'sync.taskPublishFailed'
+    })
+  )
 }
 
 export {

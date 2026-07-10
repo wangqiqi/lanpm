@@ -513,6 +513,8 @@ const enUS = {
   'err.apiKeyDevFallbackForbidden':
     'Packaged builds reject development-only key encryption. Re-enter your API key (OS secure storage).',
   'err.syncTypeUnimplemented': 'This sync message type is not implemented yet and cannot be sent',
+  'sync.taskPublishFailed': 'Failed to sync task changes; will retry when connected',
+  'sync.filePublishFailed': 'Failed to sync file metadata; will retry when connected',
   'files.bookmarkUrlInvalid': 'Invalid bookmark URL; only http(s) is allowed',
   'err.dependencySelf': 'A task cannot depend on itself',
   'err.dmSelf': 'You cannot start a DM with yourself',

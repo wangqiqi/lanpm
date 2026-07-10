@@ -6,6 +6,8 @@ import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
 import { GROUP_PUSH_CHANNEL } from '../shared/group/channels'
+import { USER_NOTICE_CHANNEL } from '../shared/sync/userNotice'
+import type { UserNotice } from '../shared/sync/userNotice'
 
 const api: LanpmApi = {
   platform: process.platform,
@@ -16,6 +18,13 @@ const api: LanpmApi = {
   },
   getSuggestedDeviceName: () =>
     ipcRenderer.sendSync('identity:getSuggestedDeviceNameSync') as string,
+  onUserNotice: (handler: (notice: UserNotice) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, notice: UserNotice) => {
+      handler(notice)
+    }
+    ipcRenderer.on(USER_NOTICE_CHANNEL, listener)
+    return () => ipcRenderer.removeListener(USER_NOTICE_CHANNEL, listener)
+  },
   identity: {
     getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),
     completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input),

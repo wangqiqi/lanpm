@@ -21,6 +21,7 @@ import {
   upsertRemoteFileMeta
 } from '../storage/repositories/fileRepository'
 import { generatePreview } from './previewService'
+import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
 const pullBuffers = new Map<
@@ -160,7 +161,9 @@ function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
   ).run(destPath, new Date().toISOString(), meta.fileId)
 
   pullBuffers.delete(chunk.fileId)
-  void generatePreview(db, { ...meta, storagePath: destPath }).catch(() => undefined)
+  void generatePreview(db, { ...meta, storagePath: destPath }).catch(
+    catchSyncFailure('fileSync.generatePreview', { notify: false })
+  )
   broadcastFiles(meta.groupId)
   session.resolve(destPath)
 }
@@ -171,7 +174,9 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     return
   }
   if (envelope.type === 'file_pull_request') {
-    void handleFilePullRequest(db, envelope).catch(() => undefined)
+    void handleFilePullRequest(db, envelope).catch(
+      catchSyncFailure('fileSync.handlePullRequest', { notify: false })
+    )
     return
   }
   if (envelope.type === 'file_chunk') {
@@ -230,7 +235,11 @@ export { armPullReceiver as armPullReceiverForTest }
 export function publishFileMeta(db: Database, meta: FileMeta): void {
   if (meta.isBookmark) return
   const payload: FileMetaBroadcastPayload = { meta }
-  void publishEnvelope(db, meta.groupId, 'file_meta', payload).catch(() => undefined)
+  void publishEnvelope(db, meta.groupId, 'file_meta', payload).catch(
+    catchSyncFailure('fileSync.publishMeta', {
+      messageKey: 'sync.filePublishFailed'
+    })
+  )
 }
 
 export async function pullRemoteFile(db: Database, fileId: string): Promise<FileMeta> {

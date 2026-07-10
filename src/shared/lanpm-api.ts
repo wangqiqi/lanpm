@@ -26,6 +26,7 @@ import type {
   DataCleanupResult,
   DataStorageSettingsView
 } from './data/types'
+import type { UserNotice } from './sync/userNotice'
 
 export interface LanpmApi {
   platform: NodeJS.Platform | 'browser'
@@ -36,6 +37,8 @@ export interface LanpmApi {
   }
   /** 本机设备名（Electron：os.hostname()；浏览器预览：占位） */
   getSuggestedDeviceName: () => string
+  /** Main → renderer 轻提示（同步失败等） */
+  onUserNotice: (handler: (notice: UserNotice) => void) => () => void
   identity: {
     getSetupStatus: () => Promise<SetupStatus>
     completeSetup: (input: SetupInput) => Promise<SetupStatus>

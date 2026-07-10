@@ -506,6 +506,8 @@ export type MessageKey =
   | 'err.apiKeySafeStorageRequired'
   | 'err.apiKeyDevFallbackForbidden'
   | 'err.syncTypeUnimplemented'
+  | 'sync.taskPublishFailed'
+  | 'sync.filePublishFailed'
   | 'files.bookmarkUrlInvalid'
   | 'err.dependencySelf'
   | 'err.dmSelf'

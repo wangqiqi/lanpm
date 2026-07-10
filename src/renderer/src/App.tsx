@@ -8,6 +8,7 @@ import AppRouter from '@renderer/app/AppRouter'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import type { SetupStatus } from '@shared/identity'
 import { translate } from '@renderer/i18n/messages'
+import type { MessageKey } from '@renderer/i18n/types'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './styles/App.module.css'
@@ -63,6 +64,18 @@ export default function App(): React.ReactElement {
     const unsub = getLanpmApi().group.onListChanged(() => void loadGroupsRef.current())
     return unsub
   }, [configured])
+
+  useEffect(() => {
+    const unsub = getLanpmApi().onUserNotice((notice) => {
+      const text = translate(locale, notice.messageKey as MessageKey)
+      if (notice.level === 'error') {
+        messageRef.current.error?.(text)
+      } else {
+        messageRef.current.warning?.(text)
+      }
+    })
+    return unsub
+  }, [locale])
 
   useEffect(() => loadIdentity(), [])
 

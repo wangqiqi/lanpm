@@ -383,6 +383,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       electron: 'dev'
     },
     getSuggestedDeviceName: previewDeviceName,
+    onUserNotice: () => () => undefined,
     identity: {
       getSetupStatus: async () => {
         if (import.meta.env.DEV) {

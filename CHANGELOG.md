@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **任务/文件同步失败可观测 (TASK-142)**：去掉静默 `.catch`；主进程打日志；用户侧 publish 失败 toast（`app:userNotice`）；预期离线早退不误报。
 - **聊天发送失败可重试 (TASK-141)**：publish 失败标记 `failed`；有限次自动重试（退避）；气泡「重试」+ `chat:retryMessage` IPC。
 - **群置顶与活跃排序 (TASK-139)**：本机置顶（localStorage）；下拉按置顶优先、其余按最后消息时间降序；`group:listLastActivity` 聚合查询。
 - **SPRINT-GROUP-SWITCHER 收尾 (TASK-140)**：Sprint VERIFY 绿；README 顶栏群切换能力一句化；归档 `20260711_003600_group_switcher_summary.md`。

@@ -18,6 +18,7 @@ import {
 import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
+import { catchSyncFailure } from '../utils/reportSyncFailure'
 import {
   applyRemoteDepPatch,
   getMaxDepUpdatedAt,
@@ -202,6 +203,8 @@ export function handleTaskSyncBatch(
       maxUpdatedAtInTasks(envelope.payload.tasks),
       maxUpdatedAtInDepPatches(envelope.payload.dependencies)
     )
-    void publishTaskSyncRequest(db, envelope.groupId, nextSince, cutoff).catch(() => undefined)
+    void publishTaskSyncRequest(db, envelope.groupId, nextSince, cutoff).catch(
+      catchSyncFailure('taskOffline.publishNextPage', { notify: false })
+    )
   }
 }
