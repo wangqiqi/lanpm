@@ -8,6 +8,7 @@
 - **头像实际可见**：TopBar / 个人资料 / 聊天气泡 / 成员列表 / 成员资料弹窗统一消费 `avatarUrl`；修复历史 SVG `;utf8` data URL 无法加载；缺省用按 userId 确定性色块兜底。
 
 ### Added
+- **SPRINT-SYNC-RELIABILITY 收尾 (TASK-145)**：Sprint VERIFY 绿；归档 `20260711_005222_sync_reliability_summary.md`；handoff `/release` → v1.0.6。
 - **聊天建任务失败补偿 (TASK-144)**：`createTaskFromChat` 在消息 publish 失败时软删任务并撤回本地消息，保持消息/任务一致。
 - **LWW 平局决胜 (TASK-143)**：`updatedAt` 相等时用 `senderDeviceId` 字典序决胜；SQLite `last_writer_device_id`（schema v3）；`lwwShouldApply` 单测 + sync/dep 集成覆盖。
 - **任务/文件同步失败可观测 (TASK-142)**：去掉静默 `.catch`；主进程打日志；用户侧 publish 失败 toast（`app:userNotice`）；预期离线早退不误报。
