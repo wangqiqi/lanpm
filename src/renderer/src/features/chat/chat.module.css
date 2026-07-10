@@ -469,7 +469,7 @@
 }
 
 .memberItem {
-  padding: 4px 0 !important;
+  padding: 2px 0 !important;
   border: none !important;
 }
 
@@ -478,16 +478,19 @@
   align-items: center;
   gap: 2px;
   width: 100%;
-  border-radius: 8px;
-  transition: background-color 0.15s ease;
+  border-radius: 6px;
+  height: 38px; /* Precise premium density line height */
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
-.memberRow:hover .memberBtn {
+.memberRow:hover {
   background: var(--lanpm-hover-bg);
 }
 
-.memberRow:active .memberBtn {
-  background: var(--lanpm-accent-fill-strong);
+.memberRow:active {
+  background: var(--lanpm-fill-secondary);
 }
 
 .dmBtn {
@@ -496,12 +499,12 @@
   background: transparent;
   cursor: pointer;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--lanpm-text-secondary);
   font-size: var(--lanpm-font-body);
   transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
 .dmBtn:hover {
@@ -516,17 +519,20 @@
 .memberBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
   border: none;
   background: transparent;
   cursor: pointer;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   text-align: left;
   color: inherit;
-  transition: background-color 0.15s ease;
+  font-size: var(--lanpm-font-body);
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
 .memberDot {
