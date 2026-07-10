@@ -2,8 +2,10 @@ import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import type { BrowserWindow } from 'electron'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
+import type { ChatMessagePage } from '../../shared/chat/pagination'
+import { CHAT_HISTORY_PAGE_SIZE } from '../../shared/chat/pagination'
 import { throwLanpm } from '../../shared/errors/lanpmError'
-import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
+import { assertGroupAllowsTasks, isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { detectLanguage } from '../../shared/chat/detectLanguage'
 import { parseMentions } from '../../shared/chat/mentions'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
@@ -23,6 +25,7 @@ import {
 } from '../data/messageRetentionService'
 import { uploadFileFromPath } from '../file/fileService'
 import { getFileById } from '../storage/repositories/fileRepository'
+import { getTaskById } from '../storage/repositories/taskRepository'
 import { showOpenDialog } from '../systemDialog'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
@@ -36,7 +39,8 @@ import {
 import {
   getMaxLamportTs,
   insertMessage,
-  listMessagesByGroup,
+  listMessagesBeforePage,
+  listRecentMessagesPage,
   messageExists,
   updateDeliveryStatus
 } from '../storage/repositories/messageRepository'
@@ -144,14 +148,32 @@ export function shutdownChatService(): void {
   subscribedGroups.clear()
 }
 
-export function listGroupMessages(db: Database, groupId: string): ChatMessage[] {
+export function listGroupMessages(db: Database, groupId: string): ChatMessagePage {
   const transport = getNetworkTransport()
   if (transport) ensureSubscribed(db, transport, groupId)
 
   if (isAnonymousGroup(db, groupId)) {
-    return listAnonymousMessages(groupId)
+    const messages = listAnonymousMessages(groupId)
+    return { messages, hasMore: false }
   }
-  return listMessagesByGroup(db, groupId)
+  return listRecentMessagesPage(db, groupId, CHAT_HISTORY_PAGE_SIZE)
+}
+
+export function listOlderGroupMessages(
+  db: Database,
+  groupId: string,
+  beforeLamportTs: number
+): ChatMessagePage {
+  const transport = getNetworkTransport()
+  if (transport) ensureSubscribed(db, transport, groupId)
+
+  if (isAnonymousGroup(db, groupId)) {
+    return { messages: [], hasMore: false }
+  }
+  if (!Number.isFinite(beforeLamportTs) || beforeLamportTs <= 0) {
+    return { messages: [], hasMore: false }
+  }
+  return listMessagesBeforePage(db, groupId, beforeLamportTs, CHAT_HISTORY_PAGE_SIZE)
 }
 
 export async function publishChatMessage(
@@ -291,5 +313,26 @@ export async function sendCodeMessage(
     language,
     code: trimmed,
     theme
+  })
+}
+
+/** Send a task_ref chat message for an existing task (used by referenceTaskFromChat). */
+export async function sendTaskRefMessage(
+  db: Database,
+  groupId: string,
+  taskId: string
+): Promise<ChatMessage> {
+  if (isAnonymousGroup(db, groupId)) {
+    throwLanpm('err.anonymousTextOnly')
+  }
+  assertGroupAllowsTasks(resolveGroupType(db, groupId))
+  const task = getTaskById(db, taskId)
+  if (!task || task.groupId !== groupId) {
+    throwLanpm('stub.taskNotFound')
+  }
+  return publishChatMessage(db, groupId, 'task_ref', {
+    kind: 'task_ref',
+    taskId: task.taskId,
+    title: task.title
   })
 }

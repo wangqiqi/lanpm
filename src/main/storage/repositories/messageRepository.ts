@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { ChatMessage, MessageContent, MessageDeliveryStatus } from '../../../shared/chat/types'
+import { CHAT_HISTORY_PAGE_SIZE, type ChatMessagePage } from '../../../shared/chat/pagination.ts'
 
 interface MessageRow {
   msg_id: string
@@ -116,6 +117,52 @@ export function listMessagesByGroup(
     )
     .all(groupId, limit) as MessageRow[]
   return rows.map(rowToMessage)
+}
+
+/** Newest `limit` messages (ASC for UI), with hasMore when older history exists. */
+export function listRecentMessagesPage(
+  db: Database,
+  groupId: string,
+  limit = CHAT_HISTORY_PAGE_SIZE
+): ChatMessagePage {
+  const rows = db
+    .prepare(
+      `SELECT * FROM messages
+       WHERE group_id = ?
+       ORDER BY lamport_ts DESC, created_at DESC
+       LIMIT ?`
+    )
+    .all(groupId, limit + 1) as MessageRow[]
+  const hasMore = rows.length > limit
+  const page = hasMore ? rows.slice(0, limit) : rows
+  return {
+    messages: page.reverse().map(rowToMessage),
+    hasMore
+  }
+}
+
+/** Older page strictly before `beforeLamportTs` (ASC for prepend). */
+export function listMessagesBeforePage(
+  db: Database,
+  groupId: string,
+  beforeLamportTs: number,
+  limit = CHAT_HISTORY_PAGE_SIZE
+): ChatMessagePage {
+  const rows = db
+    .prepare(
+      `SELECT * FROM messages
+       WHERE group_id = ?
+         AND lamport_ts < ?
+       ORDER BY lamport_ts DESC, created_at DESC
+       LIMIT ?`
+    )
+    .all(groupId, beforeLamportTs, limit + 1) as MessageRow[]
+  const hasMore = rows.length > limit
+  const page = hasMore ? rows.slice(0, limit) : rows
+  return {
+    messages: page.reverse().map(rowToMessage),
+    hasMore
+  }
 }
 
 /** ARCH-07 — 离线补同步：拉取 lamport 之后且未过 TTL 的消息 */

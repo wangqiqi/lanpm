@@ -86,9 +86,12 @@ export default function ChatView(): React.ReactElement {
     setDmPickerOpen(false)
   }, [gid])
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
+  const hasMore = useChatStore((s) => s.hasMoreByGroup[gid] ?? false)
   const loading = useChatStore((s) => s.loading[gid])
+  const loadingOlder = useChatStore((s) => s.loadingOlder[gid])
   const loadError = useChatStore((s) => s.loadError[gid])
   const loadMessages = useChatStore((s) => s.loadMessages)
+  const loadOlderMessages = useChatStore((s) => s.loadOlderMessages)
   const sendText = useChatStore((s) => s.sendText)
   const sendCode = useChatStore((s) => s.sendCode)
   const pickAndSendFile = useChatStore((s) => s.pickAndSendFile)
@@ -214,6 +217,22 @@ export default function ChatView(): React.ReactElement {
     currentUserId,
     groupKey: gid
   })
+
+  const handleMessagesScroll = useCallback(() => {
+    onMessagesScroll()
+    const el = listRef.current
+    if (!el || !gid || !hasMore || loadingOlder) return
+    if (el.scrollTop > 48) return
+    const prevHeight = el.scrollHeight
+    const prevTop = el.scrollTop
+    void loadOlderMessages(gid).then(() => {
+      requestAnimationFrame(() => {
+        const node = listRef.current
+        if (!node) return
+        node.scrollTop = node.scrollHeight - prevHeight + prevTop
+      })
+    })
+  }, [onMessagesScroll, gid, hasMore, loadingOlder, loadOlderMessages])
 
   const onlineCount = useMemo(
     () => members.filter((m) => m.presence === 'online').length,
@@ -543,7 +562,7 @@ export default function ChatView(): React.ReactElement {
           </div>
         )}
         <div className={styles.messagesWrap}>
-        <div className={styles.messages} ref={listRef} onScroll={onMessagesScroll}>
+        <div className={styles.messages} ref={listRef} onScroll={handleMessagesScroll}>
           {loading && messages.length === 0 ? (
             <ViewLoadingCenter />
           ) : loadError && messages.length === 0 ? (
@@ -557,6 +576,11 @@ export default function ChatView(): React.ReactElement {
             </Text>
           ) : (
             <div className={styles.messageList}>
+              {(hasMore || loadingOlder) && (
+                <div className={styles.loadOlder}>
+                  {loadingOlder ? t('chat.loadingOlder') : t('chat.loadOlderHint')}
+                </div>
+              )}
               {dayGroups.map((group) => (
                 <div key={group.dayKey} className={styles.dayGroup}>
                   <div className={styles.dayLabel}>{group.label}</div>

@@ -730,6 +730,14 @@
   min-width: 0;
 }
 
+.loadOlder {
+  align-self: center;
+  font-size: var(--lanpm-font-body);
+  color: var(--lanpm-text-secondary);
+  padding: 8px 12px;
+  opacity: 0.85;
+}
+
 .messageRow {
   display: flex;
   align-items: flex-start;

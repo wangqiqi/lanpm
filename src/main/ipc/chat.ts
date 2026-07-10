@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import {
   listGroupMembers,
   listGroupMessages,
+  listOlderGroupMessages,
   sendCodeMessage,
   pickAndSendFileMessage,
   recallMessage,
@@ -21,6 +22,19 @@ export function registerChatIpc(): void {
     }
     return listGroupMessages(getDatabase(), groupId)
   })
+
+  ipcMain.handle(
+    CHAT_IPC.loadOlderMessages,
+    (_event, groupId: string, beforeLamportTs: number) => {
+      if (typeof groupId !== 'string' || !groupId) {
+        throw new Error('groupId required')
+      }
+      if (typeof beforeLamportTs !== 'number' || !Number.isFinite(beforeLamportTs)) {
+        throw new Error('beforeLamportTs required')
+      }
+      return listOlderGroupMessages(getDatabase(), groupId, beforeLamportTs)
+    }
+  )
 
   ipcMain.handle(CHAT_IPC.sendText, (_event, groupId: string, text: string) => {
     if (typeof groupId !== 'string' || !groupId) {

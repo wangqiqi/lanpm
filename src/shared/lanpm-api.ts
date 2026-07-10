@@ -1,5 +1,6 @@
 import type { DiscoverSnapshot } from './discover/types'
 import type { ChatMessage } from './chat/types'
+import type { ChatMessagePage } from './chat/pagination'
 import type { GroupMemberView } from './chat/members'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from './identity'
 import type {
@@ -42,7 +43,8 @@ export interface LanpmApi {
     resetIdentity: () => Promise<SetupStatus>
   }
   chat: {
-    listMessages: (groupId: string) => Promise<ChatMessage[]>
+    listMessages: (groupId: string) => Promise<ChatMessagePage>
+    loadOlderMessages: (groupId: string, beforeLamportTs: number) => Promise<ChatMessagePage>
     sendText: (groupId: string, text: string) => Promise<ChatMessage>
     sendCode: (
       groupId: string,

@@ -4,9 +4,12 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
 interface ChatState {
   messagesByGroup: Record<string, ChatMessage[]>
+  hasMoreByGroup: Record<string, boolean>
   loading: Record<string, boolean>
+  loadingOlder: Record<string, boolean>
   loadError: Record<string, boolean>
   loadMessages: (groupId: string) => Promise<void>
+  loadOlderMessages: (groupId: string) => Promise<void>
   clearLoadError: (groupId: string) => void
   sendText: (groupId: string, text: string) => Promise<void>
   sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
@@ -34,9 +37,19 @@ function mergeMessage(list: ChatMessage[], message: ChatMessage): ChatMessage[] 
   return sortMessages([...list, message])
 }
 
+function mergeOlder(existing: ChatMessage[], older: ChatMessage[]): ChatMessage[] {
+  const byId = new Map(existing.map((m) => [m.msgId, m]))
+  for (const m of older) {
+    if (!byId.has(m.msgId)) byId.set(m.msgId, m)
+  }
+  return sortMessages([...byId.values()])
+}
+
 export const useChatStore = create<ChatState>((set, get) => ({
   messagesByGroup: {},
+  hasMoreByGroup: {},
   loading: {},
+  loadingOlder: {},
   loadError: {},
   clearLoadError: (groupId) =>
     set((s) => ({ loadError: { ...s.loadError, [groupId]: false } })),
@@ -46,14 +59,34 @@ export const useChatStore = create<ChatState>((set, get) => ({
       loadError: { ...s.loadError, [groupId]: false }
     }))
     try {
-      const messages = await getLanpmApi().chat.listMessages(groupId)
+      const page = await getLanpmApi().chat.listMessages(groupId)
       set((s) => ({
-        messagesByGroup: { ...s.messagesByGroup, [groupId]: sortMessages(messages) }
+        messagesByGroup: { ...s.messagesByGroup, [groupId]: sortMessages(page.messages) },
+        hasMoreByGroup: { ...s.hasMoreByGroup, [groupId]: page.hasMore }
       }))
     } catch {
       set((s) => ({ loadError: { ...s.loadError, [groupId]: true } }))
     } finally {
       set((s) => ({ loading: { ...s.loading, [groupId]: false } }))
+    }
+  },
+  loadOlderMessages: async (groupId) => {
+    const existing = get().messagesByGroup[groupId] ?? []
+    if (!get().hasMoreByGroup[groupId] || existing.length === 0) return
+    if (get().loadingOlder[groupId]) return
+    const beforeLamportTs = existing[0]!.lamportTs
+    set((s) => ({ loadingOlder: { ...s.loadingOlder, [groupId]: true } }))
+    try {
+      const page = await getLanpmApi().chat.loadOlderMessages(groupId, beforeLamportTs)
+      set((s) => ({
+        messagesByGroup: {
+          ...s.messagesByGroup,
+          [groupId]: mergeOlder(s.messagesByGroup[groupId] ?? [], page.messages)
+        },
+        hasMoreByGroup: { ...s.hasMoreByGroup, [groupId]: page.hasMore }
+      }))
+    } finally {
+      set((s) => ({ loadingOlder: { ...s.loadingOlder, [groupId]: false } }))
     }
   },
   sendText: async (groupId, text) => {
@@ -89,7 +122,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set((s) => {
       const rest = { ...s.messagesByGroup }
       delete rest[groupId]
-      return { messagesByGroup: rest }
+      const hasMore = { ...s.hasMoreByGroup }
+      delete hasMore[groupId]
+      return { messagesByGroup: rest, hasMoreByGroup: hasMore }
     })
   },
   upsertMessage: (message) => {

@@ -358,6 +358,8 @@ const zhCN = {
   'files.rateLimitKbps': '限速 (KB/s)',
   'files.rateLimitHint': '0 表示不限速',
   'chat.noMessages': '暂无消息，输入 @成员名 可提及',
+  'chat.loadOlderHint': '上滑加载更早消息',
+  'chat.loadingOlder': '正在加载更早消息…',
   'chat.inputHint': 'Ctrl+Enter 发送 · @ 提及',
   'chat.inputHintEnter': 'Enter 发送 · Shift+Enter 换行 · @ 提及',
   'chat.inputHintTask': ' · /task 或 /task 标题 创建任务',

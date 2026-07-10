@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@shared/chat/types'
+import { CHAT_HISTORY_PAGE_SIZE } from '@shared/chat/pagination'
 import type { GroupMemberView } from '@shared/chat/members'
 import { canRecallMessage, toRecalledMessage } from '@shared/chat/recall'
 import { parseMentions } from '@shared/chat/mentions'
@@ -453,7 +454,20 @@ export function createBrowserLanpmStub(): LanpmApi {
       listMessages: async (groupId) => {
         const status = readStatus()
         const localUserId = status.configured && status.user ? status.user.userId : undefined
-        return applyReadStatus(readChatMessages(groupId), localUserId)
+        const all = applyReadStatus(readChatMessages(groupId), localUserId)
+        const hasMore = all.length > CHAT_HISTORY_PAGE_SIZE
+        const messages = hasMore ? all.slice(-CHAT_HISTORY_PAGE_SIZE) : all
+        return { messages, hasMore }
+      },
+      loadOlderMessages: async (groupId, beforeLamportTs) => {
+        const status = readStatus()
+        const localUserId = status.configured && status.user ? status.user.userId : undefined
+        const all = applyReadStatus(readChatMessages(groupId), localUserId).filter(
+          (m) => m.lamportTs < beforeLamportTs
+        )
+        const hasMore = all.length > CHAT_HISTORY_PAGE_SIZE
+        const messages = hasMore ? all.slice(-CHAT_HISTORY_PAGE_SIZE) : all
+        return { messages, hasMore }
       },
       sendText: async (groupId, text) => {
         const status = readStatus()

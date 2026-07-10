@@ -25,6 +25,8 @@ const api: LanpmApi = {
   },
   chat: {
     listMessages: (groupId) => ipcRenderer.invoke('chat:listMessages', groupId),
+    loadOlderMessages: (groupId, beforeLamportTs) =>
+      ipcRenderer.invoke('chat:loadOlderMessages', groupId, beforeLamportTs),
     sendText: (groupId, text) => ipcRenderer.invoke('chat:sendText', groupId, text),
     sendCode: (groupId, code, languageHint, theme) =>
       ipcRenderer.invoke('chat:sendCode', groupId, code, languageHint, theme),

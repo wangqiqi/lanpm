@@ -41,6 +41,9 @@ export function useNewMessageScroll({
     prevCountRef.current = messageCount
     if (delta <= 0) return
 
+    // Prepend (load older): keep viewport; do not treat as "new messages".
+    if (el.scrollTop < 120) return
+
     const ownNew = lastSenderUserId != null && lastSenderUserId === currentUserId
 
     if (pinnedRef.current || ownNew) {

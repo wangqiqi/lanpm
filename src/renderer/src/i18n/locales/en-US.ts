@@ -360,6 +360,8 @@ const enUS = {
   'files.rateLimitKbps': 'Rate limit (KB/s)',
   'files.rateLimitHint': '0 = unlimited',
   'chat.noMessages': 'No messages yet. Type @name to mention someone.',
+  'chat.loadOlderHint': 'Scroll up for earlier messages',
+  'chat.loadingOlder': 'Loading earlier messages…',
   'chat.inputHint': 'Ctrl+Enter to send · @ to mention',
   'chat.inputHintEnter': 'Enter to send · Shift+Enter for newline · @ to mention',
   'chat.inputHintTask': ' · /task or /task title to create a task',

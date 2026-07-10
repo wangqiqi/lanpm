@@ -356,6 +356,8 @@ export type MessageKey =
   | 'files.rateLimitKbps'
   | 'files.rateLimitHint'
   | 'chat.noMessages'
+  | 'chat.loadOlderHint'
+  | 'chat.loadingOlder'
   | 'chat.inputHint'
   | 'chat.inputHintEnter'
   | 'chat.inputHintTask'

@@ -60,6 +60,7 @@
     "verify:discover": "node --experimental-strip-types tests/static/verify-discover.ts",
     "verify:m1": "npm run verify:routes && npm run verify:topbar && npm run verify:profile-panel && npm run verify:discover",
     "verify:chat": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-chat.ts",
+    "verify:chat-history-page": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-chat-history-page.ts",
     "verify:mentions": "node --experimental-strip-types tests/static/verify-mentions.ts",
     "verify:dm": "node --experimental-strip-types tests/static/verify-dm.ts",
     "verify:presence": "node --experimental-strip-types tests/static/verify-presence.ts",
