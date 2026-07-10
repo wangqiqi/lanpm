@@ -425,6 +425,7 @@ const zhCN = {
   'chat.deliveryRead': '已读',
   'chat.markReadFailed': '标记已读失败',
   'chat.taskRef': '📋 任务：{title}',
+  'chat.viewTask': '查看看板任务',
   'chat.unknownMessage': '不支持的消息类型：{type}',
   'chat.fileBtn': '文件',
   'chat.fileMessage': '📎 {name}（{size}）',

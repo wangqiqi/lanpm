@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Avatar, Dropdown, type MenuProps } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { UserOutlined, FileOutlined, ProjectOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
@@ -148,7 +148,7 @@ export default function MessageBubble({
       {message.content.kind === 'file' && groupId && (
         <button
           type="button"
-          className={styles.bubbleAttachLink}
+          className={styles.bubbleAttachCard}
           aria-label={t('chat.openInFiles')}
           onClick={() => {
             if (message.content.kind !== 'file') return
@@ -157,20 +157,31 @@ export default function MessageBubble({
             })
           }}
         >
-          {t('chat.fileMessage', {
-            name: message.content.fileName,
-            size: formatFileSize(message.content.size)
-          })}
+          <div className={styles.attachIcon}>
+            <FileOutlined />
+          </div>
+          <div className={styles.attachInfo}>
+            <span className={styles.attachTitle}>{message.content.fileName}</span>
+            <span className={styles.attachMeta}>
+              {formatFileSize(message.content.size)} • {t('chat.openInFiles')}
+            </span>
+          </div>
         </button>
       )}
 
       {message.content.kind === 'task_ref' && groupId && (
         <button
           type="button"
-          className={styles.bubbleAttachLink}
+          className={styles.bubbleAttachCard}
           onClick={() => navigate(groupViewPath(groupId, 'board'))}
         >
-          {t('chat.taskRef', { title: message.content.title })}
+          <div className={styles.attachIcon}>
+            <ProjectOutlined />
+          </div>
+          <div className={styles.attachInfo}>
+            <span className={styles.attachTitle}>{message.content.title}</span>
+            <span className={styles.attachMeta}>{t('chat.viewTask')}</span>
+          </div>
         </button>
       )}
 

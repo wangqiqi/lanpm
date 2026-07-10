@@ -423,6 +423,7 @@ export type MessageKey =
   | 'chat.deliveryRead'
   | 'chat.markReadFailed'
   | 'chat.taskRef'
+  | 'chat.viewTask'
   | 'chat.unknownMessage'
   | 'chat.fileBtn'
   | 'chat.fileMessage'

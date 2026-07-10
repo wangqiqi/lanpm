@@ -427,6 +427,7 @@ const enUS = {
   'chat.deliveryRead': 'Read',
   'chat.markReadFailed': 'Failed to mark as read',
   'chat.taskRef': '📋 Task: {title}',
+  'chat.viewTask': 'View Board Task',
   'chat.unknownMessage': 'Unsupported message type: {type}',
   'chat.fileBtn': 'File',
   'chat.fileMessage': '📎 {name} ({size})',

@@ -359,26 +359,70 @@
   padding: 4px 8px 8px;
 }
 
-.bubbleAttachLink {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
+.bubbleAttachCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--lanpm-surface-solid);
+  border: 1px solid var(--lanpm-border);
   cursor: pointer;
   text-align: left;
   font: inherit;
-  font-weight: 500;
+  color: var(--lanpm-text);
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+  width: 100%;
+  box-shadow: var(--lanpm-shadow-sm);
+  margin-top: 4px;
+}
+
+.bubbleAttachCard:hover {
+  background: var(--lanpm-hover-bg);
+  border-color: var(--lanpm-text-secondary);
+  transform: translateY(-1px);
+}
+
+.bubbleAttachCard:active {
+  transform: translateY(0);
+}
+
+.attachIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--lanpm-fill-secondary);
   color: var(--lanpm-accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
-.bubbleOwn .bubbleAttachLink {
-  color: var(--lanpm-on-accent);
+.attachInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
-.bubbleOwn .bubbleAttachLink:hover {
-  opacity: 0.92;
+.attachTitle {
+  font-size: var(--lanpm-font-body);
+  font-weight: 500;
+  color: var(--lanpm-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachMeta {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
 }
 
 .dmHint {
@@ -777,18 +821,24 @@
   width: fit-content;
   min-width: 0;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 
 .bubbleOwn {
-  background: var(--lanpm-accent);
-  color: var(--lanpm-on-accent);
+  background: var(--lanpm-accent-fill);
+  color: var(--lanpm-accent);
+  border: 1.5px solid rgba(0, 102, 204, 0.12);
+}
+
+:global(html[data-theme='dark']) .bubbleOwn {
+  border: 1.5px solid rgba(10, 132, 255, 0.24);
 }
 
 .bubbleOther {
   background: var(--lanpm-bubble-bg);
+  border: 1.5px solid transparent;
 }
 
 .searchHighlight {
