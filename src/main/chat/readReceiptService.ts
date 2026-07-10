@@ -17,6 +17,12 @@ import {
 } from '../storage/repositories/readReceiptRepository'
 import { broadcastMessage } from './chatBroadcast'
 
+/** TASK-151 — protocol types (handlers land in TASK-153) */
+export const READ_RECEIPT_OFFLINE_SYNC_TYPES = [
+  'read_receipt_sync_request',
+  'read_receipt_sync_batch'
+] as const
+
 let readReceiptUnsub: (() => void) | null = null
 
 function applyReadStatusToMessage(db: Database, msgId: string): void {

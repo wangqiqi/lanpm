@@ -19,6 +19,8 @@ export type SyncMessageType =
   | 'group_key_rotate'
   | 'chat_sync_request'
   | 'chat_sync_batch'
+  | 'read_receipt_sync_request'
+  | 'read_receipt_sync_batch'
 
 /** docs/04 §6.1 */
 export interface SyncEnvelope {

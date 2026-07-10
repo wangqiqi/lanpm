@@ -25,7 +25,9 @@ const SYNC_TYPES = [
   'member_event',
   'group_key_rotate',
   'chat_sync_request',
-  'chat_sync_batch'
+  'chat_sync_batch',
+  'read_receipt_sync_request',
+  'read_receipt_sync_batch'
 ] as const
 
 /** post-RC / transport-level — 允许仅在文档或 transport 出现 */

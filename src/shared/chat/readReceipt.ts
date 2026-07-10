@@ -11,6 +11,55 @@ export interface ReadReceiptPayload {
   receipt: ReadReceipt
 }
 
+/** 已读离线补拉请求（TASK-151；7 天窗对齐 chat/task） */
+export interface ReadReceiptSyncRequestPayload {
+  /** 排他下界；空串 = 从 epoch */
+  sinceReadAt: string
+  /** 7 天 cutoff ISO8601 */
+  minReadAt: string
+}
+
+export interface ReadReceiptSyncBatchPayload {
+  receipts: ReadReceipt[]
+  hasMore?: boolean
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+export function isReadReceipt(value: unknown): value is ReadReceipt {
+  if (!isRecord(value)) return false
+  return (
+    typeof value.msgId === 'string' &&
+    !!value.msgId &&
+    typeof value.groupId === 'string' &&
+    !!value.groupId &&
+    typeof value.readerUserId === 'string' &&
+    !!value.readerUserId &&
+    typeof value.readerDeviceId === 'string' &&
+    !!value.readerDeviceId &&
+    typeof value.readAt === 'string' &&
+    !!value.readAt
+  )
+}
+
+export function isReadReceiptSyncRequestPayload(
+  value: unknown
+): value is ReadReceiptSyncRequestPayload {
+  if (!isRecord(value)) return false
+  return typeof value.sinceReadAt === 'string' && typeof value.minReadAt === 'string' && !!value.minReadAt
+}
+
+export function isReadReceiptSyncBatchPayload(
+  value: unknown
+): value is ReadReceiptSyncBatchPayload {
+  if (!isRecord(value)) return false
+  if (!Array.isArray(value.receipts)) return false
+  if (value.hasMore !== undefined && typeof value.hasMore !== 'boolean') return false
+  return value.receipts.every(isReadReceipt)
+}
+
 /** 任一非发送方 userId 已读即视为已读（M2 双实例 / 小群） */
 export function isMessageReadByOthers(
   senderUserId: string,
