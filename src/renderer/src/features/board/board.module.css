@@ -24,6 +24,7 @@
   border-radius: var(--lanpm-radius-lg);
   background: var(--lanpm-surface-solid);
   border: 0.5px solid var(--lanpm-separator);
+  box-shadow: var(--lanpm-shadow-surface);
 }
 
 .columnOver {
@@ -82,6 +83,7 @@
   flex-direction: column;
   gap: 8px;
   min-height: 120px;
+  background: var(--lanpm-bg);
 }
 
 .columnDropHint {
@@ -101,12 +103,13 @@
 .card {
   padding: 12px 14px;
   border-radius: var(--lanpm-radius-md);
-  background: var(--lanpm-bg);
+  background: var(--lanpm-surface-solid);
   border: 1px solid var(--lanpm-border);
   border-left-width: 3px;
   border-left-color: var(--lanpm-border);
   cursor: grab;
   touch-action: none;
+  box-shadow: var(--lanpm-shadow-card);
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,
@@ -123,7 +126,7 @@
 }
 
 .cardBlocked {
-  background: color-mix(in srgb, var(--lanpm-danger-fill) 35%, var(--lanpm-bg));
+  background: color-mix(in srgb, var(--lanpm-danger-fill) 35%, var(--lanpm-surface-solid));
 }
 
 .cardRelations {
@@ -159,7 +162,7 @@
 
 .card:hover {
   border-color: color-mix(in srgb, var(--lanpm-accent) 35%, var(--lanpm-border));
-  box-shadow: var(--lanpm-shadow-sm);
+  box-shadow: var(--lanpm-shadow-md);
 }
 
 .cardDragging {
