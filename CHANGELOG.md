@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **聊天页去重群名 (TASK-137)**：群名 / DM 名仅保留在 TopBar 切换器；聊天页不再渲染重复的 `ViewHeader` 大标题；Select 与 Logo 对齐字阶与高度；`docs/04` §1.4 同步。
+
 ### Added
 - **聊天引用任务 (#)**：输入 `#` 弹出任务建议；`chat:sendTaskRef` / `task:referenceFromChat`；气泡可点击跳转看板。
 - **任务离线补拉 (TASK-134)**：`task_sync_request` / `task_sync_batch`；按 `updatedAt` 合并分页拉取任务与依赖（含软删）；`verify:task-offline-sync`。

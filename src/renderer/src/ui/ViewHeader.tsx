@@ -10,7 +10,7 @@ interface ViewHeaderProps {
   showDivider?: boolean
 }
 
-/** 群组内 / 驾驶舱统一页标题（level 4，docs/05） */
+/** 群组内任务视图 / 驾驶舱页标题（level 4，docs/04 §1.4）；聊天页不使用 */
 export default function ViewHeader({
   title,
   actions,

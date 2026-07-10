@@ -3,8 +3,7 @@ import { Alert } from 'antd'
 import { useParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
-import { getDmPeerUserId, isDmGroupId } from '@shared/chat/dmSession'
-import { resolveGroupDisplayName, resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
+import { isDmGroupId } from '@shared/chat/dmSession'
 import BoardView from '@renderer/features/board/BoardView'
 import ChatView from '@renderer/features/chat/ChatView'
 import FilesView from '@renderer/features/files/FilesView'
@@ -12,7 +11,6 @@ import GanttView from '@renderer/features/gantt/GanttView'
 import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
-import { useIdentityStore } from '@renderer/stores/identityStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewHeader from '@renderer/ui/ViewHeader'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -20,16 +18,13 @@ import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import styles from './GroupView.module.css'
 
-/** 聊天页标题为群名/DM 名；任务类视图为模块名（docs/05 §1.1） */
+/** 聊天页群名仅 TopBar；任务类视图为模块名（docs/04 §1.4） */
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
-  const group = useNavigationStore((s) => s.groups.find((g) => g.groupId === groupId))
   const getGroupType = useNavigationStore((s) => s.getGroupType)
-  const getPeerDisplayName = useDmStore((s) => s.getPeerDisplayName)
   const touchSession = useDmStore((s) => s.touchSession)
-  const localUserId = useIdentityStore((s) => s.user?.userId)
 
   useEffect(() => {
     if (groupId && isDmGroupId(groupId)) {
@@ -52,20 +47,8 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     }
   }, [groupId, getGroupType, t, message])
 
-  const chatTitle = (() => {
-    if (!groupId) return '—'
-    if (isDmGroupId(groupId) && localUserId) {
-      const peerId = getDmPeerUserId(groupId, localUserId)
-      if (peerId) {
-        return t('topbar.dmLabel', { name: getPeerDisplayName(groupId, peerId) })
-      }
-    }
-    if (group) return resolveGroupDisplayName(group, t)
-    return resolveGroupDisplayNameById(groupId, groupId, t)
-  })()
-
-  const pageTitle = view === 'chat' ? chatTitle : t(VIEW_MESSAGE_KEYS[view])
   const isChat = view === 'chat'
+  const pageTitle = isChat ? null : t(VIEW_MESSAGE_KEYS[view])
   const showFunctionGuide =
     groupId != null &&
     !isDmGroupId(groupId) &&
@@ -75,7 +58,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
 
   return (
     <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
-      <ViewHeader title={pageTitle} showDivider={isChat} />
+      {pageTitle != null ? <ViewHeader title={pageTitle} /> : null}
       {showFunctionGuide ? (
         <Alert
           type="info"

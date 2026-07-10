@@ -149,17 +149,39 @@
   max-width: min(280px, 36vw);
 }
 
+/* 与 Logo RegionButton.text（padding 6×10 · font-title · 600）同高同字阶 */
 .projectSelect :global(.ant-select-selector) {
   border-radius: var(--lanpm-radius-md) !important;
   background: var(--lanpm-fill-secondary) !important;
   border: none !important;
   box-shadow: none !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding-inline: 10px !important;
+  align-items: center !important;
+}
+
+.projectSelect :global(.ant-select-selection-item),
+.projectSelect :global(.ant-select-selection-placeholder) {
+  font-size: var(--lanpm-font-title) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.2 !important;
+  display: flex !important;
+  align-items: center;
+}
+
+.projectSelect :global(.ant-select-arrow) {
+  inset-inline-end: 10px;
+  color: var(--lanpm-text-tertiary);
 }
 
 .groupType {
-  font-size: 11px;
-  margin-left: 4px;
+  font-size: var(--lanpm-font-caption);
+  font-weight: 400;
+  margin-left: 6px;
   color: var(--lanpm-text-tertiary);
+  letter-spacing: 0;
 }
 
 .search {
