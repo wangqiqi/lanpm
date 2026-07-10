@@ -22,6 +22,8 @@ const enUS = {
   'topbar.logoAlt': 'LanPM home',
   'topbar.cockpit': 'Cockpit',
   'topbar.searchPlaceholder': 'Search tasks, messages, members…',
+  'topbar.groupSearchPlaceholder': 'Search groups (name / pinyin)',
+  'topbar.groupSearchEmpty': 'No matching groups',
   'topbar.moreActions': 'More actions',
   'topbar.networkOnline': 'Connected · {count} peer(s)',
   'topbar.networkOffline': 'Offline · click to reconnect',

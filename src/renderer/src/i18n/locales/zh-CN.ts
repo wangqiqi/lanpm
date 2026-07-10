@@ -22,6 +22,8 @@ const zhCN = {
   'topbar.logoAlt': 'LanPM 首页',
   'topbar.cockpit': '驾驶舱',
   'topbar.searchPlaceholder': '搜索任务、消息、成员…',
+  'topbar.groupSearchPlaceholder': '搜索群组（汉字/拼音）',
+  'topbar.groupSearchEmpty': '无匹配群组',
   'topbar.moreActions': '更多操作',
   'topbar.networkOnline': '已连接 · {count} 个节点',
   'topbar.networkOffline': '未连接 · 点击重连',

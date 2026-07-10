@@ -22,6 +22,8 @@ export type MessageKey =
   | 'topbar.logoAlt'
   | 'topbar.cockpit'
   | 'topbar.searchPlaceholder'
+  | 'topbar.groupSearchPlaceholder'
+  | 'topbar.groupSearchEmpty'
   | 'topbar.moreActions'
   | 'topbar.networkOnline'
   | 'topbar.networkOffline'

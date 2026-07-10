@@ -42,6 +42,7 @@ import GlobalSearch from '@renderer/layout/GlobalSearch'
 import ManualPeerModal from '@renderer/features/network/ManualPeerModal'
 import RegionButton from '@renderer/ui/RegionButton'
 import { LANPM_APP_VERSION } from '@shared/appVersion'
+import { matchesGroupSearch } from '@shared/group/matchGroupSearch'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
 
@@ -191,26 +192,32 @@ export default function TopBar(): React.ReactElement {
   }
 
   const groupSelectOptions = useMemo(() => {
-    const opts = groups.map((g) => ({
-      value: g.groupId,
-      label: (
-        <span>
-          {resolveGroupDisplayName(g, t)}{' '}
-          <Text type="secondary" className={styles.groupType}>
-            {t(GROUP_TYPE_KEYS[g.type])}
-          </Text>
-        </span>
-      )
-    }))
+    const opts = groups.map((g) => {
+      const name = resolveGroupDisplayName(g, t)
+      return {
+        value: g.groupId,
+        searchText: name,
+        label: (
+          <span>
+            {name}{' '}
+            <Text type="secondary" className={styles.groupType}>
+              {t(GROUP_TYPE_KEYS[g.type])}
+            </Text>
+          </span>
+        )
+      }
+    })
     if (isDmGroupId(activeGroupId) && !opts.some((o) => o.value === activeGroupId)) {
       const session = getDmSession(activeGroupId)
       const peerId = localUserId ? getDmPeerUserId(activeGroupId, localUserId) : null
       const name =
         session?.peerDisplayName ??
         (peerId ? getPeerDisplayName(activeGroupId, peerId) : activeGroupId)
+      const label = t('topbar.dmLabel', { name })
       opts.unshift({
         value: activeGroupId,
-        label: <span>{t('topbar.dmLabel', { name })}</span>
+        searchText: label,
+        label: <span>{label}</span>
       })
     }
     return opts
@@ -353,6 +360,14 @@ export default function TopBar(): React.ReactElement {
             value={activeGroupId}
             onChange={handleGroupChange}
             options={groupSelectOptions}
+            showSearch
+            allowClear={false}
+            placeholder={t('topbar.groupSearchPlaceholder')}
+            optionFilterProp="searchText"
+            filterOption={(input, option) =>
+              matchesGroupSearch(String(option?.searchText ?? ''), input)
+            }
+            notFoundContent={t('topbar.groupSearchEmpty')}
           />
         </div>
         <span className={styles.barDivider} aria-hidden />

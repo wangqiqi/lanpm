@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **顶栏群切换搜索**：Select 支持关键字 / 拼音过滤（`matchesGroupSearch`）。
+
 ## [1.0.5] - 2026-07-11
 
 ### Changed
