@@ -45,7 +45,10 @@
   font-size: var(--lanpm-font-body);
   font-weight: 500;
   color: var(--lanpm-text-tertiary);
-  transition: color 0.2s ease;
+  transition:
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    font-weight var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -58,6 +61,10 @@
 .tabSelected {
   color: var(--lanpm-accent);
   font-weight: 600;
+}
+
+.tabSelected:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .tab:disabled {

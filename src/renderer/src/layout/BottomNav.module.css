@@ -47,7 +47,10 @@
   font-size: var(--lanpm-font-tab);
   font-weight: 500;
   letter-spacing: 0.01em;
-  transition: color 0.2s ease;
+  transition:
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    font-weight var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
 .tab:hover:not(:disabled) {
@@ -59,6 +62,14 @@
   font-weight: 600;
 }
 
+.tabActive .icon {
+  transform: scale(1.06);
+}
+
+.tabActive:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
 .tabDisabled {
   cursor: not-allowed;
   opacity: 0.4;
@@ -67,6 +78,7 @@
 .icon {
   font-size: 24px;
   line-height: 1;
+  transition: transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
 .label {
