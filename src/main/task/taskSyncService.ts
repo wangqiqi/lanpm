@@ -1,13 +1,16 @@
 import type { Database } from 'better-sqlite3'
 import { BrowserWindow } from 'electron'
-import type { TaskPatchPayload } from '../../shared/task/sync'
+import type { TaskDepPatchPayload, TaskPatchPayload } from '../../shared/task/sync'
+import { isTaskDepPatchPayload } from '../../shared/task/sync'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { TASK_PUSH_CHANNEL } from '../../shared/task/channels'
+import type { TaskDependency } from '../../shared/task/dependency'
 import type { Task } from '../../shared/task/types'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
+import { applyRemoteDepPatch } from '../storage/repositories/taskDependencyRepository'
 import {
   applyRemoteTaskDelete,
   upsertTaskFromRemote
@@ -41,11 +44,38 @@ function handleTaskPatch(db: Database, envelope: SyncEnvelope): void {
   if (changed) broadcastTasksChanged(envelope.groupId)
 }
 
+function handleTaskDepPatch(db: Database, envelope: SyncEnvelope): void {
+  if (envelope.type !== 'task_dep_patch' || !envelope.groupId) return
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.device) return
+  if (envelope.senderDeviceId === status.device.deviceId) return
+  if (isAnonymousGroupType(resolveGroupType(db, envelope.groupId))) return
+
+  if (!isTaskDepPatchPayload(envelope.payload)) return
+  const payload: TaskDepPatchPayload = {
+    ...envelope.payload,
+    groupId: envelope.groupId
+  }
+  if (applyRemoteDepPatch(db, payload)) {
+    broadcastTasksChanged(envelope.groupId)
+  }
+}
+
+function handleIncoming(db: Database, envelope: SyncEnvelope): void {
+  if (envelope.type === 'task_patch') {
+    handleTaskPatch(db, envelope)
+    return
+  }
+  if (envelope.type === 'task_dep_patch') {
+    handleTaskDepPatch(db, envelope)
+  }
+}
+
 function ensureSubscribed(db: Database, groupId: string): void {
   if (subscribedGroups.has(groupId)) return
   const transport = getNetworkTransport()
   if (!transport) return
-  const unsub = transport.subscribe(groupId, (env) => handleTaskPatch(db, env))
+  const unsub = transport.subscribe(groupId, (env) => handleIncoming(db, env))
   subscribedGroups.set(groupId, unsub)
 }
 
@@ -80,6 +110,27 @@ async function publishPatch(db: Database, payload: TaskPatchPayload, groupId: st
   await transport.publish(envelope)
 }
 
+async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Promise<void> {
+  const transport = getNetworkTransport()
+  const status = getSetupStatus(db)
+  if (!transport || !status.configured || !status.user || !status.device) return
+  ensureSubscribed(db, payload.groupId)
+
+  const envelope: SyncEnvelope = {
+    version: 1,
+    type: 'task_dep_patch',
+    msgId: `tdp_${payload.dependency.fromTaskId}_${payload.dependency.toTaskId}_${Date.now()}`,
+    senderUserId: status.user.userId,
+    senderDeviceId: status.device.deviceId,
+    groupId: payload.groupId,
+    ts: payload.updatedAt,
+    payload,
+    nonce: '',
+    authTag: ''
+  }
+  await transport.publish(envelope)
+}
+
 export function initTaskSyncService(db: Database): void {
   refreshSubscriptions(db)
 }
@@ -102,4 +153,35 @@ export function publishTaskDelete(db: Database, task: Task): void {
   ).catch(() => undefined)
 }
 
-export { handleTaskPatch as handleTaskPatchForTest }
+export function publishTaskDepUpsert(
+  db: Database,
+  groupId: string,
+  dependency: TaskDependency
+): void {
+  const updatedAt = new Date().toISOString()
+  void publishDepPatch(db, {
+    action: 'upsert',
+    groupId,
+    dependency,
+    updatedAt
+  }).catch(() => undefined)
+}
+
+export function publishTaskDepDelete(
+  db: Database,
+  groupId: string,
+  dependency: TaskDependency
+): void {
+  const updatedAt = new Date().toISOString()
+  void publishDepPatch(db, {
+    action: 'delete',
+    groupId,
+    dependency,
+    updatedAt
+  }).catch(() => undefined)
+}
+
+export {
+  handleTaskPatch as handleTaskPatchForTest,
+  handleTaskDepPatch as handleTaskDepPatchForTest
+}

@@ -14,18 +14,21 @@ export interface MigrationStep {
 
 /**
  * Incremental steps for versions ≥ 1.
- * SCHEMA_VERSION === 1 → empty (v0 bootstrap uses full SCHEMA_SQL).
- * Adding v2: push `{ fromVersion: 1, description: '…', up }` and bump SCHEMA_VERSION.
+ * v0 bootstrap uses full SCHEMA_SQL at SCHEMA_VERSION.
+ * Adding vN: push `{ fromVersion: N-1, … }` and bump SCHEMA_VERSION.
  */
 export const MIGRATIONS: readonly MigrationStep[] = [
-  // Example (do not enable without SCHEMA_VERSION bump):
-  // {
-  //   fromVersion: 1,
-  //   description: 'add example_column to tasks',
-  //   up: (db) => {
-  //     db.exec(`ALTER TABLE tasks ADD COLUMN example_column TEXT`)
-  //   }
-  // }
+  {
+    fromVersion: 1,
+    description: 'task_dependencies updated_at + deleted_at for task_dep_patch LWW',
+    up: (db) => {
+      db.exec(`ALTER TABLE task_dependencies ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''`)
+      db.exec(`ALTER TABLE task_dependencies ADD COLUMN deleted_at TEXT`)
+      db.exec(
+        `UPDATE task_dependencies SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE updated_at = ''`
+      )
+    }
+  }
 ]
 
 function setUserVersion(db: Database.Database, version: number): void {

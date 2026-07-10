@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **task_dep_patch P2P 同步 (TASK-131)**：依赖边 upsert/delete 经 `task_dep_patch` 广播；SQLite `task_dependencies` 增 `updated_at`/`deleted_at`（schema v2）；远端 LWW 合并；`verify:task-dep-sync`。
 - **task_dep_patch 协议 (TASK-130)**：`SyncMessageType` 新增 `task_dep_patch`；`TaskDepPatchPayload` / `isTaskDepPatchPayload`（`shared/task/sync.ts`）；`docs/03` §6.2 payload 草案；`verify:task-dep-protocol`。
 
 ## [1.0.4] - 2026-07-10

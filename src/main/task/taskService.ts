@@ -33,9 +33,9 @@ import {
   removeDependency,
   upsertDependency
 } from '../storage/repositories/taskDependencyRepository'
-import { publishChatMessage } from '../chat/chatService'
+import { publishChatMessage, sendTaskRefMessage } from '../chat/chatService'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
-import { publishTaskDelete, publishTaskUpsert } from './taskSyncService'
+import { publishTaskDelete, publishTaskDepDelete, publishTaskDepUpsert, publishTaskUpsert } from './taskSyncService'
 import { broadcastToAllWindows } from '../utils/broadcast'
 
 function assertTaskWritable(db: Database, groupId: string): void {
@@ -169,6 +169,17 @@ export async function createTaskFromChat(
   return { task, message }
 }
 
+export async function referenceTaskFromChat(
+  db: Database,
+  groupId: string,
+  taskId: string
+): Promise<{ task: Task; message: ChatMessage }> {
+  const message = await sendTaskRefMessage(db, groupId, taskId)
+  const task = getTaskById(db, taskId)
+  if (!task) throwLanpm('stub.taskNotFound')
+  return { task, message }
+}
+
 export function updateTaskSchedule(db: Database, input: GanttScheduleInput): Task {
   const existing = getTaskById(db, input.taskId)
   if (!existing) throwLanpm('stub.taskNotFound')
@@ -188,6 +199,7 @@ export function upsertTaskDependency(db: Database, input: UpsertDependencyInput)
     throwLanpm('err.dependencyInvalid')
   }
   const dep = upsertDependency(db, input)
+  publishTaskDepUpsert(db, input.groupId, dep)
   broadcastTasksChanged(input.groupId)
   return dep
 }
@@ -230,7 +242,11 @@ export function deleteTaskDependency(
   toTaskId: string
 ): boolean {
   assertTaskWritable(db, groupId)
-  const ok = removeDependency(db, fromTaskId, toTaskId)
-  if (ok) broadcastTasksChanged(groupId)
-  return ok
+  const removed = removeDependency(db, fromTaskId, toTaskId)
+  if (removed) {
+    publishTaskDepDelete(db, groupId, removed)
+    broadcastTasksChanged(groupId)
+    return true
+  }
+  return false
 }

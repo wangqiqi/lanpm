@@ -34,4 +34,4 @@ export const EXPECTED_TABLES = [
   'sync_meta'
 ] as const
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
