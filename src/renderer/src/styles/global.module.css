@@ -84,6 +84,14 @@
   --lanpm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --lanpm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --lanpm-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.08);
+  /* Elevation: Surface panel (sidebar, toolbar strip) */
+  --lanpm-shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.04);
+  /* Elevation: Tactile card (task card, attach card) — dual-layer */
+  --lanpm-shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+  /* Canvas gutter: MainLayout padding that exposes --lanpm-bg */
+  --lanpm-canvas-inset: 16px;
   --lanpm-segment-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.12), 0 0.5px 1px rgba(0, 0, 0, 0.06);
   --lanpm-font-tab: 10px;
 
@@ -131,6 +139,11 @@
   --lanpm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
   --lanpm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
   --lanpm-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --lanpm-shadow-surface: 0 1px 4px rgba(0, 0, 0, 0.25);
+  --lanpm-shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  --lanpm-canvas-inset: 16px;
   --lanpm-segment-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
   --lanpm-font-tab: 10px;
 
