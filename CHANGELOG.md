@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **已读离线补拉验收 (TASK-154)**：`verify:read-receipt-offline` 双 stub（B 发消息 → A 已读 → B 补拉见双勾）。
 - **已读离线补拉服务 (TASK-153)**：重连 `read_receipt_sync_request`；对端 batch；入站 upsert + 刷新双勾；挂到 `initChatService`。
 - **已读离线补拉仓储 (TASK-152)**：`listReadReceiptsSince` / `getMaxReadAtInGroup`（since/min + LIMIT）。
 - **已读离线补拉协议 (TASK-151)**：`read_receipt_sync_request` / `read_receipt_sync_batch` + payload 校验；`docs/03` 对齐；`verify:sync-handlers` 登记。
