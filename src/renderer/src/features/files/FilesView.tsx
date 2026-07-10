@@ -23,6 +23,7 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   ExportOutlined,
+  FileSearchOutlined,
   ImportOutlined,
   LinkOutlined,
   MoreOutlined,
@@ -1007,7 +1008,19 @@ export default function FilesView(): React.ReactElement {
         {!isNarrow ? (
           <aside className={styles.previewPane}>
             {!selected ? (
-              <Text type="secondary">{t('files.selectToPreview')}</Text>
+              <div className={styles.previewEmpty}>
+                <div className={styles.previewEmptyCenter}>
+                  <div className={styles.previewEmptyIconRing}>
+                    <FileSearchOutlined className={styles.previewEmptyIcon} />
+                  </div>
+                  <Text className={styles.previewEmptyTitle}>
+                    {t('files.selectToPreview')}
+                  </Text>
+                  <Text className={styles.previewEmptyDesc}>
+                    {t('files.selectToPreviewDesc')}
+                  </Text>
+                </div>
+              </div>
             ) : (
               previewBody
             )}
