@@ -376,7 +376,7 @@
     border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
   width: 100%;
-  box-shadow: var(--lanpm-shadow-sm);
+  box-shadow: var(--lanpm-shadow-card);
   margin-top: 4px;
 }
 
@@ -631,6 +631,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  background: var(--lanpm-bg);
 }
 
 .messages {
@@ -642,6 +643,7 @@
   overflow-y: auto;
   padding: 4px 8px 8px;
   scrollbar-gutter: stable;
+  background: var(--lanpm-bg);
 }
 
 .newMessagesJump {
