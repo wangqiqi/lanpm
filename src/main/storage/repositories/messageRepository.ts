@@ -206,6 +206,7 @@ export function updateMessage(db: Database, message: ChatMessage): void {
   })
 }
 
+/** Offline sync：按 JSON 路径取撤回消息（兼容 content 包裹 / 顶层 kind）。 */
 export function listRecalledMessagesInGroup(
   db: Database,
   groupId: string,
@@ -216,7 +217,10 @@ export function listRecalledMessagesInGroup(
       `SELECT * FROM messages
        WHERE group_id = ?
          AND created_at >= ?
-         AND content_json LIKE '%"kind":"recalled"%'
+         AND (
+           json_extract(content_json, '$.content.kind') = 'recalled'
+           OR json_extract(content_json, '$.kind') = 'recalled'
+         )
        ORDER BY lamport_ts ASC, created_at ASC`
     )
     .all(groupId, minCreatedAt) as MessageRow[]

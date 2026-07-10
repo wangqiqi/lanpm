@@ -27,6 +27,7 @@ import {
   insertMessage,
   listMessagesByGroup,
   listMessagesSince,
+  listRecalledMessagesInGroup,
   messageExists
 } from '../../src/main/storage/repositories/messageRepository.ts'
 
@@ -313,6 +314,46 @@ async function waitUntil(predicate: () => boolean, ms: number): Promise<boolean>
     dbA.close()
     dbB.close()
   }
+}
+
+{
+  // TASK-149 — json_extract recall filter (no LIKE false positive on text body)
+  const db = openDb(USER_A, DEVICE_A)
+  const minCreatedAt = '2026-07-01T00:00:00.000Z'
+  insertMessage(db, {
+    msgId: 'msg_decoy',
+    groupId: GROUP,
+    senderUserId: USER_REMOTE,
+    senderDeviceId: DEVICE_REMOTE,
+    type: 'text',
+    content: { kind: 'text', text: 'mentions "kind":"recalled" in body' },
+    lamportTs: 1,
+    createdAt: '2026-07-01T00:00:00.000Z',
+    deliveryStatus: 'sent'
+  })
+  insertMessage(db, {
+    msgId: 'msg_recalled',
+    groupId: GROUP,
+    senderUserId: USER_REMOTE,
+    senderDeviceId: DEVICE_REMOTE,
+    type: 'system',
+    content: {
+      kind: 'recalled',
+      recalledBy: USER_REMOTE,
+      recalledAt: '2026-07-01T02:00:00.000Z'
+    },
+    lamportTs: 2,
+    createdAt: '2026-07-01T02:00:00.000Z',
+    deliveryStatus: 'sent'
+  })
+  const recalled = listRecalledMessagesInGroup(db, GROUP, minCreatedAt)
+  if (recalled.length !== 1 || recalled[0]?.msgId !== 'msg_recalled') {
+    throw new Error(
+      `listRecalledMessagesInGroup expected [msg_recalled], got ${recalled.map((m) => m.msgId).join(',')}`
+    )
+  }
+  db.close()
+  console.log('OK: listRecalledMessagesInGroup json_extract')
 }
 
 for (const d of _tempDirs) rmLanpmTemp(d)
