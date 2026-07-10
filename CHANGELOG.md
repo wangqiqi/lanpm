@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-07-10
+
 ### Changed
 - **看板常驻 FS 连线（P4）**：工具栏开关默认关，开启后绘制全板浅灰 FS 边，悬停/固定高亮仍加强黄/强调色；`listAllDependencyEdges` · `docs/04`（`SPRINT-BOARD-DEPS-FULL`）
 - **顶栏 IA（P4）**：主题/语言移入用户菜单；驾驶舱收入「更多」；驾驶舱路由时 Logo 显示返回当前群语义；`docs/04` §1 顶底职责（`SPRINT-IA-SHELL`）
@@ -13,6 +15,9 @@
 
 ### Added
 - **看板 FS 依赖连线**：悬停/固定高亮关联卡时，SVG 叠加层绘制前置/后继 FS 连线（`listFocusDependencyEdges` · `BoardDependencyLines`）；工具栏图例补充连线色说明（`SPRINT-BOARD-DEPS`）
+
+### Tag
+- `v1.0.2` — 文件页抛光 · 顶栏 IA · 看板 FS 连线（悬停 + 可开关全图）
 
 ## [1.0.1] - 2026-07-09
 
