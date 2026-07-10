@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.0.4-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.0.5-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -221,7 +221,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M2–M5** | 聊天 / 任务 / 文件 / 群组 / 驾驶舱 |
 | **M6–M7** | 真网路径、性能与发布门禁 |
 
-**当前版本：** `1.0.4`（M0–M7 自动化已闭环）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.0.5`（M0–M7 自动化已闭环）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、插件系统、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 

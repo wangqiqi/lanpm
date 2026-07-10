@@ -66,8 +66,8 @@ const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
   },
   {
     file: 'layout/MainLayout.module.css',
-    pattern: /\.main\s*\{[^}]*padding:\s*16px/s,
-    label: 'MainLayout padding 16px'
+    pattern: /\.main\s*\{[^}]*padding:\s*var\(--lanpm-canvas-inset\)/s,
+    label: 'MainLayout padding canvas-inset'
   },
   {
     file: 'views/CockpitView.module.css',

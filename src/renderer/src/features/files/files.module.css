@@ -46,7 +46,7 @@
 }
 
 .transferCompactIcon {
-  font-size: 14px;
+  font-size: var(--lanpm-font-body);
   color: var(--lanpm-text-secondary);
 }
 
@@ -348,7 +348,7 @@
 }
 
 .previewEmptyIcon {
-  font-size: 18px;
+  font-size: var(--lanpm-font-title);
   color: var(--lanpm-text-secondary);
 }
 

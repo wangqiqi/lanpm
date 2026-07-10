@@ -23,9 +23,10 @@ const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8')
 const readme = readFileSync(join(root, 'README.md'), 'utf8')
 const doc06 = readFileSync(join(root, 'docs/06_验收与里程碑计划.md'), 'utf8')
 
-const versionMatch = changelog.match(/^## \[([^\]]+)\]/m)
-assert.ok(versionMatch, 'CHANGELOG missing latest version heading')
-const changelogVersion = versionMatch[1]
+const versionHeadings = [...changelog.matchAll(/^## \[([^\]]+)\]/gm)].map((m) => m[1])
+assert.ok(versionHeadings.length > 0, 'CHANGELOG missing version heading')
+const changelogVersion = versionHeadings.find((v) => v !== 'Unreleased')
+assert.ok(changelogVersion, 'CHANGELOG missing released version heading')
 assert.equal(
   pkg.version,
   changelogVersion,

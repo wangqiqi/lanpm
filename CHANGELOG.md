@@ -4,10 +4,13 @@
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-07-11
+
 ### Changed
 - **聊天页去重群名 (TASK-137)**：群名 / DM 名仅保留在 TopBar 切换器；聊天页不再渲染重复的 `ViewHeader` 大标题；Select 与 Logo 对齐字阶与高度；`docs/04` §1.4 同步。
 
 ### Added
+- **群切换器拼音搜索 (TASK-138)**：TopBar 群下拉支持汉字子串与拼音全拼/首字母过滤（`pinyin-pro`）；空查询展示全量列表。
 - **聊天引用任务 (#)**：输入 `#` 弹出任务建议；`chat:sendTaskRef` / `task:referenceFromChat`；气泡可点击跳转看板。
 - **任务离线补拉 (TASK-134)**：`task_sync_request` / `task_sync_batch`；按 `updatedAt` 合并分页拉取任务与依赖（含软删）；`verify:task-offline-sync`。
 - **同步文档对齐 (TASK-135)**：`docs/03` 补 `task_sync_*` / `chat_sync_*` payload 与 §12 补拉/历史分页；`docs/06` §2.3 更新任务/聊天同步现状。
@@ -16,6 +19,12 @@
 - **聊天离线补同步分页续传 (TASK-132)**：`chat_sync_batch.hasMore`；响应方按 100 条分页循环推送；请求方跟进下一页；`splitOfflineSyncPage` / `verify:offline-sync-integration` 覆盖 >100 条。
 - **task_dep_patch P2P 同步 (TASK-131)**：依赖边 upsert/delete 经 `task_dep_patch` 广播；SQLite `task_dependencies` 增 `updated_at`/`deleted_at`（schema v2）；远端 LWW 合并；`verify:task-dep-sync`。
 - **task_dep_patch 协议 (TASK-130)**：`SyncMessageType` 新增 `task_dep_patch`；`TaskDepPatchPayload` / `isTaskDepPatchPayload`（`shared/task/sync.ts`）；`docs/03` §6.2 payload 草案；`verify:task-dep-protocol`。
+
+### Fixed
+- **发版门禁对齐**：`docs/04` / `verify-visual` 接受 `--lanpm-canvas-inset`；补齐缺失 CSS 令牌；`verify-project` 跳过 `[Unreleased]` 比对版本。
+
+### Release
+- `v1.0.5` — 分布式同步一致性 · 聊天 `#` 引用任务 · TopBar 群名去重
 
 ## [1.0.4] - 2026-07-10
 

@@ -124,14 +124,20 @@ if (doc04.includes('64px') && !/height:\s*64px/.test(bottomNav)) {
     fix: '恢复 BottomNav 高度或更新 docs/04'
   })
 }
-if (doc04.includes('16px') && !/\.main\s*\{[^}]*padding:\s*16px/s.test(mainLayout)) {
-  add({
-    severity: 'P1',
-    source: 'docs/04 vs MainLayout.module.css',
-    doc: '主区内边距 16px',
-    code: '.main padding 非 16px',
-    fix: '恢复 MainLayout 或更新 docs/04'
-  })
+if (
+  doc04.includes('canvas-inset') || doc04.includes('16px')
+) {
+  const usesToken = /\.main\s*\{[^}]*padding:\s*var\(--lanpm-canvas-inset\)/s.test(mainLayout)
+  const usesPx = /\.main\s*\{[^}]*padding:\s*16px/s.test(mainLayout)
+  if (!usesToken && !usesPx) {
+    add({
+      severity: 'P1',
+      source: 'docs/04 vs MainLayout.module.css',
+      doc: '主区内边距 canvas-inset / 16px',
+      code: '.main padding 未对齐令牌或 16px',
+      fix: '恢复 MainLayout 或更新 docs/04'
+    })
+  }
 }
 
 // --- 报告 ---

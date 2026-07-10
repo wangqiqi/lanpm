@@ -34,6 +34,7 @@
     sans-serif;
   --lanpm-font-caption: 11px;
   --lanpm-font-body: 13px;
+  --lanpm-font-body-secondary: 12px;
   --lanpm-font-title: 17px;
   --lanpm-font-display: 28px;
   --lanpm-line-caption: 1.25;
@@ -62,6 +63,7 @@
   --lanpm-bar-border: rgba(60, 60, 67, 0.12); /* Lighter border line */
   --lanpm-hover-bg: rgba(60, 60, 67, 0.04); /* Premium hover background */
   --lanpm-fill-secondary: rgba(120, 120, 128, 0.08); /* More subtle secondary fill */
+  --lanpm-fill-secondary-hover: rgba(120, 120, 128, 0.14);
   --lanpm-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); /* Softer premium shadow */
   --lanpm-blur: saturate(180%) blur(20px);
   --lanpm-border: rgba(60, 60, 67, 0.1);
@@ -117,6 +119,7 @@
   --lanpm-bar-border: rgba(84, 84, 88, 0.2); /* Lighter borders */
   --lanpm-hover-bg: rgba(255, 255, 255, 0.05); /* Softer hover indicator */
   --lanpm-fill-secondary: rgba(120, 120, 128, 0.16); /* Softer secondary fill */
+  --lanpm-fill-secondary-hover: rgba(120, 120, 128, 0.24);
   --lanpm-shadow: 0 4px 32px rgba(0, 0, 0, 0.35); /* Softer overlay dark shadow */
   --lanpm-blur: saturate(180%) blur(20px);
   --lanpm-border: rgba(84, 84, 88, 0.2);
