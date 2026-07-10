@@ -68,10 +68,13 @@
     flex: 1 1 140px;
   }
 
-  .localeSelect {
-    width: 88px;
-  }
+}
 
+.logoBackLabel {
+  max-width: min(200px, 28vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .barWideActions {
@@ -79,7 +82,7 @@
 }
 
 .barOverflowTrigger {
-  display: none;
+  display: inline-flex;
 }
 
 .searchWide {

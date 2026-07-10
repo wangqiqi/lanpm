@@ -22,6 +22,7 @@ import {
   UserOutlined
 } from '@ant-design/icons'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
+import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -77,7 +78,6 @@ export default function TopBar(): React.ReactElement {
   const device = useIdentityStore((s) => s.device)
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
-  const locale = useUiStore((s) => s.locale)
   const setLocale = useUiStore((s) => s.setLocale)
   const networkStatus = useNetworkStore((s) => s.status)
   const refreshNetwork = useNetworkStore((s) => s.refresh)
@@ -86,6 +86,7 @@ export default function TopBar(): React.ReactElement {
   const networkLoading = useNetworkStore((s) => s.loading)
   const [manualPeerOpen, setManualPeerOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const isNarrowBar = useMediaQuery('(max-width: 1100px)')
 
   useEffect(() => {
     void refreshNetwork()
@@ -159,6 +160,12 @@ export default function TopBar(): React.ReactElement {
   }
 
   const activeGroup = groups.find((g) => g.groupId === activeGroupId)
+  const activeProjectName = useMemo(() => {
+    if (!activeGroup) return activeGroupId || '—'
+    return resolveGroupDisplayName(activeGroup, t)
+  }, [activeGroup, activeGroupId, t])
+
+  const cockpitBackLabel = t('cockpit.backToProject', { name: activeProjectName })
   const canDissolveGroup =
     Boolean(localUserId) &&
     Boolean(activeGroup) &&
@@ -212,33 +219,76 @@ export default function TopBar(): React.ReactElement {
     return opts
   }, [groups, activeGroupId, localUserId, getDmSession, getPeerDisplayName, t])
 
-  const barOverflowItems: MenuProps['items'] = [
-    {
-      key: 'discover',
-      label: t('topbar.discover'),
-      icon: <CompassOutlined />,
-      onClick: () => setDiscoverOpen(true)
-    },
-    {
-      key: 'create',
-      label: t('topbar.createGroup'),
-      icon: <PlusOutlined />,
-      onClick: () => setCreateOpen(true)
-    },
-    ...(canDissolveGroup
-      ? [
-          {
-            key: 'dissolve',
-            label: t('group.dissolve'),
-            icon: <DeleteOutlined />,
-            danger: true,
-            onClick: () => handleDissolveGroup()
-          }
-        ]
-      : [])
-  ]
+  const barOverflowItems: MenuProps['items'] = useMemo(() => {
+    const items: MenuProps['items'] = []
+    if (!isCockpitRoute) {
+      items.push({
+        key: 'cockpit',
+        label: t('topbar.cockpit'),
+        icon: <DashboardOutlined />,
+        onClick: () => navigate(cockpitPath())
+      })
+    }
+    if (isNarrowBar) {
+      items.push(
+        {
+          key: 'discover',
+          label: t('topbar.discover'),
+          icon: <CompassOutlined />,
+          onClick: () => setDiscoverOpen(true)
+        },
+        {
+          key: 'create',
+          label: t('topbar.createGroup'),
+          icon: <PlusOutlined />,
+          onClick: () => setCreateOpen(true)
+        }
+      )
+      if (canDissolveGroup) {
+        items.push({
+          key: 'dissolve',
+          label: t('group.dissolve'),
+          icon: <DeleteOutlined />,
+          danger: true,
+          onClick: () => handleDissolveGroup()
+        })
+      }
+    }
+    return items
+  }, [
+    isCockpitRoute,
+    isNarrowBar,
+    canDissolveGroup,
+    t,
+    navigate,
+    handleDissolveGroup
+  ])
 
   const userMenu: MenuProps['items'] = [
+    {
+      key: 'theme',
+      label: theme === 'dark' ? t('topbar.themeToLight') : t('topbar.themeToDark'),
+      icon: theme === 'dark' ? <SunOutlined /> : <MoonOutlined />,
+      onClick: () => toggleTheme()
+    },
+    {
+      key: 'locale',
+      label: t('topbar.language'),
+      icon: <GlobalOutlined />,
+      children: [
+        {
+          key: 'zh-CN',
+          label: t('topbar.localeZh'),
+          onClick: () => setLocale('zh-CN')
+        },
+        {
+          key: 'en-US',
+          label: t('topbar.localeEn'),
+          onClick: () => setLocale('en-US')
+        }
+      ]
+    },
+    { type: 'divider' },
     { key: 'profile', label: t('topbar.profile'), onClick: () => setProfileOpen(true) },
     {
       key: 'device',
@@ -286,16 +336,22 @@ export default function TopBar(): React.ReactElement {
     <header className={styles.bar}>
       <div className={styles.barSection}>
         <div className={styles.barGroup}>
-          <RegionButton variant="text" className={styles.logo} onClick={handleLogoClick}>
-            <img
-              src={logoUrl}
-              alt={t('topbar.logoAlt')}
-              className={styles.logoMark}
-              width={24}
-              height={24}
-            />
-            <span>{t('topbar.logo')}</span>
-          </RegionButton>
+          <Tooltip
+            title={isCockpitRoute ? cockpitBackLabel : t('topbar.logoAlt')}
+          >
+            <RegionButton variant="text" className={styles.logo} onClick={handleLogoClick}>
+              <img
+                src={logoUrl}
+                alt={isCockpitRoute ? cockpitBackLabel : t('topbar.logoAlt')}
+                className={styles.logoMark}
+                width={24}
+                height={24}
+              />
+              <span className={isCockpitRoute ? styles.logoBackLabel : undefined}>
+                {isCockpitRoute ? cockpitBackLabel : t('topbar.logo')}
+              </span>
+            </RegionButton>
+          </Tooltip>
           <Select
             className={styles.projectSelect}
             value={activeGroupId}
@@ -325,20 +381,16 @@ export default function TopBar(): React.ReactElement {
               </RegionButton>
             ) : null}
           </div>
-          <Dropdown menu={{ items: barOverflowItems }} trigger={['click']}>
-            <RegionButton
-              variant="icon"
-              className={styles.barOverflowTrigger}
-              aria-label={t('topbar.moreActions')}
-            >
-              <MoreOutlined />
-            </RegionButton>
-          </Dropdown>
-          {!isCockpitRoute ? (
-            <RegionButton variant="toolbar" onClick={() => navigate(cockpitPath())}>
-              <DashboardOutlined />
-              {t('topbar.cockpit')}
-            </RegionButton>
+          {barOverflowItems.length > 0 ? (
+            <Dropdown menu={{ items: barOverflowItems }} trigger={['click']}>
+              <RegionButton
+                variant="icon"
+                className={styles.barOverflowTrigger}
+                aria-label={t('topbar.moreActions')}
+              >
+                <MoreOutlined />
+              </RegionButton>
+            </Dropdown>
           ) : null}
         </div>
       </div>
@@ -425,23 +477,6 @@ export default function TopBar(): React.ReactElement {
         </Popover>
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
-        <RegionButton
-          variant="icon"
-          aria-label={t('topbar.toggleTheme')}
-          onClick={toggleTheme}
-        >
-          {theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
-        </RegionButton>
-        <Select
-          className={styles.localeSelect}
-          value={locale}
-          onChange={(v) => setLocale(v)}
-          options={[
-            { value: 'zh-CN', label: t('topbar.localeZh') },
-            { value: 'en-US', label: t('topbar.localeEn') }
-          ]}
-          suffixIcon={<GlobalOutlined />}
-        />
         <Dropdown menu={{ items: userMenu }} trigger={['click']}>
           <RegionButton variant="user" aria-label={t('topbar.userMenu')}>
             <Avatar size="small" icon={<UserOutlined />} src={user?.avatarUrl ?? undefined} />
