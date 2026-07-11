@@ -1,10 +1,14 @@
 import type { Task } from './types'
+import { clampProgressPercent } from './validation.ts'
 
 /** 父任务进度 = round(avg(子任务 progressPercent))，见 docs/04 §3.4 */
 export function aggregateChildProgress(children: Pick<Task, 'progressPercent'>[]): number {
   if (children.length === 0) return 0
-  const sum = children.reduce((acc, c) => acc + c.progressPercent, 0)
-  return Math.round(sum / children.length)
+  const sum = children.reduce(
+    (acc, c) => acc + clampProgressPercent(c.progressPercent),
+    0
+  )
+  return clampProgressPercent(Math.round(sum / children.length))
 }
 
 /** 为含子任务的父节点写入聚合后的 progressPercent（仅内存，不写库） */

@@ -27,6 +27,16 @@ describe('aggregateChildProgress', () => {
   it('returns 0 for empty children', () => {
     expect(aggregateChildProgress([])).toBe(0)
   })
+
+  it('clamps dirty child progress before averaging', () => {
+    expect(
+      aggregateChildProgress([
+        { progressPercent: Number.NaN },
+        { progressPercent: 200 },
+        { progressPercent: -10 }
+      ])
+    ).toBe(33)
+  })
 })
 
 describe('applyAggregatedProgress', () => {

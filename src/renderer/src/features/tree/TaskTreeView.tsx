@@ -24,7 +24,7 @@ import {
   countTaskDescendants
 } from '@renderer/features/task/confirmDeleteParentTask'
 import { buildBoardRelationMap, type BoardTaskRelation } from '@shared/task/boardRelations'
-import { TASK_TITLE_MAX_LENGTH, validateTaskTitle } from '@shared/task/validation'
+import { TASK_TITLE_MAX_LENGTH, clampProgressPercent, validateTaskTitle } from '@shared/task/validation'
 import { taskValidationMessage } from '@renderer/features/task/taskValidationMessage'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import {
@@ -184,7 +184,7 @@ export default function TaskTreeView(): React.ReactElement {
       try {
         await updateTask({
           taskId,
-          progressPercent: Math.min(100, Math.max(0, value))
+          progressPercent: clampProgressPercent(value)
         })
         message.success(t('tree.progressUpdated'))
         setInlineEditTaskId(null)
