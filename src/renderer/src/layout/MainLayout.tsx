@@ -53,7 +53,7 @@ export default function MainLayout(): React.ReactElement {
         <Outlet />
       </main>
       {showBottomNav ? (
-        <div className={styles.barSlot}>
+        <div className={styles.navSlot}>
           <BottomNav />
         </div>
       ) : null}

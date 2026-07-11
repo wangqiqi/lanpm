@@ -12,6 +12,8 @@
   background: var(--lanpm-nav-bg);
   backdrop-filter: var(--lanpm-blur);
   -webkit-backdrop-filter: var(--lanpm-blur);
+  box-shadow: var(--lanpm-shadow-island);
+  z-index: 2;
 }
 
 .tabSlot {
@@ -44,6 +46,8 @@
   background: transparent;
   cursor: inherit;
   padding: 4px 2px 5px;
+  margin: 3px 4px;
+  border-radius: var(--lanpm-radius-md);
   color: var(--lanpm-text-tertiary);
   font-size: var(--lanpm-font-tab);
   font-weight: 500;
@@ -52,13 +56,15 @@
     color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     font-weight var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     transform var(--lanpm-motion-fast) var(--lanpm-ease-standard),
-    opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+    opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
   will-change: transform;
 }
 
-/* 悬停：文字提亮 + 图标轻弹上抬 */
+/* 悬停：文字提亮 + 图标轻弹上抬 + 淡底 */
 .tab:hover:not(:disabled) {
   color: var(--lanpm-text);
+  background: var(--lanpm-hover-bg);
 }
 
 .tab:hover:not(:disabled) .icon {
@@ -87,6 +93,7 @@
 .tabActive {
   color: var(--lanpm-accent);
   font-weight: 600;
+  background: var(--lanpm-selected-bg);
 }
 
 .tabActive .icon {
@@ -96,6 +103,7 @@
 
 .tabActive:hover:not(:disabled) {
   color: var(--lanpm-accent-hover);
+  background: var(--lanpm-accent-fill-strong);
 }
 
 .tabActive:hover:not(:disabled) .icon {

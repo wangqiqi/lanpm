@@ -11,6 +11,9 @@
   background: var(--lanpm-nav-bg);
   backdrop-filter: var(--lanpm-blur);
   -webkit-backdrop-filter: var(--lanpm-blur);
+  /* 通栏岛感：软 elevation，非悬浮脱离窗口 */
+  box-shadow: var(--lanpm-shadow-island);
+  z-index: 2;
 }
 
 .barSection {
@@ -110,7 +113,7 @@
 
 .barAction:hover {
   color: var(--lanpm-text);
-  background: var(--lanpm-hover-bg);
+  background: var(--lanpm-selected-bg);
 }
 
 .barAction:active {

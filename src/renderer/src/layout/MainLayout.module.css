@@ -9,6 +9,8 @@
 
 .barSlot {
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .main {
@@ -43,4 +45,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.navSlot {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
