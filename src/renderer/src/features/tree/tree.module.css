@@ -265,7 +265,7 @@
   width: 100%;
   text-align: left;
   padding: 6px 8px;
-  border: 1px solid var(--lanpm-border-subtle, rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--lanpm-border);
   border-radius: var(--lanpm-radius-sm, 6px);
   background: transparent;
   cursor: pointer;
@@ -273,11 +273,11 @@
 }
 
 .discussionItem:hover {
-  background: var(--lanpm-surface-hover, rgba(0, 0, 0, 0.04));
+  background: var(--lanpm-hover-bg);
 }
 
 .discussionKind {
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
   opacity: 0.7;
 }
 
@@ -316,7 +316,7 @@
 .checklistText {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--lanpm-font-body);
   line-height: 1.4;
   word-break: break-word;
 }
@@ -335,7 +335,7 @@
 .checklistProgressBar {
   height: 4px;
   border-radius: 2px;
-  background: var(--lanpm-border-subtle, rgba(0, 0, 0, 0.08));
+  background: var(--lanpm-border);
   overflow: hidden;
   margin-top: 4px;
 }

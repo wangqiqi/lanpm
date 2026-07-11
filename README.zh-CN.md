@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.27.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.28.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -254,11 +254,17 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.27.0` — B6 边界值 Minor（续传 offset · 限速上限 · autoDiscover 默认关 · sync 可观测 · outbox limit）；B5 加固（1.26）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.28.0` — 母版 SOP 吸收（oss-first / input-bounds / extensibility）· 顶栏宽屏平铺 · 审查手验收口。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
 **进行中 / 队列：** 会议插件 SPIKE · 插件市场 SPIKE。
 
 **规划中（P1+）：** 可购会议插件（语音/视频/投屏）、思维导图、移动端 PWA 等 —— [完整列表 · §1/§3](./docs/06_ROADMAP.md)。
+
+---
+
+## 🤖 Agent 工作流（贡献者）
+
+本仓库使用 [`.cursor/`](./.cursor/) Super Cursor SOP。日常：`/master` · `/plan` · `/run` · `/learn` · `/scaffold` · `/release` · `/delivery` · `/ux` · `/ia`。母版自检：`bash .cursor/bin/template-verify.sh` · `bash .cursor/bin/cursor-coherence.sh`。详见英文 [README · Agent workflow](./README.md#-agent-workflow-contributors)。
 
 ---
 

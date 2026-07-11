@@ -26,7 +26,7 @@
 }
 
 .crash {
-  border: 1px dashed var(--lanpm-danger, #cf1322);
+  border: 1px dashed var(--lanpm-danger);
   border-radius: 8px;
   padding: 8px 10px;
 }

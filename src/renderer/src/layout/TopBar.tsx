@@ -457,6 +457,52 @@ export default function TopBar(): React.ReactElement {
         </div>
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
+          <div className={styles.barWideActions} role="toolbar" aria-label={t('topbar.moreActions')}>
+            {!isCockpitRoute ? (
+              <button
+                type="button"
+                className={styles.barAction}
+                onClick={() => navigate(cockpitPath())}
+              >
+                <span className={styles.barActionIcon} aria-hidden>
+                  <DashboardOutlined />
+                </span>
+                <span className={styles.barActionLabel}>{t('topbar.cockpit')}</span>
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={styles.barAction}
+              onClick={() => setDiscoverOpen(true)}
+            >
+              <span className={styles.barActionIcon} aria-hidden>
+                <CompassOutlined />
+              </span>
+              <span className={styles.barActionLabel}>{t('topbar.discover')}</span>
+            </button>
+            <button
+              type="button"
+              className={styles.barAction}
+              onClick={() => setCreateOpen(true)}
+            >
+              <span className={styles.barActionIcon} aria-hidden>
+                <PlusOutlined />
+              </span>
+              <span className={styles.barActionLabel}>{t('topbar.createGroup')}</span>
+            </button>
+            {canDissolveGroup ? (
+              <button
+                type="button"
+                className={`${styles.barAction} ${styles.barActionDanger}`}
+                onClick={() => handleDissolveGroup()}
+              >
+                <span className={styles.barActionIcon} aria-hidden>
+                  <DeleteOutlined />
+                </span>
+                <span className={styles.barActionLabel}>{t('group.dissolve')}</span>
+              </button>
+            ) : null}
+          </div>
           {barOverflowItems.length > 0 ? (
             <Dropdown menu={{ items: barOverflowItems }} trigger={['click']}>
               <RegionButton

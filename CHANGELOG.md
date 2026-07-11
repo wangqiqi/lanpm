@@ -4,9 +4,16 @@
 
 ## [Unreleased]
 
+## [1.28.0] - 2026-07-12
+
 ### Changed
+- **`.cursor` 母版**：吸收通用二级/三级 SOP — `oss-first`（开源优先）· `input-bounds`（边界/默认拒绝）· `extensibility`（可选扩展宿主）；扩 `submodule`/`security`/`api`/`plan`/`delivery`/`docs`/`release`/`async-progress`/`long-running-ui`；**无**新 slash skill/agent；根 README 补 Agent workflow 门面（`cursor-coherence`）。
+- **顶栏**：宽屏将「更多」中的驾驶舱 / 发现 / 建群 / 解散平铺为图标+文字（对齐底栏 Tab 风格）；≤1100px 仍收纳到「⋯」。
 - **docs**：`06_HISTORY.md` 移出 `docs/` → `archive/20260712_003457_docs06_验收里程碑_已交付归档.md`；`docs/` 仅长期 SSOT（`06_ROADMAP` + 01–05）；已交付对外以 `CHANGELOG` 为准。
 - **审查收口（DOC-340–343）**：边界值专项手验（autoDiscover / 限速 / 续传 offset）以单测代理通过；根目录 `审查.md` 迁 `archive/20260712_004439_审查_边界值闭环.md`。
+
+### Release
+- `v1.28.0` — cursor SOP absorb + TopBar wide actions + review hand-verify close
 
 ## [1.27.0] - 2026-07-12
 

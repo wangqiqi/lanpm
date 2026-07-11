@@ -77,12 +77,79 @@
   white-space: nowrap;
 }
 
+/* 宽屏：平铺图标+文字（风格对齐底栏 Tab：上图标下文案） */
 .barWideActions {
-  display: contents;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+
+.barAction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 52px;
+  height: 44px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: var(--lanpm-radius-md);
+  background: transparent;
+  color: var(--lanpm-text-tertiary);
+  font-size: var(--lanpm-font-tab);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.barAction:hover {
+  color: var(--lanpm-text);
+  background: var(--lanpm-hover-bg);
+}
+
+.barAction:active {
+  transform: scale(0.96);
+}
+
+.barActionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  transition: transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.barAction:hover .barActionIcon {
+  transform: translateY(-1px);
+}
+
+.barActionLabel {
+  max-width: 4.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.15;
+  opacity: 0.92;
+}
+
+.barActionDanger {
+  color: var(--lanpm-danger);
+}
+
+.barActionDanger:hover {
+  color: var(--lanpm-danger-strong);
+  background: color-mix(in srgb, var(--lanpm-danger) 8%, transparent);
 }
 
 .barOverflowTrigger {
-  display: inline-flex;
+  display: none;
 }
 
 .searchWide {
@@ -116,6 +183,21 @@
 
   .searchNarrowTrigger {
     display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barAction,
+  .barActionIcon {
+    transition: none;
+  }
+
+  .barAction:active {
+    transform: none;
+  }
+
+  .barAction:hover .barActionIcon {
+    transform: none;
   }
 }
 

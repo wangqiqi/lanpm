@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.27.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.28.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -254,11 +254,23 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.27.0` — B6 boundary Minors (resume offset · rate cap · autoDiscover default off · sync observability · outbox limit); B5 harden (1.26). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.28.0` — cursor SOP absorb (oss-first / input-bounds / extensibility) · TopBar wide actions · review hand-verify close. M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (in progress / queue):** meeting-plugin SPIKE · marketplace SPIKE.
 
 **Later (P1+):** purchasable meeting plugin (voice/video/screen share), mind maps, mobile PWA — [full list · §1/§3](./docs/06_ROADMAP.md).
+
+---
+
+## 🤖 Agent workflow (contributors)
+
+This repo uses the Super Cursor SOP under [`.cursor/`](./.cursor/). Day-to-day: **`/master`** · **`/plan`** · **`/run`** · **`/learn`** · **`/scaffold`** · **`/release`** · **`/delivery`** · **`/ux`** · **`/ia`**.
+
+Skills (loaded from `.cursor/skills/`): **master** · **plan** · **run** · **learn** · **scaffold** · **git** · **security** · **api** · **ux** · **ia** · **release** · **debug** · **test** · **mcp** · **refactor** · **perf** · **review** · **study** · **delivery** · **week** · **disk** · **maintain**.
+
+Agents: **ship** · **review** · **spike**.
+
+Template self-check: `bash .cursor/bin/template-verify.sh` · `bash .cursor/bin/cursor-coherence.sh`.
 
 ---
 

@@ -99,7 +99,7 @@
 .transferRateHint {
   flex-shrink: 0;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body-secondary);
 }
 
 .body {
