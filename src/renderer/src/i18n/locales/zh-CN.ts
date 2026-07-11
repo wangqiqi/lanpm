@@ -98,6 +98,7 @@ const zhCN = {
   'group.nameRule': '名称 2–40 字',
   'group.namePlaceholder': '例如：LanPM 开发组',
   'group.autoDiscover': '局域网自动发现',
+  'group.autoDiscoverHint': '默认关闭；开启后可被局域网内其他设备发现并加入',
   'group.typeProject': '项目群',
   'group.typeFunction': '职能群',
   'group.typeAnonymous': '匿名群',

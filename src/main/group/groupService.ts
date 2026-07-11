@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { unlinkSync } from 'fs'
 import type { Database } from 'better-sqlite3'
 import { BrowserWindow } from 'electron'
-import type { CreateGroupInput, GroupRecord } from '../../shared/group/types'
+import { DEFAULT_GROUP_AUTO_DISCOVER, type CreateGroupInput, type GroupRecord } from '../../shared/group/types'
 import type { GroupType } from '../../shared/navigation/types'
 import { GROUP_PUSH_CHANNEL } from '../../shared/group/channels'
 import { LANPM_GUEST_DISPLAY } from '../../shared/constants/display'
@@ -157,7 +157,7 @@ export function createUserGroup(db: Database, input: CreateGroupInput): GroupRec
     name,
     createdBy: status.user.userId,
     createdAt: now,
-    autoDiscover: input.autoDiscover ?? true
+    autoDiscover: input.autoDiscover ?? DEFAULT_GROUP_AUTO_DISCOVER
   }
 
   insertGroup(db, group)

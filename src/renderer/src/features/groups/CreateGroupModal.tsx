@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Form, Input, Modal, Radio, Switch } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { GroupType } from '@shared/navigation/types'
+import { DEFAULT_GROUP_AUTO_DISCOVER } from '@shared/group/types'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
@@ -23,7 +24,7 @@ export default function CreateGroupModal({
 
   useEffect(() => {
     if (open) {
-      form.setFieldsValue({ type: 'project', autoDiscover: true, name: '' })
+      form.setFieldsValue({ type: 'project', autoDiscover: DEFAULT_GROUP_AUTO_DISCOVER, name: '' })
     }
   }, [open, form])
 
@@ -70,7 +71,12 @@ export default function CreateGroupModal({
             onPressEnter={submitFormOnEnter(form)}
           />
         </Form.Item>
-        <Form.Item name="autoDiscover" label={t('group.autoDiscover')} valuePropName="checked">
+        <Form.Item
+          name="autoDiscover"
+          label={t('group.autoDiscover')}
+          extra={t('group.autoDiscoverHint')}
+          valuePropName="checked"
+        >
           <Switch />
         </Form.Item>
       </Form>

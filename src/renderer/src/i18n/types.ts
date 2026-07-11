@@ -97,6 +97,7 @@ export type MessageKey =
   | 'group.nameRule'
   | 'group.namePlaceholder'
   | 'group.autoDiscover'
+  | 'group.autoDiscoverHint'
   | 'group.typeProject'
   | 'group.typeFunction'
   | 'group.typeAnonymous'

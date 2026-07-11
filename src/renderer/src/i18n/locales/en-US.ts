@@ -99,6 +99,7 @@ const enUS = {
   'group.nameRule': 'Name must be 2–40 characters',
   'group.namePlaceholder': 'e.g. LanPM Dev Team',
   'group.autoDiscover': 'LAN auto-discovery',
+  'group.autoDiscoverHint': 'Off by default; enable to let peers on the LAN discover and join',
   'group.typeProject': 'Project group',
   'group.typeFunction': 'Function group',
   'group.typeAnonymous': 'Anonymous group',

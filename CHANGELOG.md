@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Fixed
+- **TASK-332**：新建群 `autoDiscover` 默认改为 **false**（`DEFAULT_GROUP_AUTO_DISCOVER`）；创建表单提示；stub/create 对齐。
 - **TASK-331**：传输限速 `rateKbps` 上限 clamp（`FILE_TRANSFER_RATE_MAX_KBPS=100_000`）；IPC 拒绝非有限/负数。
 - **TASK-330**：续传 `startOffset` 对负数/非有限值 clamp 为 0，避免异常偏移。
 

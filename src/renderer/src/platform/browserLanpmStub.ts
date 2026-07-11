@@ -12,6 +12,7 @@ import { resolveDeviceName } from '@shared/identity/deviceName'
 
 const BROWSER_PREVIEW_DEVICE = '开发预览'
 import type { LanpmApi } from '@shared/lanpm-api'
+import { DEFAULT_GROUP_AUTO_DISCOVER } from '@shared/group/types'
 import { randomAvatarDataUrl } from '@renderer/features/setup/avatar'
 import { isMessageReadByOthers } from '@shared/chat/readReceipt'
 import type { FileMeta } from '@shared/file/types'
@@ -1193,7 +1194,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         name: input.name,
         createdBy: 'stub',
         createdAt: new Date().toISOString(),
-        autoDiscover: input.autoDiscover ?? true
+        autoDiscover: input.autoDiscover ?? DEFAULT_GROUP_AUTO_DISCOVER
       }),
       join: async (groupId) => ({
         groupId,
