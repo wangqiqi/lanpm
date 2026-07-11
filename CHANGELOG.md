@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **file_pull 续传 API (TASK-167)**：`pullRemoteFile` 读 `.partial`/SQLite 进度发 `fromOffset`；`resumeTransfer` 支持 download 方向。
 - **file_pull 接收端落盘 (TASK-166)**：pull 会话写入 `{fileId}.partial` + SQLite download `file_transfers` 进度；进程可恢复；去掉内存 `pullBuffers`。
 - **file_pull 发送端续传 (TASK-165)**：`handleFilePullRequest` 校验 payload 并从 `fromOffset` 起发 `file_chunk`。
 - **file_pull_request 续传协议 (TASK-164)**：`FilePullRequestPayload.fromOffset` + 校验；`docs/03` 对齐实现中的 `FileChunkPayload` 形状。

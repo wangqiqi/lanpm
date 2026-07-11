@@ -121,11 +121,16 @@ async function runChunkedUpload(
   broadcastTransfers(meta.groupId)
 }
 
-/** PRD-F-10 — 从已中断的分片进度续传 */
+/** PRD-F-10 — 从已中断的分片进度续传（upload 假分片 / download P2P pull） */
 export async function resumeTransfer(db: Database, transferId: string): Promise<FileTransferView> {
   const transfer = getTransferById(db, transferId)
   if (!transfer) throwLanpm('err.transferNotFound')
-  if (transfer.status !== 'failed' && transfer.status !== 'paused') {
+
+  const resumable =
+    transfer.status === 'failed' ||
+    transfer.status === 'paused' ||
+    (transfer.direction === 'download' && transfer.status === 'transferring')
+  if (!resumable) {
     throwLanpm('err.transferResumeInvalid')
   }
   if (transfer.transferredBytes <= 0 || transfer.transferredBytes >= transfer.totalBytes) {
@@ -137,6 +142,14 @@ export async function resumeTransfer(db: Database, transferId: string): Promise<
 
   const status = getSetupStatus(db)
   if (!status.configured || !status.device) throwLanpm('stub.identityRequired')
+
+  if (transfer.direction === 'download') {
+    if (!isRemotePendingPath(meta.storagePath)) {
+      throwLanpm('err.transferResumeInvalid')
+    }
+    await pullRemoteFile(db, transfer.fileId, { resumeTransferId: transferId })
+    return getTransferById(db, transferId)!
+  }
 
   await runChunkedUpload(db, meta, status.device.deviceId, {
     transferId,

@@ -196,9 +196,15 @@ export function listResumableTransfers(db: Database, groupId: string): FileTrans
       `SELECT t.*, f.name AS file_name FROM file_transfers t
        LEFT JOIN files f ON f.file_id = t.file_id
        WHERE t.group_id = ?
-         AND t.status IN ('failed', 'paused')
-         AND t.transferred_bytes > 0
-         AND t.transferred_bytes < t.total_bytes
+         AND (
+           (t.status IN ('failed', 'paused') AND t.transferred_bytes > 0 AND t.transferred_bytes < t.total_bytes)
+           OR (
+             t.direction = 'download'
+             AND t.status = 'transferring'
+             AND t.transferred_bytes > 0
+             AND t.transferred_bytes < t.total_bytes
+           )
+         )
        ORDER BY t.started_at DESC`
     )
     .all(groupId) as (TransferRow & { file_name?: string })[]

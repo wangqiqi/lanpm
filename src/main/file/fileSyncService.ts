@@ -37,6 +37,7 @@ import { getFileById, upsertRemoteFileMeta } from '../storage/repositories/fileR
 import {
   finishTransfer,
   getLatestDownloadTransfer,
+  getTransferById,
   insertTransfer,
   updateTransferProgress
 } from '../storage/repositories/fileTransferRepository'
@@ -374,7 +375,16 @@ export function publishFileMeta(db: Database, meta: FileMeta): void {
   )
 }
 
-export async function pullRemoteFile(db: Database, fileId: string): Promise<FileMeta> {
+export type PullRemoteOptions = {
+  /** Resume a specific download transfer row (IPC resumeTransfer). */
+  resumeTransferId?: string
+}
+
+export async function pullRemoteFile(
+  db: Database,
+  fileId: string,
+  opts?: PullRemoteOptions
+): Promise<FileMeta> {
   const meta = getFileById(db, fileId)
   if (!meta) throwLanpm('err.fileNotFound')
   if (!meta.storagePath.startsWith(REMOTE_PENDING_PREFIX)) {
@@ -383,20 +393,42 @@ export async function pullRemoteFile(db: Database, fileId: string): Promise<File
 
   ensureSubscribed(db, meta.groupId)
 
-  const existing = getLatestDownloadTransfer(db, fileId)
-  let fromOffset = bytesOnPartial(meta.groupId, fileId)
+  const onDisk = bytesOnPartial(meta.groupId, fileId)
+  let fromOffset = onDisk
   let transferId: string | undefined
-  if (
-    existing &&
-    (existing.status === 'failed' || existing.status === 'paused' || existing.status === 'transferring') &&
-    existing.transferredBytes > 0 &&
-    existing.transferredBytes < existing.totalBytes
-  ) {
-    fromOffset = Math.min(fromOffset, existing.transferredBytes)
-    if (fromOffset === existing.transferredBytes) transferId = existing.transferId
+  let fromDeviceId: string | undefined
+
+  if (opts?.resumeTransferId) {
+    const targeted = getTransferById(db, opts.resumeTransferId)
+    if (
+      !targeted ||
+      targeted.fileId !== fileId ||
+      targeted.direction !== 'download'
+    ) {
+      throwLanpm('err.transferResumeInvalid')
+    }
+    fromOffset = Math.min(onDisk, targeted.transferredBytes)
+    transferId = targeted.transferId
+    fromDeviceId = targeted.fromDeviceId
+  } else {
+    const existing = getLatestDownloadTransfer(db, fileId)
+    if (
+      existing &&
+      (existing.status === 'failed' ||
+        existing.status === 'paused' ||
+        existing.status === 'transferring') &&
+      existing.transferredBytes > 0 &&
+      existing.transferredBytes < existing.totalBytes
+    ) {
+      fromOffset = Math.min(onDisk, existing.transferredBytes)
+      if (fromOffset === existing.transferredBytes) {
+        transferId = existing.transferId
+        fromDeviceId = existing.fromDeviceId
+      }
+    }
   }
 
-  const destPromise = armPullReceiver(db, meta, { fromOffset, transferId })
+  const destPromise = armPullReceiver(db, meta, { fromOffset, transferId, fromDeviceId })
 
   const payload: FilePullRequestPayload = {
     fileId,
