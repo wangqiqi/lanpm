@@ -1,4 +1,5 @@
 import type { GroupType } from '../navigation/types'
+import type { DiscoveryReasonCode } from './discoveryHealth'
 
 /** UDP / stub 发现包中广播的可加入群组 */
 export interface DiscoverableGroupAdvert {
@@ -24,7 +25,20 @@ export interface DiscoverGroupView {
   joined: boolean
 }
 
+/** Serialized discovery health for DiscoverModal (A5). */
+export interface DiscoverHealthView {
+  reason: DiscoveryReasonCode
+  ok: boolean
+  suggestManualPeer: boolean
+  multicastOk: boolean | null
+  lastError?: string
+}
+
 export interface DiscoverSnapshot {
   peers: DiscoverPeerView[]
   groups: DiscoverGroupView[]
+  /** A5 · transport / empty-state health */
+  health: DiscoverHealthView
+  /** A5 · persisted seed host:port list */
+  seeds: string[]
 }

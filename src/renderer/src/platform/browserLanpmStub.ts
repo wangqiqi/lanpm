@@ -1338,7 +1338,14 @@ export function createBrowserLanpmStub(): LanpmApi {
               ownerDisplayName: 'Alice',
               joined: false
             }
-          ]
+          ],
+          health: {
+            reason: 'ok' as const,
+            ok: true,
+            suggestManualPeer: false,
+            multicastOk: null
+          },
+          seeds: [] as string[]
         }
       }
     },

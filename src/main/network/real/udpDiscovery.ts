@@ -14,6 +14,13 @@ export interface UdpDiscoveryOptions {
   onPeer: (peer: DiscoveryPayload) => void
 }
 
+export interface UdpDiscoveryDiagnostics {
+  bindOk: boolean
+  multicastOk: boolean | null
+  lastBroadcastError: string | null
+  peerCount: number
+}
+
 interface PeerCacheEntry {
   peer: DiscoveryPayload
   updatedAt: number
@@ -26,10 +33,14 @@ export class UdpDiscovery {
   private socket: dgram.Socket | null = null
   private broadcastTimer: ReturnType<typeof setInterval> | null = null
   private pruneTimer: ReturnType<typeof setInterval> | null = null
+  private bindOk = false
+  private multicastOk: boolean | null = null
+  private lastBroadcastError: string | null = null
 
   constructor(opts: UdpDiscoveryOptions) {
     this.opts = opts
     this.disableMulticast = process.env.LANPM_DISABLE_MULTICAST === '1'
+    this.multicastOk = this.disableMulticast ? null : true
   }
 
   start(): void {
@@ -55,16 +66,21 @@ export class UdpDiscovery {
 
     socket.on('error', (err) => {
       console.warn('[lanpm] UDP discovery error:', err.message)
+      this.bindOk = false
+      this.lastBroadcastError = err.message
     })
 
     socket.bind(UDP_DISCOVERY_PORT, () => {
+      this.bindOk = true
       socket.setBroadcast(true)
       if (!this.disableMulticast) {
         try {
           socket.addMembership(UDP_MULTICAST_ADDR)
+          this.multicastOk = true
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
           console.warn('[lanpm] UDP multicast join failed (broadcast only):', msg)
+          this.multicastOk = false
         }
       }
     })
@@ -82,11 +98,22 @@ export class UdpDiscovery {
     this.socket?.close()
     this.socket = null
     this.peers.clear()
+    this.bindOk = false
   }
 
   listPeers(): DiscoveryPayload[] {
     this.prune()
     return [...this.peers.values()].map((e) => e.peer)
+  }
+
+  getDiagnostics(): UdpDiscoveryDiagnostics {
+    this.prune()
+    return {
+      bindOk: this.bindOk,
+      multicastOk: this.multicastOk,
+      lastBroadcastError: this.lastBroadcastError,
+      peerCount: this.peers.size
+    }
   }
 
   private payload(): DiscoveryPayload {
@@ -107,7 +134,12 @@ export class UdpDiscovery {
     const packet = JSON.stringify({ v: 1, kind: 'discovery', payload: this.payload() })
     const buf = Buffer.from(packet, 'utf8')
     this.socket.send(buf, UDP_DISCOVERY_PORT, '255.255.255.255', (err) => {
-      if (err) console.warn('[lanpm] UDP broadcast failed:', err.message)
+      if (err) {
+        console.warn('[lanpm] UDP broadcast failed:', err.message)
+        this.lastBroadcastError = err.message
+      } else if (this.lastBroadcastError) {
+        this.lastBroadcastError = null
+      }
     })
     if (!this.disableMulticast) {
       this.socket.send(buf, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR, (err) => {

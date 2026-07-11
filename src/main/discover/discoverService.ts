@@ -1,11 +1,68 @@
 import type { Database } from 'better-sqlite3'
-import type { DiscoverSnapshot } from '../../shared/discover/types'
+import type { DiscoverHealthView, DiscoverSnapshot } from '../../shared/discover/types'
+import { evaluateDiscoveryHealth } from '../../shared/discover/discoveryHealth'
+import {
+  DISCOVER_SEEDS_META_KEY,
+  normalizeDiscoverSeeds
+} from '../../shared/discover/discoverSeeds'
 import { getSetupStatus } from '../identity/setup'
 import { listUserGroups } from '../group/groupService'
 import { listGroupMembers } from '../storage/repositories/groupRepository'
-import { getNetworkTransport } from '../network'
+import { getMeta } from '../storage/repositories/syncMetaRepository'
+import {
+  getNetworkTransport,
+  RealNetworkTransport,
+  resolveNetworkMode
+} from '../network'
 import { getAggregatedUserPresence } from '../presence/presenceRegistry'
 import { listCachedDiscoverGroups } from './discoverGroupRegistry'
+
+function loadSeeds(db: Database): string[] {
+  return normalizeDiscoverSeeds(getMeta(db, DISCOVER_SEEDS_META_KEY))
+}
+
+function buildHealth(input: {
+  peerCount: number
+  groupCount: number
+}): DiscoverHealthView {
+  const mode = resolveNetworkMode()
+  const transport = getNetworkTransport()
+
+  if (mode === 'stub' || !(transport instanceof RealNetworkTransport)) {
+    const evaluated = evaluateDiscoveryHealth({
+      mode: mode === 'stub' ? 'stub' : 'real',
+      bindOk: true,
+      multicastOk: null,
+      peerCount: input.peerCount,
+      groupCount: input.groupCount,
+      udpDisabled: mode !== 'stub' && !transport
+    })
+    return {
+      reason: evaluated.reason,
+      ok: evaluated.ok,
+      suggestManualPeer: evaluated.suggestManualPeer,
+      multicastOk: null
+    }
+  }
+
+  const diag = transport.getDiscoveryDiagnostics()
+  const evaluated = evaluateDiscoveryHealth({
+    mode: 'real',
+    bindOk: diag.bindOk,
+    multicastOk: diag.multicastOk,
+    lastBroadcastError: diag.lastBroadcastError,
+    udpDisabled: diag.udpDisabled,
+    peerCount: input.peerCount,
+    groupCount: input.groupCount
+  })
+  return {
+    reason: evaluated.reason,
+    ok: evaluated.ok,
+    suggestManualPeer: evaluated.suggestManualPeer,
+    multicastOk: diag.multicastOk,
+    lastError: diag.lastBroadcastError ?? undefined
+  }
+}
 
 export async function fetchDiscoverSnapshot(db: Database): Promise<DiscoverSnapshot> {
   const status = getSetupStatus(db)
@@ -64,5 +121,8 @@ export async function fetchDiscoverSnapshot(db: Database): Promise<DiscoverSnaps
     return a.name.localeCompare(b.name)
   })
 
-  return { peers, groups }
+  const seeds = loadSeeds(db)
+  const health = buildHealth({ peerCount: peers.length, groupCount: groups.length })
+
+  return { peers, groups, health, seeds }
 }

@@ -1,7 +1,6 @@
 /** A5 · discovery failure / empty-state reason codes (map to i18n in UI). */
 export type DiscoveryReasonCode =
   | 'ok'
-  | 'empty'
   | 'bind_failed'
   | 'multicast_degraded'
   | 'broadcast_failed'

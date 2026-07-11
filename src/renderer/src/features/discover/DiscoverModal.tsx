@@ -38,7 +38,17 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const joinGroup = useNavigationStore((s) => s.joinGroup)
   const openSession = useDmStore((s) => s.openSession)
-  const [snapshot, setSnapshot] = useState<DiscoverSnapshot>({ peers: [], groups: [] })
+  const [snapshot, setSnapshot] = useState<DiscoverSnapshot>({
+    peers: [],
+    groups: [],
+    health: {
+      reason: 'transport_offline',
+      ok: true,
+      suggestManualPeer: true,
+      multicastOk: null
+    },
+    seeds: []
+  })
   const [loading, setLoading] = useState(false)
   const [joiningId, setJoiningId] = useState<string | null>(null)
   const [tab, setTab] = useState<'groups' | 'people'>('groups')

@@ -174,6 +174,30 @@ export class RealNetworkTransport implements NetworkTransport {
     return peers
   }
 
+  /** A5 · UDP / discovery transport signals for DiscoverSnapshot.health */
+  getDiscoveryDiagnostics(): {
+    udpDisabled: boolean
+    bindOk: boolean
+    multicastOk: boolean | null
+    lastBroadcastError: string | null
+  } {
+    if (this.disableUdp) {
+      return {
+        udpDisabled: true,
+        bindOk: false,
+        multicastOk: null,
+        lastBroadcastError: null
+      }
+    }
+    const d = this.discovery?.getDiagnostics()
+    return {
+      udpDisabled: false,
+      bindOk: d?.bindOk ?? false,
+      multicastOk: d?.multicastOk ?? null,
+      lastBroadcastError: d?.lastBroadcastError ?? null
+    }
+  }
+
   /** 测试辅助：手动接入对端 */
   async connectPeer(peer: DiscoveryPayload): Promise<void> {
     await this.ensureLink(peer)
