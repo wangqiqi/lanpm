@@ -167,6 +167,10 @@ const api: LanpmApi = {
   discover: {
     snapshot: () => ipcRenderer.invoke('discover:snapshot')
   },
+  whiteboard: {
+    getScene: (groupId) => ipcRenderer.invoke('whiteboard:getScene', groupId),
+    saveScene: (input) => ipcRenderer.invoke('whiteboard:saveScene', input)
+  },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
     getStorageUsage: () => ipcRenderer.invoke('data:getStorageUsage'),

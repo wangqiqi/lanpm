@@ -192,4 +192,10 @@ export interface LanpmApi {
   discover: {
     snapshot: () => Promise<DiscoverSnapshot>
   }
+  whiteboard: {
+    getScene: (groupId: string) => Promise<import('./whiteboard/types').WhiteboardScene | null>
+    saveScene: (
+      input: import('./whiteboard/types').SaveWhiteboardSceneInput
+    ) => Promise<import('./whiteboard/types').WhiteboardScene>
+  }
 }

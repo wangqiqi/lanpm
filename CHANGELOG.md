@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **白板场景契约 (TASK-226)**：群级 `whiteboard_scenes`（sceneJson · linkedTaskId）；IPC get/save；stub + 单测。
 - **七视图导航 (TASK-225)**：`AppView` 增 `whiteboard`；`VIEW_TABS` 顺序 calendar→whiteboard→files。
 
 ## [1.10.0] - 2026-07-11

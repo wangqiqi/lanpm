@@ -13,6 +13,7 @@ import { registerSearchIpc } from './ipc/search'
 import { registerDiscoverIpc } from './ipc/discover'
 import { registerDataIpc } from './ipc/data'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
+import { registerWhiteboardIpc } from './ipc/whiteboard'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
@@ -80,6 +81,7 @@ function registerAllIpcHandlers(): void {
   registerBadgeIpc()
   registerDiscoverIpc()
   registerDataIpc()
+  registerWhiteboardIpc()
 }
 
 function createWindow(): BrowserWindow {

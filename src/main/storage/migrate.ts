@@ -76,6 +76,20 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         )
       `)
     }
+  },
+  {
+    fromVersion: 6,
+    description: 'whiteboard_scenes: per-group Excalidraw scene (TASK-226)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE whiteboard_scenes (
+          group_id TEXT PRIMARY KEY,
+          scene_json TEXT NOT NULL,
+          linked_task_id TEXT,
+          updated_at TEXT NOT NULL
+        )
+      `)
+    }
   }
 ]
 

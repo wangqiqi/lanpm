@@ -15,6 +15,7 @@ import { SEARCH_IPC } from '../../src/shared/search/channels.ts'
 import { NETWORK_IPC } from '../../src/shared/network/status.ts'
 import { BADGE_IPC } from '../../src/shared/badge/types.ts'
 import { DISCOVER_IPC } from '../../src/shared/discover/channels.ts'
+import { WHITEBOARD_IPC } from '../../src/shared/whiteboard/channels.ts'
 import { DATA_IPC } from '../../src/shared/data/channels.ts'
 
 const IDENTITY_CHANNELS = {
@@ -38,6 +39,7 @@ const DECLARED = new Set<string>([
   ...Object.values(BADGE_IPC),
   ...Object.values(DISCOVER_IPC),
   ...Object.values(DATA_IPC),
+  ...Object.values(WHITEBOARD_IPC),
   ...Object.values(IDENTITY_CHANNELS)
 ])
 
@@ -66,6 +68,7 @@ function extractMainHandlers(): Set<string> {
     BADGE_IPC,
     DISCOVER_IPC,
     DATA_IPC,
+    WHITEBOARD_IPC,
     IDENTITY_CHANNELS
   }
 

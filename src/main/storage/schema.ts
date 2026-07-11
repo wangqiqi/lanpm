@@ -33,7 +33,8 @@ export const EXPECTED_TABLES = [
   'ai_config',
   'sync_meta',
   'task_crdt_docs',
-  'group_tag_meta'
+  'group_tag_meta',
+  'whiteboard_scenes'
 ] as const
 
-export const SCHEMA_VERSION = 6
+export const SCHEMA_VERSION = 7

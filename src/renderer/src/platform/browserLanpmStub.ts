@@ -28,6 +28,8 @@ import { filterTagsToGroupDict } from '@shared/task/tags'
 import { countMineOpenTasks } from '@shared/badge/mineOpen'
 import type { GroupTagMeta } from '@shared/task/groupTagMeta'
 import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
+import type { SaveWhiteboardSceneInput, WhiteboardScene } from '@shared/whiteboard/types'
+import { buildWhiteboardScene, emptyWhiteboardSceneJson, normalizeSceneJson } from '@shared/whiteboard/types'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -35,6 +37,7 @@ const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
 const TASK_STORAGE_KEY = 'lanpm.dev.tasks'
 const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
 const FILE_STORAGE_KEY = 'lanpm.dev.files'
+const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
 
 const stubDissolvedGroups = new Set<string>(
@@ -56,6 +59,22 @@ function persistStubDissolvedGroups(): void {
 const taskListeners = new Set<(groupId: string) => void>()
 const groupTagListeners = new Set<(groupId: string) => void>()
 const stubGroupTags: Record<string, GroupTagMeta[]> = {}
+
+function readStubWhiteboards(): Record<string, WhiteboardScene> {
+  try {
+    const raw = localStorage.getItem(WHITEBOARD_STORAGE_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, WhiteboardScene>
+  } catch {
+    return {}
+  }
+}
+
+function writeStubWhiteboard(scene: WhiteboardScene): void {
+  const all = readStubWhiteboards()
+  all[scene.groupId] = scene
+  localStorage.setItem(WHITEBOARD_STORAGE_KEY, JSON.stringify(all))
+}
 
 function assertStubTaskWritable(groupId: string): void {
   if (groupId.startsWith('dm:')) throw stubError('stub.dmNoTask')
@@ -1116,6 +1135,29 @@ export function createBrowserLanpmStub(): LanpmApi {
             }
           ]
         }
+      }
+    },
+    whiteboard: {
+      getScene: async (groupId) => readStubWhiteboards()[groupId] ?? null,
+      saveScene: async (input: SaveWhiteboardSceneInput) => {
+        if (!input.groupId) throw new Error('groupId required')
+        const existing = readStubWhiteboards()[input.groupId]
+        let linkedTaskId: string | undefined
+        if (input.linkedTaskId === null) {
+          linkedTaskId = undefined
+        } else if (input.linkedTaskId === undefined) {
+          linkedTaskId = existing?.linkedTaskId
+        } else {
+          linkedTaskId = input.linkedTaskId
+        }
+        const scene = buildWhiteboardScene(
+          input.groupId,
+          normalizeSceneJson(input.sceneJson || emptyWhiteboardSceneJson()),
+          linkedTaskId,
+          new Date().toISOString()
+        )
+        writeStubWhiteboard(scene)
+        return scene
       }
     },
     data: {

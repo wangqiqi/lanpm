@@ -174,3 +174,11 @@ CREATE TABLE group_tag_meta (
   updated_by_user_id TEXT,
   PRIMARY KEY (group_id, tag_key)
 );
+
+-- 群协作白板场景（一群一板，TASK-226）
+CREATE TABLE whiteboard_scenes (
+  group_id TEXT PRIMARY KEY,
+  scene_json TEXT NOT NULL,
+  linked_task_id TEXT,
+  updated_at TEXT NOT NULL
+);
