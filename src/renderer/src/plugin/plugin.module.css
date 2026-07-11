@@ -1,0 +1,52 @@
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.card {
+  border: 1px solid var(--lanpm-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--lanpm-surface-elevated, var(--lanpm-bg-elevated, transparent));
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.badge {
+  font-size: 11px;
+  color: var(--lanpm-text-secondary);
+}
+
+.crash {
+  border: 1px dashed var(--lanpm-danger, #cf1322);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.crashDetail {
+  margin: 6px 0 0;
+  font-size: 11px;
+  white-space: pre-wrap;
+  color: var(--lanpm-text-tertiary);
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}

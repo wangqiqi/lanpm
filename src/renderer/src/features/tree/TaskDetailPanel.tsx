@@ -21,6 +21,7 @@ import {
   listTaskSuccessors
 } from '@shared/task/boardRelations'
 import TaskRelationSection from '@renderer/features/task/TaskRelationSection'
+import PluginSlot from '@renderer/plugin/PluginSlot'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import {
@@ -759,6 +760,8 @@ export default function TaskDetailPanel({
           </Button>
         </div>
       </div>
+
+      <PluginSlot slotId="task.detail.section" groupId={groupId} taskId={task.taskId} />
 
       <div className={styles.detailField}>
         <Text type="secondary">{t('tree.detailAttachments')}</Text>

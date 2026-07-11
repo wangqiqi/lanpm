@@ -38,3 +38,8 @@ linux:
 extraResources:
   - from: resources/icon.png
     to: icon.png
+  - from: plugins
+    to: plugins
+    filter:
+      - '**/*'
+      - '!**/node_modules/**'

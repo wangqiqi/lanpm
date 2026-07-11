@@ -17,6 +17,7 @@ import { BADGE_IPC } from '../../src/shared/badge/types.ts'
 import { DISCOVER_IPC } from '../../src/shared/discover/channels.ts'
 import { WHITEBOARD_IPC } from '../../src/shared/whiteboard/channels.ts'
 import { DATA_IPC } from '../../src/shared/data/channels.ts'
+import { PLUGIN_IPC } from '../../src/shared/plugin/channels.ts'
 
 const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
@@ -40,6 +41,7 @@ const DECLARED = new Set<string>([
   ...Object.values(DISCOVER_IPC),
   ...Object.values(DATA_IPC),
   ...Object.values(WHITEBOARD_IPC),
+  ...Object.values(PLUGIN_IPC),
   ...Object.values(IDENTITY_CHANNELS)
 ])
 
@@ -69,6 +71,7 @@ function extractMainHandlers(): Set<string> {
     DISCOVER_IPC,
     DATA_IPC,
     WHITEBOARD_IPC,
+    PLUGIN_IPC,
     IDENTITY_CHANNELS
   }
 
@@ -107,6 +110,8 @@ for (const ch of preloadChannels) {
 
 for (const ch of [...DECLARED].filter((c) => !c.includes('Sync'))) {
   if (ch === IDENTITY_CHANNELS.getSuggestedDeviceNameSync) continue
+  // Main→renderer push（preload 用 on，非 invoke）不要求 ipcMain.handle
+  if (ch === 'whiteboard:remoteUpdate' || ch === 'whiteboard:remoteAwareness') continue
   assert.ok(mainHandlers.has(ch), `declared IPC not registered in main: ${ch}`)
 }
 

@@ -241,4 +241,19 @@ export interface LanpmApi {
       handler: (payload: { groupId: string; updateBase64: string }) => void
     ) => () => void
   }
+  plugin: {
+    listPlugins: () => Promise<import('./plugin/types').PluginView[]>
+    listSlotPlugins: (
+      slotId: import('./plugin/types').PluginSlotId
+    ) => Promise<import('./plugin/types').PluginView[]>
+    setEnabled: (
+      pluginId: string,
+      enabled: boolean
+    ) => Promise<import('./plugin/types').PluginView[]>
+    invokeCapability: (
+      pluginId: string,
+      capability: import('./plugin/types').PluginCapabilityId,
+      args?: Record<string, unknown>
+    ) => Promise<unknown>
+  }
 }

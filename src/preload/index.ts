@@ -210,6 +210,14 @@ const api: LanpmApi = {
       return () => ipcRenderer.removeListener('whiteboard:remoteAwareness', listener)
     }
   },
+  plugin: {
+    listPlugins: () => ipcRenderer.invoke('plugin:listPlugins'),
+    listSlotPlugins: (slotId) => ipcRenderer.invoke('plugin:listSlotPlugins', slotId),
+    setEnabled: (pluginId, enabled) =>
+      ipcRenderer.invoke('plugin:setEnabled', pluginId, enabled),
+    invokeCapability: (pluginId, capability, args) =>
+      ipcRenderer.invoke('plugin:invokeCapability', pluginId, capability, args)
+  },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
     getStorageUsage: () => ipcRenderer.invoke('data:getStorageUsage'),

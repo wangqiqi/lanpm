@@ -1,6 +1,6 @@
 /**
- * Plugin system SPIKE stubs（SPIKE-276–278）— 类型契约，无运行时加载。
- * 下一 Sprint loader 实现须对齐本文件；禁止插件直连 ipcMain。
+ * Plugin system SPIKE stubs（SPIKE-276–278）+ loader runtime views（TASK-289+）。
+ * 禁止插件直连 ipcMain / SQLite。
  */
 
 /** 插件声明的 UI 槽（Host 注册表键） */
@@ -31,6 +31,13 @@ export type PluginManifest = {
   pricing: 'free' | 'paid'
 }
 
+/** Renderer / IPC 可见视图 */
+export type PluginView = PluginManifest & {
+  enabled: boolean
+  /** 插件目录相对名（如 lanpm.example） */
+  dirName: string
+}
+
 /** 安全红线（文档/verify 对照用常量） */
 export const PLUGIN_SECURITY_RULES = [
   'no-renderer-node-integration',
@@ -41,3 +48,18 @@ export const PLUGIN_SECURITY_RULES = [
 ] as const
 
 export type PluginSecurityRule = (typeof PLUGIN_SECURITY_RULES)[number]
+
+export const PLUGIN_SLOT_IDS: readonly PluginSlotId[] = [
+  'task.detail.section',
+  'topbar.menu',
+  'profile.tab',
+  'group.tab.overflow',
+  'files.preview.action'
+] as const
+
+export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
+  'task.list',
+  'task.get',
+  'group.get',
+  'file.listMeta'
+] as const

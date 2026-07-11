@@ -109,6 +109,7 @@
 - **Presence**: who is viewing a task; **description caret** awareness while co-editing  
 - **A1 nudge (v1.20.0)**: due today/overdue desktop reminders (toggle); `@assignee` alias in chat; **Nudge assignee** from task detail  
 - **B2 member search**: pinyin/keyword filter for assignees on the board, searchable assignee Select, chat member sidebar search (`verify:member-search`)  
+- **Plugin loader + form-js POC**: discover `plugins/*/plugin.json`; Host capability proxy; task-detail slot with free stub + paid form-js schema POC (`verify:plugin-loader`)  
 - Nav badges: chat unread · board **mine-open** (todo/doing assigned to me) · weak recent-change dot  
 
 ### 🎨 Whiteboard
@@ -252,7 +253,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 
 **Current:** `1.20.0` — A1 due nudge / @assignee (`verify:a1-nudge`), plus transfer A4 + plugin SPIKE (1.19), platform matrix (1.18), A3/A5/whiteboard realtime (1.17), calendar drag (1.14), checklist (1.13), whiteboard + message↔task (1.12), calendar tab (1.10), tags / badges / Presence. M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Next (in progress / queue):** B2 member search in `[Unreleased]` · plugin loader POC · form-js as purchasable plugin.
+**Next (in progress / queue):** B2 + plugin loader/form-js in `[Unreleased]` · plugin marketplace (P2).
 
 **Later (P1+):** screen share, voice, mind maps, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 

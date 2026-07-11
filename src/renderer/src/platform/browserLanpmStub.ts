@@ -38,6 +38,7 @@ import type { GroupTagMeta } from '@shared/task/groupTagMeta'
 import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
 import type { SaveWhiteboardSceneInput, WhiteboardScene } from '@shared/whiteboard/types'
 import { buildWhiteboardScene, emptyWhiteboardSceneJson, normalizeSceneJson } from '@shared/whiteboard/types'
+import type { PluginView } from '@shared/plugin/types'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -48,6 +49,29 @@ const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
 const FILE_STORAGE_KEY = 'lanpm.dev.files'
 const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
+
+const STUB_PLUGINS: PluginView[] = [
+  {
+    id: 'lanpm.example',
+    name: 'Example Slot Stub',
+    version: '0.1.0',
+    slots: ['task.detail.section'],
+    capabilities: ['task.get'],
+    pricing: 'free',
+    enabled: true,
+    dirName: 'lanpm.example'
+  },
+  {
+    id: 'lanpm.formjs',
+    name: 'Advanced Form (form-js POC)',
+    version: '0.1.0',
+    slots: ['task.detail.section'],
+    capabilities: ['task.get'],
+    pricing: 'paid',
+    enabled: true,
+    dirName: 'lanpm.formjs'
+  }
+]
 
 const stubDissolvedGroups = new Set<string>(
   (() => {
@@ -1433,6 +1457,25 @@ export function createBrowserLanpmStub(): LanpmApi {
       publishAwareness: async () => undefined,
       onRemoteUpdate: () => () => undefined,
       onRemoteAwareness: () => () => undefined
+    },
+    plugin: {
+      listPlugins: async () => STUB_PLUGINS.slice(),
+      listSlotPlugins: async (slotId) =>
+        STUB_PLUGINS.filter((p) => p.enabled && p.slots.includes(slotId)),
+      setEnabled: async () => STUB_PLUGINS.slice(),
+      invokeCapability: async (pluginId, capability, args) => {
+        const plugin = STUB_PLUGINS.find((p) => p.id === pluginId)
+        if (!plugin?.enabled) throw new Error(`plugin disabled: ${pluginId}`)
+        if (!plugin.capabilities.includes(capability)) {
+          throw new Error(`capability not granted: ${capability}`)
+        }
+        if (capability === 'task.get') {
+          const taskId = String(args?.taskId ?? '')
+          const groupTasks = Object.values(readAllTasks()).flat()
+          return groupTasks.find((t) => t.taskId === taskId) ?? null
+        }
+        throw new Error(`capability not granted: ${capability}`)
+      }
     },
     data: {
       getStorageSettings: async () => ({

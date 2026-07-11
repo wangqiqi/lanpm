@@ -72,6 +72,7 @@
     "verify:file-resume": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-file-resume.ts",
     "verify:transfer-a4": "node --experimental-strip-types tests/static/verify-transfer-a4.ts",
     "verify:plugin-spike": "node --experimental-strip-types tests/static/verify-plugin-spike.ts",
+    "verify:plugin-loader": "node --experimental-strip-types tests/static/verify-plugin-loader.ts",
     "verify:a1-nudge": "node --experimental-strip-types tests/static/verify-a1-nudge.ts",
     "verify:member-search": "node --experimental-strip-types tests/static/verify-member-search.ts",
     "verify:i18n-en": "node --experimental-strip-types tests/static/verify-i18n-en.ts",
