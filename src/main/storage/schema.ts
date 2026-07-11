@@ -35,4 +35,4 @@ export const EXPECTED_TABLES = [
   'task_crdt_docs'
 ] as const
 
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5

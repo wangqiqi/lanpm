@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { CreateTaskInput, Task, TaskPriority, TaskStatus, UpdateTaskInput } from '../../../shared/task/types'
+import { normalizeTaskTags } from '../../../shared/task/tags.ts'
 import { clampProgressPercent } from '../../../shared/task/validation.ts'
 import { lwwShouldApply } from '../../../shared/sync/lww.ts'
 import { getMeta } from './syncMetaRepository.ts'
@@ -14,6 +15,7 @@ interface TaskRow {
   other_reason: string | null
   priority: string
   assignee_user_id: string | null
+  tags_json?: string | null
   progress_percent: number
   start_date: string | null
   end_date: string | null
@@ -30,6 +32,22 @@ function localWriterDeviceId(db: Database): string {
   return getMeta(db, 'local_device_id') ?? ''
 }
 
+function parseTagsJson(raw: string | null | undefined): string[] | undefined {
+  if (raw == null || raw === '' || raw === '[]') return undefined
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    const tags = normalizeTaskTags(parsed)
+    return tags.length > 0 ? tags : undefined
+  } catch {
+    return undefined
+  }
+}
+
+function tagsToJson(tags: string[] | undefined): string {
+  const normalized = normalizeTaskTags(tags ?? [])
+  return JSON.stringify(normalized)
+}
+
 function rowToTask(row: TaskRow): Task {
   return {
     taskId: row.task_id,
@@ -41,6 +59,7 @@ function rowToTask(row: TaskRow): Task {
     otherReason: row.other_reason ?? undefined,
     priority: row.priority as TaskPriority,
     assigneeUserId: row.assignee_user_id ?? undefined,
+    tags: parseTagsJson(row.tags_json),
     progressPercent: row.progress_percent,
     startDate: row.start_date ?? undefined,
     endDate: row.end_date ?? undefined,
@@ -135,12 +154,12 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
   db.prepare(
     `INSERT INTO tasks (
       task_id, group_id, parent_task_id, title, description,
-      status, other_reason, priority, assignee_user_id,
+      status, other_reason, priority, assignee_user_id, tags_json,
       progress_percent, start_date, end_date, milestone, sort_order,
       created_by, created_at, updated_at, deleted_at, last_writer_device_id
     ) VALUES (
       @taskId, @groupId, @parentTaskId, @title, @description,
-      @status, @otherReason, @priority, @assigneeUserId,
+      @status, @otherReason, @priority, @assigneeUserId, @tagsJson,
       @progressPercent, @startDate, @endDate, @milestone, @sortOrder,
       @createdBy, @createdAt, @updatedAt, @deletedAt, @lastWriterDeviceId
     )`
@@ -154,6 +173,7 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
     otherReason: task.otherReason ?? null,
     priority: task.priority,
     assigneeUserId: task.assigneeUserId ?? null,
+    tagsJson: tagsToJson(task.tags),
     progressPercent: task.progressPercent,
     startDate: task.startDate ?? null,
     endDate: task.endDate ?? null,
@@ -183,6 +203,13 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
         : input.assigneeUserId !== undefined
           ? input.assigneeUserId
           : existing.assigneeUserId,
+    tags:
+      input.tags !== undefined
+        ? (() => {
+            const normalized = normalizeTaskTags(input.tags)
+            return normalized.length > 0 ? normalized : undefined
+          })()
+        : existing.tags,
     progressPercent:
       input.progressPercent !== undefined
         ? clampProgressPercent(input.progressPercent)
@@ -228,6 +255,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       other_reason = @otherReason,
       priority = @priority,
       assignee_user_id = @assigneeUserId,
+      tags_json = @tagsJson,
       progress_percent = @progressPercent,
       parent_task_id = @parentTaskId,
       sort_order = @sortOrder,
@@ -245,6 +273,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
     otherReason: next.otherReason ?? null,
     priority: next.priority,
     assigneeUserId: next.assigneeUserId ?? null,
+    tagsJson: tagsToJson(next.tags),
     progressPercent: next.progressPercent,
     parentTaskId: next.parentTaskId ?? null,
     sortOrder: next.sortOrder,
@@ -360,6 +389,7 @@ export function buildTaskFromInput(
   taskId: string
 ): Task {
   const now = new Date().toISOString()
+  const tags = normalizeTaskTags(input.tags ?? [])
   return {
     taskId,
     groupId: input.groupId,
@@ -368,6 +398,7 @@ export function buildTaskFromInput(
     status: input.status ?? 'todo',
     priority: input.priority ?? 'medium',
     assigneeUserId: input.assigneeUserId,
+    tags: tags.length > 0 ? tags : undefined,
     progressPercent: input.progressPercent ?? 0,
     sortOrder: 0,
     createdBy,

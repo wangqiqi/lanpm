@@ -52,6 +52,13 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         )
       `)
     }
+  },
+  {
+    fromVersion: 4,
+    description: 'tasks.tags_json for independent board tags (TASK-172)',
+    up: (db) => {
+      db.exec(`ALTER TABLE tasks ADD COLUMN tags_json TEXT NOT NULL DEFAULT '[]'`)
+    }
   }
 ]
 

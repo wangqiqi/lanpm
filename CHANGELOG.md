@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **任务 tags 持久化 (TASK-172)**：schema v5 `tasks.tags_json` + migrate；repository 读写 / create·update。
 - **任务独立标签类型 (TASK-171)**：`Task.tags` / Create·Update；`normalizeTaskTags`（trim/去重/上限）+ 单测。
 
 ## [1.2.0] - 2026-07-11
