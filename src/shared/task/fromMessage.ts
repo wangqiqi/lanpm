@@ -1,5 +1,5 @@
 import type { ChatMessage } from '../chat/types'
-import { TASK_TITLE_MAX_LENGTH } from './validation'
+import { TASK_TITLE_MAX_LENGTH } from './validation.ts'
 
 /** Derive a task title from a chat message for one-click create (A2). */
 export function titleFromChatMessage(message: ChatMessage): string | null {
