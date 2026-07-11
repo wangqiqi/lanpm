@@ -49,6 +49,7 @@ import type { MessageKey } from '@renderer/i18n/messages'
 import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { groupViewPath } from '@renderer/routes/paths'
 import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
+import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import { formatFileTypeLabel } from '@shared/file/formatFileType'
 import { buildDeliverableIndex, tasksForFile } from '@shared/task/deliverables'
 import { mergeLinkedFileId, removeLinkedFileId } from '@shared/task/linkFile'
@@ -172,6 +173,7 @@ export default function FilesView(): React.ReactElement {
   const [linkTaskId, setLinkTaskId] = useState<string | undefined>()
   const [linkSaving, setLinkSaving] = useState(false)
   const isNarrow = useMediaQuery('(max-width: 960px)')
+  const locateTask = useLocateTask(gid)
 
   const categories = useMemo(
     () => CATEGORY_KEYS.map((c) => ({ label: t(c.key), value: c.value })),
@@ -623,6 +625,13 @@ export default function FilesView(): React.ReactElement {
     setLinkTaskId(undefined)
   }, [])
 
+  const openLinkedTask = useCallback(
+    (taskId: string): void => {
+      locateTask(taskId, 'board')
+    },
+    [locateTask]
+  )
+
   const columns = useMemo((): ColumnsType<FileMeta> => {
     const activeOrder = (field: FileSortField) => (sortField === field ? sortOrder : null)
     return [
@@ -657,7 +666,13 @@ export default function FilesView(): React.ReactElement {
           return (
             <Space size={[4, 4]} wrap onClick={(e) => e.stopPropagation()}>
               {linked.map((ref) => (
-                <Tag key={ref.taskId} className={styles.taskChip}>
+                <Tag
+                  key={ref.taskId}
+                  className={styles.taskChip}
+                  title={t('files.openLinkedTask')}
+                  onClick={() => openLinkedTask(ref.taskId)}
+                  style={{ cursor: 'pointer' }}
+                >
                   {ref.title}
                 </Tag>
               ))}
@@ -804,6 +819,7 @@ export default function FilesView(): React.ReactElement {
     handleDeleteLocal,
     handleUnlinkFile,
     openLinkModal,
+    openLinkedTask,
     deliverableIndex.fileToTasks
   ])
 
@@ -901,6 +917,9 @@ export default function FilesView(): React.ReactElement {
                   <Tag
                     key={ref.taskId}
                     closable
+                    title={t('files.openLinkedTask')}
+                    onClick={() => openLinkedTask(ref.taskId)}
+                    style={{ cursor: 'pointer' }}
                     onClose={(e) => {
                       e.preventDefault()
                       void handleUnlinkFile(selected.fileId, ref.taskId)
