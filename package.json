@@ -75,6 +75,7 @@
     "verify:plugin-loader": "node --experimental-strip-types tests/static/verify-plugin-loader.ts",
     "verify:plugin-enable-ui": "node --experimental-strip-types tests/static/verify-plugin-enable-ui.ts",
     "verify:sync-outbox": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-sync-outbox.ts",
+    "verify:bundle": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-bundle.ts",
     "verify:a1-nudge": "node --experimental-strip-types tests/static/verify-a1-nudge.ts",
     "verify:member-search": "node --experimental-strip-types tests/static/verify-member-search.ts",
     "verify:i18n-en": "node --experimental-strip-types tests/static/verify-i18n-en.ts",

@@ -228,8 +228,9 @@ const api: LanpmApi = {
     listDmGroupIds: () => ipcRenderer.invoke('data:listDmGroupIds'),
     exportGroupBundle: (groupId, password, includeFileBodies) =>
       ipcRenderer.invoke('data:exportGroupBundle', groupId, password, includeFileBodies),
-    importGroupBundle: (password, conflictMode) =>
-      ipcRenderer.invoke('data:importGroupBundle', password, conflictMode)
+    previewGroupBundle: (password) => ipcRenderer.invoke('data:previewGroupBundle', password),
+    importGroupBundle: (password, conflictMode, filePath) =>
+      ipcRenderer.invoke('data:importGroupBundle', password, conflictMode, filePath)
   }
 }
 

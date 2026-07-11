@@ -1515,6 +1515,9 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
       },
       exportGroupBundle: async () => null,
+      previewGroupBundle: async () => {
+        throw stubError('stub.importBundleElectronOnly')
+      },
       importGroupBundle: async () => {
         throw stubError('stub.importBundleElectronOnly')
       }

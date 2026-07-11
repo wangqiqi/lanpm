@@ -13,9 +13,26 @@ export interface GroupBundleImportOptions {
   conflictMode: BundleConflictMode
 }
 
+/** Per-entity totals / conflict hits for messages · tasks · files (TASK-310). */
+export interface GroupBundleEntityCounts {
+  messages: number
+  tasks: number
+  files: number
+}
+
+/** Dry-run preview before import (TASK-310). */
+export interface GroupBundlePreviewResult {
+  groupId: string
+  exportedAt: string
+  totals: GroupBundleEntityCounts
+  /** Rows whose id already exists in local DB. */
+  conflicts: GroupBundleEntityCounts
+}
+
 export interface GroupBundleImportResult {
   messagesImported: number
   tasksImported: number
   filesImported: number
   skipped: number
+  overwritten: number
 }

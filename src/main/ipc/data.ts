@@ -2,7 +2,11 @@ import { ipcMain } from 'electron'
 import { DATA_IPC } from '../../shared/data/channels'
 import type { BundleConflictMode } from '../../shared/data/bundle'
 import type { ClearGroupMessagesMode, DataCleanupOptions } from '../../shared/data/types'
-import { exportGroupBundle, importGroupBundle } from '../data/bundleService'
+import {
+  exportGroupBundle,
+  importGroupBundle,
+  previewGroupBundle
+} from '../data/bundleService'
 import {
   clearGroupMessagesLocal,
   getStorageSettings,
@@ -61,16 +65,36 @@ export function registerDataIpc(): void {
     }
   )
 
+  ipcMain.handle(DATA_IPC.previewGroupBundle, async (_event, password: string) => {
+    if (!password) throw new Error('password required')
+    const picked = await showOpenDialog(null, {
+      filters: [{ name: 'LanPM Bundle', extensions: ['json'] }],
+      properties: ['openFile']
+    })
+    if (picked.canceled || !picked.filePaths[0]) return null
+    const path = picked.filePaths[0]
+    const preview = previewGroupBundle(getDatabase(), path, password)
+    return { path, preview }
+  })
+
   ipcMain.handle(
     DATA_IPC.importGroupBundle,
-    async (_event, password: string, conflictMode: BundleConflictMode) => {
+    async (
+      _event,
+      password: string,
+      conflictMode: BundleConflictMode,
+      filePath?: string
+    ) => {
       if (!password) throw new Error('password required')
-      const picked = await showOpenDialog(null, {
-        filters: [{ name: 'LanPM Bundle', extensions: ['json'] }],
-        properties: ['openFile']
-      })
-      if (picked.canceled || !picked.filePaths[0]) return null
-      const path = picked.filePaths[0]
+      let path = typeof filePath === 'string' && filePath ? filePath : null
+      if (!path) {
+        const picked = await showOpenDialog(null, {
+          filters: [{ name: 'LanPM Bundle', extensions: ['json'] }],
+          properties: ['openFile']
+        })
+        if (picked.canceled || !picked.filePaths[0]) return null
+        path = picked.filePaths[0]
+      }
       return importGroupBundle(getDatabase(), path, password, conflictMode ?? 'skip')
     }
   )

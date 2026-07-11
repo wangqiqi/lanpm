@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Added
+- **TASK-310**：单群 bundle `overwrite` 冲突模式落地；`previewGroupBundle` dry-run 冲突计数；导入结果含 `overwritten`；`npm run verify:bundle`。
+
+### Fixed
+- **`groupTagMetaRepository` ESM 导入**：补 `.ts` 扩展名，修复 `ELECTRON_RUN_AS_NODE` 下依赖任务仓库的 verify 解析失败。
+
 ## [1.24.0] - 2026-07-11
 
 ### Added

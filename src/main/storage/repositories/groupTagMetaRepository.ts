@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3'
-import type { GroupTagMeta } from '../../../shared/task/groupTagMeta'
-import { normalizeGroupTagKey } from '../../../shared/task/groupTagMeta'
+import type { GroupTagMeta } from '../../../shared/task/groupTagMeta.ts'
+import { normalizeGroupTagKey } from '../../../shared/task/groupTagMeta.ts'
 
 type Row = {
   group_id: string

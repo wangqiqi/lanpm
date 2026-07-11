@@ -19,7 +19,11 @@ import type {
   CockpitDashboard
 } from './cockpit/types'
 import type { DeleteTaskMode } from './task/deleteMode'
-import type { BundleConflictMode, GroupBundleImportResult } from './data/bundle'
+import type {
+  BundleConflictMode,
+  GroupBundleImportResult,
+  GroupBundlePreviewResult
+} from './data/bundle'
 import type {
   ClearGroupMessagesMode,
   DataCleanupOptions,
@@ -183,9 +187,15 @@ export interface LanpmApi {
       password: string,
       includeFileBodies?: boolean
     ) => Promise<string | null>
+    /** Pick file + dry-run conflict summary (TASK-310). */
+    previewGroupBundle: (
+      password: string
+    ) => Promise<{ path: string; preview: GroupBundlePreviewResult } | null>
+    /** Optional `filePath` skips the open dialog (after preview). */
     importGroupBundle: (
       password: string,
-      conflictMode: BundleConflictMode
+      conflictMode: BundleConflictMode,
+      filePath?: string
     ) => Promise<GroupBundleImportResult | null>
   }
   group: {

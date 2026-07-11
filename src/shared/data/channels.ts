@@ -6,5 +6,6 @@ export const DATA_IPC = {
   clearGroupMessages: 'data:clearGroupMessages',
   listDmGroupIds: 'data:listDmGroupIds',
   exportGroupBundle: 'data:exportGroupBundle',
+  previewGroupBundle: 'data:previewGroupBundle',
   importGroupBundle: 'data:importGroupBundle'
 } as const
