@@ -28,6 +28,7 @@ import {
   ImportOutlined,
   LinkOutlined,
   MoreOutlined,
+  PaperClipOutlined,
   PlusOutlined,
   SettingOutlined,
   UploadOutlined
@@ -49,7 +50,8 @@ import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { groupViewPath } from '@renderer/routes/paths'
 import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
 import { formatFileTypeLabel } from '@shared/file/formatFileType'
-import { buildDeliverableIndex } from '@shared/task/deliverables'
+import { buildDeliverableIndex, tasksForFile } from '@shared/task/deliverables'
+import { mergeLinkedFileId, removeLinkedFileId } from '@shared/task/linkFile'
 import {
   applyLibraryFilters,
   CATEGORY_I18N_KEYS,
@@ -140,6 +142,7 @@ export default function FilesView(): React.ReactElement {
   const sendExistingFile = useChatStore((s) => s.sendExistingFile)
   const tasks = useTaskStore((s) => s.tasksByGroup[gid] ?? [])
   const loadTasks = useTaskStore((s) => s.loadTasks)
+  const updateTask = useTaskStore((s) => s.updateTask)
 
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
   const [libraryScope, setLibraryScope] = useState<FileLibraryScope>('all')
@@ -162,6 +165,12 @@ export default function FilesView(): React.ReactElement {
   const [bookmarkSaving, setBookmarkSaving] = useState(false)
   const [sharingToChat, setSharingToChat] = useState(false)
   const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false)
+  const [linkFileModal, setLinkFileModal] = useState<{
+    fileId: string
+    fileName: string
+  } | null>(null)
+  const [linkTaskId, setLinkTaskId] = useState<string | undefined>()
+  const [linkSaving, setLinkSaving] = useState(false)
   const isNarrow = useMediaQuery('(max-width: 960px)')
 
   const categories = useMemo(
@@ -571,6 +580,49 @@ export default function FilesView(): React.ReactElement {
     )
   }
 
+  const handleConfirmLinkFile = useCallback(async (): Promise<void> => {
+    if (!gid || !linkFileModal || !linkTaskId) return
+    const task = tasks.find((item) => item.taskId === linkTaskId)
+    if (!task) return
+    setLinkSaving(true)
+    try {
+      await updateTask({
+        taskId: task.taskId,
+        linkedFileIds: mergeLinkedFileId(task.linkedFileIds, linkFileModal.fileId)
+      })
+      message.success(t('files.linkToTaskDone'))
+      setLinkFileModal(null)
+      setLinkTaskId(undefined)
+      setLibraryScope('deliverables')
+    } catch (err) {
+      message.error(formatError(err, 'tree.updateFailed'))
+    } finally {
+      setLinkSaving(false)
+    }
+  }, [gid, linkFileModal, linkTaskId, tasks, updateTask, message, t, formatError])
+
+  const handleUnlinkFile = useCallback(
+    async (fileId: string, taskId: string): Promise<void> => {
+      const task = tasks.find((item) => item.taskId === taskId)
+      if (!task) return
+      try {
+        await updateTask({
+          taskId: task.taskId,
+          linkedFileIds: removeLinkedFileId(task.linkedFileIds, fileId)
+        })
+        message.success(t('files.unlinkDone'))
+      } catch (err) {
+        message.error(formatError(err, 'tree.updateFailed'))
+      }
+    },
+    [tasks, updateTask, message, t, formatError]
+  )
+
+  const openLinkModal = useCallback((file: FileMeta): void => {
+    setLinkFileModal({ fileId: file.fileId, fileName: file.name })
+    setLinkTaskId(undefined)
+  }, [])
+
   const columns = useMemo((): ColumnsType<FileMeta> => {
     const activeOrder = (field: FileSortField) => (sortField === field ? sortOrder : null)
     return [
@@ -593,6 +645,25 @@ export default function FilesView(): React.ReactElement {
           ) : (
             <Text ellipsis={{ tooltip: r.name }}>{r.name}</Text>
           )
+      },
+      {
+        title: t('files.colTasks'),
+        key: 'tasks',
+        width: 140,
+        ellipsis: true,
+        render: (_: unknown, r: FileMeta) => {
+          const linked = tasksForFile(r.fileId, deliverableIndex.fileToTasks)
+          if (linked.length === 0) return <Text type="secondary">—</Text>
+          return (
+            <Space size={[4, 4]} wrap onClick={(e) => e.stopPropagation()}>
+              {linked.map((ref) => (
+                <Tag key={ref.taskId} className={styles.taskChip}>
+                  {ref.title}
+                </Tag>
+              ))}
+            </Space>
+          )
+        }
       },
       {
         title: t('files.colType'),
@@ -650,7 +721,7 @@ export default function FilesView(): React.ReactElement {
       {
         title: t('files.colActions'),
         key: 'actions',
-        width: 88,
+        width: 120,
         render: (_: unknown, r: FileMeta) => {
           if (isRemotePendingPath(r.storagePath)) return null
           if (r.isBookmark) {
@@ -669,6 +740,15 @@ export default function FilesView(): React.ReactElement {
               </Space>
             )
           }
+          const linked = tasksForFile(r.fileId, deliverableIndex.fileToTasks)
+          const unlinkItems: MenuProps['items'] =
+            linked.length > 0
+              ? linked.map((ref) => ({
+                  key: `unlink-${ref.taskId}`,
+                  label: `${t('files.unlinkFromTask')}: ${ref.title}`,
+                  onClick: () => void handleUnlinkFile(r.fileId, ref.taskId)
+                }))
+              : []
           return (
             <Space size={4} onClick={(e) => e.stopPropagation()}>
               {!isLocalRemovedPath(r.storagePath) ? (
@@ -684,6 +764,25 @@ export default function FilesView(): React.ReactElement {
               <Button
                 type="text"
                 size="small"
+                icon={<PaperClipOutlined />}
+                aria-label={t('files.linkToTask')}
+                title={t('files.linkToTask')}
+                onClick={() => openLinkModal(r)}
+              />
+              {unlinkItems.length > 0 ? (
+                <Dropdown menu={{ items: unlinkItems }} trigger={['click']}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<MoreOutlined />}
+                    aria-label={t('files.unlinkFromTask')}
+                    title={t('files.unlinkFromTask')}
+                  />
+                </Dropdown>
+              ) : null}
+              <Button
+                type="text"
+                size="small"
                 danger
                 icon={<DeleteOutlined />}
                 aria-label={t('files.deleteLocalRun')}
@@ -695,7 +794,18 @@ export default function FilesView(): React.ReactElement {
         }
       }
     ]
-  }, [t, locale, categoryLabels, sortField, sortOrder, handleDownload, handleDeleteLocal])
+  }, [
+    t,
+    locale,
+    categoryLabels,
+    sortField,
+    sortOrder,
+    handleDownload,
+    handleDeleteLocal,
+    handleUnlinkFile,
+    openLinkModal,
+    deliverableIndex.fileToTasks
+  ])
 
   const previewBody = !selected ? null : (
     <>
@@ -771,9 +881,38 @@ export default function FilesView(): React.ReactElement {
             >
               {t('files.shareToChat')}
             </Button>
+            <Button
+              size="small"
+              icon={<PaperClipOutlined />}
+              onClick={() => openLinkModal(selected)}
+            >
+              {t('files.linkToTask')}
+            </Button>
           </>
         )}
       </div>
+      {selected && !selected.isBookmark
+        ? (() => {
+            const linked = tasksForFile(selected.fileId, deliverableIndex.fileToTasks)
+            if (linked.length === 0) return null
+            return (
+              <Space size={[4, 4]} wrap className={styles.linkedTasksRow}>
+                {linked.map((ref) => (
+                  <Tag
+                    key={ref.taskId}
+                    closable
+                    onClose={(e) => {
+                      e.preventDefault()
+                      void handleUnlinkFile(selected.fileId, ref.taskId)
+                    }}
+                  >
+                    {ref.title}
+                  </Tag>
+                ))}
+              </Space>
+            )
+          })()
+        : null}
       {selected.isBookmark ? (
         <div className={styles.bookmarkPreviewWrap}>
           <Text type="secondary" className={styles.bookmarkPreviewHint}>
@@ -1181,6 +1320,35 @@ export default function FilesView(): React.ReactElement {
             />
           </div>
         </Space>
+      </Modal>
+
+      <Modal
+        open={linkFileModal != null}
+        title={t('files.linkToTaskTitle')}
+        okText={t('files.linkToTaskConfirm')}
+        cancelText={t('common.cancel')}
+        confirmLoading={linkSaving}
+        okButtonProps={{ disabled: !linkTaskId }}
+        onCancel={() => {
+          setLinkFileModal(null)
+          setLinkTaskId(undefined)
+        }}
+        onOk={() => void handleConfirmLinkFile()}
+      >
+        <Text type="secondary">
+          {linkFileModal ? t('files.linkToTaskHint', { name: linkFileModal.fileName }) : null}
+        </Text>
+        <Select
+          style={{ width: '100%', marginTop: 12 }}
+          placeholder={t('files.linkToTaskPick')}
+          value={linkTaskId}
+          onChange={setLinkTaskId}
+          options={tasks
+            .filter((task) => !task.deletedAt)
+            .map((task) => ({ value: task.taskId, label: task.title }))}
+          showSearch
+          optionFilterProp="label"
+        />
       </Modal>
     </div>
   )
