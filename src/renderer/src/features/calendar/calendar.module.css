@@ -9,13 +9,26 @@
 
 .calendarHost {
   flex: 1;
-  min-height: 0;
+  min-height: 480px;
+  position: relative;
   border-radius: var(--lanpm-radius-panel, 8px);
   overflow: hidden;
 }
 
 .calendarHost[data-empty='1'] {
-  min-height: 280px;
+  min-height: 480px;
+}
+
+.calendarHost :global(.fc) {
+  position: absolute;
+  inset: 0;
+}
+
+/* Inferred schedule (no persisted dates) — softer than dated events */
+.light :global(.fc .lanpm-cal-inferred),
+.dark :global(.fc .lanpm-cal-inferred) {
+  opacity: 0.72;
+  border-style: dashed !important;
 }
 
 .light :global(.fc),

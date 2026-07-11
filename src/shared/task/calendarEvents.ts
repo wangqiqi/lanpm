@@ -1,9 +1,12 @@
 /**
- * Task → FullCalendar event mapping (SPRINT-TASK-CALENDAR / TASK-221).
- * C1: only tasks with startDate and/or endDate. endDate = due day.
+ * Task → FullCalendar event mapping.
+ * Dated tasks use startDate/endDate (endDate = due).
+ * Undated tasks use the same default window as Gantt (`defaultScheduleForTask`)
+ * so the calendar is not empty when the board has tasks without dates.
  * All-day events use exclusive end (FullCalendar convention).
  */
 
+import { defaultScheduleForTask } from './ganttAdapter.ts'
 import type { Task } from './types'
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/
@@ -12,10 +15,12 @@ export type CalendarEventInput = {
   id: string
   title: string
   start: string
-  /** Exclusive end date (YYYY-MM-DD) for all-day ranges; omit for single-day */
-  end?: string
+  /** Exclusive end date (YYYY-MM-DD) for all-day ranges */
+  end: string
   allDay: true
-  extendedProps: { taskId: string }
+  /** Soft style for inferred (no persisted dates) */
+  classNames?: string[]
+  extendedProps: { taskId: string; inferredSchedule: boolean }
 }
 
 function isYmd(value: string | undefined): value is string {
@@ -35,7 +40,7 @@ export function addOneDayYmd(ymd: string): string {
 
 /**
  * Map group tasks to FullCalendar event inputs.
- * Skips deleted and undated tasks.
+ * Skips deleted only.
  */
 export function tasksToCalendarEvents(tasks: readonly Task[]): CalendarEventInput[] {
   const out: CalendarEventInput[] = []
@@ -44,25 +49,29 @@ export function tasksToCalendarEvents(tasks: readonly Task[]): CalendarEventInpu
     if (task.deletedAt) continue
     const hasStart = isYmd(task.startDate)
     const hasEnd = isYmd(task.endDate)
-    if (!hasStart && !hasEnd) continue
-
-    const startDate = hasStart ? task.startDate : undefined
-    const endDate = hasEnd ? task.endDate : undefined
 
     let start: string
     let endExclusive: string
+    let inferredSchedule = false
 
-    if (startDate && endDate) {
-      start = startDate
-      endExclusive = endDate > startDate ? addOneDayYmd(endDate) : addOneDayYmd(startDate)
-    } else if (endDate) {
-      start = endDate
-      endExclusive = addOneDayYmd(endDate)
-    } else if (startDate) {
-      start = startDate
-      endExclusive = addOneDayYmd(startDate)
+    if (hasStart || hasEnd) {
+      const startDate = hasStart ? task.startDate : undefined
+      const endDate = hasEnd ? task.endDate : undefined
+      if (startDate && endDate) {
+        start = startDate
+        endExclusive = endDate > startDate ? addOneDayYmd(endDate) : addOneDayYmd(startDate)
+      } else if (endDate) {
+        start = endDate
+        endExclusive = addOneDayYmd(endDate)
+      } else {
+        start = startDate!
+        endExclusive = addOneDayYmd(startDate!)
+      }
     } else {
-      continue
+      const fallback = defaultScheduleForTask(task)
+      start = fallback.startDate
+      endExclusive = addOneDayYmd(fallback.endDate)
+      inferredSchedule = true
     }
 
     out.push({
@@ -71,7 +80,8 @@ export function tasksToCalendarEvents(tasks: readonly Task[]): CalendarEventInpu
       start,
       end: endExclusive,
       allDay: true,
-      extendedProps: { taskId: task.taskId }
+      ...(inferredSchedule ? { classNames: ['lanpm-cal-inferred'] } : {}),
+      extendedProps: { taskId: task.taskId, inferredSchedule }
     })
   }
 

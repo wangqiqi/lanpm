@@ -38,6 +38,7 @@ export default function CalendarView(): React.ReactElement {
   }, [gid, loadTasks])
 
   const events = useMemo(() => tasksToCalendarEvents(tasks), [tasks])
+  const activeTasks = useMemo(() => tasks.filter((t) => !t.deletedAt), [tasks])
   const editTaskLive = useMemo(
     () => (editTask ? (tasks.find((x) => x.taskId === editTask.taskId) ?? editTask) : null),
     [editTask, tasks]
@@ -102,9 +103,9 @@ export default function CalendarView(): React.ReactElement {
         <ViewToolbarHint>{t('calendar.toolbarHint')}</ViewToolbarHint>
       </ViewToolbar>
 
-      {events.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
+      {activeTasks.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
 
-      <div className={styles.calendarHost} data-empty={events.length === 0 ? '1' : '0'}>
+      <div className={styles.calendarHost} data-empty={activeTasks.length === 0 ? '1' : '0'}>
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView="dayGridMonth"

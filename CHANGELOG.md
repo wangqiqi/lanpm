@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **日历空窗**：无 `startDate`/`endDate` 的任务改为与甘特相同默认排期展示（虚线样式）；修复日历区域高度，避免事件不可见。
+
 ### Added
 - **SPRINT-TASK-CALENDAR 收尾 (TASK-224)**：`verify:task-calendar`；docs/03·04 六视图；README；归档；可 handoff `/release` **1.10.0**。
 - **日历接线 (TASK-223)**：Router · BottomNav 第 6 Tab（甘特与文件之间）· i18n；点击打开 TaskEditModal。

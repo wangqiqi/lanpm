@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { addOneDayYmd, tasksToCalendarEvents } from '@shared/task/calendarEvents'
+import { defaultScheduleForTask } from '@shared/task/ganttAdapter'
 import type { Task } from '@shared/task/types'
 
 function task(partial: Partial<Task> & Pick<Task, 'taskId' | 'title'>): Task {
@@ -24,14 +25,29 @@ describe('addOneDayYmd', () => {
   })
 })
 
-describe('tasksToCalendarEvents (TASK-221)', () => {
-  it('skips undated and deleted', () => {
-    expect(
-      tasksToCalendarEvents([
-        task({ taskId: 'a', title: 'no dates' }),
-        task({ taskId: 'b', title: 'gone', endDate: '2026-07-11', deletedAt: '2026-07-10T00:00:00.000Z' })
-      ])
-    ).toEqual([])
+describe('tasksToCalendarEvents', () => {
+  it('skips deleted; infers schedule for undated (same as gantt)', () => {
+    const undated = task({ taskId: 'a', title: 'no dates' })
+    const events = tasksToCalendarEvents([
+      undated,
+      task({
+        taskId: 'b',
+        title: 'gone',
+        endDate: '2026-07-11',
+        deletedAt: '2026-07-10T00:00:00.000Z'
+      })
+    ])
+    expect(events).toHaveLength(1)
+    const fallback = defaultScheduleForTask(undated)
+    expect(events[0]).toMatchObject({
+      id: 'a',
+      title: 'no dates',
+      start: fallback.startDate,
+      end: addOneDayYmd(fallback.endDate),
+      allDay: true,
+      classNames: ['lanpm-cal-inferred'],
+      extendedProps: { taskId: 'a', inferredSchedule: true }
+    })
   })
 
   it('maps endDate-only to single all-day day', () => {
@@ -44,7 +60,7 @@ describe('tasksToCalendarEvents (TASK-221)', () => {
         start: '2026-07-11',
         end: '2026-07-12',
         allDay: true,
-        extendedProps: { taskId: 't1' }
+        extendedProps: { taskId: 't1', inferredSchedule: false }
       }
     ])
   })
@@ -66,7 +82,7 @@ describe('tasksToCalendarEvents (TASK-221)', () => {
         start: '2026-07-10',
         end: '2026-07-13',
         allDay: true,
-        extendedProps: { taskId: 't2' }
+        extendedProps: { taskId: 't2', inferredSchedule: false }
       }
     ])
   })
@@ -81,7 +97,7 @@ describe('tasksToCalendarEvents (TASK-221)', () => {
         start: '2026-07-05',
         end: '2026-07-06',
         allDay: true,
-        extendedProps: { taskId: 't3' }
+        extendedProps: { taskId: 't3', inferredSchedule: false }
       }
     ])
   })
