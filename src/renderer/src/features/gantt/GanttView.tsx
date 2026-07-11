@@ -3,7 +3,7 @@ import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
 
 const { Text } = Typography
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { DownloadOutlined, FilePdfOutlined, PlusOutlined } from '@ant-design/icons'
+import { DownloadOutlined, FilePdfOutlined, PlusOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -18,10 +18,17 @@ import { exportGanttChart } from './ganttExport'
 import { computeGanttTimelineDates } from '@shared/task/ganttTimeline'
 import {
   GANTT_HANDLE_WIDTH,
+  GANTT_ZOOM_LEVELS,
   ganttColumnWidthForView,
-  ganttTimeStepForView
+  ganttTimeStepForView,
+  nextGanttZoomIn,
+  nextGanttZoomOut
 } from './ganttDragConfig'
-import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewToolbar, {
+  ViewToolbarGroup,
+  ViewToolbarHint,
+  ViewToolbarPair
+} from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import RegionButton from '@renderer/ui/RegionButton'
 import ViewSegment from '@renderer/ui/ViewSegment'
@@ -32,12 +39,16 @@ import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { listTaskPredecessors, listTaskSuccessors } from '@shared/task/boardRelations'
 import { validateTaskDateRange } from '@shared/task/validation'
 import { useI18n } from '@renderer/i18n/useI18n'
-import { scrollGanttChartToTask } from './ganttScroll'
+import { scrollGanttChartToDateCentered, scrollGanttChartToTask } from './ganttScroll'
 import { evaluateTaskSchedule, scheduleHealthHintKey } from '@renderer/features/task/scheduleHealthUi'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
 const GANTT_HEADER_HEIGHT = 50
+/** Approx. height of gantt-task-react bottom horizontal scrollbar */
+const GANTT_H_SCROLL_HEIGHT = 20
+/** Extra past columns so “today” can sit in the middle of the viewport */
+const GANTT_PRE_STEPS = 8
 
 export default function GanttView(): React.ReactElement {
   const { locale, t, formatError } = useI18n()
@@ -52,6 +63,9 @@ export default function GanttView(): React.ReactElement {
   const upsertDependency = useTaskStore((s) => s.upsertDependency)
 
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week)
+  const [zoom, setZoom] = useState(1)
+  const [ganttBodyHeight, setGanttBodyHeight] = useState(360)
+  const [viewDate] = useState(() => new Date())
   const [depOpen, setDepOpen] = useState(false)
   const [fromId, setFromId] = useState<string>()
   const [toId, setToId] = useState<string>()
@@ -121,6 +135,22 @@ export default function GanttView(): React.ReactElement {
   const { highlightId } = useSearchHighlight('task', ganttReady)
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.taskId, t])), [tasks])
 
+  useLayoutEffect(() => {
+    if (!ganttReady || !chartRef.current) return
+    const el = chartRef.current
+    const measure = (): void => {
+      const next = Math.max(
+        120,
+        el.clientHeight - GANTT_HEADER_HEIGHT - GANTT_H_SCROLL_HEIGHT
+      )
+      setGanttBodyHeight((prev) => (Math.abs(prev - next) < 2 ? prev : next))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [ganttReady])
+
   useEffect(() => {
     if (!highlightId || !chartRef.current) return
     scrollGanttChartToTask(
@@ -131,10 +161,13 @@ export default function GanttView(): React.ReactElement {
     )
   }, [highlightId, ganttTasks])
 
-  const columnWidth = useMemo(() => ganttColumnWidthForView(viewMode), [viewMode])
+  const columnWidth = useMemo(
+    () => Math.round(ganttColumnWidthForView(viewMode) * zoom),
+    [viewMode, zoom]
+  )
 
   const timelineDates = useMemo(
-    () => computeGanttTimelineDates(ganttTasks, viewMode),
+    () => computeGanttTimelineDates(ganttTasks, viewMode, GANTT_PRE_STEPS),
     [ganttTasks, viewMode]
   )
 
@@ -143,6 +176,19 @@ export default function GanttView(): React.ReactElement {
     if (!el || ganttTasks.length === 0) return
     patchGanttCalendarLabels(el, timelineDates, viewMode, columnWidth, locale)
   }, [ganttTasks, timelineDates, viewMode, columnWidth, locale])
+
+  /** Open / zoom / mode / height settle → center timeline on today (not on every task tick) */
+  useLayoutEffect(() => {
+    if (!ganttReady || !chartRef.current || timelineDates.length === 0) return
+    const el = chartRef.current
+    const dates = timelineDates
+    const id = window.requestAnimationFrame(() => {
+      scrollGanttChartToDateCentered(el, columnWidth, dates, viewDate)
+    })
+    return () => window.cancelAnimationFrame(id)
+    // timelineDates omitted on purpose — avoid fighting user scroll on task refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- center only on viewport/scale changes
+  }, [ganttReady, viewMode, columnWidth, ganttBodyHeight, viewDate])
 
   const taskOptions = useMemo(
     () => tasks.map((t) => ({ label: t.title, value: t.taskId })),
@@ -262,12 +308,28 @@ export default function GanttView(): React.ReactElement {
     <div className={styles.root}>
       <ViewToolbar
         start={
-          <ViewSegment
-            value={viewMode}
-            options={viewOptions}
-            onChange={(v) => setViewMode(v as ViewMode)}
-            ariaLabel={t('gantt.viewModeAria')}
-          />
+          <ViewToolbarPair>
+            <ViewSegment
+              value={viewMode}
+              options={viewOptions}
+              onChange={(v) => setViewMode(v as ViewMode)}
+              ariaLabel={t('gantt.viewModeAria')}
+            />
+            <Button
+              size="small"
+              icon={<ZoomOutOutlined />}
+              aria-label={t('gantt.zoomOut')}
+              disabled={zoom <= GANTT_ZOOM_LEVELS[0]!}
+              onClick={() => setZoom((z) => nextGanttZoomOut(z))}
+            />
+            <Button
+              size="small"
+              icon={<ZoomInOutlined />}
+              aria-label={t('gantt.zoomIn')}
+              disabled={zoom >= GANTT_ZOOM_LEVELS[GANTT_ZOOM_LEVELS.length - 1]!}
+              onClick={() => setZoom((z) => nextGanttZoomIn(z))}
+            />
+          </ViewToolbarPair>
         }
         end={
           <ViewToolbarGroup>
@@ -313,6 +375,10 @@ export default function GanttView(): React.ReactElement {
             tasks={ganttTasks}
             viewMode={viewMode}
             locale={locale}
+            viewDate={viewDate}
+            preStepsCount={GANTT_PRE_STEPS}
+            ganttHeight={ganttBodyHeight}
+            headerHeight={GANTT_HEADER_HEIGHT}
             onDateChange={onDateChange}
             handleWidth={GANTT_HANDLE_WIDTH}
             timeStep={ganttTimeStepForView(viewMode)}

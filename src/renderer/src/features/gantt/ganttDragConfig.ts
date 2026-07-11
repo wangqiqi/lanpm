@@ -31,3 +31,17 @@ export function ganttColumnWidthForView(viewMode: ViewMode): number {
       return 200
   }
 }
+
+/** Zoom multipliers for toolbar +/- (column width scale). */
+export const GANTT_ZOOM_LEVELS = [0.6, 0.8, 1, 1.25, 1.5, 2] as const
+export type GanttZoomLevel = (typeof GANTT_ZOOM_LEVELS)[number]
+
+export function nextGanttZoomIn(current: number): number {
+  const next = GANTT_ZOOM_LEVELS.find((z) => z > current + 0.001)
+  return next ?? GANTT_ZOOM_LEVELS[GANTT_ZOOM_LEVELS.length - 1]!
+}
+
+export function nextGanttZoomOut(current: number): number {
+  const prev = [...GANTT_ZOOM_LEVELS].reverse().find((z) => z < current - 0.001)
+  return prev ?? GANTT_ZOOM_LEVELS[0]!
+}

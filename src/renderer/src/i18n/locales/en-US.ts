@@ -273,6 +273,8 @@ const enUS = {
   'gantt.viewWeek': 'Week',
   'gantt.viewMonth': 'Month',
   'gantt.viewModeAria': 'Time scale',
+  'gantt.zoomIn': 'Zoom in',
+  'gantt.zoomOut': 'Zoom out',
   'gantt.addDependency': 'Add dependency',
   'gantt.exportPng': 'Export PNG',
   'gantt.exportPdf': 'Export PDF',

@@ -271,6 +271,8 @@ const zhCN = {
   'gantt.viewWeek': '周',
   'gantt.viewMonth': '月',
   'gantt.viewModeAria': '时间粒度',
+  'gantt.zoomIn': '放大',
+  'gantt.zoomOut': '缩小',
   'gantt.addDependency': '添加依赖',
   'gantt.exportPng': '导出 PNG',
   'gantt.exportPdf': '导出 PDF',

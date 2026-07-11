@@ -269,6 +269,8 @@ export type MessageKey =
   | 'gantt.viewWeek'
   | 'gantt.viewMonth'
   | 'gantt.viewModeAria'
+  | 'gantt.zoomIn'
+  | 'gantt.zoomOut'
   | 'gantt.addDependency'
   | 'gantt.exportPng'
   | 'gantt.exportPdf'
