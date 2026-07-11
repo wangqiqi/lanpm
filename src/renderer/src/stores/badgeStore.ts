@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { GroupTabBadges } from '@shared/badge/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
-const EMPTY_BADGES: GroupTabBadges = { chatUnread: 0, boardTodo: 0 }
+const EMPTY_BADGES: GroupTabBadges = { chatUnread: 0, boardMineOpen: 0 }
 
 interface BadgeStore {
   badges: GroupTabBadges

@@ -25,6 +25,7 @@ import {
   validateTaskTitle
 } from '@shared/task/validation'
 import { normalizeTaskTags } from '@shared/task/tags'
+import { countMineOpenTasks } from '@shared/badge/mineOpen'
 import type { GroupTagMeta } from '@shared/task/groupTagMeta'
 import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
@@ -385,8 +386,8 @@ function stubGroupTabBadges(groupId: string): import('@shared/badge/types').Grou
     }
   }
   const tasks = readAllTasks()[groupId] ?? []
-  const boardTodo = tasks.filter((t) => t.status === 'todo').length
-  return { chatUnread, boardTodo }
+  const boardMineOpen = userId ? countMineOpenTasks(tasks, userId) : 0
+  return { chatUnread, boardMineOpen }
 }
 
 export function createBrowserLanpmStub(): LanpmApi {
