@@ -93,6 +93,7 @@
 - **Syntax-highlighted code** blocks, attachments, **`/task`** from chat, **`#`** task refs  
 - **Message ↔ task (A2)**: bubble → task; discuss from detail; link files to tasks  
 - **7-day offline catch-up** for chat (paginated), tasks/dependencies, read receipts  
+- **Weak-net publish outbox (B4):** durable queue for failed task/file/tag publishes; auto-flush on reconnect (`sync_outbox`)  
 - Chat history **load-more**; failed sends mark **`failed`** with auto-retry + bubble **Retry**  
 - TopBar **Discover**: join groups, ping members, start DMs; **seed peers** for VPN / cross-subnet (A5)  
 - TopBar **group switcher**: name/pinyin search, pins, recent activity sort  
@@ -254,7 +255,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 
 **Current:** `1.22.0` — plugin loader + form-js POC (`verify:plugin-loader`), B2 member search (1.21), A1 nudge (1.20), transfer A4 + plugin SPIKE (1.19). M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Next (in progress / queue):** Plugin enable UI in `[Unreleased]` (→ 1.23.0) · B3 backup · B4 weak-net sync · marketplace SPIKE.
+**Next (in progress / queue):** Plugin enable UI → **1.23.0** · B4 sync_outbox → **1.24.0** · B3 backup polish · marketplace SPIKE.
 
 **Later (P1+):** screen share, voice, mind maps, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 

@@ -5,9 +5,7 @@
 ## [Unreleased]
 
 ### Added
-- **SPRINT-B4-SYNC-OUTBOX（TASK-300）**：`sync_outbox` 表（schema v11）+ enqueue/ack/backoff API；`verify:sync-outbox`。
-- **SPRINT-B4-SYNC-OUTBOX（TASK-301）**：task/file/group_tag publish 无 transport 或失败时写入 outbox（仍 toast）。
-- **SPRINT-B4-SYNC-OUTBOX（TASK-302）**：启动周期 flush + 重连/手工连 peer 触发 `requestSyncOutboxFlush`。
+- **SPRINT-B4-SYNC-OUTBOX（TASK-300–303）**：`sync_outbox`（schema v11）— task/file/tag publish 失败持久排队、周期/重连 flush；`verify:sync-outbox`；docs/06 · README 对齐。
 - **SPRINT-PLUGIN-ENABLE-UI（TASK-295–299）**：Profile「扩展」Tab 启停官方插件；详情槽监听启停事件重拉；`verify:plugin-enable-ui`。
 
 ### Fixed
