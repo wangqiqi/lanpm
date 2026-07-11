@@ -31,10 +31,10 @@ const SYNC_TYPES = [
 ] as const
 
 /**
- * transport-level 或协议已解禁、handler 尚未挂上（TASK-159 前）。
- * discovery/heartbeat 无业务 handler；task_crdt 协议见 shared/task/taskCrdt.ts。
+ * transport-level only — discovery/heartbeat 无业务 handler。
+ * task_crdt 已有 taskCrdtService（TASK-159）。
  */
-const POST_RC_OR_TRANSPORT = new Set<string>(['discovery', 'heartbeat', 'task_crdt'])
+const POST_RC_OR_TRANSPORT = new Set<string>(['discovery', 'heartbeat'])
 
 /** Must be refused by publish — empty after TASK-157 */
 const UNIMPLEMENTED_PUBLISH = new Set<string>()
@@ -46,6 +46,7 @@ const HANDLER_FILES = [
   'src/main/chat/offlineSyncService.ts',
   'src/main/task/taskSyncService.ts',
   'src/main/task/taskOfflineSyncService.ts',
+  'src/main/task/taskCrdtService.ts',
   'src/main/file/fileSyncService.ts',
   'src/main/crypto/groupKeyService.ts',
   'src/main/group/memberEventService.ts',

@@ -68,12 +68,12 @@ export function applyTaskToDoc(doc: Y.Doc, task: Task): void {
 }
 
 /** Seed empty (or existing) doc from SQLite task rows. Does not clear unknown keys. */
-export function seedDocFromTasks(doc: Y.Doc, tasks: Task[]): void {
+export function seedDocFromTasks(doc: Y.Doc, tasks: Task[], origin: unknown = 'seed'): void {
   doc.transact(() => {
     for (const task of tasks) {
       applyTaskToDoc(doc, task)
     }
-  })
+  }, origin)
 }
 
 export function countTasksInDoc(doc: Y.Doc): number {
@@ -84,8 +84,12 @@ export function encodeDocState(doc: Y.Doc): Uint8Array {
   return Y.encodeStateAsUpdate(doc)
 }
 
-export function applyEncodedUpdate(doc: Y.Doc, update: Uint8Array): void {
-  Y.applyUpdate(doc, update)
+export function applyEncodedUpdate(
+  doc: Y.Doc,
+  update: Uint8Array,
+  origin: unknown = null
+): void {
+  Y.applyUpdate(doc, update, origin)
 }
 
 export function createEmptyTaskDoc(): Y.Doc {

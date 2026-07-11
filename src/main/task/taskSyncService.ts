@@ -20,6 +20,12 @@ import {
   handleTaskSyncRequest,
   requestTaskOfflineSync
 } from './taskOfflineSyncService'
+import {
+  clearTaskCrdtWiring,
+  ensureTaskCrdtWired,
+  handleIncomingTaskCrdt,
+  setTaskCrdtTasksChangedHandler
+} from './taskCrdtService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
@@ -84,6 +90,10 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'task_sync_batch') {
     handleTaskSyncBatch(db, envelope, broadcastTasksChanged)
+    return
+  }
+  if (envelope.type === 'task_crdt') {
+    handleIncomingTaskCrdt(db, envelope)
   }
 }
 
@@ -93,6 +103,7 @@ function ensureSubscribed(db: Database, groupId: string): void {
   if (!transport) return
   const unsub = transport.subscribe(groupId, (env) => handleIncoming(db, env))
   subscribedGroups.set(groupId, unsub)
+  ensureTaskCrdtWired(db, groupId)
 }
 
 function refreshSubscriptions(db: Database): void {
@@ -148,6 +159,7 @@ async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Prom
 }
 
 export function initTaskSyncService(db: Database): void {
+  setTaskCrdtTasksChangedHandler(broadcastTasksChanged)
   refreshSubscriptions(db)
   void requestTaskOfflineSync(db).catch(
     catchSyncFailure('taskSync.requestOffline', { notify: false })
@@ -157,6 +169,8 @@ export function initTaskSyncService(db: Database): void {
 export function shutdownTaskSyncService(): void {
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
+  clearTaskCrdtWiring()
+  setTaskCrdtTasksChangedHandler(null)
 }
 
 export function publishTaskUpsert(db: Database, task: Task): void {

@@ -35,3 +35,17 @@ export function isTaskCrdtPayload(value: unknown): value is TaskCrdtPayload {
 export function taskCrdtDocIdMatchesGroup(docId: string, groupId: string): boolean {
   return docId === taskCrdtDocId(groupId)
 }
+
+export function taskCrdtPayloadFromUpdate(
+  groupId: string,
+  update: Uint8Array
+): TaskCrdtPayload {
+  return {
+    docId: taskCrdtDocId(groupId),
+    updateBase64: Buffer.from(update).toString('base64')
+  }
+}
+
+export function decodeTaskCrdtUpdate(payload: TaskCrdtPayload): Uint8Array {
+  return new Uint8Array(Buffer.from(payload.updateBase64, 'base64'))
+}

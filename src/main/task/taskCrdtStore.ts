@@ -26,11 +26,11 @@ export function loadOrCreateGroupTaskDoc(db: Database, groupId: string): Y.Doc {
   const doc = createEmptyTaskDoc()
   const stored = getTaskCrdtBlob(db, groupId)
   if (stored) {
-    applyEncodedUpdate(doc, new Uint8Array(stored.updateBlob))
+    applyEncodedUpdate(doc, new Uint8Array(stored.updateBlob), 'load')
   } else {
     const tasks = listTasksByGroupIncludingDeleted(db, groupId)
     if (tasks.length > 0) {
-      seedDocFromTasks(doc, tasks)
+      seedDocFromTasks(doc, tasks, 'seed')
     }
     persistGroupTaskDoc(db, groupId, doc)
   }
