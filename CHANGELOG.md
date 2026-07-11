@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **TASK-237**：任务详情「验收清单」— 增删改勾选、进度条与文案（i18n）。
 - **TASK-236**：checklist CRUD 服务层（同群守卫）+ `checklistProgressOf` 单测；IPC 通道契约断言。
 - **TASK-235**：验收清单契约 — schema v9（`task_checklists` / `task_checklist_items`）；`ChecklistItem` 类型；IPC `listChecklist` / `upsertChecklistItem` / `toggleChecklistItem` / `removeChecklistItem`；browser stub 对齐。
 

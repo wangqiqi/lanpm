@@ -289,6 +289,63 @@
   max-width: 100%;
 }
 
+.checklistHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.checklistList {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.checklistRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.checklistText {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.checklistTextDone {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+.checklistAddRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.checklistProgressBar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--lanpm-border-subtle, rgba(0, 0, 0, 0.08));
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.checklistProgressFill {
+  height: 100%;
+  background: var(--lanpm-accent, #0071e3);
+  transition: width 0.15s ease;
+}
+
 @media (max-width: 960px) {
   .body {
     grid-template-columns: 1fr;

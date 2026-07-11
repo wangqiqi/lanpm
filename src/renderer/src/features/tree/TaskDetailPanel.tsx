@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import type { TaskDiscussionItem } from '@shared/task/discussions'
+import type { ChecklistItem, ChecklistProgress } from '@shared/task/checklist'
 import type { ChatMessage } from '@shared/chat/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
@@ -155,6 +156,20 @@ export default function TaskDetailPanel({
   const [discussions, setDiscussions] = useState<TaskDiscussionItem[]>([])
   const [discussLoading, setDiscussLoading] = useState(false)
   const [fileNameById, setFileNameById] = useState<Record<string, string>>({})
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([])
+  const [checklistProgress, setChecklistProgress] = useState<ChecklistProgress>({
+    done: 0,
+    total: 0
+  })
+  const [checklistLoading, setChecklistLoading] = useState(false)
+  const [newChecklistText, setNewChecklistText] = useState('')
+  const [checklistBusy, setChecklistBusy] = useState(false)
+
+  const reloadChecklist = async (): Promise<void> => {
+    const view = await getLanpmApi().task.listChecklist(groupId, task.taskId)
+    setChecklistItems(view.items)
+    setChecklistProgress(view.progress)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -174,6 +189,29 @@ export default function TaskDetailPanel({
       cancelled = true
     }
   }, [groupId, task.taskId, task.sourceMsgId, task.updatedAt])
+
+  useEffect(() => {
+    let cancelled = false
+    setChecklistLoading(true)
+    void getLanpmApi()
+      .task.listChecklist(groupId, task.taskId)
+      .then((view) => {
+        if (cancelled) return
+        setChecklistItems(view.items)
+        setChecklistProgress(view.progress)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setChecklistItems([])
+        setChecklistProgress({ done: 0, total: 0 })
+      })
+      .finally(() => {
+        if (!cancelled) setChecklistLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [groupId, task.taskId, task.updatedAt])
 
   useEffect(() => {
     const ids = task.linkedFileIds
@@ -221,6 +259,49 @@ export default function TaskDetailPanel({
       onClose()
     } catch (err) {
       message.error(formatError(err, 'chat.taskRefFailed'))
+    }
+  }
+
+  const handleToggleChecklistItem = async (item: ChecklistItem): Promise<void> => {
+    setChecklistBusy(true)
+    try {
+      await getLanpmApi().task.toggleChecklistItem(groupId, item.itemId, !item.done)
+      await reloadChecklist()
+    } catch (err) {
+      message.error(formatError(err, 'stub.taskNotFound'))
+    } finally {
+      setChecklistBusy(false)
+    }
+  }
+
+  const handleAddChecklistItem = async (): Promise<void> => {
+    const text = newChecklistText.trim()
+    if (!text || checklistBusy) return
+    setChecklistBusy(true)
+    try {
+      await getLanpmApi().task.upsertChecklistItem({
+        groupId,
+        taskId: task.taskId,
+        text
+      })
+      setNewChecklistText('')
+      await reloadChecklist()
+    } catch (err) {
+      message.error(formatError(err, 'stub.taskNotFound'))
+    } finally {
+      setChecklistBusy(false)
+    }
+  }
+
+  const handleRemoveChecklistItem = async (itemId: string): Promise<void> => {
+    setChecklistBusy(true)
+    try {
+      await getLanpmApi().task.removeChecklistItem(groupId, itemId)
+      await reloadChecklist()
+    } catch (err) {
+      message.error(formatError(err, 'stub.taskNotFound'))
+    } finally {
+      setChecklistBusy(false)
     }
   }
 
@@ -543,6 +624,83 @@ export default function TaskDetailPanel({
         successors={successors}
         onLocate={onLocateTask}
       />
+
+      <div className={styles.detailField}>
+        <div className={styles.checklistHeader}>
+          <Text type="secondary">{t('tree.detailChecklist')}</Text>
+          {checklistProgress.total > 0 ? (
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {t('tree.detailChecklistProgress', {
+                done: checklistProgress.done,
+                total: checklistProgress.total
+              })}
+            </Text>
+          ) : null}
+        </div>
+        {checklistProgress.total > 0 ? (
+          <div className={styles.checklistProgressBar} aria-hidden>
+            <div
+              className={styles.checklistProgressFill}
+              style={{
+                width: `${Math.round(
+                  (checklistProgress.done / checklistProgress.total) * 100
+                )}%`
+              }}
+            />
+          </div>
+        ) : null}
+        {checklistLoading ? (
+          <Text type="secondary">{t('common.loading')}</Text>
+        ) : checklistItems.length === 0 ? (
+          <Text type="secondary">{t('tree.detailChecklistEmpty')}</Text>
+        ) : (
+          <ul className={styles.checklistList}>
+            {checklistItems.map((item) => (
+              <li key={item.itemId} className={styles.checklistRow}>
+                <Checkbox
+                  checked={item.done}
+                  disabled={checklistBusy}
+                  onChange={() => void handleToggleChecklistItem(item)}
+                />
+                <span
+                  className={`${styles.checklistText}${
+                    item.done ? ` ${styles.checklistTextDone}` : ''
+                  }`}
+                >
+                  {item.text}
+                </span>
+                <Button
+                  type="link"
+                  size="small"
+                  danger
+                  disabled={checklistBusy}
+                  onClick={() => void handleRemoveChecklistItem(item.itemId)}
+                >
+                  {t('tree.detailChecklistRemove')}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className={styles.checklistAddRow}>
+          <Input
+            value={newChecklistText}
+            onChange={(e) => setNewChecklistText(e.target.value)}
+            placeholder={t('tree.detailChecklistPlaceholder')}
+            maxLength={200}
+            disabled={checklistBusy}
+            onPressEnter={runOnEnter(() => void handleAddChecklistItem(), checklistBusy)}
+          />
+          <Button
+            type="default"
+            disabled={checklistBusy || !newChecklistText.trim()}
+            loading={checklistBusy}
+            onClick={() => void handleAddChecklistItem()}
+          >
+            {t('tree.detailChecklistAdd')}
+          </Button>
+        </div>
+      </div>
 
       <div className={styles.detailField}>
         <Text type="secondary">{t('tree.detailAttachments')}</Text>
