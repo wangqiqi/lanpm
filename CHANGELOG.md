@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **A3 交付物契约（TASK-245）**：`deliverables` 派生索引（file↔task）与过滤；`removeLinkedFileId`。
+
 ## [1.14.0] - 2026-07-11
 
 ### Added
