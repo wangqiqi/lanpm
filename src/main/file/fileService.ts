@@ -12,6 +12,7 @@ import {
 } from '../../shared/file/previewExtensions.ts'
 import { FILE_CHUNK_SIZE, FILE_MAX_CONCURRENT, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
 import { canCancelTransfer } from '../../shared/file/transferControl'
+import { clampTransferStartOffset } from '../../shared/file/transferOffset'
 import { throwLanpm } from '../../shared/errors/lanpmError'
 import { isRemotePendingPath } from '../../shared/file/sync'
 import { getSetupStatus } from '../identity/setup'
@@ -93,8 +94,7 @@ async function runChunkedUpload(
   }
 
   const totalBytes = meta.size
-  let offset = options?.startOffset ?? 0
-  if (offset >= totalBytes) offset = 0
+  let offset = clampTransferStartOffset(options?.startOffset, totalBytes)
 
   const transferId = options?.transferId ?? `xfer_${randomUUID()}`
   if (!options?.transferId) {

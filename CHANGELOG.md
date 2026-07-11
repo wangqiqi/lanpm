@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **TASK-330**：续传 `startOffset` 对负数/非有限值 clamp 为 0，避免异常偏移。
+
 ## [1.26.0] - 2026-07-12
 
 ### Fixed
