@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-CALENDAR-DRAG（TASK-240–244）**：日历拖拽/拉伸改期 — FC exclusive-end 映射；`@fullcalendar/interaction`；推断排期拖动落库；`verify:calendar-drag`。
 - **TASK-240**：日历拖拽改期契约 — `scheduleFromCalendarExclusiveRange` / `subtractOneDayYmd`（FC exclusive-end ↔ 含初日）。
 
 ## [1.13.0] - 2026-07-11
