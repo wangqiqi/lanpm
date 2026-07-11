@@ -15,6 +15,7 @@ export type SyncMessageType =
   | 'task_crdt_sync_request'
   | 'task_crdt_sync_batch'
   | 'task_awareness'
+  | 'group_tag_patch'
   | 'file_meta'
   | 'file_pull_request'
   | 'file_chunk'

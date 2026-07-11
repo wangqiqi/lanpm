@@ -22,6 +22,7 @@ const SYNC_TYPES = [
   'task_crdt_sync_request',
   'task_crdt_sync_batch',
   'task_awareness',
+  'group_tag_patch',
   'file_meta',
   'file_pull_request',
   'file_chunk',
@@ -52,6 +53,7 @@ const HANDLER_FILES = [
   'src/main/task/taskCrdtService.ts',
   'src/main/task/taskCrdtOfflineSyncService.ts',
   'src/main/task/taskAwarenessService.ts',
+  'src/main/task/groupTagSyncService.ts',
   'src/main/file/fileSyncService.ts',
   'src/main/crypto/groupKeyService.ts',
   'src/main/group/memberEventService.ts',
@@ -95,6 +97,10 @@ const taskAwarenessSrc = readFileSync(join(root, 'src/shared/task/taskAwareness.
 assert.match(taskAwarenessSrc, /TaskAwarenessPayload/, 'TaskAwarenessPayload required')
 assert.match(taskAwarenessSrc, /isTaskAwarenessPayload/, 'isTaskAwarenessPayload required')
 assert.match(taskAwarenessSrc, /TaskAwarenessLocalState/, 'TaskAwarenessLocalState required')
+
+const groupTagSrc = readFileSync(join(root, 'src/shared/task/groupTagMeta.ts'), 'utf8')
+assert.match(groupTagSrc, /GroupTagPatchPayload/, 'GroupTagPatchPayload required')
+assert.match(groupTagSrc, /isGroupTagPatchPayload/, 'isGroupTagPatchPayload required')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
