@@ -158,6 +158,22 @@ CREATE TABLE sync_meta (
   value TEXT NOT NULL
 );
 
+-- 弱网 publish 失败持久队列（B4 / TASK-300）
+CREATE TABLE sync_outbox (
+  id TEXT PRIMARY KEY,
+  channel TEXT NOT NULL,
+  group_id TEXT NOT NULL,
+  dedupe_key TEXT NOT NULL,
+  envelope_json TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TEXT NOT NULL,
+  last_error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE (channel, dedupe_key)
+);
+CREATE INDEX idx_sync_outbox_due ON sync_outbox(next_attempt_at);
+
 -- 群级 Yjs 文档快照（task:{groupId}）
 CREATE TABLE task_crdt_docs (
   group_id TEXT PRIMARY KEY,

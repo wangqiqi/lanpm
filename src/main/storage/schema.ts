@@ -32,6 +32,7 @@ export const EXPECTED_TABLES = [
   'file_transfers',
   'ai_config',
   'sync_meta',
+  'sync_outbox',
   'task_crdt_docs',
   'group_tag_meta',
   'whiteboard_scenes',
@@ -40,4 +41,4 @@ export const EXPECTED_TABLES = [
   'task_checklist_items'
 ] as const
 
-export const SCHEMA_VERSION = 10
+export const SCHEMA_VERSION = 11

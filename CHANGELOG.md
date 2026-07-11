@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-B4-SYNC-OUTBOX（TASK-300）**：`sync_outbox` 表（schema v11）+ enqueue/ack/backoff API；`verify:sync-outbox`。
 - **SPRINT-PLUGIN-ENABLE-UI（TASK-295–299）**：Profile「扩展」Tab 启停官方插件；详情槽监听启停事件重拉；`verify:plugin-enable-ui`。
 
 ### Fixed

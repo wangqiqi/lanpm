@@ -15,7 +15,7 @@ const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 assert.ok(TASK_IPC.listDiscussions === 'task:listDiscussions')
 
 const schemaTs = readFileSync(join(projectRoot, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*10/)
+assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*11/)
 
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
 assert.match(schemaSql, /source_msg_id/)

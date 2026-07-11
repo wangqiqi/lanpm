@@ -146,6 +146,28 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         )
       `)
     }
+  },
+  {
+    fromVersion: 10,
+    description: 'sync_outbox: durable publish retry queue (TASK-300 / B4)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE sync_outbox (
+          id TEXT PRIMARY KEY,
+          channel TEXT NOT NULL,
+          group_id TEXT NOT NULL,
+          dedupe_key TEXT NOT NULL,
+          envelope_json TEXT NOT NULL,
+          attempts INTEGER NOT NULL DEFAULT 0,
+          next_attempt_at TEXT NOT NULL,
+          last_error TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          UNIQUE (channel, dedupe_key)
+        )
+      `)
+      db.exec(`CREATE INDEX idx_sync_outbox_due ON sync_outbox(next_attempt_at)`)
+    }
   }
 ]
 
