@@ -4,9 +4,6 @@
 
 ## [Unreleased]
 
-### Changed
-- **docs/06**：拆分为 [`06_ROADMAP.md`](./docs/06_ROADMAP.md)（仅未完成）+ [`06_HISTORY.md`](./docs/06_HISTORY.md)（已交付 / RC / §16）；删除旧 `06_验收与里程碑计划.md`；索引与 verify 路径对齐。
-
 ## [1.27.0] - 2026-07-12
 
 ### Changed
