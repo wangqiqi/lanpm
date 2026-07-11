@@ -4,14 +4,17 @@
 
 ## [Unreleased]
 
-### Changed
-- **docs/06**：对齐 v1.10–v1.22 — 七 Tab、P1 已交付/待做分表、§2.3 已闭合 vs 仍开、§16.2 七视图、§6 增量候选刷新；文档体系含 `docs/07`。
-- **onekey_run.sh / .bat / .ps1**：菜单每次重绘时重读 `package.json` 版本，避免长驻交互菜单一直显示旧号（如 v1.8.0）。
+### Added
+- **SPRINT-PLUGIN-ENABLE-UI（TASK-295–299）**：Profile「扩展」Tab 启停官方插件；详情槽监听启停事件重拉；`verify:plugin-enable-ui`。
 
 ## [1.22.0] - 2026-07-11
 
 ### Added
 - **SPRINT-PLUGIN-FORMJS（TASK-289–294）**：插件 loader 最小闭环 — `plugins/` manifest 发现、能力白名单 IPC、`task.detail.section` SlotHost + ErrorBoundary；官方 stub + **form-js 可购 POC**（schema 兼容渲染，不进核心 deps）；`verify:plugin-loader`。
+
+### Changed
+- **docs/06**：对齐 v1.10–v1.22 — 七 Tab、P1 已交付/待做分表、§2.3 已闭合 vs 仍开、§16.2 七视图、§6 增量候选刷新；文档体系含 `docs/07`。
+- **onekey_run.sh / .bat / .ps1**：菜单每次重绘时重读 `package.json` 版本，避免长驻交互菜单一直显示旧号。
 
 ### Release
 - `v1.22.0` — plugin loader + form-js POC

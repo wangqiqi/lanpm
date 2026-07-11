@@ -73,6 +73,14 @@ const STUB_PLUGINS: PluginView[] = [
   }
 ]
 
+function mutateStubPluginEnabled(pluginId: string, enabled: boolean): PluginView[] {
+  const idx = STUB_PLUGINS.findIndex((p) => p.id === pluginId)
+  if (idx < 0) throw new Error(`plugin not found: ${pluginId}`)
+  const cur = STUB_PLUGINS[idx]!
+  STUB_PLUGINS[idx] = { ...cur, enabled }
+  return STUB_PLUGINS.slice()
+}
+
 const stubDissolvedGroups = new Set<string>(
   (() => {
     try {
@@ -1462,7 +1470,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       listPlugins: async () => STUB_PLUGINS.slice(),
       listSlotPlugins: async (slotId) =>
         STUB_PLUGINS.filter((p) => p.enabled && p.slots.includes(slotId)),
-      setEnabled: async () => STUB_PLUGINS.slice(),
+      setEnabled: async (pluginId, enabled) => mutateStubPluginEnabled(pluginId, enabled),
       invokeCapability: async (pluginId, capability, args) => {
         const plugin = STUB_PLUGINS.find((p) => p.id === pluginId)
         if (!plugin?.enabled) throw new Error(`plugin disabled: ${pluginId}`)

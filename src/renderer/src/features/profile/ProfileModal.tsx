@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
 import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
+import PluginsPanel from '@renderer/features/profile/PluginsPanel'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNetworkStore } from '@renderer/stores/networkStore'
@@ -173,6 +174,11 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
       </Form>
               </>
             )
+          },
+          {
+            key: 'plugins',
+            label: t('profile.tabPlugins'),
+            children: <PluginsPanel />
           },
           {
             key: 'data',
