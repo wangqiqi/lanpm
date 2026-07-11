@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-07-11
+
 ### Added
 - **SPRINT-WB-REALTIME（TASK-258–263）**：群内白板实时同画 — `whiteboard_crdt*` / `whiteboard_awareness`；schema v10 `whiteboard_crdt_docs`；`@mizuka-wu/y-excalidraw` Binding；指针 Awareness；`sceneJson` seed/回写；assets 体积守卫；`verify:whiteboard-realtime`。
 - **SPRINT-A3-PROJECT-FILES（TASK-245–249）**：项目级文件 / 交付物 — `deliverables` 派生索引；文件 Tab「全部 / 交付物」与按任务筛选；挂接/解挂；跳转看板；`verify:project-files`。
@@ -11,6 +13,9 @@
 
 ### Changed
 - **白板实时协同 SPIKE（SPIKE-255–257）**：拍板主路径 = 群级 Y.Doc + y-excalidraw + P2P（镜像 `task_crdt`）；拒绝公网 room；实现 Sprint 已交付。
+
+### Release
+- `v1.17.0` — project deliverables A3 + discover A5 + whiteboard realtime CRDT
 
 ## [1.14.0] - 2026-07-11
 
