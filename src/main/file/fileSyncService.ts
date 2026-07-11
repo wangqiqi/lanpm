@@ -43,6 +43,7 @@ import {
 } from '../storage/repositories/fileTransferRepository'
 import { generatePreview } from './previewService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
+import { enqueueFailedPublish } from '../sync/outboxEnqueue'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -381,8 +382,47 @@ export { armPullReceiver as armPullReceiverForTest }
 
 export function publishFileMeta(db: Database, meta: FileMeta): void {
   if (meta.isBookmark) return
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user || !status.device) return
+
   const payload: FileMetaBroadcastPayload = { meta }
-  void publishEnvelope(db, meta.groupId, 'file_meta', payload).catch(
+  const envelope: SyncEnvelope = {
+    version: 1,
+    type: 'file_meta',
+    msgId: `file_meta_${randomUUID()}`,
+    senderUserId: status.user.userId,
+    senderDeviceId: status.device.deviceId,
+    groupId: meta.groupId,
+    ts: new Date().toISOString(),
+    payload,
+    nonce: '',
+    authTag: ''
+  }
+  const dedupeKey = `file:${meta.fileId}`
+  const transport = getNetworkTransport()
+  if (!transport) {
+    enqueueFailedPublish(db, {
+      channel: 'file_meta',
+      groupId: meta.groupId,
+      dedupeKey,
+      envelope
+    })
+    return
+  }
+  void (async () => {
+    ensureSubscribed(db, meta.groupId)
+    try {
+      await transport.publish(envelope)
+    } catch (err) {
+      enqueueFailedPublish(db, {
+        channel: 'file_meta',
+        groupId: meta.groupId,
+        dedupeKey,
+        envelope
+      })
+      throw err
+    }
+  })().catch(
     catchSyncFailure('fileSync.publishMeta', {
       messageKey: 'sync.filePublishFailed'
     })

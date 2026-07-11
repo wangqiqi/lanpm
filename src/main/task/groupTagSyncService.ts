@@ -22,6 +22,7 @@ import {
   upsertGroupTagMeta
 } from '../storage/repositories/groupTagMetaRepository'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
+import { enqueueFailedPublish } from '../sync/outboxEnqueue'
 
 type ChangedFn = (groupId: string) => void
 let onChanged: ChangedFn | null = null
@@ -31,9 +32,8 @@ export function setGroupTagMetaChangedHandler(handler: ChangedFn | null): void {
 }
 
 async function publishPatch(db: Database, payload: GroupTagPatchPayload): Promise<void> {
-  const transport = getNetworkTransport()
   const status = getSetupStatus(db)
-  if (!transport || !status.configured || !status.user || !status.device) return
+  if (!status.configured || !status.user || !status.device) return
   if (isAnonymousGroupType(resolveGroupType(db, payload.groupId))) return
 
   const envelope: SyncEnvelope = {
@@ -51,7 +51,28 @@ async function publishPatch(db: Database, payload: GroupTagPatchPayload): Promis
     nonce: '',
     authTag: ''
   }
-  await transport.publish(envelope)
+  const dedupeKey = `group_tag:${payload.groupId}:${normalizeGroupTagKey(payload.tagKey)}:${payload.action}`
+  const transport = getNetworkTransport()
+  if (!transport) {
+    enqueueFailedPublish(db, {
+      channel: 'group_tag_patch',
+      groupId: payload.groupId,
+      dedupeKey,
+      envelope
+    })
+    return
+  }
+  try {
+    await transport.publish(envelope)
+  } catch (err) {
+    enqueueFailedPublish(db, {
+      channel: 'group_tag_patch',
+      groupId: payload.groupId,
+      dedupeKey,
+      envelope
+    })
+    throw err
+  }
 }
 
 export function handleIncomingGroupTagPatch(db: Database, envelope: SyncEnvelope): void {

@@ -45,6 +45,7 @@ import {
   setGroupTagMetaChangedHandler
 } from './groupTagSyncService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
+import { enqueueFailedPublish } from '../sync/outboxEnqueue'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -165,10 +166,8 @@ function refreshSubscriptions(db: Database): void {
 }
 
 async function publishPatch(db: Database, payload: TaskPatchPayload, groupId: string): Promise<void> {
-  const transport = getNetworkTransport()
   const status = getSetupStatus(db)
-  if (!transport || !status.configured || !status.user || !status.device) return
-  ensureSubscribed(db, groupId)
+  if (!status.configured || !status.user || !status.device) return
 
   const envelope: SyncEnvelope = {
     version: 1,
@@ -182,14 +181,34 @@ async function publishPatch(db: Database, payload: TaskPatchPayload, groupId: st
     nonce: '',
     authTag: ''
   }
-  await transport.publish(envelope)
+  const dedupeKey = `task:${payload.task.taskId}:${payload.action}`
+  const transport = getNetworkTransport()
+  if (!transport) {
+    enqueueFailedPublish(db, {
+      channel: 'task_patch',
+      groupId,
+      dedupeKey,
+      envelope
+    })
+    return
+  }
+  ensureSubscribed(db, groupId)
+  try {
+    await transport.publish(envelope)
+  } catch (err) {
+    enqueueFailedPublish(db, {
+      channel: 'task_patch',
+      groupId,
+      dedupeKey,
+      envelope
+    })
+    throw err
+  }
 }
 
 async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Promise<void> {
-  const transport = getNetworkTransport()
   const status = getSetupStatus(db)
-  if (!transport || !status.configured || !status.user || !status.device) return
-  ensureSubscribed(db, payload.groupId)
+  if (!status.configured || !status.user || !status.device) return
 
   const envelope: SyncEnvelope = {
     version: 1,
@@ -203,7 +222,29 @@ async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Prom
     nonce: '',
     authTag: ''
   }
-  await transport.publish(envelope)
+  const dedupeKey = `task_dep:${payload.dependency.fromTaskId}:${payload.dependency.toTaskId}:${payload.action}`
+  const transport = getNetworkTransport()
+  if (!transport) {
+    enqueueFailedPublish(db, {
+      channel: 'task_dep_patch',
+      groupId: payload.groupId,
+      dedupeKey,
+      envelope
+    })
+    return
+  }
+  ensureSubscribed(db, payload.groupId)
+  try {
+    await transport.publish(envelope)
+  } catch (err) {
+    enqueueFailedPublish(db, {
+      channel: 'task_dep_patch',
+      groupId: payload.groupId,
+      dedupeKey,
+      envelope
+    })
+    throw err
+  }
 }
 
 export function initTaskSyncService(db: Database): void {

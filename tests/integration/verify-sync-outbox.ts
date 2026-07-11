@@ -97,4 +97,17 @@ try {
   rmLanpmTemp(dir)
 }
 
+const taskSync = readFileSync(join(root, 'src/main/task/taskSyncService.ts'), 'utf8')
+assert.match(taskSync, /enqueueFailedPublish/)
+assert.match(taskSync, /channel: 'task_patch'/)
+assert.match(taskSync, /channel: 'task_dep_patch'/)
+
+const fileSync = readFileSync(join(root, 'src/main/file/fileSyncService.ts'), 'utf8')
+assert.match(fileSync, /enqueueFailedPublish/)
+assert.match(fileSync, /channel: 'file_meta'/)
+
+const groupTag = readFileSync(join(root, 'src/main/task/groupTagSyncService.ts'), 'utf8')
+assert.match(groupTag, /enqueueFailedPublish/)
+assert.match(groupTag, /channel: 'group_tag_patch'/)
+
 console.log('verify:sync-outbox OK')
