@@ -22,9 +22,9 @@
   flex-direction: column;
   min-height: 200px;
   border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-solid);
+  background: var(--lanpm-surface-elevated);
   border: 0.5px solid var(--lanpm-separator);
-  box-shadow: var(--lanpm-shadow-surface);
+  box-shadow: var(--lanpm-shadow-island);
 }
 
 .columnOver {
@@ -62,7 +62,7 @@
 
 .columnAddBtn:hover {
   color: var(--lanpm-accent) !important;
-  background: var(--lanpm-accent-fill) !important;
+  background: var(--lanpm-selected-bg) !important;
 }
 
 .columnCount {
@@ -103,8 +103,8 @@
 .card {
   padding: 12px 14px;
   border-radius: var(--lanpm-radius-md);
-  background: var(--lanpm-surface-solid);
-  border: 1px solid var(--lanpm-border);
+  background: var(--lanpm-surface-elevated);
+  border: 0.5px solid var(--lanpm-border);
   border-left-width: 3px;
   border-left-color: var(--lanpm-border);
   cursor: grab;
@@ -264,7 +264,7 @@
 .milestoneTag {
   margin-inline-end: 0;
   color: var(--lanpm-accent);
-  background: var(--lanpm-accent-fill);
+  background: var(--lanpm-selected-bg);
 }
 
 .cardDue {
