@@ -208,7 +208,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3 + discover A5 + whiteboard realtime CRDT（**v1.17.0**）· cross-platform x64+arm64 matrix（**v1.18.0**）· transfer cancel/retry/ETA A4（**v1.19.0**）· WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3 + discover A5 + whiteboard realtime CRDT（**v1.17.0**）· cross-platform x64+arm64 matrix（**v1.18.0**）· transfer cancel/retry/ETA A4（**v1.19.0**）· plugin load-boundary SPIKE（**v1.20.0**）· WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 
