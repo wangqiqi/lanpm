@@ -1,7 +1,11 @@
 import type { Database } from 'better-sqlite3'
+import {
+  clampFileTransferRateKbps,
+  FILE_TRANSFER_RATE_KEY
+} from '../../shared/file/settings.ts'
 import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 
-export const FILE_TRANSFER_RATE_KEY = 'file_transfer_rate_kbps'
+export { FILE_TRANSFER_RATE_KEY }
 
 export interface FileTransferSettings {
   /** 0 = 不限速 */
@@ -11,11 +15,11 @@ export interface FileTransferSettings {
 export function getFileTransferSettings(db: Database): FileTransferSettings {
   const raw = getMeta(db, FILE_TRANSFER_RATE_KEY)
   const n = raw ? Number(raw) : 0
-  return { rateKbps: Number.isFinite(n) && n >= 0 ? n : 0 }
+  return { rateKbps: clampFileTransferRateKbps(n) }
 }
 
 export function setFileTransferRateKbps(db: Database, rateKbps: number): FileTransferSettings {
-  const safe = Number.isFinite(rateKbps) && rateKbps >= 0 ? Math.floor(rateKbps) : 0
+  const safe = clampFileTransferRateKbps(rateKbps)
   setMeta(db, FILE_TRANSFER_RATE_KEY, String(safe))
   return { rateKbps: safe }
 }

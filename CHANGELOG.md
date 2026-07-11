@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Fixed
+- **TASK-331**：传输限速 `rateKbps` 上限 clamp（`FILE_TRANSFER_RATE_MAX_KBPS=100_000`）；IPC 拒绝非有限/负数。
 - **TASK-330**：续传 `startOffset` 对负数/非有限值 clamp 为 0，避免异常偏移。
 
 ## [1.26.0] - 2026-07-12

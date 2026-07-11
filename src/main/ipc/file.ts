@@ -72,7 +72,10 @@ export function registerFileIpc(): void {
   ipcMain.handle(FILE_IPC.getTransferSettings, () => getFileTransferSettings(getDatabase()))
 
   ipcMain.handle(FILE_IPC.setTransferRate, (_event, rateKbps: number) => {
-    if (typeof rateKbps !== 'number' || rateKbps < 0) throw new Error('rateKbps invalid')
+    if (typeof rateKbps !== 'number' || !Number.isFinite(rateKbps) || rateKbps < 0) {
+      throw new Error('rateKbps invalid')
+    }
+    // 上限由 setFileTransferRateKbps → clampFileTransferRateKbps 处理
     return setFileTransferRateKbps(getDatabase(), rateKbps)
   })
 
