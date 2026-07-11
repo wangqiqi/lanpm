@@ -43,6 +43,7 @@ import {
 } from '../whiteboard/whiteboardSyncService'
 import { handleIncomingMemberEvent } from '../group/memberEventService'
 import { broadcastMessage } from './chatBroadcast'
+import { catchSyncFailure } from '../utils/reportSyncFailure'
 import { getNetworkTransport } from '../network'
 import {
   appendAnonymousMessage,
@@ -88,7 +89,9 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     return
   }
   if (envelope.type === 'chat_sync_request') {
-    void handleChatSyncRequest(db, envelope).catch(() => undefined)
+    void handleChatSyncRequest(db, envelope).catch(
+      catchSyncFailure('chat.handleChatSyncRequest', { notify: false })
+    )
     return
   }
   if (envelope.type === 'chat_sync_batch') {
@@ -100,7 +103,9 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     return
   }
   if (envelope.type === 'read_receipt_sync_request') {
-    void handleReadReceiptSyncRequest(db, envelope).catch(() => undefined)
+    void handleReadReceiptSyncRequest(db, envelope).catch(
+      catchSyncFailure('chat.handleReadReceiptSyncRequest', { notify: false })
+    )
     return
   }
   if (envelope.type === 'read_receipt_sync_batch') {
@@ -162,8 +167,10 @@ export function initChatService(db: Database): void {
   initTaskSyncService(db)
   initWhiteboardSyncService(db)
   initFileSyncService(db)
-  void requestOfflineSync(db).catch(() => undefined)
-  void requestReadReceiptOfflineSync(db).catch(() => undefined)
+  void requestOfflineSync(db).catch(catchSyncFailure('chat.requestOfflineSync', { notify: false }))
+  void requestReadReceiptOfflineSync(db).catch(
+    catchSyncFailure('chat.requestReadReceiptOfflineSync', { notify: false })
+  )
 }
 
 export function shutdownChatService(): void {

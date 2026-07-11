@@ -35,6 +35,7 @@
     "verify:stub-parity": "node --experimental-strip-types tests/static/verify-stub-parity.ts",
     "verify:stub-behavior": "node --experimental-strip-types tests/static/verify-stub-behavior.ts",
     "verify:sync-handlers": "node --experimental-strip-types tests/static/verify-sync-handlers.ts",
+    "verify:chat-sync-observability": "node --experimental-strip-types tests/static/verify-chat-sync-observability.ts",
     "verify:schema-repo": "node --experimental-strip-types tests/static/verify-schema-repo.ts",
     "verify:schema-fk": "node --experimental-strip-types tests/static/verify-schema-fk.ts",
     "verify:sec-hardening": "node --experimental-strip-types tests/static/verify-sec-hardening.ts",

@@ -26,6 +26,7 @@ import {
   updateMessage
 } from '../storage/repositories/messageRepository'
 import { broadcastMessage } from './chatBroadcast'
+import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 /** Safety cap: max pages per sync request (100 × 50 = 5k msgs). */
 const OFFLINE_SYNC_MAX_PAGES = 50
@@ -183,6 +184,8 @@ export function handleChatSyncBatch(db: Database, envelope: SyncEnvelope): void 
   // Follow-up if peer only sent one page (or multi-peer partial); advance by batch cursor.
   if (payload.hasMore && payload.messages.length > 0) {
     const nextSince = maxLamportInMessages(payload.messages)
-    void publishSyncRequest(db, envelope.groupId, nextSince, cutoff).catch(() => undefined)
+    void publishSyncRequest(db, envelope.groupId, nextSince, cutoff).catch(
+      catchSyncFailure('chat.publishSyncRequestFollowUp', { notify: false })
+    )
   }
 }
