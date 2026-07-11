@@ -59,6 +59,23 @@ export const MIGRATIONS: readonly MigrationStep[] = [
     up: (db) => {
       db.exec(`ALTER TABLE tasks ADD COLUMN tags_json TEXT NOT NULL DEFAULT '[]'`)
     }
+  },
+  {
+    fromVersion: 5,
+    description: 'group_tag_meta: per-group tag color dictionary (TASK-190)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE group_tag_meta (
+          group_id TEXT NOT NULL,
+          tag_key TEXT NOT NULL,
+          label TEXT,
+          color TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          updated_by_user_id TEXT,
+          PRIMARY KEY (group_id, tag_key)
+        )
+      `)
+    }
   }
 ]
 

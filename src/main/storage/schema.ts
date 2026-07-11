@@ -32,7 +32,8 @@ export const EXPECTED_TABLES = [
   'file_transfers',
   'ai_config',
   'sync_meta',
-  'task_crdt_docs'
+  'task_crdt_docs',
+  'group_tag_meta'
 ] as const
 
-export const SCHEMA_VERSION = 5
+export const SCHEMA_VERSION = 6

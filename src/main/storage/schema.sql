@@ -163,3 +163,14 @@ CREATE TABLE task_crdt_docs (
   update_blob BLOB NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+-- 群标签字典（色板同步，TASK-190）
+CREATE TABLE group_tag_meta (
+  group_id TEXT NOT NULL,
+  tag_key TEXT NOT NULL,
+  label TEXT,
+  color TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  updated_by_user_id TEXT,
+  PRIMARY KEY (group_id, tag_key)
+);
