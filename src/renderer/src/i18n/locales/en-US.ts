@@ -298,7 +298,11 @@ const enUS = {
   'gantt.boardViewLink': 'Board view',
   'gantt.empty': 'No tasks yet. Create tasks on the board and set dates.',
   'calendar.empty': 'No tasks yet. Create tasks on the board first.',
-  'calendar.toolbarHint': 'Click to edit · undated tasks use Gantt default window (dashed) · month/week',
+  'calendar.toolbarHint':
+    'Drag/resize to reschedule · click to edit · undated use Gantt default (dashed; drag persists) · month/week',
+  'calendar.scheduleSaved': 'Calendar schedule saved',
+  'calendar.scheduleFailed': 'Failed to update calendar schedule',
+  'calendar.scheduleInvalid': 'Invalid date range; reverted',
   'whiteboard.placeholder': 'Whiteboard canvas lands in later tasks this sprint (Excalidraw).',
   'whiteboard.save': 'Save',
   'whiteboard.toolbarHint': 'Autosave · one board per group · link from a task',

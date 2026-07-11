@@ -296,7 +296,11 @@ const zhCN = {
   'gantt.boardViewLink': '看板视图',
   'gantt.empty': '暂无任务，请先在「看板」创建任务并设置时间',
   'calendar.empty': '暂无任务。请先在看板创建任务。',
-  'calendar.toolbarHint': '点击事件打开编辑 · 无日期任务按甘特默认窗口显示（虚线）· 月/周切换',
+  'calendar.toolbarHint':
+    '拖拽/拉伸改期 · 点击编辑 · 无日期任务按甘特默认窗口（虚线，拖动后落库）· 月/周',
+  'calendar.scheduleSaved': '日历排期已保存',
+  'calendar.scheduleFailed': '更新日历排期失败',
+  'calendar.scheduleInvalid': '无效的日期范围，已还原',
   'whiteboard.placeholder': '白板画布将在本 Sprint 后续任务接入（Excalidraw）。',
   'whiteboard.save': '保存',
   'whiteboard.toolbarHint': '自动保存 · 一群一板 · 可从任务关联',
