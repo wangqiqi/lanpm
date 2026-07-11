@@ -43,11 +43,11 @@
 }
 
 .chatWorkspaceDesktop {
-  border: 1px solid var(--lanpm-border);
+  border: 0.5px solid var(--lanpm-border);
   border-radius: var(--lanpm-radius-lg);
   overflow: hidden;
-  background: var(--lanpm-surface-solid);
-  box-shadow: var(--lanpm-shadow-surface);
+  background: var(--lanpm-surface-elevated);
+  box-shadow: var(--lanpm-shadow-island);
 }
 
 .chatWorkspaceDesktop .sidebar {
@@ -179,7 +179,7 @@
     border: 1px solid var(--lanpm-border);
     color: var(--lanpm-text);
     cursor: pointer;
-    box-shadow: var(--lanpm-shadow);
+    box-shadow: var(--lanpm-shadow-island);
     transition: background-color 0.15s ease;
   }
 
@@ -209,7 +209,7 @@
     min-width: 0;
     transform: translateX(-105%);
     transition: transform 0.2s ease;
-    box-shadow: var(--lanpm-shadow);
+    box-shadow: var(--lanpm-shadow-island);
   }
 
   .sidebarOpen {
@@ -389,7 +389,7 @@
 }
 
 .dmSessionItemActive {
-  background: var(--lanpm-accent-fill-strong);
+  background: var(--lanpm-selected-bg);
   border-color: var(--lanpm-accent);
 }
 
@@ -979,13 +979,13 @@
 }
 
 .bubbleOwn {
-  background: var(--lanpm-accent-fill);
+  background: var(--lanpm-selected-bg);
   color: var(--lanpm-accent);
-  border: 1.5px solid rgba(0, 102, 204, 0.12);
+  border: 1.5px solid color-mix(in srgb, var(--lanpm-accent) 12%, transparent);
 }
 
 :global(html[data-theme='dark']) .bubbleOwn {
-  border: 1.5px solid rgba(10, 132, 255, 0.24);
+  border: 1.5px solid color-mix(in srgb, var(--lanpm-accent) 24%, transparent);
 }
 
 .bubbleOther {
