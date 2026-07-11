@@ -3,7 +3,7 @@ import type { ChatMessage } from '../shared/chat/types'
 import type { ProfileUpdateInput, SetupInput } from '../shared/identity'
 import type { LanpmApi } from '../shared/lanpm-api'
 import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
-import { TASK_PUSH_CHANNEL } from '../shared/task/channels'
+import { TASK_AWARENESS_PUSH_CHANNEL, TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
 import { GROUP_PUSH_CHANNEL } from '../shared/group/channels'
 import { USER_NOTICE_CHANNEL } from '../shared/sync/userNotice'
@@ -72,12 +72,24 @@ const api: LanpmApi = {
     removeDependency: (groupId, fromTaskId, toTaskId) =>
       ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),
     deleteTask: (taskId, mode) => ipcRenderer.invoke('task:deleteTask', taskId, mode),
+    setAwareness: (groupId, state) => ipcRenderer.invoke('task:setAwareness', groupId, state),
+    listAwareness: (groupId) => ipcRenderer.invoke('task:listAwareness', groupId),
     onTasksChanged: (handler) => {
       const listener = (_event: Electron.IpcRendererEvent, groupId: string) => {
         handler(groupId)
       }
       ipcRenderer.on(TASK_PUSH_CHANNEL, listener)
       return () => ipcRenderer.removeListener(TASK_PUSH_CHANNEL, listener)
+    },
+    onAwarenessChanged: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { groupId: string; peers: import('../shared/task/taskAwareness').TaskAwarenessLocalState[] }
+      ) => {
+        handler(payload)
+      }
+      ipcRenderer.on(TASK_AWARENESS_PUSH_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(TASK_AWARENESS_PUSH_CHANNEL, listener)
     }
   },
   file: {

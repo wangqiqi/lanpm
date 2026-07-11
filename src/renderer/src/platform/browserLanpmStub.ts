@@ -739,7 +739,10 @@ export function createBrowserLanpmStub(): LanpmApi {
       onTasksChanged: (handler) => {
         taskListeners.add(handler)
         return () => taskListeners.delete(handler)
-      }
+      },
+      setAwareness: async () => [],
+      listAwareness: async () => [],
+      onAwarenessChanged: () => () => undefined
     },
     file: {
       listFiles: async (groupId, category) => {

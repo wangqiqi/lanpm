@@ -13,7 +13,7 @@ import {
 import { GROUP_IPC, GROUP_PUSH_CHANNEL } from '@shared/group/channels'
 import { NETWORK_IPC } from '@shared/network/status'
 import { SEARCH_IPC } from '@shared/search/channels'
-import { TASK_IPC, TASK_PUSH_CHANNEL } from '@shared/task/channels'
+import { TASK_AWARENESS_PUSH_CHANNEL, TASK_IPC, TASK_PUSH_CHANNEL } from '@shared/task/channels'
 
 /** IPC 通道名为跨进程契约，变更会破坏主进程/渲染进程握手 */
 describe('IPC channel contracts', () => {
@@ -39,8 +39,11 @@ describe('IPC channel contracts', () => {
 
   it('task lifecycle channels', () => {
     expect(TASK_PUSH_CHANNEL).toBe('task:changed')
+    expect(TASK_AWARENESS_PUSH_CHANNEL).toBe('task:awareness')
     expect(TASK_IPC.deleteTask).toBe('task:deleteTask')
     expect(TASK_IPC.upsertDependency).toBe('task:upsertDependency')
+    expect(TASK_IPC.setAwareness).toBe('task:setAwareness')
+    expect(TASK_IPC.listAwareness).toBe('task:listAwareness')
   })
 
   it('group, network, search, discover, badge, cockpit', () => {

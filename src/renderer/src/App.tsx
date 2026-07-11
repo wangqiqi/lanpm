@@ -11,6 +11,10 @@ import { translate } from '@renderer/i18n/messages'
 import type { MessageKey } from '@renderer/i18n/types'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
+import {
+  unwireTaskAwarenessPush,
+  wireTaskAwarenessPush
+} from '@renderer/stores/taskAwarenessStore'
 import styles from './styles/App.module.css'
 
 export default function App(): React.ReactElement {
@@ -63,6 +67,12 @@ export default function App(): React.ReactElement {
     if (!configured) return
     const unsub = getLanpmApi().group.onListChanged(() => void loadGroupsRef.current())
     return unsub
+  }, [configured])
+
+  useEffect(() => {
+    if (!configured) return
+    wireTaskAwarenessPush()
+    return () => unwireTaskAwarenessPush()
   }, [configured])
 
   useEffect(() => {

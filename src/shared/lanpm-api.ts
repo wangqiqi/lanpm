@@ -86,7 +86,26 @@ export interface LanpmApi {
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>
+    setAwareness: (
+      groupId: string,
+      state: import('./task/taskAwareness').TaskAwarenessLocalState | null
+    ) => Promise<
+      Array<import('./task/taskAwareness').TaskAwarenessLocalState & { clientId: number }>
+    >
+    listAwareness: (
+      groupId: string
+    ) => Promise<
+      Array<import('./task/taskAwareness').TaskAwarenessLocalState & { clientId: number }>
+    >
     onTasksChanged: (handler: (groupId: string) => void) => () => void
+    onAwarenessChanged: (
+      handler: (payload: {
+        groupId: string
+        peers: Array<
+          import('./task/taskAwareness').TaskAwarenessLocalState & { clientId?: number }
+        >
+      }) => void
+    ) => () => void
   }
   search: {
     query: (query: string) => Promise<import('./search/types').GlobalSearchResult>

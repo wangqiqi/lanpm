@@ -36,8 +36,10 @@ import {
 import {
   clearTaskAwarenessWiring,
   ensureTaskAwarenessWired,
-  handleIncomingTaskAwareness
+  handleIncomingTaskAwareness,
+  setTaskAwarenessChangedHandler
 } from './taskAwarenessService'
+import { broadcastTaskAwareness } from '../ipc/task'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
@@ -190,6 +192,7 @@ async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Prom
 
 export function initTaskSyncService(db: Database): void {
   setTaskCrdtTasksChangedHandler(broadcastTasksChanged)
+  setTaskAwarenessChangedHandler(broadcastTaskAwareness)
   refreshSubscriptions(db)
   void requestTaskOfflineSync(db).catch(
     catchSyncFailure('taskSync.requestOffline', { notify: false })
@@ -204,6 +207,7 @@ export function shutdownTaskSyncService(): void {
   clearTaskCrdtWiring()
   setTaskCrdtTasksChangedHandler(null)
   setTaskCrdtOfflineTasksChangedHandler(null)
+  setTaskAwarenessChangedHandler(null)
 }
 
 export function publishTaskUpsert(db: Database, task: Task): void {

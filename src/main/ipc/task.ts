@@ -1,8 +1,10 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, UpdateTaskInput } from '../../shared/task/types'
 import type { UpsertDependencyInput } from '../../shared/task/dependency'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
-import { TASK_IPC } from '../../shared/task/channels'
+import type { TaskAwarenessLocalState } from '../../shared/task/taskAwareness'
+import { isTaskAwarenessLocalState } from '../../shared/task/taskAwareness'
+import { TASK_AWARENESS_PUSH_CHANNEL, TASK_IPC } from '../../shared/task/channels'
 import {
   createGroupTask,
   createTaskFromChat,
@@ -15,6 +17,10 @@ import {
   updateTaskSchedule,
   upsertTaskDependency
 } from '../task/taskService'
+import {
+  listRemoteTaskAwareness,
+  setLocalTaskAwareness
+} from '../task/taskAwarenessService'
 import { getDatabase } from '../storage'
 
 export function registerTaskIpc(): void {
@@ -78,4 +84,29 @@ export function registerTaskIpc(): void {
       return deleteGroupTask(getDatabase(), taskId, mode ?? 'promote')
     }
   )
+
+  ipcMain.handle(
+    TASK_IPC.setAwareness,
+    (_event, groupId: string, state: TaskAwarenessLocalState | null) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (state !== null && !isTaskAwarenessLocalState(state)) {
+        throw new Error('invalid awareness state')
+      }
+      setLocalTaskAwareness(getDatabase(), groupId, state)
+      return listRemoteTaskAwareness(groupId)
+    }
+  )
+
+  ipcMain.handle(TASK_IPC.listAwareness, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return listRemoteTaskAwareness(groupId)
+  })
+}
+
+/** Push awareness snapshot to all renderer windows. */
+export function broadcastTaskAwareness(groupId: string): void {
+  const peers = listRemoteTaskAwareness(groupId)
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send(TASK_AWARENESS_PUSH_CHANNEL, { groupId, peers })
+  }
 }
