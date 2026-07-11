@@ -26,13 +26,18 @@ import { groupViewPath } from '@renderer/routes/paths'
 import KanbanCard from './KanbanCard'
 import BoardDependencyLines from './BoardDependencyLines'
 import BoardRelationLegend from './BoardRelationLegend'
+import BoardTagPalette from './BoardTagPalette'
 import OtherReasonModal from './OtherReasonModal'
 import TaskEditModal from './TaskEditModal'
 import ViewToolbar, { ViewToolbarGroup } from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
-import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { useUiStore } from '@renderer/stores/uiStore'
+import {
+  collectUniqueTaskTags,
+  filterTasksByTags
+} from '@shared/task/tags'
 import {
   confirmDeleteParentTask,
   countTaskDescendants
@@ -115,7 +120,8 @@ function KanbanColumn({
   onHighlightRelations,
   onPinRelations,
   onLocateTask,
-  peersByTask
+  peersByTask,
+  tagColorOverrides
 }: {
   groupId: string
   status: TaskStatus
@@ -136,6 +142,7 @@ function KanbanColumn({
   onPinRelations: (taskId: string | null) => void
   onLocateTask: (taskId: string, view: 'board' | 'tree' | 'gantt') => void
   peersByTask: Map<string, AwarenessPeer[]>
+  tagColorOverrides?: Readonly<Record<string, string>> | null
 }): React.ReactElement {
   const { t } = useI18n()
   const { setNodeRef } = useDroppable({ id: status })
@@ -186,6 +193,7 @@ function KanbanColumn({
             onLocateTask={onLocateTask}
             highlighted={isTaskHighlighted(task.taskId)}
             focusPeers={peersByTask.get(task.taskId) ?? []}
+            tagColorOverrides={tagColorOverrides}
           />
         ))}
       </div>
@@ -220,9 +228,11 @@ export default function BoardView(): React.ReactElement {
   const [editTask, setEditTask] = useState<Task | null>(null)
   const [relationFocusId, setRelationFocusId] = useState<string | null>(null)
   const [relationHoverId, setRelationHoverId] = useState<string | null>(null)
+  const [tagFilter, setTagFilter] = useState<string[]>([])
   const boardBodyRef = useRef<HTMLDivElement>(null)
   const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
   const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
+  const tagColorOverrides = useUiStore((s) => s.tagColorOverridesByGroup[gid] ?? {})
   const identityUser = useIdentityStore((s) => s.user)
   const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[gid] ?? [])
   const peersByTask = useMemo(() => {
@@ -264,14 +274,22 @@ export default function BoardView(): React.ReactElement {
       done: [],
       other: []
     }
-    for (const t of tasks) {
+    const visible = filterTasksByTags(tasks, tagFilter)
+    for (const t of visible) {
       map[t.status].push(t)
     }
     for (const col of KANBAN_COLUMN_ORDER) {
       map[col].sort((a, b) => a.sortOrder - b.sortOrder)
     }
     return map
-  }, [tasks])
+  }, [tasks, tagFilter])
+
+  const availableTags = useMemo(() => collectUniqueTaskTags(tasks), [tasks])
+  const filteredCount = useMemo(
+    () => filterTasksByTags(tasks, tagFilter).length,
+    [tasks, tagFilter]
+  )
+  const tagFilterActive = tagFilter.some((t) => t.trim().length > 0)
 
   useEffect(() => {
     if (!gid) return
@@ -559,6 +577,22 @@ export default function BoardView(): React.ReactElement {
                   aria-label={t('board.showAllFsLines')}
                 />
               </label>
+              {availableTags.length > 0 ? (
+                <>
+                  <Select
+                    mode="multiple"
+                    allowClear
+                    maxTagCount="responsive"
+                    placeholder={t('board.tagFilterPlaceholder')}
+                    aria-label={t('board.tagFilter')}
+                    className={styles.tagFilterSelect}
+                    value={tagFilter}
+                    onChange={setTagFilter}
+                    options={availableTags.map((tag) => ({ value: tag, label: tag }))}
+                  />
+                  <BoardTagPalette groupId={gid} tags={availableTags} />
+                </>
+              ) : null}
             </ViewToolbarGroup>
           ) : undefined
         }
@@ -571,6 +605,8 @@ export default function BoardView(): React.ReactElement {
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />
+      ) : tagFilterActive && filteredCount === 0 ? (
+        <ViewEmptyHint>{t('board.tagFilterEmpty')}</ViewEmptyHint>
       ) : (
         <DndContext
           sensors={sensors}
@@ -603,6 +639,7 @@ export default function BoardView(): React.ReactElement {
                 onPinRelations={handlePinRelations}
                 onLocateTask={locateTask}
                 peersByTask={peersByTask}
+                tagColorOverrides={tagColorOverrides}
               />
             ))}
             </div>

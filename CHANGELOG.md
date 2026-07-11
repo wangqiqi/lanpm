@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Added
+- **看板标签筛选与色板 (TASK-184–186)**：工具栏多选 OR 筛选；KanbanCard 着色芯片；本机色板（uiStore/localStorage）。
+- **任务详情标签色 (TASK-187)**：详情面板芯片与看板同色逻辑。
 - **标签筛选/色哈希 (TASK-183)**：`filterTasksByTags`（OR）· `collectUniqueTaskTags` · `tagColorHash` / `resolveTagColor` + 单测。
 - **SPRINT-TASK-AWARENESS 收尾 (TASK-182)**：`verify:task-awareness`；docs/06·README 对齐焦点 Presence；归档；handoff `/release` → **v1.4.0**。
 - **任务树焦点 Presence UI (TASK-181)**：树行显示远端焦点点；选中任务时广播本地焦点。

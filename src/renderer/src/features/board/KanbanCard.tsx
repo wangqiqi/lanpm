@@ -8,6 +8,7 @@ import type { BoardTaskRelation } from '@shared/task/boardRelations'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
 import TaskAwarenessBadges from '@renderer/features/task/TaskAwarenessBadges'
+import TaskTagChip from '@renderer/features/task/TaskTagChip'
 import type { AwarenessPeer } from '@renderer/stores/taskAwarenessStore'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import {
@@ -49,6 +50,7 @@ interface KanbanCardProps {
   onLocateTask?: (taskId: string, view: TaskLocateView) => void
   highlighted?: boolean
   focusPeers?: AwarenessPeer[]
+  tagColorOverrides?: Readonly<Record<string, string>> | null
 }
 
 export default function KanbanCard({
@@ -65,7 +67,8 @@ export default function KanbanCard({
   onPinRelations,
   onLocateTask,
   highlighted = false,
-  focusPeers = []
+  focusPeers = [],
+  tagColorOverrides = null
 }: KanbanCardProps): React.ReactElement {
   const { t } = useI18n()
   const { attributes, listeners, setNodeRef: setDragRef, transform, isDragging } = useDraggable({
@@ -284,9 +287,7 @@ export default function KanbanCard({
           )}
         </Tag>
         {(task.tags ?? []).slice(0, 4).map((label) => (
-          <Tag key={label} bordered={false} className={styles.boardTag}>
-            {label}
-          </Tag>
+          <TaskTagChip key={label} label={label} colorOverrides={tagColorOverrides} />
         ))}
         {task.assigneeUserId && (
           <span>@{assigneeName ?? task.assigneeUserId}</span>

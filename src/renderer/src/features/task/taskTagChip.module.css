@@ -1,0 +1,7 @@
+.chip {
+  margin-inline-end: 0;
+  border: none;
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
