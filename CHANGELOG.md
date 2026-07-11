@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-BOARD-TAG-FILTER 收尾 (TASK-188)**：`verify:task-tags-filter`；docs/04·06·README 对齐标签筛选/本机色板；归档；handoff `/release` → **v1.5.0**。
 - **看板标签筛选与色板 (TASK-184–186)**：工具栏多选 OR 筛选；KanbanCard 着色芯片；本机色板（uiStore/localStorage）。
 - **任务详情标签色 (TASK-187)**：详情面板芯片与看板同色逻辑。
 - **标签筛选/色哈希 (TASK-183)**：`filterTasksByTags`（OR）· `collectUniqueTaskTags` · `tagColorHash` / `resolveTagColor` + 单测。
