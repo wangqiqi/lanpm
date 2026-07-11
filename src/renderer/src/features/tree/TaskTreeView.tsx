@@ -33,6 +33,13 @@ import {
   treeRowScheduleClass
 } from '@renderer/features/task/scheduleHealthUi'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
+import TaskAwarenessBadges from '@renderer/features/task/TaskAwarenessBadges'
+import { useIdentityStore } from '@renderer/stores/identityStore'
+import {
+  publishLocalAwareness,
+  useTaskAwarenessStore,
+  type AwarenessPeer
+} from '@renderer/stores/taskAwarenessStore'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -62,7 +69,8 @@ function buildTreeData(
   isTaskHighlighted: (taskId: string) => boolean,
   inlineEditTaskId: string | null,
   onStartInlineEdit: (taskId: string) => void,
-  onInlineProgressCommit: (taskId: string, value: number) => void
+  onInlineProgressCommit: (taskId: string, value: number) => void,
+  peersByTask: Map<string, AwarenessPeer[]>
 ): DataNode[] {
   const taskIds = new Set(tasks.map((t) => t.taskId))
   const byParent = new Map<string | undefined, Task[]>()
@@ -96,6 +104,7 @@ function buildTreeData(
             data-task-id={task.taskId}
           >
             <span className={styles.nodeTitle}>{task.title}</span>
+            <TaskAwarenessBadges peers={peersByTask.get(task.taskId) ?? []} compact />
             <div
               className={styles.nodeProgress}
               onDoubleClick={(e) => {
@@ -145,6 +154,18 @@ export default function TaskTreeView(): React.ReactElement {
   const updateTask = useTaskStore((s) => s.updateTask)
   const deleteTask = useTaskStore((s) => s.deleteTask)
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
+  const identityUser = useIdentityStore((s) => s.user)
+  const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[gid] ?? [])
+  const peersByTask = useMemo(() => {
+    const map = new Map<string, AwarenessPeer[]>()
+    for (const peer of awarenessPeers) {
+      if (!peer.focusedTaskId) continue
+      const list = map.get(peer.focusedTaskId) ?? []
+      list.push(peer)
+      map.set(peer.focusedTaskId, list)
+    }
+    return map
+  }, [awarenessPeers])
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
   const [newRootTitle, setNewRootTitle] = useState('')
@@ -196,9 +217,10 @@ export default function TaskTreeView(): React.ReactElement {
         isTaskHighlighted,
         inlineEditTaskId,
         (taskId) => setInlineEditTaskId(taskId),
-        (taskId, value) => void commitInlineProgress(taskId, value)
+        (taskId, value) => void commitInlineProgress(taskId, value),
+        peersByTask
       ),
-    [tasks, relationMap, isTaskHighlighted, inlineEditTaskId, commitInlineProgress]
+    [tasks, relationMap, isTaskHighlighted, inlineEditTaskId, commitInlineProgress, peersByTask]
   )
 
   useEffect(() => {
@@ -213,6 +235,19 @@ export default function TaskTreeView(): React.ReactElement {
     })
     return unsub
   }, [gid, loadTasks])
+
+  useEffect(() => {
+    if (!gid || !identityUser) return
+    void publishLocalAwareness(gid, {
+      userId: identityUser.userId,
+      displayName: identityUser.displayName,
+      focusedTaskId: selectedTaskId,
+      view: 'tree'
+    })
+    return () => {
+      void publishLocalAwareness(gid, null)
+    }
+  }, [gid, identityUser, selectedTaskId])
 
   useEffect(() => {
     if (!highlightId) return
