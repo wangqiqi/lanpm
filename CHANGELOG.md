@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **引入 Yjs 依赖 (TASK-156)**：安装 `yjs@^13`；`verify:rc-reality` 改为要求 `yjs`、仍禁止 WebRTC；`docs/01` §1.3.1 标明 Yjs 已引入、`task_crdt` 落地中（目标 v1.1.0）。
+
 ## [1.0.7] - 2026-07-11
 
 ### Added

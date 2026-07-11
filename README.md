@@ -203,7 +203,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs CRDT · WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（v1.1 落地中）· WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 
