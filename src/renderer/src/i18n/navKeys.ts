@@ -13,5 +13,6 @@ export const VIEW_MESSAGE_KEYS: Record<AppView, MessageKey> = {
   tree: 'nav.tree',
   gantt: 'nav.gantt',
   calendar: 'nav.calendar',
+  whiteboard: 'nav.whiteboard',
   files: 'nav.files'
 }

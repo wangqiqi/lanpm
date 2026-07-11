@@ -47,8 +47,9 @@ export interface ViewTabDef {
     | 'nav.tree'
     | 'nav.gantt'
     | 'nav.calendar'
+    | 'nav.whiteboard'
     | 'nav.files'
-  icon: 'chat' | 'board' | 'tree' | 'gantt' | 'calendar' | 'files'
+  icon: 'chat' | 'board' | 'tree' | 'gantt' | 'calendar' | 'whiteboard' | 'files'
 }
 
 export const VIEW_TABS: ViewTabDef[] = [
@@ -57,5 +58,6 @@ export const VIEW_TABS: ViewTabDef[] = [
   { view: 'tree', labelKey: 'nav.tree', icon: 'tree' },
   { view: 'gantt', labelKey: 'nav.gantt', icon: 'gantt' },
   { view: 'calendar', labelKey: 'nav.calendar', icon: 'calendar' },
+  { view: 'whiteboard', labelKey: 'nav.whiteboard', icon: 'whiteboard' },
   { view: 'files', labelKey: 'nav.files', icon: 'files' }
 ]

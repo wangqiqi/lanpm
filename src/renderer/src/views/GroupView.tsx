@@ -10,6 +10,7 @@ import FilesView from '@renderer/features/files/FilesView'
 import GanttView from '@renderer/features/gantt/GanttView'
 import CalendarView from '@renderer/features/calendar/CalendarView'
 import TaskTreeView from '@renderer/features/tree/TaskTreeView'
+import { ViewEmptyHint } from '@renderer/ui/ViewState'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -77,6 +78,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
         {view === 'tree' && <TaskTreeView />}
         {view === 'gantt' && <GanttView />}
         {view === 'calendar' && <CalendarView />}
+        {view === 'whiteboard' && <ViewEmptyHint>{t('whiteboard.placeholder')}</ViewEmptyHint>}
         {view === 'files' && <FilesView />}
       </div>
     </div>

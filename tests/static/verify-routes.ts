@@ -1,18 +1,20 @@
 /**
- * M1-01 / M1-03：六视图路由与群组 Tab 规则（无 UI）
+ * M1-01 / M1-03：七视图路由与群组 Tab 规则（无 UI）
  * 运行：npm run verify:routes
  */
 import { isViewAllowedForGroup } from '../../src/shared/navigation/tabRules.ts'
 import type { AppView } from '../../src/shared/navigation/types.ts'
 
-const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'files']
+const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files']
 
 const cases: [Parameters<typeof isViewAllowedForGroup>[0], AppView, boolean][] = [
   ['project', 'board', true],
   ['project', 'gantt', true],
   ['project', 'calendar', true],
+  ['project', 'whiteboard', true],
   ['function', 'board', false],
   ['function', 'calendar', false],
+  ['function', 'whiteboard', false],
   ['function', 'files', true],
   ['anonymous', 'chat', true],
   ['anonymous', 'files', false]

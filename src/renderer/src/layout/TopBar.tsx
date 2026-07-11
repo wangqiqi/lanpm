@@ -138,7 +138,7 @@ export default function TopBar(): React.ReactElement {
   const navigateToGroup = (groupId: string): void => {
     setActiveGroupId(groupId)
     const raw = VIEW_PATH_RE.exec(location.pathname)?.[1]
-    const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'files']
+    const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files']
     let view: AppView = views.includes(raw as AppView) ? (raw as AppView) : 'chat'
     const type = getGroupType(groupId)
     if (!isViewAllowedForGroup(type, view, groupId)) {

@@ -9,6 +9,7 @@ import {
   ApartmentOutlined,
   BarChartOutlined,
   CalendarOutlined,
+  HighlightOutlined,
   FolderOutlined
 } from '@ant-design/icons'
 import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
@@ -28,6 +29,7 @@ const VIEW_ICONS: Record<AppView, React.ReactNode> = {
   tree: <ApartmentOutlined />,
   gantt: <BarChartOutlined />,
   calendar: <CalendarOutlined />,
+  whiteboard: <HighlightOutlined />,
   files: <FolderOutlined />
 }
 
@@ -48,6 +50,7 @@ export default function BottomNav(): React.ReactElement {
       v === 'tree' ||
       v === 'gantt' ||
       v === 'calendar' ||
+      v === 'whiteboard' ||
       v === 'files'
     ) {
       return v

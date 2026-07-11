@@ -37,8 +37,8 @@ assert.equal(isViewAllowedForGroup('function', 'calendar'), false)
 
 const pathsSrc = readFileSync(join(projectRoot, 'src/renderer/src/routes/paths.ts'), 'utf8')
 const tabOrder = [...pathsSrc.matchAll(/view:\s*['"](\w+)['"]/g)].map((m) => m[1]!)
-const expected: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'files']
-assert.deepEqual(tabOrder, expected, 'VIEW_TABS must place calendar between gantt and files')
+const expected: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files']
+assert.deepEqual(tabOrder, expected, 'VIEW_TABS must place whiteboard between calendar and files')
 
 const routerSrc = readFileSync(join(projectRoot, 'src/renderer/src/app/AppRouter.tsx'), 'utf8')
 assert.match(routerSrc, /viewRoute\(\s*['"]calendar['"]\s*\)/)

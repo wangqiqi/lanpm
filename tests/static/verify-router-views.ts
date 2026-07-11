@@ -18,7 +18,7 @@ const routeViews = [...routerSrc.matchAll(/viewRoute\(\s*['"](\w+)['"]\s*\)/g)].
 const tabViews = [...pathsSrc.matchAll(/view:\s*['"](\w+)['"]/g)].map((m) => m[1]!)
 
 const views = new Set([...routeViews, ...tabViews]) as Set<AppView>
-const expected: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'files']
+const expected: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files']
 for (const v of expected) {
   assert.ok(views.has(v), `missing view in router/paths: ${v}`)
 }

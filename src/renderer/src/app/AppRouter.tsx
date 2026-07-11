@@ -36,6 +36,7 @@ export default function AppRouter(): React.ReactElement {
           <Route path="/g/:groupId/tree" element={viewRoute('tree')} />
           <Route path="/g/:groupId/gantt" element={viewRoute('gantt')} />
           <Route path="/g/:groupId/calendar" element={viewRoute('calendar')} />
+          <Route path="/g/:groupId/whiteboard" element={viewRoute('whiteboard')} />
           <Route path="/g/:groupId/files" element={viewRoute('files')} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
