@@ -169,6 +169,44 @@ export function removeTaskChecklistItem(
   return ok
 }
 
+/** P1-3: create child task from an incomplete checklist item. */
+export function createSubtaskFromChecklistItem(
+  db: Database,
+  groupId: string,
+  itemId: string
+): { task: Task; item: ChecklistItem } {
+  assertTaskWritable(db, groupId)
+  const existing = getChecklistItemById(db, itemId)
+  if (!existing) throwLanpm('stub.taskNotFound')
+  const parent = getTaskById(db, existing.taskId)
+  if (!parent || parent.groupId !== groupId) throwLanpm('stub.taskNotFound')
+  if (existing.done) throwLanpm('stub.taskNotFound')
+  if (existing.linkedSubtaskId) {
+    const linked = getTaskById(db, existing.linkedSubtaskId)
+    if (linked && !linked.deletedAt) {
+      return { task: linked, item: existing }
+    }
+  }
+  const child = createGroupTask(db, {
+    groupId,
+    title: existing.text,
+    parentTaskId: parent.taskId,
+    status: 'todo',
+    priority: parent.priority
+  })
+  const item = upsertChecklistItemRow(db, {
+    groupId,
+    taskId: parent.taskId,
+    itemId: existing.itemId,
+    text: existing.text,
+    done: existing.done,
+    sortOrder: existing.sortOrder,
+    linkedSubtaskId: child.taskId
+  })
+  broadcastTasksChanged(groupId)
+  return { task: child, item }
+}
+
 export function createGroupTask(db: Database, input: CreateTaskInput): Task {
   assertTaskWritable(db, input.groupId)
   const status = getSetupStatus(db)

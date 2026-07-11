@@ -100,6 +100,13 @@ export interface LanpmApi {
       done?: boolean
     ) => Promise<import('./task/checklist').ChecklistItem>
     removeChecklistItem: (groupId: string, itemId: string) => Promise<boolean>
+    createSubtaskFromChecklistItem: (
+      groupId: string,
+      itemId: string
+    ) => Promise<{
+      task: Task
+      item: import('./task/checklist').ChecklistItem
+    }>
     updateSchedule: (input: GanttScheduleInput) => Promise<Task>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>

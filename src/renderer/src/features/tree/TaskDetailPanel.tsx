@@ -305,6 +305,20 @@ export default function TaskDetailPanel({
     }
   }
 
+  const handleCreateSubtaskFromItem = async (item: ChecklistItem): Promise<void> => {
+    if (item.done || checklistBusy) return
+    setChecklistBusy(true)
+    try {
+      await getLanpmApi().task.createSubtaskFromChecklistItem(groupId, item.itemId)
+      await reloadChecklist()
+      message.success(t('tree.detailChecklistLinked'))
+    } catch (err) {
+      message.error(formatError(err, 'stub.taskNotFound'))
+    } finally {
+      setChecklistBusy(false)
+    }
+  }
+
   useEffect(() => {
     setTitle(task.title)
     setDescription(task.description ?? '')
@@ -669,6 +683,21 @@ export default function TaskDetailPanel({
                 >
                   {item.text}
                 </span>
+                {!item.done && !item.linkedSubtaskId ? (
+                  <Button
+                    type="link"
+                    size="small"
+                    disabled={checklistBusy}
+                    onClick={() => void handleCreateSubtaskFromItem(item)}
+                  >
+                    {t('tree.detailChecklistCreateSubtask')}
+                  </Button>
+                ) : null}
+                {item.linkedSubtaskId ? (
+                  <Text type="secondary" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>
+                    {t('tree.detailChecklistLinked')}
+                  </Text>
+                ) : null}
                 <Button
                   type="link"
                   size="small"

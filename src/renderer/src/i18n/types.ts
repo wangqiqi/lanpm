@@ -272,6 +272,8 @@ export type MessageKey =
   | 'tree.detailChecklistAdd'
   | 'tree.detailChecklistPlaceholder'
   | 'tree.detailChecklistRemove'
+  | 'tree.detailChecklistCreateSubtask'
+  | 'tree.detailChecklistLinked'
   | 'tree.detailAttachments'
   | 'tree.detailAttachmentsEmpty'
   | 'tree.detailAttachmentFile'

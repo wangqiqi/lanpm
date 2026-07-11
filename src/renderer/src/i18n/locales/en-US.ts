@@ -276,6 +276,8 @@ const enUS = {
   'tree.detailChecklistAdd': 'Add',
   'tree.detailChecklistPlaceholder': 'Add a checklist item…',
   'tree.detailChecklistRemove': 'Remove',
+  'tree.detailChecklistCreateSubtask': 'Create subtask',
+  'tree.detailChecklistLinked': 'Linked subtask',
   'tree.detailAttachments': 'Attachments',
   'tree.detailAttachmentsEmpty': 'No linked files',
   'tree.detailAttachmentFile': 'Group file',

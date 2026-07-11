@@ -76,6 +76,8 @@ const api: LanpmApi = {
       ipcRenderer.invoke('task:toggleChecklistItem', groupId, itemId, done),
     removeChecklistItem: (groupId, itemId) =>
       ipcRenderer.invoke('task:removeChecklistItem', groupId, itemId),
+    createSubtaskFromChecklistItem: (groupId, itemId) =>
+      ipcRenderer.invoke('task:createSubtaskFromChecklistItem', groupId, itemId),
     updateSchedule: (input) => ipcRenderer.invoke('task:updateSchedule', input),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>

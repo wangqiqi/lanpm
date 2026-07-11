@@ -274,6 +274,8 @@ const zhCN = {
   'tree.detailChecklistAdd': '添加',
   'tree.detailChecklistPlaceholder': '输入检查项…',
   'tree.detailChecklistRemove': '删除',
+  'tree.detailChecklistCreateSubtask': '建子任务',
+  'tree.detailChecklistLinked': '已关联子任务',
   'tree.detailAttachments': '附件',
   'tree.detailAttachmentsEmpty': '暂无挂接文件',
   'tree.detailAttachmentFile': '群文件',

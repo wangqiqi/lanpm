@@ -8,6 +8,7 @@ import type { UpsertChecklistItemInput } from '../../shared/task/checklist'
 import { TASK_AWARENESS_PUSH_CHANNEL, TASK_IPC } from '../../shared/task/channels'
 import {
   createGroupTask,
+  createSubtaskFromChecklistItem,
   createTaskFromChat,
   referenceTaskFromChat,
   deleteGroupTask,
@@ -134,6 +135,15 @@ export function registerTaskIpc(): void {
       if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
       if (typeof itemId !== 'string' || !itemId) throw new Error('itemId required')
       return removeTaskChecklistItem(getDatabase(), groupId, itemId)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.createSubtaskFromChecklistItem,
+    (_event, groupId: string, itemId: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof itemId !== 'string' || !itemId) throw new Error('itemId required')
+      return createSubtaskFromChecklistItem(getDatabase(), groupId, itemId)
     }
   )
 

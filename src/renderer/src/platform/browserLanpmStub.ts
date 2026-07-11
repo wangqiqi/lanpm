@@ -915,6 +915,43 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         return false
       },
+      createSubtaskFromChecklistItem: async (groupId, itemId) => {
+        assertStubTaskWritable(groupId)
+        const all = readAllChecklists()
+        for (const [taskId, items] of Object.entries(all)) {
+          const idx = items.findIndex((i) => i.itemId === itemId)
+          if (idx < 0) continue
+          const parent = (readAllTasks()[groupId] ?? []).find(
+            (t) => t.taskId === taskId && !t.deletedAt
+          )
+          if (!parent) throw stubError('stub.taskNotFound')
+          const prev = items[idx]!
+          if (prev.done) throw stubError('stub.taskNotFound')
+          if (prev.linkedSubtaskId) {
+            const linked = (readAllTasks()[groupId] ?? []).find(
+              (t) => t.taskId === prev.linkedSubtaskId && !t.deletedAt
+            )
+            if (linked) return { task: linked, item: prev }
+          }
+          const child = stubCreateTask({
+            groupId,
+            title: prev.text,
+            parentTaskId: parent.taskId,
+            status: 'todo',
+            priority: parent.priority
+          })
+          const next: ChecklistItem = {
+            ...prev,
+            linkedSubtaskId: child.taskId,
+            updatedAt: new Date().toISOString()
+          }
+          const copy = [...items]
+          copy[idx] = next
+          writeTaskChecklist(taskId, copy)
+          return { task: child, item: next }
+        }
+        throw stubError('stub.taskNotFound')
+      },
       updateSchedule: async (input) =>
         stubUpdateTask({
           taskId: input.taskId,

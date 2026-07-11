@@ -48,6 +48,9 @@ describe('IPC channel contracts', () => {
     expect(TASK_IPC.upsertChecklistItem).toBe('task:upsertChecklistItem')
     expect(TASK_IPC.toggleChecklistItem).toBe('task:toggleChecklistItem')
     expect(TASK_IPC.removeChecklistItem).toBe('task:removeChecklistItem')
+    expect(TASK_IPC.createSubtaskFromChecklistItem).toBe(
+      'task:createSubtaskFromChecklistItem'
+    )
   })
 
   it('group, network, search, discover, badge, cockpit', () => {
