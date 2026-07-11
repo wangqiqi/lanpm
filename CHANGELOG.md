@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-07-11
+
 ### Added
 - **SPRINT-NAV-BADGE-UX 收尾 (TASK-205)**：`verify:badge-semantics`；docs/03·04·06·README 对齐角标语义；归档；handoff `/release` → **v1.8.0**。
 - **顶栏网络点切换微动效 (TASK-204)**：`linkState` 变化时一次缩放反馈；尊重 `prefers-reduced-motion`。
@@ -13,6 +15,9 @@
 
 ### Changed
 - **看板 Tab 角标**：由「群内全部 `todo`」改为「指派给本地用户且未完成（todo/doing）」；字段 `boardTodo` → `boardMineOpen`。
+
+### Release
+- `v1.8.0` — 导航角标与我相关：`boardMineOpen`、聊天未读、网络点切换微动效（TASK-201–205）
 
 ## [1.7.0] - 2026-07-11
 
