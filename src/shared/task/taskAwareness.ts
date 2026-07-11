@@ -4,7 +4,7 @@
  * 二进制帧由 `y-protocols/awareness` encode/apply。
  */
 
-import { taskCrdtDocId, taskCrdtDocIdMatchesGroup } from './taskCrdt'
+import { taskCrdtDocId, taskCrdtDocIdMatchesGroup } from './taskCrdt.ts'
 
 export type TaskAwarenessView = 'board' | 'tree' | null
 
