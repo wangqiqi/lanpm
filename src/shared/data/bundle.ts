@@ -13,7 +13,7 @@ export interface GroupBundleImportOptions {
   conflictMode: BundleConflictMode
 }
 
-/** Per-entity totals / conflict hits (TASK-310/311). */
+/** Per-entity totals / conflict hits (TASK-310–312). */
 export interface GroupBundleEntityCounts {
   messages: number
   tasks: number
@@ -21,6 +21,9 @@ export interface GroupBundleEntityCounts {
   tags: number
   members: number
   checklists: number
+  taskCrdt: number
+  whiteboardCrdt: number
+  whiteboardScene: number
 }
 
 /** Dry-run preview before import (TASK-310). */
@@ -39,6 +42,9 @@ export interface GroupBundleImportResult {
   tagsImported: number
   membersImported: number
   checklistsImported: number
+  taskCrdtImported: number
+  whiteboardCrdtImported: number
+  whiteboardSceneImported: number
   skipped: number
   overwritten: number
 }
@@ -47,4 +53,11 @@ export interface GroupBundleImportResult {
 export interface BundleChecklistPayload {
   checklist: import('../task/checklist').TaskChecklist
   items: import('../task/checklist').ChecklistItem[]
+}
+
+/** Base64 CRDT snapshot in JSON bundle (TASK-312). */
+export interface BundleCrdtSnapshot {
+  docId: string
+  updateBlobB64: string
+  updatedAt: string
 }

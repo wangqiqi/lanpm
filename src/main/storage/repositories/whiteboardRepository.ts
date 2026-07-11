@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3'
-import type { WhiteboardScene } from '../../../shared/whiteboard/types'
-import { buildWhiteboardScene } from '../../../shared/whiteboard/types'
+import type { WhiteboardScene } from '../../../shared/whiteboard/types.ts'
+import { buildWhiteboardScene } from '../../../shared/whiteboard/types.ts'
 
 type Row = {
   group_id: string

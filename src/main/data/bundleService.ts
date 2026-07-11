@@ -5,12 +5,14 @@ import type { Database } from 'better-sqlite3'
 import type {
   BundleChecklistPayload,
   BundleConflictMode,
+  BundleCrdtSnapshot,
   GroupBundleEntityCounts,
   GroupBundleImportResult,
   GroupBundlePreviewResult
 } from '../../shared/data/bundle.ts'
 import type { GroupMemberRecord } from '../../shared/group/types.ts'
 import type { GroupTagMeta } from '../../shared/task/groupTagMeta.ts'
+import type { WhiteboardScene } from '../../shared/whiteboard/types.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { sealBytes, openBytes } from '../crypto/envelopeCrypto.ts'
 import {
@@ -30,6 +32,18 @@ import {
   upsertGroupTagMeta
 } from '../storage/repositories/groupTagMetaRepository.ts'
 import { listChecklistsByGroup } from '../storage/repositories/checklistRepository.ts'
+import {
+  getTaskCrdtBlob,
+  upsertTaskCrdtBlob
+} from '../storage/repositories/taskCrdtRepository.ts'
+import {
+  getWhiteboardCrdtBlob,
+  upsertWhiteboardCrdtBlob
+} from '../storage/repositories/whiteboardCrdtRepository.ts'
+import {
+  getWhiteboardScene,
+  upsertWhiteboardScene
+} from '../storage/repositories/whiteboardRepository.ts'
 import type { ChatMessage } from '../../shared/chat/types.ts'
 import type { Task } from '../../shared/task/types.ts'
 import type { FileMeta } from '../../shared/file/types.ts'
@@ -46,6 +60,9 @@ interface BundlePlain {
   tags?: GroupTagMeta[]
   members?: GroupMemberRecord[]
   checklists?: BundleChecklistPayload[]
+  taskCrdt?: BundleCrdtSnapshot | null
+  whiteboardCrdt?: BundleCrdtSnapshot | null
+  whiteboardScene?: WhiteboardScene | null
   fileBodies?: Record<string, string>
 }
 
@@ -64,7 +81,28 @@ function deriveKey(password: string, salt: Buffer): Buffer {
 }
 
 function emptyCounts(): GroupBundleEntityCounts {
-  return { messages: 0, tasks: 0, files: 0, tags: 0, members: 0, checklists: 0 }
+  return {
+    messages: 0,
+    tasks: 0,
+    files: 0,
+    tags: 0,
+    members: 0,
+    checklists: 0,
+    taskCrdt: 0,
+    whiteboardCrdt: 0,
+    whiteboardScene: 0
+  }
+}
+
+function toCrdtSnapshot(
+  row: { docId: string; updateBlob: Buffer; updatedAt: string } | null
+): BundleCrdtSnapshot | null {
+  if (!row) return null
+  return {
+    docId: row.docId,
+    updateBlobB64: row.updateBlob.toString('base64'),
+    updatedAt: row.updatedAt
+  }
 }
 
 function decryptBundle(inputPath: string, password: string): BundlePlain {
@@ -132,7 +170,10 @@ export function exportGroupBundle(
     files: listFilesByGroup(db, groupId),
     tags: listGroupTagMeta(db, groupId),
     members: listGroupMembers(db, groupId),
-    checklists: listChecklistsByGroup(db, groupId)
+    checklists: listChecklistsByGroup(db, groupId),
+    taskCrdt: toCrdtSnapshot(getTaskCrdtBlob(db, groupId)),
+    whiteboardCrdt: toCrdtSnapshot(getWhiteboardCrdtBlob(db, groupId)),
+    whiteboardScene: getWhiteboardScene(db, groupId)
   }
   if (includeFileBodies) {
     plain.fileBodies = {}
@@ -193,6 +234,13 @@ export function previewGroupBundle(
     const taskId = entry.checklist.taskId
     if (checklistExistsByTask(db, taskId)) conflicts.checklists += 1
   }
+  if (plain.taskCrdt && getTaskCrdtBlob(db, plain.groupId)) conflicts.taskCrdt = 1
+  if (plain.whiteboardCrdt && getWhiteboardCrdtBlob(db, plain.groupId)) {
+    conflicts.whiteboardCrdt = 1
+  }
+  if (plain.whiteboardScene && getWhiteboardScene(db, plain.groupId)) {
+    conflicts.whiteboardScene = 1
+  }
   return {
     groupId: plain.groupId,
     exportedAt: plain.exportedAt,
@@ -202,7 +250,10 @@ export function previewGroupBundle(
       files: plain.files.length,
       tags: tags.length,
       members: members.length,
-      checklists: checklists.length
+      checklists: checklists.length,
+      taskCrdt: plain.taskCrdt ? 1 : 0,
+      whiteboardCrdt: plain.whiteboardCrdt ? 1 : 0,
+      whiteboardScene: plain.whiteboardScene ? 1 : 0
     },
     conflicts
   }
@@ -225,6 +276,9 @@ export function importGroupBundle(
     tagsImported: 0,
     membersImported: 0,
     checklistsImported: 0,
+    taskCrdtImported: 0,
+    whiteboardCrdtImported: 0,
+    whiteboardSceneImported: 0,
     skipped: 0,
     overwritten: 0
   }
@@ -389,6 +443,87 @@ export function importGroupBundle(
       )
     }
     result.checklistsImported += 1
+  }
+
+  // Per-group singleton snapshots — new_id falls back to skip.
+  if (plain.taskCrdt) {
+    const exists = !!getTaskCrdtBlob(db, groupId)
+    if (exists) {
+      if (conflictMode === 'skip' || conflictMode === 'new_id') {
+        result.skipped += 1
+      } else {
+        upsertTaskCrdtBlob(
+          db,
+          groupId,
+          Buffer.from(plain.taskCrdt.updateBlobB64, 'base64'),
+          plain.taskCrdt.updatedAt
+        )
+        result.overwritten += 1
+        result.taskCrdtImported += 1
+      }
+    } else {
+      upsertTaskCrdtBlob(
+        db,
+        groupId,
+        Buffer.from(plain.taskCrdt.updateBlobB64, 'base64'),
+        plain.taskCrdt.updatedAt
+      )
+      result.taskCrdtImported += 1
+    }
+  }
+
+  if (plain.whiteboardCrdt) {
+    const exists = !!getWhiteboardCrdtBlob(db, groupId)
+    if (exists) {
+      if (conflictMode === 'skip' || conflictMode === 'new_id') {
+        result.skipped += 1
+      } else {
+        upsertWhiteboardCrdtBlob(
+          db,
+          groupId,
+          Buffer.from(plain.whiteboardCrdt.updateBlobB64, 'base64'),
+          plain.whiteboardCrdt.updatedAt
+        )
+        result.overwritten += 1
+        result.whiteboardCrdtImported += 1
+      }
+    } else {
+      upsertWhiteboardCrdtBlob(
+        db,
+        groupId,
+        Buffer.from(plain.whiteboardCrdt.updateBlobB64, 'base64'),
+        plain.whiteboardCrdt.updatedAt
+      )
+      result.whiteboardCrdtImported += 1
+    }
+  }
+
+  if (plain.whiteboardScene) {
+    const exists = !!getWhiteboardScene(db, groupId)
+    if (exists) {
+      if (conflictMode === 'skip' || conflictMode === 'new_id') {
+        result.skipped += 1
+      } else {
+        upsertWhiteboardScene(
+          db,
+          groupId,
+          plain.whiteboardScene.sceneJson,
+          plain.whiteboardScene.linkedTaskId ?? null,
+          plain.whiteboardScene.updatedAt
+        )
+        result.overwritten += 1
+        result.whiteboardSceneImported += 1
+      }
+    } else {
+      upsertWhiteboardScene(
+        db,
+        groupId,
+        plain.whiteboardScene.sceneJson,
+        plain.whiteboardScene.linkedTaskId ?? null,
+        plain.whiteboardScene.updatedAt
+      )
+      result.whiteboardSceneImported += 1
+    }
   }
 
   return result

@@ -32,6 +32,19 @@ import {
   upsertGroupTagMeta
 } from '../../src/main/storage/repositories/groupTagMetaRepository.ts'
 import { listChecklistsByGroup } from '../../src/main/storage/repositories/checklistRepository.ts'
+import {
+  getTaskCrdtBlob,
+  upsertTaskCrdtBlob
+} from '../../src/main/storage/repositories/taskCrdtRepository.ts'
+import {
+  getWhiteboardCrdtBlob,
+  upsertWhiteboardCrdtBlob
+} from '../../src/main/storage/repositories/whiteboardCrdtRepository.ts'
+import {
+  getWhiteboardScene,
+  upsertWhiteboardScene
+} from '../../src/main/storage/repositories/whiteboardRepository.ts'
+import { emptyWhiteboardSceneJson } from '../../src/shared/whiteboard/types.ts'
 import type { ChatMessage } from '../../src/shared/chat/types.ts'
 import type { FileMeta } from '../../src/shared/file/types.ts'
 import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
@@ -48,10 +61,14 @@ assert.match(bundleSrc, /export function previewGroupBundle/)
 assert.match(bundleSrc, /listGroupTagMeta/)
 assert.match(bundleSrc, /listGroupMembers/)
 assert.match(bundleSrc, /listChecklistsByGroup/)
+assert.match(bundleSrc, /getTaskCrdtBlob/)
+assert.match(bundleSrc, /getWhiteboardCrdtBlob/)
+assert.match(bundleSrc, /getWhiteboardScene/)
 
 const sharedSrc = readFileSync(join(projectRoot, 'src/shared/data/bundle.ts'), 'utf8')
 assert.match(sharedSrc, /tagsImported/)
-assert.match(sharedSrc, /checklists/)
+assert.match(sharedSrc, /taskCrdt/)
+assert.match(sharedSrc, /BundleCrdtSnapshot/)
 
 function openDb(dir: string): Database.Database {
   const db = new Database(join(dir, 'lanpm.db'))
@@ -145,6 +162,10 @@ function seedEntities(db: Database.Database, title: string, text: string, tagCol
     updatedAt: now
   }
   insertFile(db, file)
+
+  upsertTaskCrdtBlob(db, GROUP, Buffer.from(`task-crdt-${tagColor}`), now)
+  upsertWhiteboardCrdtBlob(db, GROUP, Buffer.from(`wb-crdt-${tagColor}`), now)
+  upsertWhiteboardScene(db, GROUP, emptyWhiteboardSceneJson(), null, now)
 }
 
 const dirA = mkLanpmTemp('lanpm-bundle-a-')
@@ -166,27 +187,40 @@ try {
   assert.equal(preview.totals.tags, 1)
   assert.equal(preview.totals.members, 1)
   assert.equal(preview.totals.checklists, 1)
+  assert.equal(preview.totals.taskCrdt, 1)
+  assert.equal(preview.totals.whiteboardCrdt, 1)
+  assert.equal(preview.totals.whiteboardScene, 1)
   assert.equal(preview.conflicts.tasks, 1)
   assert.equal(preview.conflicts.tags, 1)
   assert.equal(preview.conflicts.members, 1)
   assert.equal(preview.conflicts.checklists, 1)
+  assert.equal(preview.conflicts.taskCrdt, 1)
+  assert.equal(preview.conflicts.whiteboardCrdt, 1)
+  assert.equal(preview.conflicts.whiteboardScene, 1)
 
   const skipped = importGroupBundle(dbB, bundlePath, PASS, 'skip')
-  assert.ok(skipped.skipped >= 6)
+  assert.ok(skipped.skipped >= 9)
   assert.equal(skipped.tasksImported, 0)
   assert.equal(getTaskById(dbB, 'task_bundle_1')?.title, 'Local title')
   assert.equal(listGroupTagMeta(dbB, GROUP)[0]?.color, '#AABBCC')
+  assert.equal(getTaskCrdtBlob(dbB, GROUP)?.updateBlob.toString(), 'task-crdt-#AABBCC')
 
   const overwritten = importGroupBundle(dbB, bundlePath, PASS, 'overwrite')
   // checklist may be deleted with task overwrite then re-inserted (no overwritten++)
-  assert.ok(overwritten.overwritten >= 5, `overwritten=${overwritten.overwritten}`)
+  assert.ok(overwritten.overwritten >= 8, `overwritten=${overwritten.overwritten}`)
   assert.equal(overwritten.tasksImported, 1)
   assert.equal(overwritten.tagsImported, 1)
   assert.equal(overwritten.membersImported, 1)
   assert.equal(overwritten.checklistsImported, 1)
+  assert.equal(overwritten.taskCrdtImported, 1)
+  assert.equal(overwritten.whiteboardCrdtImported, 1)
+  assert.equal(overwritten.whiteboardSceneImported, 1)
   assert.equal(getTaskById(dbB, 'task_bundle_1')?.title, 'Original title')
   assert.equal(listGroupTagMeta(dbB, GROUP)[0]?.color, '#112233')
   assert.equal(listGroupMembers(dbB, GROUP)[0]?.displayAlias, 'OwnerA')
+  assert.equal(getTaskCrdtBlob(dbB, GROUP)?.updateBlob.toString(), 'task-crdt-#112233')
+  assert.equal(getWhiteboardCrdtBlob(dbB, GROUP)?.updateBlob.toString(), 'wb-crdt-#112233')
+  assert.ok(getWhiteboardScene(dbB, GROUP))
   const cls = listChecklistsByGroup(dbB, GROUP)
   assert.equal(cls.length, 1)
   assert.equal(cls[0]?.items[0]?.text, 'hello')
@@ -205,6 +239,9 @@ try {
     assert.equal(fresh.tagsImported, 1)
     assert.equal(fresh.membersImported, 1)
     assert.equal(fresh.checklistsImported, 1)
+    assert.equal(fresh.taskCrdtImported, 1)
+    assert.equal(fresh.whiteboardCrdtImported, 1)
+    assert.equal(fresh.whiteboardSceneImported, 1)
     assert.equal(fresh.overwritten, 0)
     dbC.close()
   } finally {
@@ -213,7 +250,7 @@ try {
 
   dbA.close()
   dbB.close()
-  console.log('OK: verify:bundle — overwrite + dry-run + tags/members/checklists')
+  console.log('OK: verify:bundle — overwrite + dry-run + multi-entity + CRDT snapshots')
 } finally {
   rmLanpmTemp(dirA)
   rmLanpmTemp(dirB)
