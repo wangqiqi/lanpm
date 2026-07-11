@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-TASK-CRDT 收尾 (TASK-163)**：docs/06 §2.3·§6 与 docs/00 / README 对齐 Yjs `task_crdt` 已交付；归档 `20260711_112900_task_crdt_sprint_summary.md`；handoff `/release` → **v1.1.0**。
 - **任务详情双写闭环 (TASK-162)**：详情/看板编辑仍走 `updateTask`（SQLite→Y.Doc）；入站 `task_crdt` / 离线 batch 经 `mirrorCrdtDocIntoSqlite` 回写标题描述等字段，UI 可刷新。
 - **task_crdt 离线补拉 (TASK-161)**：`task_crdt_sync_request` / `_batch`（state vector）；`taskCrdtOfflineSyncService`；`verify:task-crdt`。
 - **task_crdt 双写共存 (TASK-160)**：`taskService` 写后 `mirrorTaskToCrdt`；入站 `task_patch` `mirrorTaskPatchIntoCrdt`（不回环 publish）；约定 SQLite 先、Y.Doc 后。

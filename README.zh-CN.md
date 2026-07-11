@@ -203,7 +203,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | 甘特 | **gantt-task-react** |
 | 持久化（RC） | **SQLite**（唯一持久化层） |
 | 网络（RC） | UDP 发现 + TCP/P2P 联调路径；应用层加密 |
-| 规划 | Yjs `task_crdt`（v1.1 落地中）· WebRTC · IndexedDB 热缓存（post-RC） |
+| 规划 | Yjs `task_crdt`（v1.1.0 待打版）· WebRTC · IndexedDB 热缓存（post-RC） |
 
 ---
 
