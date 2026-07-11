@@ -43,6 +43,12 @@ import {
   type BoardTaskRelation
 } from '@shared/task/boardRelations'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
+import { useIdentityStore } from '@renderer/stores/identityStore'
+import {
+  publishLocalAwareness,
+  useTaskAwarenessStore,
+  type AwarenessPeer
+} from '@renderer/stores/taskAwarenessStore'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -108,7 +114,8 @@ function KanbanColumn({
   relationFocusId,
   onHighlightRelations,
   onPinRelations,
-  onLocateTask
+  onLocateTask,
+  peersByTask
 }: {
   groupId: string
   status: TaskStatus
@@ -128,6 +135,7 @@ function KanbanColumn({
   onHighlightRelations: (taskId: string | null) => void
   onPinRelations: (taskId: string | null) => void
   onLocateTask: (taskId: string, view: 'board' | 'tree' | 'gantt') => void
+  peersByTask: Map<string, AwarenessPeer[]>
 }): React.ReactElement {
   const { t } = useI18n()
   const { setNodeRef } = useDroppable({ id: status })
@@ -177,6 +185,7 @@ function KanbanColumn({
             onPinRelations={onPinRelations}
             onLocateTask={onLocateTask}
             highlighted={isTaskHighlighted(task.taskId)}
+            focusPeers={peersByTask.get(task.taskId) ?? []}
           />
         ))}
       </div>
@@ -214,6 +223,18 @@ export default function BoardView(): React.ReactElement {
   const boardBodyRef = useRef<HTMLDivElement>(null)
   const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
   const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
+  const identityUser = useIdentityStore((s) => s.user)
+  const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[gid] ?? [])
+  const peersByTask = useMemo(() => {
+    const map = new Map<string, AwarenessPeer[]>()
+    for (const peer of awarenessPeers) {
+      if (!peer.focusedTaskId) continue
+      const list = map.get(peer.focusedTaskId) ?? []
+      list.push(peer)
+      map.set(peer.focusedTaskId, list)
+    }
+    return map
+  }, [awarenessPeers])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -261,6 +282,19 @@ export default function BoardView(): React.ReactElement {
     })
     return unsub
   }, [gid, loadTasks, loadMembers])
+
+  useEffect(() => {
+    if (!gid || !identityUser) return
+    void publishLocalAwareness(gid, {
+      userId: identityUser.userId,
+      displayName: identityUser.displayName,
+      focusedTaskId: editTask?.taskId ?? null,
+      view: 'board'
+    })
+    return () => {
+      void publishLocalAwareness(gid, null)
+    }
+  }, [gid, identityUser, editTask?.taskId])
 
   const handleDiscuss = useCallback(
     (task: Task) => {
@@ -568,6 +602,7 @@ export default function BoardView(): React.ReactElement {
                 onHighlightRelations={handleHighlightRelations}
                 onPinRelations={handlePinRelations}
                 onLocateTask={locateTask}
+                peersByTask={peersByTask}
               />
             ))}
             </div>

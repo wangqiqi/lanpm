@@ -175,6 +175,7 @@ export type MessageKey =
   | 'board.tags'
   | 'board.tagsPlaceholder'
   | 'board.tagsHint'
+  | 'task.awarenessFocusing'
   | 'board.discussInChat'
   | 'board.discussDraft'
   | 'board.dueDate'

@@ -7,6 +7,8 @@ import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import type { BoardTaskRelation } from '@shared/task/boardRelations'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
+import TaskAwarenessBadges from '@renderer/features/task/TaskAwarenessBadges'
+import type { AwarenessPeer } from '@renderer/stores/taskAwarenessStore'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import {
   evaluateTaskSchedule,
@@ -46,6 +48,7 @@ interface KanbanCardProps {
   onPinRelations?: (taskId: string | null) => void
   onLocateTask?: (taskId: string, view: TaskLocateView) => void
   highlighted?: boolean
+  focusPeers?: AwarenessPeer[]
 }
 
 export default function KanbanCard({
@@ -61,7 +64,8 @@ export default function KanbanCard({
   onHighlightRelations,
   onPinRelations,
   onLocateTask,
-  highlighted = false
+  highlighted = false,
+  focusPeers = []
 }: KanbanCardProps): React.ReactElement {
   const { t } = useI18n()
   const { attributes, listeners, setNodeRef: setDragRef, transform, isDragging } = useDraggable({
@@ -310,6 +314,7 @@ export default function KanbanCard({
       {task.status === 'other' && task.otherReason && (
         <div className={styles.otherReason}>{task.otherReason}</div>
       )}
+      <TaskAwarenessBadges peers={focusPeers} />
     </div>
   )
 }

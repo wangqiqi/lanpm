@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **看板焦点 Presence UI (TASK-180)**：KanbanCard 显示远端查看者；编辑任务时广播本地焦点；i18n。
 - **task_awareness 桥接 (TASK-179)**：IPC `setAwareness`/`listAwareness`；push `task:awareness`；渲染进程 store；离开可清焦点。
 - **task_awareness 主进程 (TASK-178)**：群 Y.Doc 挂 Awareness；publish/apply `task_awareness`；`setLocalTaskAwareness`；≥200ms 节流；匿名群不广播。
 - **task_awareness 协议 (TASK-177)**：依赖 `y-protocols`；`TaskAwarenessPayload` / 本地焦点态校验；`SyncMessageType.task_awareness`；docs/03 §6.2·§10；`verify:sync-handlers` 登记。

@@ -178,6 +178,7 @@ const enUS = {
   'board.tags': 'Tags',
   'board.tagsPlaceholder': 'Type and press Enter',
   'board.tagsHint': 'Up to 8 tags, 32 characters each (separate from priority)',
+  'task.awarenessFocusing': '{names} viewing',
   'board.discussInChat': 'Discuss in chat',
   'board.discussDraft': 'Re: task "{title}"',
   'board.dueDate': 'Due {date}',
