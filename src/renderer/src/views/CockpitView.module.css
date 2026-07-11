@@ -90,7 +90,7 @@
   overflow: auto;
   margin: 0;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-sm);
   background: var(--lanpm-code-bg);
 }
 

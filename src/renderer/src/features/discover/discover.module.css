@@ -16,7 +16,7 @@
 }
 
 .row {
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-sm);
   padding-inline: 8px !important;
   transition: background-color 0.15s ease;
 }
@@ -26,7 +26,7 @@
 }
 
 .rowClickable:hover {
-  background: var(--lanpm-accent-fill);
+  background: var(--lanpm-selected-bg);
 }
 
 .rowTitle {
