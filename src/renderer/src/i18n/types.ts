@@ -285,6 +285,7 @@ export type MessageKey =
   | 'whiteboard.toolbarHint'
   | 'whiteboard.linkedHint'
   | 'whiteboard.saveFailed'
+  | 'whiteboard.openFromTask'
   | 'gantt.scheduleFailed'
   | 'gantt.selectBothTasks'
   | 'gantt.dependencySaved'

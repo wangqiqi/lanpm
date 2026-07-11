@@ -287,6 +287,7 @@ const zhCN = {
   'whiteboard.toolbarHint': '自动保存 · 一群一板 · 可从任务关联',
   'whiteboard.linkedHint': '已关联任务 {taskId}… · 自动保存',
   'whiteboard.saveFailed': '保存白板失败',
+  'whiteboard.openFromTask': '打开白板',
   'gantt.scheduleFailed': '更新排期失败',
   'gantt.selectBothTasks': '请选择前置与后续任务',
   'gantt.dependencySaved': '依赖已保存',

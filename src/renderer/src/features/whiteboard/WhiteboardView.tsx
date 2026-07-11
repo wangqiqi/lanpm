@@ -5,7 +5,7 @@ import { Excalidraw } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types'
 import '@excalidraw/excalidraw/index.css'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -67,7 +67,9 @@ export default function WhiteboardView(): React.ReactElement {
   const { locale, t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const gid = groupId ?? ''
+  const linkTaskFromUrl = searchParams.get('linkTask')?.trim() || undefined
   const theme = useUiStore((s) => s.theme)
 
   const [loading, setLoading] = useState(true)
@@ -92,10 +94,20 @@ export default function WhiteboardView(): React.ReactElement {
     setLoading(true)
     try {
       const scene = await getLanpmApi().whiteboard.getScene(gid)
-      setLinkedTaskId(scene?.linkedTaskId)
+      const nextLinked = linkTaskFromUrl ?? scene?.linkedTaskId
+      setLinkedTaskId(nextLinked)
       setInitialData(parseScenePayload(scene?.sceneJson ?? emptyWhiteboardSceneJson()))
       setBoardKey((k) => k + 1)
       setDirty(false)
+      if (linkTaskFromUrl) {
+        const sceneJson = scene?.sceneJson ?? emptyWhiteboardSceneJson()
+        await getLanpmApi().whiteboard.saveScene({
+          groupId: gid,
+          sceneJson,
+          linkedTaskId: linkTaskFromUrl
+        })
+        setSearchParams({}, { replace: true })
+      }
     } catch (err) {
       message.error(formatError(err, 'whiteboard.saveFailed'))
       setInitialData(parseScenePayload(emptyWhiteboardSceneJson()))
@@ -103,7 +115,7 @@ export default function WhiteboardView(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [gid, message, formatError])
+  }, [gid, linkTaskFromUrl, message, formatError, setSearchParams])
 
   useEffect(() => {
     void loadScene()

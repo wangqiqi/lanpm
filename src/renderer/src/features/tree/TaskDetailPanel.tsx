@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Checkbox, Input, InputNumber, Select, Slider, Typography } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
@@ -39,6 +40,7 @@ import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescrip
 import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
+import { whiteboardPathForTask } from '@renderer/features/whiteboard/whiteboardLink'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -93,6 +95,7 @@ export default function TaskDetailPanel({
 }: TaskDetailPanelProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
+  const navigate = useNavigate()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
   const tagMetaRows = useGroupTagStore((s) => s.byGroup[groupId] ?? [])
@@ -472,6 +475,14 @@ export default function TaskDetailPanel({
           onClick={() => void handleSave()}
         >
           {t('common.save')}
+        </Button>
+        <Button
+          onClick={() => {
+            navigate(whiteboardPathForTask(groupId, task.taskId))
+            onClose()
+          }}
+        >
+          {t('whiteboard.openFromTask')}
         </Button>
         <Button danger onClick={() => void onDelete(task.taskId)}>
           {t('common.delete')}

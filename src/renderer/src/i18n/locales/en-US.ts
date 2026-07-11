@@ -289,6 +289,7 @@ const enUS = {
   'whiteboard.toolbarHint': 'Autosave · one board per group · link from a task',
   'whiteboard.linkedHint': 'Linked to task {taskId}… · autosave',
   'whiteboard.saveFailed': 'Failed to save whiteboard',
+  'whiteboard.openFromTask': 'Open whiteboard',
   'gantt.scheduleFailed': 'Failed to update schedule',
   'gantt.selectBothTasks': 'Select predecessor and successor',
   'gantt.dependencySaved': 'Dependency saved',
