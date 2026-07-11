@@ -21,12 +21,19 @@
 - **看板标签筛选与色板 (TASK-184–186)**：工具栏多选 OR 筛选；KanbanCard 着色芯片；本机色板（uiStore/localStorage）。
 - **任务详情标签色 (TASK-187)**：详情面板芯片与看板同色逻辑。
 - **标签筛选/色哈希 (TASK-183)**：`filterTasksByTags`（OR）· `collectUniqueTaskTags` · `tagColorHash` / `resolveTagColor` + 单测。
+## [1.4.0] - 2026-07-11
+
+### Added
 - **SPRINT-TASK-AWARENESS 收尾 (TASK-182)**：`verify:task-awareness`；docs/06·README 对齐焦点 Presence；归档；handoff `/release` → **v1.4.0**。
 - **任务树焦点 Presence UI (TASK-181)**：树行显示远端焦点点；选中任务时广播本地焦点。
 - **看板焦点 Presence UI (TASK-180)**：KanbanCard 显示远端查看者；编辑任务时广播本地焦点；i18n。
 - **task_awareness 桥接 (TASK-179)**：IPC `setAwareness`/`listAwareness`；push `task:awareness`；渲染进程 store；离开可清焦点。
 - **task_awareness 主进程 (TASK-178)**：群 Y.Doc 挂 Awareness；publish/apply `task_awareness`；`setLocalTaskAwareness`；≥200ms 节流；匿名群不广播。
 - **task_awareness 协议 (TASK-177)**：依赖 `y-protocols`；`TaskAwarenessPayload` / 本地焦点态校验；`SyncMessageType.task_awareness`；docs/03 §6.2·§10；`verify:sync-handlers` 登记。
+
+### Release
+- `v1.4.0` — 任务焦点 Presence：`task_awareness`、看板/树远端焦点指示（TASK-177–182）
+
 ## [1.3.0] - 2026-07-11
 
 ### Added
