@@ -21,6 +21,7 @@ const SYNC_TYPES = [
   'task_crdt',
   'task_crdt_sync_request',
   'task_crdt_sync_batch',
+  'task_awareness',
   'file_meta',
   'file_pull_request',
   'file_chunk',
@@ -88,6 +89,16 @@ const taskCrdtSrc = readFileSync(join(root, 'src/shared/task/taskCrdt.ts'), 'utf
 assert.match(taskCrdtSrc, /TaskCrdtPayload/, 'TaskCrdtPayload required')
 assert.match(taskCrdtSrc, /isTaskCrdtPayload/, 'isTaskCrdtPayload required')
 assert.match(taskCrdtSrc, /task:\{groupId\}|task:\$\{groupId\}/, 'docId convention required')
+
+const taskAwarenessSrc = readFileSync(join(root, 'src/shared/task/taskAwareness.ts'), 'utf8')
+assert.match(taskAwarenessSrc, /TaskAwarenessPayload/, 'TaskAwarenessPayload required')
+assert.match(taskAwarenessSrc, /isTaskAwarenessPayload/, 'isTaskAwarenessPayload required')
+assert.match(taskAwarenessSrc, /TaskAwarenessLocalState/, 'TaskAwarenessLocalState required')
+
+const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
+  dependencies?: Record<string, string>
+}
+assert.ok(pkg.dependencies?.['y-protocols'], 'y-protocols dependency required (TASK-177)')
 
 const corpus = HANDLER_FILES.map((rel) => readFileSync(join(root, rel), 'utf8')).join('\n')
 

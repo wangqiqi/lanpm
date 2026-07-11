@@ -114,6 +114,11 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'task_crdt_sync_batch') {
     handleTaskCrdtSyncBatch(db, envelope)
+    return
+  }
+  if (envelope.type === 'task_awareness') {
+    // TASK-178: apply Awareness update via taskAwarenessService
+    return
   }
 }
 
