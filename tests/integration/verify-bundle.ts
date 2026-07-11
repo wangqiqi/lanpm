@@ -60,7 +60,7 @@ const DEVICE = 'd-bundle'
 const PASS = 'test-pass'
 
 const bundleSrc = readFileSync(join(projectRoot, 'src/main/data/bundleService.ts'), 'utf8')
-assert.match(bundleSrc, /conflictMode === 'overwrite'/)
+assert.match(bundleSrc, /mode === 'overwrite'/)
 assert.match(bundleSrc, /export function previewGroupBundle/)
 assert.match(bundleSrc, /listGroupTagMeta/)
 assert.match(bundleSrc, /listGroupMembers/)
@@ -70,6 +70,9 @@ assert.match(bundleSrc, /getWhiteboardCrdtBlob/)
 assert.match(bundleSrc, /getWhiteboardScene/)
 assert.match(bundleSrc, /listMessagesForBundleExport/)
 assert.match(bundleSrc, /messagesTruncated/)
+assert.match(bundleSrc, /db\.transaction/)
+assert.match(bundleSrc, /assertBundleConflictMode/)
+assert.match(bundleSrc, /assertBundlePassword/)
 
 const msgRepoSrc = readFileSync(
   join(projectRoot, 'src/main/storage/repositories/messageRepository.ts'),
@@ -84,6 +87,12 @@ assert.match(sharedSrc, /taskCrdt/)
 assert.match(sharedSrc, /BundleCrdtSnapshot/)
 assert.match(sharedSrc, /GroupBundleExportResult/)
 assert.match(sharedSrc, /messagesTruncated/)
+assert.match(sharedSrc, /assertBundleConflictMode/)
+assert.match(sharedSrc, /BUNDLE_PASSWORD_MIN_LENGTH/)
+
+const ipcSrc = readFileSync(join(projectRoot, 'src/main/ipc/data.ts'), 'utf8')
+assert.match(ipcSrc, /assertBundleConflictMode/)
+assert.match(ipcSrc, /assertBundlePassword/)
 
 function openDb(dir: string): Database.Database {
   const db = new Database(join(dir, 'lanpm.db'))
@@ -266,6 +275,53 @@ try {
   dbA.close()
   dbB.close()
   console.log('OK: verify:bundle — overwrite + dry-run + multi-entity + CRDT snapshots')
+
+  // TASK-321: password floor + conflictMode whitelist + import transaction rollback
+  const dirV = mkLanpmTemp('lanpm-bundle-validate-')
+  try {
+    const dbV = openDb(dirV)
+    const badPath = join(dirV, 'nope.lanpm-bundle.json')
+    assert.throws(
+      () => exportGroupBundle(dbV, GROUP, 'ab', badPath, false),
+      /password/i
+    )
+    assert.throws(
+      () =>
+        importGroupBundle(
+          dbV,
+          badPath,
+          PASS,
+          'merge' as unknown as import('../../src/shared/data/bundle.ts').BundleConflictMode
+        ),
+      /conflictMode/i
+    )
+
+    seedEntities(dbV, 'Before txn', 'hello', '#111111')
+    const goodPath = join(dirV, 'good.lanpm-bundle.json')
+    exportGroupBundle(dbV, GROUP, PASS, goodPath, false)
+    dbV.close()
+
+    const dirR2 = mkLanpmTemp('lanpm-bundle-rollback2-')
+    try {
+      const dbR2 = openDb(dirR2)
+      dbR2.exec(`
+        CREATE TRIGGER fail_task_insert
+        BEFORE INSERT ON tasks
+        BEGIN
+          SELECT RAISE(ABORT, 'forced_rollback');
+        END;
+      `)
+      assert.throws(() => importGroupBundle(dbR2, goodPath, PASS, 'skip'), /forced_rollback/)
+      assert.equal(getTaskById(dbR2, 'task_bundle_1'), null)
+      assert.equal(getMessageById(dbR2, 'msg_bundle_1'), null)
+      dbR2.close()
+      console.log('OK: verify:bundle — TASK-321 password/mode + transaction rollback')
+    } finally {
+      rmLanpmTemp(dirR2)
+    }
+  } finally {
+    rmLanpmTemp(dirV)
+  }
 
   // TASK-320: newest-first export under a small limit (drops oldest, keeps newest)
   const dirT = mkLanpmTemp('lanpm-bundle-trunc-')

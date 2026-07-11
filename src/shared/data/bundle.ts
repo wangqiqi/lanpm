@@ -1,5 +1,24 @@
 export type BundleConflictMode = 'skip' | 'new_id' | 'overwrite'
 
+/** Min passphrase length for export/import (UI + main IPC). */
+export const BUNDLE_PASSWORD_MIN_LENGTH = 4
+
+export function assertBundlePassword(password: unknown): void {
+  if (
+    typeof password !== 'string' ||
+    password.trim().length < BUNDLE_PASSWORD_MIN_LENGTH
+  ) {
+    throw new Error(
+      `bundle password must be at least ${BUNDLE_PASSWORD_MIN_LENGTH} characters`
+    )
+  }
+}
+
+export function assertBundleConflictMode(mode: unknown): BundleConflictMode {
+  if (mode === 'skip' || mode === 'new_id' || mode === 'overwrite') return mode
+  throw new Error('invalid bundle conflictMode')
+}
+
 export interface GroupBundleExportOptions {
   groupId: string
   password: string

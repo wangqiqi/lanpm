@@ -11,6 +11,10 @@ import type {
   GroupBundleImportResult,
   GroupBundlePreviewResult
 } from '../../shared/data/bundle.ts'
+import {
+  assertBundleConflictMode,
+  assertBundlePassword
+} from '../../shared/data/bundle.ts'
 import type { GroupMemberRecord } from '../../shared/group/types.ts'
 import type { GroupTagMeta } from '../../shared/task/groupTagMeta.ts'
 import type { WhiteboardScene } from '../../shared/whiteboard/types.ts'
@@ -169,6 +173,7 @@ export function exportGroupBundle(
   includeFileBodies = false,
   options?: { messageLimit?: number }
 ): GroupBundleExportResult {
+  assertBundlePassword(password)
   const messageLimit = options?.messageLimit ?? BUNDLE_MESSAGE_EXPORT_LIMIT
   const messageExport = listMessagesForBundleExport(db, groupId, messageLimit)
   const plain: BundlePlain = {
@@ -229,6 +234,7 @@ export function previewGroupBundle(
   inputPath: string,
   password: string
 ): GroupBundlePreviewResult {
+  assertBundlePassword(password)
   const plain = decryptBundle(inputPath, password)
   const tags = plain.tags ?? []
   const members = plain.members ?? []
@@ -285,192 +291,206 @@ export function importGroupBundle(
   password: string,
   conflictMode: BundleConflictMode
 ): GroupBundleImportResult {
+  assertBundlePassword(password)
+  const mode = assertBundleConflictMode(conflictMode)
   const plain = decryptBundle(inputPath, password)
   const tags = plain.tags ?? []
   const members = plain.members ?? []
   const checklists = plain.checklists ?? []
-  const result: GroupBundleImportResult = {
-    messagesImported: 0,
-    tasksImported: 0,
-    filesImported: 0,
-    tagsImported: 0,
-    membersImported: 0,
-    checklistsImported: 0,
-    taskCrdtImported: 0,
-    whiteboardCrdtImported: 0,
-    whiteboardSceneImported: 0,
-    skipped: 0,
-    overwritten: 0
-  }
 
-  const idMap = new Map<string, string>()
-  const groupId = plain.groupId
+  return db.transaction(() => {
+    const result: GroupBundleImportResult = {
+      messagesImported: 0,
+      tasksImported: 0,
+      filesImported: 0,
+      tagsImported: 0,
+      membersImported: 0,
+      checklistsImported: 0,
+      taskCrdtImported: 0,
+      whiteboardCrdtImported: 0,
+      whiteboardSceneImported: 0,
+      skipped: 0,
+      overwritten: 0
+    }
 
-  // Tags before tasks so coerceTagsForGroup can see dictionary entries.
-  for (const tag of tags) {
-    const exists = !!getGroupTagMeta(db, groupId, tag.tagKey)
-    if (exists) {
-      if (conflictMode === 'skip' || conflictMode === 'new_id') {
-        // tag_key is identity — new_id falls back to skip
-        result.skipped += 1
-        continue
-      }
-      result.overwritten += 1
-    }
-    upsertGroupTagMeta(db, { ...tag, groupId })
-    result.tagsImported += 1
-  }
+    const idMap = new Map<string, string>()
+    const groupId = plain.groupId
 
-  for (const member of members) {
-    const exists = memberExists(db, groupId, member.userId)
-    if (exists) {
-      if (conflictMode === 'skip' || conflictMode === 'new_id') {
-        result.skipped += 1
-        continue
-      }
-      result.overwritten += 1
-    }
-    insertGroupMember(db, { ...member, groupId })
-    result.membersImported += 1
-  }
-
-  for (const task of plain.tasks) {
-    if (task.deletedAt) continue
-    let taskId = task.taskId
-    const exists = taskExists(db, taskId)
-    if (exists) {
-      if (conflictMode === 'skip') {
-        result.skipped += 1
-        continue
-      }
-      if (conflictMode === 'new_id') {
-        taskId = `task_${createHash('sha256').update(taskId + plain.exportedAt).digest('hex').slice(0, 12)}`
-        idMap.set(task.taskId, taskId)
-      } else if (conflictMode === 'overwrite') {
-        deleteChecklistForTask(db, taskId)
-        db.prepare(`DELETE FROM tasks WHERE task_id = ?`).run(taskId)
-        result.overwritten += 1
-      }
-    }
-    insertTask(db, { ...task, taskId, groupId: task.groupId || groupId })
-    result.tasksImported += 1
-  }
-
-  for (const msg of plain.messages) {
-    let msgId = msg.msgId
-    if (messageExists(db, msgId)) {
-      if (conflictMode === 'skip') {
-        result.skipped += 1
-        continue
-      }
-      if (conflictMode === 'new_id') {
-        msgId = `msg_${randomBytes(8).toString('hex')}`
-      } else if (conflictMode === 'overwrite') {
-        db.prepare(`DELETE FROM messages WHERE msg_id = ?`).run(msgId)
-        result.overwritten += 1
-      }
-    }
-    insertMessage(db, { ...msg, msgId, groupId: msg.groupId || groupId })
-    result.messagesImported += 1
-  }
-
-  for (const file of plain.files) {
-    const exists = fileExists(db, file.fileId)
-    if (exists && conflictMode === 'skip') {
-      result.skipped += 1
-      continue
-    }
-    let fileId = file.fileId
-    if (exists && conflictMode === 'new_id') {
-      fileId = `file_${randomBytes(8).toString('hex')}`
-    } else if (exists && conflictMode === 'overwrite') {
-      db.prepare(`DELETE FROM files WHERE file_id = ?`).run(fileId)
-      result.overwritten += 1
-    }
-    let storagePath = file.storagePath
-    const bodyB64 = plain.fileBodies?.[file.fileId]
-    if (bodyB64) {
-      const filesRoot = resolveFilesRoot(groupId)
-      mkdirSync(filesRoot, { recursive: true })
-      storagePath = join(filesRoot, `${fileId}${file.ext ? `.${file.ext.replace(/^\./, '')}` : ''}`)
-      writeFileSync(storagePath, Buffer.from(bodyB64, 'base64'))
-    }
-    insertFile(db, { ...file, fileId, groupId: file.groupId || groupId, storagePath })
-    result.filesImported += 1
-  }
-
-  for (const entry of checklists) {
-    const taskId = idMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
-    let checklistId = entry.checklist.checklistId
-    const exists = checklistExistsByTask(db, taskId)
-    if (exists) {
-      if (conflictMode === 'skip') {
-        result.skipped += 1
-        continue
-      }
-      if (conflictMode === 'new_id') {
-        // If task wasn't remapped but checklist exists, skip to avoid UNIQUE(task_id)
-        if (!idMap.has(entry.checklist.taskId) && taskExists(db, entry.checklist.taskId)) {
+    // Tags before tasks so coerceTagsForGroup can see dictionary entries.
+    for (const tag of tags) {
+      const exists = !!getGroupTagMeta(db, groupId, tag.tagKey)
+      if (exists) {
+        if (mode === 'skip' || mode === 'new_id') {
+          // tag_key is identity — new_id falls back to skip
           result.skipped += 1
           continue
         }
-        checklistId = `cl_${randomBytes(8).toString('hex')}`
-      } else if (conflictMode === 'overwrite') {
-        deleteChecklistForTask(db, taskId)
         result.overwritten += 1
       }
-    } else if (conflictMode === 'new_id' && idMap.has(entry.checklist.taskId)) {
-      checklistId = `cl_${randomBytes(8).toString('hex')}`
+      upsertGroupTagMeta(db, { ...tag, groupId })
+      result.tagsImported += 1
     }
 
-    db.prepare(
-      `INSERT INTO task_checklists (checklist_id, task_id, group_id, title, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(
-      checklistId,
-      taskId,
-      entry.checklist.groupId || groupId,
-      entry.checklist.title,
-      entry.checklist.createdAt,
-      entry.checklist.updatedAt
-    )
+    for (const member of members) {
+      const exists = memberExists(db, groupId, member.userId)
+      if (exists) {
+        if (mode === 'skip' || mode === 'new_id') {
+          result.skipped += 1
+          continue
+        }
+        result.overwritten += 1
+      }
+      insertGroupMember(db, { ...member, groupId })
+      result.membersImported += 1
+    }
 
-    for (const item of entry.items) {
-      let itemId = item.itemId
-      if (conflictMode === 'new_id') {
-        itemId = `cli_${randomBytes(8).toString('hex')}`
-      } else if (db.prepare(`SELECT 1 FROM task_checklist_items WHERE item_id = ?`).get(itemId)) {
-        if (conflictMode === 'skip') continue
-        if (conflictMode === 'overwrite') {
-          db.prepare(`DELETE FROM task_checklist_items WHERE item_id = ?`).run(itemId)
+    for (const task of plain.tasks) {
+      if (task.deletedAt) continue
+      let taskId = task.taskId
+      const exists = taskExists(db, taskId)
+      if (exists) {
+        if (mode === 'skip') {
+          result.skipped += 1
+          continue
+        }
+        if (mode === 'new_id') {
+          taskId = `task_${createHash('sha256').update(taskId + plain.exportedAt).digest('hex').slice(0, 12)}`
+          idMap.set(task.taskId, taskId)
+        } else if (mode === 'overwrite') {
+          deleteChecklistForTask(db, taskId)
+          db.prepare(`DELETE FROM tasks WHERE task_id = ?`).run(taskId)
+          result.overwritten += 1
         }
       }
+      insertTask(db, { ...task, taskId, groupId: task.groupId || groupId })
+      result.tasksImported += 1
+    }
+
+    for (const msg of plain.messages) {
+      let msgId = msg.msgId
+      if (messageExists(db, msgId)) {
+        if (mode === 'skip') {
+          result.skipped += 1
+          continue
+        }
+        if (mode === 'new_id') {
+          msgId = `msg_${randomBytes(8).toString('hex')}`
+        } else if (mode === 'overwrite') {
+          db.prepare(`DELETE FROM messages WHERE msg_id = ?`).run(msgId)
+          result.overwritten += 1
+        }
+      }
+      insertMessage(db, { ...msg, msgId, groupId: msg.groupId || groupId })
+      result.messagesImported += 1
+    }
+
+    for (const file of plain.files) {
+      const exists = fileExists(db, file.fileId)
+      if (exists && mode === 'skip') {
+        result.skipped += 1
+        continue
+      }
+      let fileId = file.fileId
+      if (exists && mode === 'new_id') {
+        fileId = `file_${randomBytes(8).toString('hex')}`
+      } else if (exists && mode === 'overwrite') {
+        db.prepare(`DELETE FROM files WHERE file_id = ?`).run(fileId)
+        result.overwritten += 1
+      }
+      let storagePath = file.storagePath
+      const bodyB64 = plain.fileBodies?.[file.fileId]
+      if (bodyB64) {
+        const filesRoot = resolveFilesRoot(groupId)
+        mkdirSync(filesRoot, { recursive: true })
+        storagePath = join(filesRoot, `${fileId}${file.ext ? `.${file.ext.replace(/^\./, '')}` : ''}`)
+        writeFileSync(storagePath, Buffer.from(bodyB64, 'base64'))
+      }
+      insertFile(db, { ...file, fileId, groupId: file.groupId || groupId, storagePath })
+      result.filesImported += 1
+    }
+
+    for (const entry of checklists) {
+      const taskId = idMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
+      let checklistId = entry.checklist.checklistId
+      const exists = checklistExistsByTask(db, taskId)
+      if (exists) {
+        if (mode === 'skip') {
+          result.skipped += 1
+          continue
+        }
+        if (mode === 'new_id') {
+          // If task wasn't remapped but checklist exists, skip to avoid UNIQUE(task_id)
+          if (!idMap.has(entry.checklist.taskId) && taskExists(db, entry.checklist.taskId)) {
+            result.skipped += 1
+            continue
+          }
+          checklistId = `cl_${randomBytes(8).toString('hex')}`
+        } else if (mode === 'overwrite') {
+          deleteChecklistForTask(db, taskId)
+          result.overwritten += 1
+        }
+      } else if (mode === 'new_id' && idMap.has(entry.checklist.taskId)) {
+        checklistId = `cl_${randomBytes(8).toString('hex')}`
+      }
+
       db.prepare(
-        `INSERT INTO task_checklist_items (
-          item_id, checklist_id, task_id, text, done, sort_order,
-          linked_subtask_id, created_at, updated_at, deleted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`
+        `INSERT INTO task_checklists (checklist_id, task_id, group_id, title, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)`
       ).run(
-        itemId,
         checklistId,
         taskId,
-        item.text,
-        item.done ? 1 : 0,
-        item.sortOrder,
-        item.linkedSubtaskId ?? null,
-        item.createdAt,
-        item.updatedAt
+        entry.checklist.groupId || groupId,
+        entry.checklist.title,
+        entry.checklist.createdAt,
+        entry.checklist.updatedAt
       )
-    }
-    result.checklistsImported += 1
-  }
 
-  // Per-group singleton snapshots — new_id falls back to skip.
-  if (plain.taskCrdt) {
-    const exists = !!getTaskCrdtBlob(db, groupId)
-    if (exists) {
-      if (conflictMode === 'skip' || conflictMode === 'new_id') {
-        result.skipped += 1
+      for (const item of entry.items) {
+        let itemId = item.itemId
+        if (mode === 'new_id') {
+          itemId = `cli_${randomBytes(8).toString('hex')}`
+        } else if (db.prepare(`SELECT 1 FROM task_checklist_items WHERE item_id = ?`).get(itemId)) {
+          if (mode === 'skip') continue
+          if (mode === 'overwrite') {
+            db.prepare(`DELETE FROM task_checklist_items WHERE item_id = ?`).run(itemId)
+          }
+        }
+        db.prepare(
+          `INSERT INTO task_checklist_items (
+            item_id, checklist_id, task_id, text, done, sort_order,
+            linked_subtask_id, created_at, updated_at, deleted_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`
+        ).run(
+          itemId,
+          checklistId,
+          taskId,
+          item.text,
+          item.done ? 1 : 0,
+          item.sortOrder,
+          item.linkedSubtaskId ?? null,
+          item.createdAt,
+          item.updatedAt
+        )
+      }
+      result.checklistsImported += 1
+    }
+
+    // Per-group singleton snapshots — new_id falls back to skip.
+    if (plain.taskCrdt) {
+      const exists = !!getTaskCrdtBlob(db, groupId)
+      if (exists) {
+        if (mode === 'skip' || mode === 'new_id') {
+          result.skipped += 1
+        } else {
+          upsertTaskCrdtBlob(
+            db,
+            groupId,
+            Buffer.from(plain.taskCrdt.updateBlobB64, 'base64'),
+            plain.taskCrdt.updatedAt
+          )
+          result.overwritten += 1
+          result.taskCrdtImported += 1
+        }
       } else {
         upsertTaskCrdtBlob(
           db,
@@ -478,25 +498,25 @@ export function importGroupBundle(
           Buffer.from(plain.taskCrdt.updateBlobB64, 'base64'),
           plain.taskCrdt.updatedAt
         )
-        result.overwritten += 1
         result.taskCrdtImported += 1
       }
-    } else {
-      upsertTaskCrdtBlob(
-        db,
-        groupId,
-        Buffer.from(plain.taskCrdt.updateBlobB64, 'base64'),
-        plain.taskCrdt.updatedAt
-      )
-      result.taskCrdtImported += 1
     }
-  }
 
-  if (plain.whiteboardCrdt) {
-    const exists = !!getWhiteboardCrdtBlob(db, groupId)
-    if (exists) {
-      if (conflictMode === 'skip' || conflictMode === 'new_id') {
-        result.skipped += 1
+    if (plain.whiteboardCrdt) {
+      const exists = !!getWhiteboardCrdtBlob(db, groupId)
+      if (exists) {
+        if (mode === 'skip' || mode === 'new_id') {
+          result.skipped += 1
+        } else {
+          upsertWhiteboardCrdtBlob(
+            db,
+            groupId,
+            Buffer.from(plain.whiteboardCrdt.updateBlobB64, 'base64'),
+            plain.whiteboardCrdt.updatedAt
+          )
+          result.overwritten += 1
+          result.whiteboardCrdtImported += 1
+        }
       } else {
         upsertWhiteboardCrdtBlob(
           db,
@@ -504,25 +524,26 @@ export function importGroupBundle(
           Buffer.from(plain.whiteboardCrdt.updateBlobB64, 'base64'),
           plain.whiteboardCrdt.updatedAt
         )
-        result.overwritten += 1
         result.whiteboardCrdtImported += 1
       }
-    } else {
-      upsertWhiteboardCrdtBlob(
-        db,
-        groupId,
-        Buffer.from(plain.whiteboardCrdt.updateBlobB64, 'base64'),
-        plain.whiteboardCrdt.updatedAt
-      )
-      result.whiteboardCrdtImported += 1
     }
-  }
 
-  if (plain.whiteboardScene) {
-    const exists = !!getWhiteboardScene(db, groupId)
-    if (exists) {
-      if (conflictMode === 'skip' || conflictMode === 'new_id') {
-        result.skipped += 1
+    if (plain.whiteboardScene) {
+      const exists = !!getWhiteboardScene(db, groupId)
+      if (exists) {
+        if (mode === 'skip' || mode === 'new_id') {
+          result.skipped += 1
+        } else {
+          upsertWhiteboardScene(
+            db,
+            groupId,
+            plain.whiteboardScene.sceneJson,
+            plain.whiteboardScene.linkedTaskId ?? null,
+            plain.whiteboardScene.updatedAt
+          )
+          result.overwritten += 1
+          result.whiteboardSceneImported += 1
+        }
       } else {
         upsertWhiteboardScene(
           db,
@@ -531,20 +552,10 @@ export function importGroupBundle(
           plain.whiteboardScene.linkedTaskId ?? null,
           plain.whiteboardScene.updatedAt
         )
-        result.overwritten += 1
         result.whiteboardSceneImported += 1
       }
-    } else {
-      upsertWhiteboardScene(
-        db,
-        groupId,
-        plain.whiteboardScene.sceneJson,
-        plain.whiteboardScene.linkedTaskId ?? null,
-        plain.whiteboardScene.updatedAt
-      )
-      result.whiteboardSceneImported += 1
     }
-  }
 
-  return result
+    return result
+  })()
 }

@@ -1,6 +1,10 @@
 import { ipcMain } from 'electron'
 import { DATA_IPC } from '../../shared/data/channels'
 import type { BundleConflictMode, GroupBundleExportResult } from '../../shared/data/bundle'
+import {
+  assertBundleConflictMode,
+  assertBundlePassword
+} from '../../shared/data/bundle'
 import type { ClearGroupMessagesMode, DataCleanupOptions } from '../../shared/data/types'
 import {
   exportGroupBundle,
@@ -54,7 +58,8 @@ export function registerDataIpc(): void {
       password: string,
       includeFileBodies?: boolean
     ) => {
-      if (!groupId || !password) throw new Error('groupId and password required')
+      if (!groupId) throw new Error('groupId required')
+      assertBundlePassword(password)
       const result = await showSaveDialog(null, {
         defaultPath: `${groupId}.lanpm-bundle.json`
       })
@@ -72,7 +77,7 @@ export function registerDataIpc(): void {
   )
 
   ipcMain.handle(DATA_IPC.previewGroupBundle, async (_event, password: string) => {
-    if (!password) throw new Error('password required')
+    assertBundlePassword(password)
     const picked = await showOpenDialog(null, {
       filters: [{ name: 'LanPM Bundle', extensions: ['json'] }],
       properties: ['openFile']
@@ -91,7 +96,8 @@ export function registerDataIpc(): void {
       conflictMode: BundleConflictMode,
       filePath?: string
     ) => {
-      if (!password) throw new Error('password required')
+      assertBundlePassword(password)
+      const mode = assertBundleConflictMode(conflictMode ?? 'skip')
       let path = typeof filePath === 'string' && filePath ? filePath : null
       if (!path) {
         const picked = await showOpenDialog(null, {
@@ -101,7 +107,7 @@ export function registerDataIpc(): void {
         if (picked.canceled || !picked.filePaths[0]) return null
         path = picked.filePaths[0]
       }
-      return importGroupBundle(getDatabase(), path, password, conflictMode ?? 'skip')
+      return importGroupBundle(getDatabase(), path, password, mode)
     }
   )
 }
