@@ -8,6 +8,7 @@
 - **TASK-310**：单群 bundle `overwrite` 冲突模式落地；`previewGroupBundle` dry-run 冲突计数；导入结果含 `overwritten`；`npm run verify:bundle`。
 - **TASK-311**：bundle 纳入 `group_tag_meta` · `group_members` · checklists（含冲突策略与预检计数）。
 - **TASK-312**：bundle 纳入 `task_crdt_docs` · `whiteboard_crdt_docs` · `whiteboard_scenes` 快照（base64）。
+- **TASK-313**：导入前 dry-run 摘要 Modal · overwrite 二次确认 · 多实体结果文案（i18n）。
 
 ### Fixed
 - **`groupTagMetaRepository` ESM 导入**：补 `.ts` 扩展名，修复 `ELECTRON_RUN_AS_NODE` 下依赖任务仓库的 verify 解析失败。

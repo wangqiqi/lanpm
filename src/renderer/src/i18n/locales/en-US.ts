@@ -738,8 +738,15 @@ const enUS = {
   'data.bundleConflictSkip': 'Conflict: skip',
   'data.bundleConflictNewId': 'Conflict: new IDs',
   'data.bundleConflictOverwrite': 'Conflict: overwrite (dangerous)',
+  'data.bundlePreviewTitle': 'Confirm backup import',
+  'data.bundlePreviewBody':
+    'Group {groupId} · exported {exportedAt}\nTotals: messages {messages} / tasks {tasks} / files {files} / tags {tags} / members {members} / checklists {checklists} / CRDT {crdt}\nLocal conflicts: messages {cMessages} / tasks {cTasks} / files {cFiles} / tags {cTags} / members {cMembers} / checklists {cChecklists} / CRDT {cCrdt}\nMode: {mode}',
+  'data.bundleOverwriteConfirmTitle': 'Overwrite local data?',
+  'data.bundleOverwriteConfirmBody':
+    'Overwrite replaces local rows with the same IDs from the backup. This cannot be undone. Continue?',
+  'data.bundleImportConfirm': 'Import',
   'data.bundleImportDone':
-    'Import done: {messages} messages, {tasks} tasks, {files} files, {skipped} skipped',
+    'Import done: {messages} messages, {tasks} tasks, {files} files, {tags} tags, {members} members, {checklists} checklists; {skipped} skipped, {overwritten} overwritten',
   'files.localRemoved': 'Removed locally',
   'files.deleteLocalConfirmTitle': 'Remove local file copy?',
   'files.deleteLocalConfirmBody':

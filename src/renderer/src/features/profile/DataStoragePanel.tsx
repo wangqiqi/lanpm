@@ -12,7 +12,7 @@ import {
   Space,
   Typography
 } from 'antd'
-import type { BundleConflictMode } from '@shared/data/bundle'
+import type { BundleConflictMode, GroupBundlePreviewResult } from '@shared/data/bundle'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useDataStore } from '@renderer/stores/dataStore'
@@ -56,6 +56,131 @@ export default function DataStoragePanel(): React.ReactElement {
   const [bundleIncludeFiles, setBundleIncludeFiles] = useState(false)
   const [importPassword, setImportPassword] = useState('')
   const [importMode, setImportMode] = useState<BundleConflictMode>('skip')
+  const [importBusy, setImportBusy] = useState(false)
+
+  const modeLabel = (mode: BundleConflictMode): string => {
+    if (mode === 'skip') return t('data.bundleConflictSkip')
+    if (mode === 'new_id') return t('data.bundleConflictNewId')
+    return t('data.bundleConflictOverwrite')
+  }
+
+  const previewBody = (preview: GroupBundlePreviewResult, mode: BundleConflictMode): string => {
+    const crdt =
+      preview.totals.taskCrdt + preview.totals.whiteboardCrdt + preview.totals.whiteboardScene
+    const cCrdt =
+      preview.conflicts.taskCrdt +
+      preview.conflicts.whiteboardCrdt +
+      preview.conflicts.whiteboardScene
+    return t('data.bundlePreviewBody', {
+      groupId: preview.groupId,
+      exportedAt: preview.exportedAt,
+      messages: preview.totals.messages,
+      tasks: preview.totals.tasks,
+      files: preview.totals.files,
+      tags: preview.totals.tags,
+      members: preview.totals.members,
+      checklists: preview.totals.checklists,
+      crdt,
+      cMessages: preview.conflicts.messages,
+      cTasks: preview.conflicts.tasks,
+      cFiles: preview.conflicts.files,
+      cTags: preview.conflicts.tags,
+      cMembers: preview.conflicts.members,
+      cChecklists: preview.conflicts.checklists,
+      cCrdt,
+      mode: modeLabel(mode)
+    })
+  }
+
+  const runImportWithPath = async (path: string, mode: BundleConflictMode): Promise<void> => {
+    setImportBusy(true)
+    try {
+      const result = await getLanpmApi().data.importGroupBundle(importPassword, mode, path)
+      if (!result) return
+      message.success(
+        t('data.bundleImportDone', {
+          messages: result.messagesImported,
+          tasks: result.tasksImported,
+          files: result.filesImported,
+          tags: result.tagsImported,
+          members: result.membersImported,
+          checklists: result.checklistsImported,
+          skipped: result.skipped,
+          overwritten: result.overwritten
+        })
+      )
+    } finally {
+      setImportBusy(false)
+    }
+  }
+
+  const startBundleImport = async (): Promise<void> => {
+    if (importPassword.length < 4 || importBusy) return
+    setImportBusy(true)
+    try {
+      const picked = await getLanpmApi().data.previewGroupBundle(importPassword)
+      if (!picked) return
+      const { path, preview } = picked
+      const hasConflicts =
+        preview.conflicts.messages +
+          preview.conflicts.tasks +
+          preview.conflicts.files +
+          preview.conflicts.tags +
+          preview.conflicts.members +
+          preview.conflicts.checklists +
+          preview.conflicts.taskCrdt +
+          preview.conflicts.whiteboardCrdt +
+          preview.conflicts.whiteboardScene >
+        0
+
+      const confirmImport = (): void => {
+        const proceed = async (): Promise<void> => {
+          try {
+            await runImportWithPath(path, importMode)
+          } catch (err) {
+            message.error(formatError(err, 'data.saveFailed'))
+          }
+        }
+        if (importMode === 'overwrite') {
+          Modal.confirm({
+            title: t('data.bundleOverwriteConfirmTitle'),
+            content: t('data.bundleOverwriteConfirmBody'),
+            okText: t('data.bundleImportConfirm'),
+            okButtonProps: { danger: true },
+            cancelText: t('common.cancel'),
+            onOk: () => void proceed()
+          })
+          return
+        }
+        void proceed()
+      }
+
+      Modal.confirm({
+        title: t('data.bundlePreviewTitle'),
+        content: (
+          <Typography.Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
+            {previewBody(preview, importMode)}
+            {hasConflicts && importMode === 'overwrite' ? (
+              <>
+                {'\n\n'}
+                <Typography.Text type="danger">{t('data.bundleOverwriteConfirmBody')}</Typography.Text>
+              </>
+            ) : null}
+          </Typography.Paragraph>
+        ),
+        okText: t('data.bundleImportConfirm'),
+        okButtonProps: importMode === 'overwrite' ? { danger: true } : undefined,
+        cancelText: t('common.cancel'),
+        onOk: () => {
+          confirmImport()
+        }
+      })
+    } catch (err) {
+      message.error(formatError(err, 'data.saveFailed'))
+    } finally {
+      setImportBusy(false)
+    }
+  }
 
   useEffect(() => {
     void loadSettings()
@@ -245,25 +370,9 @@ export default function DataStoragePanel(): React.ReactElement {
               ]}
             />
             <Button
-              disabled={importPassword.length < 4}
-              onClick={() => {
-                void getLanpmApi()
-                  .data.importGroupBundle(importPassword, importMode)
-                  .then((result) => {
-                    if (!result) return
-                    message.success(
-                      t('data.bundleImportDone', {
-                        messages: result.messagesImported,
-                        tasks: result.tasksImported,
-                        files: result.filesImported,
-                        skipped: result.skipped
-                      })
-                    )
-                  })
-                  .catch((err) =>
-                    message.error(formatError(err, 'data.saveFailed'))
-                  )
-              }}
+              disabled={importPassword.length < 4 || importBusy}
+              loading={importBusy}
+              onClick={() => void startBundleImport()}
             >
               {t('data.bundleImport')}
             </Button>

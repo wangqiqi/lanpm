@@ -730,8 +730,15 @@ const zhCN = {
   'data.bundleConflictSkip': '冲突：跳过',
   'data.bundleConflictNewId': '冲突：生成新 ID',
   'data.bundleConflictOverwrite': '冲突：覆盖（危险）',
+  'data.bundlePreviewTitle': '确认导入备份',
+  'data.bundlePreviewBody':
+    '群 {groupId} · 导出于 {exportedAt}\n合计：消息 {messages} / 任务 {tasks} / 文件 {files} / 标签 {tags} / 成员 {members} / 清单 {checklists} / CRDT {crdt}\n本地冲突：消息 {cMessages} / 任务 {cTasks} / 文件 {cFiles} / 标签 {cTags} / 成员 {cMembers} / 清单 {cChecklists} / CRDT {cCrdt}\n策略：{mode}',
+  'data.bundleOverwriteConfirmTitle': '覆盖本地数据？',
+  'data.bundleOverwriteConfirmBody':
+    '覆盖模式将用备份内容替换本地同 ID 记录，且不可撤销。确认继续？',
+  'data.bundleImportConfirm': '确认导入',
   'data.bundleImportDone':
-    '导入完成：消息 {messages}、任务 {tasks}、文件 {files}，跳过 {skipped}',
+    '导入完成：消息 {messages}、任务 {tasks}、文件 {files}、标签 {tags}、成员 {members}、清单 {checklists}；跳过 {skipped}、覆盖 {overwritten}',
   'files.localRemoved': '本机已移除',
   'files.deleteLocalConfirmTitle': '移除本机文件副本？',
   'files.deleteLocalConfirmBody': '将删除磁盘文件并保留元数据，可从局域网重新下载。',
