@@ -6,7 +6,14 @@
 
 ### Added
 - **SPRINT-PLUGIN-FORMJS（TASK-289–294）**：插件 loader 最小闭环 — `plugins/` manifest 发现、能力白名单 IPC、`task.detail.section` SlotHost + ErrorBoundary；官方 stub + **form-js 可购 POC**（schema 兼容渲染，不进核心 deps）；`verify:plugin-loader`。
+
+## [1.21.0] - 2026-07-11
+
+### Added
 - **SPRINT-B2-MEMBER-SEARCH（TASK-284–288）**：`matchesMemberSearch`（显示名 / mentionKeys · 汉字 · 拼音）；看板负责人筛选（可与标签叠加）；指派 Select 可搜拼音；聊天侧栏成员搜索；`verify:member-search`。
+
+### Release
+- `v1.21.0` — B2 member search (pinyin / keyword)
 
 ## [1.20.0] - 2026-07-11
 
