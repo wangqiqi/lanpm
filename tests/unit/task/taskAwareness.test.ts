@@ -47,6 +47,31 @@ describe('taskAwareness protocol', () => {
     )
   })
 
+  it('accepts local state with description caret', () => {
+    expect(
+      isTaskAwarenessLocalState({
+        ...validLocal,
+        caret: { field: 'description', offset: 12 }
+      })
+    ).toBe(true)
+    expect(isTaskAwarenessLocalState({ ...validLocal, caret: null })).toBe(true)
+  })
+
+  it('rejects invalid caret', () => {
+    expect(
+      isTaskAwarenessLocalState({
+        ...validLocal,
+        caret: { field: 'title', offset: 0 }
+      })
+    ).toBe(false)
+    expect(
+      isTaskAwarenessLocalState({
+        ...validLocal,
+        caret: { field: 'description', offset: -1 }
+      })
+    ).toBe(false)
+  })
+
   it('rejects invalid local state', () => {
     expect(isTaskAwarenessLocalState(null)).toBe(false)
     expect(isTaskAwarenessLocalState({ ...validLocal, userId: '' })).toBe(false)

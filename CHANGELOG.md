@@ -5,6 +5,12 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-TEXT-CARET-AWARENESS 收尾 (TASK-200)**：`verify:text-caret`；docs/04·06·README 对齐描述框协同光标；归档；handoff `/release` → **v1.7.0**。
+- **描述框 caret 接线 (TASK-199)**：TaskDetailPanel + TaskEditModal 挂 overlay；选区变化广播 caret。
+- **RemoteCaretOverlay (TASK-198)**：彩色竖线 + 显示名；按 UTF-16 offset 定位；i18n。
+- **caret 桥接 (TASK-197)**：store `descriptionCarets`；`useDescriptionCaretBroadcast`；失焦清除。
+- **caret 透传验收 (TASK-196)**：`verify:task-awareness` 覆盖含 caret 的 Awareness round-trip。
+- **文本 caret 协议 (TASK-195)**：`TaskAwarenessLocalState.caret`（`description` + UTF-16 offset）；校验/单测；docs/03。
 - **SPRINT-GROUP-TAG-DICT 收尾 (TASK-194)**：`verify:group-tag-dict`；docs/04·06·README 对齐群标签字典；归档；handoff `/release` → **v1.6.0**。
 - **群标签字典协议 (TASK-189)**：`GroupTagMeta` / `GroupTagPatchPayload`；`SyncMessageType.group_tag_patch`；docs/03；`verify:sync-handlers` 登记。
 - **群标签字典持久化 (TASK-190)**：schema v6 表 `group_tag_meta` + migrate；repository；删群级联。

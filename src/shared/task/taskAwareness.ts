@@ -1,5 +1,5 @@
 /**
- * docs/03 §6.2 / §10 — `task_awareness` 焦点 Presence（TASK-177+）。
+ * docs/03 §6.2 / §10 — `task_awareness` 焦点 Presence（TASK-177+）+ 文本 caret（TASK-195+）。
  * 挂群级 Y.Doc 的 Yjs Awareness；短暂态，不落库。
  * 二进制帧由 `y-protocols/awareness` encode/apply。
  */
@@ -8,13 +8,24 @@ import { taskCrdtDocId, taskCrdtDocIdMatchesGroup } from './taskCrdt.ts'
 
 export type TaskAwarenessView = 'board' | 'tree' | null
 
-/** Awareness.setLocalState 业务字段（非文本 caret） */
+/** Caret field — Sprint 仅 description */
+export type TaskAwarenessCaretField = 'description'
+
+/** UTF-16 code-unit offset（与 textarea.selectionStart 一致） */
+export interface TaskAwarenessCaret {
+  field: TaskAwarenessCaretField
+  offset: number
+}
+
+/** Awareness.setLocalState 业务字段 */
 export interface TaskAwarenessLocalState {
   userId: string
   displayName: string
   /** 当前聚焦任务；无焦点时省略或 null */
   focusedTaskId?: string | null
   view: TaskAwarenessView
+  /** 描述框协同光标；失焦时省略或 null */
+  caret?: TaskAwarenessCaret | null
 }
 
 /** SyncEnvelope.payload for type `task_awareness` */
@@ -40,6 +51,15 @@ function isView(value: unknown): value is TaskAwarenessView {
   return value === 'board' || value === 'tree' || value === null
 }
 
+export function isTaskAwarenessCaret(value: unknown): value is TaskAwarenessCaret {
+  if (!isRecord(value)) return false
+  if (value.field !== 'description') return false
+  if (typeof value.offset !== 'number' || !Number.isFinite(value.offset) || value.offset < 0) {
+    return false
+  }
+  return true
+}
+
 export function isTaskAwarenessLocalState(value: unknown): value is TaskAwarenessLocalState {
   if (!isRecord(value)) return false
   if (typeof value.userId !== 'string' || value.userId.length === 0) return false
@@ -47,6 +67,9 @@ export function isTaskAwarenessLocalState(value: unknown): value is TaskAwarenes
   if (!isView(value.view)) return false
   if (value.focusedTaskId !== undefined && value.focusedTaskId !== null) {
     if (typeof value.focusedTaskId !== 'string') return false
+  }
+  if (value.caret !== undefined && value.caret !== null) {
+    if (!isTaskAwarenessCaret(value.caret)) return false
   }
   return true
 }
