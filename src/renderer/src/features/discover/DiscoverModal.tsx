@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Avatar, Button, Empty, List, Modal, Tabs, Tag, Typography } from 'antd'
-import { ReloadOutlined, UserOutlined } from '@ant-design/icons'
+import { Alert, Avatar, Button, Empty, Input, List, Modal, Space, Tabs, Tag, Typography } from 'antd'
+import { PlusOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import type { DiscoverGroupView, DiscoverPeerView, DiscoverSnapshot } from '@shared/discover/types'
+import type { DiscoveryReasonCode } from '@shared/discover/discoveryHealth'
+import { addDiscoverSeed, removeDiscoverSeed } from '@shared/discover/discoverSeeds'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
 import type { GroupType } from '@shared/navigation/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -24,12 +26,27 @@ const GROUP_TYPE_KEYS: Record<GroupType, MessageKey> = {
   anonymous: 'groupType.anonymous'
 }
 
+const HEALTH_REASON_KEYS: Record<DiscoveryReasonCode, MessageKey> = {
+  ok: 'discover.healthOk',
+  bind_failed: 'discover.healthBindFailed',
+  multicast_degraded: 'discover.healthMulticastDegraded',
+  broadcast_failed: 'discover.healthBroadcastFailed',
+  transport_offline: 'discover.healthEmpty',
+  udp_disabled: 'discover.healthUdpDisabled',
+  stub_mode: 'discover.healthStub'
+}
+
 interface DiscoverModalProps {
   open: boolean
   onClose: () => void
+  onOpenManualPeer?: () => void
 }
 
-export default function DiscoverModal({ open, onClose }: DiscoverModalProps): React.ReactElement {
+export default function DiscoverModal({
+  open,
+  onClose,
+  onOpenManualPeer
+}: DiscoverModalProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const navigate = useNavigate()
@@ -52,6 +69,8 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
   const [loading, setLoading] = useState(false)
   const [joiningId, setJoiningId] = useState<string | null>(null)
   const [tab, setTab] = useState<'groups' | 'people'>('groups')
+  const [seedInput, setSeedInput] = useState('')
+  const [seedSaving, setSeedSaving] = useState(false)
 
   const refresh = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -63,7 +82,7 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
     } finally {
       setLoading(false)
     }
-  }, [message, t])
+  }, [message, formatError])
 
   useEffect(() => {
     if (!open) return
@@ -94,6 +113,27 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
     }
   }
 
+  const persistSeeds = async (next: string[]): Promise<void> => {
+    setSeedSaving(true)
+    try {
+      const data = await getLanpmApi().discover.setSeeds(next)
+      setSnapshot(data)
+      message.success(t('discover.seedsSaved'))
+    } catch (err) {
+      message.error(formatError(err, 'discover.seedsSaveFailed'))
+    } finally {
+      setSeedSaving(false)
+    }
+  }
+
+  const handleAddSeed = (): void => {
+    void persistSeeds(addDiscoverSeed(snapshot.seeds, seedInput)).then(() => setSeedInput(''))
+  }
+
+  const handleRemoveSeed = (address: string): void => {
+    void persistSeeds(removeDiscoverSeed(snapshot.seeds, address))
+  }
+
   const dmOriginGroupId = activeGroupId.startsWith('dm:')
     ? useDmStore.getState().lastOriginGroupId
     : activeGroupId
@@ -117,6 +157,9 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
     onClose()
   }
 
+  const health = snapshot.health
+  const showHealthAlert = health.reason !== 'ok' || health.suggestManualPeer
+
   return (
     <Modal
       title={t('discover.title')}
@@ -139,6 +182,68 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
         </Button>
       </div>
 
+      {showHealthAlert ? (
+        <Alert
+          className={styles.healthAlert}
+          type={health.ok ? 'info' : 'warning'}
+          showIcon
+          message={t(HEALTH_REASON_KEYS[health.reason])}
+          description={
+            health.suggestManualPeer ? (
+              <Space wrap>
+                <Text type="secondary">{t('discover.manualPeerHint')}</Text>
+                {onOpenManualPeer ? (
+                  <Button
+                    size="small"
+                    type="primary"
+                    onClick={() => {
+                      onClose()
+                      onOpenManualPeer()
+                    }}
+                  >
+                    {t('discover.openManualPeer')}
+                  </Button>
+                ) : null}
+              </Space>
+            ) : null
+          }
+        />
+      ) : null}
+
+      <div className={styles.seedsBlock}>
+        <Text strong>{t('discover.seedsTitle')}</Text>
+        <Text type="secondary" className={styles.seedsHint}>
+          {t('discover.seedsHint')}
+        </Text>
+        <Space.Compact className={styles.seedsInput}>
+          <Input
+            placeholder={t('discover.seedsPlaceholder')}
+            value={seedInput}
+            onChange={(e) => setSeedInput(e.target.value)}
+            onPressEnter={handleAddSeed}
+          />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            loading={seedSaving}
+            onClick={handleAddSeed}
+          >
+            {t('discover.seedsAdd')}
+          </Button>
+        </Space.Compact>
+        {snapshot.seeds.length > 0 ? (
+          <Space size={[4, 4]} wrap className={styles.seedTags}>
+            {snapshot.seeds.map((seed) => (
+              <Tag key={seed} closable onClose={() => handleRemoveSeed(seed)}>
+                {seed}
+              </Tag>
+            ))}
+          </Space>
+        ) : (
+          <Text type="secondary">{t('discover.seedsEmpty')}</Text>
+        )}
+      </div>
+
       <Tabs
         activeKey={tab}
         onChange={(key) => setTab(key as 'groups' | 'people')}
@@ -147,7 +252,19 @@ export default function DiscoverModal({ open, onClose }: DiscoverModalProps): Re
             key: 'groups',
             label: t('discover.tabGroups'),
             children: snapshot.groups.length === 0 ? (
-              <Empty description={t('discover.emptyGroups')} />
+              <Empty description={t('discover.emptyGroups')}>
+                {onOpenManualPeer && health.suggestManualPeer ? (
+                  <Button
+                    type="link"
+                    onClick={() => {
+                      onClose()
+                      onOpenManualPeer()
+                    }}
+                  >
+                    {t('discover.openManualPeer')}
+                  </Button>
+                ) : null}
+              </Empty>
             ) : (
               <List
                 className={styles.list}

@@ -68,6 +68,7 @@ function persistStubDissolvedGroups(): void {
 const taskListeners = new Set<(groupId: string) => void>()
 const groupTagListeners = new Set<(groupId: string) => void>()
 const stubGroupTags: Record<string, GroupTagMeta[]> = {}
+let stubDiscoverSeeds: string[] = []
 
 function readStubWhiteboards(): Record<string, WhiteboardScene> {
   try {
@@ -1345,7 +1346,40 @@ export function createBrowserLanpmStub(): LanpmApi {
             suggestManualPeer: false,
             multicastOk: null
           },
-          seeds: [] as string[]
+          seeds: stubDiscoverSeeds.slice()
+        }
+      },
+      setSeeds: async (seeds: string[]) => {
+        stubDiscoverSeeds = Array.isArray(seeds) ? seeds.map(String) : []
+        const status = readStatus()
+        const localUserId = status.configured && status.user ? status.user.userId : undefined
+        const peers = listStubMembers('demo-project')
+          .filter((m) => m.userId !== localUserId)
+          .map((m) => ({
+            userId: m.userId,
+            displayName: m.displayName,
+            deviceCount: 1,
+            online: true
+          }))
+        return {
+          peers,
+          groups: [
+            {
+              groupId: 'stub-remote-project',
+              name: 'LanPM 协作组',
+              type: 'project' as const,
+              ownerUserId: 'demo-alice',
+              ownerDisplayName: 'Alice',
+              joined: false
+            }
+          ],
+          health: {
+            reason: 'ok' as const,
+            ok: true,
+            suggestManualPeer: false,
+            multicastOk: null
+          },
+          seeds: stubDiscoverSeeds.slice()
         }
       }
     },

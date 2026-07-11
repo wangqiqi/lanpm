@@ -176,7 +176,8 @@ const api: LanpmApi = {
     getGroupTabBadges: (groupId) => ipcRenderer.invoke('badge:getGroupTabBadges', groupId)
   },
   discover: {
-    snapshot: () => ipcRenderer.invoke('discover:snapshot')
+    snapshot: () => ipcRenderer.invoke('discover:snapshot'),
+    setSeeds: (seeds) => ipcRenderer.invoke('discover:setSeeds', seeds)
   },
   whiteboard: {
     getScene: (groupId) => ipcRenderer.invoke('whiteboard:getScene', groupId),

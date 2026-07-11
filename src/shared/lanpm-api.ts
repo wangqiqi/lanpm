@@ -216,6 +216,7 @@ export interface LanpmApi {
   }
   discover: {
     snapshot: () => Promise<DiscoverSnapshot>
+    setSeeds: (seeds: string[]) => Promise<DiscoverSnapshot>
   }
   whiteboard: {
     getScene: (groupId: string) => Promise<import('./whiteboard/types').WhiteboardScene | null>

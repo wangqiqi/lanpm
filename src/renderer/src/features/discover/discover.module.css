@@ -59,3 +59,30 @@
   font-size: var(--lanpm-font-caption);
   white-space: nowrap;
 }
+
+.healthAlert {
+  margin-bottom: 12px;
+}
+
+.seedsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 0.5px solid var(--lanpm-separator);
+  border-radius: var(--lanpm-radius-md);
+  background: var(--lanpm-fill-secondary);
+}
+
+.seedsHint {
+  font-size: var(--lanpm-font-caption);
+}
+
+.seedsInput {
+  width: 100%;
+}
+
+.seedTags {
+  margin-top: 4px;
+}

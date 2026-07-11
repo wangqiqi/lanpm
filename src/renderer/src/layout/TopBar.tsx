@@ -566,7 +566,11 @@ export default function TopBar(): React.ReactElement {
         </Dropdown>
         </div>
       </div>
-      <DiscoverModal open={discoverOpen} onClose={() => setDiscoverOpen(false)} />
+      <DiscoverModal
+        open={discoverOpen}
+        onClose={() => setDiscoverOpen(false)}
+        onOpenManualPeer={() => setManualPeerOpen(true)}
+      />
       <CreateGroupModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}

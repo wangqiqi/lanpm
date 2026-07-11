@@ -5,11 +5,13 @@ import {
   DISCOVER_SEEDS_META_KEY,
   normalizeDiscoverSeeds
 } from '../../shared/discover/discoverSeeds'
+import { parseHostPort } from '../../shared/network/manualPeer'
 import { getSetupStatus } from '../identity/setup'
 import { listUserGroups } from '../group/groupService'
 import { listGroupMembers } from '../storage/repositories/groupRepository'
-import { getMeta } from '../storage/repositories/syncMetaRepository'
+import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 import {
+  connectManualPeer,
   getNetworkTransport,
   RealNetworkTransport,
   resolveNetworkMode
@@ -19,6 +21,24 @@ import { listCachedDiscoverGroups } from './discoverGroupRegistry'
 
 function loadSeeds(db: Database): string[] {
   return normalizeDiscoverSeeds(getMeta(db, DISCOVER_SEEDS_META_KEY))
+}
+
+export function setDiscoverSeeds(db: Database, seeds: unknown): string[] {
+  const next = normalizeDiscoverSeeds(seeds)
+  setMeta(db, DISCOVER_SEEDS_META_KEY, JSON.stringify(next))
+  return next
+}
+
+async function tryConnectSeeds(seeds: string[]): Promise<void> {
+  for (const address of seeds) {
+    try {
+      const { host, port } = parseHostPort(address)
+      await connectManualPeer(host, port)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.warn('[lanpm] discover seed connect failed:', address, msg)
+    }
+  }
 }
 
 function buildHealth(input: {
@@ -64,9 +84,17 @@ function buildHealth(input: {
   }
 }
 
-export async function fetchDiscoverSnapshot(db: Database): Promise<DiscoverSnapshot> {
+export async function fetchDiscoverSnapshot(
+  db: Database,
+  options?: { connectSeeds?: boolean }
+): Promise<DiscoverSnapshot> {
   const status = getSetupStatus(db)
   const localUserId = status.configured && status.user ? status.user.userId : undefined
+  const seeds = loadSeeds(db)
+
+  if (options?.connectSeeds !== false && seeds.length > 0) {
+    await tryConnectSeeds(seeds)
+  }
 
   const transport = getNetworkTransport()
   const discovered = transport ? await transport.discoverPeers() : []
@@ -121,7 +149,6 @@ export async function fetchDiscoverSnapshot(db: Database): Promise<DiscoverSnaps
     return a.name.localeCompare(b.name)
   })
 
-  const seeds = loadSeeds(db)
   const health = buildHealth({ peerCount: peers.length, groupCount: groups.length })
 
   return { peers, groups, health, seeds }

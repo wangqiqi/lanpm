@@ -722,7 +722,23 @@ const enUS = {
   'discover.loadFailed': 'Failed to load discover list',
   'discover.owner': 'From {name}',
   'discover.devices': '{count} device(s) online',
-  'discover.chatHint': 'Chat'
+  'discover.chatHint': 'Chat',
+  'discover.healthOk': 'Discovery OK',
+  'discover.healthBindFailed': 'UDP discovery bind failed — LAN auto-discovery unavailable',
+  'discover.healthMulticastDegraded': 'Multicast join failed; falling back to broadcast',
+  'discover.healthBroadcastFailed': 'UDP broadcast failed — check network or firewall',
+  'discover.healthEmpty': 'No LAN peers or groups found (common on VPN / cross-subnet)',
+  'discover.healthUdpDisabled': 'UDP discovery is disabled — add a peer manually',
+  'discover.healthStub': 'Preview/stub mode — discover list may be incomplete',
+  'discover.manualPeerHint': 'Add a peer by IP:port, or save it as a discover seed',
+  'discover.openManualPeer': 'Add peer manually',
+  'discover.seedsTitle': 'Discover seeds',
+  'discover.seedsHint': 'For VPN / cross-subnet: saved addresses are tried on refresh',
+  'discover.seedsPlaceholder': '192.168.1.10:43124',
+  'discover.seedsAdd': 'Add',
+  'discover.seedsEmpty': 'No seeds saved yet',
+  'discover.seedsSaved': 'Seeds saved',
+  'discover.seedsSaveFailed': 'Failed to save seeds'
 } satisfies Record<MessageKey, string>
 
 export default enUS

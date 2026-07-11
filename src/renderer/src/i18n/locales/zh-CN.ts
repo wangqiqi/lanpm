@@ -715,7 +715,23 @@ const zhCN = {
   'discover.loadFailed': '发现列表加载失败',
   'discover.owner': '来自 {name}',
   'discover.devices': '{count} 台设备在线',
-  'discover.chatHint': '私聊'
+  'discover.chatHint': '私聊',
+  'discover.healthOk': '发现正常',
+  'discover.healthBindFailed': 'UDP 发现端口绑定失败，局域网自动发现不可用',
+  'discover.healthMulticastDegraded': '组播加入失败，已回退到广播（部分网段可能看不到对方）',
+  'discover.healthBroadcastFailed': 'UDP 广播发送失败，请检查网络或防火墙',
+  'discover.healthEmpty': '暂未发现局域网节点或群组（VPN / 跨网段时常见）',
+  'discover.healthUdpDisabled': 'UDP 发现已关闭，请使用手动添加节点',
+  'discover.healthStub': '当前为预览/Stub 模式，发现列表可能不完整',
+  'discover.manualPeerHint': '可手动添加对端 IP:端口，或保存为发现种子',
+  'discover.openManualPeer': '手动添加节点',
+  'discover.seedsTitle': '发现种子',
+  'discover.seedsHint': '跨网段 / VPN 时保存对端地址，刷新发现时自动尝试连接',
+  'discover.seedsPlaceholder': '192.168.1.10:43124',
+  'discover.seedsAdd': '添加',
+  'discover.seedsEmpty': '尚未保存种子',
+  'discover.seedsSaved': '种子已保存',
+  'discover.seedsSaveFailed': '保存种子失败'
 } satisfies Record<MessageKey, string>
 
 export default zhCN
