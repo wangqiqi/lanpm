@@ -24,6 +24,7 @@ import {
   validateTaskDateRange,
   validateTaskTitle
 } from '@shared/task/validation'
+import { normalizeTaskTags } from '@shared/task/tags'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -87,6 +88,7 @@ function stubCreateTask(input: CreateTaskInput): Task {
   const title = normalizeTaskTitle(input.title)
   const prev = readAllTasks()[input.groupId] ?? []
   const taskStatus = input.status ?? 'todo'
+  const tags = normalizeTaskTags(input.tags ?? [])
   const task: Task = {
     taskId: `task_${crypto.randomUUID()}`,
     groupId: input.groupId,
@@ -95,6 +97,7 @@ function stubCreateTask(input: CreateTaskInput): Task {
     status: taskStatus,
     priority: input.priority ?? 'medium',
     assigneeUserId: input.assigneeUserId,
+    tags: tags.length > 0 ? tags : undefined,
     progressPercent: clampProgressPercent(input.progressPercent ?? 0),
     sortOrder: maxSortInColumn(prev, taskStatus) + 1,
     createdBy: status.user.userId,
@@ -149,6 +152,13 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
       input.assigneeUserId === null
         ? undefined
         : input.assigneeUserId ?? existing.assigneeUserId,
+    tags:
+      input.tags !== undefined
+        ? (() => {
+            const normalized = normalizeTaskTags(input.tags)
+            return normalized.length > 0 ? normalized : undefined
+          })()
+        : existing.tags,
     progressPercent:
       input.progressPercent !== undefined
         ? clampProgressPercent(input.progressPercent)

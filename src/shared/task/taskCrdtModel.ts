@@ -4,6 +4,7 @@
  */
 import * as Y from 'yjs'
 import type { Task } from './types'
+import { normalizeTaskTags } from './tags'
 
 export const TASK_CRDT_TASKS_KEY = 'tasks'
 
@@ -18,6 +19,7 @@ export const TASK_CRDT_FIELD_KEYS = [
   'otherReason',
   'priority',
   'assigneeUserId',
+  'tags',
   'progressPercent',
   'startDate',
   'endDate',
@@ -61,6 +63,8 @@ export function applyTaskToDoc(doc: Y.Doc, task: Task): void {
   setOptional(row, 'description', task.description)
   setOptional(row, 'otherReason', task.otherReason)
   setOptional(row, 'assigneeUserId', task.assigneeUserId)
+  const tags = normalizeTaskTags(task.tags ?? [])
+  setOptional(row, 'tags', tags.length > 0 ? tags : undefined)
   setOptional(row, 'startDate', task.startDate)
   setOptional(row, 'endDate', task.endDate)
   setOptional(row, 'milestone', task.milestone ?? false)
@@ -144,6 +148,8 @@ export function taskFromYMap(map: Y.Map<unknown>): Task | null {
   }
   const progressPercent = asNumber(map.get('progressPercent')) ?? 0
   const sortOrder = asNumber(map.get('sortOrder')) ?? 0
+  const tagsRaw = map.get('tags')
+  const tags = normalizeTaskTags(tagsRaw)
   return {
     taskId,
     groupId,
@@ -159,6 +165,7 @@ export function taskFromYMap(map: Y.Map<unknown>): Task | null {
     description: asString(map.get('description')),
     otherReason: asString(map.get('otherReason')),
     assigneeUserId: asString(map.get('assigneeUserId')),
+    tags: tags.length > 0 ? tags : undefined,
     startDate: asString(map.get('startDate')),
     endDate: asString(map.get('endDate')),
     milestone: asBoolean(map.get('milestone')),

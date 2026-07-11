@@ -71,4 +71,11 @@ describe('taskCrdtModel', () => {
     expect(listed[0]?.title).toBe('T')
     expect(listed[0]?.description).toBe('D body')
   })
+
+  it('round-trips tags through Y.Map', () => {
+    const doc = createEmptyTaskDoc()
+    applyTaskToDoc(doc, sampleTask({ tags: ['API', '  api ', 'board'] }))
+    const listed = listTasksFromDoc(doc)
+    expect(listed[0]?.tags).toEqual(['API', 'board'])
+  })
 })
