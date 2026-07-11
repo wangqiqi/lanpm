@@ -4,8 +4,13 @@
 
 ## [Unreleased]
 
+## [1.24.0] - 2026-07-11
+
 ### Added
 - **SPRINT-B4-SYNC-OUTBOX（TASK-300–303）**：`sync_outbox`（schema v11）— task/file/tag publish 失败持久排队、周期/重连 flush；`verify:sync-outbox`；docs/06 · README 对齐。
+
+### Release
+- `v1.24.0` — B4 weak-net sync outbox
 
 ## [1.23.0] - 2026-07-11
 

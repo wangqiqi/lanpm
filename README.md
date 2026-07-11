@@ -255,7 +255,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 
 **Current:** `1.22.0` — plugin loader + form-js POC (`verify:plugin-loader`), B2 member search (1.21), A1 nudge (1.20), transfer A4 + plugin SPIKE (1.19). M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Next (in progress / queue):** B4 sync_outbox → **1.24.0** · B3 backup polish · marketplace SPIKE.
+**Next (in progress / queue):** B3 backup polish · marketplace SPIKE.
 
 **Later (P1+):** screen share, voice, mind maps, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 
