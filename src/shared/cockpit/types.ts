@@ -4,6 +4,8 @@ export interface CockpitSummary {
   totalProjects: number
   inProgressCount: number
   delayedCount: number
+  /** 健康状态为 risk 的项目数（领导 KPI） */
+  riskProjectCount: number
 }
 
 export interface ProjectDashboardItem {

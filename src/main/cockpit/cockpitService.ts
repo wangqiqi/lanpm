@@ -6,6 +6,7 @@ import type {
   ProjectDashboardItem,
   ProjectHealth
 } from '../../shared/cockpit/types'
+import { countRiskProjects, sortCockpitProjects } from '../../shared/cockpit/sortProjects'
 import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
@@ -41,14 +42,16 @@ function aggregateProject(tasks: Task[]): Omit<ProjectDashboardItem, 'groupId' |
 }
 
 export function buildCockpitDashboard(db: Database): CockpitDashboard {
-  const projects = listProjectGroups(db).map((g) => {
-    const tasks = listTasksByGroup(db, g.groupId)
-    return {
-      groupId: g.groupId,
-      name: g.name,
-      ...aggregateProject(tasks)
-    }
-  })
+  const projects = sortCockpitProjects(
+    listProjectGroups(db).map((g) => {
+      const tasks = listTasksByGroup(db, g.groupId)
+      return {
+        groupId: g.groupId,
+        name: g.name,
+        ...aggregateProject(tasks)
+      }
+    })
+  )
 
   const deptMap = new Map<string, { done: number; total: number }>()
   for (const project of listProjectGroups(db)) {
@@ -74,7 +77,8 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
   const summary = {
     totalProjects: projects.length,
     inProgressCount: projects.reduce((n, p) => n + p.inProgressCount, 0),
-    delayedCount: projects.reduce((n, p) => n + p.delayedCount, 0)
+    delayedCount: projects.reduce((n, p) => n + p.delayedCount, 0),
+    riskProjectCount: countRiskProjects(projects)
   }
 
   return { summary, projects, departments }

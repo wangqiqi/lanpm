@@ -1214,7 +1214,12 @@ export function createBrowserLanpmStub(): LanpmApi {
     },
     cockpit: {
       getDashboard: async () => ({
-        summary: { totalProjects: 1, inProgressCount: 2, delayedCount: 0 },
+        summary: {
+          totalProjects: 1,
+          inProgressCount: 2,
+          delayedCount: 0,
+          riskProjectCount: 0
+        },
         projects: [
           {
             groupId: 'demo-project',
