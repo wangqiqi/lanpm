@@ -8,6 +8,7 @@
 - **docs/06**：拍板 **可购会议插件**（语音 / 视频 / 屏幕共享 / 会议室）— 不进核心；`lanpm.meeting` 一包多档（Lite mesh / Pro SFU）；信创离线许可证；落地序与 §6 候选对齐（见 §1.2）。README 规划句同步。
 
 ### Fixed
+- **TASK-334**：`listDueSyncOutbox` `limit` clamp（默认 50 · 上限 500）；非法/非正回退默认。
 - **TASK-333**：chat sync fire-and-forget 改用 `catchSyncFailure`（`console.warn` + scope）；禁止裸吞；`verify:chat-sync-observability`。
 - **TASK-332**：新建群 `autoDiscover` 默认改为 **false**（`DEFAULT_GROUP_AUTO_DISCOVER`）；创建表单提示；stub/create 对齐。
 - **TASK-331**：传输限速 `rateKbps` 上限 clamp（`FILE_TRANSFER_RATE_MAX_KBPS=100_000`）；IPC 拒绝非有限/负数。

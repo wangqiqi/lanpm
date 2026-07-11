@@ -16,9 +16,12 @@ import {
   listDueSyncOutbox
 } from '../../src/main/sync/outboxStore.ts'
 import {
+  clampSyncOutboxListLimit,
   outboxBackoffMs,
   SYNC_OUTBOX_BACKOFF_BASE_MS,
   SYNC_OUTBOX_BACKOFF_MAX_MS,
+  SYNC_OUTBOX_LIST_DEFAULT_LIMIT,
+  SYNC_OUTBOX_LIST_MAX_LIMIT,
   SYNC_OUTBOX_MAX_ATTEMPTS
 } from '../../src/shared/sync/outbox.ts'
 import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
@@ -40,6 +43,12 @@ assert.equal(outboxBackoffMs(0), SYNC_OUTBOX_BACKOFF_BASE_MS)
 assert.equal(outboxBackoffMs(1), SYNC_OUTBOX_BACKOFF_BASE_MS * 2)
 assert.equal(outboxBackoffMs(20), SYNC_OUTBOX_BACKOFF_MAX_MS)
 assert.ok(SYNC_OUTBOX_MAX_ATTEMPTS >= 10)
+assert.equal(clampSyncOutboxListLimit(undefined), SYNC_OUTBOX_LIST_DEFAULT_LIMIT)
+assert.equal(clampSyncOutboxListLimit(0), SYNC_OUTBOX_LIST_DEFAULT_LIMIT)
+assert.equal(clampSyncOutboxListLimit(SYNC_OUTBOX_LIST_MAX_LIMIT + 99), SYNC_OUTBOX_LIST_MAX_LIMIT)
+
+const storeSrc = readFileSync(join(root, 'src/main/sync/outboxStore.ts'), 'utf8')
+assert.match(storeSrc, /clampSyncOutboxListLimit/, 'listDueSyncOutbox must clamp limit')
 
 const dir = mkLanpmTemp('lanpm-outbox-')
 try {

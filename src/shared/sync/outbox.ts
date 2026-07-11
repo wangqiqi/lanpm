@@ -34,9 +34,21 @@ export interface SyncOutboxEnqueueInput {
 /** Cap retries so a poison message cannot spin forever. */
 export const SYNC_OUTBOX_MAX_ATTEMPTS = 20
 
+/** Default / max page size for listDueSyncOutbox. */
+export const SYNC_OUTBOX_LIST_DEFAULT_LIMIT = 50
+export const SYNC_OUTBOX_LIST_MAX_LIMIT = 500
+
 /** Base backoff 1s · doubles · capped at 5 min. */
 export const SYNC_OUTBOX_BACKOFF_BASE_MS = 1000
 export const SYNC_OUTBOX_BACKOFF_MAX_MS = 5 * 60 * 1000
+
+/** ≤0 / 非有限 → default；超过 MAX → MAX */
+export function clampSyncOutboxListLimit(limit: number | null | undefined): number {
+  if (typeof limit !== 'number' || !Number.isFinite(limit) || limit <= 0) {
+    return SYNC_OUTBOX_LIST_DEFAULT_LIMIT
+  }
+  return Math.min(SYNC_OUTBOX_LIST_MAX_LIMIT, Math.floor(limit))
+}
 
 export function outboxBackoffMs(attempts: number): number {
   const n = Math.max(0, Math.floor(attempts))

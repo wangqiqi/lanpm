@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { Database } from 'better-sqlite3'
 import {
+  clampSyncOutboxListLimit,
   isSyncOutboxChannel,
   outboxNextAttemptAt,
   SYNC_OUTBOX_MAX_ATTEMPTS,
@@ -91,7 +92,7 @@ export function listDueSyncOutbox(
   opts?: { nowIso?: string; limit?: number; channel?: SyncOutboxChannel }
 ): SyncOutboxRow[] {
   const nowIso = opts?.nowIso ?? new Date().toISOString()
-  const limit = opts?.limit ?? 50
+  const limit = clampSyncOutboxListLimit(opts?.limit)
   const rows = opts?.channel
     ? (db
         .prepare(
