@@ -17,11 +17,16 @@ const REQUIRED_TOKENS = [
   '--lanpm-accent-fill',
   '--lanpm-accent-fill-strong',
   '--lanpm-accent-ring',
+  '--lanpm-selected-bg',
+  '--lanpm-surface-elevated',
+  '--lanpm-shadow-md',
+  '--lanpm-shadow-island',
+  '--lanpm-radius-md',
+  '--lanpm-radius-xl',
   '--lanpm-success',
   '--lanpm-warning',
   '--lanpm-danger',
-  '--lanpm-on-accent',
-  '--lanpm-shadow-md'
+  '--lanpm-on-accent'
 ] as const
 
 const REQUIRED_FONT_TOKENS = [

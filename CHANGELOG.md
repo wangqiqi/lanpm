@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **视觉令牌（气质）**：亮/暗双主题圆角阶升至 8/12/16/20；新增 `--lanpm-selected-bg` / `--lanpm-shadow-island` / `--lanpm-surface-elevated`；选中 fill 与岛感阴影更软（保留蓝品牌）。
+
 ## [1.28.0] - 2026-07-12
 
 ### Changed

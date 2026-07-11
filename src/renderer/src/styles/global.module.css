@@ -47,31 +47,34 @@
   --lanpm-ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* Apple HIG 风格令牌 — 亮色 */
+/* Apple HIG + Excalidraw 外壳气质令牌 — 亮色（非画布手绘） */
 :global(html[data-theme='light']) {
   --lanpm-bg: #f5f5f7;
-  --lanpm-surface: rgba(255, 255, 255, 0.78);
+  --lanpm-surface: rgba(255, 255, 255, 0.82);
   --lanpm-surface-solid: #ffffff;
   --lanpm-surface-group: #ffffff;
+  --lanpm-surface-elevated: #ffffff;
   --lanpm-text: #1d1d1f;
-  --lanpm-text-secondary: #86868b;
-  --lanpm-text-tertiary: #aeaeb2;
-  --lanpm-accent: #0066cc; /* Sophisticated Premium Slate Blue */
+  --lanpm-text-secondary: #6e6e73;
+  --lanpm-text-tertiary: #8e8e93;
+  --lanpm-accent: #0066cc;
   --lanpm-accent-hover: #0077e6;
-  --lanpm-separator: rgba(60, 60, 67, 0.1); /* Lighter border line */
-  --lanpm-nav-bg: rgba(255, 255, 255, 0.72);
-  --lanpm-bar-border: rgba(60, 60, 67, 0.12); /* Lighter border line */
-  --lanpm-hover-bg: rgba(60, 60, 67, 0.04); /* Premium hover background */
-  --lanpm-fill-secondary: rgba(120, 120, 128, 0.08); /* More subtle secondary fill */
+  --lanpm-separator: rgba(60, 60, 67, 0.09);
+  --lanpm-nav-bg: rgba(255, 255, 255, 0.78);
+  --lanpm-bar-border: rgba(60, 60, 67, 0.1);
+  --lanpm-hover-bg: rgba(60, 60, 67, 0.045);
+  --lanpm-fill-secondary: rgba(120, 120, 128, 0.08);
   --lanpm-fill-secondary-hover: rgba(120, 120, 128, 0.14);
-  --lanpm-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); /* Softer premium shadow */
+  --lanpm-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   --lanpm-blur: saturate(180%) blur(20px);
   --lanpm-border: rgba(60, 60, 67, 0.1);
   --lanpm-bubble-bg: rgba(60, 60, 67, 0.05);
   --lanpm-code-bg: rgba(0, 0, 0, 0.03);
-  --lanpm-accent-fill: rgba(0, 102, 204, 0.06); /* Sophisticated subtle accent fill */
-  --lanpm-accent-fill-strong: rgba(0, 102, 204, 0.1);
-  --lanpm-accent-ring: rgba(0, 113, 227, 0.2);
+  --lanpm-accent-fill: rgba(0, 102, 204, 0.08);
+  --lanpm-accent-fill-strong: rgba(0, 102, 204, 0.12);
+  /* 壳层选中/激活（顶栏 action · 底栏 Tab）— 蓝品牌淡底，非紫 */
+  --lanpm-selected-bg: var(--lanpm-accent-fill);
+  --lanpm-accent-ring: rgba(0, 113, 227, 0.22);
   --lanpm-success: #34c759;
   --lanpm-success-ring: rgba(52, 199, 89, 0.25);
   --lanpm-warning: #ff9500;
@@ -83,77 +86,84 @@
   --lanpm-on-accent: #ffffff;
   --lanpm-overlay: rgba(0, 0, 0, 0.35);
   --lanpm-media-bg: #000000;
-  --lanpm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --lanpm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --lanpm-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.08);
-  /* Elevation: Surface panel (sidebar, toolbar strip) */
-  --lanpm-shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.04);
-  /* Elevation: Tactile card (task card, attach card) — dual-layer */
+  --lanpm-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.05);
+  --lanpm-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --lanpm-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.07);
+  --lanpm-shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.04);
   --lanpm-shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.02);
-  /* Canvas gutter: MainLayout padding that exposes --lanpm-bg */
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 14px rgba(0, 0, 0, 0.04);
+  /* 通栏岛感：顶/底栏与浮层面板 */
+  --lanpm-shadow-island:
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 16px rgba(0, 0, 0, 0.05);
   --lanpm-canvas-inset: 16px;
-  --lanpm-segment-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.12), 0 0.5px 1px rgba(0, 0, 0, 0.06);
+  --lanpm-segment-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1), 0 0.5px 1px rgba(0, 0, 0, 0.05);
   --lanpm-font-tab: 10px;
 
-  /* Premium Unified Radius Tokens */
-  --lanpm-radius-sm: 6px;
-  --lanpm-radius-md: 10px;
-  --lanpm-radius-lg: 14px;
+  /* 圆角阶（气质：更大、更「岛」） */
+  --lanpm-radius-sm: 8px;
+  --lanpm-radius-md: 12px;
+  --lanpm-radius-lg: 16px;
+  --lanpm-radius-xl: 20px;
 }
 
-/* 暗色 */
+/* 暗色 — 与亮色同变量名；阴影更深、选中 fill 略提亮 */
 :global(html[data-theme='dark']) {
   --lanpm-bg: #000000;
-  --lanpm-surface: rgba(28, 28, 30, 0.78);
+  --lanpm-surface: rgba(28, 28, 30, 0.82);
   --lanpm-surface-solid: #1c1c1e;
   --lanpm-surface-group: #1c1c1e;
+  --lanpm-surface-elevated: #2c2c2e;
   --lanpm-text: #f5f5f7;
-  --lanpm-text-secondary: #98989d;
-  --lanpm-text-tertiary: #636366;
+  --lanpm-text-secondary: #a1a1a6;
+  --lanpm-text-tertiary: #8e8e93;
   --lanpm-accent: #0a84ff;
   --lanpm-accent-hover: #409cff;
-  --lanpm-separator: rgba(84, 84, 88, 0.28); /* More premium, less stark lines */
-  --lanpm-nav-bg: rgba(28, 28, 30, 0.72);
-  --lanpm-bar-border: rgba(84, 84, 88, 0.2); /* Lighter borders */
-  --lanpm-hover-bg: rgba(255, 255, 255, 0.05); /* Softer hover indicator */
-  --lanpm-fill-secondary: rgba(120, 120, 128, 0.16); /* Softer secondary fill */
-  --lanpm-fill-secondary-hover: rgba(120, 120, 128, 0.24);
-  --lanpm-shadow: 0 4px 32px rgba(0, 0, 0, 0.35); /* Softer overlay dark shadow */
+  --lanpm-separator: rgba(84, 84, 88, 0.32);
+  --lanpm-nav-bg: rgba(28, 28, 30, 0.78);
+  --lanpm-bar-border: rgba(84, 84, 88, 0.28);
+  --lanpm-hover-bg: rgba(255, 255, 255, 0.06);
+  --lanpm-fill-secondary: rgba(120, 120, 128, 0.18);
+  --lanpm-fill-secondary-hover: rgba(120, 120, 128, 0.26);
+  --lanpm-shadow: 0 4px 28px rgba(0, 0, 0, 0.4);
   --lanpm-blur: saturate(180%) blur(20px);
-  --lanpm-border: rgba(84, 84, 88, 0.2);
-  --lanpm-bubble-bg: rgba(255, 255, 255, 0.06);
-  --lanpm-code-bg: rgba(255, 255, 255, 0.04);
-  --lanpm-accent-fill: rgba(10, 132, 255, 0.08);
-  --lanpm-accent-fill-strong: rgba(10, 132, 255, 0.14);
-  --lanpm-accent-ring: rgba(10, 132, 255, 0.35);
+  --lanpm-border: rgba(84, 84, 88, 0.28);
+  --lanpm-bubble-bg: rgba(255, 255, 255, 0.07);
+  --lanpm-code-bg: rgba(255, 255, 255, 0.05);
+  --lanpm-accent-fill: rgba(10, 132, 255, 0.16);
+  --lanpm-accent-fill-strong: rgba(10, 132, 255, 0.24);
+  --lanpm-selected-bg: var(--lanpm-accent-fill);
+  --lanpm-accent-ring: rgba(10, 132, 255, 0.4);
   --lanpm-success: #30d158;
   --lanpm-success-ring: rgba(48, 209, 88, 0.3);
   --lanpm-warning: #ff9f0a;
   --lanpm-warning-ring: rgba(255, 159, 10, 0.3);
   --lanpm-danger: #ff453a;
   --lanpm-danger-strong: #ff6961;
-  --lanpm-danger-fill: rgba(255, 69, 58, 0.12);
+  --lanpm-danger-fill: rgba(255, 69, 58, 0.14);
   --lanpm-danger-ring: rgba(255, 69, 58, 0.35);
   --lanpm-on-accent: #ffffff;
   --lanpm-overlay: rgba(0, 0, 0, 0.55);
   --lanpm-media-bg: #000000;
-  --lanpm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --lanpm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-  --lanpm-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --lanpm-shadow-surface: 0 1px 4px rgba(0, 0, 0, 0.25);
+  --lanpm-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
+  --lanpm-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --lanpm-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.55);
+  --lanpm-shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.3);
   --lanpm-shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.15);
+    0 1px 2px rgba(0, 0, 0, 0.25),
+    0 4px 14px rgba(0, 0, 0, 0.2);
+  --lanpm-shadow-island:
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 6px 20px rgba(0, 0, 0, 0.4);
   --lanpm-canvas-inset: 16px;
-  --lanpm-segment-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  --lanpm-segment-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   --lanpm-font-tab: 10px;
 
-  /* Premium Unified Radius Tokens */
-  --lanpm-radius-sm: 6px;
-  --lanpm-radius-md: 10px;
-  --lanpm-radius-lg: 14px;
+  --lanpm-radius-sm: 8px;
+  --lanpm-radius-md: 12px;
+  --lanpm-radius-lg: 16px;
+  --lanpm-radius-xl: 20px;
 }
 
 :global(body) {
