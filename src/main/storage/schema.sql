@@ -184,3 +184,28 @@ CREATE TABLE whiteboard_scenes (
   linked_task_id TEXT,
   updated_at TEXT NOT NULL
 );
+
+-- 任务验收清单（P1-3 / TASK-235）：一任务一份清单
+CREATE TABLE task_checklists (
+  checklist_id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL UNIQUE,
+  group_id TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE task_checklist_items (
+  item_id TEXT PRIMARY KEY,
+  checklist_id TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  text TEXT NOT NULL,
+  done INTEGER NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  linked_subtask_id TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  deleted_at TEXT
+);
+CREATE INDEX idx_checklist_items_task ON task_checklist_items(task_id);
+CREATE INDEX idx_checklist_items_checklist ON task_checklist_items(checklist_id);

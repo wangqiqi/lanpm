@@ -98,6 +98,40 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       db.exec(`ALTER TABLE tasks ADD COLUMN source_msg_id TEXT`)
       db.exec(`ALTER TABLE tasks ADD COLUMN linked_file_ids_json TEXT NOT NULL DEFAULT '[]'`)
     }
+  },
+  {
+    fromVersion: 8,
+    description: 'task_checklists + task_checklist_items for P1-3 (TASK-235)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE task_checklists (
+          checklist_id TEXT PRIMARY KEY,
+          task_id TEXT NOT NULL UNIQUE,
+          group_id TEXT NOT NULL,
+          title TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+      db.exec(`
+        CREATE TABLE task_checklist_items (
+          item_id TEXT PRIMARY KEY,
+          checklist_id TEXT NOT NULL,
+          task_id TEXT NOT NULL,
+          text TEXT NOT NULL,
+          done INTEGER NOT NULL DEFAULT 0,
+          sort_order INTEGER NOT NULL DEFAULT 0,
+          linked_subtask_id TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          deleted_at TEXT
+        )
+      `)
+      db.exec(`CREATE INDEX idx_checklist_items_task ON task_checklist_items(task_id)`)
+      db.exec(
+        `CREATE INDEX idx_checklist_items_checklist ON task_checklist_items(checklist_id)`
+      )
+    }
   }
 ]
 

@@ -4,6 +4,7 @@ import type { UpsertDependencyInput } from '../../shared/task/dependency'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import type { TaskAwarenessLocalState } from '../../shared/task/taskAwareness'
 import { isTaskAwarenessLocalState } from '../../shared/task/taskAwareness'
+import type { UpsertChecklistItemInput } from '../../shared/task/checklist'
 import { TASK_AWARENESS_PUSH_CHANNEL, TASK_IPC } from '../../shared/task/channels'
 import {
   createGroupTask,
@@ -12,10 +13,14 @@ import {
   deleteGroupTask,
   deleteTaskDependency,
   listGroupTasks,
+  listTaskChecklist,
   listTaskDiscussions,
   moveGroupTask,
+  removeTaskChecklistItem,
+  toggleTaskChecklistItem,
   updateGroupTask,
   updateTaskSchedule,
+  upsertTaskChecklistItem,
   upsertTaskDependency
 } from '../task/taskService'
 import {
@@ -93,6 +98,42 @@ export function registerTaskIpc(): void {
       if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
       if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
       return listTaskDiscussions(getDatabase(), groupId, taskId)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.listChecklist,
+    (_event, groupId: string, taskId: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
+      return listTaskChecklist(getDatabase(), groupId, taskId)
+    }
+  )
+
+  ipcMain.handle(TASK_IPC.upsertChecklistItem, (_event, input: UpsertChecklistItemInput) => {
+    if (!input || typeof input !== 'object') throw new Error('input required')
+    if (typeof input.groupId !== 'string' || !input.groupId) throw new Error('groupId required')
+    if (typeof input.taskId !== 'string' || !input.taskId) throw new Error('taskId required')
+    if (typeof input.text !== 'string') throw new Error('text required')
+    return upsertTaskChecklistItem(getDatabase(), input)
+  })
+
+  ipcMain.handle(
+    TASK_IPC.toggleChecklistItem,
+    (_event, groupId: string, itemId: string, done?: boolean) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof itemId !== 'string' || !itemId) throw new Error('itemId required')
+      if (done !== undefined && typeof done !== 'boolean') throw new Error('done must be boolean')
+      return toggleTaskChecklistItem(getDatabase(), groupId, itemId, done)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.removeChecklistItem,
+    (_event, groupId: string, itemId: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof itemId !== 'string' || !itemId) throw new Error('itemId required')
+      return removeTaskChecklistItem(getDatabase(), groupId, itemId)
     }
   )
 

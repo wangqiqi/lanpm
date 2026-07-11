@@ -27,6 +27,12 @@ import {
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
+import {
+  checklistProgressOf,
+  type ChecklistItem,
+  type ChecklistView,
+  type UpsertChecklistItemInput
+} from '@shared/task/checklist'
 import { countMineOpenTasks } from '@shared/badge/mineOpen'
 import type { GroupTagMeta } from '@shared/task/groupTagMeta'
 import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
@@ -37,6 +43,7 @@ import { stubError, stubT } from '@renderer/platform/stubTranslate'
 const STORAGE_KEY = 'lanpm.dev.identity'
 const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
 const TASK_STORAGE_KEY = 'lanpm.dev.tasks'
+const CHECKLIST_STORAGE_KEY = 'lanpm.dev.checklists'
 const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
 const FILE_STORAGE_KEY = 'lanpm.dev.files'
 const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
@@ -99,6 +106,90 @@ function writeGroupTasks(groupId: string, tasks: Task[]): void {
   all[groupId] = tasks
   localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(all))
   for (const fn of taskListeners) fn(groupId)
+}
+
+function readAllChecklists(): Record<string, ChecklistItem[]> {
+  try {
+    const raw = localStorage.getItem(CHECKLIST_STORAGE_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, ChecklistItem[]>
+  } catch {
+    return {}
+  }
+}
+
+function writeTaskChecklist(taskId: string, items: ChecklistItem[]): void {
+  const all = readAllChecklists()
+  all[taskId] = items
+  localStorage.setItem(CHECKLIST_STORAGE_KEY, JSON.stringify(all))
+}
+
+function stubListChecklist(groupId: string, taskId: string): ChecklistView {
+  assertStubTaskWritable(groupId)
+  const list = readAllTasks()[groupId] ?? []
+  const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
+  if (!task) throw stubError('stub.taskNotFound')
+  const items = readAllChecklists()[taskId] ?? []
+  return {
+    checklist: items.length
+      ? {
+          checklistId: `cl_stub_${taskId}`,
+          taskId,
+          groupId,
+          title: '',
+          createdAt: items[0]!.createdAt,
+          updatedAt: items[items.length - 1]!.updatedAt
+        }
+      : null,
+    items,
+    progress: checklistProgressOf(items)
+  }
+}
+
+function stubUpsertChecklistItem(input: UpsertChecklistItemInput): ChecklistItem {
+  assertStubTaskWritable(input.groupId)
+  const list = readAllTasks()[input.groupId] ?? []
+  const task = list.find((t) => t.taskId === input.taskId && !t.deletedAt)
+  if (!task) throw stubError('stub.taskNotFound')
+  const text = input.text.trim()
+  if (!text) throw new Error('checklist item text required')
+  const items = [...(readAllChecklists()[input.taskId] ?? [])]
+  const now = new Date().toISOString()
+  if (input.itemId) {
+    const idx = items.findIndex((i) => i.itemId === input.itemId)
+    if (idx < 0) throw stubError('stub.taskNotFound')
+    const prev = items[idx]!
+    const next: ChecklistItem = {
+      ...prev,
+      text,
+      done: input.done ?? prev.done,
+      sortOrder: input.sortOrder ?? prev.sortOrder,
+      linkedSubtaskId:
+        input.linkedSubtaskId === undefined
+          ? prev.linkedSubtaskId
+          : (input.linkedSubtaskId ?? undefined),
+      updatedAt: now
+    }
+    items[idx] = next
+    writeTaskChecklist(input.taskId, items)
+    for (const fn of taskListeners) fn(input.groupId)
+    return next
+  }
+  const item: ChecklistItem = {
+    itemId: `cli_${crypto.randomUUID()}`,
+    checklistId: `cl_stub_${input.taskId}`,
+    taskId: input.taskId,
+    text,
+    done: input.done ?? false,
+    sortOrder: input.sortOrder ?? items.length,
+    linkedSubtaskId: input.linkedSubtaskId ?? undefined,
+    createdAt: now,
+    updatedAt: now
+  }
+  items.push(item)
+  writeTaskChecklist(input.taskId, items)
+  for (const fn of taskListeners) fn(input.groupId)
+  return item
 }
 
 function maxSortInColumn(tasks: Task[], status: TaskStatus): number {
@@ -779,6 +870,50 @@ export function createBrowserLanpmStub(): LanpmApi {
         const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
         if (!task) throw stubError('stub.taskNotFound')
         return collectTaskDiscussions(readChatMessages(groupId), taskId, task.sourceMsgId)
+      },
+      listChecklist: async (groupId, taskId) => stubListChecklist(groupId, taskId),
+      upsertChecklistItem: async (input) => stubUpsertChecklistItem(input),
+      toggleChecklistItem: async (groupId, itemId, done) => {
+        assertStubTaskWritable(groupId)
+        const all = readAllChecklists()
+        for (const [taskId, items] of Object.entries(all)) {
+          const idx = items.findIndex((i) => i.itemId === itemId)
+          if (idx < 0) continue
+          const task = (readAllTasks()[groupId] ?? []).find(
+            (t) => t.taskId === taskId && !t.deletedAt
+          )
+          if (!task) throw stubError('stub.taskNotFound')
+          const prev = items[idx]!
+          const next: ChecklistItem = {
+            ...prev,
+            done: done !== undefined ? done : !prev.done,
+            updatedAt: new Date().toISOString()
+          }
+          const copy = [...items]
+          copy[idx] = next
+          writeTaskChecklist(taskId, copy)
+          for (const fn of taskListeners) fn(groupId)
+          return next
+        }
+        throw stubError('stub.taskNotFound')
+      },
+      removeChecklistItem: async (groupId, itemId) => {
+        assertStubTaskWritable(groupId)
+        const all = readAllChecklists()
+        for (const [taskId, items] of Object.entries(all)) {
+          if (!items.some((i) => i.itemId === itemId)) continue
+          const task = (readAllTasks()[groupId] ?? []).find(
+            (t) => t.taskId === taskId && !t.deletedAt
+          )
+          if (!task) throw stubError('stub.taskNotFound')
+          writeTaskChecklist(
+            taskId,
+            items.filter((i) => i.itemId !== itemId)
+          )
+          for (const fn of taskListeners) fn(groupId)
+          return true
+        }
+        return false
       },
       updateSchedule: async (input) =>
         stubUpdateTask({

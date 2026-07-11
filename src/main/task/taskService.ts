@@ -47,6 +47,20 @@ import { broadcastToAllWindows } from '../utils/broadcast'
 import { updateMessage, listMessagesForTaskDiscussion } from '../storage/repositories/messageRepository'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { collectTaskDiscussions, type TaskDiscussionItem } from '../../shared/task/discussions'
+import type {
+  ChecklistItem,
+  ChecklistView,
+  UpsertChecklistItemInput
+} from '../../shared/task/checklist'
+import { checklistProgressOf } from '../../shared/task/checklist'
+import {
+  getChecklistByTaskId,
+  getChecklistItemById,
+  listChecklistItemsByTaskId,
+  setChecklistItemDone,
+  softDeleteChecklistItem,
+  upsertChecklistItemRow
+} from '../storage/repositories/checklistRepository'
 
 function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throwLanpm('stub.dmNoTask')
@@ -94,6 +108,65 @@ export function listTaskDiscussions(
   if (!task || task.groupId !== groupId) throwLanpm('stub.taskNotFound')
   const messages = listMessagesForTaskDiscussion(db, groupId, taskId, task.sourceMsgId)
   return collectTaskDiscussions(messages, taskId, task.sourceMsgId)
+}
+
+/** P1-3: list checklist + progress for a task. */
+export function listTaskChecklist(db: Database, groupId: string, taskId: string): ChecklistView {
+  assertTaskWritable(db, groupId)
+  const task = getTaskById(db, taskId)
+  if (!task || task.groupId !== groupId) throwLanpm('stub.taskNotFound')
+  const checklist = getChecklistByTaskId(db, taskId)
+  const items = listChecklistItemsByTaskId(db, taskId)
+  return {
+    checklist,
+    items,
+    progress: checklistProgressOf(items)
+  }
+}
+
+export function upsertTaskChecklistItem(
+  db: Database,
+  input: UpsertChecklistItemInput
+): ChecklistItem {
+  assertTaskWritable(db, input.groupId)
+  const task = getTaskById(db, input.taskId)
+  if (!task || task.groupId !== input.groupId) throwLanpm('stub.taskNotFound')
+  const item = upsertChecklistItemRow(db, input)
+  broadcastTasksChanged(input.groupId)
+  return item
+}
+
+export function toggleTaskChecklistItem(
+  db: Database,
+  groupId: string,
+  itemId: string,
+  done?: boolean
+): ChecklistItem {
+  assertTaskWritable(db, groupId)
+  const existing = getChecklistItemById(db, itemId)
+  if (!existing) throwLanpm('stub.taskNotFound')
+  const task = getTaskById(db, existing.taskId)
+  if (!task || task.groupId !== groupId) throwLanpm('stub.taskNotFound')
+  const next = done !== undefined ? done : !existing.done
+  const updated = setChecklistItemDone(db, itemId, next)
+  if (!updated) throwLanpm('stub.taskNotFound')
+  broadcastTasksChanged(groupId)
+  return updated
+}
+
+export function removeTaskChecklistItem(
+  db: Database,
+  groupId: string,
+  itemId: string
+): boolean {
+  assertTaskWritable(db, groupId)
+  const existing = getChecklistItemById(db, itemId)
+  if (!existing) return false
+  const task = getTaskById(db, existing.taskId)
+  if (!task || task.groupId !== groupId) throwLanpm('stub.taskNotFound')
+  const ok = softDeleteChecklistItem(db, itemId)
+  if (ok) broadcastTasksChanged(groupId)
+  return ok
 }
 
 export function createGroupTask(db: Database, input: CreateTaskInput): Task {

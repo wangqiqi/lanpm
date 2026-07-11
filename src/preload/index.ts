@@ -69,6 +69,13 @@ const api: LanpmApi = {
       ipcRenderer.invoke('task:referenceFromChat', groupId, taskId),
     listDiscussions: (groupId, taskId) =>
       ipcRenderer.invoke('task:listDiscussions', groupId, taskId),
+    listChecklist: (groupId, taskId) =>
+      ipcRenderer.invoke('task:listChecklist', groupId, taskId),
+    upsertChecklistItem: (input) => ipcRenderer.invoke('task:upsertChecklistItem', input),
+    toggleChecklistItem: (groupId, itemId, done) =>
+      ipcRenderer.invoke('task:toggleChecklistItem', groupId, itemId, done),
+    removeChecklistItem: (groupId, itemId) =>
+      ipcRenderer.invoke('task:removeChecklistItem', groupId, itemId),
     updateSchedule: (input) => ipcRenderer.invoke('task:updateSchedule', input),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>
