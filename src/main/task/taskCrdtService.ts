@@ -11,7 +11,11 @@ import {
   taskCrdtDocIdMatchesGroup,
   taskCrdtPayloadFromUpdate
 } from '../../shared/task/taskCrdt'
-import { applyEncodedUpdate } from '../../shared/task/taskCrdtModel'
+import {
+  applyEncodedUpdate,
+  applyTaskToDoc
+} from '../../shared/task/taskCrdtModel'
+import type { Task } from '../../shared/task/types'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
@@ -71,7 +75,14 @@ export function ensureTaskCrdtWired(db: Database, groupId: string): void {
 
   const doc = loadOrCreateGroupTaskDoc(db, groupId)
   doc.on('update', (update: Uint8Array, origin: unknown) => {
-    if (origin === TASK_CRDT_REMOTE_ORIGIN || origin === 'load' || origin === 'seed') return
+    if (
+      origin === TASK_CRDT_REMOTE_ORIGIN ||
+      origin === 'load' ||
+      origin === 'seed' ||
+      origin === 'patch-mirror'
+    ) {
+      return
+    }
     persistGroupTaskDoc(db, groupId, doc)
     void publishUpdate(db, groupId, update).catch(
       catchSyncFailure('taskCrdt.publish', { messageKey: 'sync.taskPublishFailed' })
@@ -114,4 +125,28 @@ export function applyLocalTaskCrdtEdit(
   ensureTaskCrdtWired(db, groupId)
   const doc = loadOrCreateGroupTaskDoc(db, groupId)
   doc.transact(() => mutate(doc), 'local')
+}
+
+/**
+ * After SQLite write: mirror task into Y.Doc and publish task_crdt (origin local).
+ * Order: SQLite first, then Y.Doc (TASK-160).
+ */
+export function mirrorTaskToCrdt(db: Database, task: Task): void {
+  if (isAnonymousGroupType(resolveGroupType(db, task.groupId))) return
+  applyLocalTaskCrdtEdit(db, task.groupId, (doc) => {
+    applyTaskToDoc(doc, task)
+  })
+}
+
+/**
+ * Inbound task_patch LWW applied to SQLite — mirror into Y.Doc without re-publishing CRDT.
+ */
+export function mirrorTaskPatchIntoCrdt(db: Database, task: Task): void {
+  if (isAnonymousGroupType(resolveGroupType(db, task.groupId))) return
+  ensureTaskCrdtWired(db, task.groupId)
+  const doc = loadOrCreateGroupTaskDoc(db, task.groupId)
+  doc.transact(() => {
+    applyTaskToDoc(doc, task)
+  }, 'patch-mirror')
+  persistGroupTaskDoc(db, task.groupId, doc)
 }

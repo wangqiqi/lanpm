@@ -24,6 +24,7 @@ import {
   clearTaskCrdtWiring,
   ensureTaskCrdtWired,
   handleIncomingTaskCrdt,
+  mirrorTaskPatchIntoCrdt,
   setTaskCrdtTasksChangedHandler
 } from './taskCrdtService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
@@ -53,7 +54,10 @@ function handleTaskPatch(db: Database, envelope: SyncEnvelope): void {
   } else {
     changed = upsertTaskFromRemote(db, task, envelope.senderDeviceId)
   }
-  if (changed) broadcastTasksChanged(envelope.groupId)
+  if (changed) {
+    mirrorTaskPatchIntoCrdt(db, task)
+    broadcastTasksChanged(envelope.groupId)
+  }
 }
 
 function handleTaskDepPatch(db: Database, envelope: SyncEnvelope): void {

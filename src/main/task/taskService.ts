@@ -40,6 +40,7 @@ import { toRecalledMessage } from '../../shared/chat/recall'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { shouldCompensateCreateTaskFromChat } from '../../shared/task/createFromChatCompensation'
 import { publishTaskDelete, publishTaskDepDelete, publishTaskDepUpsert, publishTaskUpsert } from './taskSyncService'
+import { mirrorTaskToCrdt } from './taskCrdtService'
 import { broadcastToAllWindows } from '../utils/broadcast'
 import { updateMessage } from '../storage/repositories/messageRepository'
 import { isAnonymousGroupType } from '../../shared/group/guards'
@@ -90,6 +91,7 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
   if (reasonErr) throwLanpm(reasonErr)
 
   insertTask(db, task)
+  mirrorTaskToCrdt(db, task)
   publishTaskUpsert(db, task)
   broadcastTasksChanged(input.groupId)
   return getTaskById(db, taskId)!
@@ -132,6 +134,7 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
 
   const updated = updateTaskRow(db, patch)
   if (!updated) throwLanpm('err.taskUpdateFailed')
+  mirrorTaskToCrdt(db, updated)
   publishTaskUpsert(db, updated)
   broadcastTasksChanged(existing.groupId)
   return listGroupTasks(db, existing.groupId).find((t) => t.taskId === updated.taskId) ?? updated
@@ -197,7 +200,9 @@ function compensateCreateTaskFromChat(
 ): void {
   const now = new Date().toISOString()
   softDeleteTask(db, task.taskId)
-  publishTaskDelete(db, { ...task, deletedAt: now, updatedAt: now })
+  const deleted = { ...task, deletedAt: now, updatedAt: now }
+  mirrorTaskToCrdt(db, deleted)
+  publishTaskDelete(db, deleted)
   broadcastTasksChanged(task.groupId)
 
   if (!message) return
@@ -257,12 +262,16 @@ function deleteTaskRecursive(db: Database, task: Task, mode: DeleteTaskMode): vo
   } else {
     const promoted = promoteChildrenToRoot(db, task.groupId, task.taskId)
     for (const child of promoted) {
+      mirrorTaskToCrdt(db, child)
       publishTaskUpsert(db, child)
     }
   }
   clearTaskDependencies(db, task.taskId)
   if (softDeleteTask(db, task.taskId)) {
-    publishTaskDelete(db, task)
+    const now = new Date().toISOString()
+    const deleted = { ...task, deletedAt: now, updatedAt: now }
+    mirrorTaskToCrdt(db, deleted)
+    publishTaskDelete(db, deleted)
   }
 }
 
