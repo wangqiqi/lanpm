@@ -227,7 +227,7 @@
 - 新功能：先开源 → 再 `3rd/` 改编 → 最后自研；**以完成产品为准**。
 - 进 `3rd/`：必须有 `LICENSE` + `ORIGIN.md`；授权无传染。
 - 新增 npm：MIT/BSD/Apache；扫传递依赖无 GPL 族。
-- 状态以 `docs/06` / `docs/01` §1.3.1 为准。
+- 状态以 `docs/06_ROADMAP` / `docs/01` §1.3.1 为准。
 - 债务项 Sprint 的 Done when：已用开源或 `3rd/` + verify。
 
 ---

@@ -63,8 +63,7 @@ for (const doc of [
   '03_数据模型与协议草案.md',
   '04_交互与UI约定.md',
   '05_测试与联调发布.md',
-  '06_ROADMAP.md',
-  '06_HISTORY.md'
+  '06_ROADMAP.md'
 ]) {
   assert.ok(docNav.includes(doc), `docs/00 missing index for ${doc}`)
   assert.ok(existsSync(join(root, 'docs', doc)), `missing docs/${doc}`)

@@ -240,7 +240,6 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | [docs/04 — UI](./docs/04_交互与UI约定.md) | Layout, themes, seven-tab shell |
 | [docs/05 — Testing](./docs/05_测试与联调发布.md) | Vitest, verify:*, release QA |
 | [docs/06 — ROADMAP](./docs/06_ROADMAP.md) | Open backlog · meeting plugin · marketplace |
-| [docs archive — Acceptance](./docs/06_HISTORY.md) | Delivered P0/P1 · RC gates · M0–M7 |
 | [docs/05 §1.4 — Platform matrix](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) | Cross-platform build & CI |
 | [Feige / FeiQ mapping](./docs/飞鸽飞秋.md) | Feature parity notes vs classic LAN IM |
 

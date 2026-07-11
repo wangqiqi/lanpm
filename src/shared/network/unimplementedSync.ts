@@ -4,7 +4,7 @@ import { throwLanpm } from '../errors/lanpmError.ts'
 /**
  * Protocol types defined in docs/03 · types.ts but with no main handler yet.
  * Transport must refuse to publish these until implementation lands.
- * @see docs/06 §2.3
+ * @see CHANGELOG / docs/06_ROADMAP
  * `task_crdt` 已解禁（TASK-157）；handler / 双写见 TASK-159+。
  * `member_event` 已解禁（TASK-146）。
  */

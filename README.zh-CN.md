@@ -240,7 +240,6 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | [docs/04 — 交互](./docs/04_交互与UI约定.md) | 布局、主题、七视图主壳 |
 | [docs/05 — 测试](./docs/05_测试与联调发布.md) | Vitest、verify:*、联调发布 |
 | [docs/06 — ROADMAP](./docs/06_ROADMAP.md) | 未完成项 · 会议插件 · 市场 |
-| [验收归档](./docs/06_HISTORY.md) | 已交付 P0/P1 · RC · M0–M7 |
 | [docs/05 §1.4 — 跨平台](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) | 跨平台构建与 CI |
 | [飞鸽 / 飞秋对照](./docs/飞鸽飞秋.md) | 与经典局域网 IM 的能力对照 |
 

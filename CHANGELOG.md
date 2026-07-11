@@ -4,10 +4,14 @@
 
 ## [Unreleased]
 
+### Changed
+- **docs**：`06_HISTORY.md` 移出 `docs/` → `archive/20260712_003457_docs06_验收里程碑_已交付归档.md`；`docs/` 仅长期 SSOT（`06_ROADMAP` + 01–05）；已交付对外以 `CHANGELOG` 为准。
+- **审查收口（DOC-340–343）**：边界值专项手验（autoDiscover / 限速 / 续传 offset）以单测代理通过；根目录 `审查.md` 迁 `archive/20260712_004439_审查_边界值闭环.md`。
+
 ## [1.27.0] - 2026-07-12
 
 ### Changed
-- **docs**：`07_跨平台发版矩阵` 并入 [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵)；旧 `06_验收与里程碑计划` → [`06_HISTORY.md`](./docs/06_HISTORY.md)（已交付）+ [`06_ROADMAP.md`](./docs/06_ROADMAP.md)（未完成）；可购会议插件拍板（ROADMAP §3）；`verify:platform-matrix` / `verify:docs-links` 对齐。
+- **docs**：`07_跨平台发版矩阵` 并入 [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵)；旧 `06_验收与里程碑计划` 拆为 ROADMAP（未完成）+ 历史归档（后迁 `archive/`）；可购会议插件拍板（[06_ROADMAP](./docs/06_ROADMAP.md) §3）；`verify:platform-matrix` / `verify:docs-links` 对齐。
 - **docs/06**：拍板 **可购会议插件**（语音 / 视频 / 屏幕共享 / 会议室）— 不进核心；`lanpm.meeting` 一包多档（Lite mesh / Pro SFU）；信创离线许可证；落地序对齐。README 规划句同步。
 
 ### Fixed
