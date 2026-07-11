@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-11
+
 ### Added
 - **SPRINT-TASK-CRDT 收尾 (TASK-163)**：docs/06 §2.3·§6 与 docs/00 / README 对齐 Yjs `task_crdt` 已交付；归档 `20260711_112900_task_crdt_sprint_summary.md`；handoff `/release` → **v1.1.0**。
 - **任务详情双写闭环 (TASK-162)**：详情/看板编辑仍走 `updateTask`（SQLite→Y.Doc）；入站 `task_crdt` / 离线 batch 经 `mirrorCrdtDocIntoSqlite` 回写标题描述等字段，UI 可刷新。
@@ -13,6 +15,9 @@
 - **群级 Y.Doc 持久化 (TASK-158)**：表 `task_crdt_docs`（schema v4）；`taskCrdtStore` 从 `tasks` seed / blob 加载；`verify:task-crdt-store`。
 - **task_crdt 协议解禁 (TASK-157)**：`TaskCrdtPayload` / `isTaskCrdtPayload`（`shared/task/taskCrdt.ts`）；从 `UNIMPLEMENTED_SYNC_TYPES` 移除 `task_crdt`；`docs/03` §6.2/§10 与 `verify:sync-handlers` 对齐。
 - **引入 Yjs 依赖 (TASK-156)**：安装 `yjs@^13`；`verify:rc-reality` 改为要求 `yjs`、仍禁止 WebRTC；`docs/01` §1.3.1 标明 Yjs 已引入、`task_crdt` 落地中（目标 v1.1.0）。
+
+### Release
+- `v1.1.0` — Yjs `task_crdt`：群级 Y.Doc 持久化、实时帧、双写共存、state-vector 离线补拉与详情回写闭环（TASK-156–163）
 
 ## [1.0.7] - 2026-07-11
 
