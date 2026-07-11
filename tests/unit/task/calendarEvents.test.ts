@@ -73,6 +73,19 @@ describe('scheduleFromCalendarExclusiveRange', () => {
       endDate: '2026-07-12'
     })
   })
+
+  it('round-trips inferred (undated) exclusive end to concrete dates', () => {
+    const undated = task({ taskId: 'a', title: 'no dates' })
+    const ev = tasksToCalendarEvents([undated])[0]!
+    expect(ev.extendedProps.inferredSchedule).toBe(true)
+    const mapped = scheduleFromCalendarExclusiveRange(ev.start, ev.end)
+    expect(mapped).not.toBeNull()
+    const fallback = defaultScheduleForTask(undated)
+    expect(mapped).toEqual({
+      startDate: fallback.startDate,
+      endDate: fallback.endDate
+    })
+  })
 })
 
 describe('tasksToCalendarEvents', () => {
