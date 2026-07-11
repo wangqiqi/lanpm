@@ -14,9 +14,9 @@
   overflow: auto;
   padding: 8px;
   border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-solid);
+  background: var(--lanpm-surface-elevated);
   border: 0.5px solid var(--lanpm-separator);
-  box-shadow: var(--lanpm-shadow-surface);
+  box-shadow: var(--lanpm-shadow-island);
 }
 
 /* blockNode + full-width title so progress column aligns on the right */
@@ -94,7 +94,7 @@
 }
 
 .searchHighlight {
-  border-radius: 6px;
+  border-radius: var(--lanpm-radius-sm);
   box-shadow: 0 0 0 2px var(--lanpm-accent);
   animation: lanpmHighlightPulse 3.2s ease-out;
 }
@@ -119,9 +119,9 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-solid);
+  background: var(--lanpm-surface-elevated);
   border: 0.5px solid var(--lanpm-separator);
-  box-shadow: var(--lanpm-shadow-surface);
+  box-shadow: var(--lanpm-shadow-island);
 }
 
 .detailPanelBody {
