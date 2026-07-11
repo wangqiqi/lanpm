@@ -1,5 +1,5 @@
 /**
- * M7-02 性能冒烟（Node 侧可自动化部分，完整冷启动/内存见 docs/06 §3 手测）。
+ * M7-02 性能冒烟（Node 侧可自动化部分，完整冷启动/内存见 docs/06_ROADMAP §4 / docs/05 §5）。
  * Run: npm run verify:m7-perf
  */
 import assert from 'node:assert/strict'

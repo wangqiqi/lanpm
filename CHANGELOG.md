@@ -5,14 +5,19 @@
 ## [Unreleased]
 
 ### Changed
-- **docs/06**：拍板 **可购会议插件**（语音 / 视频 / 屏幕共享 / 会议室）— 不进核心；`lanpm.meeting` 一包多档（Lite mesh / Pro SFU）；信创离线许可证；落地序与 §6 候选对齐（见 §1.2）。README 规划句同步。
+- **docs/06**：拆分为 [`06_ROADMAP.md`](./docs/06_ROADMAP.md)（仅未完成）+ [`06_HISTORY.md`](./docs/06_HISTORY.md)（已交付 / RC / §16）；删除旧 `06_验收与里程碑计划.md`；索引与 verify 路径对齐。
+
+## [1.27.0] - 2026-07-12
+
+### Changed
+- **docs**：`07_跨平台发版矩阵` 并入 [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵)；旧 `06_验收与里程碑计划` → [`06_HISTORY.md`](./docs/06_HISTORY.md)（已交付）+ [`06_ROADMAP.md`](./docs/06_ROADMAP.md)（未完成）；可购会议插件拍板（ROADMAP §3）；`verify:platform-matrix` / `verify:docs-links` 对齐。
+- **docs/06**：拍板 **可购会议插件**（语音 / 视频 / 屏幕共享 / 会议室）— 不进核心；`lanpm.meeting` 一包多档（Lite mesh / Pro SFU）；信创离线许可证；落地序对齐。README 规划句同步。
 
 ### Fixed
-- **TASK-334**：`listDueSyncOutbox` `limit` clamp（默认 50 · 上限 500）；非法/非正回退默认。
-- **TASK-333**：chat sync fire-and-forget 改用 `catchSyncFailure`（`console.warn` + scope）；禁止裸吞；`verify:chat-sync-observability`。
-- **TASK-332**：新建群 `autoDiscover` 默认改为 **false**（`DEFAULT_GROUP_AUTO_DISCOVER`）；创建表单提示；stub/create 对齐。
-- **TASK-331**：传输限速 `rateKbps` 上限 clamp（`FILE_TRANSFER_RATE_MAX_KBPS=100_000`）；IPC 拒绝非有限/负数。
-- **TASK-330**：续传 `startOffset` 对负数/非有限值 clamp 为 0，避免异常偏移。
+- **SPRINT-B6-BOUNDARY-MINOR（TASK-330–335）**：审查 Minor 收尾 — 续传 `startOffset` clamp；限速 `rateKbps` 上限 `100_000`；新建群 `autoDiscover` 默认 false；chat sync `catchSyncFailure` 可观测；`listDueSyncOutbox` limit clamp（默认 50 / 上限 500）。
+
+### Release
+- `v1.27.0` — B6 boundary Minors + docs ROADMAP split
 
 ## [1.26.0] - 2026-07-12
 

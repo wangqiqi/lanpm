@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.26.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.27.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -140,7 +140,7 @@
 
 - 传输层 **AES-GCM + ECDH**（详见 [技术实现建议](./docs/02_技术实现建议.md)）  
 - 不强制上云；AI 可按需、可脱敏外呼  
-- **跨平台安装包**：Win / macOS / Linux × **x64 + arm64**（`docs/07`，`verify:platform-matrix`）  
+- **跨平台安装包**：Win / macOS / Linux × **x64 + arm64**（`docs/05` §1.4，`verify:platform-matrix`）  
 - 发版前可跑 **`npm run verify:m7`** 全量回归  
 - 插件 **加载边界** 已 SPIKE 拍板；加载器尚未落地  
 
@@ -196,9 +196,9 @@ npm run verify:platform-matrix  # 跨平台发版矩阵静态验收
 | 说明 | 命令 / 注意 |
 |------|-------------|
 | 仅浏览器 UI 预览 | `npm run dev:web` — **验收以 Electron 为准**（IPC / SQLite） |
-| 视觉一致性门禁 | `npm run verify:visual`（见 [docs/06](./docs/06_验收与里程碑计划.md) §2.6） |
+| 视觉一致性门禁 | `npm run verify:visual`（见 [06_ROADMAP](./docs/06_ROADMAP.md) §4） |
 | 功能验收脚本 | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
-| 跨平台安装包 | `dist:win` / `dist:mac` / `dist:linux`（可加 `:x64` / `:arm64`）；矩阵见 [docs/07](./docs/07_跨平台发版矩阵.md) |
+| 跨平台安装包 | `dist:win` / `dist:mac` / `dist:linux`（可加 `:x64` / `:arm64`）；矩阵见 [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) |
 | 一键脚本菜单 | `./onekey_run.sh` → start / stop / status / build / check … |
 
 ### 浏览器 Stub 与 Electron 差异
@@ -239,8 +239,9 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | [docs/03 — 数据与协议](./docs/03_数据模型与协议草案.md) | Schema、同步消息 |
 | [docs/04 — 交互](./docs/04_交互与UI约定.md) | 布局、主题、七视图主壳 |
 | [docs/05 — 测试](./docs/05_测试与联调发布.md) | Vitest、verify:*、联调发布 |
-| [docs/06 — 验收](./docs/06_验收与里程碑计划.md) | P0 验收、里程碑、RC 发布门禁 |
-| [docs/07 — 跨平台](./docs/07_跨平台发版矩阵.md) | 跨平台构建与 CI |
+| [docs/06 — ROADMAP](./docs/06_ROADMAP.md) | 未完成项 · 会议插件 · 市场 |
+| [验收归档](./docs/06_HISTORY.md) | 已交付 P0/P1 · RC · M0–M7 |
+| [docs/05 §1.4 — 跨平台](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) | 跨平台构建与 CI |
 | [飞鸽 / 飞秋对照](./docs/飞鸽飞秋.md) | 与经典局域网 IM 的能力对照 |
 
 ---
@@ -254,11 +255,11 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.26.0` — B5 边界值/默认值加固（`verify:bundle`）；B3 备份（1.25）、B4 outbox（1.24）、插件启用 UI（1.23）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.27.0` — B6 边界值 Minor（续传 offset · 限速上限 · autoDiscover 默认关 · sync 可观测 · outbox limit）；B5 加固（1.26）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
-**进行中 / 队列：** 边界值 Minor 收尾 · 插件市场 SPIKE。
+**进行中 / 队列：** 会议插件 SPIKE · 插件市场 SPIKE。
 
-**规划中（P1+）：** 屏幕共享、语音通话、思维导图、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
+**规划中（P1+）：** 可购会议插件（语音/视频/投屏）、思维导图、移动端 PWA 等 —— [完整列表 · §1/§3](./docs/06_ROADMAP.md)。
 
 ---
 

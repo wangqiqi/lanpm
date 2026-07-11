@@ -21,7 +21,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8')
 const readme = readFileSync(join(root, 'README.md'), 'utf8')
-const doc06 = readFileSync(join(root, 'docs/06_验收与里程碑计划.md'), 'utf8')
+const doc06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 
 const versionHeadings = [...changelog.matchAll(/^## \[([^\]]+)\]/gm)].map((m) => m[1])
 assert.ok(versionHeadings.length > 0, 'CHANGELOG missing version heading')
@@ -38,8 +38,8 @@ assert.ok(
   `README missing current version ${pkg.version}`
 )
 assert.ok(
-  doc06.includes('RC') && (doc06.includes(pkg.version) || doc06.includes('package.json')),
-  'docs/06 should reference RC version or package.json'
+  doc06.includes('package.json') || doc06.includes(pkg.version),
+  'docs/06_ROADMAP should reference package.json or current version'
 )
 
 const requiredScripts = [
@@ -63,7 +63,8 @@ for (const doc of [
   '03_数据模型与协议草案.md',
   '04_交互与UI约定.md',
   '05_测试与联调发布.md',
-  '06_验收与里程碑计划.md'
+  '06_ROADMAP.md',
+  '06_HISTORY.md'
 ]) {
   assert.ok(docNav.includes(doc), `docs/00 missing index for ${doc}`)
   assert.ok(existsSync(join(root, 'docs', doc)), `missing docs/${doc}`)

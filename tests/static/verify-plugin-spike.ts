@@ -44,9 +44,6 @@ const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
 assert.match(feige, /verify:plugin-spike/)
 assert.match(feige, /插件加载边界/)
 
-const docs06 = readFileSync(join(root, 'docs/06_验收与里程碑计划.md'), 'utf8')
-assert.match(docs06, /verify:plugin-spike/)
-
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
 }

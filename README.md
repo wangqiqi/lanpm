@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.26.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.27.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -140,7 +140,7 @@
 
 - **AES-GCM** on the wire with ECDH (see [technical notes](./docs/02_技术实现建议.md))  
 - No mandatory cloud; optional AI can use **redacted** outbound calls  
-- **Cross-platform packages**: Win / macOS / Linux × **x64 + arm64** (`docs/07`, `verify:platform-matrix`)  
+- **Cross-platform packages**: Win / macOS / Linux × **x64 + arm64** (`docs/05` §1.4, `verify:platform-matrix`)  
 - **`npm run verify:m7`** full RC regression before release  
 - Plugin **load-boundary** designed (SPIKE); loader not shipped yet  
 
@@ -196,9 +196,9 @@ npm run verify:platform-matrix  # Win/mac/Linux × x64+arm64 wiring
 | Topic | Command / note |
 |-------|----------------|
 | Browser UI stub only | `npm run dev:web` — **Electron is the source of truth** for IPC & SQLite |
-| Visual consistency gate | `npm run verify:visual` (see [docs/06](./docs/06_验收与里程碑计划.md) §2.6) |
+| Visual consistency gate | `npm run verify:visual` (see [06_ROADMAP](./docs/06_ROADMAP.md) §4) |
 | Feature verifiers | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
-| Cross-platform packages | `dist:win` / `dist:mac` / `dist:linux` (+ `:x64` / `:arm64`); matrix in [docs/07](./docs/07_跨平台发版矩阵.md) |
+| Cross-platform packages | `dist:win` / `dist:mac` / `dist:linux` (+ `:x64` / `:arm64`); matrix in [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) |
 | One-key menu | `./onekey_run.sh` → start / stop / status / build / check … |
 
 ### Browser stub vs Electron
@@ -239,8 +239,9 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | [docs/03 — Data & protocol](./docs/03_数据模型与协议草案.md) | Schema, sync messages |
 | [docs/04 — UI](./docs/04_交互与UI约定.md) | Layout, themes, seven-tab shell |
 | [docs/05 — Testing](./docs/05_测试与联调发布.md) | Vitest, verify:*, release QA |
-| [docs/06 — Milestones](./docs/06_验收与里程碑计划.md) | P0 acceptance & RC release gate |
-| [docs/07 — Platform matrix](./docs/07_跨平台发版矩阵.md) | Cross-platform build & CI |
+| [docs/06 — ROADMAP](./docs/06_ROADMAP.md) | Open backlog · meeting plugin · marketplace |
+| [docs archive — Acceptance](./docs/06_HISTORY.md) | Delivered P0/P1 · RC gates · M0–M7 |
+| [docs/05 §1.4 — Platform matrix](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) | Cross-platform build & CI |
 | [Feige / FeiQ mapping](./docs/飞鸽飞秋.md) | Feature parity notes vs classic LAN IM |
 
 ---
@@ -254,11 +255,11 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.26.0` — B5 boundary/defaults harden (`verify:bundle`); B3 backup (1.25), B4 outbox (1.24), plugin enable UI (1.23). M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.27.0` — B6 boundary Minors (resume offset · rate cap · autoDiscover default off · sync observability · outbox limit); B5 harden (1.26). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Next (in progress / queue):** boundary Minors follow-up · marketplace SPIKE.
+**Next (in progress / queue):** meeting-plugin SPIKE · marketplace SPIKE.
 
-**Later (P1+):** screen share, voice, mind maps, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
+**Later (P1+):** purchasable meeting plugin (voice/video/screen share), mind maps, mobile PWA — [full list · §1/§3](./docs/06_ROADMAP.md).
 
 ---
 

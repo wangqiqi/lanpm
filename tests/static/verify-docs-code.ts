@@ -163,7 +163,7 @@ ${section1}
 
 ## 2. 待办
 
-见 \`docs/06\` §2.6 手验待办。
+见 \`docs/06_ROADMAP\` §4 手验待补。
 `
 
 const growthLogs = join(root, '.cursorGrowth', 'logs')
