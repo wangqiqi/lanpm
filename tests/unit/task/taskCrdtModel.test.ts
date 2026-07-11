@@ -7,6 +7,7 @@ import {
   countTasksInDoc,
   createEmptyTaskDoc,
   encodeDocState,
+  listTasksFromDoc,
   seedDocFromTasks,
   TASK_CRDT_TASKS_KEY
 } from '../../../src/shared/task/taskCrdtModel'
@@ -58,5 +59,16 @@ describe('taskCrdtModel', () => {
     expect(t1.get('title')).toBe('Updated')
     expect(t1.get('progressPercent')).toBe(40)
     expect(countTasksInDoc(doc)).toBe(1)
+  })
+
+  it('round-trips title/description via taskFromYMap', () => {
+    const doc = createEmptyTaskDoc()
+    seedDocFromTasks(doc, [
+      sampleTask({ title: 'T', description: 'D body' })
+    ])
+    const listed = listTasksFromDoc(doc)
+    expect(listed).toHaveLength(1)
+    expect(listed[0]?.title).toBe('T')
+    expect(listed[0]?.description).toBe('D body')
   })
 })

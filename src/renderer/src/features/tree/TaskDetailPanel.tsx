@@ -157,6 +157,10 @@ export default function TaskDetailPanel({
     [members, t]
   )
 
+  /**
+   * 保存走 `task.updateTask` → main `updateGroupTask`：
+   * SQLite 先写，再 `mirrorTaskToCrdt`（TASK-160/162 双写；无 Awareness）。
+   */
   const handleSave = async (): Promise<void> => {
     const formErr = validateTaskForm({
       title,

@@ -108,6 +108,7 @@ export default function TaskEditModal({
       await onSave({
         taskId: task.taskId,
         title: normalizeTaskTitle(title),
+        // 经 board → updateTask → updateGroupTask 双写 Y.Doc（TASK-162）
         description: normalizeTaskDescription(description),
         status,
         otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,

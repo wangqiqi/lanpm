@@ -13,13 +13,18 @@ import {
 } from '../../shared/task/taskCrdt'
 import {
   applyEncodedUpdate,
-  applyTaskToDoc
+  applyTaskToDoc,
+  listTasksFromDoc
 } from '../../shared/task/taskCrdtModel'
 import type { Task } from '../../shared/task/types'
 import { isAnonymousGroupType } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
+import {
+  applyRemoteTaskDelete,
+  upsertTaskFromRemote
+} from '../storage/repositories/taskRepository'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 import {
   evictGroupTaskDoc,
@@ -106,7 +111,28 @@ export function handleIncomingTaskCrdt(db: Database, envelope: SyncEnvelope): vo
   const doc = loadOrCreateGroupTaskDoc(db, envelope.groupId)
   applyEncodedUpdate(doc, decodeTaskCrdtUpdate(payload), TASK_CRDT_REMOTE_ORIGIN)
   persistGroupTaskDoc(db, envelope.groupId, doc)
-  onTasksChanged?.(envelope.groupId)
+  const sqliteChanged = mirrorCrdtDocIntoSqlite(db, doc, envelope.senderDeviceId)
+  if (sqliteChanged) onTasksChanged?.(envelope.groupId)
+}
+
+/**
+ * Project Y.Doc tasks into SQLite (title/description + full fields) after remote CRDT.
+ * Uses LWW via upsertTaskFromRemote / applyRemoteTaskDelete.
+ */
+export function mirrorCrdtDocIntoSqlite(
+  db: Database,
+  doc: import('yjs').Doc,
+  remoteDeviceId: string
+): boolean {
+  let changed = false
+  for (const task of listTasksFromDoc(doc)) {
+    if (task.deletedAt) {
+      if (applyRemoteTaskDelete(db, task, remoteDeviceId)) changed = true
+    } else if (upsertTaskFromRemote(db, task, remoteDeviceId)) {
+      changed = true
+    }
+  }
+  return changed
 }
 
 export function clearTaskCrdtWiring(): void {

@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **任务详情双写闭环 (TASK-162)**：详情/看板编辑仍走 `updateTask`（SQLite→Y.Doc）；入站 `task_crdt` / 离线 batch 经 `mirrorCrdtDocIntoSqlite` 回写标题描述等字段，UI 可刷新。
 - **task_crdt 离线补拉 (TASK-161)**：`task_crdt_sync_request` / `_batch`（state vector）；`taskCrdtOfflineSyncService`；`verify:task-crdt`。
 - **task_crdt 双写共存 (TASK-160)**：`taskService` 写后 `mirrorTaskToCrdt`；入站 `task_patch` `mirrorTaskPatchIntoCrdt`（不回环 publish）；约定 SQLite 先、Y.Doc 后。
 - **task_crdt 实时帧 (TASK-159)**：`taskCrdtService` publish/apply；挂入 `taskSyncService` 订阅；`verify:task-crdt-realtime`。

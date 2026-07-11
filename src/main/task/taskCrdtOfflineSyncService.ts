@@ -28,6 +28,7 @@ import { getNetworkTransport } from '../network'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 import {
   ensureTaskCrdtWired,
+  mirrorCrdtDocIntoSqlite,
   TASK_CRDT_REMOTE_ORIGIN
 } from './taskCrdtService'
 import { loadOrCreateGroupTaskDoc, persistGroupTaskDoc } from './taskCrdtStore'
@@ -144,7 +145,8 @@ export function handleTaskCrdtSyncBatch(db: Database, envelope: SyncEnvelope): v
   const doc = loadOrCreateGroupTaskDoc(db, envelope.groupId)
   applyEncodedUpdate(doc, decodeTaskCrdtUpdate(envelope.payload), TASK_CRDT_REMOTE_ORIGIN)
   persistGroupTaskDoc(db, envelope.groupId, doc)
-  onTasksChanged?.(envelope.groupId)
+  const sqliteChanged = mirrorCrdtDocIntoSqlite(db, doc, envelope.senderDeviceId)
+  if (sqliteChanged) onTasksChanged?.(envelope.groupId)
 }
 
 export function wireTaskCrdtOfflineSync(db: Database, onChanged: TasksChangedFn): void {
