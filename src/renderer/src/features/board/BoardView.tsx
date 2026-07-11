@@ -464,6 +464,7 @@ export default function BoardView(): React.ReactElement {
       otherReason: string | null
       priority: TaskPriority
       assigneeUserId: string | null
+      tags: string[]
       startDate: string | null
       endDate: string | null
       progressPercent: number
@@ -478,6 +479,7 @@ export default function BoardView(): React.ReactElement {
           otherReason: input.otherReason,
           priority: input.priority,
           assigneeUserId: input.assigneeUserId,
+          tags: input.tags,
           startDate: input.startDate,
           endDate: input.endDate,
           progressPercent: input.progressPercent,

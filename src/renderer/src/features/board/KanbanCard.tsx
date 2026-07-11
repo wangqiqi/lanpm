@@ -279,6 +279,11 @@ export default function KanbanCard({
                 : 'board.priorityMedium'
           )}
         </Tag>
+        {(task.tags ?? []).slice(0, 4).map((label) => (
+          <Tag key={label} bordered={false} className={styles.boardTag}>
+            {label}
+          </Tag>
+        ))}
         {task.assigneeUserId && (
           <span>@{assigneeName ?? task.assigneeUserId}</span>
         )}

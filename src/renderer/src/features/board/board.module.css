@@ -254,6 +254,13 @@
   background: var(--lanpm-fill-secondary);
 }
 
+.boardTag {
+  margin-inline-end: 0;
+  color: var(--lanpm-text-secondary);
+  background: var(--lanpm-fill-tertiary, var(--lanpm-fill-secondary));
+  border: 1px solid var(--lanpm-border-secondary, transparent);
+}
+
 .milestoneTag {
   margin-inline-end: 0;
   color: var(--lanpm-accent);

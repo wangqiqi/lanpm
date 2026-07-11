@@ -265,6 +265,7 @@ export default function TaskTreeView(): React.ReactElement {
         otherReason: input.otherReason,
         priority: input.priority,
         assigneeUserId: input.assigneeUserId,
+        tags: input.tags,
         startDate: input.startDate,
         endDate: input.endDate,
         progressPercent: input.progressPercent,

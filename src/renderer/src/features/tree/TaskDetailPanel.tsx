@@ -58,6 +58,7 @@ export interface TaskDetailSaveInput {
   otherReason: string | null
   priority: TaskPriority
   assigneeUserId: string | null
+  tags: string[]
   startDate: string | null
   endDate: string | null
   progressPercent: number
@@ -183,6 +184,7 @@ export default function TaskDetailPanel({
         otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
         assigneeUserId: assigneeUserId || null,
+        tags: task.tags ?? [],
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
         progressPercent: clampProgressPercent(progressPercent),

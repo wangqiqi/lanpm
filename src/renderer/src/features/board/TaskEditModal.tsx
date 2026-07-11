@@ -17,6 +17,7 @@ import {
   TASK_OTHER_REASON_MAX_LENGTH,
   validateTaskForm
 } from '@shared/task/validation'
+import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 
 const { TextArea } = Input
@@ -58,6 +59,7 @@ export default function TaskEditModal({
   const [status, setStatus] = useState<TaskStatus>('todo')
   const [otherReason, setOtherReason] = useState('')
   const [priority, setPriority] = useState<TaskPriority>('medium')
+  const [tags, setTags] = useState<string[]>([])
   const [assigneeUserId, setAssigneeUserId] = useState<string | undefined>()
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -72,6 +74,7 @@ export default function TaskEditModal({
     setStatus(task.status)
     setOtherReason(task.otherReason ?? '')
     setPriority(task.priority)
+    setTags(task.tags ?? [])
     setAssigneeUserId(task.assigneeUserId)
     setStartDate(task.startDate ?? '')
     setEndDate(task.endDate ?? '')
@@ -113,6 +116,7 @@ export default function TaskEditModal({
         status,
         otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
+        tags: normalizeTaskTags(tags),
         assigneeUserId: assigneeUserId || null,
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
@@ -193,6 +197,26 @@ export default function TaskEditModal({
             />
           </label>
         </div>
+
+        <label>
+          <div style={{ marginBottom: 4, fontSize: 12, color: 'var(--lanpm-text-secondary)' }}>
+            {t('board.tags')}
+          </div>
+          <Select
+            mode="tags"
+            value={tags}
+            onChange={(next) => setTags(normalizeTaskTags(next))}
+            tokenSeparators={[',']}
+            placeholder={t('board.tagsPlaceholder')}
+            maxTagCount={TASK_TAGS_MAX_COUNT}
+            maxTagTextLength={TASK_TAG_MAX_LENGTH}
+            style={{ width: '100%' }}
+            open={false}
+          />
+          <div style={{ marginTop: 4, fontSize: 11, color: 'var(--lanpm-text-tertiary)' }}>
+            {t('board.tagsHint')}
+          </div>
+        </label>
 
         {status === 'other' && (
           <label>
