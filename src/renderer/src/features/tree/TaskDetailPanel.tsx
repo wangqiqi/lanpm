@@ -154,6 +154,7 @@ export default function TaskDetailPanel({
   const [saving, setSaving] = useState(false)
   const [discussions, setDiscussions] = useState<TaskDiscussionItem[]>([])
   const [discussLoading, setDiscussLoading] = useState(false)
+  const [fileNameById, setFileNameById] = useState<Record<string, string>>({})
 
   useEffect(() => {
     let cancelled = false
@@ -173,6 +174,31 @@ export default function TaskDetailPanel({
       cancelled = true
     }
   }, [groupId, task.taskId, task.sourceMsgId, task.updatedAt])
+
+  useEffect(() => {
+    const ids = task.linkedFileIds
+    if (!ids || ids.length === 0) {
+      setFileNameById({})
+      return
+    }
+    let cancelled = false
+    void getLanpmApi()
+      .file.listFiles(groupId)
+      .then((files) => {
+        if (cancelled) return
+        const map: Record<string, string> = {}
+        for (const f of files) {
+          if (ids.includes(f.fileId)) map[f.fileId] = f.name
+        }
+        setFileNameById(map)
+      })
+      .catch(() => {
+        if (!cancelled) setFileNameById({})
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [groupId, task.linkedFileIds])
 
   const jumpToMessage = (msgId: string): void => {
     navigate(groupViewPath(groupId, 'chat'), { state: { highlightMsgId: msgId } })
@@ -517,6 +543,35 @@ export default function TaskDetailPanel({
         successors={successors}
         onLocate={onLocateTask}
       />
+
+      <div className={styles.detailField}>
+        <Text type="secondary">{t('tree.detailAttachments')}</Text>
+        {!task.linkedFileIds || task.linkedFileIds.length === 0 ? (
+          <Text type="secondary">{t('tree.detailAttachmentsEmpty')}</Text>
+        ) : (
+          <ul className={styles.discussionList}>
+            {task.linkedFileIds.map((fileId) => (
+              <li key={fileId}>
+                <button
+                  type="button"
+                  className={styles.discussionItem}
+                  onClick={() => {
+                    navigate(groupViewPath(groupId, 'files'), {
+                      state: { selectFileId: fileId }
+                    })
+                    onClose()
+                  }}
+                >
+                  <span className={styles.discussionKind}>{t('tree.detailAttachmentFile')}</span>
+                  <span className={styles.discussionPreview}>
+                    {fileNameById[fileId] ?? fileId}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className={styles.detailField}>
         <Text type="secondary">{t('tree.detailDiscussions')}</Text>

@@ -8,6 +8,7 @@
 - **白板工具栏**：去掉「保存 + 提示」整行（已自动保存）；导出 / 禅模式改挂 Excalidraw `renderTopRightUI`（与「素材库」同排同风格）；禅模式隐藏顶栏/底栏/标题，Esc 退出。
 
 ### Added
+- **附件挂任务 (TASK-233)**：文件气泡「挂到任务」选任务写入 `linkedFileIds`；详情附件列表跳转群文件。
 - **讨论链 (TASK-232)**：看板/详情「在聊天中讨论」发送 `task_ref` 并高亮定位；任务详情「相关讨论」列表可回跳聊天。
 - **消息一键建任务 (TASK-231)**：气泡右键「建任务」；`createFromChat` 支持 `sourceMsgId`/`linkedFileIds`；DM/非项目群无菜单。
 - **消息↔任务契约 (TASK-230)**：`Task.sourceMsgId` / `linkedFileIds`（schema v8）；`listDiscussions` IPC；`collectTaskDiscussions` 纯函数。

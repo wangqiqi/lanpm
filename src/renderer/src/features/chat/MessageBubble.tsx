@@ -43,6 +43,7 @@ interface MessageBubbleProps {
   /** Project group only — one-click create task from this message */
   taskCreateAllowed?: boolean
   onCreateTaskFromMessage?: (message: ChatMessage) => void
+  onLinkFileToTask?: (fileId: string, fileName: string) => void
 }
 
 export default function MessageBubble({
@@ -63,7 +64,8 @@ export default function MessageBubble({
   onRecall,
   onRetrySend,
   taskCreateAllowed = false,
-  onCreateTaskFromMessage
+  onCreateTaskFromMessage,
+  onLinkFileToTask
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const theme = useUiStore((s) => s.theme)
@@ -139,6 +141,18 @@ export default function MessageBubble({
     }
   }, [taskCreateAllowed, onCreateTaskFromMessage, message, t])
 
+  const linkFileItem = useMemo((): NonNullable<MenuProps['items']>[number] | null => {
+    if (!taskCreateAllowed || !onLinkFileToTask || message.content.kind !== 'file') return null
+    return {
+      key: 'linkFile',
+      label: t('chat.linkFileToTask'),
+      onClick: () => {
+        if (message.content.kind !== 'file') return
+        onLinkFileToTask(message.content.fileId, message.content.fileName)
+      }
+    }
+  }, [taskCreateAllowed, onLinkFileToTask, message, t])
+
   const ownMenu: MenuProps = useMemo(() => {
     const items: MenuProps['items'] = []
     if (own && currentUserId && onRecall && canRecallMessage(message, currentUserId)) {
@@ -149,13 +163,16 @@ export default function MessageBubble({
       })
     }
     if (createTaskItem) items.push(createTaskItem)
+    if (linkFileItem) items.push(linkFileItem)
     return { items }
-  }, [own, currentUserId, onRecall, message, t, createTaskItem])
+  }, [own, currentUserId, onRecall, message, t, createTaskItem, linkFileItem])
 
   const otherBubbleMenu: MenuProps = useMemo(() => {
-    if (!createTaskItem) return { items: [] }
-    return { items: [createTaskItem] }
-  }, [createTaskItem])
+    const items: MenuProps['items'] = []
+    if (createTaskItem) items.push(createTaskItem)
+    if (linkFileItem) items.push(linkFileItem)
+    return { items }
+  }, [createTaskItem, linkFileItem])
 
   const bubbleBody = (
     <>

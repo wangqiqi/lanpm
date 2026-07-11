@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
-import { Button, Input, Segmented, Typography } from 'antd'
+import { Button, Input, Modal, Segmented, Select, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   AudioOutlined,
@@ -25,6 +25,7 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import type { Task } from '@shared/task/types'
 import { linkedFileIdsFromMessage, titleFromChatMessage } from '@shared/task/fromMessage'
+import { mergeLinkedFileId } from '@shared/task/linkFile'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -107,6 +108,7 @@ export default function ChatView(): React.ReactElement {
   const recallMessage = useChatStore((s) => s.recallMessage)
   const retryMessage = useChatStore((s) => s.retryMessage)
   const createFromChat = useTaskStore((s) => s.createFromChat)
+  const updateTask = useTaskStore((s) => s.updateTask)
   const sendTaskRef = useChatStore((s) => s.sendTaskRef)
   const loadTasks = useTaskStore((s) => s.loadTasks)
   const tasks = useTaskStore((s) => s.tasksByGroup[projectGroupId] ?? [])
@@ -121,6 +123,12 @@ export default function ChatView(): React.ReactElement {
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
+  const [linkFileModal, setLinkFileModal] = useState<{
+    fileId: string
+    fileName: string
+  } | null>(null)
+  const [linkTaskId, setLinkTaskId] = useState<string | undefined>()
+  const [linkSaving, setLinkSaving] = useState(false)
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
@@ -495,6 +503,26 @@ export default function ChatView(): React.ReactElement {
     [gid, taskAllowed, createFromChat, upsertMessage, t, message, formatError]
   )
 
+  const handleConfirmLinkFile = useCallback(async () => {
+    if (!gid || !linkFileModal || !linkTaskId) return
+    const task = tasks.find((x) => x.taskId === linkTaskId)
+    if (!task) return
+    setLinkSaving(true)
+    try {
+      await updateTask({
+        taskId: linkTaskId,
+        linkedFileIds: mergeLinkedFileId(task.linkedFileIds, linkFileModal.fileId)
+      })
+      message.success(t('chat.linkFileToTaskDone'))
+      setLinkFileModal(null)
+      setLinkTaskId(undefined)
+    } catch (err) {
+      message.error(formatError(err, 'tree.updateFailed'))
+    } finally {
+      setLinkSaving(false)
+    }
+  }, [gid, linkFileModal, linkTaskId, tasks, updateTask, message, t, formatError])
+
   const handleSendCode = useCallback(
     async (code: string, languageHint: string) => {
       if (!gid) return
@@ -727,6 +755,10 @@ export default function ChatView(): React.ReactElement {
                         onRetrySend={(msgId) => void handleRetrySend(msgId)}
                         taskCreateAllowed={taskAllowed}
                         onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
+                        onLinkFileToTask={(fileId, fileName) => {
+                          setLinkFileModal({ fileId, fileName })
+                          setLinkTaskId(undefined)
+                        }}
                       />
                     )
                   })}
@@ -914,6 +946,35 @@ export default function ChatView(): React.ReactElement {
             }}
           />
         )}
+
+        <Modal
+          open={linkFileModal != null}
+          title={t('chat.linkFileToTaskTitle')}
+          okText={t('chat.linkFileToTaskConfirm')}
+          cancelText={t('common.cancel')}
+          confirmLoading={linkSaving}
+          okButtonProps={{ disabled: !linkTaskId }}
+          onCancel={() => {
+            setLinkFileModal(null)
+            setLinkTaskId(undefined)
+          }}
+          onOk={() => void handleConfirmLinkFile()}
+        >
+          <Text type="secondary">
+            {linkFileModal
+              ? t('chat.linkFileToTaskHint', { name: linkFileModal.fileName })
+              : null}
+          </Text>
+          <Select
+            style={{ width: '100%', marginTop: 12 }}
+            placeholder={t('chat.linkFileToTaskPick')}
+            value={linkTaskId}
+            onChange={setLinkTaskId}
+            options={tasks.map((task) => ({ value: task.taskId, label: task.title }))}
+            showSearch
+            optionFilterProp="label"
+          />
+        </Modal>
 
         <MemberProfileModal
           open={profileMember != null}
