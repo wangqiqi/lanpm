@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.22.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.25.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -255,7 +255,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 
 **当前版本：** `1.22.0` — 插件 loader + form-js POC（`verify:plugin-loader`），B2 成员搜索（1.21）、A1 催办（1.20）、传输 A4 + 插件 SPIKE（1.19）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
-**进行中 / 队列：** 插件市场 SPIKE · B3 备份加固 → **1.25.0**（Unreleased）。
+**进行中 / 队列：** 插件市场 SPIKE。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 

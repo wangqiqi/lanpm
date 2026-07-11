@@ -4,15 +4,16 @@
 
 ## [Unreleased]
 
+## [1.25.0] - 2026-07-11
+
 ### Added
-- **TASK-310**：单群 bundle `overwrite` 冲突模式落地；`previewGroupBundle` dry-run 冲突计数；导入结果含 `overwritten`；`npm run verify:bundle`。
-- **TASK-311**：bundle 纳入 `group_tag_meta` · `group_members` · checklists（含冲突策略与预检计数）。
-- **TASK-312**：bundle 纳入 `task_crdt_docs` · `whiteboard_crdt_docs` · `whiteboard_scenes` 快照（base64）。
-- **TASK-313**：导入前 dry-run 摘要 Modal · overwrite 二次确认 · 多实体结果文案（i18n）。
-- **TASK-314 / SPRINT-B3-BACKUP**：docs/06 · 飞鸽信创「可迁移、不出域」口径；README 队列对齐 → **1.25.0**。
+- **SPRINT-B3-BACKUP（TASK-310–314）**：单群加密 bundle 加固 — `overwrite` 冲突模式、`previewGroupBundle` dry-run、tags/成员/清单/CRDT·白板快照；导入前摘要与覆盖二次确认；`verify:bundle`；docs/06 · 飞鸽信创「可迁移、不出域」· README 对齐。
 
 ### Fixed
 - **`groupTagMetaRepository` ESM 导入**：补 `.ts` 扩展名，修复 `ELECTRON_RUN_AS_NODE` 下依赖任务仓库的 verify 解析失败。
+
+### Release
+- `v1.25.0` — B3 backup/restore harden
 
 ## [1.24.0] - 2026-07-11
 

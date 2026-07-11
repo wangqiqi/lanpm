@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.22.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.25.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -255,7 +255,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 
 **Current:** `1.22.0` — plugin loader + form-js POC (`verify:plugin-loader`), B2 member search (1.21), A1 nudge (1.20), transfer A4 + plugin SPIKE (1.19). M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Next (in progress / queue):** marketplace SPIKE · B3 backup polish → **1.25.0** (Unreleased).
+**Next (in progress / queue):** marketplace SPIKE.
 
 **Later (P1+):** screen share, voice, mind maps, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 
