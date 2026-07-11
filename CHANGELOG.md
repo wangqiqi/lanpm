@@ -6,10 +6,17 @@
 
 ### Added
 - **SPRINT-B4-SYNC-OUTBOX（TASK-300–303）**：`sync_outbox`（schema v11）— task/file/tag publish 失败持久排队、周期/重连 flush；`verify:sync-outbox`；docs/06 · README 对齐。
+
+## [1.23.0] - 2026-07-11
+
+### Added
 - **SPRINT-PLUGIN-ENABLE-UI（TASK-295–299）**：Profile「扩展」Tab 启停官方插件；详情槽监听启停事件重拉；`verify:plugin-enable-ui`。
 
 ### Fixed
 - **Profile 非资料 Tab 页脚**：去掉「Cancel + 取消」双按钮；扩展/数据 Tab 仅「关闭」；官方插件名走 i18n。
+
+### Release
+- `v1.23.0` — Profile extensions tab (plugin enable UI)
 
 ## [1.22.0] - 2026-07-11
 

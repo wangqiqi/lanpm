@@ -255,7 +255,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 
 **当前版本：** `1.22.0` — 插件 loader + form-js POC（`verify:plugin-loader`），B2 成员搜索（1.21）、A1 催办（1.20）、传输 A4 + 插件 SPIKE（1.19）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
-**进行中 / 队列：** 插件启用 UI → **1.23.0** · B4 sync_outbox → **1.24.0** · B3 备份加固 · 市场 SPIKE。
+**进行中 / 队列：** B4 sync_outbox → **1.24.0** · B3 备份加固 · 市场 SPIKE。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 
