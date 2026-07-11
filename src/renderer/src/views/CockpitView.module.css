@@ -8,40 +8,90 @@
   overflow: auto;
   overflow-x: clip;
   max-width: 100%;
+  gap: 12px;
+  padding-bottom: 8px;
 }
 
 .headerActions {
   justify-content: flex-end;
 }
 
-.backBtn {
-  flex-shrink: 0;
-  max-width: min(100%, 320px);
-}
-
 .backBtnLabel {
+  max-width: min(200px, 28vw);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.attention {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 16px;
+  border-radius: var(--lanpm-radius-lg);
+  border: 0.5px solid var(--lanpm-separator);
+  background: var(--lanpm-surface-elevated);
+  box-shadow: var(--lanpm-shadow-island);
+}
+
+.attentionNeed {
+  border-color: color-mix(in srgb, var(--lanpm-warning) 35%, var(--lanpm-separator));
+  background: color-mix(in srgb, var(--lanpm-warning) 8%, var(--lanpm-surface-elevated));
+}
+
+.attentionOk {
+  border-color: color-mix(in srgb, var(--lanpm-success) 28%, var(--lanpm-separator));
+}
+
+.attentionLabel {
+  flex-shrink: 0;
+  color: var(--lanpm-text);
+}
+
+.attentionBody {
+  flex: 1 1 200px;
+  min-width: 0;
+  color: var(--lanpm-text);
+}
+
+.islandCard {
+  border-radius: var(--lanpm-radius-lg) !important;
+  background: var(--lanpm-surface-elevated) !important;
+  box-shadow: var(--lanpm-shadow-island) !important;
+  border: 0.5px solid var(--lanpm-separator) !important;
+}
+
 .metrics {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   margin-inline: 0 !important;
   max-width: 100%;
 }
 
+.kpiRisk :global(.ant-statistic-content-value) {
+  color: var(--lanpm-warning);
+}
+
+.kpiDelayed :global(.ant-statistic-content-value) {
+  color: var(--lanpm-danger);
+}
+
 .section {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .projectRow {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--lanpm-border);
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--lanpm-separator);
 }
 
 .projectRow:last-child {
   border-bottom: none;
+  padding-bottom: 0;
+}
+
+.projectRow:first-child {
+  padding-top: 0;
 }
 
 .projectHead {
@@ -53,12 +103,21 @@
   min-width: 0;
 }
 
-.projectHead :global(.ant-space) {
+.projectName {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.projectActions {
+  display: inline-flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
 }
 
 .projectMeta {
-  font-size: 12px;
+  font-size: var(--lanpm-font-caption);
   display: block;
   margin-top: 4px;
 }
@@ -69,6 +128,14 @@
   gap: 12px;
   margin-bottom: 10px;
   min-width: 0;
+}
+
+.deptName {
+  flex: 0 0 min(120px, 28%);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deptRow :global(.ant-progress) {
@@ -84,16 +151,17 @@
 .reportPre {
   white-space: pre-wrap;
   word-break: break-word;
-  font-size: 13px;
-  line-height: 1.5;
-  max-height: 200px;
+  font-size: var(--lanpm-font-body);
+  line-height: 1.55;
+  max-height: 280px;
   overflow: auto;
   margin: 0;
-  padding: 12px;
-  border-radius: var(--lanpm-radius-sm);
+  padding: 14px 16px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-code-bg);
+  border: 0.5px solid var(--lanpm-separator);
 }
 
 .reportPreExpanded {
-  max-height: min(70vh, 640px);
+  max-height: min(70vh, 720px);
 }

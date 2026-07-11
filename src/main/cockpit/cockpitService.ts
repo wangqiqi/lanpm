@@ -109,6 +109,7 @@ function localWeeklyMarkdown(db: Database): string {
     '## 概览',
     `- 项目总数：${dash.summary.totalProjects}`,
     `- 进行中任务：${dash.summary.inProgressCount}`,
+    `- 风险项目：${dash.summary.riskProjectCount}`,
     `- 延期任务：${dash.summary.delayedCount}`,
     '',
     '## 项目进度',

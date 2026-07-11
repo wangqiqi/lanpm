@@ -52,7 +52,7 @@ export default function CockpitView(): React.ReactElement {
   const [aiConfigOpen, setAiConfigOpen] = useState(false)
   const [report, setReport] = useState<AiReportResult | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
-  const [reportExpanded, setReportExpanded] = useState(false)
+  const [reportExpanded, setReportExpanded] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -71,7 +71,7 @@ export default function CockpitView(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [formatError, message])
 
   useEffect(() => {
     void load()
@@ -96,6 +96,7 @@ export default function CockpitView(): React.ReactElement {
             ? await api.generateMonthlyReport()
             : await api.evaluateProjects()
       setReport(result)
+      setReportExpanded(true)
       message.success(result.usedExternalAi ? t('cockpit.reportExternal') : t('cockpit.reportLocal'))
     } catch (err) {
       message.error(formatError(err, 'cockpit.generateFailed'))
@@ -115,6 +116,11 @@ export default function CockpitView(): React.ReactElement {
     [t]
   )
 
+  const attentionProjects = useMemo(() => {
+    const list = dashboard?.projects ?? []
+    return list.filter((p) => p.status === 'delayed' || p.status === 'risk')
+  }, [dashboard?.projects])
+
   if (loading && !dashboard) {
     return <ViewLoadingCenter />
   }
@@ -130,23 +136,25 @@ export default function CockpitView(): React.ReactElement {
     ? resolveGroupDisplayNameById(activeGroup.groupId, activeGroup.name, t)
     : activeGroupId
 
+  const attentionNames = attentionProjects
+    .slice(0, 4)
+    .map((p) => resolveGroupDisplayNameById(p.groupId, p.name, t))
+    .join('、')
+  const attentionExtra =
+    attentionProjects.length > 4 ? ` +${attentionProjects.length - 4}` : ''
+
   return (
     <div className={styles.root}>
       <ViewHeader
         title={t('cockpit.title')}
         actions={
           <Space wrap className={styles.headerActions}>
-            <Button
-              type="primary"
-              icon={<ArrowLeftOutlined />}
-              className={styles.backBtn}
-              onClick={returnToActiveProject}
-            >
+            <Button type="text" icon={<ArrowLeftOutlined />} onClick={returnToActiveProject}>
               <span className={styles.backBtnLabel}>
                 {t('cockpit.backToProject', { name: activeProjectName })}
               </span>
             </Button>
-            <Button loading={reportLoading} onClick={() => void runReport('weekly')}>
+            <Button type="primary" loading={reportLoading} onClick={() => void runReport('weekly')}>
               {t('cockpit.weeklyReport')}
             </Button>
             <Button loading={reportLoading} onClick={() => void runReport('monthly')}>
@@ -159,87 +167,50 @@ export default function CockpitView(): React.ReactElement {
             >
               {t('cockpit.aiEvaluate')}
             </Button>
-            <Button icon={<KeyOutlined />} onClick={() => setAiConfigOpen(true)}>
+            <Button type="text" icon={<KeyOutlined />} onClick={() => setAiConfigOpen(true)}>
               {t('cockpit.apiKey')}
             </Button>
           </Space>
         }
       />
 
-      <Row gutter={[16, 16]} className={styles.metrics}>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic title={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic title={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic title={t('cockpit.delayedTasks')} value={summary?.delayedCount ?? 0} />
-          </Card>
-        </Col>
-      </Row>
-
-      <Card title={t('cockpit.projectProgress')} className={styles.section}>
-        {(dashboard?.projects.length ?? 0) === 0 ? (
-          <Text type="secondary">{t('cockpit.noProjects')}</Text>
+      <div
+        className={`${styles.attention} ${
+          attentionProjects.length > 0 ? styles.attentionNeed : styles.attentionOk
+        }`}
+        role="status"
+      >
+        <Text strong className={styles.attentionLabel}>
+          {t('cockpit.attentionTitle')}
+        </Text>
+        {attentionProjects.length > 0 ? (
+          <>
+            <Text className={styles.attentionBody}>
+              {t('cockpit.attentionNeed', {
+                delayed: attentionProjects.filter((p) => p.status === 'delayed').length,
+                risk: attentionProjects.filter((p) => p.status === 'risk').length,
+                names: `${attentionNames}${attentionExtra}`
+              })}
+            </Text>
+            {attentionProjects[0] ? (
+              <Button
+                size="small"
+                type="link"
+                onClick={() => navigate(groupViewPath(attentionProjects[0].groupId, 'board'))}
+              >
+                {t('cockpit.attentionOpenBoard')}
+              </Button>
+            ) : null}
+          </>
         ) : (
-          dashboard?.projects.map((p) => {
-            const meta = statusTags[p.status] ?? statusTags.normal
-            return (
-              <div key={p.groupId} className={styles.projectRow}>
-                <div className={styles.projectHead}>
-                  <Text strong>{resolveGroupDisplayNameById(p.groupId, p.name, t)}</Text>
-                  <Tag color={meta.color}>{meta.label}</Tag>
-                  <Space size="small">
-                    <Button
-                      type="primary"
-                      size="small"
-                      onClick={() => navigate(groupViewPath(p.groupId, 'chat'))}
-                    >
-                      {t('cockpit.enterProject')}
-                    </Button>
-                    <Button size="small" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
-                      {t('cockpit.openBoard')}
-                    </Button>
-                  </Space>
-                </div>
-                <Progress percent={p.progressPercent} size="small" />
-                <Text type="secondary" className={styles.projectMeta}>
-                  {t('cockpit.projectMeta', {
-                    total: p.totalTasks,
-                    inProgress: p.inProgressCount,
-                    delayed: p.delayedCount
-                  })}
-                </Text>
-              </div>
-            )
-          })
+          <Text type="secondary">{t('cockpit.attentionHealthy')}</Text>
         )}
-      </Card>
+      </div>
 
-      <Card title={t('cockpit.deptCompletion')} className={styles.section}>
-        {(dashboard?.departments.length ?? 0) === 0 ? (
-          <Text type="secondary">{t('cockpit.noDeptData')}</Text>
-        ) : (
-          dashboard?.departments.map((d) => (
-            <div key={d.department} className={styles.deptRow}>
-              <Text>{d.department}</Text>
-              <Progress percent={d.completionPercent} style={{ flex: 1 }} />
-              <Text type="secondary">{t('cockpit.taskCount', { count: d.taskCount })}</Text>
-            </div>
-          ))
-        )}
-      </Card>
-
-      {report && (
+      {report ? (
         <Card
           title={t('cockpit.reportOutput')}
-          className={styles.section}
+          className={`${styles.section} ${styles.islandCard}`}
           extra={
             <Space>
               <Button
@@ -272,7 +243,96 @@ export default function CockpitView(): React.ReactElement {
             {report.content}
           </pre>
         </Card>
-      )}
+      ) : null}
+
+      <Row gutter={[16, 16]} className={styles.metrics}>
+        <Col xs={12} sm={6}>
+          <Card className={styles.islandCard} bordered={false}>
+            <Statistic title={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card className={styles.islandCard} bordered={false}>
+            <Statistic title={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card className={`${styles.islandCard} ${styles.kpiRisk}`} bordered={false}>
+            <Statistic title={t('cockpit.riskProjects')} value={summary?.riskProjectCount ?? 0} />
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card className={`${styles.islandCard} ${styles.kpiDelayed}`} bordered={false}>
+            <Statistic title={t('cockpit.delayedTasks')} value={summary?.delayedCount ?? 0} />
+          </Card>
+        </Col>
+      </Row>
+
+      <Card
+        title={t('cockpit.projectProgress')}
+        className={`${styles.section} ${styles.islandCard}`}
+        bordered={false}
+      >
+        {(dashboard?.projects.length ?? 0) === 0 ? (
+          <Text type="secondary">{t('cockpit.noProjects')}</Text>
+        ) : (
+          dashboard?.projects.map((p) => {
+            const meta = statusTags[p.status] ?? statusTags.normal
+            return (
+              <div key={p.groupId} className={styles.projectRow}>
+                <div className={styles.projectHead}>
+                  <Text strong className={styles.projectName}>
+                    {resolveGroupDisplayNameById(p.groupId, p.name, t)}
+                  </Text>
+                  <Tag color={meta.color}>{meta.label}</Tag>
+                  <div className={styles.projectActions}>
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => navigate(groupViewPath(p.groupId, 'chat'))}
+                    >
+                      {t('cockpit.enterProject')}
+                    </Button>
+                    <Button size="small" type="text" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
+                      {t('cockpit.openBoard')}
+                    </Button>
+                  </div>
+                </div>
+                <Progress
+                  percent={p.progressPercent}
+                  size="small"
+                  status={p.status === 'delayed' ? 'exception' : p.status === 'risk' ? 'active' : 'normal'}
+                />
+                <Text type="secondary" className={styles.projectMeta}>
+                  {t('cockpit.projectMeta', {
+                    total: p.totalTasks,
+                    inProgress: p.inProgressCount,
+                    delayed: p.delayedCount
+                  })}
+                </Text>
+              </div>
+            )
+          })
+        )}
+      </Card>
+
+      <Card
+        title={t('cockpit.deptCompletion')}
+        className={`${styles.section} ${styles.islandCard}`}
+        bordered={false}
+      >
+        {(dashboard?.departments.length ?? 0) === 0 ? (
+          <Text type="secondary">{t('cockpit.noDeptData')}</Text>
+        ) : (
+          dashboard?.departments.map((d) => (
+            <div key={d.department} className={styles.deptRow}>
+              <Text className={styles.deptName}>{d.department}</Text>
+              <Progress percent={d.completionPercent} style={{ flex: 1 }} />
+              <Text type="secondary">{t('cockpit.taskCount', { count: d.taskCount })}</Text>
+            </div>
+          ))
+        )}
+      </Card>
 
       <AiConfigModal
         open={aiConfigOpen}
