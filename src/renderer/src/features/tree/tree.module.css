@@ -158,6 +158,13 @@
   gap: 4px;
 }
 
+.tagChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
 .detailFieldRow {
   display: flex;
   align-items: flex-end;

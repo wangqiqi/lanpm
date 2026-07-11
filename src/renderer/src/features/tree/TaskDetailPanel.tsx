@@ -33,6 +33,8 @@ import {
   validateTaskForm
 } from '@shared/task/validation'
 import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
+import TaskTagChip from '@renderer/features/task/TaskTagChip'
+import { useUiStore } from '@renderer/stores/uiStore'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -89,6 +91,7 @@ export default function TaskDetailPanel({
   const { message } = useLanpmApp()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
+  const tagColorOverrides = useUiStore((s) => s.tagColorOverridesByGroup[groupId] ?? {})
 
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description ?? '')
@@ -293,6 +296,13 @@ export default function TaskDetailPanel({
         <Text type="secondary" style={{ fontSize: 11 }}>
           {t('board.tagsHint')}
         </Text>
+        {tags.length > 0 ? (
+          <div className={styles.tagChipRow}>
+            {tags.map((label) => (
+              <TaskTagChip key={label} label={label} colorOverrides={tagColorOverrides} />
+            ))}
+          </div>
+        ) : null}
       </label>
 
       {status === 'other' && (
