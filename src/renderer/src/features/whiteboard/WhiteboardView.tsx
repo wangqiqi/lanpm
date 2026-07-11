@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from 'antd'
-import { SaveOutlined } from '@ant-design/icons'
-import { Excalidraw } from '@excalidraw/excalidraw'
+import { DownloadOutlined, SaveOutlined } from '@ant-design/icons'
+import { Excalidraw, exportToBlob } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types'
 import '@excalidraw/excalidraw/index.css'
@@ -74,6 +74,7 @@ export default function WhiteboardView(): React.ReactElement {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [linkedTaskId, setLinkedTaskId] = useState<string | undefined>()
   const [initialData, setInitialData] = useState<ScenePayload | null>(null)
@@ -158,6 +159,39 @@ export default function WhiteboardView(): React.ReactElement {
     [scheduleSave]
   )
 
+  const exportPng = useCallback(async (): Promise<void> => {
+    if (!gid) return
+    const api = apiRef.current
+    const latest = latestRef.current
+    setExporting(true)
+    try {
+      const elements = api?.getSceneElements() ?? latest?.elements ?? []
+      const appState = api?.getAppState() ?? latest?.appState
+      const files = api?.getFiles() ?? latest?.files ?? {}
+      if (!appState) throw new Error('no scene')
+      const blob = await exportToBlob({
+        elements,
+        appState: { ...appState, exportBackground: true },
+        files,
+        mimeType: 'image/png'
+      })
+      const buf = new Uint8Array(await blob.arrayBuffer())
+      let binary = ''
+      for (const b of buf) binary += String.fromCharCode(b)
+      const pngBase64 = btoa(binary)
+      await getLanpmApi().whiteboard.exportPng({
+        groupId: gid,
+        pngBase64,
+        linkedTaskId
+      })
+      message.success(t('whiteboard.exportDone'))
+    } catch (err) {
+      message.error(formatError(err, 'whiteboard.exportFailed'))
+    } finally {
+      setExporting(false)
+    }
+  }, [gid, linkedTaskId, message, formatError, t])
+
   const uiOptions = useMemo(
     () => ({
       canvasActions: {
@@ -189,6 +223,14 @@ export default function WhiteboardView(): React.ReactElement {
               onClick={() => void persist()}
             >
               {t('whiteboard.save')}
+            </Button>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              loading={exporting}
+              onClick={() => void exportPng()}
+            >
+              {t('whiteboard.exportPng')}
             </Button>
           </ViewToolbarGroup>
         }

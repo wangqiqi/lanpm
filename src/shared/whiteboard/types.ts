@@ -15,6 +15,15 @@ export interface SaveWhiteboardSceneInput {
   linkedTaskId?: string | null
 }
 
+export interface ExportWhiteboardPngInput {
+  groupId: string
+  /** Raw PNG bytes as base64 (no data: URL prefix). */
+  pngBase64: string
+  fileName?: string
+  /** When set, also post the file to group chat and reference the task. */
+  linkedTaskId?: string
+}
+
 /** Minimal empty Excalidraw-compatible payload. */
 export function emptyWhiteboardSceneJson(): string {
   return JSON.stringify({

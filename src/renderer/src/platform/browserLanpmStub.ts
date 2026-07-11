@@ -1158,6 +1158,25 @@ export function createBrowserLanpmStub(): LanpmApi {
         )
         writeStubWhiteboard(scene)
         return scene
+      },
+      exportPng: async (input) => {
+        if (!input.groupId || !input.pngBase64) throw new Error('exportPng input required')
+        const fileId = `file_wb_${Date.now()}`
+        return {
+          fileId,
+          groupId: input.groupId,
+          name: input.fileName ?? `whiteboard-${input.groupId}.png`,
+          ext: 'png',
+          category: 'image' as const,
+          size: Math.floor((input.pngBase64.length * 3) / 4),
+          uploadedBy: 'stub',
+          uploadedAt: new Date().toISOString(),
+          sha256: 'stub',
+          storagePath: '',
+          previewStatus: 'none' as const,
+          isBookmark: false,
+          updatedAt: new Date().toISOString()
+        }
       }
     },
     data: {

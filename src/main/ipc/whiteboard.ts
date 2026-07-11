@@ -1,8 +1,15 @@
 import { ipcMain } from 'electron'
 import { WHITEBOARD_IPC } from '../../shared/whiteboard/channels'
-import type { SaveWhiteboardSceneInput } from '../../shared/whiteboard/types'
+import type {
+  ExportWhiteboardPngInput,
+  SaveWhiteboardSceneInput
+} from '../../shared/whiteboard/types'
 import { getDatabase } from '../storage'
-import { loadWhiteboardScene, saveWhiteboardScene } from '../whiteboard/whiteboardService'
+import {
+  exportWhiteboardPngToGroup,
+  loadWhiteboardScene,
+  saveWhiteboardScene
+} from '../whiteboard/whiteboardService'
 
 export function registerWhiteboardIpc(): void {
   ipcMain.handle(WHITEBOARD_IPC.getScene, (_event, groupId: string) => {
@@ -22,5 +29,14 @@ export function registerWhiteboardIpc(): void {
       throw new Error('linkedTaskId must be string or null')
     }
     return saveWhiteboardScene(getDatabase(), input)
+  })
+
+  ipcMain.handle(WHITEBOARD_IPC.exportPng, (_event, input: ExportWhiteboardPngInput) => {
+    if (!input || typeof input !== 'object') throw new Error('input required')
+    if (typeof input.groupId !== 'string' || !input.groupId) throw new Error('groupId required')
+    if (typeof input.pngBase64 !== 'string' || !input.pngBase64) {
+      throw new Error('pngBase64 required')
+    }
+    return exportWhiteboardPngToGroup(getDatabase(), input)
   })
 }

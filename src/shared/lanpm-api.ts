@@ -197,5 +197,8 @@ export interface LanpmApi {
     saveScene: (
       input: import('./whiteboard/types').SaveWhiteboardSceneInput
     ) => Promise<import('./whiteboard/types').WhiteboardScene>
+    exportPng: (
+      input: import('./whiteboard/types').ExportWhiteboardPngInput
+    ) => Promise<import('./file/types').FileMeta>
   }
 }

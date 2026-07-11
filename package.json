@@ -52,6 +52,7 @@
     "verify:group-tag-dict": "node --experimental-strip-types tests/static/verify-group-tag-dict.ts",
     "verify:badge-semantics": "node --experimental-strip-types tests/static/verify-badge-semantics.ts",
     "verify:task-calendar": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-task-calendar.ts",
+    "verify:whiteboard": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-whiteboard.ts",
     "verify:suffix": "node --experimental-strip-types tests/static/verify-suffix.ts",
     "verify:network-stub": "node --experimental-strip-types tests/integration/verify-network-stub.ts",
     "verify:network-manual": "node --experimental-strip-types tests/static/verify-network-manual.ts",

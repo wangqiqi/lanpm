@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-WHITEBOARD 收尾 (TASK-229)**：导出 PNG→群文件（关联任务时发聊）；`verify:whiteboard`；docs/03·04 七视图；README；归档；可 handoff `/release` **1.11.0**。
 - **任务打开白板 (TASK-228)**：详情/编辑「打开白板」；`?linkTask=` 关联 `linkedTaskId`。
 - **Excalidraw 白板视图 (TASK-227)**：`WhiteboardView` 嵌入；主题跟随；自动/手动保存场景。
 - **白板场景契约 (TASK-226)**：群级 `whiteboard_scenes`（sceneJson · linkedTaskId）；IPC get/save；stub + 单测。

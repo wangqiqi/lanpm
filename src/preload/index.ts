@@ -169,7 +169,8 @@ const api: LanpmApi = {
   },
   whiteboard: {
     getScene: (groupId) => ipcRenderer.invoke('whiteboard:getScene', groupId),
-    saveScene: (input) => ipcRenderer.invoke('whiteboard:saveScene', input)
+    saveScene: (input) => ipcRenderer.invoke('whiteboard:saveScene', input),
+    exportPng: (input) => ipcRenderer.invoke('whiteboard:exportPng', input)
   },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
