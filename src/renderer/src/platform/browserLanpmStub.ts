@@ -25,6 +25,8 @@ import {
   validateTaskTitle
 } from '@shared/task/validation'
 import { normalizeTaskTags } from '@shared/task/tags'
+import type { GroupTagMeta } from '@shared/task/groupTagMeta'
+import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -51,6 +53,8 @@ function persistStubDissolvedGroups(): void {
 }
 
 const taskListeners = new Set<(groupId: string) => void>()
+const groupTagListeners = new Set<(groupId: string) => void>()
+const stubGroupTags: Record<string, GroupTagMeta[]> = {}
 
 function assertStubTaskWritable(groupId: string): void {
   if (groupId.startsWith('dm:')) throw stubError('stub.dmNoTask')
@@ -742,7 +746,57 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       setAwareness: async () => [],
       listAwareness: async () => [],
-      onAwarenessChanged: () => () => undefined
+      listGroupTags: async (groupId) => stubGroupTags[groupId] ?? [],
+      upsertGroupTag: async (groupId, tagKey, color, label) => {
+        if (!isGroupTagColor(color)) throw new Error('invalid color')
+        const key = normalizeGroupTagKey(tagKey)
+        const row: GroupTagMeta = {
+          groupId,
+          tagKey: key,
+          color: color.trim(),
+          label,
+          updatedAt: new Date().toISOString()
+        }
+        const prev = stubGroupTags[groupId] ?? []
+        stubGroupTags[groupId] = [...prev.filter((r) => r.tagKey !== key), row]
+        for (const fn of groupTagListeners) fn(groupId)
+        return row
+      },
+      removeGroupTag: async (groupId, tagKey) => {
+        const key = normalizeGroupTagKey(tagKey)
+        const prev = stubGroupTags[groupId] ?? []
+        const next = prev.filter((r) => r.tagKey !== key)
+        if (next.length === prev.length) return false
+        stubGroupTags[groupId] = next
+        for (const fn of groupTagListeners) fn(groupId)
+        return true
+      },
+      importLocalTagColors: async (groupId, overrides) => {
+        if ((stubGroupTags[groupId] ?? []).length > 0) return 0
+        let n = 0
+        const now = new Date().toISOString()
+        const rows: GroupTagMeta[] = []
+        for (const [raw, color] of Object.entries(overrides)) {
+          if (!isGroupTagColor(color)) continue
+          const tagKey = normalizeGroupTagKey(raw)
+          if (!tagKey) continue
+          rows.push({
+            groupId,
+            tagKey,
+            color: color.trim(),
+            updatedAt: now
+          })
+          n++
+        }
+        stubGroupTags[groupId] = rows
+        if (n > 0) for (const fn of groupTagListeners) fn(groupId)
+        return n
+      },
+      onAwarenessChanged: () => () => undefined,
+      onGroupTagsChanged: (handler) => {
+        groupTagListeners.add(handler)
+        return () => groupTagListeners.delete(handler)
+      }
     },
     file: {
       listFiles: async (groupId, category) => {

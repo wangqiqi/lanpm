@@ -21,7 +21,14 @@ import {
   listRemoteTaskAwareness,
   setLocalTaskAwareness
 } from '../task/taskAwarenessService'
+import {
+  importLocalTagColorsIfEmpty,
+  listGroupTags,
+  removeGroupTagLocal,
+  upsertGroupTagLocal
+} from '../task/groupTagSyncService'
 import { getDatabase } from '../storage'
+import { isGroupTagColor } from '../../shared/task/groupTagMeta'
 
 export function registerTaskIpc(): void {
   ipcMain.handle(TASK_IPC.listTasks, (_event, groupId: string) => {
@@ -101,6 +108,39 @@ export function registerTaskIpc(): void {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
     return listRemoteTaskAwareness(groupId)
   })
+
+  ipcMain.handle(TASK_IPC.listGroupTags, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return listGroupTags(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(
+    TASK_IPC.upsertGroupTag,
+    (_event, groupId: string, tagKey: string, color: string, label?: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof tagKey !== 'string' || !tagKey) throw new Error('tagKey required')
+      if (!isGroupTagColor(color)) throw new Error('invalid color')
+      return upsertGroupTagLocal(getDatabase(), groupId, tagKey, color, label)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.removeGroupTag,
+    (_event, groupId: string, tagKey: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof tagKey !== 'string' || !tagKey) throw new Error('tagKey required')
+      return removeGroupTagLocal(getDatabase(), groupId, tagKey)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.importLocalTagColors,
+    (_event, groupId: string, overrides: Record<string, string>) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (!overrides || typeof overrides !== 'object') throw new Error('overrides required')
+      return importLocalTagColorsIfEmpty(getDatabase(), groupId, overrides)
+    }
+  )
 }
 
 /** Push awareness snapshot to all renderer windows. */

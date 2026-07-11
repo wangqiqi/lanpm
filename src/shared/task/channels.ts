@@ -4,6 +4,9 @@ export const TASK_PUSH_CHANNEL = 'task:changed'
 /** Renderer push when remote focus Presence changes */
 export const TASK_AWARENESS_PUSH_CHANNEL = 'task:awareness'
 
+/** Renderer push when group tag dictionary changes */
+export const GROUP_TAG_META_PUSH_CHANNEL = 'group:tagMetaChanged'
+
 export const TASK_IPC = {
   listTasks: 'task:listTasks',
   createTask: 'task:createTask',
@@ -16,7 +19,11 @@ export const TASK_IPC = {
   removeDependency: 'task:removeDependency',
   deleteTask: 'task:deleteTask',
   setAwareness: 'task:setAwareness',
-  listAwareness: 'task:listAwareness'
+  listAwareness: 'task:listAwareness',
+  listGroupTags: 'task:listGroupTags',
+  upsertGroupTag: 'task:upsertGroupTag',
+  removeGroupTag: 'task:removeGroupTag',
+  importLocalTagColors: 'task:importLocalTagColors'
 } as const
 
 export type TaskDeleteIpcArgs = {

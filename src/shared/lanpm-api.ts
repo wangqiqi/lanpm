@@ -97,6 +97,18 @@ export interface LanpmApi {
     ) => Promise<
       Array<import('./task/taskAwareness').TaskAwarenessLocalState & { clientId: number }>
     >
+    listGroupTags: (groupId: string) => Promise<import('./task/groupTagMeta').GroupTagMeta[]>
+    upsertGroupTag: (
+      groupId: string,
+      tagKey: string,
+      color: string,
+      label?: string
+    ) => Promise<import('./task/groupTagMeta').GroupTagMeta>
+    removeGroupTag: (groupId: string, tagKey: string) => Promise<boolean>
+    importLocalTagColors: (
+      groupId: string,
+      overrides: Record<string, string>
+    ) => Promise<number>
     onTasksChanged: (handler: (groupId: string) => void) => () => void
     onAwarenessChanged: (
       handler: (payload: {
@@ -106,6 +118,7 @@ export interface LanpmApi {
         >
       }) => void
     ) => () => void
+    onGroupTagsChanged: (handler: (groupId: string) => void) => () => void
   }
   search: {
     query: (query: string) => Promise<import('./search/types').GlobalSearchResult>
