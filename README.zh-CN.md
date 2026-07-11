@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.7.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.8.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -203,7 +203,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | 甘特 | **gantt-task-react** |
 | 持久化（RC） | **SQLite**（唯一持久化层） |
 | 网络（RC） | UDP 发现 + TCP/P2P 联调路径；应用层加密 |
-| 规划 | Yjs `task_crdt`（**v1.1.0**）· P2P 续传（**v1.2.0**）· 看板标签（**v1.3.0**）· Presence（**v1.4.0**）· 标签筛选（**v1.5.0**）· 群标签字典（**v1.6.0**）· 描述框 caret（**v1.7.0**）· WebRTC · IndexedDB（post-RC） |
+| 规划 | Yjs `task_crdt`（**v1.1.0**）· P2P 续传（**v1.2.0**）· 看板标签（**v1.3.0**）· Presence（**v1.4.0**）· 标签筛选（**v1.5.0**）· 群标签字典（**v1.6.0**）· 描述框 caret（**v1.7.0**）· 导航角标与我相关（**v1.8.0**）· WebRTC · IndexedDB（post-RC） |
 
 ---
 
@@ -228,7 +228,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M2–M5** | 聊天 / 任务 / 文件 / 群组 / 驾驶舱 |
 | **M6–M7** | 真网路径、性能与发布门禁 |
 
-**当前版本：** `1.7.0`（看板标签 · Presence · 筛选色板 · 群标签字典 · 描述框协同 caret）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.8.0`（看板标签 · Presence · 筛选色板 · 群标签字典 · 描述框协同 caret · 导航角标与我相关）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、插件系统、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 

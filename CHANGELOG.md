@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+### Added
+- **SPRINT-NAV-BADGE-UX 收尾 (TASK-205)**：`verify:badge-semantics`；docs/03·04·06·README 对齐角标语义；归档；handoff `/release` → **v1.8.0**。
+- **顶栏网络点切换微动效 (TASK-204)**：`linkState` 变化时一次缩放反馈；尊重 `prefers-reduced-motion`。
+- **底栏看板角标接线 (TASK-203)**：`BottomNav` 使用 `boardMineOpen`；聊天仍 `chatUnread`。
+- **Stub / badgeStore 对齐 (TASK-202)**：browser stub 用 `countMineOpenTasks`；store 空态 `boardMineOpen`。
+- **看板角标语义契约 (TASK-201)**：`GroupTabBadges.boardMineOpen`；`shared/badge/mineOpen`；`badgeService.countMineOpenTasks`（指派给我且 todo/doing）；单测。
+
+### Changed
+- **看板 Tab 角标**：由「群内全部 `todo`」改为「指派给本地用户且未完成（todo/doing）」；字段 `boardTodo` → `boardMineOpen`。
+
 ## [1.7.0] - 2026-07-11
 
 ### Added
