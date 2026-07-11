@@ -79,7 +79,7 @@ export default function BottomNav(): React.ReactElement {
 
   const tabBadgeCount = (view: AppView): number => {
     if (view === 'chat') return badges.chatUnread
-    if (view === 'board') return badges.boardTodo
+    if (view === 'board') return badges.boardMineOpen
     return 0
   }
 
