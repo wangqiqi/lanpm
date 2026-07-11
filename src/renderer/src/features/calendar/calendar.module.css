@@ -1,0 +1,64 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.calendarHost {
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--lanpm-radius-panel, 8px);
+  overflow: hidden;
+}
+
+.calendarHost[data-empty='1'] {
+  min-height: 280px;
+}
+
+.light :global(.fc),
+.dark :global(.fc) {
+  --fc-border-color: var(--lanpm-border-subtle, #e5e5ea);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--lanpm-surface-secondary, #f5f5f7);
+  --fc-list-event-hover-bg-color: var(--lanpm-accent-fill, rgba(0, 113, 227, 0.08));
+  --fc-today-bg-color: var(--lanpm-accent-fill, rgba(0, 113, 227, 0.08));
+  --fc-event-bg-color: var(--lanpm-accent, #0071e3);
+  --fc-event-border-color: var(--lanpm-accent, #0071e3);
+  --fc-event-text-color: #fff;
+  --fc-button-bg-color: var(--lanpm-accent, #0071e3);
+  --fc-button-border-color: var(--lanpm-accent, #0071e3);
+  --fc-button-hover-bg-color: var(--lanpm-accent-hover, #0077ed);
+  --fc-button-hover-border-color: var(--lanpm-accent-hover, #0077ed);
+  --fc-button-active-bg-color: var(--lanpm-accent-hover, #0077ed);
+  --fc-button-active-border-color: var(--lanpm-accent-hover, #0077ed);
+  font-family: inherit;
+  color: var(--lanpm-text-primary, #1d1d1f);
+}
+
+.dark :global(.fc) {
+  --fc-border-color: var(--lanpm-border-subtle, #38383a);
+  color: var(--lanpm-text-primary, #f5f5f7);
+}
+
+.light :global(.fc .fc-toolbar-title),
+.dark :global(.fc .fc-toolbar-title) {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.light :global(.fc .fc-button),
+.dark :global(.fc .fc-button) {
+  border-radius: 6px;
+  text-transform: none;
+  box-shadow: none !important;
+}
+
+.light :global(.fc-theme-standard td),
+.light :global(.fc-theme-standard th),
+.dark :global(.fc-theme-standard td),
+.dark :global(.fc-theme-standard th) {
+  border-color: var(--fc-border-color);
+}

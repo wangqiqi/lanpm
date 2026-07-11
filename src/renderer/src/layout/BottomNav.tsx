@@ -8,6 +8,7 @@ import {
   ProjectOutlined,
   ApartmentOutlined,
   BarChartOutlined,
+  CalendarOutlined,
   FolderOutlined
 } from '@ant-design/icons'
 import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
@@ -26,6 +27,7 @@ const VIEW_ICONS: Record<AppView, React.ReactNode> = {
   board: <ProjectOutlined />,
   tree: <ApartmentOutlined />,
   gantt: <BarChartOutlined />,
+  calendar: <CalendarOutlined />,
   files: <FolderOutlined />
 }
 
@@ -40,7 +42,14 @@ export default function BottomNav(): React.ReactElement {
   const activeView = useMemo((): AppView | null => {
     const m = location.pathname.match(/\/g\/[^/]+\/(\w+)/)
     const v = m?.[1]
-    if (v === 'chat' || v === 'board' || v === 'tree' || v === 'gantt' || v === 'files') {
+    if (
+      v === 'chat' ||
+      v === 'board' ||
+      v === 'tree' ||
+      v === 'gantt' ||
+      v === 'calendar' ||
+      v === 'files'
+    ) {
       return v
     }
     return null

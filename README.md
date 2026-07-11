@@ -203,7 +203,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· **task calendar（→ 1.10.0）** · WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 
@@ -228,7 +228,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M2–M5** | Chat, tasks, files, groups, cockpit |
 | **M6–M7** | Real network paths, perf & release gates |
 
-**Current:** `1.9.0` — board tags, Awareness Presence, tag filter/palette, group tag dict sync, description text caret, nav badges (chat unread + my open board tasks + recent weak dot), force task tags from group dictionary only. M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.9.0` — board tags, Awareness Presence, tag filter/palette, group tag dict sync, description text caret, nav badges (chat unread + my open board tasks + recent weak dot), force task tags from group dictionary only. **Unreleased → 1.10.0:** task calendar (6th BottomNav tab, FullCalendar). M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
 
 **Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 

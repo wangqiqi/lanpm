@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+### Added
+- **SPRINT-TASK-CALENDAR 收尾 (TASK-224)**：`verify:task-calendar`；docs/03·04 六视图；README；归档；可 handoff `/release` **1.10.0**。
+- **日历接线 (TASK-223)**：Router · BottomNav 第 6 Tab（甘特与文件之间）· i18n；点击打开 TaskEditModal。
+- **FullCalendar 视图 (TASK-222)**：`CalendarView` 月/周；主题 token；只读不拖拽。
+- **日历事件契约 (TASK-221)**：`tasksToCalendarEvents`（仅有日期；endDate=到期）；单测。
+- **六视图导航 (TASK-220)**：`AppView` 增 `calendar`；`VIEW_TABS` 顺序 gantt→calendar→files。
+
 ## [1.9.0] - 2026-07-11
 
 ### Added

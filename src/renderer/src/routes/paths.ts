@@ -41,8 +41,14 @@ export function cockpitReturnPath(
 
 export interface ViewTabDef {
   view: AppView
-  labelKey: 'nav.chat' | 'nav.board' | 'nav.tree' | 'nav.gantt' | 'nav.files'
-  icon: 'chat' | 'board' | 'tree' | 'gantt' | 'files'
+  labelKey:
+    | 'nav.chat'
+    | 'nav.board'
+    | 'nav.tree'
+    | 'nav.gantt'
+    | 'nav.calendar'
+    | 'nav.files'
+  icon: 'chat' | 'board' | 'tree' | 'gantt' | 'calendar' | 'files'
 }
 
 export const VIEW_TABS: ViewTabDef[] = [
@@ -50,5 +56,6 @@ export const VIEW_TABS: ViewTabDef[] = [
   { view: 'board', labelKey: 'nav.board', icon: 'board' },
   { view: 'tree', labelKey: 'nav.tree', icon: 'tree' },
   { view: 'gantt', labelKey: 'nav.gantt', icon: 'gantt' },
+  { view: 'calendar', labelKey: 'nav.calendar', icon: 'calendar' },
   { view: 'files', labelKey: 'nav.files', icon: 'files' }
 ]

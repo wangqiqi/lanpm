@@ -15,15 +15,18 @@ const routerSrc = readFileSync(join(root, 'src/renderer/src/app/AppRouter.tsx'),
 const pathsSrc = readFileSync(join(root, 'src/renderer/src/routes/paths.ts'), 'utf8')
 
 const routeViews = [...routerSrc.matchAll(/viewRoute\(\s*['"](\w+)['"]\s*\)/g)].map((m) => m[1]!)
-const tabViews = [...pathsSrc.matchAll(/id:\s*['"](\w+)['"]/g)]
-  .map((m) => m[1]!)
-  .filter((v) => ['chat', 'board', 'tree', 'gantt', 'files'].includes(v))
+const tabViews = [...pathsSrc.matchAll(/view:\s*['"](\w+)['"]/g)].map((m) => m[1]!)
 
 const views = new Set([...routeViews, ...tabViews]) as Set<AppView>
-const expected: AppView[] = ['chat', 'board', 'tree', 'gantt', 'files']
+const expected: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'files']
 for (const v of expected) {
   assert.ok(views.has(v), `missing view in router/paths: ${v}`)
 }
+
+assert.ok(
+  tabViews.join(',') === expected.join(','),
+  `VIEW_TABS order must be ${expected.join(' → ')}, got ${tabViews.join(' → ')}`
+)
 
 assert.ok(existsSync(join(root, 'src/renderer/src/views/GroupView.tsx')), 'GroupView missing')
 assert.ok(existsSync(join(root, 'src/renderer/src/views/CockpitView.tsx')), 'CockpitView missing')

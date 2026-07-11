@@ -8,6 +8,7 @@ import BoardView from '@renderer/features/board/BoardView'
 import ChatView from '@renderer/features/chat/ChatView'
 import FilesView from '@renderer/features/files/FilesView'
 import GanttView from '@renderer/features/gantt/GanttView'
+import CalendarView from '@renderer/features/calendar/CalendarView'
 import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
@@ -75,6 +76,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
         {view === 'board' && <BoardView />}
         {view === 'tree' && <TaskTreeView />}
         {view === 'gantt' && <GanttView />}
+        {view === 'calendar' && <CalendarView />}
         {view === 'files' && <FilesView />}
       </div>
     </div>

@@ -17,6 +17,7 @@ const APP_PAGES = [
   { slug: 'board', hash: `/g/${GROUP_ID}/board` },
   { slug: 'tree', hash: `/g/${GROUP_ID}/tree` },
   { slug: 'gantt', hash: `/g/${GROUP_ID}/gantt` },
+  { slug: 'calendar', hash: `/g/${GROUP_ID}/calendar` },
   { slug: 'files', hash: `/g/${GROUP_ID}/files` },
   { slug: 'cockpit', hash: '/cockpit' }
 ] as const

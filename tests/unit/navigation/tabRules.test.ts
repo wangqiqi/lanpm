@@ -2,13 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { defaultViewForGroup, isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import type { AppView } from '@shared/navigation/types'
 
-const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'files']
+const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'files']
 
 describe('isViewAllowedForGroup', () => {
   it.each([
     ['project', 'board', true],
     ['project', 'gantt', true],
+    ['project', 'calendar', true],
     ['function', 'board', false],
+    ['function', 'calendar', false],
     ['function', 'files', true],
     ['anonymous', 'chat', true],
     ['anonymous', 'files', false]
