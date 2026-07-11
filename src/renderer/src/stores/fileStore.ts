@@ -86,10 +86,26 @@ export const useFileStore = create<FileState>((set) => ({
   exportBookmarks: async (groupId) => getLanpmApi().file.exportBookmarks(groupId),
 
   pullRemote: async (groupId, fileId) => {
-    const meta = await getLanpmApi().file.pullRemote(fileId)
-    const files = await getLanpmApi().file.listFiles(groupId)
-    set((s) => ({ filesByGroup: { ...s.filesByGroup, [groupId]: files } }))
-    return meta
+    try {
+      const meta = await getLanpmApi().file.pullRemote(fileId)
+      const files = await getLanpmApi().file.listFiles(groupId)
+      const transfers = await getLanpmApi().file.listTransfers(groupId)
+      const history = await getLanpmApi().file.listTransferHistory(groupId)
+      set((s) => ({
+        filesByGroup: { ...s.filesByGroup, [groupId]: files },
+        transfersByGroup: { ...s.transfersByGroup, [groupId]: transfers },
+        transferHistoryByGroup: { ...s.transferHistoryByGroup, [groupId]: history }
+      }))
+      return meta
+    } catch (err) {
+      const transfers = await getLanpmApi().file.listTransfers(groupId)
+      const history = await getLanpmApi().file.listTransferHistory(groupId)
+      set((s) => ({
+        transfersByGroup: { ...s.transfersByGroup, [groupId]: transfers },
+        transferHistoryByGroup: { ...s.transferHistoryByGroup, [groupId]: history }
+      }))
+      throw err
+    }
   },
 
   download: async (fileId) => getLanpmApi().file.download(fileId)

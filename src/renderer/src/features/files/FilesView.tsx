@@ -32,7 +32,7 @@ import {
   UploadOutlined
 } from '@ant-design/icons'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import type { FileCategory, FileMeta } from '@shared/file/types'
+import type { FileCategory, FileMeta, FileTransferView } from '@shared/file/types'
 import { isLocalRemovedPath, isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { useChatStore } from '@renderer/stores/chatStore'
@@ -88,6 +88,12 @@ const TRANSFER_STATUS_KEYS: Record<string, MessageKey> = {
   completed: 'files.transferCompleted',
   failed: 'files.transferFailed',
   paused: 'files.transferPaused'
+}
+
+function isResumableTransfer(tr: FileTransferView): boolean {
+  if (tr.transferredBytes <= 0 || tr.transferredBytes >= tr.totalBytes) return false
+  if (tr.status === 'failed' || tr.status === 'paused') return true
+  return tr.direction === 'download' && tr.status === 'transferring'
 }
 
 function formatSize(n: number): string {
@@ -313,13 +319,29 @@ export default function FilesView(): React.ReactElement {
 
   const handlePullRemote = async (): Promise<void> => {
     if (!selected || !gid || !isRemotePendingPath(selected.storagePath)) return
+    const resumable = [...transfers, ...transferHistory].find(
+      (tr) =>
+        tr.fileId === selected.fileId &&
+        tr.direction === 'download' &&
+        isResumableTransfer(tr)
+    )
     setPulling(true)
     try {
-      const meta = await pullRemote(gid, selected.fileId)
-      setSelected(meta)
-      message.success(t('files.previewReady'))
+      if (resumable) {
+        await resumeTransfer(gid, resumable.transferId)
+        const files = await getLanpmApi().file.listFiles(gid)
+        const updated = files.find((f) => f.fileId === selected.fileId)
+        if (updated) setSelected(updated)
+        message.success(t('files.previewReady'))
+      } else {
+        const meta = await pullRemote(gid, selected.fileId)
+        setSelected(meta)
+        message.success(t('files.previewReady'))
+      }
     } catch (err) {
-      message.error(formatError(err, 'files.pullRemoteFailed'))
+      message.error(
+        formatError(err, resumable ? 'files.transferResumeFailed' : 'files.pullRemoteFailed')
+      )
     } finally {
       setPulling(false)
     }
@@ -491,6 +513,18 @@ export default function FilesView(): React.ReactElement {
     () => transfers.filter((tr) => tr.status === 'queued' || tr.status === 'transferring'),
     [transfers]
   )
+
+  const resumableDownload = useMemo(() => {
+    if (!selected || !isRemotePendingPath(selected.storagePath)) return null
+    return (
+      [...transfers, ...transferHistory].find(
+        (tr) =>
+          tr.fileId === selected.fileId &&
+          tr.direction === 'download' &&
+          isResumableTransfer(tr)
+      ) ?? null
+    )
+  }, [selected, transfers, transferHistory])
 
   const isExpanded = useMemo(
     () => transferPanelExpanded || activeTransfers.length > 0,
@@ -682,7 +716,7 @@ export default function FilesView(): React.ReactElement {
                 loading={pulling}
                 onClick={() => void handlePullRemote()}
               >
-                {t('files.pullRemote')}
+                {resumableDownload ? t('files.pullRemoteResume') : t('files.pullRemote')}
               </Button>
             ) : null}
             {!isRemotePendingPath(selected.storagePath) ? (
@@ -717,7 +751,14 @@ export default function FilesView(): React.ReactElement {
           />
         </div>
       ) : isRemotePendingPath(selected.storagePath) ? (
-        <Text type="secondary">{t('files.remotePending')}</Text>
+        <Text type="secondary">
+          {resumableDownload
+            ? t('files.remotePartialHint', {
+                received: formatSize(resumableDownload.transferredBytes),
+                total: formatSize(resumableDownload.totalBytes)
+              })
+            : t('files.remotePending')}
+        </Text>
       ) : isLocalRemovedPath(selected.storagePath) ? (
         <Text type="secondary">{t('files.localRemoved')}</Text>
       ) : selected.previewStatus === 'converting' ? (
@@ -911,7 +952,7 @@ export default function FilesView(): React.ReactElement {
                       renderItem={(tr) => (
                         <List.Item
                           actions={
-                            tr.status === 'failed' || tr.status === 'paused'
+                            isResumableTransfer(tr)
                               ? [
                                   <RegionButton
                                     key="resume"
@@ -926,6 +967,11 @@ export default function FilesView(): React.ReactElement {
                         >
                           <div className={styles.transferRow}>
                             <span>{tr.fileName}</span>
+                            <Tag color="default" bordered={false}>
+                              {tr.direction === 'download'
+                                ? t('files.transferDownload')
+                                : t('files.transferUpload')}
+                            </Tag>
                             <Text type="secondary" style={{ flex: 1, margin: '0 12px' }}>
                               {formatSize(tr.transferredBytes)} / {formatSize(tr.totalBytes)}
                             </Text>
