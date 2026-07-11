@@ -55,7 +55,8 @@ const local = {
   userId: 'u-a',
   displayName: 'Alice',
   focusedTaskId: 'task-1',
-  view: 'board' as const
+  view: 'board' as const,
+  caret: { field: 'description' as const, offset: 7 }
 }
 assert.ok(isTaskAwarenessLocalState(local))
 a.setLocalState(local)
@@ -72,6 +73,9 @@ const remote = [...b.getStates().values()].find(
 assert.ok(remote)
 assert.equal(remote.focusedTaskId, 'task-1')
 assert.equal(remote.view, 'board')
+assert.ok(remote.caret)
+assert.equal(remote.caret.field, 'description')
+assert.equal(remote.caret.offset, 7)
 
 const stub = new NetworkStub({
   deviceId: 'dev_a',
@@ -98,4 +102,4 @@ b.destroy()
 docA.destroy()
 docB.destroy()
 
-console.log('verify:task-awareness OK (wiring + Presence round-trip + publish)')
+console.log('verify:task-awareness OK (wiring + Presence/caret round-trip + publish)')
