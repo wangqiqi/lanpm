@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-07-11
+
 ### Added
 - **SPRINT-TEXT-CARET-AWARENESS 收尾 (TASK-200)**：`verify:text-caret`；docs/04·06·README 对齐描述框协同光标；归档；handoff `/release` → **v1.7.0**。
 - **描述框 caret 接线 (TASK-199)**：TaskDetailPanel + TaskEditModal 挂 overlay；选区变化广播 caret。
@@ -11,6 +13,10 @@
 - **caret 桥接 (TASK-197)**：store `descriptionCarets`；`useDescriptionCaretBroadcast`；失焦清除。
 - **caret 透传验收 (TASK-196)**：`verify:task-awareness` 覆盖含 caret 的 Awareness round-trip。
 - **文本 caret 协议 (TASK-195)**：`TaskAwarenessLocalState.caret`（`description` + UTF-16 offset）；校验/单测；docs/03。
+
+### Release
+- `v1.7.0` — 描述框协同文本 caret：`task_awareness.caret`、详情/看板弹窗竖线+名（TASK-195–200）
+
 ## [1.6.0] - 2026-07-11
 
 ### Added
