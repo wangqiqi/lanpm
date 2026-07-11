@@ -135,6 +135,43 @@ export function listMessagesByGroup(
   return rows.map(rowToMessage)
 }
 
+/** Default cap for encrypted group bundle export (newest first). */
+export const BUNDLE_MESSAGE_EXPORT_LIMIT = 10_000
+
+export function countMessagesByGroup(db: Database, groupId: string): number {
+  const row = db
+    .prepare(`SELECT COUNT(*) AS c FROM messages WHERE group_id = ?`)
+    .get(groupId) as { c: number }
+  return row.c
+}
+
+/**
+ * Newest `limit` messages for backup (returned ASC for stable JSON order).
+ * Prefer this over `listMessagesByGroup` when a hard LIMIT would drop the newest.
+ */
+export function listMessagesForBundleExport(
+  db: Database,
+  groupId: string,
+  limit = BUNDLE_MESSAGE_EXPORT_LIMIT
+): { messages: ChatMessage[]; totalInGroup: number; truncated: boolean } {
+  const safeLimit = Math.max(1, Math.floor(limit))
+  const totalInGroup = countMessagesByGroup(db, groupId)
+  const rows = db
+    .prepare(
+      `SELECT * FROM messages
+       WHERE group_id = ?
+       ORDER BY lamport_ts DESC, created_at DESC
+       LIMIT ?`
+    )
+    .all(groupId, safeLimit) as MessageRow[]
+  const messages = rows.reverse().map(rowToMessage)
+  return {
+    messages,
+    totalInGroup,
+    truncated: totalInGroup > messages.length
+  }
+}
+
 /** Newest `limit` messages (ASC for UI), with hasMore when older history exists. */
 export function listRecentMessagesPage(
   db: Database,

@@ -733,6 +733,8 @@ const enUS = {
   'data.bundleIncludeFiles': 'Include file bodies (large)',
   'data.bundleExport': 'Export .lanpm-bundle',
   'data.bundleExportDone': 'Exported to {path}',
+  'data.bundleExportTruncated':
+    'Too many messages: exported newest {exported}/{total} (limit {limit}); older history omitted',
   'data.bundleImport': 'Import backup',
   'data.bundleImportPassword': 'Import passphrase',
   'data.bundleConflictSkip': 'Conflict: skip',

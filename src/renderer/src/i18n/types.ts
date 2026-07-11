@@ -719,6 +719,7 @@ export type MessageKey =
   | 'data.bundleIncludeFiles'
   | 'data.bundleExport'
   | 'data.bundleExportDone'
+  | 'data.bundleExportTruncated'
   | 'data.bundleImport'
   | 'data.bundleImportPassword'
   | 'data.bundleConflictSkip'

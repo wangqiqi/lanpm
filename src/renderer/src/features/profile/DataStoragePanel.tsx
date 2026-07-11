@@ -341,8 +341,18 @@ export default function DataStoragePanel(): React.ReactElement {
                   if (!bundleGroupId) return
                   void getLanpmApi()
                     .data.exportGroupBundle(bundleGroupId, bundlePassword, bundleIncludeFiles)
-                    .then((path) => {
-                      if (path) message.success(t('data.bundleExportDone', { path }))
+                    .then((result) => {
+                      if (!result) return
+                      message.success(t('data.bundleExportDone', { path: result.path }))
+                      if (result.messagesTruncated) {
+                        message.warning(
+                          t('data.bundleExportTruncated', {
+                            exported: result.messagesExported,
+                            total: result.messagesTotalInGroup,
+                            limit: result.messageExportLimit
+                          })
+                        )
+                      }
                     })
                     .catch((err) =>
                       message.error(formatError(err, 'data.saveFailed'))

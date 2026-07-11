@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { DATA_IPC } from '../../shared/data/channels'
-import type { BundleConflictMode } from '../../shared/data/bundle'
+import type { BundleConflictMode, GroupBundleExportResult } from '../../shared/data/bundle'
 import type { ClearGroupMessagesMode, DataCleanupOptions } from '../../shared/data/types'
 import {
   exportGroupBundle,
@@ -60,8 +60,14 @@ export function registerDataIpc(): void {
       })
       if (result.canceled || !result.filePath) return null
       const path = result.filePath
-      exportGroupBundle(getDatabase(), groupId, password, path, !!includeFileBodies)
-      return path
+      const exportMeta = exportGroupBundle(
+        getDatabase(),
+        groupId,
+        password,
+        path,
+        !!includeFileBodies
+      )
+      return { path, ...exportMeta } satisfies GroupBundleExportResult & { path: string }
     }
   )
 

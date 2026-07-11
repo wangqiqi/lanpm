@@ -7,6 +7,7 @@ import type {
   BundleConflictMode,
   BundleCrdtSnapshot,
   GroupBundleEntityCounts,
+  GroupBundleExportResult,
   GroupBundleImportResult,
   GroupBundlePreviewResult
 } from '../../shared/data/bundle.ts'
@@ -16,8 +17,9 @@ import type { WhiteboardScene } from '../../shared/whiteboard/types.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { sealBytes, openBytes } from '../crypto/envelopeCrypto.ts'
 import {
+  BUNDLE_MESSAGE_EXPORT_LIMIT,
   insertMessage,
-  listMessagesByGroup,
+  listMessagesForBundleExport,
   messageExists
 } from '../storage/repositories/messageRepository.ts'
 import { insertTask, listTasksByGroup } from '../storage/repositories/taskRepository.ts'
@@ -55,6 +57,10 @@ interface BundlePlain {
   groupId: string
   exportedAt: string
   messages: ChatMessage[]
+  /** Present when export hit the message cap (TASK-320). */
+  messagesTruncated?: boolean
+  messagesTotalInGroup?: number
+  messageExportLimit?: number
   tasks: Task[]
   files: FileMeta[]
   tags?: GroupTagMeta[]
@@ -160,12 +166,20 @@ export function exportGroupBundle(
   groupId: string,
   password: string,
   outputPath: string,
-  includeFileBodies = false
-): void {
+  includeFileBodies = false,
+  options?: { messageLimit?: number }
+): GroupBundleExportResult {
+  const messageLimit = options?.messageLimit ?? BUNDLE_MESSAGE_EXPORT_LIMIT
+  const messageExport = listMessagesForBundleExport(db, groupId, messageLimit)
   const plain: BundlePlain = {
     groupId,
     exportedAt: new Date().toISOString(),
-    messages: listMessagesByGroup(db, groupId, 10_000),
+    messages: messageExport.messages,
+    messagesTruncated: messageExport.truncated || undefined,
+    messagesTotalInGroup: messageExport.truncated
+      ? messageExport.totalInGroup
+      : undefined,
+    messageExportLimit: messageExport.truncated ? messageLimit : undefined,
     tasks: listTasksByGroup(db, groupId),
     files: listFilesByGroup(db, groupId),
     tags: listGroupTagMeta(db, groupId),
@@ -201,6 +215,12 @@ export function exportGroupBundle(
     ciphertext: sealed.ciphertext.toString('base64')
   }
   writeFileSync(outputPath, JSON.stringify(out, null, 2), 'utf8')
+  return {
+    messagesExported: messageExport.messages.length,
+    messagesTotalInGroup: messageExport.totalInGroup,
+    messagesTruncated: messageExport.truncated,
+    messageExportLimit: messageLimit
+  }
 }
 
 /** Decrypt-only conflict summary; does not write (TASK-310/311). */

@@ -725,6 +725,8 @@ const zhCN = {
   'data.bundleIncludeFiles': '包含文件本体（体积较大）',
   'data.bundleExport': '导出 .lanpm-bundle',
   'data.bundleExportDone': '已导出至 {path}',
+  'data.bundleExportTruncated':
+    '消息过多：仅备份最近 {exported}/{total} 条（上限 {limit}），更早历史未包含',
   'data.bundleImport': '导入备份包',
   'data.bundleImportPassword': '导入口令',
   'data.bundleConflictSkip': '冲突：跳过',

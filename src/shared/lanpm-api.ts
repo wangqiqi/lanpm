@@ -21,6 +21,7 @@ import type {
 import type { DeleteTaskMode } from './task/deleteMode'
 import type {
   BundleConflictMode,
+  GroupBundleExportResult,
   GroupBundleImportResult,
   GroupBundlePreviewResult
 } from './data/bundle'
@@ -186,7 +187,7 @@ export interface LanpmApi {
       groupId: string,
       password: string,
       includeFileBodies?: boolean
-    ) => Promise<string | null>
+    ) => Promise<(GroupBundleExportResult & { path: string }) | null>
     /** Pick file + dry-run conflict summary (TASK-310). */
     previewGroupBundle: (
       password: string

@@ -1,5 +1,5 @@
 /**
- * TASK-310/311 — bundle overwrite + dry-run + tags/members/checklists.
+ * TASK-310/311/320 — bundle overwrite + dry-run + multi-entity + newest-first message export.
  * Run: npm run verify:bundle
  */
 import assert from 'node:assert/strict'
@@ -25,7 +25,11 @@ import {
   getTaskById,
   buildTaskFromInput
 } from '../../src/main/storage/repositories/taskRepository.ts'
-import { insertMessage, getMessageById } from '../../src/main/storage/repositories/messageRepository.ts'
+import {
+  insertMessage,
+  getMessageById,
+  listMessagesForBundleExport
+} from '../../src/main/storage/repositories/messageRepository.ts'
 import { insertFile } from '../../src/main/storage/repositories/fileRepository.ts'
 import {
   listGroupTagMeta,
@@ -64,11 +68,22 @@ assert.match(bundleSrc, /listChecklistsByGroup/)
 assert.match(bundleSrc, /getTaskCrdtBlob/)
 assert.match(bundleSrc, /getWhiteboardCrdtBlob/)
 assert.match(bundleSrc, /getWhiteboardScene/)
+assert.match(bundleSrc, /listMessagesForBundleExport/)
+assert.match(bundleSrc, /messagesTruncated/)
+
+const msgRepoSrc = readFileSync(
+  join(projectRoot, 'src/main/storage/repositories/messageRepository.ts'),
+  'utf8'
+)
+assert.match(msgRepoSrc, /ORDER BY lamport_ts DESC, created_at DESC/)
+assert.match(msgRepoSrc, /export function listMessagesForBundleExport/)
 
 const sharedSrc = readFileSync(join(projectRoot, 'src/shared/data/bundle.ts'), 'utf8')
 assert.match(sharedSrc, /tagsImported/)
 assert.match(sharedSrc, /taskCrdt/)
 assert.match(sharedSrc, /BundleCrdtSnapshot/)
+assert.match(sharedSrc, /GroupBundleExportResult/)
+assert.match(sharedSrc, /messagesTruncated/)
 
 function openDb(dir: string): Database.Database {
   const db = new Database(join(dir, 'lanpm.db'))
@@ -251,6 +266,45 @@ try {
   dbA.close()
   dbB.close()
   console.log('OK: verify:bundle — overwrite + dry-run + multi-entity + CRDT snapshots')
+
+  // TASK-320: newest-first export under a small limit (drops oldest, keeps newest)
+  const dirT = mkLanpmTemp('lanpm-bundle-trunc-')
+  try {
+    const dbT = openDb(dirT)
+    const now = new Date().toISOString()
+    for (let i = 1; i <= 5; i++) {
+      insertMessage(dbT, {
+        msgId: `msg_trunc_${i}`,
+        groupId: GROUP,
+        senderUserId: USER,
+        senderDeviceId: DEVICE,
+        type: 'text',
+        content: { kind: 'text', text: `m${i}` },
+        lamportTs: i,
+        createdAt: now,
+        deliveryStatus: 'sent'
+      })
+    }
+    const page = listMessagesForBundleExport(dbT, GROUP, 3)
+    assert.equal(page.totalInGroup, 5)
+    assert.equal(page.truncated, true)
+    assert.equal(page.messages.length, 3)
+    assert.deepEqual(
+      page.messages.map((m) => m.msgId),
+      ['msg_trunc_3', 'msg_trunc_4', 'msg_trunc_5']
+    )
+
+    const truncPath = join(dirT, 'trunc.lanpm-bundle.json')
+    const meta = exportGroupBundle(dbT, GROUP, PASS, truncPath, false, { messageLimit: 3 })
+    assert.equal(meta.messagesTruncated, true)
+    assert.equal(meta.messagesExported, 3)
+    assert.equal(meta.messagesTotalInGroup, 5)
+    assert.equal(meta.messageExportLimit, 3)
+    dbT.close()
+    console.log('OK: verify:bundle — TASK-320 newest-first truncation')
+  } finally {
+    rmLanpmTemp(dirT)
+  }
 } finally {
   rmLanpmTemp(dirA)
   rmLanpmTemp(dirB)

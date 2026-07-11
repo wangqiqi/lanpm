@@ -5,6 +5,16 @@ export interface GroupBundleExportOptions {
   password: string
   includeFileBodies?: boolean
   outputPath: string
+  /** Override message export cap (tests / ops); default 10_000 newest. */
+  messageLimit?: number
+}
+
+/** Result of a successful export write (TASK-320). */
+export interface GroupBundleExportResult {
+  messagesExported: number
+  messagesTotalInGroup: number
+  messagesTruncated: boolean
+  messageExportLimit: number
 }
 
 export interface GroupBundleImportOptions {
