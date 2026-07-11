@@ -1,5 +1,5 @@
 /**
- * Renderer store for remote task focus Presence (TASK-179+).
+ * Renderer store for remote task focus Presence + description caret (TASK-179+/197).
  */
 import { create } from 'zustand'
 import type { TaskAwarenessLocalState } from '@shared/task/taskAwareness'
@@ -13,6 +13,8 @@ type AwarenessState = {
   setPeers: (groupId: string, peers: AwarenessPeer[]) => void
   clearGroup: (groupId: string) => void
   peersForTask: (groupId: string, taskId: string) => AwarenessPeer[]
+  /** Peers with description caret on a task */
+  descriptionCarets: (groupId: string, taskId: string) => AwarenessPeer[]
 }
 
 export const useTaskAwarenessStore = create<AwarenessState>((set, get) => ({
@@ -26,7 +28,15 @@ export const useTaskAwarenessStore = create<AwarenessState>((set, get) => ({
       return { byGroup: next }
     }),
   peersForTask: (groupId, taskId) =>
-    (get().byGroup[groupId] ?? []).filter((p) => p.focusedTaskId === taskId)
+    (get().byGroup[groupId] ?? []).filter((p) => p.focusedTaskId === taskId),
+  descriptionCarets: (groupId, taskId) =>
+    (get().byGroup[groupId] ?? []).filter(
+      (p) =>
+        p.focusedTaskId === taskId &&
+        p.caret != null &&
+        p.caret.field === 'description' &&
+        Number.isFinite(p.caret.offset)
+    )
 }))
 
 let unsub: (() => void) | null = null
@@ -44,7 +54,7 @@ export function unwireTaskAwarenessPush(): void {
   unsub = null
 }
 
-/** Publish local focus; pass null to clear (leave view). */
+/** Publish local focus / caret; pass null to clear (leave view). */
 export async function publishLocalAwareness(
   groupId: string,
   state: TaskAwarenessLocalState | null
