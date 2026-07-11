@@ -380,7 +380,7 @@ export function importGroupBundle(
   }
 
   for (const entry of checklists) {
-    let taskId = idMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
+    const taskId = idMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
     let checklistId = entry.checklist.checklistId
     const exists = checklistExistsByTask(db, taskId)
     if (exists) {
