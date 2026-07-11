@@ -11,8 +11,13 @@ PID_FILE="$RUN_DIR/dev.pid"
 LOG_FILE="$RUN_DIR/dev.log"
 MODE_FILE="$RUN_DIR/dev.mode"
 
-# shellcheck disable=SC2034
-VERSION="$(node -p "require('./package.json').version" 2>/dev/null || echo '?')"
+VERSION='?'
+
+refresh_version() {
+  VERSION="$(node -p "require('./package.json').version" 2>/dev/null || echo '?')"
+}
+
+refresh_version
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -214,6 +219,7 @@ menu_status_brief() {
 
 cmd_status() {
   ensure_run_dir
+  refresh_version
   info "项目: $ROOT"
   info "版本: v$VERSION"
   echo ""
@@ -427,6 +433,7 @@ cmd_clean() {
 }
 
 show_menu() {
+  refresh_version
   clear 2>/dev/null || true
   echo ""
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

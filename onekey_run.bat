@@ -319,6 +319,10 @@ echo [lanpm] packing - electron-builder ...
 call npx electron-builder --config electron-builder.yml
 exit /b %ERRORLEVEL%
 :menu
+rem 每次进菜单重读版本，避免长驻菜单卡在旧 package.json
+set "VER="
+for /f "delims=" %%v in ('node -p "require('./package.json').version" 2^>nul') do set "VER=%%v"
+if not defined VER set "VER=?"
 cls
 echo.
 echo ========================================================
