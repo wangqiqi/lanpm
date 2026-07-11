@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.19.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.20.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -249,7 +249,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.19.0` — 传输取消/重试/ETA（A4）+ 插件加载边界 SPIKE。未发版：**A1 到期催办 / @负责人**（`verify:a1-nudge`，目标 **1.20.0**）。此前亮点：跨平台矩阵（1.18）、A3/A5/白板实时（1.17）、日历拖拽（1.14）、验收清单（1.13）、白板 + 消息↔任务（1.12）、日历 Tab（1.10）、标签 / 角标 / Presence。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.20.0` — A1 到期催办 / @负责人（`verify:a1-nudge`），以及传输 A4 + 插件 SPIKE（1.19）、跨平台矩阵（1.18）、A3/A5/白板实时（1.17）、日历拖拽（1.14）、验收清单（1.13）、白板 + 消息↔任务（1.12）、日历 Tab（1.10）、标签 / 角标 / Presence。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
 **进行中 / 队列：** A1 到期催办与「@负责人」· 插件 loader POC · form-js 可购插件 · 成员搜索（B2）。
 

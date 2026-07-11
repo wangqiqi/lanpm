@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.19.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.20.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -249,7 +249,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.19.0` — transfer cancel/retry/ETA (A4) + plugin load-boundary SPIKE. Unreleased: **A1 due nudge / @assignee** (`verify:a1-nudge`, target **1.20.0**). Prior highlights: platform matrix (1.18), A3/A5/whiteboard realtime (1.17), calendar drag (1.14), checklist (1.13), whiteboard + message↔task (1.12), calendar tab (1.10), tags / badges / Presence. M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.20.0` — A1 due nudge / @assignee (`verify:a1-nudge`), plus transfer A4 + plugin SPIKE (1.19), platform matrix (1.18), A3/A5/whiteboard realtime (1.17), calendar drag (1.14), checklist (1.13), whiteboard + message↔task (1.12), calendar tab (1.10), tags / badges / Presence. M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (in progress / queue):** A1 due-date nudge & “@assignee” chase · plugin loader POC · form-js as purchasable plugin · member search (B2).
 
