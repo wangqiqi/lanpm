@@ -40,3 +40,83 @@ export function isValidTaskTag(value: unknown): value is string {
   const tag = value.trim()
   return tag.length > 0 && tag.length <= TASK_TAG_MAX_LENGTH
 }
+
+/** Case-insensitive tag key for maps / filter matching. */
+export function taskTagKey(tag: string): string {
+  return tag.trim().toLowerCase()
+}
+
+type TaggedTask = { tags?: string[] | null }
+
+/**
+ * OR filter: keep tasks that have at least one selected tag (case-insensitive).
+ * Empty / all-invalid selection → return all tasks unchanged.
+ */
+export function filterTasksByTags<T extends TaggedTask>(
+  tasks: T[],
+  selectedTags: readonly string[]
+): T[] {
+  const keys = new Set(
+    selectedTags
+      .map((t) => (typeof t === 'string' ? taskTagKey(t) : ''))
+      .filter((k) => k.length > 0)
+  )
+  if (keys.size === 0) return tasks
+
+  return tasks.filter((task) => {
+    const tags = task.tags
+    if (!tags || tags.length === 0) return false
+    return tags.some((t) => keys.has(taskTagKey(t)))
+  })
+}
+
+/**
+ * Unique tags across tasks (first-seen casing), sorted by locale-insensitive key.
+ */
+export function collectUniqueTaskTags(tasks: readonly TaggedTask[]): string[] {
+  const byKey = new Map<string, string>()
+  for (const task of tasks) {
+    for (const raw of task.tags ?? []) {
+      if (typeof raw !== 'string') continue
+      const tag = raw.trim()
+      if (!tag) continue
+      const key = taskTagKey(tag)
+      if (!byKey.has(key)) byKey.set(key, tag)
+    }
+  }
+  return [...byKey.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, label]) => label)
+}
+
+/**
+ * Stable HSL background for a tag label (hash of case-insensitive key).
+ * Returns CSS color string suitable for chip backgrounds.
+ */
+export function tagColorHash(tag: string): string {
+  const key = taskTagKey(tag)
+  let h = 0
+  for (let i = 0; i < key.length; i++) {
+    h = (h * 31 + key.charCodeAt(i)) >>> 0
+  }
+  const hue = h % 360
+  return `hsl(${hue} 42% 42%)`
+}
+
+/**
+ * Resolve chip color: optional override map (by tag key) else hash default.
+ */
+export function resolveTagColor(
+  tag: string,
+  overrides?: Readonly<Record<string, string>> | null
+): string {
+  const key = taskTagKey(tag)
+  const override = overrides?.[key] ?? overrides?.[tag]
+  if (typeof override === 'string' && /^#[0-9A-Fa-f]{6}$/.test(override.trim())) {
+    return override.trim()
+  }
+  if (typeof override === 'string' && override.trim().startsWith('hsl(')) {
+    return override.trim()
+  }
+  return tagColorHash(tag)
+}

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  collectUniqueTaskTags,
+  filterTasksByTags,
   isValidTaskTag,
   normalizeTaskTags,
+  resolveTagColor,
+  tagColorHash,
+  taskTagKey,
   TASK_TAG_MAX_LENGTH,
   TASK_TAGS_MAX_COUNT
 } from '@shared/task/tags'
@@ -47,5 +52,51 @@ describe('isValidTaskTag', () => {
     expect(isValidTaskTag('   ')).toBe(false)
     expect(isValidTaskTag(1)).toBe(false)
     expect(isValidTaskTag('a'.repeat(TASK_TAG_MAX_LENGTH + 1))).toBe(false)
+  })
+})
+
+describe('filterTasksByTags (OR)', () => {
+  const tasks = [
+    { id: '1', tags: ['API', 'urgent'] },
+    { id: '2', tags: ['docs'] },
+    { id: '3', tags: [] },
+    { id: '4', tags: undefined }
+  ]
+
+  it('returns all when selection empty', () => {
+    expect(filterTasksByTags(tasks, [])).toEqual(tasks)
+    expect(filterTasksByTags(tasks, ['  '])).toEqual(tasks)
+  })
+
+  it('keeps tasks matching any selected tag (case-insensitive)', () => {
+    expect(filterTasksByTags(tasks, ['api']).map((t) => t.id)).toEqual(['1'])
+    expect(filterTasksByTags(tasks, ['DOCS', 'urgent']).map((t) => t.id)).toEqual([
+      '1',
+      '2'
+    ])
+  })
+})
+
+describe('collectUniqueTaskTags', () => {
+  it('dedupes and sorts by key, keeping first casing', () => {
+    expect(
+      collectUniqueTaskTags([{ tags: ['Zebra', 'api'] }, { tags: ['API', 'beta'] }])
+    ).toEqual(['api', 'beta', 'Zebra'])
+  })
+})
+
+describe('tagColorHash / resolveTagColor', () => {
+  it('is stable and case-insensitive', () => {
+    expect(tagColorHash('API')).toBe(tagColorHash('api'))
+    expect(tagColorHash('API')).toMatch(/^hsl\(\d+ 42% 42%\)$/)
+  })
+
+  it('prefers hex override by key', () => {
+    expect(resolveTagColor('API', { api: '#ff0000' })).toBe('#ff0000')
+    expect(resolveTagColor('other', { api: '#ff0000' })).toBe(tagColorHash('other'))
+  })
+
+  it('exposes taskTagKey', () => {
+    expect(taskTagKey('  Foo ')).toBe('foo')
   })
 })

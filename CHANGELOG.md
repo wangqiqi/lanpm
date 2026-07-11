@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **标签筛选/色哈希 (TASK-183)**：`filterTasksByTags`（OR）· `collectUniqueTaskTags` · `tagColorHash` / `resolveTagColor` + 单测。
 - **SPRINT-TASK-AWARENESS 收尾 (TASK-182)**：`verify:task-awareness`；docs/06·README 对齐焦点 Presence；归档；handoff `/release` → **v1.4.0**。
 - **任务树焦点 Presence UI (TASK-181)**：树行显示远端焦点点；选中任务时广播本地焦点。
 - **看板焦点 Presence UI (TASK-180)**：KanbanCard 显示远端查看者；编辑任务时广播本地焦点；i18n。
