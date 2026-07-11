@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-07-11
+
 ### Fixed
 - **甘特滚动/视口**：日期头与水平滚动条固定（垂直滚动不再带走表头）；打开时以今日为中心；工具栏增加放大/缩小。
 - **日历空窗**：无 `startDate`/`endDate` 的任务改为与甘特相同默认排期展示（虚线样式）；修复日历区域高度，避免事件不可见。
@@ -14,6 +16,9 @@
 - **FullCalendar 视图 (TASK-222)**：`CalendarView` 月/周；主题 token；只读不拖拽。
 - **日历事件契约 (TASK-221)**：`tasksToCalendarEvents`（仅有日期；endDate=到期）；单测。
 - **六视图导航 (TASK-220)**：`AppView` 增 `calendar`；`VIEW_TABS` 顺序 gantt→calendar→files。
+
+### Release
+- `v1.10.0` — task calendar (6th tab) + gantt viewport UX（TASK-220–224）
 
 ## [1.9.0] - 2026-07-11
 
