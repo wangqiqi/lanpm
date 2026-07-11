@@ -25,6 +25,8 @@ import {
   validateTaskTitle
 } from '@shared/task/validation'
 import { filterTagsToGroupDict } from '@shared/task/tags'
+import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
+import { collectTaskDiscussions } from '@shared/task/discussions'
 import { countMineOpenTasks } from '@shared/badge/mineOpen'
 import type { GroupTagMeta } from '@shared/task/groupTagMeta'
 import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
@@ -113,6 +115,8 @@ function stubCreateTask(input: CreateTaskInput): Task {
   const prev = readAllTasks()[input.groupId] ?? []
   const taskStatus = input.status ?? 'todo'
   const tags = filterTagsToGroupDict(input.tags ?? [], stubGroupTags[input.groupId] ?? [])
+  const linked = normalizeLinkedFileIds(input.linkedFileIds ?? [])
+  const sourceMsgId = input.sourceMsgId?.trim() || undefined
   const task: Task = {
     taskId: `task_${crypto.randomUUID()}`,
     groupId: input.groupId,
@@ -122,6 +126,8 @@ function stubCreateTask(input: CreateTaskInput): Task {
     priority: input.priority ?? 'medium',
     assigneeUserId: input.assigneeUserId,
     tags: tags.length > 0 ? tags : undefined,
+    sourceMsgId,
+    linkedFileIds: linked.length > 0 ? linked : undefined,
     progressPercent: clampProgressPercent(input.progressPercent ?? 0),
     sortOrder: maxSortInColumn(prev, taskStatus) + 1,
     createdBy: status.user.userId,
@@ -186,6 +192,19 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
             return filtered.length > 0 ? filtered : undefined
           })()
         : existing.tags,
+    sourceMsgId:
+      input.sourceMsgId === null
+        ? undefined
+        : input.sourceMsgId !== undefined
+          ? input.sourceMsgId
+          : existing.sourceMsgId,
+    linkedFileIds:
+      input.linkedFileIds !== undefined
+        ? (() => {
+            const ids = normalizeLinkedFileIds(input.linkedFileIds)
+            return ids.length > 0 ? ids : undefined
+          })()
+        : existing.linkedFileIds,
     progressPercent:
       input.progressPercent !== undefined
         ? clampProgressPercent(input.progressPercent)
@@ -746,6 +765,14 @@ export function createBrowserLanpmStub(): LanpmApi {
         writeChatMessages(groupId, [...prev, msg])
         for (const fn of chatListeners) fn(msg)
         return { task, message: msg }
+      },
+      listDiscussions: async (groupId, taskId) => {
+        assertStubTaskWritable(groupId)
+        const all = readAllTasks()
+        const list = all[groupId] ?? []
+        const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
+        if (!task) throw stubError('stub.taskNotFound')
+        return collectTaskDiscussions(readChatMessages(groupId), taskId, task.sourceMsgId)
       },
       updateSchedule: async (input) =>
         stubUpdateTask({

@@ -1,6 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import type { CreateTaskInput, Task, TaskPriority, TaskStatus, UpdateTaskInput } from '../../../shared/task/types'
 import { filterTagsToGroupDict, normalizeTaskTags } from '../../../shared/task/tags.ts'
+import { normalizeLinkedFileIds } from '../../../shared/task/linkedFiles.ts'
 import { listGroupTagMeta } from './groupTagMetaRepository.ts'
 import { clampProgressPercent } from '../../../shared/task/validation.ts'
 import { lwwShouldApply } from '../../../shared/sync/lww.ts'
@@ -17,6 +18,8 @@ interface TaskRow {
   priority: string
   assignee_user_id: string | null
   tags_json?: string | null
+  source_msg_id?: string | null
+  linked_file_ids_json?: string | null
   progress_percent: number
   start_date: string | null
   end_date: string | null
@@ -49,6 +52,20 @@ function tagsToJson(tags: string[] | undefined): string {
   return JSON.stringify(normalized)
 }
 
+function parseLinkedFileIdsJson(raw: string | null | undefined): string[] | undefined {
+  if (raw == null || raw === '' || raw === '[]') return undefined
+  try {
+    const ids = normalizeLinkedFileIds(JSON.parse(raw) as unknown)
+    return ids.length > 0 ? ids : undefined
+  } catch {
+    return undefined
+  }
+}
+
+function linkedFileIdsToJson(ids: string[] | undefined): string {
+  return JSON.stringify(normalizeLinkedFileIds(ids ?? []))
+}
+
 /** Persist only dictionary tags (empty dict → []). */
 function coerceTagsForGroup(
   db: Database,
@@ -71,6 +88,8 @@ function rowToTask(row: TaskRow): Task {
     priority: row.priority as TaskPriority,
     assigneeUserId: row.assignee_user_id ?? undefined,
     tags: parseTagsJson(row.tags_json),
+    sourceMsgId: row.source_msg_id ?? undefined,
+    linkedFileIds: parseLinkedFileIdsJson(row.linked_file_ids_json),
     progressPercent: row.progress_percent,
     startDate: row.start_date ?? undefined,
     endDate: row.end_date ?? undefined,
@@ -162,15 +181,18 @@ export function getMaxSortOrderInColumn(
 
 export function insertTask(db: Database, task: Task, writerDeviceId?: string): void {
   const writer = writerDeviceId ?? localWriterDeviceId(db)
+  const linked = normalizeLinkedFileIds(task.linkedFileIds ?? [])
   db.prepare(
     `INSERT INTO tasks (
       task_id, group_id, parent_task_id, title, description,
       status, other_reason, priority, assignee_user_id, tags_json,
+      source_msg_id, linked_file_ids_json,
       progress_percent, start_date, end_date, milestone, sort_order,
       created_by, created_at, updated_at, deleted_at, last_writer_device_id
     ) VALUES (
       @taskId, @groupId, @parentTaskId, @title, @description,
       @status, @otherReason, @priority, @assigneeUserId, @tagsJson,
+      @sourceMsgId, @linkedFileIdsJson,
       @progressPercent, @startDate, @endDate, @milestone, @sortOrder,
       @createdBy, @createdAt, @updatedAt, @deletedAt, @lastWriterDeviceId
     )`
@@ -185,6 +207,8 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
     priority: task.priority,
     assigneeUserId: task.assigneeUserId ?? null,
     tagsJson: tagsToJson(coerceTagsForGroup(db, task.groupId, task.tags)),
+    sourceMsgId: task.sourceMsgId ?? null,
+    linkedFileIdsJson: linkedFileIdsToJson(linked.length > 0 ? linked : undefined),
     progressPercent: task.progressPercent,
     startDate: task.startDate ?? null,
     endDate: task.endDate ?? null,
@@ -202,6 +226,11 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
   const existing = getTaskById(db, input.taskId)
   if (!existing) return null
 
+  const linkedNext =
+    input.linkedFileIds !== undefined
+      ? normalizeLinkedFileIds(input.linkedFileIds)
+      : undefined
+
   const next: Task = {
     ...existing,
     title: input.title ?? existing.title,
@@ -218,6 +247,18 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       input.tags !== undefined
         ? coerceTagsForGroup(db, existing.groupId, input.tags)
         : existing.tags,
+    sourceMsgId:
+      input.sourceMsgId === null
+        ? undefined
+        : input.sourceMsgId !== undefined
+          ? input.sourceMsgId
+          : existing.sourceMsgId,
+    linkedFileIds:
+      linkedNext !== undefined
+        ? linkedNext.length > 0
+          ? linkedNext
+          : undefined
+        : existing.linkedFileIds,
     progressPercent:
       input.progressPercent !== undefined
         ? clampProgressPercent(input.progressPercent)
@@ -264,6 +305,8 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       priority = @priority,
       assignee_user_id = @assigneeUserId,
       tags_json = @tagsJson,
+      source_msg_id = @sourceMsgId,
+      linked_file_ids_json = @linkedFileIdsJson,
       progress_percent = @progressPercent,
       parent_task_id = @parentTaskId,
       sort_order = @sortOrder,
@@ -282,6 +325,8 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
     priority: next.priority,
     assigneeUserId: next.assigneeUserId ?? null,
     tagsJson: tagsToJson(next.tags),
+    sourceMsgId: next.sourceMsgId ?? null,
+    linkedFileIdsJson: linkedFileIdsToJson(next.linkedFileIds),
     progressPercent: next.progressPercent,
     parentTaskId: next.parentTaskId ?? null,
     sortOrder: next.sortOrder,
@@ -398,6 +443,8 @@ export function buildTaskFromInput(
 ): Task {
   const now = new Date().toISOString()
   const tags = normalizeTaskTags(input.tags ?? [])
+  const linked = normalizeLinkedFileIds(input.linkedFileIds ?? [])
+  const sourceMsgId = input.sourceMsgId?.trim() || undefined
   return {
     taskId,
     groupId: input.groupId,
@@ -407,6 +454,8 @@ export function buildTaskFromInput(
     priority: input.priority ?? 'medium',
     assigneeUserId: input.assigneeUserId,
     tags: tags.length > 0 ? tags : undefined,
+    sourceMsgId,
+    linkedFileIds: linked.length > 0 ? linked : undefined,
     progressPercent: input.progressPercent ?? 0,
     sortOrder: 0,
     createdBy,

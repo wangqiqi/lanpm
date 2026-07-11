@@ -37,4 +37,4 @@ export const EXPECTED_TABLES = [
   'whiteboard_scenes'
 ] as const
 
-export const SCHEMA_VERSION = 7
+export const SCHEMA_VERSION = 8

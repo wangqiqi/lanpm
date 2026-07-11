@@ -16,6 +16,10 @@ export interface Task {
   assigneeUserId?: string
   /** Independent board labels (≠ priority); omit or [] = none */
   tags?: string[]
+  /** 从哪条聊天消息一键建任务（A2） */
+  sourceMsgId?: string
+  /** 挂到任务的群文件 id 列表（A2） */
+  linkedFileIds?: string[]
   progressPercent: number
   startDate?: string
   endDate?: string
@@ -37,6 +41,8 @@ export interface CreateTaskInput {
   priority?: TaskPriority
   assigneeUserId?: string
   tags?: string[]
+  sourceMsgId?: string
+  linkedFileIds?: string[]
   progressPercent?: number
 }
 
@@ -50,6 +56,10 @@ export interface UpdateTaskInput {
   assigneeUserId?: string | null
   /** Set to replace tags; omit to leave unchanged; `[]` clears */
   tags?: string[]
+  /** Set to replace; omit unchanged; `null` clears */
+  sourceMsgId?: string | null
+  /** Set to replace; omit unchanged; `[]` clears */
+  linkedFileIds?: string[]
   progressPercent?: number
   parentTaskId?: string | null
   sortOrder?: number

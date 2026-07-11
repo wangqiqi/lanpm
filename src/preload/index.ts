@@ -67,6 +67,8 @@ const api: LanpmApi = {
       ipcRenderer.invoke('task:createFromChat', groupId, title),
     referenceFromChat: (groupId, taskId) =>
       ipcRenderer.invoke('task:referenceFromChat', groupId, taskId),
+    listDiscussions: (groupId, taskId) =>
+      ipcRenderer.invoke('task:listDiscussions', groupId, taskId),
     updateSchedule: (input) => ipcRenderer.invoke('task:updateSchedule', input),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>

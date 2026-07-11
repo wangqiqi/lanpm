@@ -44,8 +44,9 @@ import { shouldCompensateCreateTaskFromChat } from '../../shared/task/createFrom
 import { publishTaskDelete, publishTaskDepDelete, publishTaskDepUpsert, publishTaskUpsert } from './taskSyncService'
 import { mirrorTaskToCrdt } from './taskCrdtService'
 import { broadcastToAllWindows } from '../utils/broadcast'
-import { updateMessage } from '../storage/repositories/messageRepository'
+import { updateMessage, listMessagesForTaskDiscussion } from '../storage/repositories/messageRepository'
 import { isAnonymousGroupType } from '../../shared/group/guards'
+import { collectTaskDiscussions, type TaskDiscussionItem } from '../../shared/task/discussions'
 
 function assertTaskWritable(db: Database, groupId: string): void {
   if (groupId.startsWith('dm:')) throwLanpm('stub.dmNoTask')
@@ -80,6 +81,19 @@ export function listGroupTasks(db: Database, groupId: string): Task[] {
     dependencies: depsByTarget.get(t.taskId) ?? []
   }))
   return applyAggregatedProgress(enriched)
+}
+
+/** A2: task_ref + source message for task detail discussion panel. */
+export function listTaskDiscussions(
+  db: Database,
+  groupId: string,
+  taskId: string
+): TaskDiscussionItem[] {
+  assertTaskWritable(db, groupId)
+  const task = getTaskById(db, taskId)
+  if (!task || task.groupId !== groupId) throwLanpm('stub.taskNotFound')
+  const messages = listMessagesForTaskDiscussion(db, groupId, taskId, task.sourceMsgId)
+  return collectTaskDiscussions(messages, taskId, task.sourceMsgId)
 }
 
 export function createGroupTask(db: Database, input: CreateTaskInput): Task {

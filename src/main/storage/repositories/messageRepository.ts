@@ -264,3 +264,32 @@ export function listMessagesSince(
     .all(groupId, sinceLamportTs, minCreatedAt, limit) as MessageRow[]
   return rows.map(rowToMessage)
 }
+
+/** Messages for task discussion UI (task_ref + optional source). Caps scan at 2000. */
+export function listMessagesForTaskDiscussion(
+  db: Database,
+  groupId: string,
+  taskId: string,
+  sourceMsgId?: string
+): ChatMessage[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM messages
+       WHERE group_id = ?
+         AND (
+           msg_id = ?
+           OR json_extract(content_json, '$.content.kind') = 'task_ref'
+           OR json_extract(content_json, '$.kind') = 'task_ref'
+         )
+       ORDER BY lamport_ts ASC, created_at ASC
+       LIMIT 2000`
+    )
+    .all(groupId, sourceMsgId ?? '') as MessageRow[]
+  // Narrow to this taskId in TS (json_extract cannot bind taskId into both shapes cleanly)
+  return rows
+    .map(rowToMessage)
+    .filter((m) => {
+      if (sourceMsgId && m.msgId === sourceMsgId) return true
+      return m.content.kind === 'task_ref' && m.content.taskId === taskId
+    })
+}

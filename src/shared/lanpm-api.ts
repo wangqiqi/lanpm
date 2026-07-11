@@ -82,6 +82,10 @@ export interface LanpmApi {
       groupId: string,
       taskId: string
     ) => Promise<{ task: Task; message: ChatMessage }>
+    listDiscussions: (
+      groupId: string,
+      taskId: string
+    ) => Promise<import('./task/discussions').TaskDiscussionItem[]>
     updateSchedule: (input: GanttScheduleInput) => Promise<Task>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>

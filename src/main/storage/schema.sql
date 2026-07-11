@@ -74,6 +74,8 @@ CREATE TABLE tasks (
   priority TEXT NOT NULL,
   assignee_user_id TEXT,
   tags_json TEXT NOT NULL DEFAULT '[]',
+  source_msg_id TEXT,
+  linked_file_ids_json TEXT NOT NULL DEFAULT '[]',
   progress_percent INTEGER NOT NULL DEFAULT 0,
   start_date TEXT,
   end_date TEXT,

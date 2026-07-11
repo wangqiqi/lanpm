@@ -12,6 +12,7 @@ import {
   deleteGroupTask,
   deleteTaskDependency,
   listGroupTasks,
+  listTaskDiscussions,
   moveGroupTask,
   updateGroupTask,
   updateTaskSchedule,
@@ -63,6 +64,15 @@ export function registerTaskIpc(): void {
       if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
       if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
       return referenceTaskFromChat(getDatabase(), groupId, taskId)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.listDiscussions,
+    (_event, groupId: string, taskId: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof taskId !== 'string' || !taskId) throw new Error('taskId required')
+      return listTaskDiscussions(getDatabase(), groupId, taskId)
     }
   )
 

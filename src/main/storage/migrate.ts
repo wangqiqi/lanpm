@@ -90,6 +90,14 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         )
       `)
     }
+  },
+  {
+    fromVersion: 7,
+    description: 'tasks.source_msg_id + linked_file_ids_json for A2 message↔task (TASK-230)',
+    up: (db) => {
+      db.exec(`ALTER TABLE tasks ADD COLUMN source_msg_id TEXT`)
+      db.exec(`ALTER TABLE tasks ADD COLUMN linked_file_ids_json TEXT NOT NULL DEFAULT '[]'`)
+    }
   }
 ]
 

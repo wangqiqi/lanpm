@@ -14,6 +14,7 @@ export const TASK_IPC = {
   moveTask: 'task:moveTask',
   createFromChat: 'task:createFromChat',
   referenceFromChat: 'task:referenceFromChat',
+  listDiscussions: 'task:listDiscussions',
   updateSchedule: 'task:updateSchedule',
   upsertDependency: 'task:upsertDependency',
   removeDependency: 'task:removeDependency',

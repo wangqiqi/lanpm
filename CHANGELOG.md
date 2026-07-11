@@ -5,9 +5,10 @@
 ## [Unreleased]
 
 ### Changed
-- **白板工具栏**：去掉「保存 + 提示」整行（已自动保存）；右上角浮层保留导出与**禅模式**（隐藏顶栏/底栏/标题，Esc 退出）。
+- **白板工具栏**：去掉「保存 + 提示」整行（已自动保存）；导出 / 禅模式改挂 Excalidraw `renderTopRightUI`（与「素材库」同排同风格）；禅模式隐藏顶栏/底栏/标题，Esc 退出。
 
 ### Added
+- **消息↔任务契约 (TASK-230)**：`Task.sourceMsgId` / `linkedFileIds`（schema v8）；`listDiscussions` IPC；`collectTaskDiscussions` 纯函数。
 - **SPRINT-WHITEBOARD 收尾 (TASK-229)**：导出 PNG→群文件（关联任务时发聊）；`verify:whiteboard`；docs/03·04 七视图；README；归档；可 handoff `/release` **1.11.0**。
 - **任务打开白板 (TASK-228)**：详情/编辑「打开白板」；`?linkTask=` 关联 `linkedTaskId`。
 - **Excalidraw 白板视图 (TASK-227)**：`WhiteboardView` 嵌入；主题跟随；自动/手动保存场景。
