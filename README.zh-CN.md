@@ -54,7 +54,7 @@
   </tr>
   <tr>
     <td align="center"><sub><b>任务树</b> — 父子层级、进度汇总、跨视图定位</sub></td>
-    <td align="center"><sub><b>文件</b> — 上传下载、书签、本地预览</sub></td>
+    <td align="center"><sub><b>文件</b> — 上传下载、书签、按任务交付物</sub></td>
   </tr>
 </table>
 
@@ -114,6 +114,7 @@
 - 群组内上传下载、**断点续传**与传输队列（RC）  
 - **LibreOffice 本地转换预览** Office 文档，预览过程不离开本机  
 - 网址书签 + 应用内 WebView  
+- **交付物（A3）**：按任务筛选/挂接，文件 Tab 可挂到任务（`verify:project-files`）  
 
 ### 🏢 贴合真实组织形态
 

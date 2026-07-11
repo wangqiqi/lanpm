@@ -54,6 +54,7 @@
     "verify:task-calendar": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-task-calendar.ts",
     "verify:calendar-drag": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-calendar-drag.ts",
     "verify:message-task": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-message-task.ts",
+    "verify:project-files": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-project-files.ts",
     "verify:checklist": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-checklist.ts",
     "verify:whiteboard": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-whiteboard.ts",
     "verify:suffix": "node --experimental-strip-types tests/static/verify-suffix.ts",
