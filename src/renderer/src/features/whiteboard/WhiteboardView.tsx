@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Tooltip } from 'antd'
+import { Tooltip } from 'antd'
 import { CompressOutlined, DownloadOutlined, ExpandOutlined } from '@ant-design/icons'
-import { Excalidraw, exportToBlob } from '@excalidraw/excalidraw'
+import { Button as ExcalidrawButton, Excalidraw, exportToBlob } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types'
 import '@excalidraw/excalidraw/index.css'
@@ -213,32 +213,52 @@ export default function WhiteboardView(): React.ReactElement {
     []
   )
 
+  const zenLabel = whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')
+  const exportLabel = t('whiteboard.exportPng')
+
+  const renderTopRightUI = useCallback(
+    (isMobile: boolean) => {
+      if (isMobile) return null
+      return (
+        <div className={styles.floatingActions} role="toolbar" aria-label={t('whiteboard.actionsAria')}>
+          <Tooltip title={exportLabel}>
+            <ExcalidrawButton
+              className={styles.actionBtn}
+              onSelect={() => {
+                if (!exporting) void exportPng()
+              }}
+              title={exportLabel}
+              aria-label={exportLabel}
+              disabled={exporting}
+            >
+              <DownloadOutlined className={styles.actionIcon} />
+            </ExcalidrawButton>
+          </Tooltip>
+          <Tooltip title={zenLabel}>
+            <ExcalidrawButton
+              className={styles.actionBtn}
+              selected={whiteboardZen}
+              onSelect={() => setWhiteboardZen(!whiteboardZen)}
+              title={zenLabel}
+              aria-label={zenLabel}
+            >
+              {whiteboardZen ? (
+                <CompressOutlined className={styles.actionIcon} />
+              ) : (
+                <ExpandOutlined className={styles.actionIcon} />
+              )}
+            </ExcalidrawButton>
+          </Tooltip>
+        </div>
+      )
+    },
+    [exportLabel, zenLabel, exporting, exportPng, whiteboardZen, setWhiteboardZen, t]
+  )
+
   if (!gid) return <ViewLoadingCenter />
 
   return (
     <div className={`${styles.root} ${whiteboardZen ? styles.rootZen : ''}`}>
-      <div className={styles.floatingActions} role="toolbar" aria-label={t('whiteboard.actionsAria')}>
-        <Tooltip title={t('whiteboard.exportPng')}>
-          <Button
-            size="small"
-            icon={<DownloadOutlined />}
-            loading={exporting}
-            onClick={() => void exportPng()}
-            aria-label={t('whiteboard.exportPng')}
-          />
-        </Tooltip>
-        <Tooltip title={whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')}>
-          <Button
-            size="small"
-            type={whiteboardZen ? 'primary' : 'default'}
-            icon={whiteboardZen ? <CompressOutlined /> : <ExpandOutlined />}
-            onClick={() => setWhiteboardZen(!whiteboardZen)}
-            aria-label={whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')}
-          >
-            {whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')}
-          </Button>
-        </Tooltip>
-      </div>
       {loading || !initialData ? (
         <ViewLoadingCenter />
       ) : (
@@ -248,6 +268,7 @@ export default function WhiteboardView(): React.ReactElement {
             langCode={langCode}
             theme={theme === 'dark' ? 'dark' : 'light'}
             UIOptions={uiOptions}
+            renderTopRightUI={renderTopRightUI}
             initialData={{
               elements: initialData.elements ?? [],
               appState: {
