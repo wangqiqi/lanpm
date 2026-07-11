@@ -3,11 +3,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { Database } from 'better-sqlite3'
 import type {
+  BundleChecklistPayload,
   BundleConflictMode,
   GroupBundleEntityCounts,
   GroupBundleImportResult,
   GroupBundlePreviewResult
 } from '../../shared/data/bundle.ts'
+import type { GroupMemberRecord } from '../../shared/group/types.ts'
+import type { GroupTagMeta } from '../../shared/task/groupTagMeta.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { sealBytes, openBytes } from '../crypto/envelopeCrypto.ts'
 import {
@@ -17,6 +20,16 @@ import {
 } from '../storage/repositories/messageRepository.ts'
 import { insertTask, listTasksByGroup } from '../storage/repositories/taskRepository.ts'
 import { insertFile, listFilesByGroup } from '../storage/repositories/fileRepository.ts'
+import {
+  insertGroupMember,
+  listGroupMembers
+} from '../storage/repositories/groupRepository.ts'
+import {
+  getGroupTagMeta,
+  listGroupTagMeta,
+  upsertGroupTagMeta
+} from '../storage/repositories/groupTagMetaRepository.ts'
+import { listChecklistsByGroup } from '../storage/repositories/checklistRepository.ts'
 import type { ChatMessage } from '../../shared/chat/types.ts'
 import type { Task } from '../../shared/task/types.ts'
 import type { FileMeta } from '../../shared/file/types.ts'
@@ -30,6 +43,9 @@ interface BundlePlain {
   messages: ChatMessage[]
   tasks: Task[]
   files: FileMeta[]
+  tags?: GroupTagMeta[]
+  members?: GroupMemberRecord[]
+  checklists?: BundleChecklistPayload[]
   fileBodies?: Record<string, string>
 }
 
@@ -48,7 +64,7 @@ function deriveKey(password: string, salt: Buffer): Buffer {
 }
 
 function emptyCounts(): GroupBundleEntityCounts {
-  return { messages: 0, tasks: 0, files: 0 }
+  return { messages: 0, tasks: 0, files: 0, tags: 0, members: 0, checklists: 0 }
 }
 
 function decryptBundle(inputPath: string, password: string): BundlePlain {
@@ -70,6 +86,23 @@ function taskExists(db: Database, taskId: string): boolean {
 
 function fileExists(db: Database, fileId: string): boolean {
   return db.prepare(`SELECT 1 FROM files WHERE file_id = ?`).get(fileId) !== undefined
+}
+
+function memberExists(db: Database, groupId: string, userId: string): boolean {
+  return (
+    db
+      .prepare(`SELECT 1 FROM group_members WHERE group_id = ? AND user_id = ?`)
+      .get(groupId, userId) !== undefined
+  )
+}
+
+function checklistExistsByTask(db: Database, taskId: string): boolean {
+  return db.prepare(`SELECT 1 FROM task_checklists WHERE task_id = ?`).get(taskId) !== undefined
+}
+
+function deleteChecklistForTask(db: Database, taskId: string): void {
+  db.prepare(`DELETE FROM task_checklist_items WHERE task_id = ?`).run(taskId)
+  db.prepare(`DELETE FROM task_checklists WHERE task_id = ?`).run(taskId)
 }
 
 function resolveFilesRoot(groupId: string): string {
@@ -96,7 +129,10 @@ export function exportGroupBundle(
     exportedAt: new Date().toISOString(),
     messages: listMessagesByGroup(db, groupId, 10_000),
     tasks: listTasksByGroup(db, groupId),
-    files: listFilesByGroup(db, groupId)
+    files: listFilesByGroup(db, groupId),
+    tags: listGroupTagMeta(db, groupId),
+    members: listGroupMembers(db, groupId),
+    checklists: listChecklistsByGroup(db, groupId)
   }
   if (includeFileBodies) {
     plain.fileBodies = {}
@@ -126,13 +162,16 @@ export function exportGroupBundle(
   writeFileSync(outputPath, JSON.stringify(out, null, 2), 'utf8')
 }
 
-/** Decrypt-only conflict summary; does not write (TASK-310). */
+/** Decrypt-only conflict summary; does not write (TASK-310/311). */
 export function previewGroupBundle(
   db: Database,
   inputPath: string,
   password: string
 ): GroupBundlePreviewResult {
   const plain = decryptBundle(inputPath, password)
+  const tags = plain.tags ?? []
+  const members = plain.members ?? []
+  const checklists = plain.checklists ?? []
   const conflicts = emptyCounts()
   for (const task of plain.tasks) {
     if (task.deletedAt) continue
@@ -144,13 +183,26 @@ export function previewGroupBundle(
   for (const file of plain.files) {
     if (fileExists(db, file.fileId)) conflicts.files += 1
   }
+  for (const tag of tags) {
+    if (getGroupTagMeta(db, plain.groupId, tag.tagKey)) conflicts.tags += 1
+  }
+  for (const member of members) {
+    if (memberExists(db, plain.groupId, member.userId)) conflicts.members += 1
+  }
+  for (const entry of checklists) {
+    const taskId = entry.checklist.taskId
+    if (checklistExistsByTask(db, taskId)) conflicts.checklists += 1
+  }
   return {
     groupId: plain.groupId,
     exportedAt: plain.exportedAt,
     totals: {
       messages: plain.messages.length,
       tasks: plain.tasks.filter((t) => !t.deletedAt).length,
-      files: plain.files.length
+      files: plain.files.length,
+      tags: tags.length,
+      members: members.length,
+      checklists: checklists.length
     },
     conflicts
   }
@@ -163,15 +215,50 @@ export function importGroupBundle(
   conflictMode: BundleConflictMode
 ): GroupBundleImportResult {
   const plain = decryptBundle(inputPath, password)
+  const tags = plain.tags ?? []
+  const members = plain.members ?? []
+  const checklists = plain.checklists ?? []
   const result: GroupBundleImportResult = {
     messagesImported: 0,
     tasksImported: 0,
     filesImported: 0,
+    tagsImported: 0,
+    membersImported: 0,
+    checklistsImported: 0,
     skipped: 0,
     overwritten: 0
   }
 
   const idMap = new Map<string, string>()
+  const groupId = plain.groupId
+
+  // Tags before tasks so coerceTagsForGroup can see dictionary entries.
+  for (const tag of tags) {
+    const exists = !!getGroupTagMeta(db, groupId, tag.tagKey)
+    if (exists) {
+      if (conflictMode === 'skip' || conflictMode === 'new_id') {
+        // tag_key is identity — new_id falls back to skip
+        result.skipped += 1
+        continue
+      }
+      result.overwritten += 1
+    }
+    upsertGroupTagMeta(db, { ...tag, groupId })
+    result.tagsImported += 1
+  }
+
+  for (const member of members) {
+    const exists = memberExists(db, groupId, member.userId)
+    if (exists) {
+      if (conflictMode === 'skip' || conflictMode === 'new_id') {
+        result.skipped += 1
+        continue
+      }
+      result.overwritten += 1
+    }
+    insertGroupMember(db, { ...member, groupId })
+    result.membersImported += 1
+  }
 
   for (const task of plain.tasks) {
     if (task.deletedAt) continue
@@ -186,11 +273,12 @@ export function importGroupBundle(
         taskId = `task_${createHash('sha256').update(taskId + plain.exportedAt).digest('hex').slice(0, 12)}`
         idMap.set(task.taskId, taskId)
       } else if (conflictMode === 'overwrite') {
+        deleteChecklistForTask(db, taskId)
         db.prepare(`DELETE FROM tasks WHERE task_id = ?`).run(taskId)
         result.overwritten += 1
       }
     }
-    insertTask(db, { ...task, taskId, groupId: task.groupId || plain.groupId })
+    insertTask(db, { ...task, taskId, groupId: task.groupId || groupId })
     result.tasksImported += 1
   }
 
@@ -208,7 +296,7 @@ export function importGroupBundle(
         result.overwritten += 1
       }
     }
-    insertMessage(db, { ...msg, msgId, groupId: msg.groupId || plain.groupId })
+    insertMessage(db, { ...msg, msgId, groupId: msg.groupId || groupId })
     result.messagesImported += 1
   }
 
@@ -228,13 +316,79 @@ export function importGroupBundle(
     let storagePath = file.storagePath
     const bodyB64 = plain.fileBodies?.[file.fileId]
     if (bodyB64) {
-      const filesRoot = resolveFilesRoot(plain.groupId)
+      const filesRoot = resolveFilesRoot(groupId)
       mkdirSync(filesRoot, { recursive: true })
       storagePath = join(filesRoot, `${fileId}${file.ext ? `.${file.ext.replace(/^\./, '')}` : ''}`)
       writeFileSync(storagePath, Buffer.from(bodyB64, 'base64'))
     }
-    insertFile(db, { ...file, fileId, groupId: file.groupId || plain.groupId, storagePath })
+    insertFile(db, { ...file, fileId, groupId: file.groupId || groupId, storagePath })
     result.filesImported += 1
+  }
+
+  for (const entry of checklists) {
+    let taskId = idMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
+    let checklistId = entry.checklist.checklistId
+    const exists = checklistExistsByTask(db, taskId)
+    if (exists) {
+      if (conflictMode === 'skip') {
+        result.skipped += 1
+        continue
+      }
+      if (conflictMode === 'new_id') {
+        // If task wasn't remapped but checklist exists, skip to avoid UNIQUE(task_id)
+        if (!idMap.has(entry.checklist.taskId) && taskExists(db, entry.checklist.taskId)) {
+          result.skipped += 1
+          continue
+        }
+        checklistId = `cl_${randomBytes(8).toString('hex')}`
+      } else if (conflictMode === 'overwrite') {
+        deleteChecklistForTask(db, taskId)
+        result.overwritten += 1
+      }
+    } else if (conflictMode === 'new_id' && idMap.has(entry.checklist.taskId)) {
+      checklistId = `cl_${randomBytes(8).toString('hex')}`
+    }
+
+    db.prepare(
+      `INSERT INTO task_checklists (checklist_id, task_id, group_id, title, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(
+      checklistId,
+      taskId,
+      entry.checklist.groupId || groupId,
+      entry.checklist.title,
+      entry.checklist.createdAt,
+      entry.checklist.updatedAt
+    )
+
+    for (const item of entry.items) {
+      let itemId = item.itemId
+      if (conflictMode === 'new_id') {
+        itemId = `cli_${randomBytes(8).toString('hex')}`
+      } else if (db.prepare(`SELECT 1 FROM task_checklist_items WHERE item_id = ?`).get(itemId)) {
+        if (conflictMode === 'skip') continue
+        if (conflictMode === 'overwrite') {
+          db.prepare(`DELETE FROM task_checklist_items WHERE item_id = ?`).run(itemId)
+        }
+      }
+      db.prepare(
+        `INSERT INTO task_checklist_items (
+          item_id, checklist_id, task_id, text, done, sort_order,
+          linked_subtask_id, created_at, updated_at, deleted_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`
+      ).run(
+        itemId,
+        checklistId,
+        taskId,
+        item.text,
+        item.done ? 1 : 0,
+        item.sortOrder,
+        item.linkedSubtaskId ?? null,
+        item.createdAt,
+        item.updatedAt
+      )
+    }
+    result.checklistsImported += 1
   }
 
   return result

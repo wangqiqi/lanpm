@@ -4,8 +4,8 @@ import type {
   ChecklistItem,
   TaskChecklist,
   UpsertChecklistItemInput
-} from '../../../shared/task/checklist'
-import { checklistProgressOf } from '../../../shared/task/checklist'
+} from '../../../shared/task/checklist.ts'
+import { checklistProgressOf } from '../../../shared/task/checklist.ts'
 
 interface ChecklistRow {
   checklist_id: string
@@ -202,6 +202,25 @@ export function deleteChecklistsForGroup(db: Database.Database, groupId: string)
         OR checklist_id IN (SELECT checklist_id FROM task_checklists WHERE group_id = ?)`
   ).run(groupId, groupId)
   db.prepare(`DELETE FROM task_checklists WHERE group_id = ?`).run(groupId)
+}
+
+/** Group export helper — checklist + active items (TASK-311). */
+export function listChecklistsByGroup(
+  db: Database.Database,
+  groupId: string
+): Array<{ checklist: TaskChecklist; items: ChecklistItem[] }> {
+  const rows = db
+    .prepare(
+      `SELECT * FROM task_checklists WHERE group_id = ? ORDER BY created_at ASC`
+    )
+    .all(groupId) as ChecklistRow[]
+  return rows.map((row) => {
+    const checklist = rowToChecklist(row)
+    return {
+      checklist,
+      items: listChecklistItemsByTaskId(db, checklist.taskId)
+    }
+  })
 }
 
 export function progressForTask(db: Database.Database, taskId: string) {

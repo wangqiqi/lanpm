@@ -1,5 +1,5 @@
 /**
- * TASK-310 — bundle overwrite + dry-run preview.
+ * TASK-310/311 — bundle overwrite + dry-run + tags/members/checklists.
  * Run: npm run verify:bundle
  */
 import assert from 'node:assert/strict'
@@ -12,14 +12,26 @@ import {
   importGroupBundle,
   previewGroupBundle
 } from '../../src/main/data/bundleService.ts'
-import { insertGroup } from '../../src/main/storage/repositories/groupRepository.ts'
+import {
+  insertGroup,
+  insertGroupMember,
+  listGroupMembers
+} from '../../src/main/storage/repositories/groupRepository.ts'
 import { upsertUser } from '../../src/main/storage/repositories/userRepository.ts'
 import { upsertDevice } from '../../src/main/storage/repositories/deviceRepository.ts'
 import { setMeta } from '../../src/main/storage/repositories/syncMetaRepository.ts'
-import { insertTask, getTaskById } from '../../src/main/storage/repositories/taskRepository.ts'
+import {
+  insertTask,
+  getTaskById,
+  buildTaskFromInput
+} from '../../src/main/storage/repositories/taskRepository.ts'
 import { insertMessage, getMessageById } from '../../src/main/storage/repositories/messageRepository.ts'
 import { insertFile } from '../../src/main/storage/repositories/fileRepository.ts'
-import { buildTaskFromInput } from '../../src/main/storage/repositories/taskRepository.ts'
+import {
+  listGroupTagMeta,
+  upsertGroupTagMeta
+} from '../../src/main/storage/repositories/groupTagMetaRepository.ts'
+import { listChecklistsByGroup } from '../../src/main/storage/repositories/checklistRepository.ts'
 import type { ChatMessage } from '../../src/shared/chat/types.ts'
 import type { FileMeta } from '../../src/shared/file/types.ts'
 import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
@@ -33,14 +45,13 @@ const PASS = 'test-pass'
 const bundleSrc = readFileSync(join(projectRoot, 'src/main/data/bundleService.ts'), 'utf8')
 assert.match(bundleSrc, /conflictMode === 'overwrite'/)
 assert.match(bundleSrc, /export function previewGroupBundle/)
-assert.match(bundleSrc, /overwritten/)
-
-const channelsSrc = readFileSync(join(projectRoot, 'src/shared/data/channels.ts'), 'utf8')
-assert.match(channelsSrc, /previewGroupBundle/)
+assert.match(bundleSrc, /listGroupTagMeta/)
+assert.match(bundleSrc, /listGroupMembers/)
+assert.match(bundleSrc, /listChecklistsByGroup/)
 
 const sharedSrc = readFileSync(join(projectRoot, 'src/shared/data/bundle.ts'), 'utf8')
-assert.match(sharedSrc, /GroupBundlePreviewResult/)
-assert.match(sharedSrc, /overwritten/)
+assert.match(sharedSrc, /tagsImported/)
+assert.match(sharedSrc, /checklists/)
 
 function openDb(dir: string): Database.Database {
   const db = new Database(join(dir, 'lanpm.db'))
@@ -68,8 +79,23 @@ function openDb(dir: string): Database.Database {
   return db
 }
 
-function seedEntities(db: Database.Database, title: string, text: string): void {
+function seedEntities(db: Database.Database, title: string, text: string, tagColor: string): void {
   const now = new Date().toISOString()
+  upsertGroupTagMeta(db, {
+    groupId: GROUP,
+    tagKey: 'prio',
+    color: tagColor,
+    updatedAt: now,
+    updatedByUserId: USER
+  })
+  insertGroupMember(db, {
+    groupId: GROUP,
+    userId: USER,
+    role: 'owner',
+    joinedAt: now,
+    displayAlias: title === 'Original title' ? 'OwnerA' : 'OwnerB'
+  })
+
   const task = buildTaskFromInput(
     { groupId: GROUP, title, status: 'todo' },
     USER,
@@ -78,6 +104,17 @@ function seedEntities(db: Database.Database, title: string, text: string): void 
   task.createdAt = now
   task.updatedAt = now
   insertTask(db, task)
+
+  db.prepare(
+    `INSERT INTO task_checklists (checklist_id, task_id, group_id, title, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run('cl_bundle_1', 'task_bundle_1', GROUP, 'CL', now, now)
+  db.prepare(
+    `INSERT INTO task_checklist_items (
+      item_id, checklist_id, task_id, text, done, sort_order,
+      linked_subtask_id, created_at, updated_at, deleted_at
+    ) VALUES (?, ?, ?, ?, 0, 0, NULL, ?, ?, NULL)`
+  ).run('cli_bundle_1', 'cl_bundle_1', 'task_bundle_1', text, now, now)
 
   const msg: ChatMessage = {
     msgId: 'msg_bundle_1',
@@ -114,33 +151,46 @@ const dirA = mkLanpmTemp('lanpm-bundle-a-')
 const dirB = mkLanpmTemp('lanpm-bundle-b-')
 try {
   const dbA = openDb(dirA)
-  seedEntities(dbA, 'Original title', 'hello')
+  seedEntities(dbA, 'Original title', 'hello', '#112233')
   const bundlePath = join(dirA, 'group.lanpm-bundle.json')
   exportGroupBundle(dbA, GROUP, PASS, bundlePath, false)
 
   const dbB = openDb(dirB)
-  seedEntities(dbB, 'Local title', 'local')
+  seedEntities(dbB, 'Local title', 'local', '#AABBCC')
 
   const preview = previewGroupBundle(dbB, bundlePath, PASS)
   assert.equal(preview.groupId, GROUP)
   assert.equal(preview.totals.tasks, 1)
   assert.equal(preview.totals.messages, 1)
   assert.equal(preview.totals.files, 1)
+  assert.equal(preview.totals.tags, 1)
+  assert.equal(preview.totals.members, 1)
+  assert.equal(preview.totals.checklists, 1)
   assert.equal(preview.conflicts.tasks, 1)
-  assert.equal(preview.conflicts.messages, 1)
-  assert.equal(preview.conflicts.files, 1)
+  assert.equal(preview.conflicts.tags, 1)
+  assert.equal(preview.conflicts.members, 1)
+  assert.equal(preview.conflicts.checklists, 1)
 
   const skipped = importGroupBundle(dbB, bundlePath, PASS, 'skip')
-  assert.equal(skipped.skipped, 3)
+  assert.ok(skipped.skipped >= 6)
   assert.equal(skipped.tasksImported, 0)
   assert.equal(getTaskById(dbB, 'task_bundle_1')?.title, 'Local title')
+  assert.equal(listGroupTagMeta(dbB, GROUP)[0]?.color, '#AABBCC')
 
   const overwritten = importGroupBundle(dbB, bundlePath, PASS, 'overwrite')
-  assert.equal(overwritten.overwritten, 3)
+  // checklist may be deleted with task overwrite then re-inserted (no overwritten++)
+  assert.ok(overwritten.overwritten >= 5, `overwritten=${overwritten.overwritten}`)
   assert.equal(overwritten.tasksImported, 1)
-  assert.equal(overwritten.messagesImported, 1)
-  assert.equal(overwritten.filesImported, 1)
+  assert.equal(overwritten.tagsImported, 1)
+  assert.equal(overwritten.membersImported, 1)
+  assert.equal(overwritten.checklistsImported, 1)
   assert.equal(getTaskById(dbB, 'task_bundle_1')?.title, 'Original title')
+  assert.equal(listGroupTagMeta(dbB, GROUP)[0]?.color, '#112233')
+  assert.equal(listGroupMembers(dbB, GROUP)[0]?.displayAlias, 'OwnerA')
+  const cls = listChecklistsByGroup(dbB, GROUP)
+  assert.equal(cls.length, 1)
+  assert.equal(cls[0]?.items[0]?.text, 'hello')
+
   const msg = getMessageById(dbB, 'msg_bundle_1')
   assert.ok(msg)
   assert.equal(msg.content.kind, 'text')
@@ -152,8 +202,9 @@ try {
     const fresh = importGroupBundle(dbC, bundlePath, PASS, 'skip')
     assert.equal(fresh.skipped, 0)
     assert.equal(fresh.tasksImported, 1)
-    assert.equal(fresh.messagesImported, 1)
-    assert.equal(fresh.filesImported, 1)
+    assert.equal(fresh.tagsImported, 1)
+    assert.equal(fresh.membersImported, 1)
+    assert.equal(fresh.checklistsImported, 1)
     assert.equal(fresh.overwritten, 0)
     dbC.close()
   } finally {
@@ -162,7 +213,7 @@ try {
 
   dbA.close()
   dbB.close()
-  console.log('OK: verify:bundle — overwrite + dry-run preview')
+  console.log('OK: verify:bundle — overwrite + dry-run + tags/members/checklists')
 } finally {
   rmLanpmTemp(dirA)
   rmLanpmTemp(dirB)

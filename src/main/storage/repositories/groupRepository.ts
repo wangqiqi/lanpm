@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3'
-import type { GroupMemberRecord, GroupRecord } from '../../../shared/group/types'
-import type { GroupType } from '../../../shared/navigation/types'
+import type { GroupMemberRecord, GroupRecord } from '../../../shared/group/types.ts'
+import type { GroupType } from '../../../shared/navigation/types.ts'
 
 interface GroupRow {
   group_id: string
