@@ -49,11 +49,13 @@ import {
 } from '@shared/task/boardRelations'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import {
   publishLocalAwareness,
   useTaskAwarenessStore,
   type AwarenessPeer
 } from '@renderer/stores/taskAwarenessStore'
+import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -232,7 +234,12 @@ export default function BoardView(): React.ReactElement {
   const boardBodyRef = useRef<HTMLDivElement>(null)
   const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
   const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
-  const tagColorOverrides = useUiStore((s) => s.tagColorOverridesByGroup[gid] ?? {})
+  const tagMetaRows = useGroupTagStore((s) => s.byGroup[gid] ?? [])
+  const tagColorOverrides = useMemo(
+    () => groupTagMetaToColorMap(tagMetaRows),
+    [tagMetaRows]
+  )
+  const ensureImported = useGroupTagStore((s) => s.ensureImported)
   const identityUser = useIdentityStore((s) => s.user)
   const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[gid] ?? [])
   const peersByTask = useMemo(() => {
@@ -295,11 +302,12 @@ export default function BoardView(): React.ReactElement {
     if (!gid) return
     void loadTasks(gid)
     void loadMembers(gid)
+    void ensureImported(gid)
     const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
       if (changedGroupId === gid) void loadTasks(gid)
     })
     return unsub
-  }, [gid, loadTasks, loadMembers])
+  }, [gid, loadTasks, loadMembers, ensureImported])
 
   useEffect(() => {
     if (!gid || !identityUser) return

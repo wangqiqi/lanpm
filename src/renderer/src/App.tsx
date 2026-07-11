@@ -15,6 +15,10 @@ import {
   unwireTaskAwarenessPush,
   wireTaskAwarenessPush
 } from '@renderer/stores/taskAwarenessStore'
+import {
+  unwireGroupTagPush,
+  wireGroupTagPush
+} from '@renderer/stores/groupTagStore'
 import styles from './styles/App.module.css'
 
 export default function App(): React.ReactElement {
@@ -72,7 +76,11 @@ export default function App(): React.ReactElement {
   useEffect(() => {
     if (!configured) return
     wireTaskAwarenessPush()
-    return () => unwireTaskAwarenessPush()
+    wireGroupTagPush()
+    return () => {
+      unwireTaskAwarenessPush()
+      unwireGroupTagPush()
+    }
   }, [configured])
 
   useEffect(() => {

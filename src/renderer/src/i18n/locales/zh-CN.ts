@@ -181,6 +181,7 @@ const zhCN = {
   'board.tagFilterEmpty': '没有带所选标签的任务',
   'board.tagPalette': '标签色板',
   'board.tagPaletteHint': '本机改色，仅此设备生效',
+  'board.tagPaletteSyncedHint': '改色后同步到群内其他设备',
   'task.awarenessFocusing': '{names} 正在查看',
   'board.discussInChat': '在聊天中讨论',
   'board.discussDraft': '关于任务「{title}」',

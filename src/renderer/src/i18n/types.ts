@@ -180,6 +180,7 @@ export type MessageKey =
   | 'board.tagFilterEmpty'
   | 'board.tagPalette'
   | 'board.tagPaletteHint'
+  | 'board.tagPaletteSyncedHint'
   | 'task.awarenessFocusing'
   | 'board.discussInChat'
   | 'board.discussDraft'

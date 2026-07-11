@@ -34,7 +34,8 @@ import {
 } from '@shared/task/validation'
 import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import TaskTagChip from '@renderer/features/task/TaskTagChip'
-import { useUiStore } from '@renderer/stores/uiStore'
+import { useGroupTagStore } from '@renderer/stores/groupTagStore'
+import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -91,7 +92,12 @@ export default function TaskDetailPanel({
   const { message } = useLanpmApp()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
-  const tagColorOverrides = useUiStore((s) => s.tagColorOverridesByGroup[groupId] ?? {})
+  const tagMetaRows = useGroupTagStore((s) => s.byGroup[groupId] ?? [])
+  const tagColorOverrides = useMemo(
+    () => groupTagMetaToColorMap(tagMetaRows),
+    [tagMetaRows]
+  )
+  const ensureImported = useGroupTagStore((s) => s.ensureImported)
 
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description ?? '')
@@ -121,6 +127,10 @@ export default function TaskDetailPanel({
     setProgressPercent(task.progressPercent)
     setMilestone(!!task.milestone)
   }, [task])
+
+  useEffect(() => {
+    void ensureImported(groupId)
+  }, [groupId, ensureImported])
 
   const scheduleDraft = useMemo(
     () => ({

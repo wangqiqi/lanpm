@@ -183,6 +183,7 @@ const enUS = {
   'board.tagFilterEmpty': 'No tasks with the selected tags',
   'board.tagPalette': 'Tag colors',
   'board.tagPaletteHint': 'Local colors for this device only',
+  'board.tagPaletteSyncedHint': 'Colors sync to other devices in the group',
   'task.awarenessFocusing': '{names} viewing',
   'board.discussInChat': 'Discuss in chat',
   'board.discussDraft': 'Re: task "{title}"',
