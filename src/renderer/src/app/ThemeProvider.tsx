@@ -9,22 +9,27 @@ const LANPM_FONT_FAMILY =
   "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', 'Helvetica Neue', sans-serif"
 
 /** 与 global.module.css 一致；Ant Design 无法对 CSS 变量做颜色运算，须用实色 */
+/** 与 global.module.css light/dark 气质令牌对齐（Ant 须实色） */
 const LANPM_PALETTE = {
   light: {
     surfaceSolid: '#ffffff',
+    surfaceElevated: '#ffffff',
     text: '#1d1d1f',
-    textSecondary: '#86868b',
-    separator: 'rgba(60, 60, 67, 0.18)',
-    border: 'rgba(60, 60, 67, 0.18)',
-    fillSecondary: 'rgba(120, 120, 128, 0.12)'
+    textSecondary: '#6e6e73',
+    separator: 'rgba(60, 60, 67, 0.1)',
+    border: 'rgba(60, 60, 67, 0.1)',
+    fillSecondary: 'rgba(120, 120, 128, 0.08)',
+    selectedBg: 'rgba(0, 102, 204, 0.08)'
   },
   dark: {
     surfaceSolid: '#1c1c1e',
+    surfaceElevated: '#2c2c2e',
     text: '#f5f5f7',
-    textSecondary: '#98989d',
-    separator: 'rgba(84, 84, 88, 0.65)',
-    border: 'rgba(84, 84, 88, 0.36)',
-    fillSecondary: 'rgba(120, 120, 128, 0.24)'
+    textSecondary: '#a1a1a6',
+    separator: 'rgba(84, 84, 88, 0.32)',
+    border: 'rgba(84, 84, 88, 0.28)',
+    fillSecondary: 'rgba(120, 120, 128, 0.18)',
+    selectedBg: 'rgba(10, 132, 255, 0.16)'
   }
 } as const
 
@@ -54,11 +59,14 @@ export default function ThemeProvider({
         algorithm: isDark ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: {
           fontFamily: LANPM_FONT_FAMILY,
-          borderRadius: 10,
-          borderRadiusLG: 12,
+          /* 对齐 --lanpm-radius-md / lg / xl */
+          borderRadius: 12,
+          borderRadiusLG: 16,
+          borderRadiusSM: 8,
+          borderRadiusXS: 6,
           colorPrimary: isDark ? '#0a84ff' : '#0071e3',
           colorBgContainer: palette.surfaceSolid,
-          colorBgElevated: palette.surfaceSolid,
+          colorBgElevated: palette.surfaceElevated,
           colorBorder: palette.separator,
           colorText: palette.text,
           colorTextSecondary: palette.textSecondary,
@@ -82,15 +90,20 @@ export default function ThemeProvider({
             textTextColor: palette.textSecondary,
             textTextHoverColor: palette.text,
             textTextActiveColor: palette.text,
-            colorText: palette.textSecondary
+            colorText: palette.textSecondary,
+            borderRadius: 12
           },
           Input: {
             activeBorderColor: isDark ? '#0a84ff' : '#0071e3',
             hoverBorderColor: palette.separator,
-            paddingBlock: 8
+            paddingBlock: 8,
+            borderRadius: 12
+          },
+          Modal: {
+            borderRadiusLG: 16
           },
           Select: {
-            optionSelectedBg: palette.fillSecondary
+            optionSelectedBg: palette.selectedBg
           },
           Table: {
             headerBg: palette.fillSecondary,
@@ -99,28 +112,32 @@ export default function ThemeProvider({
           },
           Tag: {
             defaultBg: palette.fillSecondary,
-            defaultColor: palette.textSecondary
+            defaultColor: palette.textSecondary,
+            borderRadiusSM: 8
           },
           Segmented: {
             trackBg: palette.fillSecondary,
             itemColor: palette.textSecondary,
-            itemSelectedBg: palette.surfaceSolid,
-            itemSelectedColor: palette.text
+            itemSelectedBg: palette.surfaceElevated,
+            itemSelectedColor: palette.text,
+            trackPadding: 3,
+            borderRadius: 12,
+            borderRadiusSM: 10
           },
           Descriptions: {
             labelBg: palette.fillSecondary,
             titleColor: palette.text
           },
           Tree: {
-            nodeSelectedBg: palette.fillSecondary
+            nodeSelectedBg: palette.selectedBg
           },
           Menu: {
-            itemSelectedBg: palette.fillSecondary,
+            itemSelectedBg: palette.selectedBg,
             itemSelectedColor: palette.text
           },
           Radio: {
             buttonBg: palette.fillSecondary,
-            buttonCheckedBg: palette.surfaceSolid,
+            buttonCheckedBg: palette.surfaceElevated,
             buttonColor: palette.text
           },
           List: {
