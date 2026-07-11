@@ -3,10 +3,16 @@ import { Alert, Button, Checkbox, Input, InputNumber, Select, Slider, Typography
 import { useNavigate } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
+import type { TaskDiscussionItem } from '@shared/task/discussions'
+import type { ChatMessage } from '@shared/chat/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import { useChatStore } from '@renderer/stores/chatStore'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { groupViewPath } from '@renderer/routes/paths'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import type { TranslateParams } from '@renderer/i18n/messages'
 import {
   buildBoardRelationMap,
   listTaskPredecessors,
@@ -146,6 +152,51 @@ export default function TaskDetailPanel({
   const [progressPercent, setProgressPercent] = useState(task.progressPercent)
   const [milestone, setMilestone] = useState(!!task.milestone)
   const [saving, setSaving] = useState(false)
+  const [discussions, setDiscussions] = useState<TaskDiscussionItem[]>([])
+  const [discussLoading, setDiscussLoading] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setDiscussLoading(true)
+    void getLanpmApi()
+      .task.listDiscussions(groupId, task.taskId)
+      .then((items) => {
+        if (!cancelled) setDiscussions(items)
+      })
+      .catch(() => {
+        if (!cancelled) setDiscussions([])
+      })
+      .finally(() => {
+        if (!cancelled) setDiscussLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [groupId, task.taskId, task.sourceMsgId, task.updatedAt])
+
+  const jumpToMessage = (msgId: string): void => {
+    navigate(groupViewPath(groupId, 'chat'), { state: { highlightMsgId: msgId } })
+    onClose()
+  }
+
+  const handleDiscussInChat = async (): Promise<void> => {
+    try {
+      const { message: chatMsg } = await getLanpmApi().task.referenceFromChat(
+        groupId,
+        task.taskId
+      )
+      useChatStore.getState().upsertMessage(chatMsg)
+      navigate(groupViewPath(groupId, 'chat'), {
+        state: {
+          highlightMsgId: chatMsg.msgId,
+          composeDraft: t('board.discussDraft', { title: task.title })
+        }
+      })
+      onClose()
+    } catch (err) {
+      message.error(formatError(err, 'chat.taskRefFailed'))
+    }
+  }
 
   useEffect(() => {
     setTitle(task.title)
@@ -467,6 +518,36 @@ export default function TaskDetailPanel({
         onLocate={onLocateTask}
       />
 
+      <div className={styles.detailField}>
+        <Text type="secondary">{t('tree.detailDiscussions')}</Text>
+        {discussLoading ? (
+          <Text type="secondary">{t('common.loading')}</Text>
+        ) : discussions.length === 0 ? (
+          <Text type="secondary">{t('tree.detailDiscussionsEmpty')}</Text>
+        ) : (
+          <ul className={styles.discussionList}>
+            {discussions.map((item) => (
+              <li key={item.message.msgId}>
+                <button
+                  type="button"
+                  className={styles.discussionItem}
+                  onClick={() => jumpToMessage(item.message.msgId)}
+                >
+                  <span className={styles.discussionKind}>
+                    {item.kind === 'source'
+                      ? t('tree.detailDiscussionSource')
+                      : t('tree.detailDiscussionRef')}
+                  </span>
+                  <span className={styles.discussionPreview}>
+                    {discussionPreview(item.message, t)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div className={styles.detailActions}>
         <Button
           type="primary"
@@ -476,6 +557,7 @@ export default function TaskDetailPanel({
         >
           {t('common.save')}
         </Button>
+        <Button onClick={() => void handleDiscussInChat()}>{t('board.discussInChat')}</Button>
         <Button
           onClick={() => {
             navigate(whiteboardPathForTask(groupId, task.taskId))
@@ -490,4 +572,16 @@ export default function TaskDetailPanel({
       </div>
     </div>
   )
+}
+
+function discussionPreview(
+  message: ChatMessage,
+  t: (key: MessageKey, params?: TranslateParams) => string
+): string {
+  const { content } = message
+  if (content.kind === 'text') return content.text.slice(0, 80)
+  if (content.kind === 'code') return content.code.split('\n')[0]?.slice(0, 80) ?? ''
+  if (content.kind === 'file') return content.fileName
+  if (content.kind === 'task_ref') return content.title
+  return t('chat.unknownMessage', { type: message.type })
 }

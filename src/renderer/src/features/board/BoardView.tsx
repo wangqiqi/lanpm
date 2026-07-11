@@ -20,6 +20,7 @@ import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { TASK_TITLE_MAX_LENGTH, validateTaskTitle } from '@shared/task/validation'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useTaskStore } from '@renderer/stores/taskStore'
+import { useChatStore } from '@renderer/stores/chatStore'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
@@ -323,12 +324,21 @@ export default function BoardView(): React.ReactElement {
   }, [gid, identityUser, editTask?.taskId])
 
   const handleDiscuss = useCallback(
-    (task: Task) => {
-      navigate(groupViewPath(gid, 'chat'), {
-        state: { composeDraft: t('board.discussDraft', { title: task.title }) }
-      })
+    async (task: Task) => {
+      try {
+        const { message: chatMsg } = await getLanpmApi().task.referenceFromChat(gid, task.taskId)
+        useChatStore.getState().upsertMessage(chatMsg)
+        navigate(groupViewPath(gid, 'chat'), {
+          state: {
+            highlightMsgId: chatMsg.msgId,
+            composeDraft: t('board.discussDraft', { title: task.title })
+          }
+        })
+      } catch (err) {
+        message.error(formatError(err, 'chat.taskRefFailed'))
+      }
     },
-    [gid, navigate, t]
+    [gid, navigate, t, message, formatError]
   )
 
   const handleDragStart = (event: DragStartEvent): void => {

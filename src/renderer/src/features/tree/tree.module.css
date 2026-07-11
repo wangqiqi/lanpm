@@ -246,6 +246,49 @@
   flex-shrink: 0;
 }
 
+.discussionList {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.discussionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border: 1px solid var(--lanpm-border-subtle, rgba(0, 0, 0, 0.08));
+  border-radius: var(--lanpm-radius-sm, 6px);
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.discussionItem:hover {
+  background: var(--lanpm-surface-hover, rgba(0, 0, 0, 0.04));
+}
+
+.discussionKind {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.discussionPreview {
+  font-size: var(--lanpm-font-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 @media (max-width: 960px) {
   .body {
     grid-template-columns: 1fr;
