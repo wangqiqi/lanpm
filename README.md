@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.28.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.29.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -134,7 +134,7 @@
 - **Project**, **functional**, and **anonymous** groups — tabs adapt (calendar/whiteboard project-only)  
 - **Leadership cockpit**: portfolio, reports, optional AI API keys  
 - **Multi-device identity**: online if any device is up; optional display-name **suffix**  
-- **Light / dark** theme · **zh / en** UI  
+- **Light / dark** theme with shared chrome vibe tokens · **zh / en** UI  
 
 ### 🔒 Security & shipping
 
@@ -254,7 +254,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.28.0` — cursor SOP absorb (oss-first / input-bounds / extensibility) · TopBar wide actions · review hand-verify close. M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.29.0` — Excalidraw-inspired **chrome vibe** (island bars, soft radius/shadow, blue selected fill) for light + dark · UI token ladder 8/12/16/20. M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (in progress / queue):** meeting-plugin SPIKE · marketplace SPIKE.
 

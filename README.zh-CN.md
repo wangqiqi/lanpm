@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.28.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.29.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -134,7 +134,7 @@
 - **项目群 / 职能群 / 匿名群** — Tab 按类型启停（日历/白板仅项目群）  
 - **领导驾驶舱**：项目总览、报表、可选 AI API Key  
 - **一人多设备**：任一设备在线即在线；后缀区分同名  
-- **亮色 / 暗色** 主题 · **中 / 英** 界面  
+- **亮色 / 暗色** 主题（共享外壳气质 token）· **中 / 英** 界面  
 
 ### 🔒 安全与发版
 
@@ -254,7 +254,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.28.0` — 母版 SOP 吸收（oss-first / input-bounds / extensibility）· 顶栏宽屏平铺 · 审查手验收口。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.29.0` — Excalidraw 式**外壳气质**（通栏岛感、软圆角/阴影、蓝淡选中）亮暗双主题 · UI 圆角阶 8/12/16/20。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
 **进行中 / 队列：** 会议插件 SPIKE · 插件市场 SPIKE。
 
