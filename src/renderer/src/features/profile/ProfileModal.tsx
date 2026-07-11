@@ -31,6 +31,8 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   const refreshNetwork = useNetworkStore((s) => s.refresh)
   const notifyAllMessages = useNotificationPrefsStore((s) => s.notifyAllMessages)
   const setNotifyAllMessages = useNotificationPrefsStore((s) => s.setNotifyAllMessages)
+  const notifyDueTasks = useNotificationPrefsStore((s) => s.notifyDueTasks)
+  const setNotifyDueTasks = useNotificationPrefsStore((s) => s.setNotifyDueTasks)
   const hydrateNotificationPrefs = useNotificationPrefsStore((s) => s.hydrate)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const [form] = Form.useForm<ProfileFormValues>()
@@ -143,6 +145,16 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
           </Checkbox>
           <div>
             <Typography.Text type="secondary">{t('profile.notifyAllMessagesHint')}</Typography.Text>
+          </div>
+          <Checkbox
+            style={{ marginTop: 12 }}
+            checked={notifyDueTasks}
+            onChange={(e) => setNotifyDueTasks(e.target.checked)}
+          >
+            {t('profile.notifyDueTasks')}
+          </Checkbox>
+          <div>
+            <Typography.Text type="secondary">{t('profile.notifyDueTasksHint')}</Typography.Text>
           </div>
         </Form.Item>
         <Form.Item label={t('profile.device')}>

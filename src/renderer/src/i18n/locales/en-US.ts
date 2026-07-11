@@ -258,6 +258,10 @@ const enUS = {
   'tree.detailName': 'Title',
   'tree.detailAssignee': 'Assignee',
   'tree.detailStatus': 'Status',
+  'task.nudgeAssignee': 'Nudge assignee',
+  'task.nudgeNoAssignee': 'Assign someone first',
+  'task.dueNotifyTodayTitle': 'Task due today',
+  'task.dueNotifyOverdueTitle': 'Task overdue',
   'tree.detailEndDate': 'Due date',
   'tree.detailDescription': 'Description',
   'tree.detailChildren': 'Subtasks: {done}/{total} done',
@@ -664,6 +668,9 @@ const enUS = {
   'profile.notifyAllMessages': 'Notify for all new messages when not in chat',
   'profile.notifyAllMessagesHint':
     '@mentions always notify. When enabled, other new messages notify while unfocused or on another view.',
+  'profile.notifyDueTasks': 'Desktop reminders for due tasks',
+  'profile.notifyDueTasksHint':
+    'Notify for open tasks assigned to me or created by me that are due today or overdue (once per task per day).',
   'data.intro': 'Manage local retention, usage, and cleanup. LAN catch-up window is fixed.',
   'data.syncWindowTitle': 'P2P catch-up window',
   'data.syncWindowDesc':

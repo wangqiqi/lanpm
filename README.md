@@ -28,7 +28,7 @@
 
 ## ✨ One line
 
-**LanPM** is a **decentralized LAN/VPN collaboration desktop app** — instant messaging, project management (Kanban / task tree / Gantt), and file sharing in **one window**, with **no central server** and **data that stays on your network**.
+**LanPM** is a **decentralized LAN/VPN collaboration desktop app** — instant messaging, project management (Kanban / task tree / Gantt / calendar), group whiteboard, and file sharing in **one window**, with **no central server** and **data that stays on your network**.
 
 ---
 
@@ -37,16 +37,16 @@
 <p align="center">
   <img src="assets/chat.png" alt="LanPM chat — member list, messages, and bottom navigation" width="920" />
 </p>
-<p align="center"><sub><b>Chat</b> — group &amp; DM, members, code highlights, five-tab shell</sub></p>
+<p align="center"><sub><b>Chat</b> — group &amp; DM, members, code highlights, seven-tab shell</sub></p>
 
 <table>
   <tr>
-    <td width="50%"><img src="assets/kanban.png" alt="KanPM Kanban board with columns and task cards" width="100%" /></td>
+    <td width="50%"><img src="assets/kanban.png" alt="LanPM Kanban board with columns and task cards" width="100%" /></td>
     <td width="50%"><img src="assets/gantt.png" alt="LanPM Gantt chart timeline" width="100%" /></td>
   </tr>
   <tr>
-    <td align="center"><sub><b>Board</b> — drag columns, family colors, schedule health</sub></td>
-    <td align="center"><sub><b>Gantt</b> — timeline, dependencies, milestones</sub></td>
+    <td align="center"><sub><b>Board</b> — drag columns, family colors, tags &amp; schedule health</sub></td>
+    <td align="center"><sub><b>Gantt</b> — timeline, dependencies, milestones, export</sub></td>
   </tr>
   <tr>
     <td width="50%"><img src="assets/task-tree.png" alt="LanPM hierarchical task tree" width="100%" /></td>
@@ -61,7 +61,7 @@
 <p align="center">
   <img src="assets/export-gantt.png" alt="LanPM Gantt export to PNG or PDF" width="720" />
 </p>
-<p align="center"><sub><b>Gantt export</b> — PNG / PDF from the chart view</sub></p>
+<p align="center"><sub><b>Gantt export</b> — PNG / PDF from the chart view · <i>also in-app: Calendar (month/week) · Whiteboard (Excalidraw realtime)</i></sub></p>
 
 ---
 
@@ -69,66 +69,75 @@
 
 | Pain today | LanPM answer |
 |------------|----------------|
-| IM tools don’t do real project views | **5 views in one shell**: Chat · Board · Tree · Gantt · Files |
+| IM tools don’t do real project views | **7 views in one shell**: Chat · Board · Tree · Gantt · Calendar · Whiteboard · Files |
 | Project tools need cloud & accounts | **Peer-to-peer in the group** — discover nodes on the LAN, sync in-group |
 | Sensitive files forced through SaaS | **Local-first SQLite**, encrypted transport, **LibreOffice preview on device** |
-| “FeiQ / Feige” feel but no tasks | **Familiar IM UX** plus boards, dependencies, cockpit for leads |
+| “FeiQ / Feige” feel but no tasks | **Familiar IM UX** plus boards, calendar, whiteboard, dependencies, cockpit |
 
 ```
-   ┌──────────────────────────────────────────────────────────────┐
-   │  IM (FeiQ-style)  +  PM (Board / Tree / Gantt)  +  Files   │
-   │              +  Leadership cockpit  +  AI assist (opt-in)   │
-   │                                                              │
-   │     Core business data syncs inside the LAN — not to cloud   │
-   └──────────────────────────────────────────────────────────────┘
+   ┌──────────────────────────────────────────────────────────────────┐
+   │  IM  +  PM (Board / Tree / Gantt / Calendar)  +  Whiteboard      │
+   │              +  Files  +  Leadership cockpit  +  AI (opt-in)     │
+   │                                                                  │
+   │     Core business data syncs inside the LAN — not to cloud       │
+   └──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 🚀 Features
 
-### 💬 Communication that teams actually use
+### 💬 Communication
 
 - Group & DM, **@mentions**, read receipts, desktop notifications  
-- **Syntax-highlighted code** blocks, attachments, **`/task`** to create work from chat, **`#`** to reference tasks  
-- **7-day offline catch-up** for chat messages (paginated batches), **tasks/dependencies**, and **read receipts**  
-- Chat history **load-more** beyond the initial 200 messages  
-- Failed sends mark **`failed`**, auto-retry with backoff, and a bubble **Retry** action  
-- Task/file sync publish failures log in main and show a light toast (offline early-return stays quiet)  
-- Task/dependency LWW ties break on `senderDeviceId` (schema v3 `last_writer_device_id`)  
-- `/task` from chat rolls back the local task if the chat publish fails  
-- LAN **Discover** panel: join groups, ping online members, start DMs  
-- TopBar **group switcher**: search by name/pinyin, local pins, sort by recent message activity; chat page no longer duplicates the group title  
-- Owner **dissolve** publishes `member_event` so peers clear the group locally and see a toast  
-- **Avatars** render in TopBar, chat bubbles, and member lists (with color fallbacks)  
+- **Syntax-highlighted code** blocks, attachments, **`/task`** from chat, **`#`** task refs  
+- **Message ↔ task (A2)**: bubble → task; discuss from detail; link files to tasks  
+- **7-day offline catch-up** for chat (paginated), tasks/dependencies, read receipts  
+- Chat history **load-more**; failed sends mark **`failed`** with auto-retry + bubble **Retry**  
+- TopBar **Discover**: join groups, ping members, start DMs; **seed peers** for VPN / cross-subnet (A5)  
+- TopBar **group switcher**: name/pinyin search, pins, recent activity sort  
+- Owner **dissolve** clears peers via `member_event`; **avatars** in TopBar, bubbles, member lists  
 
-### 📋 Project management — three lenses, one truth
+### 📋 Project management
 
-- **Kanban**: drag columns, family colors, FS/SS/FF/SF dependency rules when moving cards  
-- **Task tree**: parent/child hierarchy, progress roll-up, cross-view “locate in board/Gantt”  
-- **Gantt**: timeline, milestones, dependency lines, cross-view highlight & scroll-to-task  
-- **Schedule health** (on track / behind / overdue) consistent across board, tree, Gantt, and cockpit  
+- **Kanban**: drag columns, family colors, FS/SS/FF/SF deps; **tags** (group dictionary, OR filter, palette)  
+- **Task tree**: parent/child, progress roll-up, locate in board/Gantt  
+- **Gantt**: timeline, milestones, dependency lines, zoom, PNG/PDF export  
+- **Calendar**: month/week (FullCalendar); **drag / resize to reschedule**; inferred windows for undated tasks  
+- **Schedule health** (on track / behind / overdue) aligned across board, tree, Gantt, cockpit  
+- **Acceptance checklist** on tasks; incomplete items → subtasks  
+- **Presence**: who is viewing a task; **description caret** awareness while co-editing  
+- **A1 nudge (v1.20.0)**: due today/overdue desktop reminders (toggle); `@assignee` alias in chat; **Nudge assignee** from task detail  
+- Nav badges: chat unread · board **mine-open** (todo/doing assigned to me) · weak recent-change dot  
 
-### 📁 Files without leaving the building
+### 🎨 Whiteboard
 
-- Upload/download over the group network, **resumable transfers** & queue (RC); **cancel / retry / rate·ETA** (A4 · **v1.19.0**)  
-- **LibreOffice local preview** for Office docs — preview stays on your machine  
-- Bookmarks & in-app WebView for team URLs  
-- **Deliverables (A3)**: filter by linked tasks, attach/detach files from the Files tab (`verify:project-files`)  
-- **Discover (A5)**: actionable empty/error hints + persistent seed peers for VPN / cross-subnet (`verify:discover-a5`)  
+- 7th tab: **Excalidraw** group board (one scene per group)  
+- **Realtime CRDT** + pointer awareness over P2P (no public room)  
+- Open from a task (linked); export PNG into the group file library  
 
-### 🏢 Built for real org shapes
+### 📁 Files
 
-- **Project**, **functional**, and **anonymous** group types — tabs adapt to what each group allows  
-- **Leadership cockpit**: portfolio view, reports, API keys for optional AI workflows  
-- **Multi-device identity**: one person, many machines; online if any device is up; optional **suffix** for duplicate display names  
-- **Light / dark** theme and **zh / en** UI  
+- Upload/download on the group network, **resumable** transfers & queue  
+- **Cancel / retry / rate · ETA** (A4 · v1.19.0)  
+- **LibreOffice local preview** for Office docs  
+- Bookmarks & in-app WebView  
+- **Deliverables (A3)**: filter by linked tasks; attach/detach from Files tab  
 
-### 🔒 Security & sovereignty (RC)
+### 🏢 Org shapes & identity
 
-- **AES-GCM** on the wire with ECDH key agreement (see [technical notes](./docs/02_技术实现建议.md))  
+- **Project**, **functional**, and **anonymous** groups — tabs adapt (calendar/whiteboard project-only)  
+- **Leadership cockpit**: portfolio, reports, optional AI API keys  
+- **Multi-device identity**: online if any device is up; optional display-name **suffix**  
+- **Light / dark** theme · **zh / en** UI  
+
+### 🔒 Security & shipping
+
+- **AES-GCM** on the wire with ECDH (see [technical notes](./docs/02_技术实现建议.md))  
 - No mandatory cloud; optional AI can use **redacted** outbound calls  
-- Automated **verify:m7** regression suite for release confidence  
+- **Cross-platform packages**: Win / macOS / Linux × **x64 + arm64** (`docs/07`, `verify:platform-matrix`)  
+- **`npm run verify:m7`** full RC regression before release  
+- Plugin **load-boundary** designed (SPIKE); loader not shipped yet  
 
 ---
 
@@ -183,6 +192,7 @@ npm run verify:platform-matrix  # Win/mac/Linux × x64+arm64 wiring
 |-------|----------------|
 | Browser UI stub only | `npm run dev:web` — **Electron is the source of truth** for IPC & SQLite |
 | Visual consistency gate | `npm run verify:visual` (see [docs/06](./docs/06_验收与里程碑计划.md) §2.6) |
+| Feature verifiers | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
 | Cross-platform packages | `dist:win` / `dist:mac` / `dist:linux` (+ `:x64` / `:arm64`); matrix in [docs/07](./docs/07_跨平台发版矩阵.md) |
 | One-key menu | `./onekey_run.sh` → start / stop / status / build / check … |
 
@@ -205,10 +215,12 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Desktop | **Electron** |
 | UI | **React 18** + **TypeScript** + **Ant Design 5** |
 | State | **Zustand** · styling **CSS Modules** |
+| Calendar | **FullCalendar** (+ interaction for drag/resize) |
+| Whiteboard | **Excalidraw** + Yjs / `@mizuka-wu/y-excalidraw` |
 | Gantt | **gantt-task-react** |
-| Persistence (RC) | **SQLite** (single source of truth) |
-| Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3 + discover A5 + whiteboard realtime CRDT（**v1.17.0**）· cross-platform x64+arm64 matrix（**v1.18.0**）· transfer A4 + plugin load-boundary SPIKE（**v1.19.0**）· WebRTC · IndexedDB hot cache (post-RC) |
+| Persistence | **SQLite** (single source of truth) |
+| Sync | UDP discovery + TCP/P2P; task CRDT · whiteboard CRDT · AES-GCM transport |
+| Packaging | electron-builder — Win / macOS / Linux × x64 + arm64 |
 
 ---
 
@@ -219,9 +231,12 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | [docs/00 — Index](./docs/00_文档导航.md) | Navigation, traceability, decisions |
 | [docs/01 — PRD](./docs/01_产品需求文档.md) | Product requirements |
 | [docs/02 — Architecture](./docs/02_技术实现建议.md) | System design, networking |
-| [docs/04 — UI](./docs/04_交互与UI约定.md) | Layout, themes, components |
+| [docs/03 — Data & protocol](./docs/03_数据模型与协议草案.md) | Schema, sync messages |
+| [docs/04 — UI](./docs/04_交互与UI约定.md) | Layout, themes, seven-tab shell |
 | [docs/05 — Testing](./docs/05_测试与联调发布.md) | Vitest, verify:*, release QA |
 | [docs/06 — Milestones](./docs/06_验收与里程碑计划.md) | P0 acceptance & RC release gate |
+| [docs/07 — Platform matrix](./docs/07_跨平台发版矩阵.md) | Cross-platform build & CI |
+| [Feige / FeiQ mapping](./docs/飞鸽飞秋.md) | Feature parity notes vs classic LAN IM |
 
 ---
 
@@ -229,13 +244,16 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 
 | Milestone | Scope |
 |-----------|--------|
-| **M0–M1** | Scaffold, first-run setup, 5-view shell |
+| **M0–M1** | Scaffold, first-run setup, multi-view shell |
 | **M2–M5** | Chat, tasks, files, groups, cockpit |
 | **M6–M7** | Real network paths, perf & release gates |
+| **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.19.0` — transfer cancel/retry/ETA (A4) + plugin load-boundary SPIKE (`verify:transfer-a4` · `verify:plugin-spike`), plus prior platform matrix / A3 / A5 / whiteboard realtime CRDT / calendar drag / checklist / whiteboard / message↔task / tags / Presence. M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.19.0` — transfer cancel/retry/ETA (A4) + plugin load-boundary SPIKE. Unreleased: **A1 due nudge / @assignee** (`verify:a1-nudge`, target **1.20.0**). Prior highlights: platform matrix (1.18), A3/A5/whiteboard realtime (1.17), calendar drag (1.14), checklist (1.13), whiteboard + message↔task (1.12), calendar tab (1.10), tags / badges / Presence. M0–M7 closed in automation; true-device hand tests still deferred ([acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
+**Next (in progress / queue):** A1 due-date nudge & “@assignee” chase · plugin loader POC · form-js as purchasable plugin · member search (B2).
+
+**Later (P1+):** screen share, voice, mind maps, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 
 ---
 

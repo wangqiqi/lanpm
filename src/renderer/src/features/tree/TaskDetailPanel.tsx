@@ -48,6 +48,7 @@ import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import { whiteboardPathForTask } from '@renderer/features/whiteboard/whiteboardLink'
+import { buildAssigneeNudgeDraft } from '@shared/task/dueNudge'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -501,6 +502,30 @@ export default function TaskDetailPanel({
             style={{ width: '100%' }}
           />
         </label>
+      </div>
+
+      <div className={styles.detailField}>
+        <Button
+          size="small"
+          disabled={!assigneeUserId}
+          onClick={() => {
+            if (!assigneeUserId) {
+              message.warning(t('task.nudgeNoAssignee'))
+              return
+            }
+            const name = getMemberDisplayName(groupId, assigneeUserId) || assigneeUserId
+            navigate(groupViewPath(groupId, 'chat'), {
+              state: { composeDraft: buildAssigneeNudgeDraft(name) }
+            })
+          }}
+        >
+          {t('task.nudgeAssignee')}
+        </Button>
+        {!assigneeUserId ? (
+          <Text type="secondary" style={{ marginLeft: 8 }}>
+            {t('task.nudgeNoAssignee')}
+          </Text>
+        ) : null}
       </div>
 
       <label className={styles.detailField}>

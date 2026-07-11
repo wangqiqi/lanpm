@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { GroupMemberView } from '@shared/chat/members'
+import { orderMentionCandidates } from '@shared/chat/mentionOrder'
 
 export function useMentionSuggest(
   draft: string,
   members: GroupMemberView[],
   onPick: (displayName: string) => void,
-  onDismiss: () => void
+  onDismiss: () => void,
+  options?: { pinUserIds?: string[] }
 ): {
   query: string | null
   candidates: GroupMemberView[]
@@ -17,14 +19,12 @@ export function useMentionSuggest(
     return match ? match[1]!.toLowerCase() : null
   }, [draft])
 
+  const pinUserIds = options?.pinUserIds
+
   const candidates = useMemo(() => {
     if (query === null) return []
-    return members.filter((m) => {
-      const name = m.displayName.toLowerCase()
-      const id = m.userId.toLowerCase()
-      return name.includes(query) || id.includes(query)
-    })
-  }, [members, query])
+    return orderMentionCandidates(members, query, { pinUserIds })
+  }, [members, query, pinUserIds])
 
   const [activeIndex, setActiveIndex] = useState(0)
 

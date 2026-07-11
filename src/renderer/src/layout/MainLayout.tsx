@@ -3,6 +3,7 @@ import { Outlet, useLocation, useParams } from 'react-router-dom'
 import TopBar from '@renderer/layout/TopBar'
 import BottomNav from '@renderer/layout/BottomNav'
 import { useChatNotifications } from '@renderer/features/chat/useChatNotifications'
+import { useDueTaskNotifications } from '@renderer/features/task/useDueTaskNotifications'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import styles from './MainLayout.module.css'
@@ -15,6 +16,7 @@ export default function MainLayout(): React.ReactElement {
   const whiteboardZen = useUiStore((s) => s.whiteboardZen)
 
   useChatNotifications()
+  useDueTaskNotifications()
 
   useEffect(() => {
     if (!/\/whiteboard$/.test(location.pathname) && whiteboardZen) {

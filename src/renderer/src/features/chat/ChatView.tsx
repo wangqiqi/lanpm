@@ -253,11 +253,25 @@ export default function ChatView(): React.ReactElement {
     [draft, taskAllowed]
   )
 
+  const assigneePinIds = useMemo(() => {
+    const ids: string[] = []
+    const seen = new Set<string>()
+    for (const task of tasks) {
+      if (task.deletedAt || task.status === 'done') continue
+      const id = task.assigneeUserId
+      if (!id || seen.has(id)) continue
+      seen.add(id)
+      ids.push(id)
+    }
+    return ids
+  }, [tasks])
+
   const { candidates, activeIndex, handleKeyDown: handleMentionKeyDown } = useMentionSuggest(
     draft,
     members,
     insertMention,
-    dismissMention
+    dismissMention,
+    { pinUserIds: assigneePinIds }
   )
 
   const {

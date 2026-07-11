@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Added
+- **SPRINT-A1-NUDGE（TASK-279–283）**：任务到期桌面提醒（可关）· 聊天 `@负责人` 别名置顶 · 详情「催办负责人」预填群聊；`verify:a1-nudge`。
+
+### Changed
+- **README / README.zh-CN**：对齐当前产品面 — 七视图（含日历、白板）、A2–A5 / Presence / 标签 / 清单 / 跨平台矩阵；技术栈与路线图去重；补 docs/03·07 与飞鸽对照入口。
+
 ## [1.19.0] - 2026-07-11
 
 ### Added
