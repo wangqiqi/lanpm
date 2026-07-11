@@ -175,6 +175,7 @@ export type MessageKey =
   | 'board.tags'
   | 'board.tagsPlaceholder'
   | 'board.tagsHint'
+  | 'board.tagsEmptyDictHint'
   | 'board.tagFilter'
   | 'board.tagFilterPlaceholder'
   | 'board.tagFilterEmpty'

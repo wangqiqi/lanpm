@@ -1,6 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import type { CreateTaskInput, Task, TaskPriority, TaskStatus, UpdateTaskInput } from '../../../shared/task/types'
-import { normalizeTaskTags } from '../../../shared/task/tags.ts'
+import { filterTagsToGroupDict, normalizeTaskTags } from '../../../shared/task/tags.ts'
+import { listGroupTagMeta } from './groupTagMetaRepository.ts'
 import { clampProgressPercent } from '../../../shared/task/validation.ts'
 import { lwwShouldApply } from '../../../shared/sync/lww.ts'
 import { getMeta } from './syncMetaRepository.ts'
@@ -46,6 +47,16 @@ function parseTagsJson(raw: string | null | undefined): string[] | undefined {
 function tagsToJson(tags: string[] | undefined): string {
   const normalized = normalizeTaskTags(tags ?? [])
   return JSON.stringify(normalized)
+}
+
+/** Persist only dictionary tags (empty dict → []). */
+function coerceTagsForGroup(
+  db: Database,
+  groupId: string,
+  tags: string[] | undefined
+): string[] | undefined {
+  const filtered = filterTagsToGroupDict(tags ?? [], listGroupTagMeta(db, groupId))
+  return filtered.length > 0 ? filtered : undefined
 }
 
 function rowToTask(row: TaskRow): Task {
@@ -173,7 +184,7 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
     otherReason: task.otherReason ?? null,
     priority: task.priority,
     assigneeUserId: task.assigneeUserId ?? null,
-    tagsJson: tagsToJson(task.tags),
+    tagsJson: tagsToJson(coerceTagsForGroup(db, task.groupId, task.tags)),
     progressPercent: task.progressPercent,
     startDate: task.startDate ?? null,
     endDate: task.endDate ?? null,
@@ -205,10 +216,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
           : existing.assigneeUserId,
     tags:
       input.tags !== undefined
-        ? (() => {
-            const normalized = normalizeTaskTags(input.tags)
-            return normalized.length > 0 ? normalized : undefined
-          })()
+        ? coerceTagsForGroup(db, existing.groupId, input.tags)
         : existing.tags,
     progressPercent:
       input.progressPercent !== undefined

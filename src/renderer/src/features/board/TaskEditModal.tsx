@@ -17,10 +17,11 @@ import {
   TASK_OTHER_REASON_MAX_LENGTH,
   validateTaskForm
 } from '@shared/task/validation'
-import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
+import { filterTagsToGroupDict, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import RemoteCaretOverlay from '@renderer/features/task/RemoteCaretOverlay'
 import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescriptionCaretBroadcast'
+import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import awarenessStyles from '@renderer/features/task/taskAwareness.module.css'
 
@@ -57,6 +58,16 @@ export default function TaskEditModal({
   const { t } = useI18n()
   const { message } = useLanpmApp()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
+  const tagMetaRows = useGroupTagStore((s) => s.byGroup[groupId] ?? [])
+  const tagOptions = useMemo(
+    () =>
+      tagMetaRows.map((row) => ({
+        value: row.label?.trim() || row.tagKey,
+        label: row.label?.trim() || row.tagKey
+      })),
+    [tagMetaRows]
+  )
+  const dictEmpty = tagMetaRows.length === 0
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -91,6 +102,11 @@ export default function TaskEditModal({
   )
   const descHostRef = useRef<HTMLDivElement>(null)
   const [descTextarea, setDescTextarea] = useState<HTMLTextAreaElement | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    void useGroupTagStore.getState().ensureImported(groupId)
+  }, [open, groupId])
 
   useEffect(() => {
     if (!task) return
@@ -155,7 +171,7 @@ export default function TaskEditModal({
         status,
         otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
-        tags: normalizeTaskTags(tags),
+        tags: filterTagsToGroupDict(tags, tagMetaRows),
         assigneeUserId: assigneeUserId || null,
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
@@ -242,18 +258,21 @@ export default function TaskEditModal({
             {t('board.tags')}
           </div>
           <Select
-            mode="tags"
+            mode="multiple"
             value={tags}
-            onChange={(next) => setTags(normalizeTaskTags(next))}
-            tokenSeparators={[',']}
-            placeholder={t('board.tagsPlaceholder')}
+            onChange={(next) => setTags(filterTagsToGroupDict(next, tagMetaRows))}
+            options={tagOptions}
+            placeholder={
+              dictEmpty ? t('board.tagsEmptyDictHint') : t('board.tagsPlaceholder')
+            }
             maxTagCount={TASK_TAGS_MAX_COUNT}
-            maxTagTextLength={TASK_TAG_MAX_LENGTH}
             style={{ width: '100%' }}
-            open={false}
+            disabled={dictEmpty}
+            showSearch
+            optionFilterProp="label"
           />
           <div style={{ marginTop: 4, fontSize: 11, color: 'var(--lanpm-text-tertiary)' }}>
-            {t('board.tagsHint')}
+            {dictEmpty ? t('board.tagsEmptyDictHint') : t('board.tagsHint')}
           </div>
         </label>
 

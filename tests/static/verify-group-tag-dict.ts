@@ -79,4 +79,41 @@ assert.match(store, /wireGroupTagPush/)
 const types = readFileSync(join(projectRoot, 'src/shared/network/types.ts'), 'utf8')
 assert.match(types, /group_tag_patch/)
 
-console.log('verify:group-tag-dict OK (protocol · schema v6 · sync · UI wiring)')
+// SPRINT-FORCE-DICT-TAGS — persist/UI only allow dictionary tags
+const tagsShared = readFileSync(join(projectRoot, 'src/shared/task/tags.ts'), 'utf8')
+assert.match(tagsShared, /filterTagsToGroupDict/)
+
+const taskService = readFileSync(join(projectRoot, 'src/main/task/taskService.ts'), 'utf8')
+assert.match(taskService, /filterTagsToGroupDict/)
+assert.match(taskService, /dictFilteredTags/)
+
+const taskRepo = readFileSync(join(projectRoot, 'src/main/storage/repositories/taskRepository.ts'), 'utf8')
+assert.match(taskRepo, /coerceTagsForGroup/)
+assert.match(taskRepo, /filterTagsToGroupDict/)
+
+const stub = readFileSync(
+  join(projectRoot, 'src/renderer/src/platform/browserLanpmStub.ts'),
+  'utf8'
+)
+assert.match(stub, /filterTagsToGroupDict/)
+
+const editModal = readFileSync(
+  join(projectRoot, 'src/renderer/src/features/board/TaskEditModal.tsx'),
+  'utf8'
+)
+assert.match(editModal, /mode="multiple"/)
+assert.match(editModal, /filterTagsToGroupDict/)
+assert.doesNotMatch(editModal, /mode="tags"/)
+
+const detailPanel = readFileSync(
+  join(projectRoot, 'src/renderer/src/features/tree/TaskDetailPanel.tsx'),
+  'utf8'
+)
+assert.match(detailPanel, /mode="multiple"/)
+assert.match(detailPanel, /filterTagsToGroupDict/)
+assert.doesNotMatch(detailPanel, /mode="tags"/)
+
+const zh = readFileSync(join(projectRoot, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
+assert.match(zh, /board\.tagsEmptyDictHint/)
+
+console.log('verify:group-tag-dict OK (protocol · schema v6 · sync · UI · force-dict)')

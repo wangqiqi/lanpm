@@ -13,6 +13,7 @@ import {
   validateTaskDateRange,
   validateTaskTitle
 } from '../../shared/task/validation'
+import { filterTagsToGroupDict } from '../../shared/task/tags'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
@@ -28,6 +29,7 @@ import {
   softDeleteTask,
   updateTaskRow
 } from '../storage/repositories/taskRepository'
+import { listGroupTagMeta } from '../storage/repositories/groupTagMetaRepository'
 import {
   listDependenciesByGroup,
   removeDependency,
@@ -52,6 +54,16 @@ function assertTaskWritable(db: Database, groupId: string): void {
 
 function broadcastTasksChanged(groupId: string): void {
   broadcastToAllWindows(TASK_PUSH_CHANNEL, groupId)
+}
+
+function dictFilteredTags(
+  db: Database,
+  groupId: string,
+  tags: string[] | undefined | null
+): string[] | undefined {
+  const meta = listGroupTagMeta(db, groupId)
+  const filtered = filterTagsToGroupDict(tags ?? [], meta)
+  return filtered.length > 0 ? filtered : undefined
 }
 
 export function listGroupTasks(db: Database, groupId: string): Task[] {
@@ -85,6 +97,7 @@ export function createGroupTask(db: Database, input: CreateTaskInput): Task {
     status.user.userId,
     taskId
   )
+  task.tags = dictFilteredTags(db, input.groupId, task.tags)
   task.sortOrder = getMaxSortOrderInColumn(db, input.groupId, task.status) + 1
 
   const reasonErr = validateOtherReason(task.status, task.otherReason)
@@ -129,6 +142,9 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
     ...(input.title !== undefined ? { title: normalizeTaskTitle(input.title) } : {}),
     ...(input.progressPercent !== undefined
       ? { progressPercent: clampProgressPercent(input.progressPercent) }
+      : {}),
+    ...(input.tags !== undefined
+      ? { tags: dictFilteredTags(db, existing.groupId, input.tags) }
       : {})
   }
 

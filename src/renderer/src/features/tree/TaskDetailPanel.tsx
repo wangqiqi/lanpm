@@ -32,7 +32,7 @@ import {
   normalizeTaskTitle,
   validateTaskForm
 } from '@shared/task/validation'
-import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
+import { filterTagsToGroupDict, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import TaskTagChip from '@renderer/features/task/TaskTagChip'
 import RemoteCaretOverlay from '@renderer/features/task/RemoteCaretOverlay'
 import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescriptionCaretBroadcast'
@@ -100,6 +100,15 @@ export default function TaskDetailPanel({
     () => groupTagMetaToColorMap(tagMetaRows),
     [tagMetaRows]
   )
+  const tagOptions = useMemo(
+    () =>
+      tagMetaRows.map((row) => ({
+        value: row.label?.trim() || row.tagKey,
+        label: row.label?.trim() || row.tagKey
+      })),
+    [tagMetaRows]
+  )
+  const dictEmpty = tagMetaRows.length === 0
   const ensureImported = useGroupTagStore((s) => s.ensureImported)
   const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[groupId] ?? [])
   const remoteCarets = useMemo(
@@ -229,7 +238,7 @@ export default function TaskDetailPanel({
         otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
         assigneeUserId: assigneeUserId || null,
-        tags: normalizeTaskTags(tags),
+        tags: filterTagsToGroupDict(tags, tagMetaRows),
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
         progressPercent: clampProgressPercent(progressPercent),
@@ -322,18 +331,21 @@ export default function TaskDetailPanel({
       <label className={styles.detailField}>
         <Text type="secondary">{t('board.tags')}</Text>
         <Select
-          mode="tags"
+          mode="multiple"
           value={tags}
-          onChange={(next) => setTags(normalizeTaskTags(next))}
-          tokenSeparators={[',']}
-          placeholder={t('board.tagsPlaceholder')}
+          onChange={(next) => setTags(filterTagsToGroupDict(next, tagMetaRows))}
+          options={tagOptions}
+          placeholder={
+            dictEmpty ? t('board.tagsEmptyDictHint') : t('board.tagsPlaceholder')
+          }
           maxTagCount={TASK_TAGS_MAX_COUNT}
-          maxTagTextLength={TASK_TAG_MAX_LENGTH}
           style={{ width: '100%' }}
-          open={false}
+          disabled={dictEmpty}
+          showSearch
+          optionFilterProp="label"
         />
         <Text type="secondary" style={{ fontSize: 11 }}>
-          {t('board.tagsHint')}
+          {dictEmpty ? t('board.tagsEmptyDictHint') : t('board.tagsHint')}
         </Text>
         {tags.length > 0 ? (
           <div className={styles.tagChipRow}>

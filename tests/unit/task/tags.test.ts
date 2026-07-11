@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   collectUniqueTaskTags,
+  filterTagsToGroupDict,
   filterTasksByTags,
   isValidTaskTag,
   normalizeTaskTags,
@@ -98,5 +99,24 @@ describe('tagColorHash / resolveTagColor', () => {
 
   it('exposes taskTagKey', () => {
     expect(taskTagKey('  Foo ')).toBe('foo')
+  })
+})
+
+describe('filterTagsToGroupDict (TASK-210)', () => {
+  it('returns empty when dict is empty', () => {
+    expect(filterTagsToGroupDict(['a', 'b'], [])).toEqual([])
+  })
+
+  it('keeps only dict keys and uses dict label casing', () => {
+    expect(
+      filterTagsToGroupDict(['api', 'orphan', 'UI'], [
+        { tagKey: 'api', label: 'API' },
+        { tagKey: 'ui', label: 'UI' }
+      ])
+    ).toEqual(['API', 'UI'])
+  })
+
+  it('drops all when none match', () => {
+    expect(filterTagsToGroupDict(['x'], [{ tagKey: 'api', label: 'API' }])).toEqual([])
   })
 })

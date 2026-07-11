@@ -1,6 +1,7 @@
 /**
  * Board independent tags (DOC-F-02 / TASK-171).
  * Multi-tag string[] alongside priority — normalize before persist/UI.
+ * SPRINT-FORCE-DICT-TAGS: persist only tags present in group_tag_meta (see filterTagsToGroupDict).
  */
 
 /** Max Unicode code units per single tag after trim. */
@@ -31,6 +32,48 @@ export function normalizeTaskTags(input: unknown): string[] {
     if (out.length >= TASK_TAGS_MAX_COUNT) break
   }
 
+  return out
+}
+
+/** Dict entry shape for force-filter (tagKey + optional display label). */
+export type GroupDictTagLike = {
+  tagKey: string
+  label?: string
+}
+
+/**
+ * Keep only tags that exist in the group dictionary.
+ * Empty dict → []; matching uses case-insensitive key; output uses dict label casing.
+ */
+export function filterTagsToGroupDict(
+  tags: unknown,
+  dict: readonly GroupDictTagLike[]
+): string[] {
+  const normalized = normalizeTaskTags(tags)
+  if (dict.length === 0) return []
+
+  const byKey = new Map<string, string>()
+  for (const d of dict) {
+    if (typeof d.tagKey !== 'string') continue
+    const key = taskTagKey(d.tagKey)
+    if (!key) continue
+    const labelRaw =
+      typeof d.label === 'string' && d.label.trim() ? d.label.trim() : d.tagKey.trim()
+    const label = labelRaw.slice(0, TASK_TAG_MAX_LENGTH) || key
+    if (!byKey.has(key)) byKey.set(key, label)
+  }
+  if (byKey.size === 0) return []
+
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const tag of normalized) {
+    const key = taskTagKey(tag)
+    const canonical = byKey.get(key)
+    if (!canonical || seen.has(key)) continue
+    seen.add(key)
+    out.push(canonical)
+    if (out.length >= TASK_TAGS_MAX_COUNT) break
+  }
   return out
 }
 

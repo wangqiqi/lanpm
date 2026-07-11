@@ -24,7 +24,7 @@ import {
   validateTaskDateRange,
   validateTaskTitle
 } from '@shared/task/validation'
-import { normalizeTaskTags } from '@shared/task/tags'
+import { filterTagsToGroupDict } from '@shared/task/tags'
 import { countMineOpenTasks } from '@shared/badge/mineOpen'
 import type { GroupTagMeta } from '@shared/task/groupTagMeta'
 import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta'
@@ -93,7 +93,7 @@ function stubCreateTask(input: CreateTaskInput): Task {
   const title = normalizeTaskTitle(input.title)
   const prev = readAllTasks()[input.groupId] ?? []
   const taskStatus = input.status ?? 'todo'
-  const tags = normalizeTaskTags(input.tags ?? [])
+  const tags = filterTagsToGroupDict(input.tags ?? [], stubGroupTags[input.groupId] ?? [])
   const task: Task = {
     taskId: `task_${crypto.randomUUID()}`,
     groupId: input.groupId,
@@ -160,8 +160,11 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
     tags:
       input.tags !== undefined
         ? (() => {
-            const normalized = normalizeTaskTags(input.tags)
-            return normalized.length > 0 ? normalized : undefined
+            const filtered = filterTagsToGroupDict(
+              input.tags,
+              stubGroupTags[groupId] ?? []
+            )
+            return filtered.length > 0 ? filtered : undefined
           })()
         : existing.tags,
     progressPercent:

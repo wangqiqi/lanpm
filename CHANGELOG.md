@@ -5,6 +5,10 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-FORCE-DICT-TAGS 收尾 (TASK-213)**：`verify:group-tag-dict` 断言强制字典；docs/03·04；归档；可 handoff `/release` **1.9.0**。
+- **标签强制字典 UI (TASK-212)**：`TaskEditModal` / `TaskDetailPanel` 改为 `Select mode="multiple"` + 字典 options；空字典提示。
+- **标签强制过滤主路径 (TASK-211)**：create/update（main · repo · stub）经 `filterTagsToGroupDict`；空字典→空 tags。
+- **标签强制字典契约 (TASK-210)**：`filterTagsToGroupDict` + 单测。
 - **SPRINT-BADGE-WEAK-HINT 收尾 (TASK-209)**：扩展 `verify:badge-semantics`；docs/03·04 弱红点语义；归档。
 - **看板弱红点 UI (TASK-208)**：BottomNav 数字优先，否则 `Badge` `dot`；进入看板 mark seen。
 - **弱红点桥接 (TASK-207)**：`boardLatestUpdatedAt` Stub/store；本机 `lastBoardSeenAt`。
