@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Dropdown,
   Popover,
@@ -89,7 +89,9 @@ export default function TopBar(): React.ReactElement {
   const networkLoading = useNetworkStore((s) => s.loading)
   const [manualPeerOpen, setManualPeerOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [netDotPulse, setNetDotPulse] = useState(false)
   const [lastActivity, setLastActivity] = useState<Record<string, string>>({})
+  const prevLinkStateRef = useRef<string | undefined>(undefined)
   const pinnedIds = useGroupPinStore((s) => s.pinnedIds)
   const togglePin = useGroupPinStore((s) => s.togglePin)
   const isPinned = useGroupPinStore((s) => s.isPinned)
@@ -110,6 +112,17 @@ export default function TopBar(): React.ReactElement {
   useEffect(() => {
     refreshGroupActivity()
   }, [activeGroupId, groups])
+
+  useEffect(() => {
+    const next = networkStatus?.linkState
+    if (next === undefined) return
+    const prev = prevLinkStateRef.current
+    prevLinkStateRef.current = next
+    if (prev === undefined || prev === next) return
+    setNetDotPulse(true)
+    const t = window.setTimeout(() => setNetDotPulse(false), 420)
+    return () => window.clearTimeout(t)
+  }, [networkStatus?.linkState])
 
   const networkTooltip = networkStatus
     ? t(
@@ -494,7 +507,7 @@ export default function TopBar(): React.ReactElement {
               }}
             >
               <span
-                className={`${styles.netDot} ${styles[`net_${networkStatus?.linkState ?? 'offline'}`]}`}
+                className={`${styles.netDot} ${styles[`net_${networkStatus?.linkState ?? 'offline'}`]} ${netDotPulse ? styles.netDotPulse : ''}`}
               />
             </RegionButton>
           </Tooltip>
