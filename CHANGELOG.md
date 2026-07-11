@@ -4,9 +4,14 @@
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-07-11
+
 ### Added
-- **SPRINT-PLUGIN-SPIKE（SPIKE-276–278）**：插件加载边界与扩展点拍板 — `PluginManifest` / Slot / 能力白名单 stub；安全红线；form-js 走可购插件不进核心；`verify:plugin-spike`。
 - **SPRINT-A4-TRANSFER-UX（TASK-270–275）**：传输取消 / 失败重试 / 速率·ETA；`cancelTransfer` IPC；活动队列取消按钮；历史重试；`verify:transfer-a4`。
+- **SPRINT-PLUGIN-SPIKE（SPIKE-276–278）**：插件加载边界与扩展点拍板 — `PluginManifest` / Slot / 能力白名单 stub；安全红线；form-js 走可购插件不进核心；`verify:plugin-spike`。
+
+### Release
+- `v1.19.0` — transfer A4 UX + plugin load-boundary SPIKE
 
 ## [1.18.0] - 2026-07-11
 

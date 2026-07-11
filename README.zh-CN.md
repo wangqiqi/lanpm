@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.18.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.19.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -111,7 +111,7 @@
 
 ### 📁 文件协作，数据不出楼
 
-- 群组内上传下载、**断点续传**与传输队列（RC）  
+- 群组内上传下载、**断点续传**与传输队列（RC）；**取消 / 重试 / 速率·ETA**（A4 · **v1.19.0**）  
 - **LibreOffice 本地转换预览** Office 文档，预览过程不离开本机  
 - 网址书签 + 应用内 WebView  
 - **交付物（A3）**：按任务筛选/挂接，文件 Tab 可挂到任务（`verify:project-files`）  
@@ -208,7 +208,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | 甘特 | **gantt-task-react** |
 | 持久化（RC） | **SQLite**（唯一持久化层） |
 | 网络（RC） | UDP 发现 + TCP/P2P 联调路径；应用层加密 |
-| 规划 | Yjs `task_crdt`（**v1.1.0**）· P2P 续传（**v1.2.0**）· 看板标签（**v1.3.0**）· Presence（**v1.4.0**）· 标签筛选（**v1.5.0**）· 群标签字典（**v1.6.0**）· 描述框 caret（**v1.7.0**）· 导航角标与我相关（**v1.8.0**）· 弱红点 + 强制字典标签（**v1.9.0**）· 任务日历（**v1.10.0**）· 白板 + 消息↔任务（**v1.12.0**）· 验收清单（**v1.13.0**）· 日历拖拽改期（**v1.14.0**）· 项目交付物 A3 + 发现加固 A5 + 白板实时 CRDT（**v1.17.0**）· 跨平台 x64+arm64 发版矩阵（**v1.18.0**）· WebRTC · IndexedDB（post-RC） |
+| 规划 | Yjs `task_crdt`（**v1.1.0**）· P2P 续传（**v1.2.0**）· 看板标签（**v1.3.0**）· Presence（**v1.4.0**）· 标签筛选（**v1.5.0**）· 群标签字典（**v1.6.0**）· 描述框 caret（**v1.7.0**）· 导航角标与我相关（**v1.8.0**）· 弱红点 + 强制字典标签（**v1.9.0**）· 任务日历（**v1.10.0**）· 白板 + 消息↔任务（**v1.12.0**）· 验收清单（**v1.13.0**）· 日历拖拽改期（**v1.14.0**）· 项目交付物 A3 + 发现加固 A5 + 白板实时 CRDT（**v1.17.0**）· 跨平台 x64+arm64 发版矩阵（**v1.18.0**）· 传输 A4 + 插件加载边界 SPIKE（**v1.19.0**）· WebRTC · IndexedDB（post-RC） |
 
 ---
 
@@ -233,7 +233,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M2–M5** | 聊天 / 任务 / 文件 / 群组 / 驾驶舱 |
 | **M6–M7** | 真网路径、性能与发布门禁 |
 
-**当前版本：** `1.18.0`（跨平台 x64+arm64 发版矩阵 · `docs/07` · `verify:platform-matrix`，以及既有 A3 交付物 / A5 发现加固 / 白板实时 CRDT / 日历拖拽 / 验收清单 / 白板 / 消息↔任务 / 标签 / Presence）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.19.0`（传输取消/重试/ETA A4 · 插件加载边界 SPIKE · `verify:transfer-a4` / `verify:plugin-spike`，以及既有跨平台矩阵 / A3 交付物 / A5 发现加固 / 白板实时 CRDT / 日历拖拽 / 验收清单 / 白板 / 消息↔任务 / 标签 / Presence）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、插件系统、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 
