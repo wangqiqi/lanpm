@@ -413,6 +413,8 @@ export type MessageKey =
   | 'chat.taskNotAllowed'
   | 'chat.taskCreated'
   | 'chat.taskCreateFailed'
+  | 'chat.createTaskFromMessage'
+  | 'chat.createTaskFromMessageEmpty'
   | 'chat.taskRefFailed'
   | 'chat.members'
   | 'chat.dmPeer'

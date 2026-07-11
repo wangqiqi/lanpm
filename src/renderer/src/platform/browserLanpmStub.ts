@@ -717,8 +717,14 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         throw stubError('stub.taskNotFound')
       },
-      createFromChat: async (groupId, title) => {
-        const task = stubCreateTask({ groupId, title, status: 'todo' })
+      createFromChat: async (groupId, title, options) => {
+        const task = stubCreateTask({
+          groupId,
+          title,
+          status: 'todo',
+          sourceMsgId: options?.sourceMsgId,
+          linkedFileIds: options?.linkedFileIds
+        })
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
           throw stubError('stub.identityRequired')

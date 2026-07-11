@@ -197,9 +197,16 @@ export function moveGroupTask(db: Database, input: MoveTaskInput): Task {
 export async function createTaskFromChat(
   db: Database,
   groupId: string,
-  title: string
+  title: string,
+  options?: { sourceMsgId?: string; linkedFileIds?: string[] }
 ): Promise<{ task: Task; message: ChatMessage }> {
-  const task = createGroupTask(db, { groupId, title, status: 'todo' })
+  const task = createGroupTask(db, {
+    groupId,
+    title,
+    status: 'todo',
+    sourceMsgId: options?.sourceMsgId,
+    linkedFileIds: options?.linkedFileIds
+  })
   let message: ChatMessage | undefined
   try {
     message = await publishChatMessage(db, groupId, 'task_ref', {

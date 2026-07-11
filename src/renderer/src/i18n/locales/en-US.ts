@@ -417,6 +417,8 @@ const enUS = {
   'chat.taskNotAllowed': 'Tasks cannot be created in this group',
   'chat.taskCreated': 'Task created. View it on the board.',
   'chat.taskCreateFailed': 'Failed to create task',
+  'chat.createTaskFromMessage': 'Create task',
+  'chat.createTaskFromMessageEmpty': 'Cannot derive a title from this message',
   'chat.taskRefFailed': 'Failed to reference task',
   'chat.members': 'Members',
   'chat.memberProfileTitle': 'Member profile',

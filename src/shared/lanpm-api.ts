@@ -76,7 +76,8 @@ export interface LanpmApi {
     moveTask: (input: MoveTaskInput) => Promise<Task>
     createFromChat: (
       groupId: string,
-      title: string
+      title: string,
+      options?: { sourceMsgId?: string; linkedFileIds?: string[] }
     ) => Promise<{ task: Task; message: ChatMessage }>
     referenceFromChat: (
       groupId: string,

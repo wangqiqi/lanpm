@@ -40,6 +40,9 @@ interface MessageBubbleProps {
   onDmSender?: (member: GroupMemberView) => void
   onRecall?: (msgId: string) => void
   onRetrySend?: (msgId: string) => void
+  /** Project group only — one-click create task from this message */
+  taskCreateAllowed?: boolean
+  onCreateTaskFromMessage?: (message: ChatMessage) => void
 }
 
 export default function MessageBubble({
@@ -58,7 +61,9 @@ export default function MessageBubble({
   onViewSender,
   onDmSender,
   onRecall,
-  onRetrySend
+  onRetrySend,
+  taskCreateAllowed = false,
+  onCreateTaskFromMessage
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const theme = useUiStore((s) => s.theme)
@@ -118,20 +123,39 @@ export default function MessageBubble({
     return { items }
   }, [own, senderName, senderMember, dmAllowed, onDmSender, onMentionSender, onViewSender, t])
 
-  const ownMenu: MenuProps = useMemo(() => {
-    if (!own || !currentUserId || !onRecall || !canRecallMessage(message, currentUserId)) {
-      return { items: [] }
+  const createTaskItem = useMemo((): NonNullable<MenuProps['items']>[number] | null => {
+    if (!taskCreateAllowed || !onCreateTaskFromMessage) return null
+    if (
+      message.content.kind === 'recalled' ||
+      message.content.kind === 'system' ||
+      message.content.kind === 'task_ref'
+    ) {
+      return null
     }
     return {
-      items: [
-        {
-          key: 'recall',
-          label: t('chat.recallMessage'),
-          onClick: () => onRecall(message.msgId)
-        }
-      ]
+      key: 'createTask',
+      label: t('chat.createTaskFromMessage'),
+      onClick: () => onCreateTaskFromMessage(message)
     }
-  }, [own, currentUserId, onRecall, message, t])
+  }, [taskCreateAllowed, onCreateTaskFromMessage, message, t])
+
+  const ownMenu: MenuProps = useMemo(() => {
+    const items: MenuProps['items'] = []
+    if (own && currentUserId && onRecall && canRecallMessage(message, currentUserId)) {
+      items.push({
+        key: 'recall',
+        label: t('chat.recallMessage'),
+        onClick: () => onRecall(message.msgId)
+      })
+    }
+    if (createTaskItem) items.push(createTaskItem)
+    return { items }
+  }, [own, currentUserId, onRecall, message, t, createTaskItem])
+
+  const otherBubbleMenu: MenuProps = useMemo(() => {
+    if (!createTaskItem) return { items: [] }
+    return { items: [createTaskItem] }
+  }, [createTaskItem])
 
   const bubbleBody = (
     <>
@@ -232,12 +256,17 @@ export default function MessageBubble({
   }
 
   if (own) {
+    const hasOwnMenu = (ownMenu.items?.length ?? 0) > 0
     return (
       <div className={styles.messageRowOwn} data-own="1" data-msg-id={message.msgId}>
         <div className={styles.messageColOwn}>
-          <Dropdown menu={ownMenu} trigger={['contextMenu']}>
+          {hasOwnMenu ? (
+            <Dropdown menu={ownMenu} trigger={['contextMenu']}>
+              <div className={bubbleClass}>{bubbleBody}</div>
+            </Dropdown>
+          ) : (
             <div className={bubbleClass}>{bubbleBody}</div>
-          </Dropdown>
+          )}
           <div className={styles.status}>
             {formatTime(message.createdAt)}{' '}
             <span
@@ -261,6 +290,8 @@ export default function MessageBubble({
       </div>
     )
   }
+
+  const hasOtherBubbleMenu = (otherBubbleMenu.items?.length ?? 0) > 0
 
   return (
     <div
@@ -304,7 +335,13 @@ export default function MessageBubble({
             </div>
           </Dropdown>
         ) : null}
-        <div className={bubbleClass}>{bubbleBody}</div>
+        {hasOtherBubbleMenu ? (
+          <Dropdown menu={otherBubbleMenu} trigger={['contextMenu']}>
+            <div className={bubbleClass}>{bubbleBody}</div>
+          </Dropdown>
+        ) : (
+          <div className={bubbleClass}>{bubbleBody}</div>
+        )}
       </div>
     </div>
   )

@@ -51,10 +51,30 @@ export function registerTaskIpc(): void {
 
   ipcMain.handle(
     TASK_IPC.createFromChat,
-    (_event, groupId: string, title: string) => {
+    (
+      _event,
+      groupId: string,
+      title: string,
+      options?: { sourceMsgId?: string; linkedFileIds?: string[] }
+    ) => {
       if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
       if (typeof title !== 'string') throw new Error('title required')
-      return createTaskFromChat(getDatabase(), groupId, title)
+      if (options !== undefined && (typeof options !== 'object' || options === null)) {
+        throw new Error('options must be object')
+      }
+      if (
+        options?.sourceMsgId !== undefined &&
+        typeof options.sourceMsgId !== 'string'
+      ) {
+        throw new Error('sourceMsgId must be string')
+      }
+      if (
+        options?.linkedFileIds !== undefined &&
+        !Array.isArray(options.linkedFileIds)
+      ) {
+        throw new Error('linkedFileIds must be array')
+      }
+      return createTaskFromChat(getDatabase(), groupId, title, options)
     }
   )
 

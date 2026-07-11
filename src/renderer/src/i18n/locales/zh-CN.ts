@@ -415,6 +415,8 @@ const zhCN = {
   'chat.taskNotAllowed': '当前群组不支持创建任务',
   'chat.taskCreated': '任务已创建，可在看板查看',
   'chat.taskCreateFailed': '创建任务失败',
+  'chat.createTaskFromMessage': '建任务',
+  'chat.createTaskFromMessageEmpty': '无法从该消息提取标题',
   'chat.taskRefFailed': '引用任务失败',
   'chat.members': '成员',
   'chat.memberProfileTitle': '成员资料',

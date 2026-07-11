@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
 import { Button, Input, Segmented, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
@@ -23,6 +24,7 @@ import { groupViewPath } from '@renderer/routes/paths'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import type { Task } from '@shared/task/types'
+import { linkedFileIdsFromMessage, titleFromChatMessage } from '@shared/task/fromMessage'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -471,6 +473,28 @@ export default function ChatView(): React.ReactElement {
     [gid, taskAllowed, createFromChat, upsertMessage, t]
   )
 
+  const handleCreateTaskFromMessage = useCallback(
+    async (msg: ChatMessage) => {
+      if (!gid || !taskAllowed) return
+      const title = titleFromChatMessage(msg)
+      if (!title) {
+        message.warning(t('chat.createTaskFromMessageEmpty'))
+        return
+      }
+      try {
+        const { message: chatMsg } = await createFromChat(gid, title, {
+          sourceMsgId: msg.msgId,
+          linkedFileIds: linkedFileIdsFromMessage(msg)
+        })
+        upsertMessage(chatMsg)
+        message.success(t('chat.taskCreated'))
+      } catch (err) {
+        message.error(formatError(err, 'chat.taskCreateFailed'))
+      }
+    },
+    [gid, taskAllowed, createFromChat, upsertMessage, t, message, formatError]
+  )
+
   const handleSendCode = useCallback(
     async (code: string, languageHint: string) => {
       if (!gid) return
@@ -701,6 +725,8 @@ export default function ChatView(): React.ReactElement {
                         onDmSender={startDmWithMember}
                         onRecall={(msgId) => void handleRecall(msgId)}
                         onRetrySend={(msgId) => void handleRetrySend(msgId)}
+                        taskCreateAllowed={taskAllowed}
+                        onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
                       />
                     )
                   })}
