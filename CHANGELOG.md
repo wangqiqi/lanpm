@@ -4,12 +4,13 @@
 
 ## [Unreleased]
 
+## [1.26.0] - 2026-07-12
+
 ### Fixed
-- **Bundle 导出消息截断**：超过上限时按 **最新优先** 保留最近 N 条（不再丢掉最新、只留最旧）；明文与导出结果含 `messagesTruncated` 元数据，UI 警告提示（TASK-320）。
-- **Bundle 导入加固**：整包 SQLite 事务（失败回滚）；`conflictMode` 白名单；主进程口令至少 4 位（与 UI 对齐）（TASK-321）。
-- **Bundle `new_id` 外键**：导入前预建 task/msg/file ID 映射，重写 `parentTaskId` · `linkedFileIds` · `sourceMsgId` · `replyToMsgId` · checklist/白板关联（TASK-322）。
-- **任务进度 clamp**：`insertTask` / `buildTaskFromInput` / 读库 / 聚合 / 树内联统一 `clampProgressPercent`，防 NaN 与越界写入（TASK-323）。
-- **端口与插件默认**：`LANPM_TCP_PORT` 校验 1–65535 非法回退默认；未配置插件默认拒绝，仅官方 `lanpm.example` / `lanpm.formjs` 白名单默认启用（TASK-324）。
+- **SPRINT-B5-BOUNDARY（TASK-320–325）**：消化边界值/默认值审查 — bundle 导出**最新优先**+截断提示；导入 SQLite 事务 + `conflictMode` 白名单 + 口令≥4；`new_id` 外键重映射；进度全路径 clamp；`LANPM_TCP_PORT` 校验回退；插件未配置默认拒绝（官方白名单默认启用）。
+
+### Release
+- `v1.26.0` — B5 boundary / defaults harden
 
 ## [1.25.0] - 2026-07-11
 

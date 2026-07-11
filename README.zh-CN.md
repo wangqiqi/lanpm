@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.25.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.26.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -112,6 +112,7 @@
 - **B2 成员搜索**：看板按负责人拼音/关键词筛选、指派下拉可搜、聊天侧栏成员搜索（`verify:member-search`）  
 - **插件 loader + form-js POC**：发现 `plugins/*/plugin.json`；Host 能力代理；任务详情槽挂免费 stub + 可购 form-js schema POC（`verify:plugin-loader`）  
 - **插件启用 UI**：个人资料「扩展」Tab 启停官方插件；详情槽即时刷新（`verify:plugin-enable-ui`）  
+- **单群加密备份（B3+B5）**：`.lanpm-bundle` dry-run/覆盖；消息最新优先导出；导入事务 + 外键重映射；进度/端口/插件默认加固（`verify:bundle`）  
 - 底栏角标：聊天未读 · 看板 **与我相关未完成** · 近期变更弱红点  
 
 ### 🎨 协作白板
@@ -253,9 +254,9 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.22.0` — 插件 loader + form-js POC（`verify:plugin-loader`），B2 成员搜索（1.21）、A1 催办（1.20）、传输 A4 + 插件 SPIKE（1.19）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.26.0` — B5 边界值/默认值加固（`verify:bundle`）；B3 备份（1.25）、B4 outbox（1.24）、插件启用 UI（1.23）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
-**进行中 / 队列：** 插件市场 SPIKE。
+**进行中 / 队列：** 边界值 Minor 收尾 · 插件市场 SPIKE。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 
