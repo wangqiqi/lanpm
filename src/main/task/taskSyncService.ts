@@ -46,6 +46,7 @@ import {
 } from './groupTagSyncService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 import { enqueueFailedPublish } from '../sync/outboxEnqueue'
+import { initSyncOutboxFlush, shutdownSyncOutboxFlush } from '../sync/outboxFlushService'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -256,6 +257,7 @@ export function initTaskSyncService(db: Database): void {
     catchSyncFailure('taskSync.requestOffline', { notify: false })
   )
   wireTaskCrdtOfflineSync(db, broadcastTasksChanged)
+  initSyncOutboxFlush(db)
 }
 
 export function shutdownTaskSyncService(): void {
@@ -267,6 +269,7 @@ export function shutdownTaskSyncService(): void {
   setTaskCrdtOfflineTasksChangedHandler(null)
   setTaskAwarenessChangedHandler(null)
   setGroupTagMetaChangedHandler(null)
+  shutdownSyncOutboxFlush()
 }
 
 export function publishTaskUpsert(db: Database, task: Task): void {

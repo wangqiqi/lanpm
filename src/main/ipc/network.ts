@@ -6,12 +6,14 @@ import { parseHostPort } from '../../shared/network/manualPeer'
 import { connectManualPeer, fetchNetworkStatus, reconnectNetwork } from '../network'
 import { getGroupTabBadges } from '../badge/badgeService'
 import { getDatabase } from '../storage'
+import { requestSyncOutboxFlush } from '../sync/outboxFlushService'
 
 export function registerNetworkIpc(): void {
   ipcMain.handle(NETWORK_IPC.getStatus, () => fetchNetworkStatus())
 
   ipcMain.handle(NETWORK_IPC.reconnect, () => {
     reconnectNetwork(getDatabase())
+    requestSyncOutboxFlush()
     return fetchNetworkStatus()
   })
 
@@ -26,7 +28,10 @@ export function registerNetworkIpc(): void {
     } catch {
       throwLanpm('err.peerAddressInvalid')
     }
-    return connectManualPeer(host, port).then(() => fetchNetworkStatus())
+    return connectManualPeer(host, port).then(() => {
+      requestSyncOutboxFlush()
+      return fetchNetworkStatus()
+    })
   })
 }
 

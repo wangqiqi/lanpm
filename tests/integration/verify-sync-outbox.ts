@@ -110,4 +110,16 @@ const groupTag = readFileSync(join(root, 'src/main/task/groupTagSyncService.ts')
 assert.match(groupTag, /enqueueFailedPublish/)
 assert.match(groupTag, /channel: 'group_tag_patch'/)
 
+const flushSrc = readFileSync(join(root, 'src/main/sync/outboxFlushService.ts'), 'utf8')
+assert.match(flushSrc, /export async function flushSyncOutbox/)
+assert.match(flushSrc, /initSyncOutboxFlush/)
+assert.match(flushSrc, /requestSyncOutboxFlush/)
+
+const taskSyncInit = readFileSync(join(root, 'src/main/task/taskSyncService.ts'), 'utf8')
+assert.match(taskSyncInit, /initSyncOutboxFlush/)
+assert.match(taskSyncInit, /shutdownSyncOutboxFlush/)
+
+const netIpc = readFileSync(join(root, 'src/main/ipc/network.ts'), 'utf8')
+assert.match(netIpc, /requestSyncOutboxFlush/)
+
 console.log('verify:sync-outbox OK')
