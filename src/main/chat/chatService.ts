@@ -37,6 +37,10 @@ import {
   requestReadReceiptOfflineSync
 } from './readReceiptOfflineSyncService'
 import { initTaskSyncService, shutdownTaskSyncService } from '../task/taskSyncService'
+import {
+  initWhiteboardSyncService,
+  shutdownWhiteboardSyncService
+} from '../whiteboard/whiteboardSyncService'
 import { handleIncomingMemberEvent } from '../group/memberEventService'
 import { broadcastMessage } from './chatBroadcast'
 import { getNetworkTransport } from '../network'
@@ -156,6 +160,7 @@ export function initChatService(db: Database): void {
   ensureLocalRetentionMeta(db)
   initMessageRetentionScheduler(db)
   initTaskSyncService(db)
+  initWhiteboardSyncService(db)
   initFileSyncService(db)
   void requestOfflineSync(db).catch(() => undefined)
   void requestReadReceiptOfflineSync(db).catch(() => undefined)
@@ -164,6 +169,7 @@ export function initChatService(db: Database): void {
 export function shutdownChatService(): void {
   shutdownMessageRetentionScheduler()
   shutdownTaskSyncService()
+  shutdownWhiteboardSyncService()
   shutdownFileSyncService()
   shutdownGroupKeyService()
   shutdownReadReceiptService()

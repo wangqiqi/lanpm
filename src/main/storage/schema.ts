@@ -35,8 +35,9 @@ export const EXPECTED_TABLES = [
   'task_crdt_docs',
   'group_tag_meta',
   'whiteboard_scenes',
+  'whiteboard_crdt_docs',
   'task_checklists',
   'task_checklist_items'
 ] as const
 
-export const SCHEMA_VERSION = 9
+export const SCHEMA_VERSION = 10

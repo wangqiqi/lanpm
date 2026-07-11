@@ -132,6 +132,20 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `CREATE INDEX idx_checklist_items_checklist ON task_checklist_items(checklist_id)`
       )
     }
+  },
+  {
+    fromVersion: 9,
+    description: 'whiteboard_crdt_docs: per-group Yjs snapshot blob (TASK-259)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE whiteboard_crdt_docs (
+          group_id TEXT PRIMARY KEY,
+          doc_id TEXT NOT NULL,
+          update_blob BLOB NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+    }
   }
 ]
 

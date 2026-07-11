@@ -185,6 +185,14 @@ CREATE TABLE whiteboard_scenes (
   updated_at TEXT NOT NULL
 );
 
+-- 群级白板 Yjs 文档快照（whiteboard:{groupId}，TASK-259）
+CREATE TABLE whiteboard_crdt_docs (
+  group_id TEXT PRIMARY KEY,
+  doc_id TEXT NOT NULL,
+  update_blob BLOB NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
 -- 任务验收清单（P1-3 / TASK-235）：一任务一份清单
 CREATE TABLE task_checklists (
   checklist_id TEXT PRIMARY KEY,

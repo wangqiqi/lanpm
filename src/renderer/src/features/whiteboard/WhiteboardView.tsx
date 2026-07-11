@@ -5,6 +5,9 @@ import { Button as ExcalidrawButton, Excalidraw, exportToBlob } from '@excalidra
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types'
 import '@excalidraw/excalidraw/index.css'
+import { ExcalidrawBinding } from '@mizuka-wu/y-excalidraw'
+import * as Y from 'yjs'
+import { Awareness, applyAwarenessUpdate, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -14,6 +17,14 @@ import {
   emptyWhiteboardSceneJson,
   normalizeSceneJson
 } from '@shared/whiteboard/types'
+import {
+  WHITEBOARD_CRDT_ASSETS_KEY,
+  WHITEBOARD_CRDT_ELEMENTS_KEY,
+  applyWhiteboardEncodedUpdate,
+  createEmptyWhiteboardDoc,
+  seedWhiteboardDocFromSceneJson,
+  whiteboardDocToSceneJson
+} from '@shared/whiteboard/whiteboardCrdtModel'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import styles from './whiteboard.module.css'
 
@@ -22,6 +33,14 @@ type ScenePayload = {
   appState?: Partial<AppState>
   files?: BinaryFiles
 }
+
+const USER_COLORS = [
+  { color: '#30bced', light: '#30bced33' },
+  { color: '#6eeb83', light: '#6eeb8333' },
+  { color: '#ffbc42', light: '#ffbc4233' },
+  { color: '#ee6352', light: '#ee635233' },
+  { color: '#8acb88', light: '#8acb8833' }
+]
 
 function parseScenePayload(sceneJson: string): ScenePayload {
   try {
@@ -62,6 +81,25 @@ function serializeScene(
   )
 }
 
+function colorForUserId(userId: string): { color: string; light: string } {
+  let h = 0
+  for (let i = 0; i < userId.length; i++) h = (h * 31 + userId.charCodeAt(i)) >>> 0
+  return USER_COLORS[h % USER_COLORS.length]!
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!)
+  return btoa(binary)
+}
+
+function base64ToBytes(b64: string): Uint8Array {
+  const binary = atob(b64)
+  const out = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i)
+  return out
+}
+
 export default function WhiteboardView(): React.ReactElement {
   const { locale, t, formatError } = useI18n()
   const { message } = useLanpmApp()
@@ -78,6 +116,7 @@ export default function WhiteboardView(): React.ReactElement {
   const [linkedTaskId, setLinkedTaskId] = useState<string | undefined>()
   const [initialData, setInitialData] = useState<ScenePayload | null>(null)
   const [boardKey, setBoardKey] = useState(0)
+  const [collabReady, setCollabReady] = useState(false)
 
   const apiRef = useRef<ExcalidrawImperativeAPI | null>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -87,6 +126,11 @@ export default function WhiteboardView(): React.ReactElement {
     files: BinaryFiles
   } | null>(null)
   const linkedTaskIdRef = useRef<string | undefined>(undefined)
+  const docRef = useRef<Y.Doc | null>(null)
+  const awarenessRef = useRef<Awareness | null>(null)
+  const bindingRef = useRef<ExcalidrawBinding | null>(null)
+  const anonymousRef = useRef(true)
+  const applyingRemoteRef = useRef(false)
 
   const langCode = locale.startsWith('zh') ? 'zh-CN' : 'en'
 
@@ -95,12 +139,20 @@ export default function WhiteboardView(): React.ReactElement {
   }, [linkedTaskId])
 
   const flushSave = useCallback(async (): Promise<void> => {
-    if (!gid || !latestRef.current) return
+    if (!gid) return
     try {
-      const { elements, appState, files } = latestRef.current
+      let sceneJson: string
+      if (docRef.current && !anonymousRef.current) {
+        sceneJson = whiteboardDocToSceneJson(docRef.current)
+      } else if (latestRef.current) {
+        const { elements, appState, files } = latestRef.current
+        sceneJson = serializeScene(elements, appState, files)
+      } else {
+        return
+      }
       await getLanpmApi().whiteboard.saveScene({
         groupId: gid,
-        sceneJson: serializeScene(elements, appState, files),
+        sceneJson,
         linkedTaskId: linkedTaskIdRef.current ?? null
       })
     } catch (err) {
@@ -108,18 +160,87 @@ export default function WhiteboardView(): React.ReactElement {
     }
   }, [gid, message, formatError])
 
+  const teardownCollab = useCallback((): void => {
+    bindingRef.current?.destroy()
+    bindingRef.current = null
+    awarenessRef.current?.destroy()
+    awarenessRef.current = null
+    docRef.current?.destroy()
+    docRef.current = null
+    setCollabReady(false)
+  }, [])
+
   const loadScene = useCallback(async (): Promise<void> => {
     if (!gid) return
     setLoading(true)
+    teardownCollab()
     try {
-      const scene = await getLanpmApi().whiteboard.getScene(gid)
+      const api = getLanpmApi()
+      const scene = await api.whiteboard.getScene(gid)
       const nextLinked = linkTaskFromUrl ?? scene?.linkedTaskId
       setLinkedTaskId(nextLinked)
-      setInitialData(parseScenePayload(scene?.sceneJson ?? emptyWhiteboardSceneJson()))
+
+      const docState = await api.whiteboard.getDocState(gid)
+      anonymousRef.current = docState.anonymous
+
+      if (!docState.anonymous) {
+        const doc = createEmptyWhiteboardDoc()
+        if (docState.updateBase64) {
+          applyWhiteboardEncodedUpdate(doc, base64ToBytes(docState.updateBase64), 'load')
+        } else {
+          seedWhiteboardDocFromSceneJson(
+            doc,
+            scene?.sceneJson ?? emptyWhiteboardSceneJson(),
+            'seed'
+          )
+        }
+        const awareness = new Awareness(doc)
+        const status = await api.identity.getSetupStatus()
+        const user = status.user
+        const palette = colorForUserId(user?.userId ?? 'local')
+        awareness.setLocalStateField('user', {
+          name: user?.displayName ?? 'User',
+          color: palette.color,
+          colorLight: palette.light,
+          userId: user?.userId
+        })
+
+        doc.on('update', (update: Uint8Array, origin: unknown) => {
+          if (origin === 'remote' || origin === 'load' || origin === 'seed' || applyingRemoteRef.current) {
+            return
+          }
+          void api.whiteboard.publishUpdate(gid, bytesToBase64(update))
+        })
+
+        awareness.on('update', ({ added, updated, removed }: { added: number[]; updated: number[]; removed: number[] }, origin: unknown) => {
+          if (origin === 'remote') return
+          const ids = [...added, ...updated, ...removed]
+          if (ids.length === 0) return
+          try {
+            const encoded = encodeAwarenessUpdate(awareness, ids)
+            void api.whiteboard.publishAwareness(gid, bytesToBase64(encoded))
+          } catch {
+            /* ignore */
+          }
+        })
+
+        docRef.current = doc
+        awarenessRef.current = awareness
+        setInitialData({
+          elements: [],
+          appState: { viewBackgroundColor: '#ffffff' },
+          files: {}
+        })
+        setCollabReady(true)
+      } else {
+        setInitialData(parseScenePayload(scene?.sceneJson ?? emptyWhiteboardSceneJson()))
+        setCollabReady(false)
+      }
+
       setBoardKey((k) => k + 1)
       if (linkTaskFromUrl) {
         const sceneJson = scene?.sceneJson ?? emptyWhiteboardSceneJson()
-        await getLanpmApi().whiteboard.saveScene({
+        await api.whiteboard.saveScene({
           groupId: gid,
           sceneJson,
           linkedTaskId: linkTaskFromUrl
@@ -133,15 +254,38 @@ export default function WhiteboardView(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [gid, linkTaskFromUrl, message, formatError, setSearchParams])
+  }, [gid, linkTaskFromUrl, message, formatError, setSearchParams, teardownCollab])
 
   useEffect(() => {
     void loadScene()
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      teardownCollab()
       setWhiteboardZen(false)
     }
-  }, [loadScene, setWhiteboardZen])
+  }, [loadScene, setWhiteboardZen, teardownCollab])
+
+  useEffect(() => {
+    if (!gid || anonymousRef.current) return
+    const api = getLanpmApi()
+    const offUpdate = api.whiteboard.onRemoteUpdate((payload) => {
+      if (payload.groupId !== gid || !docRef.current) return
+      applyingRemoteRef.current = true
+      try {
+        applyWhiteboardEncodedUpdate(docRef.current, base64ToBytes(payload.updateBase64), 'remote')
+      } finally {
+        applyingRemoteRef.current = false
+      }
+    })
+    const offAwareness = api.whiteboard.onRemoteAwareness((payload) => {
+      if (payload.groupId !== gid || !awarenessRef.current) return
+      applyAwarenessUpdate(awarenessRef.current, base64ToBytes(payload.updateBase64), 'remote')
+    })
+    return () => {
+      offUpdate()
+      offAwareness()
+    }
+  }, [gid, boardKey])
 
   useEffect(() => {
     if (!whiteboardZen) return
@@ -165,6 +309,23 @@ export default function WhiteboardView(): React.ReactElement {
       scheduleSave()
     },
     [scheduleSave]
+  )
+
+  const bindExcalidraw = useCallback(
+    (api: ExcalidrawImperativeAPI): void => {
+      apiRef.current = api
+      if (!collabReady || !docRef.current || !awarenessRef.current) return
+      if (bindingRef.current) return
+      const yElements = docRef.current.getArray<Y.Map<unknown>>(WHITEBOARD_CRDT_ELEMENTS_KEY)
+      const yAssets = docRef.current.getMap(WHITEBOARD_CRDT_ASSETS_KEY)
+      bindingRef.current = new ExcalidrawBinding(
+        yElements as Y.Array<Y.Map<unknown>>,
+        yAssets,
+        api,
+        awarenessRef.current
+      )
+    },
+    [collabReady]
   )
 
   const exportPng = useCallback(async (): Promise<void> => {
@@ -279,8 +440,11 @@ export default function WhiteboardView(): React.ReactElement {
               scrollToContent: true
             }}
             onChange={onChange}
+            onPointerUpdate={(payload) => {
+              bindingRef.current?.onPointerUpdate(payload)
+            }}
             excalidrawAPI={(api) => {
-              apiRef.current = api
+              bindExcalidraw(api)
             }}
           />
         </div>

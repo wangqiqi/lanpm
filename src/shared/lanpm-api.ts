@@ -226,5 +226,18 @@ export interface LanpmApi {
     exportPng: (
       input: import('./whiteboard/types').ExportWhiteboardPngInput
     ) => Promise<import('./file/types').FileMeta>
+    getDocState: (groupId: string) => Promise<{
+      groupId: string
+      anonymous: boolean
+      updateBase64: string
+    }>
+    publishUpdate: (groupId: string, updateBase64: string) => Promise<void>
+    publishAwareness: (groupId: string, updateBase64: string) => Promise<void>
+    onRemoteUpdate: (
+      handler: (payload: { groupId: string; updateBase64: string }) => void
+    ) => () => void
+    onRemoteAwareness: (
+      handler: (payload: { groupId: string; updateBase64: string }) => void
+    ) => () => void
   }
 }

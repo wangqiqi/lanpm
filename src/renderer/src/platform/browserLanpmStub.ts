@@ -1423,7 +1423,12 @@ export function createBrowserLanpmStub(): LanpmApi {
           isBookmark: false,
           updatedAt: new Date().toISOString()
         }
-      }
+      },
+      getDocState: async (groupId) => ({ groupId, anonymous: true, updateBase64: '' }),
+      publishUpdate: async () => undefined,
+      publishAwareness: async () => undefined,
+      onRemoteUpdate: () => () => undefined,
+      onRemoteAwareness: () => () => undefined
     },
     data: {
       getStorageSettings: async () => ({

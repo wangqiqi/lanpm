@@ -21,7 +21,7 @@ assert.equal(
 )
 
 const schemaTs = readFileSync(join(root, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*9/)
+assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*10/)
 assert.match(schemaTs, /task_checklists/)
 assert.match(schemaTs, /task_checklist_items/)
 

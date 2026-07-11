@@ -182,7 +182,32 @@ const api: LanpmApi = {
   whiteboard: {
     getScene: (groupId) => ipcRenderer.invoke('whiteboard:getScene', groupId),
     saveScene: (input) => ipcRenderer.invoke('whiteboard:saveScene', input),
-    exportPng: (input) => ipcRenderer.invoke('whiteboard:exportPng', input)
+    exportPng: (input) => ipcRenderer.invoke('whiteboard:exportPng', input),
+    getDocState: (groupId) => ipcRenderer.invoke('whiteboard:getDocState', groupId),
+    publishUpdate: (groupId, updateBase64) =>
+      ipcRenderer.invoke('whiteboard:publishUpdate', { groupId, updateBase64 }),
+    publishAwareness: (groupId, updateBase64) =>
+      ipcRenderer.invoke('whiteboard:publishAwareness', { groupId, updateBase64 }),
+    onRemoteUpdate: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { groupId: string; updateBase64: string }
+      ) => {
+        handler(payload)
+      }
+      ipcRenderer.on('whiteboard:remoteUpdate', listener)
+      return () => ipcRenderer.removeListener('whiteboard:remoteUpdate', listener)
+    },
+    onRemoteAwareness: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { groupId: string; updateBase64: string }
+      ) => {
+        handler(payload)
+      }
+      ipcRenderer.on('whiteboard:remoteAwareness', listener)
+      return () => ipcRenderer.removeListener('whiteboard:remoteAwareness', listener)
+    }
   },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
