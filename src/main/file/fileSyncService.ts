@@ -8,8 +8,8 @@ import type {
   FileMetaBroadcastPayload,
   FilePullRequestPayload
 } from '../../shared/file/sync'
+import { filePullFromOffset, isFilePullRequestPayload, REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import { throwLanpm } from '../../shared/errors/lanpmError'
-import { REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { FILE_CHUNK_SIZE, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
 import type { FileMeta } from '../../shared/file/types'
@@ -99,14 +99,17 @@ async function handleFilePullRequest(db: Database, envelope: SyncEnvelope): Prom
   const status = getSetupStatus(db)
   if (!status.configured || !status.device) return
   if (envelope.senderDeviceId === status.device.deviceId) return
+  if (!isFilePullRequestPayload(envelope.payload)) return
 
-  const payload = envelope.payload as FilePullRequestPayload
+  const payload = envelope.payload
   const meta = getFileById(db, payload.fileId)
   if (!meta || meta.isBookmark || !existsSync(meta.storagePath)) return
   if (meta.storagePath.startsWith(REMOTE_PENDING_PREFIX)) return
 
   const buf = readFileSync(meta.storagePath)
-  let offset = 0
+  let fromOffset = filePullFromOffset(payload)
+  if (fromOffset > buf.length) fromOffset = 0
+  let offset = fromOffset
   while (offset < buf.length) {
     const end = Math.min(buf.length, offset + FILE_CHUNK_SIZE)
     const slice = buf.subarray(offset, end)

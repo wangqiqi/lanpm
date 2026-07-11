@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **file_pull 发送端续传 (TASK-165)**：`handleFilePullRequest` 校验 payload 并从 `fromOffset` 起发 `file_chunk`。
 - **file_pull_request 续传协议 (TASK-164)**：`FilePullRequestPayload.fromOffset` + 校验；`docs/03` 对齐实现中的 `FileChunkPayload` 形状。
 
 ## [1.1.0] - 2026-07-11
