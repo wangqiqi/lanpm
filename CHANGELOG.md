@@ -17,10 +17,17 @@
 - **群标签字典同步 (TASK-191)**：`groupTagSyncService` publish/apply `group_tag_patch`；匿名群跳过；挂入 taskSync。
 - **群标签字典桥接 (TASK-192)**：IPC list/upsert/remove/import；preload · lanpm-api · browser stub；本机色一次性导入。
 - **群标签字典 UI (TASK-193)**：`groupTagStore`；BoardTagPalette/芯片/详情读群字典；改色走 IPC；i18n「已同步」提示。
+## [1.5.0] - 2026-07-11
+
+### Added
 - **SPRINT-BOARD-TAG-FILTER 收尾 (TASK-188)**：`verify:task-tags-filter`；docs/04·06·README 对齐标签筛选/本机色板；归档；handoff `/release` → **v1.5.0**。
 - **看板标签筛选与色板 (TASK-184–186)**：工具栏多选 OR 筛选；KanbanCard 着色芯片；本机色板（uiStore/localStorage）。
 - **任务详情标签色 (TASK-187)**：详情面板芯片与看板同色逻辑。
 - **标签筛选/色哈希 (TASK-183)**：`filterTasksByTags`（OR）· `collectUniqueTaskTags` · `tagColorHash` / `resolveTagColor` + 单测。
+
+### Release
+- `v1.5.0` — 看板标签 OR 筛选 + 本机色板（TASK-183–188）
+
 ## [1.4.0] - 2026-07-11
 
 ### Added
