@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-11
+
 ### Added
 - **SPRINT-FILE-RESUME 收尾 (TASK-170)**：docs/06 §2.3·§6、docs/00/05、README 对齐 P2P pull 断点续传；Sprint VERIFY；归档；handoff `/release` → **v1.2.0**。
 - **file_pull 续传验收 (TASK-169)**：`verify:file-resume`（中断后 `fromOffset` 续传拼完整文件）；`package.json` 脚本。
@@ -12,6 +14,9 @@
 - **file_pull 接收端落盘 (TASK-166)**：pull 会话写入 `{fileId}.partial` + SQLite download `file_transfers` 进度；进程可恢复；去掉内存 `pullBuffers`。
 - **file_pull 发送端续传 (TASK-165)**：`handleFilePullRequest` 校验 payload 并从 `fromOffset` 起发 `file_chunk`。
 - **file_pull_request 续传协议 (TASK-164)**：`FilePullRequestPayload.fromOffset` + 校验；`docs/03` 对齐实现中的 `FileChunkPayload` 形状。
+
+### Release
+- `v1.2.0` — P2P `file_pull` 断点续传：`fromOffset`、`.partial` 落盘、SQLite 进度、FilesView 续传 UX（TASK-164–170）
 
 ## [1.1.0] - 2026-07-11
 
