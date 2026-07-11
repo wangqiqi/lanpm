@@ -33,6 +33,11 @@ import {
   setTaskCrdtOfflineTasksChangedHandler,
   wireTaskCrdtOfflineSync
 } from './taskCrdtOfflineSyncService'
+import {
+  clearTaskAwarenessWiring,
+  ensureTaskAwarenessWired,
+  handleIncomingTaskAwareness
+} from './taskAwarenessService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
@@ -117,8 +122,7 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     return
   }
   if (envelope.type === 'task_awareness') {
-    // TASK-178: apply Awareness update via taskAwarenessService
-    return
+    handleIncomingTaskAwareness(db, envelope)
   }
 }
 
@@ -129,6 +133,7 @@ function ensureSubscribed(db: Database, groupId: string): void {
   const unsub = transport.subscribe(groupId, (env) => handleIncoming(db, env))
   subscribedGroups.set(groupId, unsub)
   ensureTaskCrdtWired(db, groupId)
+  ensureTaskAwarenessWired(db, groupId)
 }
 
 function refreshSubscriptions(db: Database): void {
@@ -195,6 +200,7 @@ export function initTaskSyncService(db: Database): void {
 export function shutdownTaskSyncService(): void {
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
+  clearTaskAwarenessWiring()
   clearTaskCrdtWiring()
   setTaskCrdtTasksChangedHandler(null)
   setTaskCrdtOfflineTasksChangedHandler(null)

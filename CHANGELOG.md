@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **task_awareness 主进程 (TASK-178)**：群 Y.Doc 挂 Awareness；publish/apply `task_awareness`；`setLocalTaskAwareness`；≥200ms 节流；匿名群不广播。
 - **task_awareness 协议 (TASK-177)**：依赖 `y-protocols`；`TaskAwarenessPayload` / 本地焦点态校验；`SyncMessageType.task_awareness`；docs/03 §6.2·§10；`verify:sync-handlers` 登记。
 - **SPRINT-BOARD-TAGS 收尾 (TASK-176)**：docs/03·04·06·00、README 对齐独立标签；Sprint VERIFY；归档；handoff `/release` → **v1.3.0**。
 - **任务树详情标签 (TASK-175)**：TaskDetailPanel 可编辑独立标签，与看板编辑对齐。

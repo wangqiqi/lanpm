@@ -51,6 +51,7 @@ const HANDLER_FILES = [
   'src/main/task/taskOfflineSyncService.ts',
   'src/main/task/taskCrdtService.ts',
   'src/main/task/taskCrdtOfflineSyncService.ts',
+  'src/main/task/taskAwarenessService.ts',
   'src/main/file/fileSyncService.ts',
   'src/main/crypto/groupKeyService.ts',
   'src/main/group/memberEventService.ts',
