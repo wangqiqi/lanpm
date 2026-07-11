@@ -185,6 +185,7 @@ const enUS = {
   'board.tagPaletteHint': 'Local colors for this device only',
   'board.tagPaletteSyncedHint': 'Colors sync to other devices in the group',
   'task.awarenessFocusing': '{names} viewing',
+  'task.awarenessEditing': '{names} editing',
   'board.discussInChat': 'Discuss in chat',
   'board.discussDraft': 'Re: task "{title}"',
   'board.dueDate': 'Due {date}',

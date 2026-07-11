@@ -42,3 +42,45 @@
   font-size: 11px;
   color: var(--lanpm-text-tertiary);
 }
+
+.caretHost {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.caretLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.caret {
+  position: absolute;
+  transform: translateY(-2px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 8rem;
+}
+
+.caretBar {
+  width: 2px;
+  height: 1.15em;
+  border-radius: 1px;
+}
+
+.caretLabel {
+  margin-top: 1px;
+  padding: 0 4px;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

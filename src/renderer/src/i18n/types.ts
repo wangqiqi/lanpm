@@ -182,6 +182,7 @@ export type MessageKey =
   | 'board.tagPaletteHint'
   | 'board.tagPaletteSyncedHint'
   | 'task.awarenessFocusing'
+  | 'task.awarenessEditing'
   | 'board.discussInChat'
   | 'board.discussDraft'
   | 'board.dueDate'

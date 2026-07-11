@@ -1,12 +1,7 @@
 import type { AwarenessPeer } from '@renderer/stores/taskAwarenessStore'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { awarenessPeerHue } from './awarenessPeerHue'
 import styles from './taskAwareness.module.css'
-
-function peerHue(userId: string): number {
-  let h = 0
-  for (let i = 0; i < userId.length; i++) h = (h * 31 + userId.charCodeAt(i)) % 360
-  return h
-}
 
 interface TaskAwarenessBadgesProps {
   peers: AwarenessPeer[]
@@ -32,7 +27,7 @@ export default function TaskAwarenessBadges({
         <span
           key={`${p.userId}-${p.clientId ?? ''}`}
           className={styles.dot}
-          style={{ background: `hsl(${peerHue(p.userId)} 55% 48%)` }}
+          style={{ background: `hsl(${awarenessPeerHue(p.userId)} 55% 48%)` }}
         >
           {!compact && <span className={styles.name}>{p.displayName}</span>}
         </span>
