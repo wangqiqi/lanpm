@@ -197,7 +197,7 @@ export function listResumableTransfers(db: Database, groupId: string): FileTrans
        LEFT JOIN files f ON f.file_id = t.file_id
        WHERE t.group_id = ?
          AND (
-           (t.status IN ('failed', 'paused') AND t.transferred_bytes > 0 AND t.transferred_bytes < t.total_bytes)
+           (t.status IN ('failed', 'paused', 'cancelled') AND t.transferred_bytes > 0 AND t.transferred_bytes < t.total_bytes)
            OR (
              t.direction = 'download'
              AND t.status = 'transferring'

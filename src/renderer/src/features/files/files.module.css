@@ -96,6 +96,12 @@
   gap: 8px;
 }
 
+.transferRateHint {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
 .body {
   flex: 1;
   min-height: 0;

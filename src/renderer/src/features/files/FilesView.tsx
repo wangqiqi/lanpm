@@ -9,7 +9,6 @@ import {
   InputNumber,
   List,
   Modal,
-  Progress,
   Select,
   Space,
   Table,
@@ -38,6 +37,7 @@ import type { FileCategory, FileMeta, FileTransferView } from '@shared/file/type
 import { isLocalRemovedPath, isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
+import { TransferActiveRow } from './TransferActiveRow'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
@@ -95,12 +95,13 @@ const TRANSFER_STATUS_KEYS: Record<string, MessageKey> = {
   transferring: 'files.transferTransferring',
   completed: 'files.transferCompleted',
   failed: 'files.transferFailed',
-  paused: 'files.transferPaused'
+  paused: 'files.transferPaused',
+  cancelled: 'files.transferCancelled'
 }
 
 function isResumableTransfer(tr: FileTransferView): boolean {
   if (tr.transferredBytes <= 0 || tr.transferredBytes >= tr.totalBytes) return false
-  if (tr.status === 'failed' || tr.status === 'paused') return true
+  if (tr.status === 'failed' || tr.status === 'paused' || tr.status === 'cancelled') return true
   return tr.direction === 'download' && tr.status === 'transferring'
 }
 
@@ -134,6 +135,7 @@ export default function FilesView(): React.ReactElement {
   const loadTransferSettings = useFileStore((s) => s.loadTransferSettings)
   const setTransferRate = useFileStore((s) => s.setTransferRate)
   const resumeTransfer = useFileStore((s) => s.resumeTransfer)
+  const cancelTransfer = useFileStore((s) => s.cancelTransfer)
   const upload = useFileStore((s) => s.upload)
   const addBookmark = useFileStore((s) => s.addBookmark)
   const importBookmarks = useFileStore((s) => s.importBookmarks)
@@ -579,6 +581,12 @@ export default function FilesView(): React.ReactElement {
   const handleResume = (transferId: string): void => {
     void resumeTransfer(gid, transferId).catch((err: unknown) =>
       message.error(formatError(err, 'files.transferResumeFailed'))
+    )
+  }
+
+  const handleCancel = (transferId: string): void => {
+    void cancelTransfer(gid, transferId).catch((err: unknown) =>
+      message.error(formatError(err, 'files.transferCancelFailed'))
     )
   }
 
@@ -1135,21 +1143,13 @@ export default function FilesView(): React.ReactElement {
               dataSource={activeTransfers}
               renderItem={(tr) => (
                 <List.Item>
-                  <div className={styles.transferRow}>
-                    <span>{tr.fileName}</span>
-                    <Progress
-                      percent={Math.round((tr.transferredBytes / Math.max(1, tr.totalBytes)) * 100)}
-                      size="small"
-                      style={{ flex: 1, margin: '0 12px' }}
-                    />
-                    {tr.fromDeviceId === tr.toDeviceId ? (
-                      <Tag color="default">{t('files.transferLocalQueue')}</Tag>
-                    ) : null}
-                    <TagStatus
-                      status={tr.status}
-                      label={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
-                    />
-                  </div>
+                  <TransferActiveRow
+                    tr={tr}
+                    statusLabel={t(TRANSFER_STATUS_KEYS[tr.status] ?? 'files.transferFailed')}
+                    localQueueLabel={t('files.transferLocalQueue')}
+                    cancelLabel={t('files.transferCancel')}
+                    onCancel={handleCancel}
+                  />
                 </List.Item>
               )}
             />
@@ -1171,11 +1171,11 @@ export default function FilesView(): React.ReactElement {
                             isResumableTransfer(tr)
                               ? [
                                   <RegionButton
-                                    key="resume"
+                                    key="retry"
                                     variant="caption"
                                     onClick={() => handleResume(tr.transferId)}
                                   >
-                                    {t('files.transferResume')}
+                                    {t('files.transferRetry')}
                                   </RegionButton>
                                 ]
                               : undefined

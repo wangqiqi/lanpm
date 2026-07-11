@@ -15,6 +15,7 @@ import {
   readPreviewText,
   resolvePreviewUrl,
   resumeTransfer,
+  cancelTransfer,
   setFileTransferRateKbps,
   pullRemoteFile,
   uploadFileFromPath,
@@ -61,6 +62,11 @@ export function registerFileIpc(): void {
   ipcMain.handle(FILE_IPC.resumeTransfer, (_event, transferId: string) => {
     if (typeof transferId !== 'string' || !transferId) throw new Error('transferId required')
     return resumeTransfer(getDatabase(), transferId)
+  })
+
+  ipcMain.handle(FILE_IPC.cancelTransfer, (_event, transferId: string) => {
+    if (typeof transferId !== 'string' || !transferId) throw new Error('transferId required')
+    return cancelTransfer(getDatabase(), transferId)
   })
 
   ipcMain.handle(FILE_IPC.getTransferSettings, () => getFileTransferSettings(getDatabase()))

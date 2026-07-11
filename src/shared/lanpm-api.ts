@@ -156,6 +156,7 @@ export interface LanpmApi {
     listTransfers: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
     listTransferHistory: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
     resumeTransfer: (transferId: string) => Promise<import('./file/types').FileTransferView>
+    cancelTransfer: (transferId: string) => Promise<import('./file/types').FileTransferView>
     getTransferSettings: () => Promise<import('./file/settings').FileTransferSettingsView>
     setTransferRate: (rateKbps: number) => Promise<import('./file/settings').FileTransferSettingsView>
     addBookmark: (

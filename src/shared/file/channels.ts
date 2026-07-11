@@ -8,6 +8,7 @@ export const FILE_IPC = {
   listTransfers: 'file:listTransfers',
   listTransferHistory: 'file:listTransferHistory',
   resumeTransfer: 'file:resumeTransfer',
+  cancelTransfer: 'file:cancelTransfer',
   getTransferSettings: 'file:getTransferSettings',
   setTransferRate: 'file:setTransferRate',
   addBookmark: 'file:addBookmark',

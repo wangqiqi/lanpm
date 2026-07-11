@@ -196,6 +196,20 @@ function failPullSession(db: Database, fileId: string, err: Error): void {
   session.reject(err)
 }
 
+/** 用户取消：停收 chunk、保留 .partial，供后续 resume */
+export function cancelPullByTransferId(db: Database, transferId: string): boolean {
+  for (const [fileId, session] of pullSessions) {
+    if (session.transferId !== transferId) continue
+    clearTimeout(session.timer)
+    pullSessions.delete(fileId)
+    finishTransfer(db, session.transferId, 'cancelled')
+    broadcastFiles(session.groupId)
+    session.reject(new Error('err.transferCancelled'))
+    return true
+  }
+  return false
+}
+
 function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
   if (envelope.type !== 'file_chunk' || !envelope.groupId) return
   const chunk = envelope.payload as FileChunkPayload
@@ -416,6 +430,7 @@ export async function pullRemoteFile(
       existing &&
       (existing.status === 'failed' ||
         existing.status === 'paused' ||
+        existing.status === 'cancelled' ||
         existing.status === 'transferring') &&
       existing.transferredBytes > 0 &&
       existing.transferredBytes < existing.totalBytes

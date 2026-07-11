@@ -15,6 +15,7 @@ interface FileState {
   loadTransferSettings: () => Promise<void>
   setTransferRate: (rateKbps: number) => Promise<void>
   resumeTransfer: (groupId: string, transferId: string) => Promise<void>
+  cancelTransfer: (groupId: string, transferId: string) => Promise<void>
   upload: (groupId: string) => Promise<FileMeta | null>
   addBookmark: (groupId: string, url: string, title: string) => Promise<FileMeta>
   importBookmarks: (groupId: string) => Promise<FileMeta[]>
@@ -62,6 +63,16 @@ export const useFileStore = create<FileState>((set) => ({
 
   resumeTransfer: async (groupId, transferId) => {
     await getLanpmApi().file.resumeTransfer(transferId)
+    const transfers = await getLanpmApi().file.listTransfers(groupId)
+    const history = await getLanpmApi().file.listTransferHistory(groupId)
+    set((s) => ({
+      transfersByGroup: { ...s.transfersByGroup, [groupId]: transfers },
+      transferHistoryByGroup: { ...s.transferHistoryByGroup, [groupId]: history }
+    }))
+  },
+
+  cancelTransfer: async (groupId, transferId) => {
+    await getLanpmApi().file.cancelTransfer(transferId)
     const transfers = await getLanpmApi().file.listTransfers(groupId)
     const history = await getLanpmApi().file.listTransferHistory(groupId)
     set((s) => ({

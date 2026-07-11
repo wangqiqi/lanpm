@@ -11,6 +11,7 @@ import {
   TEXT_PREVIEW_MAX_BYTES
 } from '../../shared/file/previewExtensions.ts'
 import { FILE_CHUNK_SIZE, FILE_MAX_CONCURRENT, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
+import { canCancelTransfer } from '../../shared/file/transferControl'
 import { throwLanpm } from '../../shared/errors/lanpmError'
 import { isRemotePendingPath } from '../../shared/file/sync'
 import { getSetupStatus } from '../identity/setup'
@@ -34,8 +35,11 @@ import { previewUrlForFileId } from './previewProtocol.ts'
 import { resolveFileDiskPath, resolvePreviewDiskPath } from './storagePathResolver.ts'
 import { assertFileWritable } from './fileServiceHelpers'
 import { showOpenDialog, showSaveDialog } from '../systemDialog'
-import { publishFileMeta, pullRemoteFile } from './fileSyncService'
+import { cancelPullByTransferId, publishFileMeta, pullRemoteFile } from './fileSyncService'
 import { broadcastToAllWindows } from '../utils/broadcast'
+
+/** 本机假上传循环协作取消 */
+const cancelRequested = new Set<string>()
 
 function filesRootDir(): string {
   const dir = join(app.getPath('userData'), 'files')
@@ -79,6 +83,12 @@ async function runChunkedUpload(
   options?: { transferId?: string; startOffset?: number }
 ): Promise<void> {
   while (countActiveTransfers(db) >= FILE_MAX_CONCURRENT) {
+    if (options?.transferId && cancelRequested.has(options.transferId)) {
+      cancelRequested.delete(options.transferId)
+      finishTransfer(db, options.transferId, 'cancelled')
+      broadcastTransfers(meta.groupId)
+      return
+    }
     await new Promise((r) => setTimeout(r, 100))
   }
 
@@ -107,14 +117,50 @@ async function runChunkedUpload(
   }
   broadcastTransfers(meta.groupId)
 
+  if (cancelRequested.has(transferId)) {
+    cancelRequested.delete(transferId)
+    finishTransfer(db, transferId, 'cancelled')
+    broadcastTransfers(meta.groupId)
+    return
+  }
+
   const { rateKbps } = getFileTransferSettings(db)
   while (offset < totalBytes) {
+    const live = getTransferById(db, transferId)
+    if (
+      cancelRequested.has(transferId) ||
+      !live ||
+      !canCancelTransfer(live.status)
+    ) {
+      cancelRequested.delete(transferId)
+      if (live && canCancelTransfer(live.status)) {
+        finishTransfer(db, transferId, 'cancelled')
+        broadcastTransfers(meta.groupId)
+      }
+      return
+    }
     const prev = offset
     offset = Math.min(totalBytes, offset + FILE_CHUNK_SIZE)
     const chunkBytes = offset - prev
     updateTransferProgress(db, transferId, offset, 'transferring')
     broadcastTransfers(meta.groupId)
     await new Promise((r) => setTimeout(r, chunkDelayMs(chunkBytes, rateKbps)))
+  }
+
+  if (cancelRequested.has(transferId)) {
+    cancelRequested.delete(transferId)
+    const cur = getTransferById(db, transferId)
+    if (cur && canCancelTransfer(cur.status)) {
+      finishTransfer(db, transferId, 'cancelled')
+      broadcastTransfers(meta.groupId)
+    }
+    return
+  }
+
+  const after = getTransferById(db, transferId)
+  if (!after || after.status === 'cancelled') {
+    cancelRequested.delete(transferId)
+    return
   }
 
   finishTransfer(db, transferId, 'completed')
@@ -129,6 +175,7 @@ export async function resumeTransfer(db: Database, transferId: string): Promise<
   const resumable =
     transfer.status === 'failed' ||
     transfer.status === 'paused' ||
+    transfer.status === 'cancelled' ||
     (transfer.direction === 'download' && transfer.status === 'transferring')
   if (!resumable) {
     throwLanpm('err.transferResumeInvalid')
@@ -155,6 +202,29 @@ export async function resumeTransfer(db: Database, transferId: string): Promise<
     transferId,
     startOffset: transfer.transferredBytes
   })
+  return getTransferById(db, transferId)!
+}
+
+/** 取消进行中/排队传输；保留已写入进度与 .partial 供续传 */
+export function cancelTransfer(db: Database, transferId: string): FileTransferView {
+  const transfer = getTransferById(db, transferId)
+  if (!transfer) throwLanpm('err.transferNotFound')
+  if (!canCancelTransfer(transfer.status)) {
+    throwLanpm('err.transferCancelInvalid')
+  }
+
+  if (transfer.direction === 'download') {
+    const aborted = cancelPullByTransferId(db, transferId)
+    if (!aborted) {
+      finishTransfer(db, transferId, 'cancelled')
+      broadcastTransfers(transfer.groupId)
+    }
+    return getTransferById(db, transferId)!
+  }
+
+  cancelRequested.add(transferId)
+  finishTransfer(db, transferId, 'cancelled')
+  broadcastTransfers(transfer.groupId)
   return getTransferById(db, transferId)!
 }
 

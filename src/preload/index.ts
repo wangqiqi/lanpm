@@ -125,6 +125,7 @@ const api: LanpmApi = {
     listTransfers: (groupId) => ipcRenderer.invoke('file:listTransfers', groupId),
     listTransferHistory: (groupId) => ipcRenderer.invoke('file:listTransferHistory', groupId),
     resumeTransfer: (transferId) => ipcRenderer.invoke('file:resumeTransfer', transferId),
+    cancelTransfer: (transferId) => ipcRenderer.invoke('file:cancelTransfer', transferId),
     getTransferSettings: () => ipcRenderer.invoke('file:getTransferSettings'),
     setTransferRate: (rateKbps) => ipcRenderer.invoke('file:setTransferRate', rateKbps),
     addBookmark: (groupId, url, title) =>
