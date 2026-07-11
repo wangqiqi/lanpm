@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-07-11
+
 ### Added
 - **SPRINT-FORCE-DICT-TAGS 收尾 (TASK-213)**：`verify:group-tag-dict` 断言强制字典；docs/03·04；归档；可 handoff `/release` **1.9.0**。
 - **标签强制字典 UI (TASK-212)**：`TaskEditModal` / `TaskDetailPanel` 改为 `Select mode="multiple"` + 字典 options；空字典提示。
@@ -13,6 +15,9 @@
 - **看板弱红点 UI (TASK-208)**：BottomNav 数字优先，否则 `Badge` `dot`；进入看板 mark seen。
 - **弱红点桥接 (TASK-207)**：`boardLatestUpdatedAt` Stub/store；本机 `lastBoardSeenAt`。
 - **弱红点契约 (TASK-206)**：`shouldShowBoardRecentDot`（48h ∩ unseen）；`getBoardLatestUpdatedAt`；单测。
+
+### Release
+- `v1.9.0` — board recent weak dot + force task tags from group dictionary（TASK-206–213）
 
 ## [1.8.0] - 2026-07-11
 
