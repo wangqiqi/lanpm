@@ -38,6 +38,38 @@ export function addOneDayYmd(ymd: string): string {
   return `${yy}-${mm}-${dd}`
 }
 
+/** Subtract one calendar day from YYYY-MM-DD (UTC-safe). */
+export function subtractOneDayYmd(ymd: string): string {
+  const [y, m, d] = ymd.split('-').map(Number)
+  const dt = new Date(Date.UTC(y!, m! - 1, d!))
+  dt.setUTCDate(dt.getUTCDate() - 1)
+  const yy = dt.getUTCFullYear()
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, '0')
+  const dd = String(dt.getUTCDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
+}
+
+/**
+ * FullCalendar all-day drop/resize → inclusive Task dates for `updateSchedule`.
+ * `endExclusiveYmd` is FC exclusive end; omit/null → single-day (start = end).
+ * Returns null if inputs are invalid or inverted.
+ */
+export function scheduleFromCalendarExclusiveRange(
+  startYmd: string,
+  endExclusiveYmd?: string | null
+): { startDate: string; endDate: string } | null {
+  if (!isYmd(startYmd)) return null
+  if (endExclusiveYmd == null || endExclusiveYmd === '') {
+    return { startDate: startYmd, endDate: startYmd }
+  }
+  if (!isYmd(endExclusiveYmd)) return null
+  // exclusive end must be strictly after start for a non-empty all-day range
+  if (endExclusiveYmd <= startYmd) return null
+  const endDate = subtractOneDayYmd(endExclusiveYmd)
+  if (endDate < startYmd) return null
+  return { startDate: startYmd, endDate }
+}
+
 /**
  * Map group tasks to FullCalendar event inputs.
  * Skips deleted only.

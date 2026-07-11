@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addOneDayYmd, tasksToCalendarEvents } from '@shared/task/calendarEvents'
+import { addOneDayYmd, scheduleFromCalendarExclusiveRange, subtractOneDayYmd, tasksToCalendarEvents } from '@shared/task/calendarEvents'
 import { defaultScheduleForTask } from '@shared/task/ganttAdapter'
 import type { Task } from '@shared/task/types'
 
@@ -22,6 +22,56 @@ describe('addOneDayYmd', () => {
     expect(addOneDayYmd('2026-07-11')).toBe('2026-07-12')
     expect(addOneDayYmd('2026-07-31')).toBe('2026-08-01')
     expect(addOneDayYmd('2026-12-31')).toBe('2027-01-01')
+  })
+})
+
+describe('subtractOneDayYmd', () => {
+  it('rolls month/year backward', () => {
+    expect(subtractOneDayYmd('2026-07-12')).toBe('2026-07-11')
+    expect(subtractOneDayYmd('2026-08-01')).toBe('2026-07-31')
+    expect(subtractOneDayYmd('2027-01-01')).toBe('2026-12-31')
+  })
+})
+
+describe('scheduleFromCalendarExclusiveRange', () => {
+  it('maps multi-day exclusive end to inclusive dates', () => {
+    expect(scheduleFromCalendarExclusiveRange('2026-07-10', '2026-07-13')).toEqual({
+      startDate: '2026-07-10',
+      endDate: '2026-07-12'
+    })
+  })
+
+  it('maps single-day (end = start+1) and null end', () => {
+    expect(scheduleFromCalendarExclusiveRange('2026-07-11', '2026-07-12')).toEqual({
+      startDate: '2026-07-11',
+      endDate: '2026-07-11'
+    })
+    expect(scheduleFromCalendarExclusiveRange('2026-07-11', null)).toEqual({
+      startDate: '2026-07-11',
+      endDate: '2026-07-11'
+    })
+  })
+
+  it('rejects invalid or inverted ranges', () => {
+    expect(scheduleFromCalendarExclusiveRange('bad', '2026-07-12')).toBeNull()
+    expect(scheduleFromCalendarExclusiveRange('2026-07-11', '2026-07-11')).toBeNull()
+    expect(scheduleFromCalendarExclusiveRange('2026-07-12', '2026-07-11')).toBeNull()
+  })
+
+  it('round-trips with tasksToCalendarEvents exclusive end', () => {
+    const events = tasksToCalendarEvents([
+      task({
+        taskId: 't2',
+        title: 'Span',
+        startDate: '2026-07-10',
+        endDate: '2026-07-12'
+      })
+    ])
+    const ev = events[0]!
+    expect(scheduleFromCalendarExclusiveRange(ev.start, ev.end)).toEqual({
+      startDate: '2026-07-10',
+      endDate: '2026-07-12'
+    })
   })
 })
 

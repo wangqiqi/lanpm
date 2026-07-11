@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **TASK-240**：日历拖拽改期契约 — `scheduleFromCalendarExclusiveRange` / `subtractOneDayYmd`（FC exclusive-end ↔ 含初日）。
+
 ## [1.13.0] - 2026-07-11
 
 ### Added
