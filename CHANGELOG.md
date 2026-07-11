@@ -9,6 +9,7 @@
 - **Bundle 导入加固**：整包 SQLite 事务（失败回滚）；`conflictMode` 白名单；主进程口令至少 4 位（与 UI 对齐）（TASK-321）。
 - **Bundle `new_id` 外键**：导入前预建 task/msg/file ID 映射，重写 `parentTaskId` · `linkedFileIds` · `sourceMsgId` · `replyToMsgId` · checklist/白板关联（TASK-322）。
 - **任务进度 clamp**：`insertTask` / `buildTaskFromInput` / 读库 / 聚合 / 树内联统一 `clampProgressPercent`，防 NaN 与越界写入（TASK-323）。
+- **端口与插件默认**：`LANPM_TCP_PORT` 校验 1–65535 非法回退默认；未配置插件默认拒绝，仅官方 `lanpm.example` / `lanpm.formjs` 白名单默认启用（TASK-324）。
 
 ## [1.25.0] - 2026-07-11
 

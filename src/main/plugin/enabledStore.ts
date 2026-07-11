@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, join } from 'path'
 import { app } from 'electron'
+import { defaultPluginEnabled } from '../../shared/plugin/enabledDefaults.ts'
 
 type EnabledMap = Record<string, boolean>
 
@@ -30,12 +31,14 @@ export function writeEnabledMap(map: EnabledMap): void {
   writeFileSync(path, JSON.stringify(map, null, 2), 'utf8')
 }
 
-/** 未写入过启用态时默认启用 */
+/**
+ * Explicit preference wins. Unset → deny by default, except builtin whitelist.
+ */
 export function isPluginEnabled(pluginId: string, map: EnabledMap): boolean {
   if (Object.prototype.hasOwnProperty.call(map, pluginId)) {
     return map[pluginId] === true
   }
-  return true
+  return defaultPluginEnabled(pluginId)
 }
 
 export function setPluginEnabled(pluginId: string, enabled: boolean): EnabledMap {

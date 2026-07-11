@@ -16,6 +16,10 @@ import {
 } from './stub/index'
 import { getKnownLanUserIds } from './peerDirectory'
 import { getLocalLanIp } from './localIp'
+import {
+  DEFAULT_LANPM_TCP_PORT,
+  resolveLanpmTcpPort
+} from '../../shared/network/listenPort.ts'
 
 export type { NetworkMode } from '../../shared/network/status'
 
@@ -33,7 +37,18 @@ export function resolveNetworkMode(): NetworkMode {
 }
 
 function buildReal(deviceId: string, userId: string, displayName: string): RealNetworkTransport {
-  const port = Number(process.env.LANPM_TCP_PORT) || 43_124
+  const rawPort = process.env.LANPM_TCP_PORT
+  const port = resolveLanpmTcpPort(rawPort)
+  if (
+    rawPort != null &&
+    String(rawPort).trim() !== '' &&
+    port === DEFAULT_LANPM_TCP_PORT &&
+    Number(String(rawPort).trim()) !== DEFAULT_LANPM_TCP_PORT
+  ) {
+    console.warn(
+      `[lanpm] invalid LANPM_TCP_PORT=${JSON.stringify(rawPort)}; using ${DEFAULT_LANPM_TCP_PORT}`
+    )
+  }
   const transport = new RealNetworkTransport({
     deviceId,
     userId,
