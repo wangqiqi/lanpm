@@ -8,6 +8,9 @@
 - **SPRINT-A3-PROJECT-FILES（TASK-245–249）**：项目级文件 / 交付物 — `deliverables` 派生索引；文件 Tab「全部 / 交付物」与按任务筛选；挂接/解挂；跳转看板；`verify:project-files`。
 - **SPRINT-A5-DISCOVER（TASK-250–254）**：发现加固 — health reason code；snapshot 健康态；空态/失败 CTA；发现种子持久化与刷新连接；`verify:discover-a5`。
 
+### Changed
+- **白板实时协同 SPIKE（SPIKE-255–257）**：拍板主路径 = 群级 Y.Doc + y-excalidraw + P2P（镜像 `task_crdt`）；拒绝公网 room；实现 Sprint 候选已回填。
+
 ## [1.14.0] - 2026-07-11
 
 ### Added
