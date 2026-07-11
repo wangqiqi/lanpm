@@ -1,14 +1,31 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import { BrowserWindow, app } from 'electron'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import {
+  closeSync,
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  renameSync,
+  statSync,
+  truncateSync,
+  unlinkSync,
+  writeSync
+} from 'fs'
 import { join } from 'path'
 import type {
   FileChunkPayload,
   FileMetaBroadcastPayload,
   FilePullRequestPayload
 } from '../../shared/file/sync'
-import { filePullFromOffset, isFilePullRequestPayload, REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
+import {
+  filePullFromOffset,
+  isFilePullRequestPayload,
+  partialFileName,
+  REMOTE_PENDING_PREFIX
+} from '../../shared/file/sync'
 import { throwLanpm } from '../../shared/errors/lanpmError'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { FILE_CHUNK_SIZE, FILE_TRANSFER_PUSH_CHANNEL } from '../../shared/file/channels'
@@ -16,29 +33,45 @@ import type { FileMeta } from '../../shared/file/types'
 import { listUserGroups } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
+import { getFileById, upsertRemoteFileMeta } from '../storage/repositories/fileRepository'
 import {
-  getFileById,
-  upsertRemoteFileMeta
-} from '../storage/repositories/fileRepository'
+  finishTransfer,
+  getLatestDownloadTransfer,
+  insertTransfer,
+  updateTransferProgress
+} from '../storage/repositories/fileTransferRepository'
 import { generatePreview } from './previewService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
-const pullBuffers = new Map<
-  string,
-  {
-    chunks: Map<number, Buffer>
-    totalBytes: number
-    sha256: string
-    resolve: (p: string) => void
-    reject: (e: Error) => void
-  }
->()
+
+interface PullSession {
+  transferId: string
+  partialPath: string
+  totalBytes: number
+  sha256: string
+  groupId: string
+  resolve: (p: string) => void
+  reject: (e: Error) => void
+  timer: ReturnType<typeof setTimeout>
+}
+
+const pullSessions = new Map<string, PullSession>()
 
 function filesRootDir(): string {
   const dir = join(app.getPath('userData'), 'files')
   mkdirSync(dir, { recursive: true })
   return dir
+}
+
+function groupFilesDir(groupId: string): string {
+  const dir = join(filesRootDir(), groupId)
+  mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+export function partialPathFor(groupId: string, fileId: string): string {
+  return join(groupFilesDir(groupId), partialFileName(fileId))
 }
 
 function broadcastFiles(groupId: string): void {
@@ -127,47 +160,97 @@ async function handleFilePullRequest(db: Database, envelope: SyncEnvelope): Prom
   }
 }
 
+function ensurePartialFile(partialPath: string, fromOffset: number): void {
+  if (existsSync(partialPath)) {
+    const size = statSync(partialPath).size
+    if (size === fromOffset) return
+    if (size > fromOffset) {
+      truncateSync(partialPath, fromOffset)
+      return
+    }
+    unlinkSync(partialPath)
+  }
+  const fd = openSync(partialPath, 'w')
+  closeSync(fd)
+  if (fromOffset > 0) truncateSync(partialPath, fromOffset)
+}
+
+function sha256FileSync(path: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = createHash('sha256')
+    const stream = createReadStream(path)
+    stream.on('data', (chunk) => hash.update(chunk))
+    stream.on('error', reject)
+    stream.on('end', () => resolve(hash.digest('hex')))
+  })
+}
+
+function failPullSession(db: Database, fileId: string, err: Error): void {
+  const session = pullSessions.get(fileId)
+  if (!session) return
+  clearTimeout(session.timer)
+  pullSessions.delete(fileId)
+  finishTransfer(db, session.transferId, 'failed', err.message)
+  broadcastFiles(session.groupId)
+  session.reject(err)
+}
+
 function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
   if (envelope.type !== 'file_chunk' || !envelope.groupId) return
   const chunk = envelope.payload as FileChunkPayload
   if (!chunk?.fileId) return
 
-  const session = pullBuffers.get(chunk.fileId)
+  const session = pullSessions.get(chunk.fileId)
   if (!session) return
 
-  session.chunks.set(chunk.offset, Buffer.from(chunk.chunkBase64, 'base64'))
-  if (!chunk.done) return
+  try {
+    const data = Buffer.from(chunk.chunkBase64, 'base64')
+    const fd = openSync(session.partialPath, 'r+')
+    writeSync(fd, data, 0, data.length, chunk.offset)
+    closeSync(fd)
 
-  const ordered = [...session.chunks.entries()].sort((a, b) => a[0] - b[0])
-  const body = Buffer.concat(ordered.map(([, b]) => b))
-  const hash = createHash('sha256').update(body).digest('hex')
+    const transferred = Math.max(chunk.offset + data.length, statSync(session.partialPath).size)
+    updateTransferProgress(db, session.transferId, transferred, 'transferring')
+    broadcastFiles(session.groupId)
+
+    if (!chunk.done) return
+
+    void finalizePull(db, chunk.fileId, session).catch((e) => {
+      failPullSession(db, chunk.fileId, e instanceof Error ? e : new Error(String(e)))
+    })
+  } catch (e) {
+    failPullSession(db, chunk.fileId, e instanceof Error ? e : new Error(String(e)))
+  }
+}
+
+async function finalizePull(db: Database, fileId: string, session: PullSession): Promise<void> {
+  const hash = await sha256FileSync(session.partialPath)
   if (hash !== session.sha256) {
-    pullBuffers.delete(chunk.fileId)
-    session.reject(new Error('SHA256 校验失败'))
+    failPullSession(db, fileId, new Error('SHA256 校验失败'))
     return
   }
 
-  const meta = getFileById(db, chunk.fileId)
+  const meta = getFileById(db, fileId)
   if (!meta) {
-    pullBuffers.delete(chunk.fileId)
-    session.reject(new Error('文件元数据不存在'))
+    failPullSession(db, fileId, new Error('文件元数据不存在'))
     return
   }
 
-  const groupDir = join(filesRootDir(), meta.groupId)
-  mkdirSync(groupDir, { recursive: true })
-  const destPath = join(groupDir, `${meta.fileId}_${meta.name}`)
-  writeFileSync(destPath, body)
+  const destPath = join(groupFilesDir(meta.groupId), `${meta.fileId}_${meta.name}`)
+  if (existsSync(destPath)) unlinkSync(destPath)
+  renameSync(session.partialPath, destPath)
 
   db.prepare(
     `UPDATE files SET storage_path = ?, preview_status = 'none', updated_at = ? WHERE file_id = ?`
   ).run(destPath, new Date().toISOString(), meta.fileId)
 
-  pullBuffers.delete(chunk.fileId)
+  clearTimeout(session.timer)
+  pullSessions.delete(fileId)
+  finishTransfer(db, session.transferId, 'completed')
   void generatePreview(db, { ...meta, storagePath: destPath }).catch(
     catchSyncFailure('fileSync.generatePreview', { notify: false })
   )
-  broadcastFiles(meta.groupId)
+  broadcastFiles(session.groupId)
   session.resolve(destPath)
 }
 
@@ -208,28 +291,74 @@ export function initFileSyncService(db: Database): void {
 export function shutdownFileSyncService(): void {
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
-  pullBuffers.clear()
+  for (const [fileId, session] of pullSessions) {
+    clearTimeout(session.timer)
+    session.reject(new Error('file sync shutdown'))
+    pullSessions.delete(fileId)
+  }
 }
 
+export function bytesOnPartial(groupId: string, fileId: string): number {
+  const path = partialPathFor(groupId, fileId)
+  if (!existsSync(path)) return 0
+  return statSync(path).size
+}
+
+/**
+ * Arm receiver: write chunks to `{fileId}.partial`, track SQLite download transfer.
+ */
 function armPullReceiver(
-  fileId: string,
-  meta: { size: number; sha256: string },
-  timeoutMs = 60_000
+  db: Database,
+  meta: FileMeta,
+  opts?: { fromOffset?: number; transferId?: string; fromDeviceId?: string },
+  timeoutMs = 120_000
 ): Promise<string> {
+  const fromOffset = opts?.fromOffset ?? 0
+  const partialPath = partialPathFor(meta.groupId, meta.fileId)
+  ensurePartialFile(partialPath, fromOffset)
+
+  const status = getSetupStatus(db)
+  const deviceId = status.device?.deviceId ?? ''
+  const transferId = opts?.transferId ?? `xfer_dl_${randomUUID()}`
+
+  if (!opts?.transferId) {
+    insertTransfer(db, {
+      transferId,
+      fileId: meta.fileId,
+      groupId: meta.groupId,
+      direction: 'download',
+      fromDeviceId: opts?.fromDeviceId ?? '',
+      toDeviceId: deviceId,
+      status: 'transferring',
+      totalBytes: meta.size,
+      transferredBytes: fromOffset,
+      chunkSize: FILE_CHUNK_SIZE,
+      checksum: meta.sha256,
+      startedAt: new Date().toISOString()
+    })
+  } else {
+    db.prepare(
+      `UPDATE file_transfers SET transferred_bytes = ?, status = ?, finished_at = NULL, error_message = NULL WHERE transfer_id = ?`
+    ).run(fromOffset, 'transferring', transferId)
+  }
+  broadcastFiles(meta.groupId)
+
   return new Promise((resolve, reject) => {
-    pullBuffers.set(fileId, {
-      chunks: new Map(),
+    const timer = setTimeout(() => {
+      if (!pullSessions.has(meta.fileId)) return
+      failPullSession(db, meta.fileId, new Error('拉取远端文件超时'))
+    }, timeoutMs)
+
+    pullSessions.set(meta.fileId, {
+      transferId,
+      partialPath,
       totalBytes: meta.size,
       sha256: meta.sha256,
+      groupId: meta.groupId,
       resolve,
-      reject
+      reject,
+      timer
     })
-    setTimeout(() => {
-      if (pullBuffers.has(fileId)) {
-        pullBuffers.delete(fileId)
-        reject(new Error('拉取远端文件超时'))
-      }
-    }, timeoutMs)
   })
 }
 
@@ -254,9 +383,26 @@ export async function pullRemoteFile(db: Database, fileId: string): Promise<File
 
   ensureSubscribed(db, meta.groupId)
 
-  const destPromise = armPullReceiver(fileId, meta)
+  const existing = getLatestDownloadTransfer(db, fileId)
+  let fromOffset = bytesOnPartial(meta.groupId, fileId)
+  let transferId: string | undefined
+  if (
+    existing &&
+    (existing.status === 'failed' || existing.status === 'paused' || existing.status === 'transferring') &&
+    existing.transferredBytes > 0 &&
+    existing.transferredBytes < existing.totalBytes
+  ) {
+    fromOffset = Math.min(fromOffset, existing.transferredBytes)
+    if (fromOffset === existing.transferredBytes) transferId = existing.transferId
+  }
 
-  const payload: FilePullRequestPayload = { fileId, groupId: meta.groupId }
+  const destPromise = armPullReceiver(db, meta, { fromOffset, transferId })
+
+  const payload: FilePullRequestPayload = {
+    fileId,
+    groupId: meta.groupId,
+    fromOffset: fromOffset > 0 ? fromOffset : undefined
+  }
   await publishEnvelope(db, meta.groupId, 'file_pull_request', payload)
 
   await destPromise

@@ -3,8 +3,11 @@ import {
   isLocalRemovedPath,
   isRemotePendingPath,
   isFilePullRequestPayload,
+  isPartialFilePath,
   filePullFromOffset,
+  partialFileName,
   LOCAL_REMOVED_PREFIX,
+  PARTIAL_FILE_SUFFIX,
   REMOTE_PENDING_PREFIX
 } from '@shared/file/sync'
 
@@ -19,6 +22,14 @@ describe('isLocalRemovedPath', () => {
   it('detects local-removed storage paths', () => {
     expect(isLocalRemovedPath(`${LOCAL_REMOVED_PREFIX}file_abc`)).toBe(true)
     expect(isLocalRemovedPath('/data/files/sample.txt')).toBe(false)
+  })
+})
+
+describe('partial download path helpers', () => {
+  it('builds and detects .partial names', () => {
+    expect(partialFileName('file_abc')).toBe(`file_abc${PARTIAL_FILE_SUFFIX}`)
+    expect(isPartialFilePath(`/data/g1/file_abc${PARTIAL_FILE_SUFFIX}`)).toBe(true)
+    expect(isPartialFilePath('/data/g1/file_abc_name.txt')).toBe(false)
   })
 })
 

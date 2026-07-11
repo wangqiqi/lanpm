@@ -202,7 +202,28 @@ export function listResumableTransfers(db: Database, groupId: string): FileTrans
        ORDER BY t.started_at DESC`
     )
     .all(groupId) as (TransferRow & { file_name?: string })[]
-  return rows.map((r) => ({
+  return rows.map((r) => rowToView(r))
+}
+
+/** Latest download transfer for a file (any status) — for P2P resume. */
+export function getLatestDownloadTransfer(
+  db: Database,
+  fileId: string
+): FileTransferView | null {
+  const row = db
+    .prepare(
+      `SELECT t.*, f.name AS file_name FROM file_transfers t
+       LEFT JOIN files f ON f.file_id = t.file_id
+       WHERE t.file_id = ? AND t.direction = 'download'
+       ORDER BY t.started_at DESC
+       LIMIT 1`
+    )
+    .get(fileId) as (TransferRow & { file_name?: string }) | undefined
+  return row ? rowToView(row) : null
+}
+
+function rowToView(r: TransferRow & { file_name?: string }): FileTransferView {
+  return {
     transferId: r.transfer_id,
     fileId: r.file_id,
     groupId: r.group_id,
@@ -216,5 +237,5 @@ export function listResumableTransfers(db: Database, groupId: string): FileTrans
     startedAt: r.started_at,
     finishedAt: r.finished_at ?? undefined,
     errorMessage: r.error_message ?? undefined
-  }))
+  }
 }

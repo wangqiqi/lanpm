@@ -30,6 +30,9 @@ export const REMOTE_PENDING_PREFIX = 'remote-pending:'
 
 export const LOCAL_REMOVED_PREFIX = 'local-removed:'
 
+/** On-disk suffix for in-progress P2P downloads (TASK-166). */
+export const PARTIAL_FILE_SUFFIX = '.partial'
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
@@ -40,6 +43,15 @@ export function isRemotePendingPath(storagePath: string): boolean {
 
 export function isLocalRemovedPath(storagePath: string): boolean {
   return storagePath.startsWith(LOCAL_REMOVED_PREFIX)
+}
+
+export function isPartialFilePath(storagePath: string): boolean {
+  return storagePath.endsWith(PARTIAL_FILE_SUFFIX)
+}
+
+/** `{groupDir}/{fileId}.partial` */
+export function partialFileName(fileId: string): string {
+  return `${fileId}${PARTIAL_FILE_SUFFIX}`
 }
 
 export function isFilePullRequestPayload(value: unknown): value is FilePullRequestPayload {
