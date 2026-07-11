@@ -6,6 +6,7 @@
 
 ### Added
 - **A3 交付物契约（TASK-245）**：`deliverables` 派生索引（file↔task）与过滤；`removeLinkedFileId`。
+- **A3 文件库筛选（TASK-246）**：文件 Tab「全部 / 交付物」分段 + 按任务筛选。
 
 ## [1.14.0] - 2026-07-11
 

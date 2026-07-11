@@ -1,9 +1,15 @@
 import type { FileMeta } from '@shared/file/types'
 import { formatFileTypeLabel } from '@shared/file/formatFileType'
+import {
+  filterDeliverableFiles,
+  filterFilesByTaskId
+} from '@shared/task/deliverables'
 import type { MessageKey } from '@renderer/i18n/messages'
 
 export type FileSortField = 'name' | 'type' | 'size' | 'uploadedAt'
 export type FileSortOrder = 'ascend' | 'descend'
+/** 全部群文件 vs 已挂任务的交付物（A3） */
+export type FileLibraryScope = 'all' | 'deliverables'
 
 type CategoryLabels = Record<
   'document' | 'image' | 'video' | 'code' | 'bookmark' | 'other',
@@ -20,6 +26,26 @@ export function filterFiles(files: FileMeta[], query: string): FileMeta[] {
     if (f.bookmarkUrl?.toLowerCase().includes(q)) return true
     return false
   })
+}
+
+/** Apply A3 library scope + optional task filter (before text search). */
+export function applyLibraryFilters(
+  files: FileMeta[],
+  opts: {
+    scope: FileLibraryScope
+    taskId: string | null
+    fileToTaskIds: Map<string, string[]>
+    taskToFileIds: Map<string, string[]>
+  }
+): FileMeta[] {
+  let list = files
+  if (opts.scope === 'deliverables') {
+    list = filterDeliverableFiles(list, opts.fileToTaskIds)
+  }
+  if (opts.taskId) {
+    list = filterFilesByTaskId(list, opts.taskId, opts.taskToFileIds)
+  }
+  return list
 }
 
 export function sortFiles(

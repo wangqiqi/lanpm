@@ -10,6 +10,7 @@ import {
   List,
   Modal,
   Progress,
+  Select,
   Space,
   Table,
   Tag,
@@ -35,6 +36,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import type { FileCategory, FileMeta, FileTransferView } from '@shared/file/types'
 import { isLocalRemovedPath, isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
+import { useTaskStore } from '@renderer/stores/taskStore'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
@@ -47,10 +49,13 @@ import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { groupViewPath } from '@renderer/routes/paths'
 import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
 import { formatFileTypeLabel } from '@shared/file/formatFileType'
+import { buildDeliverableIndex } from '@shared/task/deliverables'
 import {
+  applyLibraryFilters,
   CATEGORY_I18N_KEYS,
   filterFiles,
   formatFileUploadedAt,
+  type FileLibraryScope,
   type FileSortField,
   type FileSortOrder
 } from '@renderer/features/files/fileListModel'
@@ -133,8 +138,12 @@ export default function FilesView(): React.ReactElement {
   const pullRemote = useFileStore((s) => s.pullRemote)
   const download = useFileStore((s) => s.download)
   const sendExistingFile = useChatStore((s) => s.sendExistingFile)
+  const tasks = useTaskStore((s) => s.tasksByGroup[gid] ?? [])
+  const loadTasks = useTaskStore((s) => s.loadTasks)
 
   const [category, setCategory] = useState<FileCategory | 'all'>('all')
+  const [libraryScope, setLibraryScope] = useState<FileLibraryScope>('all')
+  const [taskFilterId, setTaskFilterId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<FileSortField>('uploadedAt')
   const [sortOrder, setSortOrder] = useState<FileSortOrder>('descend')
@@ -160,6 +169,23 @@ export default function FilesView(): React.ReactElement {
     [t]
   )
 
+  const libraryScopeOptions = useMemo(
+    () => [
+      { label: t('files.scopeAll'), value: 'all' as const },
+      { label: t('files.scopeDeliverables'), value: 'deliverables' as const }
+    ],
+    [t]
+  )
+
+  const deliverableIndex = useMemo(() => buildDeliverableIndex(tasks), [tasks])
+
+  const taskFilterOptions = useMemo(() => {
+    const withLinks = tasks.filter(
+      (task) => !task.deletedAt && (task.linkedFileIds?.length ?? 0) > 0
+    )
+    return withLinks.map((task) => ({ value: task.taskId, label: task.title }))
+  }, [tasks])
+
   const categoryLabels = useMemo(
     () => ({
       document: t(CATEGORY_I18N_KEYS.document),
@@ -172,13 +198,20 @@ export default function FilesView(): React.ReactElement {
     [t]
   )
 
-  const filteredFiles = useMemo(
-    () => filterFiles(files, searchQuery),
-    [files, searchQuery]
-  )
+  const filteredFiles = useMemo(() => {
+    const scoped = applyLibraryFilters(files, {
+      scope: libraryScope,
+      taskId: taskFilterId,
+      fileToTaskIds: deliverableIndex.fileToTaskIds,
+      taskToFileIds: deliverableIndex.taskToFileIds
+    })
+    return filterFiles(scoped, searchQuery)
+  }, [files, searchQuery, libraryScope, taskFilterId, deliverableIndex])
 
   useEffect(() => {
     consumedSelectFileIdRef.current = null
+    setLibraryScope('all')
+    setTaskFilterId(null)
   }, [gid])
 
   useEffect(() => {
@@ -213,6 +246,7 @@ export default function FilesView(): React.ReactElement {
   useEffect(() => {
     if (!gid) return
     void loadFiles(gid, category === 'all' ? undefined : category)
+    void loadTasks(gid)
     void loadTransfers(gid)
     void loadTransferHistory(gid)
     void loadTransferSettings()
@@ -224,7 +258,7 @@ export default function FilesView(): React.ReactElement {
       }
     })
     return unsub
-  }, [gid, category, loadFiles, loadTransfers, loadTransferHistory, loadTransferSettings])
+  }, [gid, category, loadFiles, loadTasks, loadTransfers, loadTransferHistory, loadTransferSettings])
 
   useEffect(() => {
     if (!selected) {
@@ -845,6 +879,30 @@ export default function FilesView(): React.ReactElement {
       />
 
       <div className={styles.searchRow}>
+        <ViewSegment
+          value={libraryScope}
+          options={libraryScopeOptions}
+          onChange={(v) => {
+            setLibraryScope(v)
+            if (v === 'all') setTaskFilterId(null)
+          }}
+          equalWidth={false}
+          ariaLabel={t('files.scopeFilter')}
+        />
+        <Select
+          allowClear
+          showSearch
+          optionFilterProp="label"
+          className={styles.taskFilterSelect}
+          placeholder={t('files.taskFilterPlaceholder')}
+          value={taskFilterId ?? undefined}
+          options={taskFilterOptions}
+          onChange={(v) => {
+            const next = v ? String(v) : null
+            setTaskFilterId(next)
+            if (next) setLibraryScope('deliverables')
+          }}
+        />
         <Input.Search
           className={styles.searchInput}
           allowClear
@@ -1007,9 +1065,13 @@ export default function FilesView(): React.ReactElement {
                     <Text type="secondary">
                       {searchQuery.trim()
                         ? t('files.emptySearch')
-                        : category !== 'all'
-                          ? t('files.emptyCategory')
-                          : t('files.empty')}
+                        : taskFilterId
+                          ? t('files.emptyTaskDeliverables')
+                          : libraryScope === 'deliverables'
+                            ? t('files.emptyDeliverables')
+                            : category !== 'all'
+                              ? t('files.emptyCategory')
+                              : t('files.empty')}
                     </Text>
                     <Space wrap className={styles.emptyActions}>
                       <Button

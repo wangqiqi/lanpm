@@ -165,10 +165,17 @@
 .searchRow {
   flex-shrink: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin: 0 0 8px;
   padding: 0 4px;
+}
+
+.taskFilterSelect {
+  min-width: 160px;
+  max-width: 240px;
+  width: 200px;
 }
 
 .toolbarPrimary {
