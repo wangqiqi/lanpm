@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **任务独立标签类型 (TASK-171)**：`Task.tags` / Create·Update；`normalizeTaskTags`（trim/去重/上限）+ 单测。
+
 ## [1.2.0] - 2026-07-11
 
 ### Added

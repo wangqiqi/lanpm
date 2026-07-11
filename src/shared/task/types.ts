@@ -14,6 +14,8 @@ export interface Task {
   otherReason?: string
   priority: TaskPriority
   assigneeUserId?: string
+  /** Independent board labels (≠ priority); omit or [] = none */
+  tags?: string[]
   progressPercent: number
   startDate?: string
   endDate?: string
@@ -34,6 +36,7 @@ export interface CreateTaskInput {
   status?: TaskStatus
   priority?: TaskPriority
   assigneeUserId?: string
+  tags?: string[]
   progressPercent?: number
 }
 
@@ -45,6 +48,8 @@ export interface UpdateTaskInput {
   otherReason?: string | null
   priority?: TaskPriority
   assigneeUserId?: string | null
+  /** Set to replace tags; omit to leave unchanged; `[]` clears */
+  tags?: string[]
   progressPercent?: number
   parentTaskId?: string | null
   sortOrder?: number
