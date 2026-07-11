@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **TASK-236**：checklist CRUD 服务层（同群守卫）+ `checklistProgressOf` 单测；IPC 通道契约断言。
 - **TASK-235**：验收清单契约 — schema v9（`task_checklists` / `task_checklist_items`）；`ChecklistItem` 类型；IPC `listChecklist` / `upsertChecklistItem` / `toggleChecklistItem` / `removeChecklistItem`；browser stub 对齐。
 
 ## [1.12.0] - 2026-07-11
