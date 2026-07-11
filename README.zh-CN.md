@@ -175,12 +175,15 @@ npm run test              # Vitest 单元测试
 npm run verify:p0         # P0 一致性守卫（IPC / i18n / 文档 …）
 npm run verify:m7         # RC 全量回归（发版前推荐）
 npm run build             # 生产构建
+npm run dist:linux:x64    # electron-builder 按平台/arch 打安装包
+npm run verify:platform-matrix  # 跨平台发版矩阵静态验收
 ```
 
 | 说明 | 命令 / 注意 |
 |------|-------------|
 | 仅浏览器 UI 预览 | `npm run dev:web` — **验收以 Electron 为准**（IPC / SQLite） |
 | 视觉一致性门禁 | `npm run verify:visual`（见 [docs/06](./docs/06_验收与里程碑计划.md) §2.6） |
+| 跨平台安装包 | `dist:win` / `dist:mac` / `dist:linux`（可加 `:x64` / `:arm64`）；矩阵见 [docs/07](./docs/07_跨平台发版矩阵.md) |
 | 一键脚本菜单 | `./onekey_run.sh` → start / stop / status / build / check … |
 
 ### 浏览器 Stub 与 Electron 差异
@@ -230,7 +233,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M2–M5** | 聊天 / 任务 / 文件 / 群组 / 驾驶舱 |
 | **M6–M7** | 真网路径、性能与发布门禁 |
 
-**当前版本：** `1.17.0`（项目交付物 A3 · 发现加固 A5 · 白板实时 CRDT · 以及既有日历拖拽 / 验收清单 / 白板 / 消息↔任务 / 标签 / Presence）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
+**当前版本：** `1.17.0`（项目交付物 A3 · 发现加固 A5 · 白板实时 CRDT · 以及既有日历拖拽 / 验收清单 / 白板 / 消息↔任务 / 标签 / Presence）。**Unreleased：** 跨平台发版矩阵（`docs/07` · `verify:platform-matrix`）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [验收计划](./docs/06_验收与里程碑计划.md) §2.6。
 
 **规划中（P1+）：** 屏幕共享、语音通话、思维导图、插件系统、移动端 PWA 等 —— [完整列表](./docs/06_验收与里程碑计划.md)。
 

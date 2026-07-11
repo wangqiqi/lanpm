@@ -175,12 +175,15 @@ npm run test              # Vitest unit tests
 npm run verify:p0         # IPC / i18n / docs guards
 npm run verify:m7         # full RC regression (recommended before release)
 npm run build             # production Electron build
+npm run dist:linux:x64    # package for current host OS/arch via electron-builder
+npm run verify:platform-matrix  # Win/mac/Linux × x64+arm64 wiring
 ```
 
 | Topic | Command / note |
 |-------|----------------|
 | Browser UI stub only | `npm run dev:web` — **Electron is the source of truth** for IPC & SQLite |
 | Visual consistency gate | `npm run verify:visual` (see [docs/06](./docs/06_验收与里程碑计划.md) §2.6) |
+| Cross-platform packages | `dist:win` / `dist:mac` / `dist:linux` (+ `:x64` / `:arm64`); matrix in [docs/07](./docs/07_跨平台发版矩阵.md) |
 | One-key menu | `./onekey_run.sh` → start / stop / status / build / check … |
 
 ### Browser stub vs Electron
@@ -205,7 +208,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3 + discover A5 + whiteboard realtime CRDT（**v1.17.0**）· WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3 + discover A5 + whiteboard realtime CRDT（**v1.17.0**）· cross-platform x64+arm64 matrix（**Unreleased**）· WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 
@@ -230,7 +233,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M2–M5** | Chat, tasks, files, groups, cockpit |
 | **M6–M7** | Real network paths, perf & release gates |
 
-**Current:** `1.17.0` — project deliverables (A3), discover hardening (A5), whiteboard realtime CRDT (`whiteboard_crdt` + y-excalidraw), plus prior calendar drag / checklist / whiteboard / message↔task / tags / Presence. M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.17.0` — project deliverables (A3), discover hardening (A5), whiteboard realtime CRDT (`whiteboard_crdt` + y-excalidraw), plus prior calendar drag / checklist / whiteboard / message↔task / tags / Presence. **Unreleased:** cross-platform release matrix (`docs/07`, `verify:platform-matrix`). M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
 
 **Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 

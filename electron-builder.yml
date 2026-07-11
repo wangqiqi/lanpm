@@ -11,16 +11,29 @@ files:
   - '!docs/**'
   - '!.cursorGrowth/**'
   - '!**/*.md'
+# Explicit multi-arch (TASK-265) — do not rely on host default alone
 win:
   target:
-    - nsis
+    - target: nsis
+      arch:
+        - x64
+        - arm64
 mac:
   target:
-    - dmg
+    - target: dmg
+      arch:
+        - x64
+        - arm64
 linux:
   target:
-    - AppImage
-    - deb
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
   category: Office
 extraResources:
   - from: resources/icon.png

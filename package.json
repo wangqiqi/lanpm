@@ -105,6 +105,17 @@
     "build:icons": "node scripts/build-icons.mjs",
     "ensure:native": "node scripts/ensure-native-deps.mjs",
     "rebuild:native": "node scripts/ensure-native-deps.mjs --force",
+    "dist": "npm run build && electron-builder --publish never",
+    "dist:win": "npm run build && electron-builder --win --x64 --arm64 --publish never",
+    "dist:win:x64": "npm run build && electron-builder --win --x64 --publish never",
+    "dist:win:arm64": "npm run build && electron-builder --win --arm64 --publish never",
+    "dist:mac": "npm run build && electron-builder --mac --x64 --arm64 --publish never",
+    "dist:mac:x64": "npm run build && electron-builder --mac --x64 --publish never",
+    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64 --publish never",
+    "dist:linux": "npm run build && electron-builder --linux --x64 --arm64 --publish never",
+    "dist:linux:x64": "npm run build && electron-builder --linux --x64 --publish never",
+    "dist:linux:arm64": "npm run build && electron-builder --linux --arm64 --publish never",
+    "verify:platform-matrix": "node --experimental-strip-types tests/static/verify-platform-matrix.ts",
     "postinstall": "node scripts/ensure-native-deps.mjs"
   },
   "dependencies": {

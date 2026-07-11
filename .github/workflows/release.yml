@@ -86,13 +86,24 @@ jobs:
         include:
           - label: Windows x86_64
             platform: windows-latest
-            artifact: windows
+            artifact: windows-x64
+            builder_args: --win --x64
+          - label: macOS Intel x64
+            platform: macos-13
+            artifact: macos-x64
+            builder_args: --mac --x64
           - label: macOS Apple Silicon
             platform: macos-latest
-            artifact: macos
+            artifact: macos-arm64
+            builder_args: --mac --arm64
           - label: Linux x86_64
             platform: ubuntu-22.04
-            artifact: linux
+            artifact: linux-x64
+            builder_args: --linux --x64
+          - label: Linux arm64
+            platform: ubuntu-24.04-arm
+            artifact: linux-arm64
+            builder_args: --linux --arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +111,7 @@ jobs:
           ref: ${{ needs.resolve-tag.outputs.build_ref }}
 
       - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
+        if: startsWith(matrix.platform, 'ubuntu-')
         run: bash .github/scripts/install-linux-deps.sh release
 
       - uses: actions/setup-node@v4
@@ -117,7 +128,7 @@ jobs:
       - name: Package installer
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npx electron-builder --publish never
+        run: npx electron-builder ${{ matrix.builder_args }} --publish never
 
       - name: List dist output
         shell: bash
@@ -176,9 +187,12 @@ jobs:
 
             | 平台 | 文件 |
             |------|------|
-            | Windows | `*.exe`（NSIS） |
-            | macOS | `*.dmg` |
-            | Linux | `*.AppImage` · `*.deb` |
+            | Windows x64 | `*.exe`（NSIS） |
+            | macOS x64 / arm64 | `*.dmg` |
+            | Linux x64 / arm64 | `*.AppImage` · `*.deb` |
+
+            矩阵说明见 [docs/07_跨平台发版矩阵.md](https://github.com/${{ github.repository }}/blob/master/docs/07_跨平台发版矩阵.md)。
+            Win arm64 不在本 CI 强制构建（自建机，见文档 §3）。
           files: |
             release-assets/**/*.exe
             release-assets/**/*.dmg

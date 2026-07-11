@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **SPRINT-PLATFORM-MATRIX（TASK-264–269）**：跨平台发版矩阵 — builder 显式 x64+arm64；`dist:*`；ensure-native 含 node-screenshots；Release CI 补 mac x64 / linux arm64；`docs/07` + `verify:platform-matrix`。
+
 ## [1.17.0] - 2026-07-11
 
 ### Added
