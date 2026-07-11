@@ -11,12 +11,19 @@
 - **caret 桥接 (TASK-197)**：store `descriptionCarets`；`useDescriptionCaretBroadcast`；失焦清除。
 - **caret 透传验收 (TASK-196)**：`verify:task-awareness` 覆盖含 caret 的 Awareness round-trip。
 - **文本 caret 协议 (TASK-195)**：`TaskAwarenessLocalState.caret`（`description` + UTF-16 offset）；校验/单测；docs/03。
+## [1.6.0] - 2026-07-11
+
+### Added
 - **SPRINT-GROUP-TAG-DICT 收尾 (TASK-194)**：`verify:group-tag-dict`；docs/04·06·README 对齐群标签字典；归档；handoff `/release` → **v1.6.0**。
 - **群标签字典协议 (TASK-189)**：`GroupTagMeta` / `GroupTagPatchPayload`；`SyncMessageType.group_tag_patch`；docs/03；`verify:sync-handlers` 登记。
 - **群标签字典持久化 (TASK-190)**：schema v6 表 `group_tag_meta` + migrate；repository；删群级联。
 - **群标签字典同步 (TASK-191)**：`groupTagSyncService` publish/apply `group_tag_patch`；匿名群跳过；挂入 taskSync。
 - **群标签字典桥接 (TASK-192)**：IPC list/upsert/remove/import；preload · lanpm-api · browser stub；本机色一次性导入。
 - **群标签字典 UI (TASK-193)**：`groupTagStore`；BoardTagPalette/芯片/详情读群字典；改色走 IPC；i18n「已同步」提示。
+
+### Release
+- `v1.6.0` — 群标签色字典：`group_tag_meta` / `group_tag_patch` LWW（TASK-189–194）
+
 ## [1.5.0] - 2026-07-11
 
 ### Added
