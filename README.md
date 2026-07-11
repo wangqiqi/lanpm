@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.12.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.13.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -203,7 +203,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**Unreleased → 1.13.0**）· WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 
@@ -228,7 +228,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M2–M5** | Chat, tasks, files, groups, cockpit |
 | **M6–M7** | Real network paths, perf & release gates |
 
-**Current:** `1.12.0` — collaboration whiteboard (7th BottomNav tab, Excalidraw), message↔task A2 loop (one-click create, discuss `task_ref`, linked files), plus prior calendar / tags / Presence. **Unreleased:** task acceptance checklist (P1-3, schema v9). M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.13.0` — task acceptance checklist (P1-3, schema v9: detail CRUD, progress, create subtask from item), plus prior whiteboard / message↔task / calendar / tags / Presence. M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
 
 **Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 

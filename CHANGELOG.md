@@ -4,12 +4,13 @@
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-07-11
+
 ### Added
 - **SPRINT-P1-3-CHECKLIST（TASK-235–239）**：任务验收清单 — schema v9；详情增删改勾选与进度；未完成项建子任务；`verify:checklist`；飞鸽 P1-3 对齐。
-- **TASK-238**：未完成检查项「建子任务」— 标题=检查项文案、挂同一父任务；`linkedSubtaskId` 关联。
-- **TASK-237**：任务详情「验收清单」— 增删改勾选、进度条与文案（i18n）。
-- **TASK-236**：checklist CRUD 服务层（同群守卫）+ `checklistProgressOf` 单测；IPC 通道契约断言。
-- **TASK-235**：验收清单契约 — schema v9（`task_checklists` / `task_checklist_items`）；`ChecklistItem` 类型；IPC `listChecklist` / `upsertChecklistItem` / `toggleChecklistItem` / `removeChecklistItem`；browser stub 对齐。
+
+### Release
+- `v1.13.0` — task acceptance checklist (P1-3)
 
 ## [1.12.0] - 2026-07-11
 
