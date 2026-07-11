@@ -203,7 +203,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0** 已交付）· WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（目标 **v1.2.0**）· WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 
@@ -228,7 +228,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M2–M5** | Chat, tasks, files, groups, cockpit |
 | **M6–M7** | Real network paths, perf & release gates |
 
-**Current:** `1.1.0` — Yjs `task_crdt` delivered; M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.1.0` — Yjs `task_crdt` delivered; P2P file pull resume ready for **`/release` → v1.2.0**; M0–M7 closed in automation; true-device hand tests still deferred (see [acceptance plan](./docs/06_验收与里程碑计划.md) §2.6). Licensed under [AGPL-3.0-or-later](./LICENSE).
 
 **Coming (P1+):** screen share, voice, mind maps, plugin system, mobile PWA — [full list](./docs/06_验收与里程碑计划.md).
 

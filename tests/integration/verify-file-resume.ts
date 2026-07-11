@@ -206,7 +206,7 @@ const partialPath = join(dirB, partialFileName(fileId))
 const transferId = `xfer_dl_${randomUUID()}`
 let phase1Chunks = 0
 let phase2Chunks = 0
-let interruptAfter = TEST_CHUNK * 2 // keep first 16 bytes, then resume
+const interruptAfter = TEST_CHUNK * 2 // keep first 16 bytes, then resume
 let phase: 'interrupt' | 'resume' = 'interrupt'
 let completedPath: string | null = null
 

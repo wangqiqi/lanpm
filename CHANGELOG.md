@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **SPRINT-FILE-RESUME 收尾 (TASK-170)**：docs/06 §2.3·§6、docs/00/05、README 对齐 P2P pull 断点续传；Sprint VERIFY；归档；handoff `/release` → **v1.2.0**。
 - **file_pull 续传验收 (TASK-169)**：`verify:file-resume`（中断后 `fromOffset` 续传拼完整文件）；`package.json` 脚本。
 - **FilesView 远端下载续传 UX (TASK-168)**：失败/中断下载显示「续传下载」与进度提示；传输历史可续传并标注方向。
 - **file_pull 续传 API (TASK-167)**：`pullRemoteFile` 读 `.partial`/SQLite 进度发 `fromOffset`；`resumeTransfer` 支持 download 方向。
