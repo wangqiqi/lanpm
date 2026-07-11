@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.30.0] - 2026-07-12
+
+### Changed
+- **领导驾驶舱**：`riskProjectCount` KPI；项目按延期→风险→正常排序；「需关注」条；周报为主 CTA（API Key / 返回降噪）；岛感 KPI/列表/报表面板（亮暗）；`docs/01` §12 / `docs/04` 对齐。
+
+### Release
+- `v1.30.0` — executive cockpit chrome
+
 ## [1.29.0] - 2026-07-12
 
 ### Changed
