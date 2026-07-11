@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Checkbox, Input, InputNumber, Modal, Select } from 'antd'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
@@ -19,6 +19,10 @@ import {
 } from '@shared/task/validation'
 import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
+import RemoteCaretOverlay from '@renderer/features/task/RemoteCaretOverlay'
+import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescriptionCaretBroadcast'
+import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
+import awarenessStyles from '@renderer/features/task/taskAwareness.module.css'
 
 const { TextArea } = Input
 
@@ -66,6 +70,27 @@ export default function TaskEditModal({
   const [progressPercent, setProgressPercent] = useState(0)
   const [milestone, setMilestone] = useState(false)
   const [saving, setSaving] = useState(false)
+  const taskId = task?.taskId
+  const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[groupId] ?? [])
+  const remoteCarets = useMemo(
+    () =>
+      taskId
+        ? awarenessPeers.filter(
+            (p) =>
+              p.focusedTaskId === taskId &&
+              p.caret != null &&
+              p.caret.field === 'description'
+          )
+        : [],
+    [awarenessPeers, taskId]
+  )
+  const { publishCaret, clearCaret } = useDescriptionCaretBroadcast(
+    groupId,
+    taskId,
+    'board'
+  )
+  const descHostRef = useRef<HTMLDivElement>(null)
+  const [descTextarea, setDescTextarea] = useState<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     if (!task) return
@@ -81,6 +106,20 @@ export default function TaskEditModal({
     setProgressPercent(task.progressPercent)
     setMilestone(!!task.milestone)
   }, [task])
+
+  useEffect(() => {
+    if (!open) {
+      clearCaret()
+      setDescTextarea(null)
+      return
+    }
+    setDescTextarea(descHostRef.current?.querySelector('textarea') ?? null)
+  }, [open, description, taskId, clearCaret])
+
+  useEffect(() => {
+    if (!open) return
+    return () => clearCaret()
+  }, [open, taskId, clearCaret])
 
   const memberOptions = useMemo(
     () => [
@@ -285,16 +324,30 @@ export default function TaskEditModal({
           <div style={{ marginBottom: 4, fontSize: 12, color: 'var(--lanpm-text-secondary)' }}>
             {t('tree.detailDescription')}
           </div>
-          <TextArea
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t('tree.detailDescriptionPlaceholder')}
-            maxLength={TASK_DESCRIPTION_MAX_LENGTH}
-            onKeyDown={(e) => {
-              if (!okDisabled) onCtrlEnter(e, () => void handleOk())
-            }}
-          />
+          <div ref={descHostRef} className={awarenessStyles.caretHost}>
+            <TextArea
+              rows={3}
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value)
+                publishCaret(e.target.selectionStart)
+              }}
+              onSelect={(e) => publishCaret(e.currentTarget.selectionStart)}
+              onClick={(e) => publishCaret(e.currentTarget.selectionStart)}
+              onKeyUp={(e) => publishCaret(e.currentTarget.selectionStart)}
+              onBlur={() => clearCaret()}
+              placeholder={t('tree.detailDescriptionPlaceholder')}
+              maxLength={TASK_DESCRIPTION_MAX_LENGTH}
+              onKeyDown={(e) => {
+                if (!okDisabled) onCtrlEnter(e, () => void handleOk())
+              }}
+            />
+            <RemoteCaretOverlay
+              text={description}
+              textarea={descTextarea}
+              carets={remoteCarets}
+            />
+          </div>
         </label>
       </div>
     </Modal>

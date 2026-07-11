@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Checkbox, Input, InputNumber, Select, Slider, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
@@ -34,7 +34,10 @@ import {
 } from '@shared/task/validation'
 import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import TaskTagChip from '@renderer/features/task/TaskTagChip'
+import RemoteCaretOverlay from '@renderer/features/task/RemoteCaretOverlay'
+import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescriptionCaretBroadcast'
 import { useGroupTagStore } from '@renderer/stores/groupTagStore'
+import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import styles from './tree.module.css'
 
@@ -98,6 +101,24 @@ export default function TaskDetailPanel({
     [tagMetaRows]
   )
   const ensureImported = useGroupTagStore((s) => s.ensureImported)
+  const awarenessPeers = useTaskAwarenessStore((s) => s.byGroup[groupId] ?? [])
+  const remoteCarets = useMemo(
+    () =>
+      awarenessPeers.filter(
+        (p) =>
+          p.focusedTaskId === task.taskId &&
+          p.caret != null &&
+          p.caret.field === 'description'
+      ),
+    [awarenessPeers, task.taskId]
+  )
+  const { publishCaret, clearCaret } = useDescriptionCaretBroadcast(
+    groupId,
+    task.taskId,
+    'tree'
+  )
+  const descHostRef = useRef<HTMLDivElement>(null)
+  const [descTextarea, setDescTextarea] = useState<HTMLTextAreaElement | null>(null)
 
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description ?? '')
@@ -131,6 +152,14 @@ export default function TaskDetailPanel({
   useEffect(() => {
     void ensureImported(groupId)
   }, [groupId, ensureImported])
+
+  useEffect(() => {
+    setDescTextarea(descHostRef.current?.querySelector('textarea') ?? null)
+  }, [description, task.taskId])
+
+  useEffect(() => {
+    return () => clearCaret()
+  }, [task.taskId, clearCaret])
 
   const scheduleDraft = useMemo(
     () => ({
@@ -379,14 +408,28 @@ export default function TaskDetailPanel({
 
       <label className={`${styles.detailField} ${styles.detailDescriptionField}`}>
         <Text type="secondary">{t('tree.detailDescription')}</Text>
-        <TextArea
-          className={styles.detailDescriptionInput}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder={t('tree.detailDescriptionPlaceholder')}
-          maxLength={TASK_DESCRIPTION_MAX_LENGTH}
-          onKeyDown={(e) => onCtrlEnter(e, trySave, saveDisabled || saving)}
-        />
+        <div ref={descHostRef} className={styles.detailDescriptionHost}>
+          <TextArea
+            className={styles.detailDescriptionInput}
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value)
+              publishCaret(e.target.selectionStart)
+            }}
+            onSelect={(e) => publishCaret(e.currentTarget.selectionStart)}
+            onClick={(e) => publishCaret(e.currentTarget.selectionStart)}
+            onKeyUp={(e) => publishCaret(e.currentTarget.selectionStart)}
+            onBlur={() => clearCaret()}
+            placeholder={t('tree.detailDescriptionPlaceholder')}
+            maxLength={TASK_DESCRIPTION_MAX_LENGTH}
+            onKeyDown={(e) => onCtrlEnter(e, trySave, saveDisabled || saving)}
+          />
+          <RemoteCaretOverlay
+            text={description}
+            textarea={descTextarea}
+            carets={remoteCarets}
+          />
+        </div>
       </label>
 
       <Text type="secondary" className={styles.detailMeta}>
