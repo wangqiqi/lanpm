@@ -32,11 +32,14 @@ interface UiState {
   boardShowAllFsLines: boolean
   /** groupId → (tagKey → css color) */
   tagColorOverridesByGroup: Record<string, Record<string, string>>
+  /** Whiteboard immersive chrome-off mode */
+  whiteboardZen: boolean
   setTheme: (theme: ThemeMode) => void
   toggleTheme: () => void
   setLocale: (locale: 'zh-CN' | 'en-US') => void
   setBoardShowAllFsLines: (on: boolean) => void
   setTagColorOverride: (groupId: string, tagKey: string, color: string | null) => void
+  setWhiteboardZen: (on: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -44,6 +47,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   locale: (localStorage.getItem('locale') as 'zh-CN' | 'en-US') || 'zh-CN',
   boardShowAllFsLines: readBoardShowAllFsLines(),
   tagColorOverridesByGroup: readTagColorOverrides(),
+  whiteboardZen: false,
   setTheme: (theme) => {
     localStorage.setItem('theme', theme)
     set({ theme })
@@ -77,7 +81,8 @@ export const useUiStore = create<UiState>((set, get) => ({
     }
     localStorage.setItem('board.tagColorOverrides', JSON.stringify(next))
     set({ tagColorOverridesByGroup: next })
-  }
+  },
+  setWhiteboardZen: (on) => set({ whiteboardZen: on })
 }))
 
 /** AUTO-20：无头截图在同一会话内切换主题时同步 Ant ConfigProvider */

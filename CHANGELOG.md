@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **白板工具栏**：去掉「保存 + 提示」整行（已自动保存）；右上角浮层保留导出与**禅模式**（隐藏顶栏/底栏/标题，Esc 退出）。
+
 ### Added
 - **SPRINT-WHITEBOARD 收尾 (TASK-229)**：导出 PNG→群文件（关联任务时发聊）；`verify:whiteboard`；docs/03·04 七视图；README；归档；可 handoff `/release` **1.11.0**。
 - **任务打开白板 (TASK-228)**：详情/编辑「打开白板」；`?linkTask=` 关联 `linkedTaskId`。

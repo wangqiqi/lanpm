@@ -33,3 +33,14 @@
   min-height: 0;
   min-width: 0;
 }
+
+.shellZen {
+  background: var(--lanpm-surface-solid);
+}
+
+.mainZen {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

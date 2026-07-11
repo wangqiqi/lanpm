@@ -13,6 +13,7 @@ import WhiteboardView from '@renderer/features/whiteboard/WhiteboardView'
 import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
+import { useUiStore } from '@renderer/stores/uiStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewHeader from '@renderer/ui/ViewHeader'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -27,6 +28,7 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
   const { groupId } = useParams<{ groupId: string }>()
   const getGroupType = useNavigationStore((s) => s.getGroupType)
   const touchSession = useDmStore((s) => s.touchSession)
+  const whiteboardZen = useUiStore((s) => s.whiteboardZen)
 
   useEffect(() => {
     if (groupId && isDmGroupId(groupId)) {
@@ -50,7 +52,8 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
   }, [groupId, getGroupType, t, message])
 
   const isChat = view === 'chat'
-  const pageTitle = isChat ? null : t(VIEW_MESSAGE_KEYS[view])
+  const hideChrome = view === 'whiteboard' && whiteboardZen
+  const pageTitle = isChat || hideChrome ? null : t(VIEW_MESSAGE_KEYS[view])
   const showFunctionGuide =
     groupId != null &&
     !isDmGroupId(groupId) &&
@@ -59,7 +62,9 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
     !localStorage.getItem(FUNCTION_GUIDE_STORAGE_KEY)
 
   return (
-    <div className={`${styles.root} ${isChat ? '' : styles.taskView}`}>
+    <div
+      className={`${styles.root} ${isChat ? '' : styles.taskView} ${hideChrome ? styles.zenRoot : ''}`}
+    >
       {pageTitle != null ? <ViewHeader title={pageTitle} /> : null}
       {showFunctionGuide ? (
         <Alert

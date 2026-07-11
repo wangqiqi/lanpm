@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button } from 'antd'
-import { DownloadOutlined, SaveOutlined } from '@ant-design/icons'
+import { Button, Tooltip } from 'antd'
+import { CompressOutlined, DownloadOutlined, ExpandOutlined } from '@ant-design/icons'
 import { Excalidraw, exportToBlob } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types'
@@ -15,7 +15,6 @@ import {
   normalizeSceneJson
 } from '@shared/whiteboard/types'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
-import ViewToolbar, { ViewToolbarGroup, ViewToolbarHint } from '@renderer/ui/ViewToolbar'
 import styles from './whiteboard.module.css'
 
 type ScenePayload = {
@@ -71,11 +70,11 @@ export default function WhiteboardView(): React.ReactElement {
   const gid = groupId ?? ''
   const linkTaskFromUrl = searchParams.get('linkTask')?.trim() || undefined
   const theme = useUiStore((s) => s.theme)
+  const whiteboardZen = useUiStore((s) => s.whiteboardZen)
+  const setWhiteboardZen = useUiStore((s) => s.setWhiteboardZen)
 
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [exporting, setExporting] = useState(false)
-  const [dirty, setDirty] = useState(false)
   const [linkedTaskId, setLinkedTaskId] = useState<string | undefined>()
   const [initialData, setInitialData] = useState<ScenePayload | null>(null)
   const [boardKey, setBoardKey] = useState(0)
@@ -87,8 +86,27 @@ export default function WhiteboardView(): React.ReactElement {
     appState: AppState
     files: BinaryFiles
   } | null>(null)
+  const linkedTaskIdRef = useRef<string | undefined>(undefined)
 
   const langCode = locale.startsWith('zh') ? 'zh-CN' : 'en'
+
+  useEffect(() => {
+    linkedTaskIdRef.current = linkedTaskId
+  }, [linkedTaskId])
+
+  const flushSave = useCallback(async (): Promise<void> => {
+    if (!gid || !latestRef.current) return
+    try {
+      const { elements, appState, files } = latestRef.current
+      await getLanpmApi().whiteboard.saveScene({
+        groupId: gid,
+        sceneJson: serializeScene(elements, appState, files),
+        linkedTaskId: linkedTaskIdRef.current ?? null
+      })
+    } catch (err) {
+      message.error(formatError(err, 'whiteboard.saveFailed'))
+    }
+  }, [gid, message, formatError])
 
   const loadScene = useCallback(async (): Promise<void> => {
     if (!gid) return
@@ -99,7 +117,6 @@ export default function WhiteboardView(): React.ReactElement {
       setLinkedTaskId(nextLinked)
       setInitialData(parseScenePayload(scene?.sceneJson ?? emptyWhiteboardSceneJson()))
       setBoardKey((k) => k + 1)
-      setDirty(false)
       if (linkTaskFromUrl) {
         const sceneJson = scene?.sceneJson ?? emptyWhiteboardSceneJson()
         await getLanpmApi().whiteboard.saveScene({
@@ -122,34 +139,25 @@ export default function WhiteboardView(): React.ReactElement {
     void loadScene()
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      setWhiteboardZen(false)
     }
-  }, [loadScene])
+  }, [loadScene, setWhiteboardZen])
 
-  const persist = useCallback(async (): Promise<void> => {
-    if (!gid || !latestRef.current) return
-    setSaving(true)
-    try {
-      const { elements, appState, files } = latestRef.current
-      await getLanpmApi().whiteboard.saveScene({
-        groupId: gid,
-        sceneJson: serializeScene(elements, appState, files),
-        linkedTaskId: linkedTaskId ?? null
-      })
-      setDirty(false)
-    } catch (err) {
-      message.error(formatError(err, 'whiteboard.saveFailed'))
-    } finally {
-      setSaving(false)
+  useEffect(() => {
+    if (!whiteboardZen) return
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setWhiteboardZen(false)
     }
-  }, [gid, linkedTaskId, message, formatError])
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [whiteboardZen, setWhiteboardZen])
 
   const scheduleSave = useCallback((): void => {
-    setDirty(true)
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(() => {
-      void persist()
+      void flushSave()
     }, 900)
-  }, [persist])
+  }, [flushSave])
 
   const onChange = useCallback(
     (elements: readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
@@ -165,6 +173,7 @@ export default function WhiteboardView(): React.ReactElement {
     const latest = latestRef.current
     setExporting(true)
     try {
+      await flushSave()
       const elements = api?.getSceneElements() ?? latest?.elements ?? []
       const appState = api?.getAppState() ?? latest?.appState
       const files = api?.getFiles() ?? latest?.files ?? {}
@@ -182,7 +191,7 @@ export default function WhiteboardView(): React.ReactElement {
       await getLanpmApi().whiteboard.exportPng({
         groupId: gid,
         pngBase64,
-        linkedTaskId
+        linkedTaskId: linkedTaskIdRef.current
       })
       message.success(t('whiteboard.exportDone'))
     } catch (err) {
@@ -190,7 +199,7 @@ export default function WhiteboardView(): React.ReactElement {
     } finally {
       setExporting(false)
     }
-  }, [gid, linkedTaskId, message, formatError, t])
+  }, [gid, message, formatError, t, flushSave])
 
   const uiOptions = useMemo(
     () => ({
@@ -204,42 +213,36 @@ export default function WhiteboardView(): React.ReactElement {
     []
   )
 
-  const hint = linkedTaskId
-    ? t('whiteboard.linkedHint', { taskId: linkedTaskId.slice(0, 8) })
-    : t('whiteboard.toolbarHint')
-
   if (!gid) return <ViewLoadingCenter />
 
   return (
-    <div className={styles.root}>
-      <ViewToolbar
-        start={
-          <ViewToolbarGroup>
-            <Button
-              size="small"
-              icon={<SaveOutlined />}
-              loading={saving}
-              disabled={!dirty && !saving}
-              onClick={() => void persist()}
-            >
-              {t('whiteboard.save')}
-            </Button>
-            <Button
-              size="small"
-              icon={<DownloadOutlined />}
-              loading={exporting}
-              onClick={() => void exportPng()}
-            >
-              {t('whiteboard.exportPng')}
-            </Button>
-          </ViewToolbarGroup>
-        }
-        end={<ViewToolbarHint>{hint}</ViewToolbarHint>}
-      />
+    <div className={`${styles.root} ${whiteboardZen ? styles.rootZen : ''}`}>
+      <div className={styles.floatingActions} role="toolbar" aria-label={t('whiteboard.actionsAria')}>
+        <Tooltip title={t('whiteboard.exportPng')}>
+          <Button
+            size="small"
+            icon={<DownloadOutlined />}
+            loading={exporting}
+            onClick={() => void exportPng()}
+            aria-label={t('whiteboard.exportPng')}
+          />
+        </Tooltip>
+        <Tooltip title={whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')}>
+          <Button
+            size="small"
+            type={whiteboardZen ? 'primary' : 'default'}
+            icon={whiteboardZen ? <CompressOutlined /> : <ExpandOutlined />}
+            onClick={() => setWhiteboardZen(!whiteboardZen)}
+            aria-label={whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')}
+          >
+            {whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')}
+          </Button>
+        </Tooltip>
+      </div>
       {loading || !initialData ? (
         <ViewLoadingCenter />
       ) : (
-        <div className={styles.canvasHost} data-theme={theme}>
+        <div className={styles.canvasHost} data-theme={theme} data-zen={whiteboardZen ? '1' : '0'}>
           <Excalidraw
             key={`${gid}-${boardKey}`}
             langCode={langCode}
