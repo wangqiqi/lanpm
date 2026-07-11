@@ -313,8 +313,45 @@ export function importGroupBundle(
       overwritten: 0
     }
 
-    const idMap = new Map<string, string>()
+    const taskIdMap = new Map<string, string>()
+    const msgIdMap = new Map<string, string>()
+    const fileIdMap = new Map<string, string>()
     const groupId = plain.groupId
+
+    // Pre-assign new_id remaps so parent/file/msg FKs stay consistent regardless of insert order.
+    if (mode === 'new_id') {
+      for (const task of plain.tasks) {
+        if (task.deletedAt) continue
+        if (taskExists(db, task.taskId)) {
+          taskIdMap.set(
+            task.taskId,
+            `task_${createHash('sha256')
+              .update(task.taskId + plain.exportedAt)
+              .digest('hex')
+              .slice(0, 12)}`
+          )
+        }
+      }
+      for (const msg of plain.messages) {
+        if (messageExists(db, msg.msgId)) {
+          msgIdMap.set(msg.msgId, `msg_${randomBytes(8).toString('hex')}`)
+        }
+      }
+      for (const file of plain.files) {
+        if (fileExists(db, file.fileId)) {
+          fileIdMap.set(file.fileId, `file_${randomBytes(8).toString('hex')}`)
+        }
+      }
+    }
+
+    const remapId = (map: Map<string, string>, id: string | undefined): string | undefined => {
+      if (!id) return undefined
+      return map.get(id) ?? id
+    }
+    const remapIds = (map: Map<string, string>, ids: string[] | undefined): string[] | undefined => {
+      if (!ids || ids.length === 0) return ids
+      return ids.map((id) => map.get(id) ?? id)
+    }
 
     // Tags before tasks so coerceTagsForGroup can see dictionary entries.
     for (const tag of tags) {
@@ -354,15 +391,21 @@ export function importGroupBundle(
           continue
         }
         if (mode === 'new_id') {
-          taskId = `task_${createHash('sha256').update(taskId + plain.exportedAt).digest('hex').slice(0, 12)}`
-          idMap.set(task.taskId, taskId)
+          taskId = taskIdMap.get(task.taskId) ?? taskId
         } else if (mode === 'overwrite') {
           deleteChecklistForTask(db, taskId)
           db.prepare(`DELETE FROM tasks WHERE task_id = ?`).run(taskId)
           result.overwritten += 1
         }
       }
-      insertTask(db, { ...task, taskId, groupId: task.groupId || groupId })
+      insertTask(db, {
+        ...task,
+        taskId,
+        groupId: task.groupId || groupId,
+        parentTaskId: remapId(taskIdMap, task.parentTaskId),
+        sourceMsgId: remapId(msgIdMap, task.sourceMsgId),
+        linkedFileIds: remapIds(fileIdMap, task.linkedFileIds)
+      })
       result.tasksImported += 1
     }
 
@@ -374,13 +417,18 @@ export function importGroupBundle(
           continue
         }
         if (mode === 'new_id') {
-          msgId = `msg_${randomBytes(8).toString('hex')}`
+          msgId = msgIdMap.get(msg.msgId) ?? msgId
         } else if (mode === 'overwrite') {
           db.prepare(`DELETE FROM messages WHERE msg_id = ?`).run(msgId)
           result.overwritten += 1
         }
       }
-      insertMessage(db, { ...msg, msgId, groupId: msg.groupId || groupId })
+      insertMessage(db, {
+        ...msg,
+        msgId,
+        groupId: msg.groupId || groupId,
+        replyToMsgId: remapId(msgIdMap, msg.replyToMsgId)
+      })
       result.messagesImported += 1
     }
 
@@ -392,7 +440,7 @@ export function importGroupBundle(
       }
       let fileId = file.fileId
       if (exists && mode === 'new_id') {
-        fileId = `file_${randomBytes(8).toString('hex')}`
+        fileId = fileIdMap.get(file.fileId) ?? fileId
       } else if (exists && mode === 'overwrite') {
         db.prepare(`DELETE FROM files WHERE file_id = ?`).run(fileId)
         result.overwritten += 1
@@ -410,7 +458,7 @@ export function importGroupBundle(
     }
 
     for (const entry of checklists) {
-      const taskId = idMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
+      const taskId = taskIdMap.get(entry.checklist.taskId) ?? entry.checklist.taskId
       let checklistId = entry.checklist.checklistId
       const exists = checklistExistsByTask(db, taskId)
       if (exists) {
@@ -420,7 +468,7 @@ export function importGroupBundle(
         }
         if (mode === 'new_id') {
           // If task wasn't remapped but checklist exists, skip to avoid UNIQUE(task_id)
-          if (!idMap.has(entry.checklist.taskId) && taskExists(db, entry.checklist.taskId)) {
+          if (!taskIdMap.has(entry.checklist.taskId) && taskExists(db, entry.checklist.taskId)) {
             result.skipped += 1
             continue
           }
@@ -429,7 +477,7 @@ export function importGroupBundle(
           deleteChecklistForTask(db, taskId)
           result.overwritten += 1
         }
-      } else if (mode === 'new_id' && idMap.has(entry.checklist.taskId)) {
+      } else if (mode === 'new_id' && taskIdMap.has(entry.checklist.taskId)) {
         checklistId = `cl_${randomBytes(8).toString('hex')}`
       }
 
@@ -455,6 +503,8 @@ export function importGroupBundle(
             db.prepare(`DELETE FROM task_checklist_items WHERE item_id = ?`).run(itemId)
           }
         }
+        const linkedSub =
+          remapId(taskIdMap, item.linkedSubtaskId ?? undefined) ?? null
         db.prepare(
           `INSERT INTO task_checklist_items (
             item_id, checklist_id, task_id, text, done, sort_order,
@@ -467,7 +517,7 @@ export function importGroupBundle(
           item.text,
           item.done ? 1 : 0,
           item.sortOrder,
-          item.linkedSubtaskId ?? null,
+          linkedSub,
           item.createdAt,
           item.updatedAt
         )
@@ -530,6 +580,8 @@ export function importGroupBundle(
 
     if (plain.whiteboardScene) {
       const exists = !!getWhiteboardScene(db, groupId)
+      const linkedTaskId =
+        remapId(taskIdMap, plain.whiteboardScene.linkedTaskId ?? undefined) ?? null
       if (exists) {
         if (mode === 'skip' || mode === 'new_id') {
           result.skipped += 1
@@ -538,7 +590,7 @@ export function importGroupBundle(
             db,
             groupId,
             plain.whiteboardScene.sceneJson,
-            plain.whiteboardScene.linkedTaskId ?? null,
+            linkedTaskId,
             plain.whiteboardScene.updatedAt
           )
           result.overwritten += 1
@@ -549,7 +601,7 @@ export function importGroupBundle(
           db,
           groupId,
           plain.whiteboardScene.sceneJson,
-          plain.whiteboardScene.linkedTaskId ?? null,
+          linkedTaskId,
           plain.whiteboardScene.updatedAt
         )
         result.whiteboardSceneImported += 1

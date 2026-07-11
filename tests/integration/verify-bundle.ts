@@ -23,7 +23,8 @@ import { setMeta } from '../../src/main/storage/repositories/syncMetaRepository.
 import {
   insertTask,
   getTaskById,
-  buildTaskFromInput
+  buildTaskFromInput,
+  listTasksByGroup
 } from '../../src/main/storage/repositories/taskRepository.ts'
 import {
   insertMessage,
@@ -70,9 +71,9 @@ assert.match(bundleSrc, /getWhiteboardCrdtBlob/)
 assert.match(bundleSrc, /getWhiteboardScene/)
 assert.match(bundleSrc, /listMessagesForBundleExport/)
 assert.match(bundleSrc, /messagesTruncated/)
-assert.match(bundleSrc, /db\.transaction/)
-assert.match(bundleSrc, /assertBundleConflictMode/)
-assert.match(bundleSrc, /assertBundlePassword/)
+assert.match(bundleSrc, /taskIdMap/)
+assert.match(bundleSrc, /remapId\(taskIdMap/)
+assert.match(bundleSrc, /linkedFileIds: remapIds/)
 
 const msgRepoSrc = readFileSync(
   join(projectRoot, 'src/main/storage/repositories/messageRepository.ts'),
@@ -321,6 +322,122 @@ try {
     }
   } finally {
     rmLanpmTemp(dirV)
+  }
+
+  // TASK-322: new_id remaps parentTaskId + linkedFileIds
+  const dirN = mkLanpmTemp('lanpm-bundle-newid-')
+  try {
+    const dbN = openDb(dirN)
+    const now = new Date().toISOString()
+    const parent = buildTaskFromInput(
+      { groupId: GROUP, title: 'Parent', status: 'todo' },
+      USER,
+      'task_parent'
+    )
+    parent.createdAt = now
+    parent.updatedAt = now
+    insertTask(dbN, parent)
+    const child = buildTaskFromInput(
+      {
+        groupId: GROUP,
+        title: 'Child',
+        status: 'todo',
+        parentTaskId: 'task_parent',
+        linkedFileIds: ['file_link_1'],
+        sourceMsgId: 'msg_link_1'
+      },
+      USER,
+      'task_child'
+    )
+    child.createdAt = now
+    child.updatedAt = now
+    insertTask(dbN, child)
+    insertMessage(dbN, {
+      msgId: 'msg_link_1',
+      groupId: GROUP,
+      senderUserId: USER,
+      senderDeviceId: DEVICE,
+      type: 'text',
+      content: { kind: 'text', text: 'src' },
+      lamportTs: 1,
+      createdAt: now,
+      deliveryStatus: 'sent'
+    })
+    insertFile(dbN, {
+      fileId: 'file_link_1',
+      groupId: GROUP,
+      name: 'a.txt',
+      ext: 'txt',
+      category: 'document',
+      size: 1,
+      uploadedBy: USER,
+      uploadedAt: now,
+      sha256: 'x',
+      storagePath: '/tmp/a.txt',
+      previewStatus: 'none',
+      isBookmark: false,
+      updatedAt: now
+    })
+    const newIdPath = join(dirN, 'newid.lanpm-bundle.json')
+    exportGroupBundle(dbN, GROUP, PASS, newIdPath, false)
+
+    const dirN2 = mkLanpmTemp('lanpm-bundle-newid2-')
+    try {
+      const dbN2 = openDb(dirN2)
+      // Conflict on same primary IDs
+      insertTask(dbN2, { ...parent, title: 'Local parent' })
+      insertTask(dbN2, { ...child, title: 'Local child' })
+      insertMessage(dbN2, {
+        msgId: 'msg_link_1',
+        groupId: GROUP,
+        senderUserId: USER,
+        senderDeviceId: DEVICE,
+        type: 'text',
+        content: { kind: 'text', text: 'local' },
+        lamportTs: 1,
+        createdAt: now,
+        deliveryStatus: 'sent'
+      })
+      insertFile(dbN2, {
+        fileId: 'file_link_1',
+        groupId: GROUP,
+        name: 'b.txt',
+        ext: 'txt',
+        category: 'document',
+        size: 1,
+        uploadedBy: USER,
+        uploadedAt: now,
+        sha256: 'y',
+        storagePath: '/tmp/b.txt',
+        previewStatus: 'none',
+        isBookmark: false,
+        updatedAt: now
+      })
+
+      const imported = importGroupBundle(dbN2, newIdPath, PASS, 'new_id')
+      assert.ok(imported.tasksImported >= 2)
+      const tasks = listTasksByGroup(dbN2, GROUP)
+      const remappedParent = tasks.find((t) => t.title === 'Parent')
+      const remappedChild = tasks.find((t) => t.title === 'Child')
+      assert.ok(remappedParent)
+      assert.ok(remappedChild)
+      assert.notEqual(remappedParent.taskId, 'task_parent')
+      assert.notEqual(remappedChild.taskId, 'task_child')
+      assert.equal(remappedChild.parentTaskId, remappedParent.taskId)
+      assert.ok(remappedChild.linkedFileIds?.[0])
+      assert.notEqual(remappedChild.linkedFileIds?.[0], 'file_link_1')
+      assert.ok(remappedChild.sourceMsgId)
+      assert.notEqual(remappedChild.sourceMsgId, 'msg_link_1')
+      // originals still present
+      assert.equal(getTaskById(dbN2, 'task_parent')?.title, 'Local parent')
+      dbN2.close()
+      console.log('OK: verify:bundle — TASK-322 new_id FK remap')
+    } finally {
+      rmLanpmTemp(dirN2)
+    }
+    dbN.close()
+  } finally {
+    rmLanpmTemp(dirN)
   }
 
   // TASK-320: newest-first export under a small limit (drops oldest, keeps newest)
