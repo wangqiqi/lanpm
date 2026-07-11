@@ -40,13 +40,25 @@ import {
   setTaskAwarenessChangedHandler
 } from './taskAwarenessService'
 import { broadcastTaskAwareness } from '../ipc/task'
+import {
+  handleIncomingGroupTagPatch,
+  setGroupTagMetaChangedHandler
+} from './groupTagSyncService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
 
+const GROUP_TAG_PUSH = 'group:tagMetaChanged'
+
 function broadcastTasksChanged(groupId: string): void {
   for (const win of BrowserWindow.getAllWindows()) {
     win.webContents.send(TASK_PUSH_CHANNEL, groupId)
+  }
+}
+
+function broadcastGroupTagMetaChanged(groupId: string): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send(GROUP_TAG_PUSH, groupId)
   }
 }
 
@@ -125,6 +137,10 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'task_awareness') {
     handleIncomingTaskAwareness(db, envelope)
+    return
+  }
+  if (envelope.type === 'group_tag_patch') {
+    handleIncomingGroupTagPatch(db, envelope)
   }
 }
 
@@ -193,6 +209,7 @@ async function publishDepPatch(db: Database, payload: TaskDepPatchPayload): Prom
 export function initTaskSyncService(db: Database): void {
   setTaskCrdtTasksChangedHandler(broadcastTasksChanged)
   setTaskAwarenessChangedHandler(broadcastTaskAwareness)
+  setGroupTagMetaChangedHandler(broadcastGroupTagMetaChanged)
   refreshSubscriptions(db)
   void requestTaskOfflineSync(db).catch(
     catchSyncFailure('taskSync.requestOffline', { notify: false })
@@ -208,6 +225,7 @@ export function shutdownTaskSyncService(): void {
   setTaskCrdtTasksChangedHandler(null)
   setTaskCrdtOfflineTasksChangedHandler(null)
   setTaskAwarenessChangedHandler(null)
+  setGroupTagMetaChangedHandler(null)
 }
 
 export function publishTaskUpsert(db: Database, task: Task): void {
