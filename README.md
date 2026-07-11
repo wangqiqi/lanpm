@@ -115,6 +115,7 @@
 - **LibreOffice local preview** for Office docs — preview stays on your machine  
 - Bookmarks & in-app WebView for team URLs  
 - **Deliverables (A3)**: filter by linked tasks, attach/detach files from the Files tab (`verify:project-files`)  
+- **Discover (A5)**: actionable empty/error hints + persistent seed peers for VPN / cross-subnet (`verify:discover-a5`)  
 
 ### 🏢 Built for real org shapes
 
@@ -204,7 +205,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | Gantt | **gantt-task-react** |
 | Persistence (RC) | **SQLite** (single source of truth) |
 | Network (RC) | UDP discovery + TCP/P2P paths; transport encryption |
-| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3（**Unreleased → 1.15.0**）· WebRTC · IndexedDB hot cache (post-RC) |
+| Roadmap | Yjs `task_crdt`（**v1.1.0**）· P2P file pull resume（**v1.2.0**）· board tags（**v1.3.0**）· task Awareness Presence（**v1.4.0**）· tag filter/palette（**v1.5.0**）· group tag dict sync（**v1.6.0**）· description text caret（**v1.7.0**）· nav badges mine-open（**v1.8.0**）· weak-hint + force-dict tags（**v1.9.0**）· task calendar（**v1.10.0**）· whiteboard + message↔task（**v1.12.0**）· acceptance checklist（**v1.13.0**）· calendar drag reschedule（**v1.14.0**）· project deliverables A3 + discover A5（**Unreleased**）· WebRTC · IndexedDB hot cache (post-RC) |
 
 ---
 

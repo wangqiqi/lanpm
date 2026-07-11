@@ -115,6 +115,7 @@
 - **LibreOffice 本地转换预览** Office 文档，预览过程不离开本机  
 - 网址书签 + 应用内 WebView  
 - **交付物（A3）**：按任务筛选/挂接，文件 Tab 可挂到任务（`verify:project-files`）  
+- **发现（A5）**：失败/空态可操作提示 + 发现种子（VPN/跨网段，`verify:discover-a5`）  
 
 ### 🏢 贴合真实组织形态
 
