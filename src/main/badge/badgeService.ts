@@ -25,13 +25,21 @@ export function countUnreadMessages(
   return row.c
 }
 
-export function countTodoTasks(db: Database, groupId: string): number {
+/** 指派给 userId 且 status ∈ {todo, doing} 的未删除任务数 */
+export function countMineOpenTasks(
+  db: Database,
+  groupId: string,
+  assigneeUserId: string
+): number {
   const row = db
     .prepare(
       `SELECT COUNT(*) AS c FROM tasks
-       WHERE group_id = ? AND status = 'todo' AND deleted_at IS NULL`
+       WHERE group_id = ?
+       AND assignee_user_id = ?
+       AND status IN ('todo', 'doing')
+       AND deleted_at IS NULL`
     )
-    .get(groupId) as { c: number }
+    .get(groupId, assigneeUserId) as { c: number }
   return row.c
 }
 
@@ -39,10 +47,10 @@ export function getGroupTabBadges(db: Database, groupId: string): GroupTabBadges
   const status = getSetupStatus(db)
   const userId = status.user?.userId
   if (!userId) {
-    return { chatUnread: 0, boardTodo: 0 }
+    return { chatUnread: 0, boardMineOpen: 0 }
   }
   return {
     chatUnread: countUnreadMessages(db, groupId, userId),
-    boardTodo: countTodoTasks(db, groupId)
+    boardMineOpen: countMineOpenTasks(db, groupId, userId)
   }
 }
