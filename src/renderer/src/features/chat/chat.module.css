@@ -516,6 +516,11 @@
   padding-top: 4px;
 }
 
+.memberSearch {
+  margin: 0 0 8px;
+  width: 100%;
+}
+
 .memberStats {
   display: block;
   font-size: var(--lanpm-font-caption);

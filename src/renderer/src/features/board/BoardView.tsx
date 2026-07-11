@@ -11,6 +11,9 @@ import {
   type DragStartEvent
 } from '@dnd-kit/core'
 import { Button, Form, Input, Modal, Select, Switch } from 'antd'
+import {
+  filterTasksByAssigneeSearch
+} from '@shared/chat/matchMemberSearch'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -219,6 +222,7 @@ export default function BoardView(): React.ReactElement {
   const deleteTask = useTaskStore((s) => s.deleteTask)
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
+  const members = useChatMembersStore((s) => s.membersByGroup[gid] ?? [])
 
   const [createOpen, setCreateOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -232,6 +236,7 @@ export default function BoardView(): React.ReactElement {
   const [relationFocusId, setRelationFocusId] = useState<string | null>(null)
   const [relationHoverId, setRelationHoverId] = useState<string | null>(null)
   const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [assigneeSearch, setAssigneeSearch] = useState('')
   const boardBodyRef = useRef<HTMLDivElement>(null)
   const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
   const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
@@ -282,7 +287,11 @@ export default function BoardView(): React.ReactElement {
       done: [],
       other: []
     }
-    const visible = filterTasksByTags(tasks, tagFilter)
+    const visible = filterTasksByAssigneeSearch(
+      filterTasksByTags(tasks, tagFilter),
+      members,
+      assigneeSearch
+    )
     for (const t of visible) {
       map[t.status].push(t)
     }
@@ -290,14 +299,18 @@ export default function BoardView(): React.ReactElement {
       map[col].sort((a, b) => a.sortOrder - b.sortOrder)
     }
     return map
-  }, [tasks, tagFilter])
+  }, [tasks, tagFilter, members, assigneeSearch])
 
   const availableTags = useMemo(() => collectUniqueTaskTags(tasks), [tasks])
   const filteredCount = useMemo(
-    () => filterTasksByTags(tasks, tagFilter).length,
-    [tasks, tagFilter]
+    () =>
+      filterTasksByAssigneeSearch(filterTasksByTags(tasks, tagFilter), members, assigneeSearch)
+        .length,
+    [tasks, tagFilter, members, assigneeSearch]
   )
   const tagFilterActive = tagFilter.some((t) => t.trim().length > 0)
+  const assigneeFilterActive = assigneeSearch.trim().length > 0
+  const boardFilterActive = tagFilterActive || assigneeFilterActive
 
   useEffect(() => {
     if (!gid) return
@@ -595,6 +608,15 @@ export default function BoardView(): React.ReactElement {
                   aria-label={t('board.showAllFsLines')}
                 />
               </label>
+              <Input.Search
+                allowClear
+                size="small"
+                className={styles.assigneeFilterInput}
+                placeholder={t('board.assigneeFilterPlaceholder')}
+                aria-label={t('board.assigneeFilter')}
+                value={assigneeSearch}
+                onChange={(e) => setAssigneeSearch(e.target.value)}
+              />
               {availableTags.length > 0 ? (
                 <>
                   <Select
@@ -623,8 +645,12 @@ export default function BoardView(): React.ReactElement {
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />
-      ) : tagFilterActive && filteredCount === 0 ? (
-        <ViewEmptyHint>{t('board.tagFilterEmpty')}</ViewEmptyHint>
+      ) : boardFilterActive && filteredCount === 0 ? (
+        <ViewEmptyHint>
+          {assigneeFilterActive && !tagFilterActive
+            ? t('board.assigneeFilterEmpty')
+            : t('board.tagFilterEmpty')}
+        </ViewEmptyHint>
       ) : (
         <DndContext
           sensors={sensors}

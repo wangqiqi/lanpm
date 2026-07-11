@@ -5,6 +5,7 @@ import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import type { TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPanel'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import { memberSelectFilterOption } from '@shared/chat/matchMemberSearch'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { onCtrlEnter, onEnterUnlessShift } from '@renderer/lib/inputKeyboard'
@@ -237,6 +238,9 @@ export default function TaskEditModal({
             {t('tree.detailAssignee')}
           </div>
           <Select
+            showSearch
+            optionFilterProp="label"
+            filterOption={(input, option) => memberSelectFilterOption(input, option, members)}
             value={assigneeUserId ?? ''}
             onChange={(v) => setAssigneeUserId(v || undefined)}
             options={memberOptions}

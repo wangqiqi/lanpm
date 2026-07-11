@@ -419,6 +419,11 @@
   max-width: 280px;
 }
 
+.assigneeFilterInput {
+  min-width: 140px;
+  max-width: 200px;
+}
+
 .tagFilterEmpty {
   padding: 24px 16px;
   text-align: center;

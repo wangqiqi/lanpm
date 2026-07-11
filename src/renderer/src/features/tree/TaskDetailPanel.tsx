@@ -8,6 +8,7 @@ import type { ChecklistItem, ChecklistProgress } from '@shared/task/checklist'
 import type { ChatMessage } from '@shared/chat/types'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import { memberSelectFilterOption } from '@shared/chat/matchMemberSearch'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
@@ -475,6 +476,9 @@ export default function TaskDetailPanel({
         <label className={styles.detailFieldGrow}>
           <Text type="secondary">{t('tree.detailAssignee')}</Text>
           <Select
+            showSearch
+            optionFilterProp="label"
+            filterOption={(input, option) => memberSelectFilterOption(input, option, members)}
             value={assigneeUserId ?? ''}
             onChange={(v) => setAssigneeUserId(v || undefined)}
             options={memberOptions}

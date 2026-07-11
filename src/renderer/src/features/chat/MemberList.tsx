@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
-import { List, Typography } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { Input, List, Typography } from 'antd'
 import { MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
+import { matchesMemberSearch } from '@shared/chat/matchMemberSearch'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { presenceEmoji } from '@shared/presence'
@@ -34,6 +35,7 @@ export default function MemberList({
   onInsertMention
 }: MemberListProps): React.ReactElement {
   const { t } = useI18n()
+  const [search, setSearch] = useState('')
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const openSession = useDmStore((s) => s.openSession)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
@@ -42,11 +44,20 @@ export default function MemberList({
   const originGroupId = isDm ? useDmStore.getState().lastOriginGroupId : groupId
   const dmAllowed = groupAllowsDirectMessage(getGroupType(originGroupId))
 
+  const filteredMembers = useMemo(
+    () => members.filter((m) => matchesMemberSearch(m, search)),
+    [members, search]
+  )
+
   useEffect(() => {
     onRefresh()
     const timer = window.setInterval(onRefresh, PRESENCE_POLL_MS)
     return () => window.clearInterval(timer)
   }, [groupId, onRefresh])
+
+  useEffect(() => {
+    setSearch('')
+  }, [groupId])
 
   const startDm = (member: GroupMemberView): void => {
     if (!currentUserId || member.userId === currentUserId || !dmAllowed) return
@@ -66,10 +77,23 @@ export default function MemberList({
       <Text className={styles.memberTitle}>
         {isDm ? t('chat.dmPeer') : t('chat.members')}
       </Text>
+      {!isDm ? (
+        <Input.Search
+          allowClear
+          size="small"
+          className={styles.memberSearch}
+          placeholder={t('chat.memberSearchPlaceholder')}
+          aria-label={t('chat.memberSearch')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      ) : null}
       <List
         size="small"
-        dataSource={members}
-        locale={{ emptyText: t('chat.noMembers') }}
+        dataSource={filteredMembers}
+        locale={{
+          emptyText: search.trim() ? t('chat.memberSearchEmpty') : t('chat.noMembers')
+        }}
         renderItem={(member) => {
           const isSelf = member.userId === currentUserId
           const presence = member.presence ?? 'offline'

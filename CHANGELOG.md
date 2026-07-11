@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **SPRINT-B2-MEMBER-SEARCH（TASK-284–288）**：`matchesMemberSearch`（显示名 / mentionKeys · 汉字 · 拼音）；看板负责人筛选（可与标签叠加）；指派 Select 可搜拼音；聊天侧栏成员搜索；`verify:member-search`。
+
 ## [1.20.0] - 2026-07-11
 
 ### Added
