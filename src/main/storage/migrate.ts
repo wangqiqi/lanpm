@@ -38,6 +38,20 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `ALTER TABLE task_dependencies ADD COLUMN last_writer_device_id TEXT NOT NULL DEFAULT ''`
       )
     }
+  },
+  {
+    fromVersion: 3,
+    description: 'task_crdt_docs: per-group Yjs snapshot blob (TASK-158)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE task_crdt_docs (
+          group_id TEXT PRIMARY KEY,
+          doc_id TEXT NOT NULL,
+          update_blob BLOB NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+    }
   }
 ]
 

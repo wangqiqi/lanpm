@@ -64,6 +64,18 @@ export function listTasksByGroup(db: Database, groupId: string): Task[] {
   return rows.map(rowToTask)
 }
 
+/** All tasks in group including soft-deleted (Y.Doc seed / CRDT). */
+export function listTasksByGroupIncludingDeleted(db: Database, groupId: string): Task[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM tasks
+       WHERE group_id = ?
+       ORDER BY sort_order ASC, created_at ASC`
+    )
+    .all(groupId) as TaskRow[]
+  return rows.map(rowToTask)
+}
+
 /** Max updated_at in group (including soft-deleted); empty when none. */
 export function getMaxTaskUpdatedAt(db: Database, groupId: string): string {
   const row = db

@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **群级 Y.Doc 持久化 (TASK-158)**：表 `task_crdt_docs`（schema v4）；`taskCrdtStore` 从 `tasks` seed / blob 加载；`verify:task-crdt-store`。
 - **task_crdt 协议解禁 (TASK-157)**：`TaskCrdtPayload` / `isTaskCrdtPayload`（`shared/task/taskCrdt.ts`）；从 `UNIMPLEMENTED_SYNC_TYPES` 移除 `task_crdt`；`docs/03` §6.2/§10 与 `verify:sync-handlers` 对齐。
 - **引入 Yjs 依赖 (TASK-156)**：安装 `yjs@^13`；`verify:rc-reality` 改为要求 `yjs`、仍禁止 WebRTC；`docs/01` §1.3.1 标明 Yjs 已引入、`task_crdt` 落地中（目标 v1.1.0）。
 

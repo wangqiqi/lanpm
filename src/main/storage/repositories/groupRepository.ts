@@ -122,6 +122,7 @@ export function deleteGroupCascade(db: Database, groupId: string): void {
         OR to_task_id IN (SELECT task_id FROM tasks WHERE group_id = ?)`
   ).run(groupId, groupId)
   db.prepare(`DELETE FROM tasks WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM task_crdt_docs WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM file_transfers WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM files WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM group_members WHERE group_id = ?`).run(groupId)

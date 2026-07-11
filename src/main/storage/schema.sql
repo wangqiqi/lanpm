@@ -154,3 +154,11 @@ CREATE TABLE sync_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- 群级 Yjs 文档快照（task:{groupId}）
+CREATE TABLE task_crdt_docs (
+  group_id TEXT PRIMARY KEY,
+  doc_id TEXT NOT NULL,
+  update_blob BLOB NOT NULL,
+  updated_at TEXT NOT NULL
+);

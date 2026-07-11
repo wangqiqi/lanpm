@@ -31,7 +31,8 @@ export const EXPECTED_TABLES = [
   'files',
   'file_transfers',
   'ai_config',
-  'sync_meta'
+  'sync_meta',
+  'task_crdt_docs'
 ] as const
 
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
