@@ -3,11 +3,12 @@ import { throwLanpm } from '../errors/lanpmError.ts'
 
 /**
  * Protocol types defined in docs/03 · types.ts but with no main handler yet.
- * Transport must refuse to publish these until post-RC implementation.
+ * Transport must refuse to publish these until implementation lands.
  * @see docs/06 §2.3
- * `member_event` 已解禁（TASK-146）；handler 见 TASK-147。
+ * `task_crdt` 已解禁（TASK-157）；handler / 双写见 TASK-159+。
+ * `member_event` 已解禁（TASK-146）。
  */
-export const UNIMPLEMENTED_SYNC_TYPES = ['task_crdt'] as const
+export const UNIMPLEMENTED_SYNC_TYPES = [] as const
 
 export type UnimplementedSyncType = (typeof UNIMPLEMENTED_SYNC_TYPES)[number]
 

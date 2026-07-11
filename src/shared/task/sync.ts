@@ -3,7 +3,7 @@ import type { Task } from './types'
 
 export type TaskPatchAction = 'upsert' | 'delete'
 
-/** docs/03 §6.2 — task_patch payload（LWW by task.updatedAt；Yjs 见 task_crdt post-v1.1） */
+/** docs/03 §6.2 — task_patch payload（LWW by task.updatedAt；Yjs 见 `taskCrdt.ts` / task_crdt） */
 export interface TaskPatchPayload {
   action: TaskPatchAction
   task: Task

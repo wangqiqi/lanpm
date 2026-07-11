@@ -30,11 +30,14 @@ const SYNC_TYPES = [
   'read_receipt_sync_batch'
 ] as const
 
-/** post-RC / transport-level — 允许仅在文档或 transport 出现 */
+/**
+ * transport-level 或协议已解禁、handler 尚未挂上（TASK-159 前）。
+ * discovery/heartbeat 无业务 handler；task_crdt 协议见 shared/task/taskCrdt.ts。
+ */
 const POST_RC_OR_TRANSPORT = new Set<string>(['discovery', 'heartbeat', 'task_crdt'])
 
-/** Must be refused by publish (SPRINT-PROTOCOL-DOCS) — task_crdt only after TASK-146 */
-const UNIMPLEMENTED_PUBLISH = new Set<string>(['task_crdt'])
+/** Must be refused by publish — empty after TASK-157 */
+const UNIMPLEMENTED_PUBLISH = new Set<string>()
 
 const HANDLER_FILES = [
   'src/main/chat/chatService.ts',
@@ -72,6 +75,16 @@ for (const type of UNIMPLEMENTED_PUBLISH) {
   )
 }
 
+assert.ok(
+  !/UNIMPLEMENTED_SYNC_TYPES\s*=\s*\[[^\]]*['"]task_crdt['"]/.test(unimplementedSrc),
+  'task_crdt must not remain in UNIMPLEMENTED_SYNC_TYPES (TASK-157)'
+)
+
+const taskCrdtSrc = readFileSync(join(root, 'src/shared/task/taskCrdt.ts'), 'utf8')
+assert.match(taskCrdtSrc, /TaskCrdtPayload/, 'TaskCrdtPayload required')
+assert.match(taskCrdtSrc, /isTaskCrdtPayload/, 'isTaskCrdtPayload required')
+assert.match(taskCrdtSrc, /task:\{groupId\}|task:\$\{groupId\}/, 'docId convention required')
+
 const corpus = HANDLER_FILES.map((rel) => readFileSync(join(root, rel), 'utf8')).join('\n')
 
 for (const type of SYNC_TYPES) {
@@ -82,7 +95,9 @@ for (const type of SYNC_TYPES) {
       realPublish.includes(type) ||
       readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8').includes(`'${type}'`) ||
       unimplementedSrc.includes(`'${type}'`) ||
-      readFileSync(join(root, 'src/shared/group/memberEvent.ts'), 'utf8').includes(type)
+      readFileSync(join(root, 'src/shared/group/memberEvent.ts'), 'utf8').includes(type) ||
+      taskCrdtSrc.includes(type) ||
+      taskCrdtSrc.includes('task_crdt')
     assert.ok(inTransport, `transport/doc reference missing for ${type}`)
     continue
   }
