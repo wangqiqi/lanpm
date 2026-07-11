@@ -2,6 +2,7 @@ export type LocaleId = 'zh-CN' | 'en-US'
 
 export type MessageKey =
   | 'common.cancel'
+  | 'common.close'
   | 'common.confirm'
   | 'common.create'
   | 'common.delete'
@@ -301,6 +302,8 @@ export type MessageKey =
   | 'plugin.toggleAria'
   | 'plugin.listFailed'
   | 'plugin.toggleFailed'
+  | 'plugin.name.example'
+  | 'plugin.name.formjs'
   | 'tree.detailAttachmentFile'
   | 'task.titleTooLong'
   | 'task.otherReasonTooLong'

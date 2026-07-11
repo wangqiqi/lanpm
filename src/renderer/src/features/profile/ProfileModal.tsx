@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
+import { Button, Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
 import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
 import PluginsPanel from '@renderer/features/profile/PluginsPanel'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -39,9 +39,13 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   const [form] = Form.useForm<ProfileFormValues>()
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('profile')
+  const isProfileTab = activeTab === 'profile'
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setActiveTab('profile')
+      return
+    }
     void refreshNetwork({ silent: true })
     hydrateNotificationPrefs()
   }, [open, refreshNetwork, hydrateNotificationPrefs])
@@ -86,9 +90,18 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
       title={t('profile.title')}
       open={open}
       onCancel={onClose}
-      onOk={() => (activeTab === 'profile' ? form.submit() : onClose())}
-      okText={activeTab === 'profile' ? undefined : t('common.cancel')}
-      confirmLoading={activeTab === 'profile' ? saving : false}
+      onOk={isProfileTab ? () => void submit() : undefined}
+      okText={isProfileTab ? t('common.save') : undefined}
+      confirmLoading={isProfileTab ? saving : false}
+      footer={
+        isProfileTab
+          ? undefined
+          : [
+              <Button key="close" type="primary" onClick={onClose}>
+                {t('common.close')}
+              </Button>
+            ]
+      }
       destroyOnHidden
       width={520}
     >
@@ -101,77 +114,81 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
             label: t('profile.tabProfile'),
             children: (
               <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <UserAvatar
-          size={48}
-          displayName={user?.displayName ?? '—'}
-          userId={user?.userId}
-          avatarUrl={user?.avatarUrl}
-        />
-        <div>
-          <Typography.Text type="secondary">{t('profile.userId')}</Typography.Text>
-          <div>{user?.userId ?? '—'}</div>
-        </div>
-      </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                  <UserAvatar
+                    size={48}
+                    displayName={user?.displayName ?? '—'}
+                    userId={user?.userId}
+                    avatarUrl={user?.avatarUrl}
+                  />
+                  <div>
+                    <Typography.Text type="secondary">{t('profile.userId')}</Typography.Text>
+                    <div>{user?.userId ?? '—'}</div>
+                  </div>
+                </div>
 
-      <Form form={form} layout="vertical" requiredMark={false} onFinish={() => void submit()}>
-        <Form.Item
-          name="baseName"
-          label={t('profile.displayName')}
-          rules={[
-            { required: true, message: t('setup.usernameRequired') },
-            { min: 2, max: 20, message: t('setup.usernameLength') }
-          ]}
-          extra={suffixHint}
-        >
-          <Input
-            maxLength={20}
-            placeholder={t('setup.usernamePlaceholder')}
-            onPressEnter={submitFormOnEnter(form)}
-          />
-        </Form.Item>
-        <Form.Item name="department" label={t('profile.department')}>
-          <Input
-            maxLength={50}
-            placeholder={t('setup.departmentPlaceholder')}
-            onPressEnter={submitFormOnEnter(form)}
-          />
-        </Form.Item>
-        <Form.Item label={t('profile.notifications')}>
-          <Checkbox
-            checked={notifyAllMessages}
-            onChange={(e) => setNotifyAllMessages(e.target.checked)}
-          >
-            {t('profile.notifyAllMessages')}
-          </Checkbox>
-          <div>
-            <Typography.Text type="secondary">{t('profile.notifyAllMessagesHint')}</Typography.Text>
-          </div>
-          <Checkbox
-            style={{ marginTop: 12 }}
-            checked={notifyDueTasks}
-            onChange={(e) => setNotifyDueTasks(e.target.checked)}
-          >
-            {t('profile.notifyDueTasks')}
-          </Checkbox>
-          <div>
-            <Typography.Text type="secondary">{t('profile.notifyDueTasksHint')}</Typography.Text>
-          </div>
-        </Form.Item>
-        <Form.Item label={t('profile.device')}>
-          <Typography.Text>{device?.deviceName ?? '—'}</Typography.Text>
-          <div>
-            <Typography.Text type="secondary">
-              {t('profile.ipWithAddress', { ip: localIp ?? '—' })}
-            </Typography.Text>
-          </div>
-          <div>
-            <Typography.Text type="secondary">
-              {t('profile.versionWithNumber', { version: LANPM_APP_VERSION })}
-            </Typography.Text>
-          </div>
-        </Form.Item>
-      </Form>
+                <Form form={form} layout="vertical" requiredMark={false} onFinish={() => void submit()}>
+                  <Form.Item
+                    name="baseName"
+                    label={t('profile.displayName')}
+                    rules={[
+                      { required: true, message: t('setup.usernameRequired') },
+                      { min: 2, max: 20, message: t('setup.usernameLength') }
+                    ]}
+                    extra={suffixHint}
+                  >
+                    <Input
+                      maxLength={20}
+                      placeholder={t('setup.usernamePlaceholder')}
+                      onPressEnter={submitFormOnEnter(form)}
+                    />
+                  </Form.Item>
+                  <Form.Item name="department" label={t('profile.department')}>
+                    <Input
+                      maxLength={50}
+                      placeholder={t('setup.departmentPlaceholder')}
+                      onPressEnter={submitFormOnEnter(form)}
+                    />
+                  </Form.Item>
+                  <Form.Item label={t('profile.notifications')}>
+                    <Checkbox
+                      checked={notifyAllMessages}
+                      onChange={(e) => setNotifyAllMessages(e.target.checked)}
+                    >
+                      {t('profile.notifyAllMessages')}
+                    </Checkbox>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('profile.notifyAllMessagesHint')}
+                      </Typography.Text>
+                    </div>
+                    <Checkbox
+                      style={{ marginTop: 12 }}
+                      checked={notifyDueTasks}
+                      onChange={(e) => setNotifyDueTasks(e.target.checked)}
+                    >
+                      {t('profile.notifyDueTasks')}
+                    </Checkbox>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('profile.notifyDueTasksHint')}
+                      </Typography.Text>
+                    </div>
+                  </Form.Item>
+                  <Form.Item label={t('profile.device')}>
+                    <Typography.Text>{device?.deviceName ?? '—'}</Typography.Text>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('profile.ipWithAddress', { ip: localIp ?? '—' })}
+                      </Typography.Text>
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('profile.versionWithNumber', { version: LANPM_APP_VERSION })}
+                      </Typography.Text>
+                    </div>
+                  </Form.Item>
+                </Form>
               </>
             )
           },

@@ -2,6 +2,7 @@ import type { MessageKey } from '../types'
 
 const enUS = {
   'common.cancel': 'Cancel',
+  'common.close': 'Close',
   'common.confirm': 'Confirm',
   'common.create': 'Create',
   'common.delete': 'Delete',
@@ -305,6 +306,8 @@ const enUS = {
   'plugin.toggleAria': 'Toggle plugin {name}',
   'plugin.listFailed': 'Failed to load plugins',
   'plugin.toggleFailed': 'Failed to toggle plugin',
+  'plugin.name.example': 'Example extension (stub)',
+  'plugin.name.formjs': 'Advanced form (form-js)',
   'tree.detailAttachmentFile': 'Group file',
   'task.titleTooLong': 'Title cannot exceed {max} characters',
   'task.otherReasonTooLong': 'Reason cannot exceed {max} characters',

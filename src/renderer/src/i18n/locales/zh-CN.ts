@@ -2,6 +2,7 @@ import type { MessageKey } from '../types'
 
 const zhCN = {
   'common.cancel': '取消',
+  'common.close': '关闭',
   'common.confirm': '确认',
   'common.create': '创建',
   'common.delete': '删除',
@@ -303,6 +304,8 @@ const zhCN = {
   'plugin.toggleAria': '启停插件 {name}',
   'plugin.listFailed': '加载插件列表失败',
   'plugin.toggleFailed': '切换插件失败',
+  'plugin.name.example': '示例扩展（占位）',
+  'plugin.name.formjs': '高级表单（form-js）',
   'tree.detailAttachmentFile': '群文件',
   'task.titleTooLong': '任务名称不能超过 {max} 个字符',
   'task.otherReasonTooLong': '原因不能超过 {max} 个字符',

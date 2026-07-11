@@ -7,6 +7,9 @@
 ### Added
 - **SPRINT-PLUGIN-ENABLE-UI（TASK-295–299）**：Profile「扩展」Tab 启停官方插件；详情槽监听启停事件重拉；`verify:plugin-enable-ui`。
 
+### Fixed
+- **Profile 非资料 Tab 页脚**：去掉「Cancel + 取消」双按钮；扩展/数据 Tab 仅「关闭」；官方插件名走 i18n。
+
 ## [1.22.0] - 2026-07-11
 
 ### Added

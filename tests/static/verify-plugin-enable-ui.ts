@@ -18,6 +18,8 @@ const profile = readFileSync(
 )
 assert.match(profile, /PluginsPanel/)
 assert.match(profile, /profile\.tabPlugins/)
+assert.match(profile, /common\.close/)
+assert.match(profile, /isProfileTab/)
 
 const panel = readFileSync(
   join(root, 'src/renderer/src/features/profile/PluginsPanel.tsx'),
