@@ -387,7 +387,14 @@ function stubGroupTabBadges(groupId: string): import('@shared/badge/types').Grou
   }
   const tasks = readAllTasks()[groupId] ?? []
   const boardMineOpen = userId ? countMineOpenTasks(tasks, userId) : 0
-  return { chatUnread, boardMineOpen }
+  let boardLatestUpdatedAt: string | null = null
+  for (const t of tasks) {
+    if (t.deletedAt) continue
+    if (!boardLatestUpdatedAt || t.updatedAt > boardLatestUpdatedAt) {
+      boardLatestUpdatedAt = t.updatedAt
+    }
+  }
+  return { chatUnread, boardMineOpen, boardLatestUpdatedAt }
 }
 
 export function createBrowserLanpmStub(): LanpmApi {

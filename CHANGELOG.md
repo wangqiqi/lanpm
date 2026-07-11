@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Added
+- **SPRINT-BADGE-WEAK-HINT 收尾 (TASK-209)**：扩展 `verify:badge-semantics`；docs/03·04 弱红点语义；归档。
+- **看板弱红点 UI (TASK-208)**：BottomNav 数字优先，否则 `Badge` `dot`；进入看板 mark seen。
+- **弱红点桥接 (TASK-207)**：`boardLatestUpdatedAt` Stub/store；本机 `lastBoardSeenAt`。
+- **弱红点契约 (TASK-206)**：`shouldShowBoardRecentDot`（48h ∩ unseen）；`getBoardLatestUpdatedAt`；单测。
+
 ## [1.8.0] - 2026-07-11
 
 ### Added

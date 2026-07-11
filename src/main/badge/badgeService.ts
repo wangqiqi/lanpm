@@ -43,14 +43,30 @@ export function countMineOpenTasks(
   return row.c
 }
 
+/** 群内未删除任务的最大 updated_at */
+export function getBoardLatestUpdatedAt(
+  db: Database,
+  groupId: string
+): string | null {
+  const row = db
+    .prepare(
+      `SELECT MAX(updated_at) AS m FROM tasks
+       WHERE group_id = ? AND deleted_at IS NULL`
+    )
+    .get(groupId) as { m: string | null }
+  return row.m ?? null
+}
+
 export function getGroupTabBadges(db: Database, groupId: string): GroupTabBadges {
   const status = getSetupStatus(db)
   const userId = status.user?.userId
+  const boardLatestUpdatedAt = getBoardLatestUpdatedAt(db, groupId)
   if (!userId) {
-    return { chatUnread: 0, boardMineOpen: 0 }
+    return { chatUnread: 0, boardMineOpen: 0, boardLatestUpdatedAt }
   }
   return {
     chatUnread: countUnreadMessages(db, groupId, userId),
-    boardMineOpen: countMineOpenTasks(db, groupId, userId)
+    boardMineOpen: countMineOpenTasks(db, groupId, userId),
+    boardLatestUpdatedAt
   }
 }

@@ -48,7 +48,9 @@ export default function BottomNav(): React.ReactElement {
 
   const gid = groupId ?? ''
   const badges = useBadgeStore((s) => s.badges)
+  const boardRecentDot = useBadgeStore((s) => s.boardRecentDot)
   const refreshBadges = useBadgeStore((s) => s.refresh)
+  const markBoardSeenAndRefresh = useBadgeStore((s) => s.markBoardSeenAndRefresh)
 
   useEffect(() => {
     if (!gid) return
@@ -64,6 +66,11 @@ export default function BottomNav(): React.ReactElement {
       unsubTasks()
     }
   }, [gid, refreshBadges])
+
+  useEffect(() => {
+    if (!gid || activeView !== 'board') return
+    void markBoardSeenAndRefresh(gid)
+  }, [gid, activeView, markBoardSeenAndRefresh])
 
   const groupType = groupId ? getGroupType(groupId) : null
 
@@ -83,6 +90,12 @@ export default function BottomNav(): React.ReactElement {
     return 0
   }
 
+  const tabBadgeDot = (view: AppView): boolean => {
+    if (view !== 'board') return false
+    if (badges.boardMineOpen > 0) return false
+    return boardRecentDot
+  }
+
   const maybeShowFunctionGuide = (): void => {
     if (groupType !== 'function') return
     if (localStorage.getItem(FUNCTION_GUIDE_STORAGE_KEY)) return
@@ -99,6 +112,8 @@ export default function BottomNav(): React.ReactElement {
       {visibleTabs.map((tab) => {
         const allowed = isViewAllowedForGroup(groupType, tab.view)
         const active = activeView === tab.view
+        const count = tabBadgeCount(tab.view)
+        const showDot = tabBadgeDot(tab.view)
         const tabRegion = (
           <span
             className={`${styles.tabWrap} ${!allowed ? styles.tabWrapDisabled : ''}`}
@@ -117,7 +132,12 @@ export default function BottomNav(): React.ReactElement {
               }}
             >
               <span className={styles.icon}>
-                <Badge count={tabBadgeCount(tab.view)} size="small" offset={[-2, 2]}>
+                <Badge
+                  count={count}
+                  dot={showDot}
+                  size="small"
+                  offset={[-2, 2]}
+                >
                   {VIEW_ICONS[tab.view]}
                 </Badge>
               </span>
