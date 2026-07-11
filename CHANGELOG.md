@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **任务树详情标签 (TASK-175)**：TaskDetailPanel 可编辑独立标签，与看板编辑对齐。
 - **看板标签 UI (TASK-174)**：TaskEditModal 编辑多标签；KanbanCard 展示（与优先级 Tag 区分）；i18n。
 - **任务 tags 薄同步 (TASK-173)**：`task_crdt` 字段 `tags`；browser stub create/update；`verify:task-sync` 回归。
 - **任务 tags 持久化 (TASK-172)**：schema v5 `tasks.tags_json` + migrate；repository 读写 / create·update。

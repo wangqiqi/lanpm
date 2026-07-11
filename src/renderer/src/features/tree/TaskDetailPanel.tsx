@@ -32,6 +32,7 @@ import {
   normalizeTaskTitle,
   validateTaskForm
 } from '@shared/task/validation'
+import { normalizeTaskTags, TASK_TAG_MAX_LENGTH, TASK_TAGS_MAX_COUNT } from '@shared/task/tags'
 import styles from './tree.module.css'
 
 const { Text } = Typography
@@ -94,6 +95,7 @@ export default function TaskDetailPanel({
   const [status, setStatus] = useState<TaskStatus>(task.status)
   const [otherReason, setOtherReason] = useState(task.otherReason ?? '')
   const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [tags, setTags] = useState<string[]>(task.tags ?? [])
   const [assigneeUserId, setAssigneeUserId] = useState<string | undefined>(
     task.assigneeUserId
   )
@@ -109,6 +111,7 @@ export default function TaskDetailPanel({
     setStatus(task.status)
     setOtherReason(task.otherReason ?? '')
     setPriority(task.priority)
+    setTags(task.tags ?? [])
     setAssigneeUserId(task.assigneeUserId)
     setStartDate(task.startDate ?? '')
     setEndDate(task.endDate ?? '')
@@ -184,7 +187,7 @@ export default function TaskDetailPanel({
         otherReason: status === 'other' ? normalizeOtherReason(otherReason) : null,
         priority,
         assigneeUserId: assigneeUserId || null,
-        tags: task.tags ?? [],
+        tags: normalizeTaskTags(tags),
         startDate: startDate.trim() || null,
         endDate: endDate.trim() || null,
         progressPercent: clampProgressPercent(progressPercent),
@@ -273,6 +276,24 @@ export default function TaskDetailPanel({
           />
         </label>
       </div>
+
+      <label className={styles.detailField}>
+        <Text type="secondary">{t('board.tags')}</Text>
+        <Select
+          mode="tags"
+          value={tags}
+          onChange={(next) => setTags(normalizeTaskTags(next))}
+          tokenSeparators={[',']}
+          placeholder={t('board.tagsPlaceholder')}
+          maxTagCount={TASK_TAGS_MAX_COUNT}
+          maxTagTextLength={TASK_TAG_MAX_LENGTH}
+          style={{ width: '100%' }}
+          open={false}
+        />
+        <Text type="secondary" style={{ fontSize: 11 }}>
+          {t('board.tagsHint')}
+        </Text>
+      </label>
 
       {status === 'other' && (
         <label className={styles.detailField}>
