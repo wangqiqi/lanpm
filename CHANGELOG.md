@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **task_crdt 离线补拉 (TASK-161)**：`task_crdt_sync_request` / `_batch`（state vector）；`taskCrdtOfflineSyncService`；`verify:task-crdt`。
 - **task_crdt 双写共存 (TASK-160)**：`taskService` 写后 `mirrorTaskToCrdt`；入站 `task_patch` `mirrorTaskPatchIntoCrdt`（不回环 publish）；约定 SQLite 先、Y.Doc 后。
 - **task_crdt 实时帧 (TASK-159)**：`taskCrdtService` publish/apply；挂入 `taskSyncService` 订阅；`verify:task-crdt-realtime`。
 - **群级 Y.Doc 持久化 (TASK-158)**：表 `task_crdt_docs`（schema v4）；`taskCrdtStore` 从 `tasks` seed / blob 加载；`verify:task-crdt-store`。

@@ -84,6 +84,25 @@ export function encodeDocState(doc: Y.Doc): Uint8Array {
   return Y.encodeStateAsUpdate(doc)
 }
 
+/** State vector for offline catch-up requests. */
+export function encodeDocStateVector(doc: Y.Doc): Uint8Array {
+  return Y.encodeStateVector(doc)
+}
+
+/**
+ * Diff update relative to remote state vector.
+ * Empty SV → full document state.
+ */
+export function encodeDocStateAsUpdate(
+  doc: Y.Doc,
+  targetStateVector?: Uint8Array
+): Uint8Array {
+  if (!targetStateVector || targetStateVector.byteLength === 0) {
+    return Y.encodeStateAsUpdate(doc)
+  }
+  return Y.encodeStateAsUpdate(doc, targetStateVector)
+}
+
 export function applyEncodedUpdate(
   doc: Y.Doc,
   update: Uint8Array,

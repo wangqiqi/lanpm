@@ -45,6 +45,7 @@
     "verify:storage": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-storage.ts",
     "verify:task-crdt-store": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-task-crdt-store.ts",
     "verify:task-crdt-realtime": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-task-crdt-realtime.ts",
+    "verify:task-crdt": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-task-crdt.ts",
     "verify:suffix": "node --experimental-strip-types tests/static/verify-suffix.ts",
     "verify:network-stub": "node --experimental-strip-types tests/integration/verify-network-stub.ts",
     "verify:network-manual": "node --experimental-strip-types tests/static/verify-network-manual.ts",

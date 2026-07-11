@@ -27,6 +27,12 @@ import {
   mirrorTaskPatchIntoCrdt,
   setTaskCrdtTasksChangedHandler
 } from './taskCrdtService'
+import {
+  handleTaskCrdtSyncBatch,
+  handleTaskCrdtSyncRequest,
+  setTaskCrdtOfflineTasksChangedHandler,
+  wireTaskCrdtOfflineSync
+} from './taskCrdtOfflineSyncService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 
 const subscribedGroups = new Map<string, () => void>()
@@ -98,6 +104,16 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'task_crdt') {
     handleIncomingTaskCrdt(db, envelope)
+    return
+  }
+  if (envelope.type === 'task_crdt_sync_request') {
+    void handleTaskCrdtSyncRequest(db, envelope).catch(
+      catchSyncFailure('taskCrdt.handleSyncRequest', { notify: false })
+    )
+    return
+  }
+  if (envelope.type === 'task_crdt_sync_batch') {
+    handleTaskCrdtSyncBatch(db, envelope)
   }
 }
 
@@ -168,6 +184,7 @@ export function initTaskSyncService(db: Database): void {
   void requestTaskOfflineSync(db).catch(
     catchSyncFailure('taskSync.requestOffline', { notify: false })
   )
+  wireTaskCrdtOfflineSync(db, broadcastTasksChanged)
 }
 
 export function shutdownTaskSyncService(): void {
@@ -175,6 +192,7 @@ export function shutdownTaskSyncService(): void {
   subscribedGroups.clear()
   clearTaskCrdtWiring()
   setTaskCrdtTasksChangedHandler(null)
+  setTaskCrdtOfflineTasksChangedHandler(null)
 }
 
 export function publishTaskUpsert(db: Database, task: Task): void {
