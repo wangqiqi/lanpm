@@ -5,6 +5,7 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ArrowLeftOutlined, CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
+import { resolveDeptDoneCount } from '@shared/cockpit/departmentStats'
 import { formatWeekOverWeekDelta } from '@shared/cockpit/weeklyTrend'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -274,28 +275,29 @@ export default function CockpitView(): React.ReactElement {
         )}
       </div>
 
-      {dashboard?.executiveSummary && dashboard?.weeklyTrend ? (
+      {dashboard?.executiveSummary ? (
         <section className={styles.execSummary} aria-label={t('cockpit.execSummaryTitle')}>
           <h2 className={styles.execSummaryTitle}>{t('cockpit.execSummaryTitle')}</h2>
           <div className={styles.execSummaryGrid}>
             <div className={styles.execMetric}>
               <span className={styles.execLabel}>{t('cockpit.execCompletedWeek')}</span>
               <span className={styles.execValue}>
-                {dashboard.weeklyTrend.completedThisWeek}
+                {dashboard.weeklyTrend?.completedThisWeek ??
+                  dashboard.executiveSummary.completedThisWeek}
               </span>
             </div>
             <div className={styles.execMetric}>
               <span className={styles.execLabel}>{t('cockpit.trendDelta')}</span>
               <span
                 className={`${styles.execValue} ${
-                  dashboard.weeklyTrend.weekOverWeekDelta > 0
+                  (dashboard.weeklyTrend?.weekOverWeekDelta ?? 0) > 0
                     ? styles.trendDeltaUp
-                    : dashboard.weeklyTrend.weekOverWeekDelta < 0
+                    : (dashboard.weeklyTrend?.weekOverWeekDelta ?? 0) < 0
                       ? styles.trendDeltaDown
                       : ''
                 }`.trim()}
               >
-                {formatWeekOverWeekDelta(dashboard.weeklyTrend.weekOverWeekDelta)}
+                {formatWeekOverWeekDelta(dashboard.weeklyTrend?.weekOverWeekDelta ?? 0)}
               </span>
             </div>
             <div className={styles.execMetric}>
@@ -492,7 +494,10 @@ export default function CockpitView(): React.ReactElement {
                     />
                     <span className={styles.deptPct}>{d.completionPercent}%</span>
                     <Text type="secondary" className={styles.deptCount}>
-                      {t('cockpit.deptDoneRatio', { done: d.doneCount, total: d.taskCount })}
+                      {t('cockpit.deptDoneRatio', {
+                        done: resolveDeptDoneCount(d),
+                        total: d.taskCount
+                      })}
                     </Text>
                   </>
                 )}

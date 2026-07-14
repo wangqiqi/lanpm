@@ -325,6 +325,11 @@ assert.match(
   'Project health progress bar must share row with meta (CK-405)'
 )
 assert.match(cockpitSrc, /deptList/, 'CockpitView must render scrollable dept list (CK-406)')
+assert.match(
+  cockpitSrc,
+  /resolveDeptDoneCount/,
+  'Cockpit must use dept doneCount fallback (CK-406)'
+)
 assert.match(cockpitCss, /\.deptList\b[^}]*overflow-y:\s*auto/s, 'Dept list must scroll in sub-region (CK-406)')
 assert.match(
   cockpitSrc,
@@ -337,6 +342,16 @@ assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (C
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),
   'CockpitView root must not lock height:100% (CK-401 scroll contract)'
+)
+assert.match(
+  cockpitCss,
+  /\.root\s*\{[^}]*overflow:\s*hidden/s,
+  'CockpitView root must contain scroll in scrollBody (CK-401)'
+)
+assert.match(
+  cockpitCss,
+  /\.scrollBody\s*\{[^}]*flex:\s*1\s+1\s+0/s,
+  'CockpitView scroll body must use flex 1 1 0 (CK-401)'
 )
 assert.match(
   cockpitCss,

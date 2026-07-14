@@ -15,9 +15,11 @@
 - **驾驶舱部门完成率（TASK-CK-406）**：紧凑行（进度/百分比/完成比同行）；列表限高可滚动子区；无任务与无部门数据分态说明；未分配部门 i18n 化；`verify:visual` 守卫。
 - **驾驶舱项目健康（TASK-CK-405）**：紧凑卡片列表（状态 pill + 进度/百分比/元数据同行）；风险/延期轻量边框强调；面板显示项目数；操作改为 link 样式；`verify:visual` 守卫。
 - **驾驶舱首屏 IA（TASK-CK-402）**：需关注 → KPI 四卡 → 报表（默认折叠一行摘要）；展开限高 `min(40dvh, 28rem)`；`verify:visual` 守卫。
+- **驾驶舱文档 SSOT（TASK-CK-409）**：`docs/01` §12.1 · `docs/04` §1.4 · `docs/05` §2.2 与领导视图 IA、滚动契约、`verify:visual` 守卫对齐。
 
 ### Fixed
-- **驾驶舱滚动**：标题栏固定、内容区 `scrollBody` 独立纵向滚动（`scrollbar-gutter: stable`），可滚至部门完成率底部。
+- **驾驶舱滚动（续）**：`.root` 增加 `overflow:hidden`，`scrollBody` 改为 `flex:1 1 0`，避免内容撑破视口却无滚动条。
+- **部门完成率 `undefined`**：`resolveDeptDoneCount` 兼容旧 IPC 无 `doneCount`；执行摘要不再强依赖 `weeklyTrend` 字段。
 - **顶栏垂直对齐**：群切换器与全局搜索外层锁 32px（修复 Ant `controlHeight:40` 导致灰底贴顶）；搜索灰底移至 selector。
 - **驾驶舱滚动（TASK-CK-401）**：`mainCockpit` 单滚动契约（对齐 `mainChat`）；移除 `.root { height:100% }` 双滚动裁切；`verify:visual` 守卫。
 
