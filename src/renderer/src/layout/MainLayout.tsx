@@ -36,6 +36,7 @@ export default function MainLayout(): React.ReactElement {
 
   const showBottomNav = /^\/g\/[^/]+\//.test(location.pathname) && !whiteboardZen
   const isChatView = /\/g\/[^/]+\/chat$/.test(location.pathname)
+  const isCockpitView = location.pathname.startsWith('/cockpit')
   const isWhiteboard = /\/g\/[^/]+\/whiteboard$/.test(location.pathname)
 
   return (
@@ -47,8 +48,8 @@ export default function MainLayout(): React.ReactElement {
       ) : null}
       <main
         className={`${styles.main} ${isChatView ? styles.mainChat : ''} ${
-          whiteboardZen && isWhiteboard ? styles.mainZen : ''
-        }`}
+          isCockpitView ? styles.mainCockpit : ''
+        } ${whiteboardZen && isWhiteboard ? styles.mainZen : ''}`}
       >
         <Outlet />
       </main>

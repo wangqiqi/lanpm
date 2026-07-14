@@ -36,6 +36,20 @@
   min-width: 0;
 }
 
+/** 驾驶舱：主区域不滚动，由 CockpitView 内部单容器滚动 */
+.mainCockpit {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.mainCockpit > * {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
 .shellZen {
   background: var(--lanpm-surface-solid);
 }

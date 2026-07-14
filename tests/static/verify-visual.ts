@@ -255,6 +255,25 @@ assert.ok(
 const cockpitCss = readFileSync(join(renderer, 'views/CockpitView.module.css'), 'utf8')
 assert.match(cockpitCss, /\.panel\b/, 'CockpitView must use island panel styles')
 assert.match(cockpitCss, /\.kpiValue\b/, 'CockpitView KPI must use custom typography')
+assert.ok(
+  !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),
+  'CockpitView root must not lock height:100% (CK-401 scroll contract)'
+)
+assert.match(
+  cockpitCss,
+  /\.root\s*\{[^}]*overflow-y:\s*auto/s,
+  'CockpitView root must be the single vertical scroll container (CK-401)'
+)
+
+const mainLayoutCss = readFileSync(join(renderer, 'layout/MainLayout.module.css'), 'utf8')
+assert.match(mainLayoutCss, /\.mainCockpit\b/, 'MainLayout must define mainCockpit (CK-401)')
+assert.match(
+  mainLayoutCss,
+  /\.mainCockpit\s*\{[^}]*overflow:\s*hidden/s,
+  'mainCockpit must not scroll (CK-401)'
+)
+const mainLayoutSrc = readFileSync(join(renderer, 'layout/MainLayout.tsx'), 'utf8')
+assert.match(mainLayoutSrc, /mainCockpit/, 'MainLayout must apply mainCockpit on cockpit route (CK-401)')
 
 const chatCss = readFileSync(join(renderer, 'features/chat/chat.module.css'), 'utf8')
 const chatSrc = readFileSync(join(renderer, 'features/chat/ChatView.tsx'), 'utf8')

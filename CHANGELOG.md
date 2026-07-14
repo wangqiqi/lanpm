@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **驾驶舱滚动（TASK-CK-401）**：`mainCockpit` 单滚动契约（对齐 `mainChat`）；移除 `.root { height:100% }` 双滚动裁切；`verify:visual` 守卫。
+
 ### Changed
 - **视觉抛光 II（TASK-VP-407）**：底栏 Tab 移除弹跳 keyframes，改为 `--lanpm-motion-fast` 轻过渡；`ViewState` 统一空/加载态图标环；Files 预览与表格空态对齐；`verify:visual` 守卫；`docs/04` §1 同步。
 - **视觉抛光 II（TASK-VP-406）**：日历 FullCalendar `--fc-*` 全量映射 `--lanpm-*`；宿主 `--lanpm-shadow-island`；移除 `.light/.dark` 双份样式；`verify:visual` 守卫 FC 令牌。
