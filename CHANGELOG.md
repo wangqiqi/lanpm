@@ -9,6 +9,11 @@
 ### Changed
 - **视觉抛光 II（TASK-VP-401）**：设计令牌 SSOT — 新增 `src/shared/design/lanpmDesignTokens.ts`；`ThemeProvider` / 头像 / 任务族色 / 甘特 fallback 统一亮 accent `#0066cc`；`--lanpm-accent-ring` 与 `docs/04` · `UI优化.md` 圆角阶对齐；`verify:visual` 增加 SSOT 交叉校验。
 - **`.cursor` Super Cursor 母版**：plan/run/release 引用分层 · week/disk/maintain 指令与 skill · delivery/plan reference · prompt-security · resolve-role · cursor-coherence 扩展。
+- **Dev 稳定性**：Linux inotify 不足时 Vite 自动轮询 watch；`dev-run` / `onekey_run` 与 `electron.vite.config` 忽略 `.cursorGrowth` 等路径。
+
+### Fixed
+- **Linux dev 热更新**：`electron.vite.config` / `dev-run` 在低 inotify 上限时自动轮询 watch，缓解 `ENOSPC`。
+- **开发体验**：Linux inotify 不足时 Vite 自动轮询 watch；`dev-run` / `onekey_run` 支持 `--web` 快捷入口。
 
 ### Release
 - `v1.31.0` — design token SSOT + Super Cursor sync

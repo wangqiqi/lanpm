@@ -245,11 +245,25 @@ cmd_status() {
   fi
 }
 
+check_inotify_linux() {
+  [[ "$(uname -s 2>/dev/null)" == "Linux" ]] || return 0
+  [[ -r /proc/sys/fs/inotify/max_user_watches ]] || return 0
+  local max
+  max="$(tr -d '[:space:]' </proc/sys/fs/inotify/max_user_watches)"
+  [[ "$max" =~ ^[0-9]+$ ]] || return 0
+  if [[ "$max" -lt 200000 ]]; then
+    export LANPM_VITE_POLLING=1
+    warn "inotify max_user_watches=$max 偏低，已启用 Vite 轮询监视 (LANPM_VITE_POLLING=1)"
+    warn "建议永久提升: echo fs.inotify.max_user_watches=524288 | sudo tee /etc/sysctl.d/99-inotify.conf && sudo sysctl --system"
+  fi
+}
+
 start_dev() {
   local mode="${1:-electron}"
   ensure_run_dir
   need_cmd npm
   need_cmd node
+  check_inotify_linux
 
   if is_running; then
     warn "已在运行 (pid=$(read_pid))，请先 stop 或 restart"

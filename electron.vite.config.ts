@@ -1,4 +1,5 @@
 import dns from 'node:dns'
+import { readFileSync } from 'node:fs'
 import { copyFileSync, mkdirSync } from 'fs'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -11,6 +12,33 @@ dns.setDefaultResultOrder('ipv4first')
 
 const root = dirname(fileURLToPath(import.meta.url))
 const isBrowserDev = process.env.LANPM_BROWSER_DEV === '1'
+
+/** Linux inotify 上限偏低时 Vite 会 ENOSPC；轮询略慢但稳定 */
+function shouldUsePollingWatch(): boolean {
+  if (process.env.LANPM_VITE_POLLING === '1') return true
+  if (process.platform !== 'linux') return false
+  try {
+    const max = Number(readFileSync('/proc/sys/fs/inotify/max_user_watches', 'utf8').trim())
+    return Number.isFinite(max) && max < 200_000
+  } catch {
+    return false
+  }
+}
+
+const devWatch = {
+  ignored: [
+    '**/out/**',
+    '**/.git/**',
+    '**/node_modules/**',
+    '**/*.db',
+    '**/.config/**',
+    '**/dist/**',
+    '**/coverage/**',
+    '**/.lanpm/**',
+    '**/.cursorGrowth/**'
+  ],
+  ...(shouldUsePollingWatch() ? { usePolling: true, interval: 1000 } : {})
+}
 
 /** 开发态移除 CSP，避免 Vite 内联脚本被拦 */
 function lanpmDevCspPlugin(): Plugin {
@@ -88,9 +116,11 @@ function copySchemaSqlPlugin(): Plugin {
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin()]
+    plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin()],
+    server: { watch: devWatch }
   },
   preload: {
+    server: { watch: devWatch },
     ssr: {
       external: ['electron']
     },
@@ -122,9 +152,7 @@ export default defineConfig({
       strictPort: false,
       /** 浏览器专用 dev：关闭 HMR；其它开发态也关闭错误遮罩，避免 Cursor 内嵌页无法点击 */
       hmr: isBrowserDev ? false : { overlay: false },
-      watch: {
-        ignored: ['**/out/**', '**/.git/**', '**/node_modules/**', '**/*.db', '**/.config/**']
-      }
+      watch: devWatch
     },
     plugins: [
       react(),
