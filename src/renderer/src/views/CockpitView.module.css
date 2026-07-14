@@ -110,6 +110,56 @@
   color: var(--lanpm-warning);
 }
 
+.attentionTaskList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.attentionTaskRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--lanpm-separator);
+}
+
+.attentionTaskRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.attentionTaskRow:first-child {
+  padding-top: 0;
+}
+
+.attentionTaskMain {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.attentionTaskTitle {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attentionTaskMeta {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--lanpm-font-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attentionTaskAction {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
 .panel {
   border-radius: var(--lanpm-radius-lg);
   background: var(--lanpm-surface-elevated);

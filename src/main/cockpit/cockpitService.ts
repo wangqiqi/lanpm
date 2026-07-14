@@ -8,6 +8,7 @@ import type {
 } from '../../shared/cockpit/types'
 import { countRiskProjects, sortCockpitProjects } from '../../shared/cockpit/sortProjects'
 import { buildExecutiveSummary } from '../../shared/cockpit/executiveSummary'
+import { buildAttentionTasks } from '../../shared/cockpit/attentionTasks'
 import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
@@ -82,10 +83,32 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
     riskProjectCount: countRiskProjects(projects)
   }
 
-  const allTasks = listProjectGroups(db).flatMap((g) => listTasksByGroup(db, g.groupId))
+  const projectGroups = listProjectGroups(db)
+  const allTasks = projectGroups.flatMap((g) => listTasksByGroup(db, g.groupId))
   const executiveSummary = buildExecutiveSummary(allTasks, summary.riskProjectCount)
 
-  return { summary, executiveSummary, projects, departments }
+  const attentionTasks = buildAttentionTasks(
+    projectGroups.flatMap((g) =>
+      listTasksByGroup(db, g.groupId).map((task) => ({
+        taskId: task.taskId,
+        groupId: task.groupId,
+        title: task.title,
+        startDate: task.startDate,
+        endDate: task.endDate,
+        progressPercent: task.progressPercent,
+        status: task.status,
+        milestone: task.milestone,
+        createdAt: task.createdAt,
+        deletedAt: task.deletedAt,
+        projectName: g.name,
+        assigneeName: task.assigneeUserId
+          ? getUserById(db, task.assigneeUserId)?.displayName
+          : undefined
+      }))
+    )
+  )
+
+  return { summary, executiveSummary, attentionTasks, projects, departments }
 }
 
 function desensitizeTasks(db: Database, groupId: string): AiTaskAuditPayload[] {

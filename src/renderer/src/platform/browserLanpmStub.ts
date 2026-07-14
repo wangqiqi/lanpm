@@ -1237,7 +1237,18 @@ export function createBrowserLanpmStub(): LanpmApi {
           inProgressCount: 2,
           riskProjectCount: 0,
           dueNextWeek: 0
-        }
+        },
+        attentionTasks: [
+          {
+            taskId: 'task-attention-1',
+            groupId: 'demo-project',
+            projectName: stubT('demo.groupProject'),
+            title: '示例延期任务',
+            assigneeName: '张三',
+            kind: 'overdue' as const,
+            endDate: '2026-07-01'
+          }
+        ]
       }),
       generateWeeklyReport: async () => ({
         format: 'markdown' as const,

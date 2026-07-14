@@ -276,6 +276,12 @@ assert.match(
   /executiveSummary/,
   'CockpitView must render executive summary (CK-403)'
 )
+assert.match(
+  cockpitSrc,
+  /attentionTasks/,
+  'CockpitView must render attention task list (CK-404)'
+)
+assert.match(cockpitCss, /\.attentionTaskList\b/, 'Cockpit attention task list (CK-404)')
 assert.match(cockpitCss, /\.execSummary\b/, 'Cockpit executive summary strip (CK-403)')
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
@@ -368,6 +374,9 @@ const definedLanpmTokens = new Set(
 const usedLanpmTokens = new Set<string>()
 for (const file of cssFiles) {
   const content = readFileSync(file, 'utf8')
+  for (const m of content.matchAll(/(--lanpm-[a-z0-9-]+):/g)) {
+    definedLanpmTokens.add(m[1])
+  }
   for (const m of content.matchAll(/var\((--lanpm-[a-z0-9-]+)\)/g)) {
     usedLanpmTokens.add(m[1])
   }

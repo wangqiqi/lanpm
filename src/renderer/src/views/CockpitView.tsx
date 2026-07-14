@@ -287,6 +287,50 @@ export default function CockpitView(): React.ReactElement {
         />
       </div>
 
+      <Panel title={t('cockpit.attentionTasksTitle')} className={styles.section}>
+        {(dashboard?.attentionTasks.length ?? 0) === 0 ? (
+          <Text type="secondary">{t('cockpit.attentionTasksEmpty')}</Text>
+        ) : (
+          <ul className={styles.attentionTaskList}>
+            {dashboard?.attentionTasks.map((item) => {
+              const kindTone = item.kind === 'overdue' ? 'delayed' : 'risk'
+              const kindLabel =
+                item.kind === 'overdue'
+                  ? t('cockpit.attentionTaskOverdue')
+                  : t('cockpit.attentionTaskBehind')
+              return (
+                <li key={item.taskId} className={styles.attentionTaskRow}>
+                  <div className={styles.attentionTaskMain}>
+                    <Text strong className={styles.attentionTaskTitle}>
+                      {item.title}
+                    </Text>
+                    <Text type="secondary" className={styles.attentionTaskMeta}>
+                      {resolveGroupDisplayNameById(item.groupId, item.projectName, t)}
+                      {' · '}
+                      {item.assigneeName ?? t('cockpit.attentionTaskUnassigned')}
+                      {item.endDate ? ` · ${item.endDate}` : ''}
+                    </Text>
+                  </div>
+                  <span
+                    className={`${styles.statusPill} ${styles[`statusPill_${kindTone}`]}`}
+                  >
+                    {kindLabel}
+                  </span>
+                  <Button
+                    size="small"
+                    type="link"
+                    className={styles.attentionTaskAction}
+                    onClick={() => navigate(groupViewPath(item.groupId, 'board'))}
+                  >
+                    {t('cockpit.attentionOpenBoard')}
+                  </Button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </Panel>
+
       {report ? (
         <Panel
           title={t('cockpit.reportOutput')}

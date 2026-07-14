@@ -28,8 +28,22 @@ export interface CockpitDashboard {
   summary: CockpitSummary
   /** 领导首屏执行摘要（CK-403） */
   executiveSummary: ExecutiveSummary
+  /** 延期 / 落后任务 Top N（CK-404） */
+  attentionTasks: CockpitAttentionTask[]
   projects: ProjectDashboardItem[]
   departments: DepartmentStats[]
+}
+
+export type AttentionTaskKind = 'overdue' | 'behind'
+
+export interface CockpitAttentionTask {
+  taskId: string
+  groupId: string
+  projectName: string
+  title: string
+  assigneeName?: string
+  kind: AttentionTaskKind
+  endDate?: string
 }
 
 /** 领导首屏执行摘要 */
