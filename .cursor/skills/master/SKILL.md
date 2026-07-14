@@ -20,6 +20,8 @@ description: 总入口（/master）：不确定用什么指令时用。AskQuesti
 
 **已有明确 slash**（如 `/plan` `/run` `/scaffold`）→ **不要**拦截，直接走对应 skill；**不要**为了「保险」多绕 `/master`。
 
+**呼叫人格**（「呼叫小妮」「切换御姐」等）→ **不要**当普通闲聊：按 [routes.md §人格·呼叫](routes.md#呼叫会话内) 跑 `resolve-role.sh` → 写 `.cursorGrowth/session/persona.json` → 改语气（能力不减）。
+
 ## 流程
 
 ### 1. 快速感知（可选，不阻塞提问）
@@ -33,6 +35,18 @@ ls plan.md .cursorGrowth/learn/ 2>/dev/null || true
 用于缩小选项（空仓库 / 无 plan / 有 ACTIVE / gate 阻塞等），**不向用户抛技术细节**。
 
 ### 2. AskQuestion — 主路由（**≤7 项**）
+
+#### AskQuestion 约定（工具可用性 · SSOT）
+
+**优先**调用 Cursor 原生 `AskQuestion`（结构化多选；每轮 ≤7 项）。
+
+若当前会话**无**该工具（模型未注入时常见，例如部分 Grok 会话；官方亦写 *when unavailable, ask in prose*）：
+
+1. **勿空转、勿假装已弹出选择 UI**
+2. 用**同一选项表**写成正文编号列表，请用户回复 **id 或序号**
+3. 收到选择后按表 handoff — 流程与选项不变
+
+下游 skill（plan · scaffold · ux · release …）凡写 AskQuestion，均遵循本约定。
 
 文案跟用户语言；中文示例：
 
@@ -96,7 +110,7 @@ ls plan.md .cursorGrowth/learn/ 2>/dev/null || true
 | `api` | REST / OpenAPI 设计审查 | **api** · `rules/execution/api.mdc` |
 | `delivery` | 交付验收 / 上线前走查 | **delivery** · `rules/execution/delivery.mdc` |
 | `docs` | 文档与代码同步更新 | **plan** `DOC-*` 或直述 · `rules/execution/docs.mdc` |
-| `deps` | submodule / vendor / 选型与授权 | `oss-first.mdc` · `submodule.mdc` · **security**（依赖节） |
+| `deps` | submodule / vendor / 选型与授权 / 外网 skill 裁剪 | `oss-first.mdc` · `submodule.mdc` · **security** · [routes.md §DAILY/LIBRARY](routes.md#外网-skill--daily--librarydeps) |
 | `config` | verify 配置 / 本地 rules / 模板自测 | 见 [routes.md § 扩展](routes.md#扩展场景) |
 | `style` | 人格 / 沟通语气 | `config/roles.json` · 见 [routes.md § 人格](routes.md#人格预设-style) |
 
@@ -129,5 +143,6 @@ ls plan.md .cursorGrowth/learn/ 2>/dev/null || true
 
 - 用户已明确 `/plan` 等 slash 时仍强行走 master 问答
 - 未弄清意图就执行 scaffold apply、commit、改 `.cursor/`
-- 一次抛出全部 skill 列表让用户自己猜（必须 AskQuestion 收敛）
+- 一次抛出全部 skill 列表让用户自己猜（必须 AskQuestion **或正文编号选项**收敛）
 - 主路由或子路由单轮超过 7 个选项
+- AskQuestion 不可用时卡住或只说「请用别的模型」而不给出正文选项

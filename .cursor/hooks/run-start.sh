@@ -9,39 +9,63 @@ source "$HOOKS_DIR/lib/config-load.sh"
 # shellcheck source=lib/json-utils.sh
 source "$HOOKS_DIR/lib/json-utils.sh"
 
-jw_resolve_project_root "$HOOKS_DIR"
-jw_init_config "$CURSOR_DIR"
+sc_resolve_project_root "$HOOKS_DIR"
+sc_init_config "$CURSOR_DIR"
 
-jw_role_hint() {
+sc_role_hint() {
   local cursor_dir="$1"
   local roles_file="${cursor_dir}/config/roles.json"
-  local role_id
-  role_id="$(jw_cfg '.role.default' 'professional')"
+  local role_id project_root session_file
+  role_id="$(sc_cfg '.role.default' 'professional')"
+  project_root="${SC_PROJECT_ROOT:-}"
+  session_file="${project_root}/.cursorGrowth/session/persona.json"
+  if [[ -n "$project_root" && -f "$session_file" ]]; then
+    local sid
+    sid="$(json_get "$(cat "$session_file")" persona_id 2>/dev/null || true)"
+    if [[ -z "$sid" ]]; then
+      sid="$(json_get "$(cat "$session_file")" id 2>/dev/null || true)"
+    fi
+    if [[ -n "$sid" && "$sid" != "null" ]]; then
+      role_id="$sid"
+    fi
+  fi
   [[ -f "$roles_file" ]] || return 0
   local py
-  py="$(jw_python 2>/dev/null)" || return 0
+  py="$(sc_python 2>/dev/null)" || return 0
   "$py" - "$roles_file" "$role_id" <<'PY'
 import json, sys
-for p in json.load(open(sys.argv[1])).get("personas", []):
-    if p.get("id") == sys.argv[2]:
-        print(p.get("hint", ""))
+q = sys.argv[2].strip().lower()
+for p in json.load(open(sys.argv[1], encoding="utf-8")).get("personas", []):
+    keys = {str(p.get("id","")).lower(), str(p.get("role_name") or p.get("name") or "").lower(), str(p.get("given_name","")).lower()}
+    for n in p.get("nicknames") or []:
+        keys.add(str(n).lower())
+    if q in keys or p.get("id") == sys.argv[2]:
+        role = p.get("role_name") or p.get("name") or p.get("id")
+        given = p.get("given_name") or ""
+        nicks = "、".join(p.get("nicknames") or [])
+        skills = p.get("skills") or "full"
+        hint = p.get("hint") or ""
+        pers = p.get("personality") or ""
+        examples = p.get("speech_examples") or []
+        ex = (" · 例：" + " / ".join(examples[:2])) if examples else ""
+        print(f"{role}（{given}）· nick={nicks or '-'} · skills={skills} · {pers} · {hint}{ex}".strip(" ·"))
         break
 PY
 }
 
-if [[ "$JW_HOOKS_ENABLED" != "true" || "$JW_WORKFLOW_ENABLED" != "true" ]]; then
+if [[ "$SC_HOOKS_ENABLED" != "true" || "$SC_WORKFLOW_ENABLED" != "true" ]]; then
   echo "{}"
   exit 0
 fi
 
-PLAN="$(jw_plan_path)"
+PLAN="$(sc_plan_path)"
 # shellcheck source=lib/plan-parse.sh
 source "$HOOKS_DIR/lib/plan-parse.sh" "$PLAN"
 
 input="$(cat)"
 conversation_id="$(json_get "$input" conversation_id)"
 
-STATE_DIR="$JW_PROJECT_ROOT/.cursor/hooks/state"
+STATE_DIR="$SC_PROJECT_ROOT/.cursor/hooks/state"
 mkdir -p "$STATE_DIR"
 
 active="$(plan_active)"
@@ -102,14 +126,14 @@ if [[ "$autonomous" == "true" && -n "$active" ]]; then
 - **SPRINT**: \`${sprint:-unset}\` · **ACTIVE**: \`$active\` (${status:-unknown})
 - **Verify**: \`./.cursor/bin/runner.sh task-verify\`; release \`${verify}\`
 - Load \`run\`: gate-check → implement → task-verify → commit"
-  role_hint="$(jw_role_hint "$CURSOR_DIR" 2>/dev/null || true)"
+  role_hint="$(sc_role_hint "$CURSOR_DIR" 2>/dev/null || true)"
   if [[ -n "$role_hint" ]]; then
     ctx="${ctx}
 - **Persona hint**: ${role_hint}"
   fi
   json_additional_context "$ctx"
 else
-  role_hint="$(jw_role_hint "$CURSOR_DIR" 2>/dev/null || true)"
+  role_hint="$(sc_role_hint "$CURSOR_DIR" 2>/dev/null || true)"
   if [[ -n "$role_hint" ]]; then
     json_additional_context "## session
 - **Persona hint**: ${role_hint}"

@@ -1,7 +1,7 @@
 /* 任务族色条：看板卡片、任务树行、甘特条共用（色值见 shared/task/taskFamilyColors.ts） */
 
 .familyStripe0 {
-  border-left: 3px solid #0071e3;
+  border-left: 3px solid var(--lanpm-accent);
 }
 
 .familyStripe1 {

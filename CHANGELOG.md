@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [1.31.0] - 2026-07-14
+
+### Changed
+- **视觉抛光 II（TASK-VP-401）**：设计令牌 SSOT — 新增 `src/shared/design/lanpmDesignTokens.ts`；`ThemeProvider` / 头像 / 任务族色 / 甘特 fallback 统一亮 accent `#0066cc`；`--lanpm-accent-ring` 与 `docs/04` · `UI优化.md` 圆角阶对齐；`verify:visual` 增加 SSOT 交叉校验。
+- **`.cursor` Super Cursor 母版**：plan/run/release 引用分层 · week/disk/maintain 指令与 skill · delivery/plan reference · prompt-security · resolve-role · cursor-coherence 扩展。
+
+### Release
+- `v1.31.0` — design token SSOT + Super Cursor sync
+
 ## [1.30.1] - 2026-07-14
 
 ### Added

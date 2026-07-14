@@ -1,8 +1,10 @@
+import { LANPM_ACCENT } from '../design/lanpmDesignTokens.ts'
+
 /** 头像 data URL 生成与规范化（主进程 / 渲染进程共用） */
 
 const ACCENT_BY_THEME = {
-  light: '#0071e3',
-  dark: '#0a84ff'
+  light: LANPM_ACCENT.light,
+  dark: LANPM_ACCENT.dark
 } as const
 
 const PALETTE = [

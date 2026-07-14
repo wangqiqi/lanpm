@@ -41,15 +41,15 @@
   --fc-neutral-bg-color: var(--lanpm-surface-secondary, #f5f5f7);
   --fc-list-event-hover-bg-color: var(--lanpm-selected-bg);
   --fc-today-bg-color: var(--lanpm-selected-bg);
-  --fc-event-bg-color: var(--lanpm-accent, #0071e3);
-  --fc-event-border-color: var(--lanpm-accent, #0071e3);
+  --fc-event-bg-color: var(--lanpm-accent, #0066cc);
+  --fc-event-border-color: var(--lanpm-accent, #0066cc);
   --fc-event-text-color: #fff;
-  --fc-button-bg-color: var(--lanpm-accent, #0071e3);
-  --fc-button-border-color: var(--lanpm-accent, #0071e3);
-  --fc-button-hover-bg-color: var(--lanpm-accent-hover, #0077ed);
-  --fc-button-hover-border-color: var(--lanpm-accent-hover, #0077ed);
-  --fc-button-active-bg-color: var(--lanpm-accent-hover, #0077ed);
-  --fc-button-active-border-color: var(--lanpm-accent-hover, #0077ed);
+  --fc-button-bg-color: var(--lanpm-accent, #0066cc);
+  --fc-button-border-color: var(--lanpm-accent, #0066cc);
+  --fc-button-hover-bg-color: var(--lanpm-accent-hover, #0077e6);
+  --fc-button-hover-border-color: var(--lanpm-accent-hover, #0077e6);
+  --fc-button-active-bg-color: var(--lanpm-accent-hover, #0077e6);
+  --fc-button-active-border-color: var(--lanpm-accent-hover, #0077e6);
   font-family: inherit;
   color: var(--lanpm-text-primary, #1d1d1f);
 }

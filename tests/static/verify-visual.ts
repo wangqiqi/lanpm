@@ -2,6 +2,11 @@
  * 视觉一致性静态守卫（V-01~V-13 回归 + V-14a 自动化部分）。
  * Run: npm run verify:visual
  */
+import {
+  LANPM_ACCENT,
+  LANPM_ACCENT_RING_RGBA,
+  LANPM_RADIUS_PX
+} from '../../src/shared/design/lanpmDesignTokens.ts'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -160,6 +165,47 @@ for (const token of ['--lanpm-bg', '--lanpm-text', '--lanpm-bubble-bg'] as const
   assert.ok(lightVal && darkVal, `${token} must be defined in both themes`)
   assert.notEqual(lightVal, darkVal, `${token} light/dark must differ (AUTO-17)`)
 }
+
+// --- design token SSOT (global.module.css ↔ lanpmDesignTokens ↔ ThemeProvider) ---
+const lightAccent = themeTokenValue(lightBlock, '--lanpm-accent')
+const darkAccent = themeTokenValue(darkBlock, '--lanpm-accent')
+assert.equal(lightAccent, LANPM_ACCENT.light, 'global light --lanpm-accent must match SSOT')
+assert.equal(darkAccent, LANPM_ACCENT.dark, 'global dark --lanpm-accent must match SSOT')
+assert.equal(
+  themeTokenValue(lightBlock, '--lanpm-accent-hover'),
+  LANPM_ACCENT.lightHover,
+  'global light --lanpm-accent-hover must match SSOT'
+)
+assert.equal(
+  themeTokenValue(darkBlock, '--lanpm-accent-hover'),
+  LANPM_ACCENT.darkHover,
+  'global dark --lanpm-accent-hover must match SSOT'
+)
+assert.equal(
+  themeTokenValue(lightBlock, '--lanpm-accent-ring'),
+  LANPM_ACCENT_RING_RGBA.light,
+  'global light --lanpm-accent-ring must match SSOT'
+)
+assert.equal(
+  themeTokenValue(darkBlock, '--lanpm-accent-ring'),
+  LANPM_ACCENT_RING_RGBA.dark,
+  'global dark --lanpm-accent-ring must match SSOT'
+)
+for (const [key, px] of [
+  ['sm', LANPM_RADIUS_PX.sm],
+  ['md', LANPM_RADIUS_PX.md],
+  ['lg', LANPM_RADIUS_PX.lg],
+  ['xl', LANPM_RADIUS_PX.xl]
+] as const) {
+  const lightRadius = themeTokenValue(lightBlock, `--lanpm-radius-${key}`)
+  const darkRadius = themeTokenValue(darkBlock, `--lanpm-radius-${key}`)
+  assert.equal(lightRadius, `${px}px`, `light --lanpm-radius-${key} must be ${px}px`)
+  assert.equal(darkRadius, `${px}px`, `dark --lanpm-radius-${key} must be ${px}px`)
+}
+
+const themeProviderSrc = readFileSync(join(renderer, 'app/ThemeProvider.tsx'), 'utf8')
+assert.match(themeProviderSrc, /lanpmDesignTokens/, 'ThemeProvider must import lanpmDesignTokens SSOT')
+assert.ok(!themeProviderSrc.includes('#0071e3'), 'ThemeProvider must not use legacy #0071e3 accent')
 
 // --- UI components ---
 for (const rel of UI_COMPONENTS) {

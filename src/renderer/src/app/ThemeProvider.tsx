@@ -2,14 +2,18 @@ import { useEffect } from 'react'
 import { App as AntdApp, ConfigProvider, theme as antTheme } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import enUS from 'antd/locale/en_US'
+import {
+  LANPM_ACCENT,
+  LANPM_ACCENT_FILL_RGBA,
+  LANPM_RADIUS_PX
+} from '@shared/design/lanpmDesignTokens'
 import { useUiStore } from '@renderer/stores/uiStore'
 
 /** 与 global.module.css `--lanpm-font-family` 一致（Ant token 须写完整栈，不能用 var） */
 const LANPM_FONT_FAMILY =
   "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', 'Helvetica Neue', sans-serif"
 
-/** 与 global.module.css 一致；Ant Design 无法对 CSS 变量做颜色运算，须用实色 */
-/** 与 global.module.css light/dark 气质令牌对齐（Ant 须实色） */
+/** 与 global.module.css light/dark 气质令牌对齐（Ant 须实色 · SSOT `lanpmDesignTokens.ts`） */
 const LANPM_PALETTE = {
   light: {
     surfaceSolid: '#ffffff',
@@ -19,7 +23,7 @@ const LANPM_PALETTE = {
     separator: 'rgba(60, 60, 67, 0.1)',
     border: 'rgba(60, 60, 67, 0.1)',
     fillSecondary: 'rgba(120, 120, 128, 0.08)',
-    selectedBg: 'rgba(0, 102, 204, 0.08)'
+    selectedBg: LANPM_ACCENT_FILL_RGBA.light
   },
   dark: {
     surfaceSolid: '#1c1c1e',
@@ -29,7 +33,7 @@ const LANPM_PALETTE = {
     separator: 'rgba(84, 84, 88, 0.32)',
     border: 'rgba(84, 84, 88, 0.28)',
     fillSecondary: 'rgba(120, 120, 128, 0.18)',
-    selectedBg: 'rgba(10, 132, 255, 0.16)'
+    selectedBg: LANPM_ACCENT_FILL_RGBA.dark
   }
 } as const
 
@@ -42,6 +46,7 @@ export default function ThemeProvider({
   const locale = useUiStore((s) => s.locale)
   const isDark = themeMode === 'dark'
   const palette = isDark ? LANPM_PALETTE.dark : LANPM_PALETTE.light
+  const accent = isDark ? LANPM_ACCENT.dark : LANPM_ACCENT.light
 
   useEffect(() => {
     document.documentElement.dataset.theme = themeMode
@@ -59,12 +64,11 @@ export default function ThemeProvider({
         algorithm: isDark ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: {
           fontFamily: LANPM_FONT_FAMILY,
-          /* 对齐 --lanpm-radius-md / lg / xl */
-          borderRadius: 12,
-          borderRadiusLG: 16,
-          borderRadiusSM: 8,
-          borderRadiusXS: 6,
-          colorPrimary: isDark ? '#0a84ff' : '#0071e3',
+          borderRadius: LANPM_RADIUS_PX.md,
+          borderRadiusLG: LANPM_RADIUS_PX.lg,
+          borderRadiusSM: LANPM_RADIUS_PX.sm,
+          borderRadiusXS: LANPM_RADIUS_PX.xs,
+          colorPrimary: accent,
           colorBgContainer: palette.surfaceSolid,
           colorBgElevated: palette.surfaceElevated,
           colorBorder: palette.separator,
@@ -91,16 +95,16 @@ export default function ThemeProvider({
             textTextHoverColor: palette.text,
             textTextActiveColor: palette.text,
             colorText: palette.textSecondary,
-            borderRadius: 12
+            borderRadius: LANPM_RADIUS_PX.md
           },
           Input: {
-            activeBorderColor: isDark ? '#0a84ff' : '#0071e3',
+            activeBorderColor: accent,
             hoverBorderColor: palette.separator,
             paddingBlock: 8,
-            borderRadius: 12
+            borderRadius: LANPM_RADIUS_PX.md
           },
           Modal: {
-            borderRadiusLG: 16
+            borderRadiusLG: LANPM_RADIUS_PX.lg
           },
           Select: {
             optionSelectedBg: palette.selectedBg
@@ -113,7 +117,7 @@ export default function ThemeProvider({
           Tag: {
             defaultBg: palette.fillSecondary,
             defaultColor: palette.textSecondary,
-            borderRadiusSM: 8
+            borderRadiusSM: LANPM_RADIUS_PX.sm
           },
           Segmented: {
             trackBg: palette.fillSecondary,
@@ -121,7 +125,7 @@ export default function ThemeProvider({
             itemSelectedBg: palette.surfaceElevated,
             itemSelectedColor: palette.text,
             trackPadding: 3,
-            borderRadius: 12,
+            borderRadius: LANPM_RADIUS_PX.md,
             borderRadiusSM: 10
           },
           Descriptions: {

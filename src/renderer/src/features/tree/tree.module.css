@@ -342,7 +342,7 @@
 
 .checklistProgressFill {
   height: 100%;
-  background: var(--lanpm-accent, #0071e3);
+  background: var(--lanpm-accent, #0066cc);
   transition: width 0.15s ease;
 }
 

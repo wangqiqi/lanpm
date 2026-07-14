@@ -74,7 +74,7 @@
   --lanpm-accent-fill-strong: rgba(0, 102, 204, 0.12);
   /* 壳层选中/激活（顶栏 action · 底栏 Tab）— 蓝品牌淡底，非紫 */
   --lanpm-selected-bg: var(--lanpm-accent-fill);
-  --lanpm-accent-ring: rgba(0, 113, 227, 0.22);
+  --lanpm-accent-ring: rgba(0, 102, 204, 0.22);
   --lanpm-success: #34c759;
   --lanpm-success-ring: rgba(52, 199, 89, 0.25);
   --lanpm-warning: #ff9500;

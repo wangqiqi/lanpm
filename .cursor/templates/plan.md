@@ -10,11 +10,12 @@
 <!-- VERIFY: ./scripts/verify.sh -->
 <!-- 禁止写 runner.sh verify — CLI 入口会读本行；指回自身会无限递归 -->
 <!-- MAX_LOOPS: 15 -->
+<!-- VERSION_LINE: (optional · major.minor，如 4.22；省略则 release-tag 读最新 v* tag) -->
 <!-- VERSION_TARGET: (optional) -->
 
 # Plan
 
-无 Active Sprint / 未完成任务。新开 → `/plan`。已完成 → `.cursorGrowth/archive/` · `CHANGELOG.md`。
+无 Active Sprint / 未完成任务。新开 → `/plan`。Sprint 闭合后：**`CHANGELOG.md`**（git）为可移植记录；Sprint 笔记仅**写入**本地 `.cursorGrowth/archive/`（母版/培训文档**不得**链具体 archive 文件名）。
 
 ---
 

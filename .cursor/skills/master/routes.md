@@ -1,6 +1,7 @@
 # master · 路由表
 
 AskQuestion 选项与关键词 → 下游 skill / agent / rules。  
+无 AskQuestion 工具时：同表**正文编号选项**（见 **master**「AskQuestion 约定」）。  
 与 `.cursor/README.md` **场景速查** 对齐；详表在本文件，README 为摘要链。
 
 ## 主路由（第 1 轮 · ≤7 项）
@@ -10,7 +11,7 @@ AskQuestion 选项与关键词 → 下游 skill / agent / rules。
 | `scaffold` | 新建 / 空项目 | **scaffold** `/scaffold` | 脚手架、初始化、空仓库、new project、bootstrap |
 | `plan` | 规划 / Sprint / 调研 / 文档 | **plan** `/plan` | 规划、需求、Sprint、SPIKE、DOC、归档 |
 | `run` | 继续开发 | **run** `/run` | 继续、做任务、ACTIVE、next task |
-| `learn` | 了解项目 | **learn** `/learn` | 了解项目、约定、onboarding、术语 |
+| `learn` | 了解本仓 | **learn** `/learn` | 本仓约定（**不是** study 学技术） |
 | `fix` | bug / 验收 / 闸门 | bugfix · **run**/**plan** | bug、hotfix、verify 失败、gate-check、卡住 |
 | `ship` | 发版 | **release** · **ship** | 打版、发版、CHANGELOG、tag、release |
 | `more` | 审查 / 文档 / 依赖 / 配置 | 见下表 | commit、PR、security、api、submodule、config |
@@ -23,17 +24,72 @@ AskQuestion 选项与关键词 → 下游 skill / agent / rules。
 | `pr` | PR 描述 / Review / babysit | **git** · **review** · `babysit` | collaboration |
 | `security` | 安全审查 | **security** | — |
 | `api` | API 设计 | **api** | `rules/execution/api.mdc` |
-| `delivery` | 交付验收 / 上线前 | **delivery** | `rules/execution/delivery.mdc` |
-| `ux` | UX / 体验不好 / 界面乱（未明 IA/交付） | **ux** | `rules/execution/ux.mdc` → **ia** / **delivery** |
-| `ia` | 信息架构 / 导航迷路 / 角色首页 | **ia** | `rules/execution/ia.mdc` · `docs/design/*-ia*` |
+| `delivery` | 交付验收 / 上线前 | **delivery** | **用这个**上线走查；**不是** `/ia` 规划 |
+| `ux` | UX / 体验不好 / 界面乱（未明 IA/交付） | **ux** | **用这个**分流；明导航→**ia** · 明上线→**delivery** |
+| `ia` | 信息架构 / 导航迷路 / 角色首页 | **ia** | **用这个**结构层；**不是** delivery 视觉抛光 |
 | `docs` | 文档同步 | **plan** `DOC-*` 或直述 | `rules/execution/docs.mdc` |
-| `deps` | 依赖 / 选型 / vendor / submodule | 直述 + 规范 | `oss-first.mdc` · `submodule.mdc` · **security** |
+| `deps` | 依赖 / 选型 / vendor / submodule / **外网 Agent Skill** | 直述 + 规范 | `oss-first.mdc` · `submodule.mdc` · **security** §外部 Agent Skill · §DAILY/LIBRARY |
 | `config` | verify / 本地 rules / 母版自测 | 见 [扩展场景](#扩展场景) | `config/workflow.json` |
 | `style` | 人格 / 沟通语气 | `config/roles.json` | 见 [人格预设](#人格预设-style) |
 
+## 外网 skill · DAILY / LIBRARY（`deps`）
+
+**用这个**：安装 Super Cursor 或外网 skill 后，按**本仓证据**裁剪默认加载面，避免全量噪音。**不是那个**：发现 skill 商店 → 上表 `deps` + **security** 审计；学本仓约定 → **learn**。
+
+吸收自 SkillsMP `agent-sort`（协议 only，不装 ECC）。
+
+| 桶 | 含义 |
+|----|------|
+| **DAILY** | 每会话强相关 — 与本仓语言/框架/workflow 明确匹配，值得默认启用 |
+| **LIBRARY** | 保留可达、**不**默认全载 — 离栈、偶用、或上下文开销大于收益 |
+
+**证据来源**（分类前必读仓库）：扩展名 · lockfile · `package.json` / `pyproject.toml` / `go.mod` · 框架配置 · CI · `scripts/test.sh` · `.cursorGrowth/learn/module-map.md`。
+
+**分类规则**：
+
+- 晋升 **DAILY**：栈在用 + 每任务都可能用到（如活跃栈的 `rules/tech/*`、**plan**/**run**/**learn**）
+- 降级 **LIBRARY**：离栈 tech rules、未用的 **perf**/**mcp**、一次性 **study** 主题、外网 skill 仅偶发场景
+
+**输出**（给用户或写入 `learn/dev-conventions.md` 一句）：
+
+```text
+DAILY   — 路径 + 证据
+LIBRARY — 路径 + 何时手动选用
+```
+
+安装外网 skill 到 `~/.cursor/skills/` 前仍走 **security** §外部 Agent Skill；**禁止**引入第二套安装 CLI 作为母版必选路径。
+
 ## 人格预设 (`style`)
 
-> 仅改语气，**全能**；默认 `professional`。12 项分两轮 AskQuestion（每轮 ≤7）。
+> **仅改语气/性格，全员 `skills: full`（同等全能）**；默认 `professional`。12 项分两轮 AskQuestion（每轮 ≤7）。
+
+每人字段：`id` · `role_name`（角色名）· `nicknames[]`（昵称）· `given_name`（具体名字）· `personality` · `tone` · `skills`。
+
+### 呼叫（会话内）
+
+用户说「呼叫 / 切换」+ 下列任一即可匹配（大小写不敏感）：
+
+| 字段 | 例（萝莉） |
+|------|------------|
+| `id` | `loli` |
+| `role_name` | 萝莉 |
+| `nicknames` | 小妮 |
+| `given_name` | 妮妮 |
+
+**Agent 必做顺序**：
+
+1. `bash .cursor/bin/resolve-role.sh .cursor/config/roles.json '<称呼>' [项目根]`
+2. **唯一命中** → 写 `.cursorGrowth/session/persona.json`（`persona_id` · `resolved_via` · `updated_at` ISO8601）→ **本会话改用该人格语气**（`skills` 仍 full）
+3. **exit 2 多命中** → AskQuestion / 正文编号消歧，**禁止**静默猜人
+4. **exit 1 未命中** → 说明无此人，列出 `/master` → `style` 或常用称呼
+
+**解析优先级**：
+
+1. `.cursorGrowth/session/aliases.json` → `aliases`（项目覆盖，gitignore）
+2. 母版 `roles.json`：`id` / `role_name` / `nicknames` / `given_name`
+
+- 持久默认仍用 `workflow.json` → `role.default`（可选；会话态优先由 `run-start` 注入）
+- 模板：`templates/cursorGrowth/session/persona.json` · `aliases.json`（勿 commit Growth）
 
 **轮 1 · 日常/硬核**：`professional` · `zhiyin` · `tough_guy` · `strict` · `old_master` · `dashu` · `pretty_boy`
 
@@ -51,7 +107,7 @@ AskQuestion 选项与关键词 → 下游 skill / agent / rules。
 | 信息架构、导航、迷路、Dashboard、角色入口、工作流分支 | **ia** |
 | 性能、慢、瓶颈 | **perf** |
 | 代码回顾、REV | **review** · **review** agent |
-| 学新技术、study | **study** |
+| 学新技术、study | **study**（≠ `/learn`） |
 | 调研只读、SPIKE | **spike** agent · **plan** `SPIKE-*` |
 | 周报、本周总结、weekly report | **week** · `/week` |
 | 磁盘快照、空间变动、disk snapshot | **disk** · `/disk` |
@@ -86,7 +142,7 @@ README 场景速查中无独立主菜单、经 `more` → `config` 或关键词�
 | 只写文档、README、DOC | **plan** · `DOC-*` · `docs.mdc` |
 | 归档、ROADMAP、Sprint 做完 | **plan** · `archive/` |
 | 继续、实现、ACTIVE | **run** |
-| 了解项目、learn、模块地图 | **learn** |
+| 了解项目、learn、模块地图 | **learn**（≠ study） |
 | bug、hotfix、线上、报错 | **fix** → bugfix |
 | 验收失败、verify 红、task-verify | **fix** → verify.mdc · **run**/**plan** |
 | gate-check、PLAN_APPROVED、被挡 | **fix** → **plan** |
@@ -102,6 +158,8 @@ README 场景速查中无独立主菜单、经 `more` → `config` 或关键词�
 | 磁盘快照、空间占用、哪个目录变大 | **disk** · `/disk` |
 | 环境维护、清理磁盘、dev maintenance | **maintain** · `/maintain` |
 | submodule、vendor、依赖升级、开源选型、许可证、MIT、GPL | **more** → `deps`（`oss-first.mdc` · `submodule.mdc`） |
+| 外网 skill、安装 skill、发现 skill、有没有能做 X 的 skill | **more** → `deps` → **security** §外部 Agent Skill；个人目录安装须用户确认 |
+| DAILY、LIBRARY、裁剪 skill、精简规则、skill 太多、全量安装 | **more** → `deps` §DAILY/LIBRARY；结论可写入 **learn** |
 | workflow.json、hooks、profile | **more** → config |
 | 本地 rules、local | **more** → `.cursor/rules/local/` |
 
@@ -130,6 +188,7 @@ README 场景速查中无独立主菜单、经 `more` → `config` 或关键词�
 ## 文档
 
 - [quickstart.md](../../docs/quickstart.md) — 5 分钟闭环
+- [effective-collaboration.md](../../docs/effective-collaboration.md) — 效果型效率 · 少拉扯才是真省
 - [walkthrough.md](../../docs/walkthrough.md) — 端到端示例
 - [training/skills.md](../../docs/training/skills.md) — 全 skill 表
 - [scaffold.md](../../docs/scaffold.md) · [plan-run.md](../../docs/plan-run.md)

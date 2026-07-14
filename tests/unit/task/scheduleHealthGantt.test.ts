@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { LANPM_ACCENT } from '@shared/design/lanpmDesignTokens'
 import {
   countScheduleHealth,
   mergeGanttBarStyles,
@@ -24,10 +25,10 @@ const jan3 = new Date(2026, 0, 3)
 const jan5 = new Date(2026, 0, 5)
 
 const baseBarStyles = {
-  backgroundColor: '#0071e3',
-  backgroundSelectedColor: '#0071e3',
-  progressColor: '#0071e3',
-  progressSelectedColor: '#0071e3'
+  backgroundColor: LANPM_ACCENT.light,
+  backgroundSelectedColor: LANPM_ACCENT.light,
+  progressColor: LANPM_ACCENT.light,
+  progressSelectedColor: LANPM_ACCENT.light
 }
 
 describe('scheduleHealth gantt styles', () => {
@@ -58,7 +59,7 @@ describe('scheduleHealth gantt styles', () => {
       jan3
     )
     expect(behindStyles?.progressColor).toBe('#c99700')
-    expect(behindStyles?.backgroundColor).toBe('#0071e3')
+    expect(behindStyles?.backgroundColor).toBe(LANPM_ACCENT.light)
   })
 
   it('applies on-track progress color', () => {

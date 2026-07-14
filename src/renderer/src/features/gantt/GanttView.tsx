@@ -34,6 +34,7 @@ import RegionButton from '@renderer/ui/RegionButton'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { readCssVar } from '@renderer/ui/cssVar'
+import { LANPM_ACCENT, LANPM_ACCENT_FILL_RGBA } from '@shared/design/lanpmDesignTokens'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { listTaskPredecessors, listTaskSuccessors } from '@shared/task/boardRelations'
@@ -80,21 +81,21 @@ export default function GanttView(): React.ReactElement {
   const suppressClickRef = useRef(false)
   const themeMode = useUiStore((s) => s.theme)
   const [todayColor, setTodayColor] = useState(() =>
-    readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)')
+    readCssVar('--lanpm-accent-fill', LANPM_ACCENT_FILL_RGBA.light)
   )
   const [ganttBarColors, setGanttBarColors] = useState(() => ({
-    barBackgroundColor: readCssVar('--lanpm-accent', '#0071e3'),
-    barBackgroundSelectedColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
-    barProgressColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
-    barProgressSelectedColor: readCssVar('--lanpm-accent', '#0071e3')
+    barBackgroundColor: readCssVar('--lanpm-accent', LANPM_ACCENT.light),
+    barBackgroundSelectedColor: readCssVar('--lanpm-accent-hover', LANPM_ACCENT.lightHover),
+    barProgressColor: readCssVar('--lanpm-accent-hover', LANPM_ACCENT.lightHover),
+    barProgressSelectedColor: readCssVar('--lanpm-accent', LANPM_ACCENT.light)
   }))
   useEffect(() => {
-    setTodayColor(readCssVar('--lanpm-accent-fill', 'rgba(0, 113, 227, 0.08)'))
+    setTodayColor(readCssVar('--lanpm-accent-fill', LANPM_ACCENT_FILL_RGBA.light))
     setGanttBarColors({
-      barBackgroundColor: readCssVar('--lanpm-accent', '#0071e3'),
-      barBackgroundSelectedColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
-      barProgressColor: readCssVar('--lanpm-accent-hover', '#0077ed'),
-      barProgressSelectedColor: readCssVar('--lanpm-accent', '#0071e3')
+      barBackgroundColor: readCssVar('--lanpm-accent', LANPM_ACCENT.light),
+      barBackgroundSelectedColor: readCssVar('--lanpm-accent-hover', LANPM_ACCENT.lightHover),
+      barProgressColor: readCssVar('--lanpm-accent-hover', LANPM_ACCENT.lightHover),
+      barProgressSelectedColor: readCssVar('--lanpm-accent', LANPM_ACCENT.light)
     })
   }, [themeMode])
 
