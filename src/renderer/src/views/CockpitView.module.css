@@ -518,12 +518,41 @@
 
 .reportPanel {
   flex-shrink: 0;
+  background: var(--lanpm-bg);
+  box-shadow: none;
+  border: 0.5px solid var(--lanpm-separator);
+}
+
+.reportPanelTitle {
+  font-size: var(--lanpm-font-body);
+  font-weight: 500;
+  color: var(--lanpm-text-secondary);
+}
+
+.reportPanel .panelBody {
+  padding-top: 10px;
 }
 
 .reportMeta {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: var(--lanpm-font-caption);
+}
+
+.reportTeaserButton {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+  border-radius: var(--lanpm-radius-sm);
+}
+
+.reportTeaserButton:hover .reportTeaser {
+  color: var(--lanpm-text);
 }
 
 .reportTeaser {

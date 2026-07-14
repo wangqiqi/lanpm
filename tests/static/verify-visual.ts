@@ -250,9 +250,19 @@ const cockpitSrc = readFileSync(join(renderer, 'views/CockpitView.tsx'), 'utf8')
 assert.match(cockpitSrc, /kpiGrid/, 'CockpitView should use custom KPI grid')
 const kpiIdx = cockpitSrc.indexOf('kpiGrid')
 const reportIdx = cockpitSrc.indexOf('cockpit.reportOutput')
+const deptIdx = cockpitSrc.indexOf('cockpit.deptCompletion')
 assert.ok(
   kpiIdx >= 0 && reportIdx >= 0 && kpiIdx < reportIdx,
   'CockpitView KPI grid must appear before report panel (CK-402)'
+)
+assert.ok(
+  deptIdx >= 0 && reportIdx > deptIdx,
+  'Cockpit report panel must follow department section (CK-408)'
+)
+assert.match(
+  cockpitSrc,
+  /type="text"\s+icon=\{<RobotOutlined/,
+  'Cockpit AI evaluate must be secondary text CTA (CK-408)'
 )
 assert.match(
   cockpitSrc,
@@ -298,6 +308,8 @@ assert.match(cockpitSrc, /deptList/, 'CockpitView must render scrollable dept li
 assert.match(cockpitCss, /\.deptList\b[^}]*overflow-y:\s*auto/s, 'Dept list must scroll in sub-region (CK-406)')
 assert.match(cockpitSrc, /weeklyTrend/, 'CockpitView must render weekly trend (CK-407)')
 assert.match(cockpitCss, /\.weeklyTrend\b/, 'Cockpit weekly trend strip (CK-407)')
+assert.match(cockpitCss, /\.reportPanelTitle\b/, 'Cockpit report panel secondary title (CK-408)')
+assert.match(cockpitCss, /\.reportTeaserButton\b/, 'Cockpit report teaser expand affordance (CK-408)')
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),

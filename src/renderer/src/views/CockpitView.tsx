@@ -57,17 +57,19 @@ function Panel({
   title,
   extra,
   className = '',
+  titleClassName = '',
   children
 }: {
   title: string
   extra?: React.ReactNode
   className?: string
+  titleClassName?: string
   children: React.ReactNode
 }): React.ReactElement {
   return (
     <section className={`${styles.panel} ${className}`.trim()}>
       <header className={styles.panelHeader}>
-        <h2 className={styles.panelTitle}>{title}</h2>
+        <h2 className={`${styles.panelTitle} ${titleClassName}`.trim()}>{title}</h2>
         {extra ? <div className={styles.panelExtra}>{extra}</div> : null}
       </header>
       <div className={styles.panelBody}>{children}</div>
@@ -92,6 +94,7 @@ export default function CockpitView(): React.ReactElement {
   const [aiConfig, setAiConfig] = useState<AiConfigView | null>(null)
   const [aiConfigOpen, setAiConfigOpen] = useState(false)
   const [report, setReport] = useState<AiReportResult | null>(null)
+  const [reportKind, setReportKind] = useState<'weekly' | 'monthly' | 'evaluate' | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
   const [reportExpanded, setReportExpanded] = useState(false)
 
@@ -137,6 +140,7 @@ export default function CockpitView(): React.ReactElement {
             ? await api.generateMonthlyReport()
             : await api.evaluateProjects()
       setReport(result)
+      setReportKind(kind)
       setReportExpanded(false)
       message.success(result.usedExternalAi ? t('cockpit.reportExternal') : t('cockpit.reportLocal'))
     } catch (err) {
@@ -189,6 +193,15 @@ export default function CockpitView(): React.ReactElement {
   const attentionExtra =
     attentionProjects.length > 4 ? ` +${attentionProjects.length - 4}` : ''
 
+  const reportKindLabel =
+    reportKind === 'weekly'
+      ? t('cockpit.weeklyReport')
+      : reportKind === 'monthly'
+        ? t('cockpit.monthlyReport')
+        : reportKind === 'evaluate'
+          ? t('cockpit.aiEvaluate')
+          : ''
+
   return (
     <div className={styles.root} data-lanpm-view-scroll>
       <ViewHeader
@@ -207,6 +220,7 @@ export default function CockpitView(): React.ReactElement {
               {t('cockpit.monthlyReport')}
             </Button>
             <Button
+              type="text"
               icon={<RobotOutlined />}
               loading={reportLoading}
               onClick={() => void runReport('evaluate')}
@@ -384,46 +398,6 @@ export default function CockpitView(): React.ReactElement {
         )}
       </Panel>
 
-      {report ? (
-        <Panel
-          title={t('cockpit.reportOutput')}
-          className={`${styles.section} ${styles.reportPanel}`}
-          extra={
-            <Space>
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => {
-                  void navigator.clipboard.writeText(report.content).then(
-                    () => message.success(t('cockpit.reportCopied')),
-                    () => message.error(t('cockpit.reportCopyFailed'))
-                  )
-                }}
-              >
-                {t('cockpit.reportCopy')}
-              </Button>
-              <RegionButton variant="caption" onClick={() => setReportExpanded((v) => !v)}>
-                {reportExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
-              </RegionButton>
-            </Space>
-          }
-        >
-          <Text type="secondary" className={styles.reportMeta}>
-            {report.generatedAt} ·{' '}
-            {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
-          </Text>
-          {reportExpanded ? (
-            <pre className={`${styles.reportPre} ${styles.reportPreExpanded}`}>
-              {report.content}
-            </pre>
-          ) : (
-            <Text type="secondary" className={styles.reportTeaser}>
-              {report.content.trim().split('\n').find((line) => line.trim()) ?? ''}
-            </Text>
-          )}
-        </Panel>
-      ) : null}
-
       <Panel
         title={t('cockpit.projectProgress')}
         className={styles.section}
@@ -547,6 +521,55 @@ export default function CockpitView(): React.ReactElement {
           </div>
         )}
       </Panel>
+
+      {report ? (
+        <Panel
+          title={t('cockpit.reportOutput')}
+          titleClassName={styles.reportPanelTitle}
+          className={`${styles.section} ${styles.reportPanel}`}
+          extra={
+            <Space size={4}>
+              <Button
+                size="small"
+                type="link"
+                icon={<CopyOutlined />}
+                onClick={() => {
+                  void navigator.clipboard.writeText(report.content).then(
+                    () => message.success(t('cockpit.reportCopied')),
+                    () => message.error(t('cockpit.reportCopyFailed'))
+                  )
+                }}
+              >
+                {t('cockpit.reportCopy')}
+              </Button>
+              <RegionButton variant="caption" onClick={() => setReportExpanded((v) => !v)}>
+                {reportExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
+              </RegionButton>
+            </Space>
+          }
+        >
+          <Text type="secondary" className={styles.reportMeta}>
+            {reportKindLabel ? `${reportKindLabel} · ` : ''}
+            {report.generatedAt} ·{' '}
+            {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
+          </Text>
+          {reportExpanded ? (
+            <pre className={`${styles.reportPre} ${styles.reportPreExpanded}`}>
+              {report.content}
+            </pre>
+          ) : (
+            <button
+              type="button"
+              className={styles.reportTeaserButton}
+              onClick={() => setReportExpanded(true)}
+            >
+              <Text type="secondary" className={styles.reportTeaser}>
+                {report.content.trim().split('\n').find((line) => line.trim()) ?? ''}
+              </Text>
+            </button>
+          )}
+        </Panel>
+      ) : null}
 
       <AiConfigModal
         open={aiConfigOpen}
