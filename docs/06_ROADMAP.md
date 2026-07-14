@@ -50,18 +50,18 @@
 
 | 档位 | 能力 | 技术路径 | 收费 |
 |------|------|----------|------|
-| **Lite / POC** | 1v1～小房间语音（约 2～4 人） | WebRTC **mesh**，无独立 SFU | 可免费试用或低价 |
-| **Pro** | 语音 + 视频 + 屏幕共享 + 群组会议室 | 内网旁路 **LiveKit / Jitsi**（SFU） | **可购** |
+| **Lite / POC** | 1v1～小房间语音 + 屏幕共享（约 2～4 人） | WebRTC **mesh** + Host 代理 `desktopCapturer`；信令经 `SyncEnvelope` | 可免费试用或低价 |
+| **Pro** | 语音 + 视频 + 群组会议室 | 内网旁路 **LiveKit 自托管 SFU**（**首选**；Jitsi 为 Plan B） | **可购** |
 | **Pro+（P2）** | 多人会议、录制、日程入会等 | 同一插件升级档 | 同授权或升级 SKU |
 
 > 单一插件 id（如 `lanpm.meeting`）+ 能力档位；屏幕共享归入会议包。
 
 ### 3.3 与现有插件底座
 
-| 已有 | 会议插件还需 |
-|------|----------------|
-| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 | 媒体 Slot（聊天工具栏 / 群组 Tab）；媒体 capability；**离线许可证真正拦功能**（当前 `paid` 仅为展示） |
-| 安全红线：禁插件直连 DB / `ipcMain` | 维持；媒体经 Host 代理或旁路服务进程 |
+| 已有 | 会议插件还需（SPIKE-374–376 已拍板） |
+|------|--------------------------------------|
+| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 | **新增** `chat.toolbar.media` Slot · `PluginGroupSlot`（无 taskId）· 媒体 capability（`media.signal.*` · `media.captureDesktop` · `media.room.state`）· **离线许可证真正拦功能**（当前 `paid` 仅为展示） |
+| 安全红线：禁插件直连 DB / `ipcMain` | 维持；媒体经 Host 代理；**builtin registry** 注册 `lanpm.meeting`；LiveKit SDK **不进**核心 `dependencies` |
 
 ### 3.4 架构注意（无中心 vs SFU）
 
@@ -74,14 +74,18 @@
 
 ### 3.5 落地节奏
 
-| 序 | 项 | 阶段 |
-|----|-----|------|
-| 1 | **SPIKE-会议插件**：mesh vs LiveKit 旁路、Slot、与 Presence 关系 | 立项前 |
-| 2 | Host 扩展：媒体 Slot + capability；聊天占位 → 未授权引导 / 已授权入会 | P1 |
-| 3 | 离线许可证（内网可购） | P1～P2（可与插件市场并行） |
-| 4 | Pro 会议包 + 插件市场安装/更新 | P2 · M8 |
+| 序 | 项 | 阶段 | 状态 |
+|----|-----|------|------|
+| 1 | **SPIKE-会议插件**（SPIKE-374–376）：Lite mesh vs LiveKit 旁路 · `chat.toolbar.media` · Presence 侧车 | 立项前 | **SPIKE 已交付** · `npm run verify:meeting-spike` |
+| 2 | Host 扩展 + `lanpm.meeting` stub：`PluginGroupSlot` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | 下一 Sprint |
+| 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | 待 2 |
+| 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | 待 3 |
+| 5 | 离线许可证（内网可购） | P1～P2 | 可与插件市场并行 |
+| 6 | 插件市场安装/更新 | P2 · M8 | 待 |
 
-验收锚点（待实现后补）：`verify:meeting-spike` · `verify:meeting-plugin`。
+验收锚点：`verify:meeting-spike`（SPIKE）· `verify:meeting-plugin`（实现 Sprint，待补）。
+
+**下一实现 Sprint Goal（一句话）**：扩展 Host 媒体 Slot/capability + `plugins/lanpm.meeting` manifest/registry stub，并将聊天 `voice` 面板接到 `chat.toolbar.media`（Lite mesh 信令/投屏代理可 stub）。
 
 ---
 
@@ -104,7 +108,7 @@
 
 | 候选 | 说明 | 备注 |
 |------|------|------|
-| **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** |
+| **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
 | 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | P2 |
 | 思维导图 | 可购插件 | P1 |
 | PWA | 移动端 Web | 后置 |
