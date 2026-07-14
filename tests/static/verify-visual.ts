@@ -294,6 +294,8 @@ assert.match(
   /\.projectHealthMetrics\b[^}]*:global\(\.ant-progress\)/s,
   'Project health progress bar must share row with meta (CK-405)'
 )
+assert.match(cockpitSrc, /deptList/, 'CockpitView must render scrollable dept list (CK-406)')
+assert.match(cockpitCss, /\.deptList\b[^}]*overflow-y:\s*auto/s, 'Dept list must scroll in sub-region (CK-406)')
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),

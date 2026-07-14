@@ -1231,7 +1231,7 @@ export function createBrowserLanpmStub(): LanpmApi {
             totalTasks: 4
           }
         ],
-        departments: [{ department: '研发部', completionPercent: 75, taskCount: 4 }],
+        departments: [{ department: '研发部', completionPercent: 75, taskCount: 4, doneCount: 3 }],
         executiveSummary: {
           completedThisWeek: 1,
           inProgressCount: 2,

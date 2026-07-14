@@ -4,6 +4,7 @@ import { Button, Progress, Space, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ArrowLeftOutlined, CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
+import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
@@ -22,6 +23,10 @@ const STATUS_KEYS: Record<string, { tone: 'normal' | 'risk' | 'delayed'; key: Me
   normal: { tone: 'normal', key: 'cockpit.statusNormal' },
   risk: { tone: 'risk', key: 'cockpit.statusRisk' },
   delayed: { tone: 'delayed', key: 'cockpit.statusDelayed' }
+}
+
+function resolveDeptDisplayName(department: string, t: (key: MessageKey) => string): string {
+  return department === COCKPIT_UNASSIGNED_DEPT ? t('cockpit.deptUnassigned') : department
 }
 
 function KpiTile({
@@ -155,6 +160,11 @@ export default function CockpitView(): React.ReactElement {
     const list = dashboard?.projects ?? []
     return list.filter((p) => p.status === 'delayed' || p.status === 'risk')
   }, [dashboard?.projects])
+
+  const cockpitTotalTasks = useMemo(
+    () => dashboard?.projects.reduce((n, p) => n + p.totalTasks, 0) ?? 0,
+    [dashboard?.projects]
+  )
 
   if (loading && !dashboard) {
     return <ViewLoadingCenter />
@@ -448,23 +458,50 @@ export default function CockpitView(): React.ReactElement {
         )}
       </Panel>
 
-      <Panel title={t('cockpit.deptCompletion')} className={styles.section}>
+      <Panel
+        title={t('cockpit.deptCompletion')}
+        className={styles.section}
+        extra={
+          (dashboard?.departments.length ?? 0) > 0 ? (
+            <Text type="secondary" className={styles.panelCount}>
+              {t('cockpit.deptPanelCount', { count: dashboard?.departments.length ?? 0 })}
+            </Text>
+          ) : null
+        }
+      >
         {(dashboard?.departments.length ?? 0) === 0 ? (
-          <Text type="secondary">{t('cockpit.noDeptData')}</Text>
+          <Text type="secondary">
+            {cockpitTotalTasks === 0 ? t('cockpit.noDeptNoTasks') : t('cockpit.noDeptData')}
+          </Text>
         ) : (
-          dashboard?.departments.map((d) => (
-            <div key={d.department} className={styles.deptRow}>
-              <Text className={styles.deptName}>{d.department}</Text>
-              <Progress
-                className={styles.deptProgress}
-                percent={d.completionPercent}
-                size="small"
-              />
-              <Text type="secondary" className={styles.deptCount}>
-                {t('cockpit.taskCount', { count: d.taskCount })}
-              </Text>
-            </div>
-          ))
+          <div className={styles.deptList}>
+            {dashboard?.departments.map((d) => (
+              <div
+                key={d.department}
+                className={`${styles.deptRow} ${d.department === COCKPIT_UNASSIGNED_DEPT ? styles.deptRowUnassigned : ''}`}
+              >
+                <Text className={styles.deptName}>{resolveDeptDisplayName(d.department, t)}</Text>
+                {d.taskCount === 0 ? (
+                  <Text type="secondary" className={styles.deptZeroHint}>
+                    {t('cockpit.deptZeroTasks')}
+                  </Text>
+                ) : (
+                  <>
+                    <Progress
+                      className={styles.deptProgress}
+                      percent={d.completionPercent}
+                      size="small"
+                      showInfo={false}
+                    />
+                    <span className={styles.deptPct}>{d.completionPercent}%</span>
+                    <Text type="secondary" className={styles.deptCount}>
+                      {t('cockpit.deptDoneRatio', { done: d.doneCount, total: d.taskCount })}
+                    </Text>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </Panel>
 

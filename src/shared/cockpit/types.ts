@@ -22,6 +22,7 @@ export interface DepartmentStats {
   department: string
   completionPercent: number
   taskCount: number
+  doneCount: number
 }
 
 export interface CockpitDashboard {

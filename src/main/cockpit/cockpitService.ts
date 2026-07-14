@@ -6,6 +6,7 @@ import type {
   ProjectDashboardItem,
   ProjectHealth
 } from '../../shared/cockpit/types'
+import { COCKPIT_UNASSIGNED_DEPT, formatDeptForReport } from '../../shared/cockpit/constants'
 import { countRiskProjects, sortCockpitProjects } from '../../shared/cockpit/sortProjects'
 import { buildExecutiveSummary } from '../../shared/cockpit/executiveSummary'
 import { buildAttentionTasks } from '../../shared/cockpit/attentionTasks'
@@ -60,7 +61,7 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
     for (const task of listTasksByGroup(db, project.groupId)) {
       if (task.deletedAt) continue
       const user = task.assigneeUserId ? getUserById(db, task.assigneeUserId) : null
-      const dept = user?.department?.trim() || '未分配'
+      const dept = user?.department?.trim() || COCKPIT_UNASSIGNED_DEPT
       const bucket = deptMap.get(dept) ?? { done: 0, total: 0 }
       bucket.total += 1
       if (task.status === 'done') bucket.done += 1
@@ -72,9 +73,14 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
     .map(([department, { done, total }]) => ({
       department,
       taskCount: total,
+      doneCount: done,
       completionPercent: total === 0 ? 0 : Math.round((done / total) * 100)
     }))
-    .sort((a, b) => b.completionPercent - a.completionPercent)
+    .sort((a, b) => {
+      if (a.department === COCKPIT_UNASSIGNED_DEPT) return 1
+      if (b.department === COCKPIT_UNASSIGNED_DEPT) return -1
+      return b.completionPercent - a.completionPercent || b.taskCount - a.taskCount
+    })
 
   const summary = {
     totalProjects: projects.length,
@@ -146,7 +152,10 @@ function localWeeklyMarkdown(db: Database): string {
     ),
     '',
     '## 部门完成率',
-    ...dash.departments.map((d) => `- ${d.department}：${d.completionPercent}%（${d.taskCount} 项任务）`)
+    ...dash.departments.map(
+      (d) =>
+        `- ${formatDeptForReport(d.department)}：${d.completionPercent}%（${d.doneCount}/${d.taskCount} 项完成）`
+    )
   ]
   return lines.join('\n')
 }
