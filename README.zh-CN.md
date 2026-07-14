@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.30.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.30.1-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -254,9 +254,9 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.30.0` — **领导驾驶舱**：风险优先关注条、四 KPI（含风险项目）、周报主 CTA、岛感面板 · 含 v1.29 壳层气质。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.30.1` — **会议插件 SPIKE**：Lite mesh / LiveKit Pro 架构拍板、Host 媒体扩展点、`verify:meeting-spike` · 含 **1.30.0** 领导驾驶舱。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
-**进行中 / 队列：** 会议插件 SPIKE · 插件市场 SPIKE。
+**进行中 / 队列：** 视觉抛光 II · 会议实现 Sprint · 插件市场 SPIKE。
 
 **规划中（P1+）：** 可购会议插件（语音/视频/投屏）、思维导图、移动端 PWA 等 —— [完整列表 · §1/§3](./docs/06_ROADMAP.md)。
 

@@ -4,11 +4,16 @@
 
 ## [Unreleased]
 
+## [1.30.1] - 2026-07-14
+
 ### Added
-- **SPRINT-MEETING-PLUGIN-SPIKE（SPIKE-374–376）**：可购会议插件 `lanpm.meeting` 架构拍板 — Lite **mesh** + Host 投屏代理 vs Pro **LiveKit 自托管**（Jitsi Plan B）；必扩 `chat.toolbar.media` Slot 与媒体 capability；禁默认公有云 SFU；`npm run verify:meeting-spike`。详 `.cursorGrowth/archive/20260714_214500_meeting_plugin_spike.md` · `docs/06` §3。
+- **SPRINT-MEETING-PLUGIN-SPIKE（SPIKE-374–376）**：可购会议插件 `lanpm.meeting` 架构拍板 — Lite **mesh** + Host 投屏代理 vs Pro **LiveKit 自托管**（Jitsi Plan B）；必扩 `chat.toolbar.media` Slot 与媒体 capability；禁默认公有云 SFU；`npm run verify:meeting-spike`。详 `archive/20260714_214500_meeting_plugin_spike.md` · `docs/06` §3。
 
 ### Fixed
 - **`verify:plugin-spike` / `verify:meeting-spike`**：改经 `run-electron-node.mjs` 执行，避免系统 Node 20 不支持 `--experimental-strip-types` 导致验收失败。
+
+### Release
+- `v1.30.1` — meeting plugin architecture SPIKE
 
 ## [1.30.0] - 2026-07-12
 
