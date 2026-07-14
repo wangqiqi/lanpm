@@ -1,12 +1,44 @@
-.root {
+.root:global(.ant-select-auto-complete),
+.root:global(.ant-select) {
   width: 220px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  box-sizing: border-box;
 }
 
 .root :global(.ant-select-selector) {
   padding: 0 !important;
   border: none !important;
-  background: transparent !important;
+  background: var(--lanpm-fill-secondary) !important;
+  border-radius: var(--lanpm-radius-md) !important;
   box-shadow: none !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+.root :global(.ant-select-selection-wrap) {
+  height: 32px !important;
+  min-height: 32px !important;
+  align-items: center !important;
+}
+
+.root :global(.ant-select-selection-search) {
+  inset-inline-start: 0 !important;
+  inset-inline-end: 0 !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.root :global(.ant-select-selection-search-input) {
+  height: 32px !important;
+  padding: 0 !important;
 }
 
 .input {
@@ -14,14 +46,15 @@
   height: 32px;
   min-height: 32px;
   max-height: 32px;
+  margin: 0;
   padding: 0 11px;
   box-sizing: border-box;
   border: none;
   border-radius: var(--lanpm-radius-md);
-  background: var(--lanpm-fill-secondary);
+  background: transparent;
   color: var(--lanpm-text);
-  font-size: 14px;
-  line-height: 32px;
+  font-size: var(--lanpm-font-body);
+  line-height: 1.25;
   outline: none;
 }
 

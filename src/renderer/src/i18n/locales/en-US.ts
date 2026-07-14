@@ -137,6 +137,7 @@ const enUS = {
   'cockpit.execInProgress': 'In progress',
   'cockpit.execRiskProjects': 'At-risk projects',
   'cockpit.execDueNextWeek': 'Due next week',
+  'cockpit.execAttentionCount': 'Tasks needing attention',
   'cockpit.trendTitle': 'Weekly trend',
   'cockpit.trendLastWeek': 'Done last week',
   'cockpit.trendThisWeek': 'Done this week',

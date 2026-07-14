@@ -134,6 +134,7 @@ export type MessageKey =
   | 'cockpit.execInProgress'
   | 'cockpit.execRiskProjects'
   | 'cockpit.execDueNextWeek'
+  | 'cockpit.execAttentionCount'
   | 'cockpit.trendTitle'
   | 'cockpit.trendLastWeek'
   | 'cockpit.trendThisWeek'

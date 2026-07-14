@@ -172,12 +172,18 @@ export default function CockpitView(): React.ReactElement {
   )
 
   if (loading && !dashboard) {
-    return <ViewLoadingCenter />
+    return (
+      <div className={styles.root}>
+        <ViewLoadingCenter />
+      </div>
+    )
   }
 
   if (loadError && !dashboard) {
     return (
-      <ViewErrorCenter message={t('cockpit.loadErrorHint')} onRetry={() => void load()} />
+      <div className={styles.root}>
+        <ViewErrorCenter message={t('cockpit.loadErrorHint')} onRetry={() => void load()} />
+      </div>
     )
   }
 
@@ -203,7 +209,7 @@ export default function CockpitView(): React.ReactElement {
           : ''
 
   return (
-    <div className={styles.root} data-lanpm-view-scroll>
+    <div className={styles.root}>
       <ViewHeader
         title={t('cockpit.title')}
         actions={
@@ -234,6 +240,7 @@ export default function CockpitView(): React.ReactElement {
         }
       />
 
+      <div className={styles.scrollBody} data-lanpm-view-scroll>
       <div
         className={`${styles.attention} ${
           attentionProjects.length > 0 ? styles.attentionNeed : styles.attentionOk
@@ -267,47 +274,15 @@ export default function CockpitView(): React.ReactElement {
         )}
       </div>
 
-      {dashboard?.executiveSummary ? (
+      {dashboard?.executiveSummary && dashboard?.weeklyTrend ? (
         <section className={styles.execSummary} aria-label={t('cockpit.execSummaryTitle')}>
           <h2 className={styles.execSummaryTitle}>{t('cockpit.execSummaryTitle')}</h2>
           <div className={styles.execSummaryGrid}>
             <div className={styles.execMetric}>
               <span className={styles.execLabel}>{t('cockpit.execCompletedWeek')}</span>
               <span className={styles.execValue}>
-                {dashboard.executiveSummary.completedThisWeek}
+                {dashboard.weeklyTrend.completedThisWeek}
               </span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.execInProgress')}</span>
-              <span className={styles.execValue}>{dashboard.executiveSummary.inProgressCount}</span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.execRiskProjects')}</span>
-              <span
-                className={`${styles.execValue} ${styles.execValueRisk}`.trim()}
-              >
-                {dashboard.executiveSummary.riskProjectCount}
-              </span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.execDueNextWeek')}</span>
-              <span className={styles.execValue}>{dashboard.executiveSummary.dueNextWeek}</span>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {dashboard?.weeklyTrend ? (
-        <section className={styles.weeklyTrend} aria-label={t('cockpit.trendTitle')}>
-          <h2 className={styles.weeklyTrendTitle}>{t('cockpit.trendTitle')}</h2>
-          <div className={styles.weeklyTrendGrid}>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.trendLastWeek')}</span>
-              <span className={styles.execValue}>{dashboard.weeklyTrend.completedLastWeek}</span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.trendThisWeek')}</span>
-              <span className={styles.execValue}>{dashboard.weeklyTrend.completedThisWeek}</span>
             </div>
             <div className={styles.execMetric}>
               <span className={styles.execLabel}>{t('cockpit.trendDelta')}</span>
@@ -324,16 +299,21 @@ export default function CockpitView(): React.ReactElement {
               </span>
             </div>
             <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.trendMilestones')}</span>
-              <span className={styles.execValue}>
-                {t('cockpit.trendMilestonePair', {
-                  current: dashboard.weeklyTrend.milestonesCompletedThisWeek,
-                  previous: dashboard.weeklyTrend.milestonesCompletedLastWeek
-                })}
+              <span className={styles.execLabel}>{t('cockpit.execDueNextWeek')}</span>
+              <span className={styles.execValue}>{dashboard.executiveSummary.dueNextWeek}</span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.execAttentionCount')}</span>
+              <span
+                className={`${styles.execValue} ${
+                  (dashboard.attentionTasks.length ?? 0) > 0 ? styles.execValueRisk : ''
+                }`.trim()}
+              >
+                {dashboard.attentionTasks.length}
               </span>
             </div>
           </div>
-          <Text type="secondary" className={styles.trendNote}>
+          <Text type="secondary" className={styles.execFootnote}>
             {t('cockpit.trendApproxNote')}
           </Text>
         </section>
@@ -570,6 +550,7 @@ export default function CockpitView(): React.ReactElement {
           )}
         </Panel>
       ) : null}
+      </div>
 
       <AiConfigModal
         open={aiConfigOpen}

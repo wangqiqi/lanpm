@@ -110,6 +110,26 @@ const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
     label: 'RegionButton user 32px'
   },
   {
+    file: 'layout/TopBar.module.css',
+    pattern: /\.projectSelect\s*\{[^}]*height:\s*32px/s,
+    label: 'TopBar project select outer 32px'
+  },
+  {
+    file: 'layout/TopBar.module.css',
+    pattern: /\.search:global\(\.ant-select-auto-complete\)/,
+    label: 'TopBar search binds ant-select 32px'
+  },
+  {
+    file: 'layout/GlobalSearch.module.css',
+    pattern: /\.root:global\(\.ant-select-auto-complete\)/,
+    label: 'GlobalSearch root binds ant-select 32px'
+  },
+  {
+    file: 'layout/GlobalSearch.module.css',
+    pattern: /\.root\s*:global\(\.ant-select-selector\)\s*\{[^}]*background:\s*var\(--lanpm-fill-secondary\)/s,
+    label: 'GlobalSearch pill background on selector'
+  },
+  {
     file: 'layout/GlobalSearch.module.css',
     pattern: /\.input\s*\{[^}]*height:\s*32px/s,
     label: 'GlobalSearch input 32px'
@@ -306,8 +326,11 @@ assert.match(
 )
 assert.match(cockpitSrc, /deptList/, 'CockpitView must render scrollable dept list (CK-406)')
 assert.match(cockpitCss, /\.deptList\b[^}]*overflow-y:\s*auto/s, 'Dept list must scroll in sub-region (CK-406)')
-assert.match(cockpitSrc, /weeklyTrend/, 'CockpitView must render weekly trend (CK-407)')
-assert.match(cockpitCss, /\.weeklyTrend\b/, 'Cockpit weekly trend strip (CK-407)')
+assert.match(
+  cockpitSrc,
+  /formatWeekOverWeekDelta/,
+  'CockpitView must render week-over-week delta in executive summary (CK-407)'
+)
 assert.match(cockpitCss, /\.reportPanelTitle\b/, 'Cockpit report panel secondary title (CK-408)')
 assert.match(cockpitCss, /\.reportTeaserButton\b/, 'Cockpit report teaser expand affordance (CK-408)')
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
@@ -317,8 +340,8 @@ assert.ok(
 )
 assert.match(
   cockpitCss,
-  /\.root\s*\{[^}]*overflow-y:\s*auto/s,
-  'CockpitView root must be the single vertical scroll container (CK-401)'
+  /\.scrollBody\s*\{[^}]*overflow-y:\s*auto/s,
+  'CockpitView scroll body must be the vertical scroll container (CK-401)'
 )
 
 const mainLayoutCss = readFileSync(join(renderer, 'layout/MainLayout.module.css'), 'utf8')

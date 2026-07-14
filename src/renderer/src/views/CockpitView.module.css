@@ -4,11 +4,20 @@
   flex: 1;
   min-height: 0;
   min-width: 0;
+  max-width: 100%;
+}
+
+.scrollBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  gap: 12px;
   overflow-x: clip;
   overflow-y: auto;
-  max-width: 100%;
-  gap: 12px;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
+  scrollbar-gutter: stable;
 }
 
 .headerActions {
@@ -110,35 +119,6 @@
   color: var(--lanpm-warning);
 }
 
-.weeklyTrend {
-  padding: 14px 16px;
-  border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-elevated);
-  box-shadow: var(--lanpm-shadow-island);
-  border: 0.5px solid var(--lanpm-separator);
-}
-
-.weeklyTrendTitle {
-  margin: 0 0 12px;
-  font-size: var(--lanpm-font-title);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: var(--lanpm-line-title);
-  color: var(--lanpm-text);
-}
-
-.weeklyTrendGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (max-width: 900px) {
-  .weeklyTrendGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 .trendDeltaUp {
   color: var(--lanpm-success);
 }
@@ -147,7 +127,7 @@
   color: var(--lanpm-danger);
 }
 
-.trendNote {
+.execFootnote {
   display: block;
   margin-top: 10px;
   font-size: var(--lanpm-font-caption);

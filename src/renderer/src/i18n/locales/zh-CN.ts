@@ -135,6 +135,7 @@ const zhCN = {
   'cockpit.execInProgress': '进行中',
   'cockpit.execRiskProjects': '风险项目',
   'cockpit.execDueNextWeek': '下周到期',
+  'cockpit.execAttentionCount': '需关注任务',
   'cockpit.trendTitle': '周趋势',
   'cockpit.trendLastWeek': '上周完成',
   'cockpit.trendThisWeek': '本周完成',
