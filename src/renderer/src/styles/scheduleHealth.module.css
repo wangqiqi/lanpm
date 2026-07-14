@@ -25,58 +25,58 @@
 }
 
 .dueOnTrack {
-  color: #248a3d;
+  color: var(--lanpm-success);
   font-weight: 600;
 }
 
 .dueBehind {
-  color: #8f6b00;
+  color: var(--lanpm-warning);
   font-weight: 600;
 }
 
 .dueOverdue {
-  color: #ff0000;
+  color: var(--lanpm-danger);
   font-weight: 600;
 }
 
 .progressOnTrack {
-  color: #248a3d;
+  color: var(--lanpm-success);
   font-weight: 600;
 }
 
 .progressBehind {
-  color: #8f6b00;
+  color: var(--lanpm-warning);
   font-weight: 600;
 }
 
 .progressOverdue {
-  color: #ff0000;
+  color: var(--lanpm-danger);
   font-weight: 600;
 }
 
 .treeRowOnTrack {
-  box-shadow: inset 3px 0 0 #34c759;
+  box-shadow: inset 3px 0 0 var(--lanpm-success);
   border-radius: var(--lanpm-radius-sm);
 }
 
 .treeRowBehind {
-  box-shadow: inset 3px 0 0 #c99700;
+  box-shadow: inset 3px 0 0 var(--lanpm-warning);
   border-radius: var(--lanpm-radius-sm);
 }
 
 .treeRowOverdue {
-  box-shadow: inset 3px 0 0 #ff0000;
+  box-shadow: inset 3px 0 0 var(--lanpm-danger);
   border-radius: var(--lanpm-radius-sm);
 }
 
 .legendSwatchOnTrack {
-  background-color: #34c759;
+  background-color: var(--lanpm-success);
 }
 
 .legendSwatchBehind {
-  background-color: #c99700;
+  background-color: var(--lanpm-warning);
 }
 
 .legendSwatchOverdue {
-  background-color: #ff0000;
+  background-color: var(--lanpm-danger);
 }

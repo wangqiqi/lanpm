@@ -19,7 +19,7 @@
   max-width: 7rem;
   padding: 1px 6px 1px 4px;
   border-radius: 999px;
-  color: #fff;
+  color: var(--lanpm-on-accent);
   font-size: 11px;
   line-height: 1.3;
   overflow: hidden;
@@ -76,7 +76,7 @@
   margin-top: 1px;
   padding: 0 4px;
   border-radius: 3px;
-  color: #fff;
+  color: var(--lanpm-on-accent);
   font-size: 10px;
   line-height: 1.4;
   white-space: nowrap;

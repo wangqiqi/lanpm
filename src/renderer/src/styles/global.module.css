@@ -45,6 +45,16 @@
   --lanpm-motion-fast: 150ms;
   --lanpm-motion-normal: 220ms;
   --lanpm-ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* 任务族色条（亮暗共用 · SSOT `lanpmDesignTokens.ts` LANPM_TASK_FAMILY） */
+  --lanpm-task-family-0: #0066cc;
+  --lanpm-task-family-1: #5856d6;
+  --lanpm-task-family-2: #34c759;
+  --lanpm-task-family-3: #ff9500;
+  --lanpm-task-family-4: #ff2d55;
+  --lanpm-task-family-5: #00c7be;
+  --lanpm-task-family-6: #af52de;
+  --lanpm-task-family-7: #8e8e93;
 }
 
 /* Apple HIG + Excalidraw 外壳气质令牌 — 亮色（非画布手绘） */

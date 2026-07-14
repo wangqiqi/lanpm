@@ -643,7 +643,7 @@
 }
 
 .taskRef {
-  color: #007a3d;
+  color: var(--lanpm-success);
   font-weight: 600;
   background: var(--lanpm-success-ring);
   border-radius: var(--lanpm-radius-sm);
@@ -1193,7 +1193,7 @@
 }
 
 .toolbarGlyphTask {
-  color: #007a3d !important;
+  color: var(--lanpm-success) !important;
 }
 
 :global(html[data-theme='dark']) .toolbarGlyphTask {

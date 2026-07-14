@@ -31,3 +31,15 @@ export const LANPM_ACCENT_RING_RGBA = {
   light: 'rgba(0, 102, 204, 0.22)',
   dark: 'rgba(10, 132, 255, 0.4)'
 } as const
+
+/** 看板 / 树 / 甘特任务族色条（与 `global.module.css` `--lanpm-task-family-*` 同步） */
+export const LANPM_TASK_FAMILY = [
+  LANPM_ACCENT.light,
+  '#5856d6',
+  '#34c759',
+  '#ff9500',
+  '#ff2d55',
+  '#00c7be',
+  '#af52de',
+  '#8e8e93'
+] as const

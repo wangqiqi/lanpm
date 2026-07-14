@@ -5,7 +5,8 @@
 import {
   LANPM_ACCENT,
   LANPM_ACCENT_RING_RGBA,
-  LANPM_RADIUS_PX
+  LANPM_RADIUS_PX,
+  LANPM_TASK_FAMILY
 } from '../../src/shared/design/lanpmDesignTokens.ts'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
@@ -55,6 +56,25 @@ const FORBIDDEN_PATTERNS = [
 ] as const
 
 const BAD_TOKEN_FALLBACK = /var\(--lanpm-[^,)]+,\s*rgba\(\s*0\s*,\s*0\s*,\s*0/gi
+
+/** 业务 module.css 禁止散落硬编码色（令牌定义仅在 global.module.css） */
+const FORBIDDEN_MODULE_HEX = [
+  /#007a3d/i,
+  /#0071e3/i,
+  /#e5e5ea/i,
+  /#38383a/i,
+  /#ff0000\b/i,
+  /#248a3d/i,
+  /#8f6b00/i
+] as const
+
+const FORBIDDEN_PHANTOM_TOKENS = [
+  '--lanpm-border-subtle',
+  '--lanpm-surface-secondary',
+  '--lanpm-text-primary'
+] as const
+
+const HEX_FALLBACK_IN_VAR = /var\(--lanpm-[^,)]+,\s*#[0-9a-fA-F]{3,8}/gi
 
 const UI_COMPONENTS = [
   'ui/ViewHeader.tsx',
@@ -207,6 +227,14 @@ const themeProviderSrc = readFileSync(join(renderer, 'app/ThemeProvider.tsx'), '
 assert.match(themeProviderSrc, /lanpmDesignTokens/, 'ThemeProvider must import lanpmDesignTokens SSOT')
 assert.ok(!themeProviderSrc.includes('#0071e3'), 'ThemeProvider must not use legacy #0071e3 accent')
 
+const htmlRootEnd = globalCss.indexOf("html[data-theme='light']")
+const htmlRootBlock = globalCss.slice(0, htmlRootEnd)
+for (let i = 0; i < LANPM_TASK_FAMILY.length; i++) {
+  const token = `--lanpm-task-family-${i}`
+  const val = themeTokenValue(htmlRootBlock, token)
+  assert.equal(val, LANPM_TASK_FAMILY[i], `${token} must match lanpmDesignTokens LANPM_TASK_FAMILY[${i}]`)
+}
+
 // --- UI components ---
 for (const rel of UI_COMPONENTS) {
   assert.ok(existsSync(join(renderer, rel)), `missing ${rel}`)
@@ -257,12 +285,27 @@ for (const file of cssFiles) {
   const rel = file.slice(renderer.length + 1)
   const content = readFileSync(file, 'utf8')
   scanned++
+  const isGlobal = rel === 'styles/global.module.css'
   for (const pat of FORBIDDEN_PATTERNS.slice(0, 6)) {
     const m = content.match(pat)
     assert.ok(!m, `${rel}: forbidden color pattern ${pat} → ${m?.[0] ?? ''}`)
   }
   const badFallback = content.match(BAD_TOKEN_FALLBACK)
   assert.ok(!badFallback, `${rel}: use --lanpm-* without rgba(0,0,0,*) fallback`)
+  if (!isGlobal) {
+    for (const pat of FORBIDDEN_MODULE_HEX) {
+      const m = content.match(pat)
+      assert.ok(!m, `${rel}: legacy hardcoded hex ${pat} → use semantic --lanpm-* tokens`)
+    }
+    for (const phantom of FORBIDDEN_PHANTOM_TOKENS) {
+      assert.ok(!content.includes(phantom), `${rel}: unknown token ${phantom}`)
+    }
+    const hexVarFallback = content.match(HEX_FALLBACK_IN_VAR)
+    assert.ok(
+      !hexVarFallback,
+      `${rel}: do not use var(--lanpm-*, #hex) fallbacks → ${hexVarFallback?.[0] ?? ''}`
+    )
+  }
 }
 
 const tsxFiles: string[] = []

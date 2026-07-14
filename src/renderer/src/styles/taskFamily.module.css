@@ -1,35 +1,35 @@
-/* 任务族色条：看板卡片、任务树行、甘特条共用（色值见 shared/task/taskFamilyColors.ts） */
+/* 任务族色条：看板卡片、任务树行、甘特条共用（色值见 `lanpmDesignTokens.ts` · `--lanpm-task-family-*`） */
 
 .familyStripe0 {
-  border-left: 3px solid var(--lanpm-accent);
+  border-left: 3px solid var(--lanpm-task-family-0);
 }
 
 .familyStripe1 {
-  border-left: 3px solid #5856d6;
+  border-left: 3px solid var(--lanpm-task-family-1);
 }
 
 .familyStripe2 {
-  border-left: 3px solid #34c759;
+  border-left: 3px solid var(--lanpm-task-family-2);
 }
 
 .familyStripe3 {
-  border-left: 3px solid #ff9500;
+  border-left: 3px solid var(--lanpm-task-family-3);
 }
 
 .familyStripe4 {
-  border-left: 3px solid #ff2d55;
+  border-left: 3px solid var(--lanpm-task-family-4);
 }
 
 .familyStripe5 {
-  border-left: 3px solid #00c7be;
+  border-left: 3px solid var(--lanpm-task-family-5);
 }
 
 .familyStripe6 {
-  border-left: 3px solid #af52de;
+  border-left: 3px solid var(--lanpm-task-family-6);
 }
 
 .familyStripe7 {
-  border-left: 3px solid #8e8e93;
+  border-left: 3px solid var(--lanpm-task-family-7);
 }
 
 .nodeFamilyStripe {
