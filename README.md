@@ -254,9 +254,9 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.31.0` — **Design token SSOT** (VP-401 start) + **Super Cursor** workflow sync · prior **1.30.1** meeting-plugin SPIKE · **1.30.0** executive cockpit. M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.31.0` — **Visual polish II** (VP-401–407): design-token SSOT · cockpit/chat/calendar chrome · restrained tab motion · unified empty states · prior **1.30.1** meeting-plugin SPIKE. M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
-**Next (in progress / queue):** visual polish II · meeting implementation sprint · marketplace SPIKE.
+**Next (queue):** meeting implementation sprint · marketplace SPIKE.
 
 **Later (P1+):** purchasable meeting plugin (voice/video/screen share), mind maps, mobile PWA — [full list · §1/§3](./docs/06_ROADMAP.md).
 
