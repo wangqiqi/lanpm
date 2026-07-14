@@ -15,7 +15,6 @@ import {
 } from '@shared/task/calendarEvents'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
-import { useUiStore } from '@renderer/stores/uiStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import TaskEditModal from '@renderer/features/board/TaskEditModal'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
@@ -38,7 +37,6 @@ export default function CalendarView(): React.ReactElement {
   const loadTasks = useTaskStore((s) => s.loadTasks)
   const updateTask = useTaskStore((s) => s.updateTask)
   const updateSchedule = useTaskStore((s) => s.updateSchedule)
-  const theme = useUiStore((s) => s.theme)
   const [editTask, setEditTask] = useState<Task | null>(null)
   const suppressClickRef = useRef(false)
 
@@ -148,7 +146,7 @@ export default function CalendarView(): React.ReactElement {
   }
 
   return (
-    <div className={`${styles.root} ${theme === 'dark' ? styles.dark : styles.light}`}>
+    <div className={styles.root}>
       <ViewToolbar>
         <ViewToolbarHint>{t('calendar.toolbarHint')}</ViewToolbarHint>
       </ViewToolbar>

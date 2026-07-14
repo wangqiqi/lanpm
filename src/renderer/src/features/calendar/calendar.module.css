@@ -14,7 +14,7 @@
   border-radius: var(--lanpm-radius-lg);
   overflow: hidden;
   background: var(--lanpm-surface-elevated);
-  box-shadow: var(--lanpm-shadow-surface);
+  box-shadow: var(--lanpm-shadow-island);
   border: 0.5px solid var(--lanpm-separator);
 }
 
@@ -25,55 +25,65 @@
 .calendarHost :global(.fc) {
   position: absolute;
   inset: 0;
-}
-
-/* Inferred schedule (no persisted dates) — softer than dated events */
-.light :global(.fc .lanpm-cal-inferred),
-.dark :global(.fc .lanpm-cal-inferred) {
-  opacity: 0.72;
-  border-style: dashed !important;
-}
-
-.light :global(.fc),
-.dark :global(.fc) {
-  --fc-border-color: var(--lanpm-border);
+  --fc-small-font-size: var(--lanpm-font-caption);
   --fc-page-bg-color: transparent;
-  --fc-neutral-bg-color: var(--lanpm-bg);
-  --fc-list-event-hover-bg-color: var(--lanpm-selected-bg);
-  --fc-today-bg-color: var(--lanpm-selected-bg);
-  --fc-event-bg-color: var(--lanpm-accent);
-  --fc-event-border-color: var(--lanpm-accent);
-  --fc-event-text-color: var(--lanpm-on-accent);
+  --fc-neutral-bg-color: var(--lanpm-fill-secondary);
+  --fc-neutral-text-color: var(--lanpm-text-secondary);
+  --fc-border-color: var(--lanpm-border);
+  --fc-button-text-color: var(--lanpm-on-accent);
   --fc-button-bg-color: var(--lanpm-accent);
   --fc-button-border-color: var(--lanpm-accent);
   --fc-button-hover-bg-color: var(--lanpm-accent-hover);
   --fc-button-hover-border-color: var(--lanpm-accent-hover);
   --fc-button-active-bg-color: var(--lanpm-accent-hover);
   --fc-button-active-border-color: var(--lanpm-accent-hover);
+  --fc-event-bg-color: var(--lanpm-accent);
+  --fc-event-border-color: var(--lanpm-accent);
+  --fc-event-text-color: var(--lanpm-on-accent);
+  --fc-event-selected-overlay-color: var(--lanpm-accent-ring);
+  --fc-more-link-bg-color: var(--lanpm-fill-secondary);
+  --fc-more-link-text-color: var(--lanpm-text);
+  --fc-non-business-color: color-mix(in srgb, var(--lanpm-fill-secondary) 80%, transparent);
+  --fc-bg-event-color: var(--lanpm-accent-fill);
+  --fc-bg-event-opacity: 0.35;
+  --fc-highlight-color: var(--lanpm-accent-ring);
+  --fc-today-bg-color: var(--lanpm-selected-bg);
+  --fc-now-indicator-color: var(--lanpm-danger);
+  --fc-list-event-hover-bg-color: var(--lanpm-selected-bg);
   font-family: inherit;
   color: var(--lanpm-text);
 }
 
-.dark :global(.fc) {
-  --fc-border-color: var(--lanpm-border);
+/* Inferred schedule (no persisted dates) — softer than dated events */
+.calendarHost :global(.fc .lanpm-cal-inferred) {
+  opacity: 0.72;
+  border-style: dashed !important;
 }
 
-.light :global(.fc .fc-toolbar-title),
-.dark :global(.fc .fc-toolbar-title) {
-  font-size: 1.1rem;
+.calendarHost :global(.fc .fc-toolbar-title) {
+  font-size: var(--lanpm-font-title);
   font-weight: 600;
+  color: var(--lanpm-text);
 }
 
-.light :global(.fc .fc-button),
-.dark :global(.fc .fc-button) {
+.calendarHost :global(.fc .fc-button) {
   border-radius: var(--lanpm-radius-sm);
   text-transform: none;
   box-shadow: none !important;
+  font-size: var(--lanpm-font-body);
 }
 
-.light :global(.fc-theme-standard td),
-.light :global(.fc-theme-standard th),
-.dark :global(.fc-theme-standard td),
-.dark :global(.fc-theme-standard th) {
+.calendarHost :global(.fc-theme-standard td),
+.calendarHost :global(.fc-theme-standard th) {
   border-color: var(--fc-border-color);
+}
+
+.calendarHost :global(.fc .fc-scrollgrid) {
+  border-color: var(--lanpm-border);
+}
+
+.calendarHost :global(.fc .fc-col-header-cell-cushion),
+.calendarHost :global(.fc .fc-daygrid-day-number) {
+  color: var(--lanpm-text-secondary);
+  font-size: var(--lanpm-font-caption);
 }

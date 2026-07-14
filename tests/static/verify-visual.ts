@@ -286,6 +286,23 @@ assert.ok(
   'TopBar must not nest discover in overflow menu (VP-405)'
 )
 
+const calendarCss = readFileSync(join(renderer, 'features/calendar/calendar.module.css'), 'utf8')
+assert.match(calendarCss, /--lanpm-shadow-island/, 'calendar host uses island shadow (VP-406)')
+assert.ok(
+  !/\.light\b|\.dark\b/.test(calendarCss),
+  'calendar FC theme should scope under .calendarHost not .light/.dark (VP-406)'
+)
+const fcVarLines = calendarCss.match(/--fc-[a-z0-9-]+:\s*[^;]+;/g) ?? []
+assert.ok(fcVarLines.length >= 16, `calendar should define FC CSS variables (VP-406), got ${fcVarLines.length}`)
+for (const line of fcVarLines) {
+  if (/transparent/.test(line) || /--fc-[a-z0-9-]+:\s*[\d.]+;/.test(line)) continue
+  assert.match(
+    line,
+    /var\(--lanpm-/,
+    `calendar FC variable must reference --lanpm-* token: ${line.trim()}`
+  )
+}
+
 // --- legacy removed ---
 mustNotExist('src/renderer/src/features/shell/MainLayout.tsx')
 mustNotExist('src/renderer/src/features/views/ViewPlaceholder.tsx')
