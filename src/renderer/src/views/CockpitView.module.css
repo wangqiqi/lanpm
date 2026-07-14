@@ -247,32 +247,85 @@
   margin-bottom: 4px;
 }
 
-.projectRow {
-  padding: 12px 0;
-  border-bottom: 0.5px solid var(--lanpm-separator);
+.panelCount {
+  font-size: var(--lanpm-font-caption);
 }
 
-.projectRow:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.projectHealthList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.projectRow:first-child {
-  padding-top: 0;
+.projectHealthCard {
+  padding: 10px 12px;
+  border-radius: var(--lanpm-radius-md);
+  background: var(--lanpm-bg);
+  border: 0.5px solid var(--lanpm-separator);
 }
 
-.projectHead {
+.projectHealthCard_delayed {
+  border-color: color-mix(in srgb, var(--lanpm-danger) 30%, var(--lanpm-separator));
+  background: color-mix(in srgb, var(--lanpm-danger) 4%, var(--lanpm-bg));
+}
+
+.projectHealthCard_risk {
+  border-color: color-mix(in srgb, var(--lanpm-warning) 30%, var(--lanpm-separator));
+  background: color-mix(in srgb, var(--lanpm-warning) 4%, var(--lanpm-bg));
+}
+
+.projectHealthCard_normal {
+  border-color: var(--lanpm-separator);
+}
+
+.projectHealthTop {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
   min-width: 0;
+}
+
+.projectHealthMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 8px;
+  min-width: 0;
+}
+
+.projectHealthMetrics :global(.ant-progress) {
+  flex: 1 1 120px;
+  min-width: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.projectMetaInline {
+  flex: 1 1 160px;
+  min-width: 0;
+  font-size: var(--lanpm-font-caption);
+  line-height: var(--lanpm-line-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectHealthActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 6px;
 }
 
 .projectName {
   min-width: 0;
   flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .statusPill {

@@ -140,6 +140,7 @@ export type MessageKey =
   | 'cockpit.attentionTaskBehind'
   | 'cockpit.attentionTaskUnassigned'
   | 'cockpit.projectProgress'
+  | 'cockpit.projectCount'
   | 'cockpit.noProjects'
   | 'cockpit.statusNormal'
   | 'cockpit.statusRisk'

@@ -283,6 +283,17 @@ assert.match(
 )
 assert.match(cockpitCss, /\.attentionTaskList\b/, 'Cockpit attention task list (CK-404)')
 assert.match(cockpitCss, /\.execSummary\b/, 'Cockpit executive summary strip (CK-403)')
+assert.match(
+  cockpitSrc,
+  /projectHealthList/,
+  'CockpitView must render project health cards (CK-405)'
+)
+assert.match(cockpitCss, /\.projectHealthCard\b/, 'Cockpit project health card (CK-405)')
+assert.match(
+  cockpitCss,
+  /\.projectHealthMetrics\b[^}]*:global\(\.ant-progress\)/s,
+  'Project health progress bar must share row with meta (CK-405)'
+)
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),

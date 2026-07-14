@@ -371,61 +371,80 @@ export default function CockpitView(): React.ReactElement {
         </Panel>
       ) : null}
 
-      <Panel title={t('cockpit.projectProgress')} className={styles.section}>
+      <Panel
+        title={t('cockpit.projectProgress')}
+        className={styles.section}
+        extra={
+          (dashboard?.projects.length ?? 0) > 0 ? (
+            <Text type="secondary" className={styles.panelCount}>
+              {t('cockpit.projectCount', { count: dashboard?.projects.length ?? 0 })}
+            </Text>
+          ) : null
+        }
+      >
         {(dashboard?.projects.length ?? 0) === 0 ? (
           <Text type="secondary">{t('cockpit.noProjects')}</Text>
         ) : (
-          dashboard?.projects.map((p) => {
-            const meta = statusTags[p.status] ?? statusTags.normal
-            const progressClass =
-              p.status === 'delayed'
-                ? styles.projectProgressDelayed
-                : p.status === 'risk'
-                  ? styles.projectProgressRisk
-                  : styles.projectProgress
-            return (
-              <div key={p.groupId} className={styles.projectRow}>
-                <div className={styles.projectHead}>
-                  <Text strong className={styles.projectName}>
-                    {resolveGroupDisplayNameById(p.groupId, p.name, t)}
-                  </Text>
-                  <span
-                    className={`${styles.statusPill} ${styles[`statusPill_${meta.tone}`]}`}
-                  >
-                    {meta.label}
-                  </span>
-                  <div className={styles.projectActions}>
-                    <Button
-                      type="primary"
+          <div className={styles.projectHealthList}>
+            {dashboard?.projects.map((p) => {
+              const meta = statusTags[p.status] ?? statusTags.normal
+              const progressClass =
+                p.status === 'delayed'
+                  ? styles.projectProgressDelayed
+                  : p.status === 'risk'
+                    ? styles.projectProgressRisk
+                    : styles.projectProgress
+              return (
+                <article
+                  key={p.groupId}
+                  className={`${styles.projectHealthCard} ${styles[`projectHealthCard_${p.status}`]}`}
+                >
+                  <div className={styles.projectHealthTop}>
+                    <Text strong className={styles.projectName}>
+                      {resolveGroupDisplayNameById(p.groupId, p.name, t)}
+                    </Text>
+                    <span
+                      className={`${styles.statusPill} ${styles[`statusPill_${meta.tone}`]}`}
+                    >
+                      {meta.label}
+                    </span>
+                  </div>
+                  <div className={styles.projectHealthMetrics}>
+                    <Progress
+                      className={progressClass}
+                      percent={p.progressPercent}
                       size="small"
+                      showInfo={false}
+                    />
+                    <span className={styles.projectProgressPct}>{p.progressPercent}%</span>
+                    <Text type="secondary" className={styles.projectMetaInline}>
+                      {t('cockpit.projectMeta', {
+                        total: p.totalTasks,
+                        inProgress: p.inProgressCount,
+                        delayed: p.delayedCount
+                      })}
+                    </Text>
+                  </div>
+                  <div className={styles.projectHealthActions}>
+                    <Button
+                      size="small"
+                      type="link"
+                      onClick={() => navigate(groupViewPath(p.groupId, 'board'))}
+                    >
+                      {t('cockpit.openBoard')}
+                    </Button>
+                    <Button
+                      size="small"
+                      type="link"
                       onClick={() => navigate(groupViewPath(p.groupId, 'chat'))}
                     >
                       {t('cockpit.enterProject')}
                     </Button>
-                    <Button size="small" type="text" onClick={() => navigate(groupViewPath(p.groupId, 'board'))}>
-                      {t('cockpit.openBoard')}
-                    </Button>
                   </div>
-                </div>
-                <Progress
-                  className={progressClass}
-                  percent={p.progressPercent}
-                  size="small"
-                  showInfo={false}
-                />
-                <div className={styles.projectProgressMeta}>
-                  <span className={styles.projectProgressPct}>{p.progressPercent}%</span>
-                </div>
-                <Text type="secondary" className={styles.projectMeta}>
-                  {t('cockpit.projectMeta', {
-                    total: p.totalTasks,
-                    inProgress: p.inProgressCount,
-                    delayed: p.delayedCount
-                  })}
-                </Text>
-              </div>
-            )
-          })
+                </article>
+              )
+            })}
+          </div>
         )}
       </Panel>
 

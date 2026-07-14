@@ -141,6 +141,7 @@ const zhCN = {
   'cockpit.attentionTaskBehind': '落后',
   'cockpit.attentionTaskUnassigned': '未指派',
   'cockpit.projectProgress': '项目进度',
+  'cockpit.projectCount': '{count} 个项目',
   'cockpit.noProjects': '暂无项目群组，请先创建项目群',
   'cockpit.statusNormal': '正常',
   'cockpit.statusRisk': '风险',

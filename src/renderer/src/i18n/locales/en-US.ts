@@ -143,6 +143,7 @@ const enUS = {
   'cockpit.attentionTaskBehind': 'Behind',
   'cockpit.attentionTaskUnassigned': 'Unassigned',
   'cockpit.projectProgress': 'Project progress',
+  'cockpit.projectCount': '{count} projects',
   'cockpit.noProjects': 'No project groups yet. Create a project group first.',
   'cockpit.statusNormal': 'Normal',
   'cockpit.statusRisk': 'At risk',
