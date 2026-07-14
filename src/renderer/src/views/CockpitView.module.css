@@ -36,12 +36,13 @@
 }
 
 .attentionNeed {
-  border-color: color-mix(in srgb, var(--lanpm-warning) 35%, var(--lanpm-separator));
-  background: color-mix(in srgb, var(--lanpm-warning) 8%, var(--lanpm-surface-elevated));
+  border-color: color-mix(in srgb, var(--lanpm-warning) 28%, var(--lanpm-separator));
+  background: color-mix(in srgb, var(--lanpm-warning) 6%, var(--lanpm-surface-elevated));
 }
 
 .attentionOk {
-  border-color: color-mix(in srgb, var(--lanpm-success) 28%, var(--lanpm-separator));
+  border-color: color-mix(in srgb, var(--lanpm-success) 22%, var(--lanpm-separator));
+  background: color-mix(in srgb, var(--lanpm-success) 5%, var(--lanpm-surface-elevated));
 }
 
 .attentionLabel {
@@ -55,24 +56,86 @@
   color: var(--lanpm-text);
 }
 
-.islandCard {
-  border-radius: var(--lanpm-radius-lg) !important;
-  background: var(--lanpm-surface-elevated) !important;
-  box-shadow: var(--lanpm-shadow-island) !important;
-  border: 0.5px solid var(--lanpm-separator) !important;
+.panel {
+  border-radius: var(--lanpm-radius-lg);
+  background: var(--lanpm-surface-elevated);
+  box-shadow: var(--lanpm-shadow-island);
+  border: 0.5px solid var(--lanpm-separator);
+  overflow: hidden;
 }
 
-.metrics {
-  margin-bottom: 4px;
-  margin-inline: 0 !important;
-  max-width: 100%;
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px;
+  border-bottom: 0.5px solid var(--lanpm-separator);
 }
 
-.kpiRisk :global(.ant-statistic-content-value) {
+.panelTitle {
+  margin: 0;
+  font-size: var(--lanpm-font-title);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--lanpm-line-title);
+  color: var(--lanpm-text);
+}
+
+.panelExtra {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panelBody {
+  padding: 14px 16px 16px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.kpiTile {
+  padding: 16px;
+  border-radius: var(--lanpm-radius-lg);
+  background: var(--lanpm-surface-elevated);
+  box-shadow: var(--lanpm-shadow-island);
+  border: 0.5px solid var(--lanpm-separator);
+}
+
+.kpiLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--lanpm-font-caption);
+  line-height: var(--lanpm-line-caption);
+  color: var(--lanpm-text-secondary);
+}
+
+.kpiValue {
+  display: block;
+  font-size: var(--lanpm-font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: var(--lanpm-line-display);
+  color: var(--lanpm-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiValueRisk {
   color: var(--lanpm-warning);
 }
 
-.kpiDelayed :global(.ant-statistic-content-value) {
+.kpiValueDelayed {
   color: var(--lanpm-danger);
 }
 
@@ -99,13 +162,37 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   min-width: 0;
 }
 
 .projectName {
   min-width: 0;
   flex: 1 1 auto;
+}
+
+.statusPill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--lanpm-radius-sm);
+  font-size: var(--lanpm-font-caption);
+  font-weight: 500;
+  line-height: var(--lanpm-line-caption);
+}
+
+.statusPill_normal {
+  color: var(--lanpm-success);
+  background: color-mix(in srgb, var(--lanpm-success) 12%, transparent);
+}
+
+.statusPill_risk {
+  color: var(--lanpm-warning);
+  background: color-mix(in srgb, var(--lanpm-warning) 12%, transparent);
+}
+
+.statusPill_delayed {
+  color: var(--lanpm-danger);
+  background: color-mix(in srgb, var(--lanpm-danger) 10%, transparent);
 }
 
 .projectActions {
@@ -120,6 +207,41 @@
   font-size: var(--lanpm-font-caption);
   display: block;
   margin-top: 4px;
+}
+
+.projectProgressMeta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.projectProgressPct {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.projectProgress :global(.ant-progress-inner),
+.projectProgressRisk :global(.ant-progress-inner),
+.projectProgressDelayed :global(.ant-progress-inner),
+.deptProgress :global(.ant-progress-inner) {
+  background: var(--lanpm-fill-secondary) !important;
+}
+
+.projectProgress :global(.ant-progress-bg) {
+  background: var(--lanpm-accent) !important;
+}
+
+.projectProgressRisk :global(.ant-progress-bg) {
+  background: var(--lanpm-warning) !important;
+}
+
+.projectProgressDelayed :global(.ant-progress-bg) {
+  background: var(--lanpm-danger) !important;
+}
+
+.deptProgress :global(.ant-progress-bg) {
+  background: var(--lanpm-accent) !important;
 }
 
 .deptRow {
@@ -138,14 +260,25 @@
   white-space: nowrap;
 }
 
-.deptRow :global(.ant-progress) {
+.deptProgress {
   flex: 1;
   min-width: 0;
   margin-inline-end: 0;
 }
 
+.deptCount {
+  flex-shrink: 0;
+  font-size: var(--lanpm-font-caption);
+}
+
 .deptRow:last-child {
   margin-bottom: 0;
+}
+
+.reportMeta {
+  display: block;
+  margin-bottom: 10px;
+  font-size: var(--lanpm-font-caption);
 }
 
 .reportPre {

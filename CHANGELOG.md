@@ -7,6 +7,7 @@
 ## [1.31.0] - 2026-07-14
 
 ### Changed
+- **视觉抛光 II（TASK-VP-403）**：驾驶舱去 Ant 后台感 — 自定义 KPI 岛式网格与 `Panel` 分区；语义状态 pill；进度条走 `--lanpm-accent` / warning / danger；`verify:visual` 禁 `Card`/`Statistic` 回退。
 - **视觉抛光 II（TASK-VP-402）**：清扫聊天 `#007a3d`、日历 FC 幻影令牌/hex fallback、任务族/工期健康度散落色；新增 `--lanpm-task-family-*`；`verify:visual` 禁 module 内 legacy hex 与 `var(--lanpm-*, #hex)` fallback。
 - **视觉抛光 II（TASK-VP-401）**：设计令牌 SSOT — 新增 `src/shared/design/lanpmDesignTokens.ts`；`ThemeProvider` / 头像 / 任务族色 / 甘特 fallback 统一亮 accent `#0066cc`；`--lanpm-accent-ring` 与 `docs/04` · `UI优化.md` 圆角阶对齐；`verify:visual` 增加 SSOT 交叉校验。
 - **`.cursor` Super Cursor 母版**：plan/run/release 引用分层 · week/disk/maintain 指令与 skill · delivery/plan reference · prompt-security · resolve-role · cursor-coherence 扩展。

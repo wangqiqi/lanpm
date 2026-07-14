@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  Button,
-  Card,
-  Col,
-  Progress,
-  Row,
-  Space,
-  Statistic,
-  Tag,
-  Typography
-} from 'antd'
+import { Button, Progress, Space, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ArrowLeftOutlined, CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
@@ -26,12 +16,57 @@ import type { MessageKey } from '@renderer/i18n/messages'
 import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import styles from './CockpitView.module.css'
 
-const { Text, Paragraph } = Typography
+const { Text } = Typography
 
-const STATUS_KEYS: Record<string, { color: string; key: MessageKey }> = {
-  normal: { color: 'success', key: 'cockpit.statusNormal' },
-  risk: { color: 'warning', key: 'cockpit.statusRisk' },
-  delayed: { color: 'error', key: 'cockpit.statusDelayed' }
+const STATUS_KEYS: Record<string, { tone: 'normal' | 'risk' | 'delayed'; key: MessageKey }> = {
+  normal: { tone: 'normal', key: 'cockpit.statusNormal' },
+  risk: { tone: 'risk', key: 'cockpit.statusRisk' },
+  delayed: { tone: 'delayed', key: 'cockpit.statusDelayed' }
+}
+
+function KpiTile({
+  label,
+  value,
+  tone = 'default'
+}: {
+  label: string
+  value: number
+  tone?: 'default' | 'risk' | 'delayed'
+}): React.ReactElement {
+  const valueToneClass =
+    tone === 'risk'
+      ? styles.kpiValueRisk
+      : tone === 'delayed'
+        ? styles.kpiValueDelayed
+        : ''
+  return (
+    <div className={styles.kpiTile}>
+      <span className={styles.kpiLabel}>{label}</span>
+      <span className={`${styles.kpiValue} ${valueToneClass}`.trim()}>{value}</span>
+    </div>
+  )
+}
+
+function Panel({
+  title,
+  extra,
+  className = '',
+  children
+}: {
+  title: string
+  extra?: React.ReactNode
+  className?: string
+  children: React.ReactNode
+}): React.ReactElement {
+  return (
+    <section className={`${styles.panel} ${className}`.trim()}>
+      <header className={styles.panelHeader}>
+        <h2 className={styles.panelTitle}>{title}</h2>
+        {extra ? <div className={styles.panelExtra}>{extra}</div> : null}
+      </header>
+      <div className={styles.panelBody}>{children}</div>
+    </section>
+  )
 }
 
 export default function CockpitView(): React.ReactElement {
@@ -110,9 +145,9 @@ export default function CockpitView(): React.ReactElement {
       Object.fromEntries(
         Object.entries(STATUS_KEYS).map(([status, meta]) => [
           status,
-          { color: meta.color, label: t(meta.key) }
+          { tone: meta.tone, label: t(meta.key) }
         ])
-      ) as Record<string, { color: string; label: string }>,
+      ) as Record<string, { tone: 'normal' | 'risk' | 'delayed'; label: string }>,
     [t]
   )
 
@@ -208,9 +243,9 @@ export default function CockpitView(): React.ReactElement {
       </div>
 
       {report ? (
-        <Card
+        <Panel
           title={t('cockpit.reportOutput')}
-          className={`${styles.section} ${styles.islandCard}`}
+          className={styles.section}
           extra={
             <Space>
               <Button
@@ -231,60 +266,56 @@ export default function CockpitView(): React.ReactElement {
             </Space>
           }
         >
-          <Paragraph>
-            <Text type="secondary">
-              {report.generatedAt} ·{' '}
-              {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
-            </Text>
-          </Paragraph>
+          <Text type="secondary" className={styles.reportMeta}>
+            {report.generatedAt} ·{' '}
+            {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
+          </Text>
           <pre
             className={`${styles.reportPre} ${reportExpanded ? styles.reportPreExpanded : ''}`}
           >
             {report.content}
           </pre>
-        </Card>
+        </Panel>
       ) : null}
 
-      <Row gutter={[16, 16]} className={styles.metrics}>
-        <Col xs={12} sm={6}>
-          <Card className={styles.islandCard} bordered={false}>
-            <Statistic title={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className={styles.islandCard} bordered={false}>
-            <Statistic title={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className={`${styles.islandCard} ${styles.kpiRisk}`} bordered={false}>
-            <Statistic title={t('cockpit.riskProjects')} value={summary?.riskProjectCount ?? 0} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className={`${styles.islandCard} ${styles.kpiDelayed}`} bordered={false}>
-            <Statistic title={t('cockpit.delayedTasks')} value={summary?.delayedCount ?? 0} />
-          </Card>
-        </Col>
-      </Row>
+      <div className={styles.kpiGrid}>
+        <KpiTile label={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
+        <KpiTile label={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
+        <KpiTile
+          label={t('cockpit.riskProjects')}
+          value={summary?.riskProjectCount ?? 0}
+          tone="risk"
+        />
+        <KpiTile
+          label={t('cockpit.delayedTasks')}
+          value={summary?.delayedCount ?? 0}
+          tone="delayed"
+        />
+      </div>
 
-      <Card
-        title={t('cockpit.projectProgress')}
-        className={`${styles.section} ${styles.islandCard}`}
-        bordered={false}
-      >
+      <Panel title={t('cockpit.projectProgress')} className={styles.section}>
         {(dashboard?.projects.length ?? 0) === 0 ? (
           <Text type="secondary">{t('cockpit.noProjects')}</Text>
         ) : (
           dashboard?.projects.map((p) => {
             const meta = statusTags[p.status] ?? statusTags.normal
+            const progressClass =
+              p.status === 'delayed'
+                ? styles.projectProgressDelayed
+                : p.status === 'risk'
+                  ? styles.projectProgressRisk
+                  : styles.projectProgress
             return (
               <div key={p.groupId} className={styles.projectRow}>
                 <div className={styles.projectHead}>
                   <Text strong className={styles.projectName}>
                     {resolveGroupDisplayNameById(p.groupId, p.name, t)}
                   </Text>
-                  <Tag color={meta.color}>{meta.label}</Tag>
+                  <span
+                    className={`${styles.statusPill} ${styles[`statusPill_${meta.tone}`]}`}
+                  >
+                    {meta.label}
+                  </span>
                   <div className={styles.projectActions}>
                     <Button
                       type="primary"
@@ -299,10 +330,14 @@ export default function CockpitView(): React.ReactElement {
                   </div>
                 </div>
                 <Progress
+                  className={progressClass}
                   percent={p.progressPercent}
                   size="small"
-                  status={p.status === 'delayed' ? 'exception' : p.status === 'risk' ? 'active' : 'normal'}
+                  showInfo={false}
                 />
+                <div className={styles.projectProgressMeta}>
+                  <span className={styles.projectProgressPct}>{p.progressPercent}%</span>
+                </div>
                 <Text type="secondary" className={styles.projectMeta}>
                   {t('cockpit.projectMeta', {
                     total: p.totalTasks,
@@ -314,25 +349,27 @@ export default function CockpitView(): React.ReactElement {
             )
           })
         )}
-      </Card>
+      </Panel>
 
-      <Card
-        title={t('cockpit.deptCompletion')}
-        className={`${styles.section} ${styles.islandCard}`}
-        bordered={false}
-      >
+      <Panel title={t('cockpit.deptCompletion')} className={styles.section}>
         {(dashboard?.departments.length ?? 0) === 0 ? (
           <Text type="secondary">{t('cockpit.noDeptData')}</Text>
         ) : (
           dashboard?.departments.map((d) => (
             <div key={d.department} className={styles.deptRow}>
               <Text className={styles.deptName}>{d.department}</Text>
-              <Progress percent={d.completionPercent} style={{ flex: 1 }} />
-              <Text type="secondary">{t('cockpit.taskCount', { count: d.taskCount })}</Text>
+              <Progress
+                className={styles.deptProgress}
+                percent={d.completionPercent}
+                size="small"
+              />
+              <Text type="secondary" className={styles.deptCount}>
+                {t('cockpit.taskCount', { count: d.taskCount })}
+              </Text>
             </div>
           ))
         )}
-      </Card>
+      </Panel>
 
       <AiConfigModal
         open={aiConfigOpen}

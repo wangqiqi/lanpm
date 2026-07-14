@@ -246,6 +246,16 @@ for (const rel of ['views/GroupView.tsx', 'views/CockpitView.tsx']) {
   assert.match(src, /ViewHeader/, `${rel} should use ViewHeader`)
 }
 
+const cockpitSrc = readFileSync(join(renderer, 'views/CockpitView.tsx'), 'utf8')
+assert.match(cockpitSrc, /kpiGrid/, 'CockpitView should use custom KPI grid')
+assert.ok(
+  !/\b(Card|Statistic|Row|Col|Tag)\b/.test(cockpitSrc),
+  'CockpitView must not use Ant Card/Statistic/Row/Col/Tag'
+)
+const cockpitCss = readFileSync(join(renderer, 'views/CockpitView.module.css'), 'utf8')
+assert.match(cockpitCss, /\.panel\b/, 'CockpitView must use island panel styles')
+assert.match(cockpitCss, /\.kpiValue\b/, 'CockpitView KPI must use custom typography')
+
 // --- legacy removed ---
 mustNotExist('src/renderer/src/features/shell/MainLayout.tsx')
 mustNotExist('src/renderer/src/features/views/ViewPlaceholder.tsx')
