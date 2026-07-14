@@ -25,6 +25,7 @@ import {
   ExportOutlined,
   FileSearchOutlined,
   ImportOutlined,
+  InboxOutlined,
   LinkOutlined,
   MoreOutlined,
   PaperClipOutlined,
@@ -43,7 +44,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import RegionButton from '@renderer/ui/RegionButton'
-import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { ViewEmptyHint, ViewEmptyIcon, ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
@@ -1220,6 +1221,7 @@ export default function FilesView(): React.ReactElement {
               locale={{
                 emptyText: (
                   <div className={styles.emptyState}>
+                    <ViewEmptyIcon icon={<InboxOutlined />} />
                     <Text type="secondary">
                       {searchQuery.trim()
                         ? t('files.emptySearch')
@@ -1274,19 +1276,12 @@ export default function FilesView(): React.ReactElement {
         {!isNarrow ? (
           <aside className={styles.previewPane}>
             {!selected ? (
-              <div className={styles.previewEmpty}>
-                <div className={styles.previewEmptyCenter}>
-                  <div className={styles.previewEmptyIconRing}>
-                    <FileSearchOutlined className={styles.previewEmptyIcon} />
-                  </div>
-                  <Text className={styles.previewEmptyTitle}>
-                    {t('files.selectToPreview')}
-                  </Text>
-                  <Text className={styles.previewEmptyDesc}>
-                    {t('files.selectToPreviewDesc')}
-                  </Text>
-                </div>
-              </div>
+              <ViewEmptyHint
+                className={styles.previewEmptyFill}
+                icon={<FileSearchOutlined />}
+              >
+                {t('files.selectToPreview')}
+              </ViewEmptyHint>
             ) : (
               previewBody
             )}

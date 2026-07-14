@@ -1,5 +1,4 @@
-/* iOS Tab Bar：发丝顶线 + 毛玻璃；选中仅强调色（无槽位竖线/顶条/底色块）
-   桌面悬停：图标轻抬 + 弹性缩放，弥补无底块时的触感不足 */
+/* iOS Tab Bar：发丝顶线 + 毛玻璃；选中仅强调色（无槽位竖线/顶条/底色块） */
 
 .nav {
   display: flex;
@@ -58,36 +57,29 @@
     transform var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
-  will-change: transform;
 }
 
-/* 悬停：文字提亮 + 图标轻弹上抬 + 淡底 */
+/* 悬停：文字提亮 + 图标轻抬 */
 .tab:hover:not(:disabled) {
   color: var(--lanpm-text);
   background: var(--lanpm-hover-bg);
 }
 
 .tab:hover:not(:disabled) .icon {
-  animation: tabIconHoverBounce 0.36s cubic-bezier(0.34, 1.45, 0.64, 1) both;
-  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--lanpm-text) 12%, transparent));
+  transform: translateY(-1px) scale(1.04);
 }
 
 .tab:hover:not(:disabled) .label {
   opacity: 1;
-  transform: translateY(-0.5px);
 }
 
-/* 按压：微缩回弹（所有可点 Tab） */
+/* 按压：微缩（所有可点 Tab） */
 .tab:active:not(:disabled) {
-  transform: scale(0.94);
-  transition-duration: 90ms;
+  transform: scale(0.97);
 }
 
 .tab:active:not(:disabled) .icon {
-  animation: none;
-  transform: translateY(0) scale(0.9);
-  filter: none;
-  transition-duration: 90ms;
+  transform: translateY(0) scale(0.96);
 }
 
 .tabActive {
@@ -97,8 +89,7 @@
 }
 
 .tabActive .icon {
-  transform: scale(1.08);
-  animation: tabIconPop 0.4s cubic-bezier(0.34, 1.45, 0.64, 1);
+  transform: scale(1.06);
 }
 
 .tabActive:hover:not(:disabled) {
@@ -107,20 +98,15 @@
 }
 
 .tabActive:hover:not(:disabled) .icon {
-  animation: tabIconHoverBounceActive 0.38s cubic-bezier(0.34, 1.45, 0.64, 1) both;
-  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--lanpm-accent) 26%, transparent));
+  transform: translateY(-1px) scale(1.08);
 }
 
 .tabActive:active:not(:disabled) {
-  transform: scale(0.94);
-  transition-duration: 90ms;
+  transform: scale(0.97);
 }
 
 .tabActive:active:not(:disabled) .icon {
-  animation: none;
-  transform: translateY(0) scale(0.92);
-  filter: none;
-  transition-duration: 90ms;
+  transform: translateY(0) scale(0.98);
 }
 
 .tabDisabled {
@@ -135,8 +121,8 @@
   align-items: center;
   justify-content: center;
   transition:
-    transform 0.26s cubic-bezier(0.34, 1.45, 0.64, 1),
-    filter var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
   transform-origin: center bottom;
 }
 
@@ -148,7 +134,6 @@
   opacity: 0.92;
   transition:
     opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard),
-    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
@@ -159,44 +144,6 @@
 .tabLock {
   font-size: 9px;
   opacity: 0.85;
-}
-
-/* 选中切换：单次过冲回弹 */
-@keyframes tabIconPop {
-  0% {
-    transform: scale(0.88);
-  }
-  55% {
-    transform: scale(1.16);
-  }
-  100% {
-    transform: scale(1.08);
-  }
-}
-
-/* 悬停：轻抬 + 小过冲 */
-@keyframes tabIconHoverBounce {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  45% {
-    transform: translateY(-3px) scale(1.16);
-  }
-  100% {
-    transform: translateY(-2px) scale(1.12);
-  }
-}
-
-@keyframes tabIconHoverBounceActive {
-  0% {
-    transform: translateY(0) scale(1.08);
-  }
-  45% {
-    transform: translateY(-3px) scale(1.2);
-  }
-  100% {
-    transform: translateY(-2px) scale(1.16);
-  }
 }
 
 @media (max-width: 720px) {
@@ -217,18 +164,12 @@
     transition: none;
   }
 
-  .tabActive .icon,
-  .tab:hover:not(:disabled) .icon,
-  .tabActive:hover:not(:disabled) .icon {
-    animation: none;
-  }
-
   .tab:hover:not(:disabled) .icon,
   .tabActive:hover:not(:disabled) .icon,
   .tab:active:not(:disabled) .icon,
-  .tabActive:active:not(:disabled) .icon {
+  .tabActive:active:not(:disabled) .icon,
+  .tabActive .icon {
     transform: none;
-    filter: none;
   }
 
   .tab:active:not(:disabled),

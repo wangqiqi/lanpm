@@ -4,9 +4,30 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   min-height: 120px;
   padding: 24px;
+  text-align: center;
+}
+
+.iconRing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--lanpm-fill-secondary);
+  border: 0.5px solid var(--lanpm-separator);
+  color: var(--lanpm-text-secondary);
+}
+
+.iconGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--lanpm-font-title);
+  line-height: 1;
 }
 
 .loadingHint {
@@ -16,9 +37,11 @@
 
 .empty {
   margin: 0;
+  max-width: 28rem;
   text-align: center;
   color: var(--lanpm-text-secondary);
   font-size: var(--lanpm-font-body);
+  line-height: 1.45;
 }
 
 .retryBtn {

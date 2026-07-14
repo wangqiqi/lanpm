@@ -443,6 +443,18 @@ assert.ok(
   'BottomNav uses dedicated iOS tab styles (not regionInteract composes)'
 )
 assert.match(bottomNavCss, /var\(--lanpm-font-tab\)/, 'BottomNav tab label should use --lanpm-font-tab')
+assert.ok(
+  !/tabIconHoverBounce|tabIconPop/.test(bottomNavCss),
+  'BottomNav must not use bounce keyframes (VP-407)'
+)
+assert.match(
+  bottomNavCss,
+  /transform var\(--lanpm-motion-fast\)/,
+  'BottomNav icon motion uses fast token (VP-407)'
+)
+
+const viewStateCss = readFileSync(join(renderer, 'ui/ViewState.module.css'), 'utf8')
+assert.match(viewStateCss, /\.iconRing/, 'ViewState empty/loading icon ring (VP-407)')
 
 const regionTabBarCss = readFileSync(join(renderer, 'ui/RegionTabBar.module.css'), 'utf8')
 assert.ok(

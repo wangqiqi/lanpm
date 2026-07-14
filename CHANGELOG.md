@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Changed
+- **视觉抛光 II（TASK-VP-407）**：底栏 Tab 移除弹跳 keyframes，改为 `--lanpm-motion-fast` 轻过渡；`ViewState` 统一空/加载态图标环；Files 预览与表格空态对齐；`verify:visual` 守卫；`docs/04` §1 同步。
 - **视觉抛光 II（TASK-VP-406）**：日历 FullCalendar `--fc-*` 全量映射 `--lanpm-*`；宿主 `--lanpm-shadow-island`；移除 `.light/.dark` 双份样式；`verify:visual` 守卫 FC 令牌。
 - **视觉抛光 II（TASK-VP-405）**：顶栏发现/建群/解散窄屏仍平铺（移除「更多」overflow）；次要操作 `barActionSecondary` 弱 hover；`docs/04` §1 同步。
 - **视觉抛光 II（TASK-VP-404）**：聊天气泡己方浅底深字（mention/taskRef 卡片化）；composer 工具条+输入+发送同一岛面（`--lanpm-radius-lg`）；`verify:visual` 防实心蓝底回退；`docs/04` §1 同步。
