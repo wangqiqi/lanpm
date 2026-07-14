@@ -296,6 +296,8 @@ assert.match(
 )
 assert.match(cockpitSrc, /deptList/, 'CockpitView must render scrollable dept list (CK-406)')
 assert.match(cockpitCss, /\.deptList\b[^}]*overflow-y:\s*auto/s, 'Dept list must scroll in sub-region (CK-406)')
+assert.match(cockpitSrc, /weeklyTrend/, 'CockpitView must render weekly trend (CK-407)')
+assert.match(cockpitCss, /\.weeklyTrend\b/, 'Cockpit weekly trend strip (CK-407)')
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),

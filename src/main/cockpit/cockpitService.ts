@@ -10,6 +10,7 @@ import { COCKPIT_UNASSIGNED_DEPT, formatDeptForReport } from '../../shared/cockp
 import { countRiskProjects, sortCockpitProjects } from '../../shared/cockpit/sortProjects'
 import { buildExecutiveSummary } from '../../shared/cockpit/executiveSummary'
 import { buildAttentionTasks } from '../../shared/cockpit/attentionTasks'
+import { buildWeeklyTrend } from '../../shared/cockpit/weeklyTrend'
 import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
@@ -92,6 +93,7 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
   const projectGroups = listProjectGroups(db)
   const allTasks = projectGroups.flatMap((g) => listTasksByGroup(db, g.groupId))
   const executiveSummary = buildExecutiveSummary(allTasks, summary.riskProjectCount)
+  const weeklyTrend = buildWeeklyTrend(allTasks)
 
   const attentionTasks = buildAttentionTasks(
     projectGroups.flatMap((g) =>
@@ -114,7 +116,7 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
     )
   )
 
-  return { summary, executiveSummary, attentionTasks, projects, departments }
+  return { summary, executiveSummary, weeklyTrend, attentionTasks, projects, departments }
 }
 
 function desensitizeTasks(db: Database, groupId: string): AiTaskAuditPayload[] {

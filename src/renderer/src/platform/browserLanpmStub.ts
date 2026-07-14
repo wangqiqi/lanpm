@@ -1238,6 +1238,13 @@ export function createBrowserLanpmStub(): LanpmApi {
           riskProjectCount: 0,
           dueNextWeek: 0
         },
+        weeklyTrend: {
+          completedThisWeek: 1,
+          completedLastWeek: 0,
+          weekOverWeekDelta: 1,
+          milestonesCompletedThisWeek: 0,
+          milestonesCompletedLastWeek: 0
+        },
         attentionTasks: [
           {
             taskId: 'task-attention-1',

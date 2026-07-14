@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **驾驶舱周趋势（TASK-CK-407）**：本周 vs 上周完成数环比 + 里程碑完成对比；`buildWeeklyTrend` 聚合与单元测；首屏岛式趋势条；`verify:visual` 守卫。
 - **驾驶舱需关注任务（TASK-CK-404）**：延期/落后任务 Top 8 列表（项目·任务·负责人·截止日）；点击进看板；`buildAttentionTasks` 单元测。
 - **驾驶舱执行摘要（TASK-CK-403）**：本周完成 / 进行中 / 风险项目 / 下周到期；`buildExecutiveSummary` 聚合 + 首屏岛式摘要条；单元测覆盖。
 

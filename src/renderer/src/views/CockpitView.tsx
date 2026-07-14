@@ -5,6 +5,7 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ArrowLeftOutlined, CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
+import { formatWeekOverWeekDelta } from '@shared/cockpit/weeklyTrend'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
@@ -279,6 +280,48 @@ export default function CockpitView(): React.ReactElement {
               <span className={styles.execValue}>{dashboard.executiveSummary.dueNextWeek}</span>
             </div>
           </div>
+        </section>
+      ) : null}
+
+      {dashboard?.weeklyTrend ? (
+        <section className={styles.weeklyTrend} aria-label={t('cockpit.trendTitle')}>
+          <h2 className={styles.weeklyTrendTitle}>{t('cockpit.trendTitle')}</h2>
+          <div className={styles.weeklyTrendGrid}>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.trendLastWeek')}</span>
+              <span className={styles.execValue}>{dashboard.weeklyTrend.completedLastWeek}</span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.trendThisWeek')}</span>
+              <span className={styles.execValue}>{dashboard.weeklyTrend.completedThisWeek}</span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.trendDelta')}</span>
+              <span
+                className={`${styles.execValue} ${
+                  dashboard.weeklyTrend.weekOverWeekDelta > 0
+                    ? styles.trendDeltaUp
+                    : dashboard.weeklyTrend.weekOverWeekDelta < 0
+                      ? styles.trendDeltaDown
+                      : ''
+                }`.trim()}
+              >
+                {formatWeekOverWeekDelta(dashboard.weeklyTrend.weekOverWeekDelta)}
+              </span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.trendMilestones')}</span>
+              <span className={styles.execValue}>
+                {t('cockpit.trendMilestonePair', {
+                  current: dashboard.weeklyTrend.milestonesCompletedThisWeek,
+                  previous: dashboard.weeklyTrend.milestonesCompletedLastWeek
+                })}
+              </span>
+            </div>
+          </div>
+          <Text type="secondary" className={styles.trendNote}>
+            {t('cockpit.trendApproxNote')}
+          </Text>
         </section>
       ) : null}
 

@@ -33,6 +33,8 @@ export interface CockpitDashboard {
   attentionTasks: CockpitAttentionTask[]
   projects: ProjectDashboardItem[]
   departments: DepartmentStats[]
+  /** 本周 vs 上周完成趋势（CK-407） */
+  weeklyTrend: WeeklyTrend
 }
 
 export type AttentionTaskKind = 'overdue' | 'behind'
@@ -53,6 +55,15 @@ export interface ExecutiveSummary {
   inProgressCount: number
   riskProjectCount: number
   dueNextWeek: number
+}
+
+/** 周完成数环比（基于 status=done + updatedAt 近似） */
+export interface WeeklyTrend {
+  completedThisWeek: number
+  completedLastWeek: number
+  weekOverWeekDelta: number
+  milestonesCompletedThisWeek: number
+  milestonesCompletedLastWeek: number
 }
 
 export type AiProvider =
