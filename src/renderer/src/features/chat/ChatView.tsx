@@ -801,6 +801,7 @@ export default function ChatView(): React.ReactElement {
             aria-label={t('chat.resizeComposer')}
           />
           <div className={styles.inputRow}>
+            <div className={styles.composerIsland}>
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>
                 <EmojiPicker onPick={insertEmoji} />
@@ -903,16 +904,26 @@ export default function ChatView(): React.ReactElement {
                         statusLabel={(status) => t(taskStatusMessageKey(status))}
                       />
                     )}
-                    <TextArea
-                      ref={draftInputRef}
-                      className={styles.inputTextarea}
-                      placeholder={
-                        taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')
-                      }
-                      value={draft}
-                      onChange={(e) => setDraft(e.target.value)}
-                      onKeyDown={onKeyDown}
-                    />
+                    <div className={styles.inputComposeRow}>
+                      <TextArea
+                        ref={draftInputRef}
+                        className={styles.inputTextarea}
+                        placeholder={
+                          taskAllowed ? t('chat.placeholderTask') : t('chat.placeholder')
+                        }
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={onKeyDown}
+                      />
+                      <Button
+                        type="primary"
+                        shape="circle"
+                        icon={<SendOutlined />}
+                        className={styles.sendIconBtn}
+                        disabled={!draft.trim()}
+                        onClick={() => void handleSend()}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div className={styles.voicePanel}>
@@ -925,14 +936,7 @@ export default function ChatView(): React.ReactElement {
                   </div>
                 )}
               </div>
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<SendOutlined />}
-                className={styles.sendIconBtn}
-                disabled={inputMode === 'voice' || !draft.trim()}
-                onClick={() => void handleSend()}
-              />
+            </div>
             </div>
           </div>
         </div>

@@ -635,9 +635,10 @@
 }
 
 .mentionOwn {
-  color: var(--lanpm-on-accent);
+  color: var(--lanpm-accent);
   font-weight: 600;
-  background: var(--lanpm-accent);
+  background: var(--lanpm-accent-fill-strong);
+  border: 1px solid color-mix(in srgb, var(--lanpm-accent) 18%, transparent);
   border-radius: var(--lanpm-radius-sm);
   padding: 0 4px;
 }
@@ -675,11 +676,13 @@
 }
 
 .taskRefOwn {
-  color: var(--lanpm-on-accent);
+  color: var(--lanpm-success);
   font-weight: 600;
-  background: var(--lanpm-success);
+  background: var(--lanpm-surface-solid);
+  border: 1px solid color-mix(in srgb, var(--lanpm-success) 32%, var(--lanpm-border));
   border-radius: var(--lanpm-radius-sm);
-  padding: 0 4px;
+  padding: 1px 6px;
+  box-shadow: var(--lanpm-shadow-card);
 }
 
 .inputWrap {
@@ -988,6 +991,11 @@
   border: 1.5px solid color-mix(in srgb, var(--lanpm-accent) 24%, transparent);
 }
 
+.bubbleOwn .bubbleAttachCard {
+  border-color: color-mix(in srgb, var(--lanpm-accent) 14%, var(--lanpm-border));
+  box-shadow: var(--lanpm-shadow-card);
+}
+
 .bubbleOther {
   background: var(--lanpm-bubble-bg);
   border: 1.5px solid transparent;
@@ -1127,8 +1135,28 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
   padding: 0 8px 10px;
+}
+
+.composerIsland {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--lanpm-fill-secondary);
+  border: 1.5px solid var(--lanpm-border);
+  border-radius: var(--lanpm-radius-lg);
+  overflow: visible;
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    box-shadow var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.composerIsland:focus-within {
+  background: var(--lanpm-surface-solid);
+  border-color: color-mix(in srgb, var(--lanpm-accent) 36%, var(--lanpm-border));
+  box-shadow: 0 0 0 3px var(--lanpm-accent-ring);
 }
 
 .toolbar {
@@ -1138,7 +1166,7 @@
   justify-content: space-between;
   gap: 8px;
   min-height: 32px;
-  padding: 2px 0 0;
+  padding: 4px 8px 2px;
   border-bottom: 0.5px solid var(--lanpm-separator);
 }
 
@@ -1213,7 +1241,36 @@
   min-height: 0;
   display: flex;
   align-items: stretch;
-  gap: 8px;
+  padding: 0 6px 6px;
+}
+
+.composerIsland .inputWrap {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.composerIsland .inputWrap:focus-within {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.inputComposeRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.inputComposeRow :global(.ant-input-textarea) {
+  flex: 1;
+  min-width: 0;
 }
 
 .inputMain {
@@ -1265,7 +1322,8 @@
 
 .sendIconBtn {
   flex-shrink: 0;
-  align-self: center;
+  align-self: flex-end;
+  margin-bottom: 2px;
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;

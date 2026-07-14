@@ -256,6 +256,24 @@ const cockpitCss = readFileSync(join(renderer, 'views/CockpitView.module.css'), 
 assert.match(cockpitCss, /\.panel\b/, 'CockpitView must use island panel styles')
 assert.match(cockpitCss, /\.kpiValue\b/, 'CockpitView KPI must use custom typography')
 
+const chatCss = readFileSync(join(renderer, 'features/chat/chat.module.css'), 'utf8')
+const chatSrc = readFileSync(join(renderer, 'features/chat/ChatView.tsx'), 'utf8')
+assert.match(chatCss, /\.bubbleOwn[\s\S]*--lanpm-selected-bg/, 'bubbleOwn must use selected-bg fill (VP-404)')
+assert.match(chatCss, /\.composerIsland/, 'chat.module.css must define composerIsland (VP-404)')
+assert.match(chatSrc, /composerIsland/, 'ChatView must wrap composer in island bar (VP-404)')
+assert.ok(
+  !/\.mentionOwn\s*\{[^}]*--lanpm-on-accent/.test(chatCss),
+  'mentionOwn must not use on-accent on solid fill (VP-404)'
+)
+assert.ok(
+  !/\.taskRefOwn\s*\{[^}]*--lanpm-on-accent/.test(chatCss),
+  'taskRefOwn must not use on-accent on solid fill (VP-404)'
+)
+assert.ok(
+  !/\.bubbleOwn\s*\{[^}]*background:\s*var\(--lanpm-accent\)/.test(chatCss),
+  'bubbleOwn must not use solid accent background (VP-404)'
+)
+
 // --- legacy removed ---
 mustNotExist('src/renderer/src/features/shell/MainLayout.tsx')
 mustNotExist('src/renderer/src/features/views/ViewPlaceholder.tsx')
