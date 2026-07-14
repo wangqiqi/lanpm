@@ -13,7 +13,6 @@ import {
   DashboardOutlined,
   DeleteOutlined,
   GlobalOutlined,
-  MoreOutlined,
   MoonOutlined,
   PlusOutlined,
   PushpinFilled,
@@ -277,50 +276,6 @@ export default function TopBar(): React.ReactElement {
     t
   ])
 
-  const barOverflowItems: MenuProps['items'] = useMemo(() => {
-    const items: MenuProps['items'] = []
-    if (!isCockpitRoute) {
-      items.push({
-        key: 'cockpit',
-        label: t('topbar.cockpit'),
-        icon: <DashboardOutlined />,
-        onClick: () => navigate(cockpitPath())
-      })
-    }
-    // Wide screen operations (Discover, Create Group, Dissolve) also nested inside "More" dropdown
-    // to provide "One Principal CTA" simplicity and reduce clutter in the TopBar.
-    items.push(
-      {
-        key: 'discover',
-        label: t('topbar.discover'),
-        icon: <CompassOutlined />,
-        onClick: () => setDiscoverOpen(true)
-      },
-      {
-        key: 'create',
-        label: t('topbar.createGroup'),
-        icon: <PlusOutlined />,
-        onClick: () => setCreateOpen(true)
-      }
-    )
-    if (canDissolveGroup) {
-      items.push({
-        key: 'dissolve',
-        label: t('group.dissolve'),
-        icon: <DeleteOutlined />,
-        danger: true,
-        onClick: () => handleDissolveGroup()
-      })
-    }
-    return items
-  }, [
-    isCockpitRoute,
-    canDissolveGroup,
-    t,
-    navigate,
-    handleDissolveGroup
-  ])
-
   const userMenu: MenuProps['items'] = [
     {
       key: 'theme',
@@ -472,7 +427,7 @@ export default function TopBar(): React.ReactElement {
             ) : null}
             <button
               type="button"
-              className={styles.barAction}
+              className={`${styles.barAction} ${styles.barActionSecondary}`}
               onClick={() => setDiscoverOpen(true)}
             >
               <span className={styles.barActionIcon} aria-hidden>
@@ -482,7 +437,7 @@ export default function TopBar(): React.ReactElement {
             </button>
             <button
               type="button"
-              className={styles.barAction}
+              className={`${styles.barAction} ${styles.barActionSecondary}`}
               onClick={() => setCreateOpen(true)}
             >
               <span className={styles.barActionIcon} aria-hidden>
@@ -493,7 +448,7 @@ export default function TopBar(): React.ReactElement {
             {canDissolveGroup ? (
               <button
                 type="button"
-                className={`${styles.barAction} ${styles.barActionDanger}`}
+                className={`${styles.barAction} ${styles.barActionSecondary} ${styles.barActionDanger}`}
                 onClick={() => handleDissolveGroup()}
               >
                 <span className={styles.barActionIcon} aria-hidden>
@@ -503,17 +458,6 @@ export default function TopBar(): React.ReactElement {
               </button>
             ) : null}
           </div>
-          {barOverflowItems.length > 0 ? (
-            <Dropdown menu={{ items: barOverflowItems }} trigger={['click']}>
-              <RegionButton
-                variant="icon"
-                className={styles.barOverflowTrigger}
-                aria-label={t('topbar.moreActions')}
-              >
-                <MoreOutlined />
-              </RegionButton>
-            </Dropdown>
-          ) : null}
         </div>
       </div>
 

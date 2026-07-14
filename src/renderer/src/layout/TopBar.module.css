@@ -151,6 +151,29 @@
   background: color-mix(in srgb, var(--lanpm-danger) 8%, transparent);
 }
 
+/* 发现 / 建群 / 解散：次要操作，hover 弱于群切换与搜索 */
+.barActionSecondary {
+  opacity: 0.9;
+}
+
+.barActionSecondary:hover {
+  color: var(--lanpm-text-secondary);
+  background: var(--lanpm-hover-bg);
+}
+
+.barActionSecondary:hover .barActionIcon {
+  transform: none;
+}
+
+.barActionSecondary.barActionDanger {
+  opacity: 0.88;
+}
+
+.barActionSecondary.barActionDanger:hover {
+  color: var(--lanpm-danger);
+  background: color-mix(in srgb, var(--lanpm-danger) 6%, transparent);
+}
+
 .barOverflowTrigger {
   display: none;
 }
@@ -173,11 +196,28 @@
 
 @media (max-width: 1100px) {
   .barWideActions {
+    display: flex;
+    flex-shrink: 1;
+    min-width: 0;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .barWideActions::-webkit-scrollbar {
     display: none;
   }
 
-  .barOverflowTrigger {
-    display: inline-flex;
+  .barAction {
+    min-width: 44px;
+    height: 40px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+  }
+
+  .barActionLabel {
+    font-size: var(--lanpm-font-caption);
+    max-width: 3.5em;
   }
 
   .searchWide {

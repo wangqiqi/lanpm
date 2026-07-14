@@ -274,6 +274,18 @@ assert.ok(
   'bubbleOwn must not use solid accent background (VP-404)'
 )
 
+const topBarCss = readFileSync(join(renderer, 'layout/TopBar.module.css'), 'utf8')
+const topBarSrc = readFileSync(join(renderer, 'layout/TopBar.tsx'), 'utf8')
+assert.match(
+  topBarCss,
+  /@media\s*\(max-width:\s*1100px\)[\s\S]*\.barWideActions\s*\{[^}]*display:\s*flex/,
+  'barWideActions must stay visible at ≤1100px (VP-405)'
+)
+assert.ok(
+  !/key:\s*'discover'/.test(topBarSrc),
+  'TopBar must not nest discover in overflow menu (VP-405)'
+)
+
 // --- legacy removed ---
 mustNotExist('src/renderer/src/features/shell/MainLayout.tsx')
 mustNotExist('src/renderer/src/features/views/ViewPlaceholder.tsx')
