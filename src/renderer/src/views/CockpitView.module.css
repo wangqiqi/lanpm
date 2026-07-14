@@ -274,10 +274,24 @@
   margin-bottom: 0;
 }
 
+.reportPanel {
+  flex-shrink: 0;
+}
+
 .reportMeta {
   display: block;
   margin-bottom: 10px;
   font-size: var(--lanpm-font-caption);
+}
+
+.reportTeaser {
+  display: block;
+  margin: 0;
+  font-size: var(--lanpm-font-caption);
+  line-height: var(--lanpm-line-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .reportPre {
@@ -285,7 +299,6 @@
   word-break: break-word;
   font-size: var(--lanpm-font-body);
   line-height: 1.55;
-  max-height: 280px;
   overflow: auto;
   margin: 0;
   padding: 14px 16px;
@@ -295,5 +308,5 @@
 }
 
 .reportPreExpanded {
-  max-height: min(70vh, 720px);
+  max-height: min(40dvh, 28rem);
 }

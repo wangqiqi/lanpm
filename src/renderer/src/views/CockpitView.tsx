@@ -87,7 +87,7 @@ export default function CockpitView(): React.ReactElement {
   const [aiConfigOpen, setAiConfigOpen] = useState(false)
   const [report, setReport] = useState<AiReportResult | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
-  const [reportExpanded, setReportExpanded] = useState(true)
+  const [reportExpanded, setReportExpanded] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -131,7 +131,7 @@ export default function CockpitView(): React.ReactElement {
             ? await api.generateMonthlyReport()
             : await api.evaluateProjects()
       setReport(result)
-      setReportExpanded(true)
+      setReportExpanded(false)
       message.success(result.usedExternalAi ? t('cockpit.reportExternal') : t('cockpit.reportLocal'))
     } catch (err) {
       message.error(formatError(err, 'cockpit.generateFailed'))
@@ -242,10 +242,25 @@ export default function CockpitView(): React.ReactElement {
         )}
       </div>
 
+      <div className={styles.kpiGrid}>
+        <KpiTile label={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
+        <KpiTile label={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
+        <KpiTile
+          label={t('cockpit.riskProjects')}
+          value={summary?.riskProjectCount ?? 0}
+          tone="risk"
+        />
+        <KpiTile
+          label={t('cockpit.delayedTasks')}
+          value={summary?.delayedCount ?? 0}
+          tone="delayed"
+        />
+      </div>
+
       {report ? (
         <Panel
           title={t('cockpit.reportOutput')}
-          className={styles.section}
+          className={`${styles.section} ${styles.reportPanel}`}
           extra={
             <Space>
               <Button
@@ -270,28 +285,17 @@ export default function CockpitView(): React.ReactElement {
             {report.generatedAt} ·{' '}
             {report.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
           </Text>
-          <pre
-            className={`${styles.reportPre} ${reportExpanded ? styles.reportPreExpanded : ''}`}
-          >
-            {report.content}
-          </pre>
+          {reportExpanded ? (
+            <pre className={`${styles.reportPre} ${styles.reportPreExpanded}`}>
+              {report.content}
+            </pre>
+          ) : (
+            <Text type="secondary" className={styles.reportTeaser}>
+              {report.content.trim().split('\n').find((line) => line.trim()) ?? ''}
+            </Text>
+          )}
         </Panel>
       ) : null}
-
-      <div className={styles.kpiGrid}>
-        <KpiTile label={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
-        <KpiTile label={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
-        <KpiTile
-          label={t('cockpit.riskProjects')}
-          value={summary?.riskProjectCount ?? 0}
-          tone="risk"
-        />
-        <KpiTile
-          label={t('cockpit.delayedTasks')}
-          value={summary?.delayedCount ?? 0}
-          tone="delayed"
-        />
-      </div>
 
       <Panel title={t('cockpit.projectProgress')} className={styles.section}>
         {(dashboard?.projects.length ?? 0) === 0 ? (

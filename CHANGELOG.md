@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **驾驶舱首屏 IA（TASK-CK-402）**：需关注 → KPI 四卡 → 报表（默认折叠一行摘要）；展开限高 `min(40dvh, 28rem)`；`verify:visual` 守卫。
+
 ### Fixed
 - **驾驶舱滚动（TASK-CK-401）**：`mainCockpit` 单滚动契约（对齐 `mainChat`）；移除 `.root { height:100% }` 双滚动裁切；`verify:visual` 守卫。
 

@@ -248,6 +248,17 @@ for (const rel of ['views/GroupView.tsx', 'views/CockpitView.tsx']) {
 
 const cockpitSrc = readFileSync(join(renderer, 'views/CockpitView.tsx'), 'utf8')
 assert.match(cockpitSrc, /kpiGrid/, 'CockpitView should use custom KPI grid')
+const kpiIdx = cockpitSrc.indexOf('kpiGrid')
+const reportIdx = cockpitSrc.indexOf('cockpit.reportOutput')
+assert.ok(
+  kpiIdx >= 0 && reportIdx >= 0 && kpiIdx < reportIdx,
+  'CockpitView KPI grid must appear before report panel (CK-402)'
+)
+assert.match(
+  cockpitSrc,
+  /reportExpanded,\s*setReportExpanded\]\s*=\s*useState\(false\)/,
+  'Cockpit report must default collapsed (CK-402)'
+)
 assert.ok(
   !/\b(Card|Statistic|Row|Col|Tag)\b/.test(cockpitSrc),
   'CockpitView must not use Ant Card/Statistic/Row/Col/Tag'
@@ -255,6 +266,12 @@ assert.ok(
 const cockpitCss = readFileSync(join(renderer, 'views/CockpitView.module.css'), 'utf8')
 assert.match(cockpitCss, /\.panel\b/, 'CockpitView must use island panel styles')
 assert.match(cockpitCss, /\.kpiValue\b/, 'CockpitView KPI must use custom typography')
+assert.match(
+  cockpitCss,
+  /\.reportPreExpanded\s*\{[^}]*max-height:\s*min\(40dvh,\s*28rem\)/s,
+  'Cockpit report expanded height must stay bounded (CK-402)'
+)
+assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),
   'CockpitView root must not lock height:100% (CK-401 scroll contract)'
