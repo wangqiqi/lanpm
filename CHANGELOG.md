@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **驾驶舱执行摘要（TASK-CK-403）**：本周完成 / 进行中 / 风险项目 / 下周到期；`buildExecutiveSummary` 聚合 + 首屏岛式摘要条；单元测覆盖。
+
 ### Changed
 - **驾驶舱首屏 IA（TASK-CK-402）**：需关注 → KPI 四卡 → 报表（默认折叠一行摘要）；展开限高 `min(40dvh, 28rem)`；`verify:visual` 守卫。
 

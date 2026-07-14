@@ -7,6 +7,7 @@ import type {
   ProjectHealth
 } from '../../shared/cockpit/types'
 import { countRiskProjects, sortCockpitProjects } from '../../shared/cockpit/sortProjects'
+import { buildExecutiveSummary } from '../../shared/cockpit/executiveSummary'
 import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
@@ -81,7 +82,10 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
     riskProjectCount: countRiskProjects(projects)
   }
 
-  return { summary, projects, departments }
+  const allTasks = listProjectGroups(db).flatMap((g) => listTasksByGroup(db, g.groupId))
+  const executiveSummary = buildExecutiveSummary(allTasks, summary.riskProjectCount)
+
+  return { summary, executiveSummary, projects, departments }
 }
 
 function desensitizeTasks(db: Database, groupId: string): AiTaskAuditPayload[] {

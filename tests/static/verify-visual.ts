@@ -271,6 +271,12 @@ assert.match(
   /\.reportPreExpanded\s*\{[^}]*max-height:\s*min\(40dvh,\s*28rem\)/s,
   'Cockpit report expanded height must stay bounded (CK-402)'
 )
+assert.match(
+  cockpitSrc,
+  /executiveSummary/,
+  'CockpitView must render executive summary (CK-403)'
+)
+assert.match(cockpitCss, /\.execSummary\b/, 'Cockpit executive summary strip (CK-403)')
 assert.match(cockpitCss, /\.reportTeaser\b/, 'Cockpit collapsed report teaser (CK-402)')
 assert.ok(
   !/\.root\s*\{[^}]*height:\s*100%/.test(cockpitCss),

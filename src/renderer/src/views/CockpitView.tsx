@@ -179,7 +179,7 @@ export default function CockpitView(): React.ReactElement {
     attentionProjects.length > 4 ? ` +${attentionProjects.length - 4}` : ''
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} data-lanpm-view-scroll>
       <ViewHeader
         title={t('cockpit.title')}
         actions={
@@ -241,6 +241,36 @@ export default function CockpitView(): React.ReactElement {
           <Text type="secondary">{t('cockpit.attentionHealthy')}</Text>
         )}
       </div>
+
+      {dashboard?.executiveSummary ? (
+        <section className={styles.execSummary} aria-label={t('cockpit.execSummaryTitle')}>
+          <h2 className={styles.execSummaryTitle}>{t('cockpit.execSummaryTitle')}</h2>
+          <div className={styles.execSummaryGrid}>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.execCompletedWeek')}</span>
+              <span className={styles.execValue}>
+                {dashboard.executiveSummary.completedThisWeek}
+              </span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.execInProgress')}</span>
+              <span className={styles.execValue}>{dashboard.executiveSummary.inProgressCount}</span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.execRiskProjects')}</span>
+              <span
+                className={`${styles.execValue} ${styles.execValueRisk}`.trim()}
+              >
+                {dashboard.executiveSummary.riskProjectCount}
+              </span>
+            </div>
+            <div className={styles.execMetric}>
+              <span className={styles.execLabel}>{t('cockpit.execDueNextWeek')}</span>
+              <span className={styles.execValue}>{dashboard.executiveSummary.dueNextWeek}</span>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <div className={styles.kpiGrid}>
         <KpiTile label={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />

@@ -26,8 +26,18 @@ export interface DepartmentStats {
 
 export interface CockpitDashboard {
   summary: CockpitSummary
+  /** 领导首屏执行摘要（CK-403） */
+  executiveSummary: ExecutiveSummary
   projects: ProjectDashboardItem[]
   departments: DepartmentStats[]
+}
+
+/** 领导首屏执行摘要 */
+export interface ExecutiveSummary {
+  completedThisWeek: number
+  inProgressCount: number
+  riskProjectCount: number
+  dueNextWeek: number
 }
 
 export type AiProvider =

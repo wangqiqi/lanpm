@@ -55,6 +55,61 @@
   color: var(--lanpm-text);
 }
 
+.execSummary {
+  padding: 14px 16px;
+  border-radius: var(--lanpm-radius-lg);
+  background: var(--lanpm-surface-elevated);
+  box-shadow: var(--lanpm-shadow-island);
+  border: 0.5px solid var(--lanpm-separator);
+}
+
+.execSummaryTitle {
+  margin: 0 0 12px;
+  font-size: var(--lanpm-font-title);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--lanpm-line-title);
+  color: var(--lanpm-text);
+}
+
+.execSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .execSummaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.execMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.execLabel {
+  font-size: var(--lanpm-font-caption);
+  line-height: var(--lanpm-line-caption);
+  color: var(--lanpm-text-secondary);
+}
+
+.execValue {
+  font-size: var(--lanpm-font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: var(--lanpm-line-display);
+  color: var(--lanpm-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.execValueRisk {
+  color: var(--lanpm-warning);
+}
+
 .panel {
   border-radius: var(--lanpm-radius-lg);
   background: var(--lanpm-surface-elevated);

@@ -1231,7 +1231,13 @@ export function createBrowserLanpmStub(): LanpmApi {
             totalTasks: 4
           }
         ],
-        departments: [{ department: '研发部', completionPercent: 75, taskCount: 4 }]
+        departments: [{ department: '研发部', completionPercent: 75, taskCount: 4 }],
+        executiveSummary: {
+          completedThisWeek: 1,
+          inProgressCount: 2,
+          riskProjectCount: 0,
+          dueNextWeek: 0
+        }
       }),
       generateWeeklyReport: async () => ({
         format: 'markdown' as const,
