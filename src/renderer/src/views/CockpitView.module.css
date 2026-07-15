@@ -20,6 +20,12 @@
   padding-bottom: 12px;
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
+  align-content: flex-start;
+}
+
+/* Flex children must not shrink — otherwise expanded panels clip instead of scrollBody scrolling (CK-410 follow-up) */
+.scrollBody > * {
+  flex-shrink: 0;
 }
 
 .headerActions {

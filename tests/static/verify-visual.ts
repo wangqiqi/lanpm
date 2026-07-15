@@ -466,6 +466,11 @@ assert.match(
   /\.scrollBody\s*\{[^}]*overflow-y:\s*auto/s,
   'CockpitView scroll body must be the vertical scroll container (CK-401)'
 )
+assert.match(
+  cockpitCss,
+  /\.scrollBody\s*>\s*\*\s*\{[^}]*flex-shrink:\s*0/s,
+  'scrollBody children must not flex-shrink (expanded panels scroll via scrollBody, CK-410)'
+)
 
 const mainLayoutCss = readFileSync(join(renderer, 'layout/MainLayout.module.css'), 'utf8')
 assert.match(mainLayoutCss, /\.mainCockpit\b/, 'MainLayout must define mainCockpit (CK-401)')
