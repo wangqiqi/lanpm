@@ -482,6 +482,28 @@ assert.match(
 )
 assert.match(mainLayoutSrc, /mainCockpit/, 'MainLayout must apply mainCockpit on cockpit route (CK-401)')
 
+// --- CK-415: density accordion suite still green (CK-410～414) ---
+assert.ok(
+  (cockpitSrc.match(/\bdefaultCollapsed\b/g) ?? []).length >= 3,
+  'Cockpit must default-collapse attention/project/dept panels (CK-415)'
+)
+assert.ok(
+  !/\bkpiGrid\b/.test(cockpitSrc) && !/\.kpiGrid\b/.test(cockpitCss),
+  'CK-415: dual-island kpiGrid must stay banned (CK-411)'
+)
+
+const docs01 = readFileSync(join(root, 'docs/01_产品需求文档.md'), 'utf8')
+const docs04 = readFileSync(join(root, 'docs/04_交互与UI约定.md'), 'utf8')
+const docs05 = readFileSync(join(root, 'docs/05_测试与联调发布.md'), 'utf8')
+assert.match(docs01, /领导摘要（单一岛）/, 'docs/01 §12.1 must describe single leadership summary (CK-415)')
+assert.match(docs01, /手风琴/, 'docs/01 §12.1 must describe accordion list IA (CK-415)')
+assert.match(docs01, /overflow-x:clip/, 'docs/01 scroll contract must mention overflow-x:clip (CK-415)')
+assert.match(docs04, /手风琴/, 'docs/04 cockpit IA must mention accordion (CK-415)')
+assert.match(docs04, /CK-401～415|CK-410～414/, 'docs/04 must reference density accordion guards (CK-415)')
+assert.match(docs05, /列表手风琴/, 'docs/05 walkthrough must mention list accordion (CK-415)')
+assert.match(docs04, /01_产品需求文档\.md/, 'docs/04 must link docs/01 §12.1 (CK-415)')
+assert.match(docs01, /docs\/04/, 'docs/01 must cross-link docs/04 (CK-415)')
+
 const chatCss = readFileSync(join(renderer, 'features/chat/chat.module.css'), 'utf8')
 const chatSrc = readFileSync(join(renderer, 'features/chat/ChatView.tsx'), 'utf8')
 assert.match(chatCss, /\.bubbleOwn[\s\S]*--lanpm-selected-bg/, 'bubbleOwn must use selected-bg fill (VP-404)')

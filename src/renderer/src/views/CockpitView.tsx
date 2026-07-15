@@ -210,7 +210,7 @@ export default function CockpitView(): React.ReactElement {
   const attentionPreview = attentionTasks.slice(0, 2)
   const projects = dashboard?.projects ?? []
   const worstProject = projects[0] ?? null
-  const departments = dashboard?.departments ?? []
+  const departments = useMemo(() => dashboard?.departments ?? [], [dashboard?.departments])
   const worstDepartment = useMemo(() => {
     const withTasks = departments.filter((d) => d.taskCount > 0)
     if (withTasks.length === 0) {
