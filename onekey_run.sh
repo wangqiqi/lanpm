@@ -258,12 +258,33 @@ check_inotify_linux() {
   fi
 }
 
+preflight_dev() {
+  info "启动前预检（依赖 / native）…"
+  if ! node "$ROOT/scripts/onekey-preflight.mjs" --fix; then
+    err "预检未通过，已中止启动"
+    if is_windows; then
+      hint_win_onekey
+    fi
+    return 1
+  fi
+}
+
+hint_win_onekey() {
+  warn "Windows 推荐: CMD → onekey_run.bat · PowerShell → onekey_run.ps1（Git Bash 下 sh 偶发兼容问题）"
+}
+
+diagnose_start_failure() {
+  [[ -f "$LOG_FILE" ]] || return 0
+  node "$ROOT/scripts/onekey-preflight.mjs" --diagnose-log "$LOG_FILE" 2>/dev/null || true
+}
+
 start_dev() {
   local mode="${1:-electron}"
   ensure_run_dir
   need_cmd npm
   need_cmd node
   check_inotify_linux
+  preflight_dev || return 1
 
   if is_running; then
     warn "已在运行 (pid=$(read_pid))，请先 stop 或 restart"
@@ -307,6 +328,7 @@ start_dev() {
   else
     err "启动失败，请查看日志:"
     tail -n 30 "$LOG_FILE" 2>/dev/null || true
+    diagnose_start_failure
     rm -f "$PID_FILE" "$MODE_FILE"
     return 1
   fi
@@ -356,6 +378,10 @@ cmd_logs() {
 
 cmd_build() {
   need_cmd npm
+  node "$ROOT/scripts/onekey-preflight.mjs" --fix --quiet || {
+    err "预检未通过，已中止构建"
+    return 1
+  }
   info "生产构建 …"
   npm run build
   ok "构建完成 → out/"
@@ -377,7 +403,11 @@ cmd_rebuild() {
 cmd_install() {
   need_cmd npm
   info "npm install …"
-  npm install
+  if ! npm install; then
+    err "npm install 失败"
+    hint_win_onekey 2>/dev/null || true
+    return 1
+  fi
   ok "依赖安装完成 (postinstall 已 ensure native)"
 }
 

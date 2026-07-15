@@ -101,9 +101,24 @@ for %%P in (5173 5174) do (
 )
 if "%PORT_FOUND%"=="0" echo   5173/5174 not listening
 exit /b 0
+:preflight_dev
+echo [lanpm] 启动前预检（依赖 / native）...
+node "%ROOT%\scripts\onekey-preflight.mjs" --fix
+if errorlevel 1 (
+  echo [lanpm] 预检未通过，已中止启动
+  echo [lanpm] 提示: onekey_run.bat install  或  npm install
+  exit /b 1
+)
+exit /b 0
+:diagnose_failure
+if not exist "%LOG_FILE%" exit /b 0
+node "%ROOT%\scripts\onekey-preflight.mjs" --diagnose-log "%LOG_FILE%" 2>nul
+exit /b 0
 :start_dev
 set "DEV_MODE=%~1"
 call :ensure_run_dir
+call :preflight_dev
+if errorlevel 1 exit /b 1
 call :test_dev_running
 if not errorlevel 1 (
   echo [lanpm] already running; stop or restart first
@@ -130,6 +145,7 @@ if not errorlevel 1 (
 )
 echo [lanpm] start failed; see log:
 if exist "%LOG_FILE%" call :log_tail 30
+call :diagnose_failure
 del "%PID_FILE%" "%MODE_FILE%" 2>nul
 exit /b 1
 :start_dev_pid_ok
@@ -243,6 +259,11 @@ goto :cmd_check
 :cmd_clean_dispatch
 goto :cmd_clean
 :cmd_build
+node "%ROOT%\scripts\onekey-preflight.mjs" --fix --quiet
+if errorlevel 1 (
+  echo [lanpm] 预检未通过，已中止构建
+  exit /b 1
+)
 echo [lanpm] building ...
 call npm run build
 if errorlevel 1 exit /b %ERRORLEVEL%
@@ -261,7 +282,12 @@ exit /b 0
 :cmd_install
 echo [lanpm] npm install ...
 call npm install
-exit /b %ERRORLEVEL%
+if errorlevel 1 (
+  echo [lanpm] npm install 失败 - 检查网络或 npm 源
+  exit /b 1
+)
+echo [lanpm] install done - postinstall ensure native
+exit /b 0
 :cmd_check
 set "CHK_MODE=%~1"
 if not defined CHK_MODE set "CHK_MODE=!EXT!"

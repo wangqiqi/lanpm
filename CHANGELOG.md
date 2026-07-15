@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [1.33.1] - 2026-07-15
+
+### Added
+- **onekey 启动预检（`scripts/onekey-preflight.mjs`）**：`start`/`web`/`build` 前自动检测关键依赖与 native ABI；缺包时 `--fix` 自动 `npm install`；启动失败时解析 `.lanpm/dev.log` 并给出修复建议；三端 `onekey_run.{sh,bat,ps1}` 集成。
+
+### Fixed
+- **Windows Profile 迁移**：旧版 `lanpm.db` 无 `files` 表时迁移不再崩溃；迁移中断后自动从 `profiles/<id>/` 恢复 `active_profile.json` 绑定。
+
+### Release
+- `v1.33.1` — Windows dev startup: profile migration guard · onekey preflight auto-fix
+
 ## [1.33.0] - 2026-07-15
 
 ### Added

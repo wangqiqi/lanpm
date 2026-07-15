@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { existsSync, mkdirSync, renameSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, renameSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import DatabaseConstructor from 'better-sqlite3'
 import type { Database } from 'better-sqlite3'
@@ -57,7 +57,26 @@ function resolveUserIdFromLegacyDb(legacyDbPath: string): string | null {
   }
 }
 
+function hasTable(db: Database, table: string): boolean {
+  const row = db
+    .prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?`)
+    .get(table) as { 1: number } | undefined
+  return row != null
+}
+
+/** 迁移中断后 profiles/<id>/lanpm.db 已存在但 active_profile.json 未写入 */
+function discoverUserIdFromExistingProfiles(): string | null {
+  const profilesRoot = join(getRootUserDataPath(), 'profiles')
+  if (!existsSync(profilesRoot)) return null
+  const withDb = readdirSync(profilesRoot, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .filter((id) => existsSync(join(profilesRoot, id, 'lanpm.db')))
+  return withDb.length === 1 ? withDb[0]! : null
+}
+
 function rewriteFilePathsAfterProfileMove(db: Database, oldRoot: string, newRoot: string): void {
+  if (!hasTable(db, 'files')) return
   const rows = db
     .prepare(`SELECT file_id, storage_path, preview_path FROM files WHERE is_bookmark = 0`)
     .all() as { file_id: string; storage_path: string; preview_path: string | null }[]
@@ -111,6 +130,11 @@ export function ensureProfileUserDataPath(): void {
   if (!userId) {
     userId = resolveUserIdFromLegacyDb(legacyDb)
     if (userId) migrateLegacyToProfile(userId)
+  }
+
+  if (!userId) {
+    userId = discoverUserIdFromExistingProfiles()
+    if (userId) writeActiveUserId(userId)
   }
 
   if (userId) {
