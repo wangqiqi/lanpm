@@ -31,29 +31,6 @@ function resolveDeptDisplayName(department: string, t: (key: MessageKey) => stri
   return department === COCKPIT_UNASSIGNED_DEPT ? t('cockpit.deptUnassigned') : department
 }
 
-function KpiTile({
-  label,
-  value,
-  tone = 'default'
-}: {
-  label: string
-  value: number
-  tone?: 'default' | 'risk' | 'delayed'
-}): React.ReactElement {
-  const valueToneClass =
-    tone === 'risk'
-      ? styles.kpiValueRisk
-      : tone === 'delayed'
-        ? styles.kpiValueDelayed
-        : ''
-  return (
-    <div className={styles.kpiTile}>
-      <span className={styles.kpiLabel}>{label}</span>
-      <span className={`${styles.kpiValue} ${valueToneClass}`.trim()}>{value}</span>
-    </div>
-  )
-}
-
 function Panel({
   title,
   extra,
@@ -275,66 +252,80 @@ export default function CockpitView(): React.ReactElement {
         )}
       </div>
 
-      {dashboard?.executiveSummary ? (
-        <section className={styles.execSummary} aria-label={t('cockpit.execSummaryTitle')}>
-          <h2 className={styles.execSummaryTitle}>{t('cockpit.execSummaryTitle')}</h2>
-          <div className={styles.execSummaryGrid}>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.execCompletedWeek')}</span>
-              <span className={styles.execValue}>
-                {dashboard.weeklyTrend?.completedThisWeek ??
-                  dashboard.executiveSummary.completedThisWeek}
-              </span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.trendDelta')}</span>
-              <span
-                className={`${styles.execValue} ${
-                  (dashboard.weeklyTrend?.weekOverWeekDelta ?? 0) > 0
-                    ? styles.trendDeltaUp
-                    : (dashboard.weeklyTrend?.weekOverWeekDelta ?? 0) < 0
-                      ? styles.trendDeltaDown
-                      : ''
-                }`.trim()}
-              >
-                {formatWeekOverWeekDelta(dashboard.weeklyTrend?.weekOverWeekDelta ?? 0)}
-              </span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.execDueNextWeek')}</span>
-              <span className={styles.execValue}>{dashboard.executiveSummary.dueNextWeek}</span>
-            </div>
-            <div className={styles.execMetric}>
-              <span className={styles.execLabel}>{t('cockpit.execAttentionCount')}</span>
-              <span
-                className={`${styles.execValue} ${
-                  (dashboard.attentionTasks.length ?? 0) > 0 ? styles.execValueRisk : ''
-                }`.trim()}
-              >
-                {dashboard.attentionTasks.length}
-              </span>
-            </div>
+      <section className={styles.execSummary} aria-label={t('cockpit.execSummaryTitle')}>
+        <h2 className={styles.execSummaryTitle}>{t('cockpit.execSummaryTitle')}</h2>
+        <div className={styles.execSummaryGrid}>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.execCompletedWeek')}</span>
+            <span className={styles.execValue}>
+              {dashboard?.weeklyTrend?.completedThisWeek ??
+                dashboard?.executiveSummary?.completedThisWeek ??
+                0}
+            </span>
           </div>
-          <Text type="secondary" className={styles.execFootnote}>
-            {t('cockpit.trendApproxNote')}
-          </Text>
-        </section>
-      ) : null}
-
-      <div className={styles.kpiGrid}>
-        <KpiTile label={t('cockpit.totalProjects')} value={summary?.totalProjects ?? 0} />
-        <KpiTile label={t('cockpit.inProgressTasks')} value={summary?.inProgressCount ?? 0} />
-        <KpiTile
-          label={t('cockpit.riskProjects')}
-          value={summary?.riskProjectCount ?? 0}
-          tone="risk"
-        />
-        <KpiTile
-          label={t('cockpit.delayedTasks')}
-          value={summary?.delayedCount ?? 0}
-          tone="delayed"
-        />
-      </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.trendDelta')}</span>
+            <span
+              className={`${styles.execValue} ${
+                (dashboard?.weeklyTrend?.weekOverWeekDelta ?? 0) > 0
+                  ? styles.trendDeltaUp
+                  : (dashboard?.weeklyTrend?.weekOverWeekDelta ?? 0) < 0
+                    ? styles.trendDeltaDown
+                    : ''
+              }`.trim()}
+            >
+              {formatWeekOverWeekDelta(dashboard?.weeklyTrend?.weekOverWeekDelta ?? 0)}
+            </span>
+          </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.execDueNextWeek')}</span>
+            <span className={styles.execValue}>
+              {dashboard?.executiveSummary?.dueNextWeek ?? 0}
+            </span>
+          </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.execAttentionCount')}</span>
+            <span
+              className={`${styles.execValue} ${
+                (dashboard?.attentionTasks.length ?? 0) > 0 ? styles.execValueRisk : ''
+              }`.trim()}
+            >
+              {dashboard?.attentionTasks.length ?? 0}
+            </span>
+          </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.totalProjects')}</span>
+            <span className={styles.execValue}>{summary?.totalProjects ?? 0}</span>
+          </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.inProgressTasks')}</span>
+            <span className={styles.execValue}>{summary?.inProgressCount ?? 0}</span>
+          </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.riskProjects')}</span>
+            <span
+              className={`${styles.execValue} ${
+                (summary?.riskProjectCount ?? 0) > 0 ? styles.execValueRisk : ''
+              }`.trim()}
+            >
+              {summary?.riskProjectCount ?? 0}
+            </span>
+          </div>
+          <div className={styles.execMetric}>
+            <span className={styles.execLabel}>{t('cockpit.delayedTasks')}</span>
+            <span
+              className={`${styles.execValue} ${
+                (summary?.delayedCount ?? 0) > 0 ? styles.execValueDelayed : ''
+              }`.trim()}
+            >
+              {summary?.delayedCount ?? 0}
+            </span>
+          </div>
+        </div>
+        <Text type="secondary" className={styles.execFootnote}>
+          {t('cockpit.trendApproxNote')}
+        </Text>
+      </section>
 
       <Panel title={t('cockpit.attentionTasksTitle')} className={styles.section}>
         {(dashboard?.attentionTasks.length ?? 0) === 0 ? (

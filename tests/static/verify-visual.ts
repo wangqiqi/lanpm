@@ -267,13 +267,20 @@ for (const rel of ['views/GroupView.tsx', 'views/CockpitView.tsx']) {
 }
 
 const cockpitSrc = readFileSync(join(renderer, 'views/CockpitView.tsx'), 'utf8')
-assert.match(cockpitSrc, /kpiGrid/, 'CockpitView should use custom KPI grid')
-const kpiIdx = cockpitSrc.indexOf('kpiGrid')
 const reportIdx = cockpitSrc.indexOf('cockpit.reportOutput')
 const deptIdx = cockpitSrc.indexOf('cockpit.deptCompletion')
+const execSummaryIdx = cockpitSrc.indexOf('styles.execSummary')
 assert.ok(
-  kpiIdx >= 0 && reportIdx >= 0 && kpiIdx < reportIdx,
-  'CockpitView KPI grid must appear before report panel (CK-402)'
+  !/\bkpiGrid\b/.test(cockpitSrc),
+  'CockpitView must not render a second kpiGrid island (CK-411)'
+)
+assert.ok(
+  !/\bKpiTile\b/.test(cockpitSrc),
+  'CockpitView must not use standalone KpiTile islands (CK-411)'
+)
+assert.ok(
+  execSummaryIdx >= 0 && reportIdx >= 0 && execSummaryIdx < reportIdx,
+  'Cockpit leadership summary must appear before report panel (CK-411)'
 )
 assert.ok(
   deptIdx >= 0 && reportIdx > deptIdx,
@@ -295,7 +302,11 @@ assert.ok(
 )
 const cockpitCss = readFileSync(join(renderer, 'views/CockpitView.module.css'), 'utf8')
 assert.match(cockpitCss, /\.panel\b/, 'CockpitView must use island panel styles')
-assert.match(cockpitCss, /\.kpiValue\b/, 'CockpitView KPI must use custom typography')
+assert.ok(
+  !/\.kpiGrid\b/.test(cockpitCss) && !/\.kpiTile\b/.test(cockpitCss),
+  'Cockpit CSS must drop dual-island kpiGrid/kpiTile (CK-411)'
+)
+assert.match(cockpitCss, /\.execValue\b/, 'Cockpit leadership summary must use custom typography')
 assert.match(
   cockpitCss,
   /\.reportPreExpanded\s*\{[^}]*max-height:\s*min\(40dvh,\s*28rem\)/s,
@@ -304,7 +315,17 @@ assert.match(
 assert.match(
   cockpitSrc,
   /executiveSummary/,
-  'CockpitView must render executive summary (CK-403)'
+  'CockpitView must render executive summary fields (CK-403)'
+)
+assert.match(
+  cockpitSrc,
+  /cockpit\.totalProjects/,
+  'Leadership summary must include project KPIs (CK-411)'
+)
+assert.match(
+  cockpitSrc,
+  /cockpit\.riskProjects/,
+  'Leadership summary must include risk KPI (CK-411)'
 )
 assert.match(
   cockpitSrc,
@@ -312,7 +333,12 @@ assert.match(
   'CockpitView must render attention task list (CK-404)'
 )
 assert.match(cockpitCss, /\.attentionTaskList\b/, 'Cockpit attention task list (CK-404)')
-assert.match(cockpitCss, /\.execSummary\b/, 'Cockpit executive summary strip (CK-403)')
+assert.match(cockpitCss, /\.execSummary\b/, 'Cockpit single leadership summary island (CK-411)')
+assert.equal(
+  (cockpitSrc.match(/styles\.execSummary\b/g) ?? []).length,
+  1,
+  'CockpitView must render exactly one leadership summary island (CK-411)'
+)
 assert.match(
   cockpitSrc,
   /projectHealthList/,

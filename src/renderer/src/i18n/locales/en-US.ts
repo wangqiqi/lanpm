@@ -132,7 +132,7 @@ const enUS = {
   'cockpit.attentionNeed': '{delayed} delayed · {risk} at risk: {names}',
   'cockpit.attentionHealthy': 'All clear — no delayed or at-risk projects',
   'cockpit.attentionOpenBoard': 'Open board',
-  'cockpit.execSummaryTitle': 'Executive summary',
+  'cockpit.execSummaryTitle': 'Leadership summary',
   'cockpit.execCompletedWeek': 'Done this week',
   'cockpit.execInProgress': 'In progress',
   'cockpit.execRiskProjects': 'At-risk projects',

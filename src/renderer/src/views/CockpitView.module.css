@@ -121,6 +121,10 @@
   color: var(--lanpm-warning);
 }
 
+.execValueDelayed {
+  color: var(--lanpm-danger);
+}
+
 .trendDeltaUp {
   color: var(--lanpm-success);
 }
@@ -221,52 +225,6 @@
 
 .panelBody {
   padding: 14px 16px 16px;
-}
-
-.kpiGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (max-width: 900px) {
-  .kpiGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.kpiTile {
-  padding: 16px;
-  border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-elevated);
-  box-shadow: var(--lanpm-shadow-island);
-  border: 0.5px solid var(--lanpm-separator);
-}
-
-.kpiLabel {
-  display: block;
-  margin-bottom: 6px;
-  font-size: var(--lanpm-font-caption);
-  line-height: var(--lanpm-line-caption);
-  color: var(--lanpm-text-secondary);
-}
-
-.kpiValue {
-  display: block;
-  font-size: var(--lanpm-font-display);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: var(--lanpm-line-display);
-  color: var(--lanpm-text);
-  font-variant-numeric: tabular-nums;
-}
-
-.kpiValueRisk {
-  color: var(--lanpm-warning);
-}
-
-.kpiValueDelayed {
-  color: var(--lanpm-danger);
 }
 
 .section {

@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **驾驶舱领导摘要去重（TASK-CK-411）**：合并执行摘要与 KPI 四卡为**单一**领导摘要岛（八指标两排紧凑）；删除独立 `kpiGrid` 双岛；`verify:visual` 禁双岛回归；`docs/01` §12.1 · `docs/04` · `docs/05` 对齐。
+
 ### Fixed
 - **驾驶舱主滚动（TASK-CK-410）**：`mainCockpit flex:1 1 0` 加固高度链；移除 `deptList` 默认嵌套 `overflow-y:auto`，部门列表随 `scrollBody` 统一纵向滚动；`verify:visual` 守卫。
 

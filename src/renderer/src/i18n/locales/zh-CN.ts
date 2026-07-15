@@ -130,7 +130,7 @@ const zhCN = {
   'cockpit.attentionNeed': '延期 {delayed} · 风险 {risk}：{names}',
   'cockpit.attentionHealthy': '全局健康 — 暂无延期或风险项目',
   'cockpit.attentionOpenBoard': '看看板',
-  'cockpit.execSummaryTitle': '执行摘要',
+  'cockpit.execSummaryTitle': '领导摘要',
   'cockpit.execCompletedWeek': '本周完成',
   'cockpit.execInProgress': '进行中',
   'cockpit.execRiskProjects': '风险项目',
