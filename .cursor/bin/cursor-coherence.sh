@@ -52,13 +52,25 @@ assert len(personas) == 12, f"expected 12 personas, got {len(personas)}"
 assert len(ids) == len(set(ids)), "duplicate persona id"
 assert "professional" in ids, "missing professional persona"
 assert data.get("skills_policy") == "full", "skills_policy must be full"
+rules = data.get("speech_rules") or {}
+assert rules.get("forbid_self_name_opener") is True, "speech_rules.forbid_self_name_opener must be true"
 aliases = {}
 for p in personas:
     assert p.get("skills") == "full", f"{p.get('id')} skills must be full"
     for key in ("role_name", "given_name", "personality", "tone", "hint"):
         assert p.get(key), f"{p.get('id')} missing {key}"
+    cues = p.get("voice_cues") or {}
+    for ck in ("address_user", "rhythm", "flavor", "never"):
+        assert cues.get(ck), f"{p.get('id')} voice_cues missing {ck}"
+    emo = p.get("emotion_cues") or {}
+    for ek in ("on_success", "on_blocker", "on_decision", "on_grind"):
+        assert emo.get(ek), f"{p.get('id')} emotion_cues missing {ek}"
     ex = p.get("speech_examples") or []
-    assert isinstance(ex, list) and len(ex) >= 2, f"{p.get('id')} needs >=2 speech_examples"
+    assert isinstance(ex, list) and len(ex) >= 4, f"{p.get('id')} needs >=4 speech_examples"
+    gn = str(p.get("given_name") or "")
+    for line in ex:
+        s = str(line).strip()
+        assert not gn or not s.startswith(gn), f"{p.get('id')} speech_example must not start with given_name"
     keys = [p.get("id"), p.get("role_name"), p.get("given_name")]
     keys += list(p.get("nicknames") or [])
     for k in keys:

@@ -59,7 +59,7 @@ LIBRARY — 路径 + 何时手动选用
 
 安装外网 skill 到 `~/.cursor/skills/` 前仍走 **security** §外部 Agent Skill；**禁止**引入第二套安装 CLI 作为母版必选路径。
 
-### anthropics/skills · LIBRARY 速查（SPRINT-anthropics-absorb）
+### anthropics/skills · LIBRARY 速查
 
 **不默认加载**；用户意图命中或 `deps` 路由时引用。详表 → **`docs/library-index.md`** · `routes.md` §LIBRARY。
 
@@ -82,7 +82,7 @@ LIBRARY — 路径 + 何时手动选用
 
 **Office 深度编辑** — AskQuestion（≤3 项）：`装 upstream anthropics skill` · `用 MCP/飞书等` · `本轮不做`
 
-### github/spec-kit · LIBRARY（SPRINT-spec-kit-absorb）
+### github/spec-kit · LIBRARY
 
 **不默认加载** `specify-cli`；SDD 协议已并入 **plan · run · review**。详表 → **`docs/library-index.md`** · `reference/sdd/source-map.md`。
 
@@ -98,11 +98,48 @@ LIBRARY — 路径 + 何时手动选用
 
 **路径**：默认 `docs/specs/`（`workflow.json` `sdd.specs_dir`）；与 spec-kit 原生 `specs/` 可配置兼容。
 
+### SpaceZephyr/pm-skills · LIBRARY
+
+**不默认加载**整包；产品协议已蒸馏进 **plan · review · delivery**。详表 → **`docs/library-index.md`**。
+
+| 远端 skill | 母版已吸收 | 何时用 LIBRARY（装 `~/.cursor/skills/`） |
+|------------|------------|------------------------------------------|
+| pm-prd-writer | ✅ **plan** `doc-prd-enrich.md` | — |
+| pm-review-board | ✅ **review** §文档预审 | — |
+| pm-tracking-spec-writer | ✅ **delivery** §埋点 | — |
+| pm-master 链路 | ✅ 下表预置链路 | 要完整 20 skill 编排 |
+| pm-prioritization-engine | ✅ **plan** `prioritization.md` | — |
+| pm-roadmap-planner | ❌ backlog | 甘特专精（与 Sprint 重叠） |
+| pm-experiment-designer · pm-analytics · pm-survey-designer | ❌ | 实验/分析/问卷专精 |
+| pm-advisory-suite（产品判断顾问团） | ❌ 不蒸馏 | 「该不该做」· 价值判断 · 访谈求真 |
+| pm-image2proto · pm-url2proto · pm-image2pencil | ❌ | 截图/网址原型（CLI 设计 → **pencil-design**） |
+
+**母版命名纪律**：正文用功能/视角名（风险与可行性预审 · 发现与假设树 · 价值与替换成本 等），**禁止**专家人名作节标题。
+
+**预置产品链路**（每步产出是下一步输入；可让用户砍步）：
+
+```text
+[想法] →（可选）装 upstream 产品判断 skill
+      → plan §协作文档 + doc-prd-enrich（PRD + 待确认项）
+      → review §文档预审
+      → plan 修订 → delivery §埋点
+```
+
+用户只要一步 → 只 handoff 对应 skill，不强推链路。
+
 ## 人格预设 (`style`)
 
-> **仅改语气/性格，全员 `skills: full`（同等全能）**；默认 `dashu`（老周）。12 项分两轮 AskQuestion（每轮 ≤7）。
+> **仅改语气/性格，全员 `skills: full`（同等全能）**；默认 `dashu`。12 项分两轮 AskQuestion（每轮 ≤7）。
 
-每人字段：`id` · `role_name`（角色名）· `nicknames[]`（昵称）· `given_name`（具体名字）· `personality` · `tone` · `skills`。
+每人字段：`id` · `role_name` · `nicknames[]` · `given_name` · `voice_cues` · `personality` · `tone` · `attitude` · `intensity` · `speech_examples` · `skills`（全员 `full`）。
+
+| 字段 | 用途 | Agent 禁止 |
+|------|------|------------|
+| `given_name` | **用户点名**匹配（如「呼叫老周」） | 回复开场自报此人设名 |
+| `voice_cues` | 落地语气：称呼用户、句长、语气词 | 忽略 cues 只用名字装人设 |
+| `speech_examples` | 句式锚点（≥3 条） | 照抄 given_name 开场 |
+
+全局 `speech_rules.forbid_self_name_opener` → 见 **super-cursor-persona.mdc**。
 
 ### 呼叫（会话内）
 
@@ -151,6 +188,7 @@ LIBRARY — 路径 + 何时手动选用
 | 周报、本周总结、weekly report | **week** · `/week` |
 | 磁盘快照、空间变动、disk snapshot | **disk** · `/disk` |
 | 环境维护、清理缓存、系统维护 | **maintain** · `/maintain` |
+| 做设计、mockup、landing page 视觉、.pen、生成海报/App 屏 | **pencil-design** · `/pencil-design` |
 | 分支收尾、merge、开 PR、打 tag | **release** · **git** |
 | PR 评论、CI 循环 | `babysit`（`more` → `git`） |
 | 拆 PR、大 diff | `split-to-prs`（`more` → `git`） |
@@ -196,6 +234,7 @@ README 场景速查中无独立主菜单、经 `more` → `config` 或关键词�
 | 周报、本周总结、CHANGELOG 汇总 | **week** · `/week` |
 | 磁盘快照、空间占用、哪个目录变大 | **disk** · `/disk` |
 | 环境维护、清理磁盘、dev maintenance | **maintain** · `/maintain` |
+| 做设计、mockup、视觉稿、.pen、海报、banner、App 屏 | **pencil-design** · `/pencil-design` |
 | submodule、vendor、依赖升级、开源选型、许可证、MIT、GPL | **more** → `deps`（`oss-first.mdc` · `submodule.mdc`） |
 | 外网 skill、安装 skill、发现 skill、有没有能做 X 的 skill | **more** → `deps` → **security** §外部 Agent Skill；个人目录安装须用户确认 |
 | DAILY、LIBRARY、裁剪 skill、精简规则、skill 太多、全量安装 | **more** → `deps` §DAILY/LIBRARY；结论可写入 **learn** |

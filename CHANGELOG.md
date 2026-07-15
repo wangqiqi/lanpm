@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **Super Cursor 母版**：`roles.json` 12 人格与 `run-start` Persona 注入；`master` 路由补 `review` / `debug` / `pencil-design`；`plan` 增 PRD 丰富与优先级参考；`review` / `pencil-design` skill 与 reference；`verify-super-cursor` · `cursor-coherence` 扩展；docs 目录与协作规则同步。
+
 ## [1.33.4] - 2026-07-15
 
 ### Fixed

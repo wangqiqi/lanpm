@@ -55,6 +55,8 @@ slash 菜单按 **【日常】→【生命周期】→【高级】** 标注；Ag
 | `/delivery` | UI/功能 Sprint 发版前 7 维走查（**不是**规划导航） | delivery |
 | `/ux` | 体验类型不明 → 分流 ia/delivery（**不是**直接改视觉） | ux |
 | `/ia` | 导航/角色/信息架构大改（**不是** token/i18n 抛光） | ia |
+| `/debug` | 根因不明 / 反复失败 / 系统调试循环（**不是**小修直接 run） | debug |
+| `/review` | REV-* / 合并前结构化回顾（**不是** Bugbot 全局 review） | review |
 
 ## 使用场景
 
@@ -81,7 +83,7 @@ slash 菜单按 **【日常】→【生命周期】→【高级】** 标注；Ag
 
 治理：`constitution.mdc` · `evolution.mdc` · `config/roles.json`（12 人格 · 呼叫可解析 · Growth 会话态 · speech_examples；**skills 全员 full**）。  
 扩展 skills（主路径）：**ux** · **ia** · **debug** · **test** · **review** · **study** · **delivery** · **mcp** · **refactor** · **perf**（入口见 `core.mdc`）。  
-**工具技能**（非日常主路径；`/week` · `/disk` · `/maintain`）：**week** · **disk** · **maintain** — full 默认带；lite/rules-only 可不强调（见 `config/README`）。
+**工具技能**（非日常主路径；`/week` · `/disk` · `/maintain` · `/pencil-design`）：**week** · **disk** · **maintain** · **pencil-design** — full 默认带；lite/rules-only 可不强调（见 `config/README`）。
 
 ### 重复劳动 SOP（rules · 通用）
 
