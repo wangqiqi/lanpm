@@ -4,30 +4,28 @@
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-07-15
+
 ### Added
-- **驾驶舱周趋势（TASK-CK-407）**：本周 vs 上周完成数环比 + 里程碑完成对比；`buildWeeklyTrend` 聚合与单元测；首屏岛式趋势条；`verify:visual` 守卫。
+- **驾驶舱周趋势（TASK-CK-407）**：本周 vs 上周完成数环比 + 里程碑完成对比；`buildWeeklyTrend` 聚合与单元测；环比并入执行摘要；`verify:visual` 守卫。
 - **驾驶舱需关注任务（TASK-CK-404）**：延期/落后任务 Top 8 列表（项目·任务·负责人·截止日）；点击进看板；`buildAttentionTasks` 单元测。
 - **驾驶舱执行摘要（TASK-CK-403）**：本周完成 / 进行中 / 风险项目 / 下周到期；`buildExecutiveSummary` 聚合 + 首屏岛式摘要条；单元测覆盖。
 
 ### Changed
-- **驾驶舱首屏 IA 去重**：执行摘要合并周趋势（本周完成 / 环比 / 下周到期 / 需关注任务数）；KPI 四卡专注项目健康（总数 / 进行中 / 风险 / 延期），去掉与摘要重复指标。
-- **驾驶舱 AI 报表层级（TASK-CK-408）**：周报保持主 CTA；月报默认、AI 评估降为 text；报告区置底、弱化岛面样式、默认可折叠 teaser 可点击展开；复制为 link；`verify:visual` 守卫。
-- **驾驶舱部门完成率（TASK-CK-406）**：紧凑行（进度/百分比/完成比同行）；列表限高可滚动子区；无任务与无部门数据分态说明；未分配部门 i18n 化；`verify:visual` 守卫。
-- **驾驶舱项目健康（TASK-CK-405）**：紧凑卡片列表（状态 pill + 进度/百分比/元数据同行）；风险/延期轻量边框强调；面板显示项目数；操作改为 link 样式；`verify:visual` 守卫。
-- **驾驶舱首屏 IA（TASK-CK-402）**：需关注 → KPI 四卡 → 报表（默认折叠一行摘要）；展开限高 `min(40dvh, 28rem)`；`verify:visual` 守卫。
-- **驾驶舱文档 SSOT（TASK-CK-409）**：`docs/01` §12.1 · `docs/04` §1.4 · `docs/05` §2.2 与领导视图 IA、滚动契约、`verify:visual` 守卫对齐。
+- **驾驶舱领导视图（TASK-CK-401～409）**：`mainCockpit` + `scrollBody` 单滚动契约；需关注 → 执行摘要 → KPI → 任务列表 → 项目健康 → 部门完成率 → 报表置底；文档 SSOT（`docs/01` §12 · `docs/04` · `docs/05`）。
+- **驾驶舱首屏 IA 去重**：执行摘要合并周趋势（本周完成 / 环比 / 下周到期 / 需关注任务数）；KPI 四卡专注项目健康（总数 / 进行中 / 风险 / 延期）。
+- **驾驶舱 AI 报表层级（TASK-CK-408）**：周报主 CTA；月报默认、AI 评估 text 次要；报告区置底、可折叠 teaser；`verify:visual` 守卫。
+- **驾驶舱部门完成率（TASK-CK-406）**：紧凑行；列表限高可滚动；`resolveDeptDoneCount` 兼容旧 IPC。
+- **驾驶舱项目健康（TASK-CK-405）**：紧凑卡片列表（状态 pill + 进度/元数据同行）；`verify:visual` 守卫。
+- **视觉抛光 II（TASK-VP-404～407）**：聊天气泡/composer 岛面；顶栏窄屏平铺；日历 FC 令牌映射；Tab 轻过渡；`ViewState` 统一空态；`docs/04` §1 同步。
 
 ### Fixed
-- **驾驶舱滚动（续）**：`.root` 增加 `overflow:hidden`，`scrollBody` 改为 `flex:1 1 0`，避免内容撑破视口却无滚动条。
-- **部门完成率 `undefined`**：`resolveDeptDoneCount` 兼容旧 IPC 无 `doneCount`；执行摘要不再强依赖 `weeklyTrend` 字段。
-- **顶栏垂直对齐**：群切换器与全局搜索外层锁 32px（修复 Ant `controlHeight:40` 导致灰底贴顶）；搜索灰底移至 selector。
-- **驾驶舱滚动（TASK-CK-401）**：`mainCockpit` 单滚动契约（对齐 `mainChat`）；移除 `.root { height:100% }` 双滚动裁切；`verify:visual` 守卫。
+- **驾驶舱滚动**：`.root overflow:hidden` · `scrollBody flex:1 1 0`；修复底部裁切无滚动条（TASK-CK-401）。
+- **部门完成率 `undefined`**：`resolveDeptDoneCount` 反推完成数；执行摘要不再强依赖 `weeklyTrend`。
+- **顶栏垂直对齐**：群切换器与全局搜索外层锁 32px；搜索灰底移至 selector。
 
-### Changed
-- **视觉抛光 II（TASK-VP-407）**：底栏 Tab 移除弹跳 keyframes，改为 `--lanpm-motion-fast` 轻过渡；`ViewState` 统一空/加载态图标环；Files 预览与表格空态对齐；`verify:visual` 守卫；`docs/04` §1 同步。
-- **视觉抛光 II（TASK-VP-406）**：日历 FullCalendar `--fc-*` 全量映射 `--lanpm-*`；宿主 `--lanpm-shadow-island`；移除 `.light/.dark` 双份样式；`verify:visual` 守卫 FC 令牌。
-- **视觉抛光 II（TASK-VP-405）**：顶栏发现/建群/解散窄屏仍平铺（移除「更多」overflow）；次要操作 `barActionSecondary` 弱 hover；`docs/04` §1 同步。
-- **视觉抛光 II（TASK-VP-404）**：聊天气泡己方浅底深字（mention/taskRef 卡片化）；composer 工具条+输入+发送同一岛面（`--lanpm-radius-lg`）；`verify:visual` 防实心蓝底回退；`docs/04` §1 同步。
+### Release
+- `v1.32.0` — cockpit leader view (CK-401–409) + visual polish II tail (VP-404–407)
 
 ## [1.31.0] - 2026-07-14
 
