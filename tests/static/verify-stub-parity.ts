@@ -9,15 +9,20 @@ import { projectRoot } from '../projectRoot.ts'
 
 const root = projectRoot
 
+function normalizeLines(source: string): string {
+  return source.replace(/\r\n/g, '\n')
+}
+
 function extractApiShape(
   source: string,
   startMarker: string,
   nsIndent: number,
   methodIndent: number
 ): Record<string, string[]> {
-  const start = source.indexOf(startMarker)
+  const normalized = normalizeLines(source)
+  const start = normalized.indexOf(startMarker)
   assert.ok(start >= 0, `marker not found: ${startMarker}`)
-  const slice = source.slice(start)
+  const slice = normalized.slice(start)
   const top: Record<string, string[]> = { _root: [] }
   const nsRe = new RegExp(`^\\s{${nsIndent}}(\\w+):\\s*\\{`, 'gm')
   const methodRe = new RegExp(`^\\s{${methodIndent}}(\\w+):`, 'gm')

@@ -3,6 +3,7 @@
  * Run: npm run verify:m7
  */
 import { spawnSync } from 'node:child_process'
+import { projectRoot } from '../projectRoot.ts'
 
 const steps: { name: string; cmd: string; env?: Record<string, string> }[] = [
   { name: 'typecheck', cmd: 'npm run typecheck' },
@@ -34,7 +35,7 @@ function runStep(name: string, cmd: string, env?: Record<string, string>): void 
     shell: true,
     stdio: 'inherit',
     env: { ...process.env, ...env },
-    cwd: process.cwd()
+    cwd: projectRoot
   })
   if (result.status !== 0) {
     throw new Error(`step failed: ${name}`)

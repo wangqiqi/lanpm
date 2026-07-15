@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [1.33.2] - 2026-07-15
+
+### Fixed
+- **Windows 验证串联**：`tests/spawnNpm.ts` 统一 `npm run` 跨平台调用（`win32` 启用 `shell`），修复 `verify:p0` / `verify:shared` / `verify:coverage` 在 Windows 上 `ENOENT` 假失败。
+- **stub-parity CRLF**：`verify-stub-parity` 归一化 `\r\n`，修复 Windows 检出下 marker 匹配失败。
+
+### Release
+- `v1.33.2` — Windows verify:m7 regression green
+
 ## [1.33.1] - 2026-07-15
 
 ### Added

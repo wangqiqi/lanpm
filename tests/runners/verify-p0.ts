@@ -2,8 +2,7 @@
  * P0 一致性守卫串联。
  * Run: npm run verify:p0
  */
-import { spawnSync } from 'node:child_process'
-import { projectRoot } from '../projectRoot.ts'
+import { spawnNpmRun } from '../spawnNpm.ts'
 
 const steps = [
   'verify:ipc-contract',
@@ -21,7 +20,7 @@ const steps = [
 
 for (const step of steps) {
   console.log(`\n=== verify:p0 / ${step} ===`)
-  const result = spawnSync('npm', ['run', step], { cwd: projectRoot, stdio: 'inherit', shell: false })
+  const result = spawnNpmRun(step)
   if (result.status !== 0) throw new Error(`verify:p0 failed at ${step}`)
 }
 
