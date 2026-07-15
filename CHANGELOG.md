@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **onekey 交互菜单精简（`onekey_run.sh` / `.bat` / `.ps1`）**：主菜单保留日常开发 + `build`/`install`/`clean`/`pack`；`check`/`verify`/`rebuild`/`preview`/`clean deep` 收入「更多维护」子菜单；`check` 合并为一项并询问是否跑 `verify:m0`；减轻 `cls` 清屏残影；`bat` 提示去掉 `[]` 并修剪选项空格。
+
 ## [1.33.2] - 2026-07-15
 
 ### Fixed

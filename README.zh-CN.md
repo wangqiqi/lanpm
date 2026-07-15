@@ -199,7 +199,7 @@ npm run verify:platform-matrix  # 跨平台发版矩阵静态验收
 | 视觉一致性门禁 | `npm run verify:visual`（见 [06_ROADMAP](./docs/06_ROADMAP.md) §4） |
 | 功能验收脚本 | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
 | 跨平台安装包 | `dist:win` / `dist:mac` / `dist:linux`（可加 `:x64` / `:arm64`）；矩阵见 [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) |
-| 一键脚本菜单 | `./onekey_run.sh` → start / stop / status / build / check … |
+| 一键脚本菜单 | `./onekey_run.sh` 交互菜单：主屏 `start`/`stop`/`build`/`pack` 等；`11` 进入「更多维护」（`check`/`verify`/`rebuild`…）；CLI 子命令不变 |
 
 ### 浏览器 Stub 与 Electron 差异
 
