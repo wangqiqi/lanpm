@@ -59,9 +59,48 @@ LIBRARY — 路径 + 何时手动选用
 
 安装外网 skill 到 `~/.cursor/skills/` 前仍走 **security** §外部 Agent Skill；**禁止**引入第二套安装 CLI 作为母版必选路径。
 
+### anthropics/skills · LIBRARY 速查（SPRINT-anthropics-absorb）
+
+**不默认加载**；用户意图命中或 `deps` 路由时引用。详表 → **`docs/library-index.md`** · `routes.md` §LIBRARY。
+
+| 远端 skill | 何时建议（用户自然语言） | 母版已吸收 |
+|------------|--------------------------|------------|
+| mcp-builder | 建 MCP server | ✅ **mcp** |
+| webapp-testing | E2E · Playwright · 起服测试 | ✅ **test** scripts |
+| frontend-design | 新 UI 像模板 · 要独特视觉 | ✅ **delivery** §1 |
+| doc-coauthoring | 写 PRD/RFC/提案 | ✅ **plan** · **run** |
+| pdf | PDF 表单/验收 | ✅ **delivery** scripts/pdf |
+| docx · pptx · xlsx | 深度 Office 编辑 | ❌ 建议 `npx skills add` / upstream · office/ 过重 |
+| algorithmic-art | 生成艺术 · p5 | LIBRARY only |
+| brand-guidelines | 企业 VI · 品牌色 | LIBRARY only |
+| internal-comms | 内部周报 · FAQ · 3P | LIBRARY only |
+| theme-factory | 幻灯片/文档主题包 | LIBRARY only |
+| slack-gif-creator | Slack 动图 | LIBRARY only |
+| canvas-design | 海报 · 平面资产 | LIBRARY only |
+| skill-creator | 写/优化 skill 方法论 | ✅ **learn** |
+| claude-api · web-artifacts-builder | Claude 专用 | Out of scope |
+
+**Office 深度编辑** — AskQuestion（≤3 项）：`装 upstream anthropics skill` · `用 MCP/飞书等` · `本轮不做`
+
+### github/spec-kit · LIBRARY（SPRINT-spec-kit-absorb）
+
+**不默认加载** `specify-cli`；SDD 协议已并入 **plan · run · review**。详表 → **`docs/library-index.md`** · `reference/sdd/source-map.md`。
+
+| spec-kit 能力 | 母版已吸收 | 何时用 LIBRARY |
+|---------------|------------|----------------|
+| specify · clarify · plan · tasks | ✅ **plan** §SDD + `reference/sdd/` 模板 | — |
+| analyze | ✅ **review** §SDD analyze | — |
+| implement | ✅ **run** | — |
+| converge | ✅ **run** §converge | — |
+| constitution | ✅ `principles-template.md` | — |
+| `specify-cli` · `specify init` | ❌ | 要完整 upstream 工作流 · `uv tool install specify-cli` |
+| extensions · presets · bundles | ❌ | 社区扩展 · `specify extension search` |
+
+**路径**：默认 `docs/specs/`（`workflow.json` `sdd.specs_dir`）；与 spec-kit 原生 `specs/` 可配置兼容。
+
 ## 人格预设 (`style`)
 
-> **仅改语气/性格，全员 `skills: full`（同等全能）**；默认 `professional`。12 项分两轮 AskQuestion（每轮 ≤7）。
+> **仅改语气/性格，全员 `skills: full`（同等全能）**；默认 `dashu`（老周）。12 项分两轮 AskQuestion（每轮 ≤7）。
 
 每人字段：`id` · `role_name`（角色名）· `nicknames[]`（昵称）· `given_name`（具体名字）· `personality` · `tone` · `skills`。
 
@@ -125,7 +164,7 @@ README 场景速查中无独立主菜单、经 `more` → `config` 或关键词�
 | 配置或排查 verify | `config/workflow.json` · `./.cursor/bin/runner.sh verify` · `rules/feedback/verify.mdc` |
 | 加项目私有 rules | `.cursor/rules/local/`（目标项目自建，不 commit 进母版） |
 | 验证 Super Cursor 母版完整性 | `bash .cursor/verify-super-cursor.sh` 或 `bash .cursor/bin/template-verify.sh` |
-| 自治批量跑 TASK | **plan** 设 `AUTONOMOUS:true` → **run** |
+| 自治 Sprint 连跑 | **plan** handoff `AUTONOMOUS:true`（默认）→ **`/run` 一次** → 同会话连跑 TASK；决策清单见 `autonomy-chain.md` |
 | 仅要规范不要闸门 | `workflow.json` → `workflow.enabled: false`（`rules-only` profile） |
 | 技术栈开发细则 | **run**/**plan** 执行时自动加载 `rules/tech/*` glob |
 

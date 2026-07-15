@@ -92,6 +92,9 @@ check "$CUR/rules/execution/vibe.mdc"
 check "$CUR/rules/execution/scope.mdc"
 check "$CUR/rules/execution/testing.mdc"
 check "$CUR/rules/communication/agent-discipline.mdc"
+check "$CUR/rules/communication/super-cursor-persona.mdc"
+check "$CUR/rules/communication/cursor-standalone.mdc"
+check "$CUR/docs/library-index.md"
 check "$CUR/config/roles.json"
 check "$CUR/skills/debug/SKILL.md"
 check "$CUR/skills/test/SKILL.md"
@@ -178,11 +181,11 @@ echo "--- changelog order (newest_first) ---"
 CL="$ROOT/CHANGELOG.md"
 if [[ ! -f "$CL" ]]; then
   echo "OK  no root CHANGELOG.md (skip order check)"
-elif ! command -v python3 >/dev/null 2>&1; then
-  echo "FAIL python3 required for CHANGELOG order check"
+elif ! py="$(sc_python 2>/dev/null)"; then
+  echo "FAIL python required for CHANGELOG order check"
   FAIL=$((FAIL+1))
 else
-  if python3 - "$CL" <<'PY'
+  if "$py" - "$CL" <<'PY'
 import re, sys
 from pathlib import Path
 text = Path(sys.argv[1]).read_text(encoding="utf-8")
@@ -210,6 +213,21 @@ PY
   else
     FAIL=$((FAIL+1))
   fi
+fi
+
+echo "--- standalone: no upstream URL in skills ---"
+# skill 正文禁止 github.com 作 SSOT（library-index / standalone-map 除外）
+violators=""
+while IFS= read -r f; do
+  [[ "$f" == *"standalone-map.md" ]] && continue
+  violators="${violators}${f}"$'\n'
+done < <(grep -rl 'https://github.com' "$CUR/skills" 2>/dev/null || true)
+if [[ -n "$(echo "$violators" | sed '/^$/d')" ]]; then
+  echo "FAIL skills contain github.com URL (use docs/library-index.md):"
+  echo "$violators" | sed '/^$/d'
+  FAIL=$((FAIL+1))
+else
+  echo "OK  skills no upstream github URLs"
 fi
 
 echo "---"

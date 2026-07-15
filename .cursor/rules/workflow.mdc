@@ -16,7 +16,7 @@ CLI：`.cursor/bin/runner.sh` — `gate-check` · `task-verify` · `verify` · `
 - 每任务：`task-verify` 通过才 ✅/commit
 - Sprint/打版前：`verify`
 - 打版：`release.mode`（`patch-per-task` | `tag-per-commit`；见 `rules/feedback/release.mdc`）
-- `AUTONOMOUS:true` 直接执行；高风险删除须确认；`⚠️` → `/plan`
+- `AUTONOMOUS:true` → **一次 `/run` Sprint 连跑**（详 `plan/reference/autonomy-chain.md`）；仅决策打断 · `⚠️` → `/plan`
 
 ## 规模门禁（plan≥5）
 
@@ -37,6 +37,6 @@ CLI：`.cursor/bin/runner.sh` — `gate-check` · `task-verify` · `verify` · `
 
 ## Growth
 
-项目特化与产出统一 `.cursorGrowth/`（plan·archive·learn·rules）· 禁止写入 `.cursor/` · 细则 **learn** skill
+项目特化与产出统一 `.cursorGrowth/`（坐标见 `workflow.json`）· 禁止写入目标项目的 `.cursor/` · 细则 **learn** skill · 引用纪律 **cursor-standalone**
 
-**`.cursor/` 只读**：见 `core.mdc`「.cursor 不可变」— 非用户明确要求，不得改 `.cursor/**`（含 `config/`）。
+**`.cursor/` 只读（仅目标项目）**：见 `core.mdc`「安装后只读」— 母版仓库可自由演进。

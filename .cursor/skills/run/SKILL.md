@@ -14,6 +14,18 @@ disable-model-invocation: true
 ./.cursor/bin/runner.sh gate-check   # BLOCK → /plan
 ```
 
+## Sprint 连跑（`AUTONOMOUS:true`）
+
+plan handoff 默认自治时，用户 **只说一次 `/run`**；Agent **同会话**按 **执行顺序**做完 Sprint P0 TASK（verify+commit），**仅决策点**打断。
+
+| 必须 | 禁止 |
+|------|------|
+| 每 TASK 收尾后 **立即**续下一 `ACTIVE`（`next-task` / 读 plan） | TASK ✅ 后停住等用户再说 `/run` |
+| 决策清单命中 → AskQuestion 或 `⚠️` → `/plan` | 静默扩 scope · 跳过 verify |
+| 人格/行为 → **super-cursor-persona** · `role.default`（dashu） | 因语气跳过高风险确认 |
+
+触点矩阵 → **plan** `reference/autonomy-chain.md` · `workflow.json` → `autonomy.interrupt_on`。
+
 ## 单轮（含必做 commit）
 
 **禁止**在任务 ✅ 后仅更新 plan/CHANGELOG 却留给用户手动 commit。单轮顺序固定：
@@ -115,6 +127,46 @@ bash .cursor/bin/cursor-coherence.sh   # README ↔ 磁盘 skills/agents 一致
 **顺序**（插入单轮流程）：`task-verify` ✅ → **closeout review（若触发）** → 审计复核 → CHANGELOG → commit。
 
 输出：Blocker/High 须修或向用户说明；仅 Medium/Low 可在回复中列出，用户确认后再 commit。
+
+### Reader Testing（DOC / 协作文档 · 吸收自 doc-coauthoring）
+
+| 触发 | 动作 |
+|------|------|
+| `DOC-*` 或 plan 三阶段协作文档 **阶段 3** | 生成 5–10 个「读者会发现的问题」 |
+| 验证 | 委派 **review** agent（只读）或新会话：仅给文档全文 + 单题，检查答案与歧义 |
+| 失败 | 回到 plan 阶段 2 修订对应节；勿标 DOC ✅ |
+
+用户说「不用测读者」→ 记录跳过，仍须用户最终通读确认。
+
+## 文档与 Office 触发表（无感路由）
+
+用户自然语言命中下表时，**自动**选用右侧能力（**勿**要求用户说 skill 名）：
+
+| 用户意图 | Agent 动作 |
+|----------|------------|
+| 写 PRD/RFC/设计 doc | **plan** §协作文档 · AskQuestion 结构化 vs 自由 |
+| E2E / Playwright / 起 dev server | **test** §E2E · `with_server.py` |
+| PDF 表单/验收 | **delivery** §PDF 工具 |
+| 编辑 docx/pptx/xlsx 深度 | AskQuestion：**装 upstream** anthropics skill / 用 MCP / 跳过 |
+| 新 UI 交付走查 | **delivery** §1 反模板自检 |
+| MCP 建服 | **mcp** §Eval |
+| 新功能 0→1 / 写 spec / SDD | **plan** §SDD · Greenfield 模式 |
+| 实现后仍有差距 | **run** §converge |
+
+Ambiguous 时 AskQuestion ≤4 项，禁止开放式「你想用哪个 skill」。
+
+### Converge（SDD · 吸收自 github/spec-kit）
+
+**触发**：Greenfield/Brownfield feature 一批 TASK ✅ 后 · 或用户说「对照 spec 看还差什么」。
+
+| 步 | 动作 |
+|----|------|
+| 1 | 读 `{specs_dir}/<id>/spec.md` + 当前实现（grep/Read） |
+| 2 | 列 **未覆盖** FR/用户故事/验收场景 |
+| 3 | 差距 → 新 `TASK-*` 写入 plan · 或 **下一 Sprint 候选** |
+| 4 | 无差距 → 可选 **review** §SDD analyze 终检 |
+
+勿 silent merge：Blocker 级差距须用户确认再标 feature 完成。
 
 ## plan 维护（单任务 · 不提交）
 
