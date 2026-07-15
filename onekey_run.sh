@@ -476,9 +476,39 @@ cmd_clean() {
   fi
 }
 
-show_menu() {
+menu_clear() {
+  # 集成终端 full clear 易残留叠影；用换行刷新代替
+  printf '\n%.0s' {1..2}
+}
+
+menu_pause() {
+  echo ""
+  read -r -p "按 Enter 继续 …" _
+}
+
+menu_check_prompt() {
+  local run_m0=""
+  read -r -p "是否运行 verify:m0? (Y/n): " run_m0
+  case "${run_m0,,}" in
+    n|no) cmd_check quick || true ;;
+    *) cmd_check || true ;;
+  esac
+}
+
+menu_clean_deep_confirm() {
+  warn "将删除 node_modules 与 Electron 工具链缓存（可重建）"
+  local confirm=""
+  read -r -p "确认 clean deep? 输入 yes: " confirm
+  if [[ "$confirm" == "yes" ]]; then
+    cmd_clean deep || true
+  else
+    info "已取消"
+  fi
+}
+
+show_menu_header() {
   refresh_version
-  clear 2>/dev/null || true
+  menu_clear
   echo ""
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   printf "${CYAN}  LanPM 一键运维${NC}  ${GREEN}v%s${NC}\n" "$VERSION"
@@ -490,6 +520,10 @@ show_menu() {
   fi
   menu_status_brief 2>/dev/null || true
   echo ""
+}
+
+show_menu() {
+  show_menu_header
   echo "  1) start      启动 Electron 开发"
   echo "  2) web        仅渲染进程 (浏览器预览)"
   echo "  3) restart    重启开发服务"
@@ -497,23 +531,49 @@ show_menu() {
   echo "  5) status     查看状态"
   echo "  6) logs       跟踪日志"
   echo "  7) build      生产构建"
-  echo "  8) preview    预览构建 (前台)"
-  echo "  9) rebuild    重编 native 依赖"
-  echo " 10) check       typecheck + lint + verify:m0"
-  echo " 11) check quick 跳过 verify:m0"
-  echo " 12) verify      全量 verify:m7"
-  echo " 13) install     npm install"
-  echo " 14) clean       清理 out/dist/coverage/.lanpm 可重建项"
-  echo " 15) clean deep  含 node_modules + electron 缓存"
-  echo " 16) pack        安装包 (electron-builder)"
+  echo "  8) install    npm install"
+  echo "  9) clean      清理 out/dist/coverage/.lanpm 可重建项"
+  echo " 10) pack       安装包 (electron-builder)"
+  echo " 11) 更多维护   check/verify/rebuild/…"
   echo "  0) exit"
   echo ""
+}
+
+show_more_menu() {
+  show_menu_header
+  echo -e "${YELLOW}  ── 更多维护 ──${NC}"
+  echo ""
+  echo "  1) check       typecheck + lint [+ verify:m0]"
+  echo "  2) verify      全量 verify:m7"
+  echo "  3) rebuild     重编 native 依赖"
+  echo "  4) clean deep  含 node_modules + electron 缓存"
+  echo "  5) preview     预览构建 (前台)"
+  echo "  0) 返回主菜单"
+  echo ""
+}
+
+menu_more_loop() {
+  while true; do
+    show_more_menu
+    read -r -p "请选择 (0-5): " choice
+    echo ""
+    case "$choice" in
+      1) menu_check_prompt ;;
+      2) cmd_verify || true ;;
+      3) cmd_rebuild || true ;;
+      4) menu_clean_deep_confirm ;;
+      5) cmd_preview || true ;;
+      0|b|B|back) return 0 ;;
+      *) warn "无效选项: $choice" ;;
+    esac
+    menu_pause
+  done
 }
 
 menu_loop() {
   while true; do
     show_menu
-    read -r -p "请选择 [0-16]: " choice
+    read -r -p "请选择 (0-11): " choice
     echo ""
     case "$choice" in
       1)  start_dev electron || true ;;
@@ -521,22 +581,17 @@ menu_loop() {
       3)  cmd_restart || true ;;
       4)  cmd_stop || true ;;
       5)  cmd_status ;;
-      6)  read -r -p "日志行数 [50]: " n; cmd_logs "${n:-50}" ;;
+      6)  read -r -p "日志行数 (默认50): " n; cmd_logs "${n:-50}" ;;
       7)  cmd_build ;;
-      8)  cmd_preview ;;
-      9)  cmd_rebuild ;;
-      10) cmd_check ;;
-      11) cmd_check quick ;;
-      12) cmd_verify ;;
-      13) cmd_install ;;
-      14) cmd_clean ;;
-      15) cmd_clean deep ;;
-      16) cmd_pack ;;
+      8)  cmd_install ;;
+      9)  cmd_clean ;;
+      10) cmd_pack ;;
+      11) menu_more_loop ;;
       0|q|Q|exit) ok "再见"; exit 0 ;;
       *) warn "无效选项: $choice" ;;
     esac
     echo ""
-    read -r -p "按 Enter 继续 …" _
+    menu_pause
   done
 }
 

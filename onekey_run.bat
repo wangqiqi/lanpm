@@ -344,12 +344,16 @@ if not exist "%ROOT%\out\main" (
 echo [lanpm] packing - electron-builder ...
 call npx electron-builder --config electron-builder.yml
 exit /b %ERRORLEVEL%
-:menu
+:menu_clear
+echo.
+echo.
+exit /b 0
+:menu_header
 rem 每次进菜单重读版本，避免长驻菜单卡在旧 package.json
 set "VER="
 for /f "delims=" %%v in ('node -p "require('./package.json').version" 2^>nul') do set "VER=%%v"
 if not defined VER set "VER=?"
-cls
+call :menu_clear
 echo.
 echo ========================================================
 echo   LanPM 一键运维  v%VER%  [CMD]
@@ -358,42 +362,74 @@ echo.
 echo [lanpm] 目录: %ROOT%
 call :cmd_menu_brief
 echo.
+exit /b 0
+:menu_check_prompt
+set /p "runm0=是否运行 verify:m0? (Y/n): "
+if /i "!runm0!"=="n" (call :cmd_check quick) else if /i "!runm0!"=="no" (call :cmd_check quick) else (call :cmd_check)
+exit /b 0
+:menu_clean_deep_confirm
+echo [lanpm] 警告: 将删除 node_modules 与 electron 缓存
+set /p "deepconfirm=确认 clean deep? 输入 yes: "
+if /i not "!deepconfirm!"=="yes" (
+  echo [lanpm] 已取消
+  exit /b 0
+)
+call :cmd_clean deep
+exit /b 0
+:menu_more
+call :menu_header
+echo   -- 更多维护 --
+echo.
+call :print "  1) check       typecheck + lint [+ verify:m0]"
+call :print "  2) verify      全量 verify:m7"
+call :print "  3) rebuild     重编 native 依赖"
+call :print "  4) clean deep  含 node_modules + electron 缓存"
+call :print "  5) preview     预览构建 - 前台"
+call :print "  0) 返回主菜单"
+echo.
+set /p "morechoice=请选择 (0-5): "
+if defined morechoice set "morechoice=!morechoice: =!"
+echo.
+if "!morechoice!"=="1" call :menu_check_prompt & goto :menu_more_pause
+if "!morechoice!"=="2" call :cmd_verify & goto :menu_more_pause
+if "!morechoice!"=="3" call :cmd_rebuild & goto :menu_more_pause
+if "!morechoice!"=="4" call :menu_clean_deep_confirm & goto :menu_more_pause
+if "!morechoice!"=="5" call :cmd_preview & goto :menu_more_pause
+if "!morechoice!"=="0" goto :menu
+echo [lanpm] 无效选项: !morechoice!
+:menu_more_pause
+echo.
+pause
+goto :menu_more
+:menu
+call :menu_header
 call :print "  1) start      启动 Electron 开发"
-call :print "  2) web        仅渲染进程 (浏览器预览)"
+call :print "  2) web        仅渲染进程 - 浏览器预览"
 call :print "  3) restart    重启开发服务"
 call :print "  4) stop       停止开发服务"
 call :print "  5) status     查看状态"
 call :print "  6) logs       跟踪日志"
 call :print "  7) build      生产构建"
-call :print "  8) preview    预览构建 (前台)"
-call :print "  9) rebuild    重编 native 依赖"
-call :print " 10) check       typecheck + lint + verify:m0"
-call :print " 11) check quick 跳过 verify:m0"
-call :print " 12) verify      全量 verify:m7"
-call :print " 13) install     npm install"
-call :print " 14) clean       清理 out/dist/coverage/.lanpm 可重建项"
-call :print " 15) clean deep  含 node_modules + electron 缓存"
-call :print " 16) pack        安装包 (electron-builder)"
+call :print "  8) install    npm install"
+call :print "  9) clean      清理 out/dist/coverage/.lanpm 可重建项"
+call :print " 10) pack       安装包 - electron-builder"
+call :print " 11) 更多维护   check/verify/rebuild/..."
 call :print "  0) exit"
 echo.
-set /p "choice=请选择 [0-16]: "
+set /p "choice=请选择 (0-11): "
+if defined choice set "choice=!choice: =!"
 echo.
+if "%choice%"=="11" goto :menu_more
+if "%choice%"=="10" call :cmd_pack & goto :menu_pause
 if "%choice%"=="1"  call :cmd_start & goto :menu_pause
 if "%choice%"=="2"  call :cmd_web & goto :menu_pause
 if "%choice%"=="3"  call :cmd_restart & goto :menu_pause
 if "%choice%"=="4"  call :cmd_stop & goto :menu_pause
 if "%choice%"=="5"  call :cmd_status & goto :menu_pause
-if "%choice%"=="6"  set /p "loglines=日志行数 [50]: " & if not defined loglines set "loglines=50" & call :cmd_logs !loglines! & goto :menu_pause
+if "%choice%"=="6"  set /p "loglines=日志行数 (默认50): " & if not defined loglines set "loglines=50" & call :cmd_logs !loglines! & goto :menu_pause
 if "%choice%"=="7"  call :cmd_build & goto :menu_pause
-if "%choice%"=="8"  call :cmd_preview & goto :menu_pause
-if "%choice%"=="9"  call :cmd_rebuild & goto :menu_pause
-if "%choice%"=="10" call :cmd_check & goto :menu_pause
-if "%choice%"=="11" call :cmd_check quick & goto :menu_pause
-if "%choice%"=="12" call :cmd_verify & goto :menu_pause
-if "%choice%"=="13" call :cmd_install & goto :menu_pause
-if "%choice%"=="14" call :cmd_clean & goto :menu_pause
-if "%choice%"=="15" call :cmd_clean deep & goto :menu_pause
-if "%choice%"=="16" call :cmd_pack & goto :menu_pause
+if "%choice%"=="8"  call :cmd_install & goto :menu_pause
+if "%choice%"=="9"  call :cmd_clean & goto :menu_pause
 if "%choice%"=="0"  echo [lanpm] 再见 & exit /b 0
 echo [lanpm] 无效选项: %choice%
 :menu_pause
