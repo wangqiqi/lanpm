@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.33.0] - 2026-07-15
+
 ### Added
 - **驾驶舱部门手风琴（TASK-CK-414）**：部门完成率默认摘要（整体% · 最差部门进度条），展开行列表；`deptList` 明确 `overflow:visible` / `max-height:none`，随 `scrollBody` 滚、不抢第二竖滚条。
 - **驾驶舱列表手风琴（TASK-CK-413）**：需关注任务默认摘要（条数 + Top 2），展开完整列表与操作；项目进度默认最差项目进度条，展开卡片列表；`verify:visual` 守卫默认收起。
@@ -14,7 +16,11 @@
 - **驾驶舱领导摘要去重（TASK-CK-411）**：合并执行摘要与 KPI 四卡为**单一**领导摘要岛（八指标两排紧凑）；删除独立 `kpiGrid` 双岛；`verify:visual` 禁双岛回归；`docs/01` §12.1 · `docs/04` · `docs/05` 对齐。
 
 ### Fixed
+- **驾驶舱展开裁切（hotfix）**：`scrollBody` 子项 `flex-shrink: 0`，修复手风琴展开后列表被 flex 压缩裁切、主区无纵向滚动条的问题。
 - **驾驶舱主滚动（TASK-CK-410）**：`mainCockpit flex:1 1 0` 加固高度链；移除 `deptList` 默认嵌套 `overflow-y:auto`，部门列表随 `scrollBody` 统一纵向滚动；`verify:visual` 守卫。
+
+### Release
+- `v1.33.0` — cockpit density accordion (CK-410–415): single leadership summary island · default-collapsed list accordions · scrollBody scroll contract
 
 ## [1.32.0] - 2026-07-15
 
