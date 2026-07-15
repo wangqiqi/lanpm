@@ -162,6 +162,7 @@ const enUS = {
   'cockpit.deptCompletion': 'Department completion',
   'cockpit.deptUnassigned': 'Unassigned',
   'cockpit.deptPanelCount': '{count} departments',
+  'cockpit.deptSummary': 'Overall {percent}% · Worst {name} ({worstPercent}%)',
   'cockpit.deptDoneRatio': '{done}/{total} done',
   'cockpit.deptZeroTasks': 'No tasks',
   'cockpit.noDeptNoTasks': 'No tasks yet — department completion cannot be calculated',

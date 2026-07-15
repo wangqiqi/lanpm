@@ -405,9 +405,29 @@ assert.match(
   /resolveDeptDoneCount/,
   'Cockpit must use dept doneCount fallback (CK-406)'
 )
+assert.match(
+  cockpitSrc,
+  /deptCompletion[\s\S]*?defaultCollapsed/,
+  'Department panel must default collapsed (CK-414)'
+)
+assert.match(
+  cockpitSrc,
+  /deptSummary|worstDepartment/,
+  'Department summary must show overall/worst dept (CK-414)'
+)
 assert.ok(
   !/\.deptList\b[^}]*overflow-y:\s*auto/s.test(cockpitCss),
   'Dept list must not nest vertical scroll by default (CK-410)'
+)
+assert.match(
+  cockpitCss,
+  /\.deptList\s*\{[^}]*overflow:\s*visible/s,
+  'Dept list must overflow:visible so scrollBody owns vertical scroll (CK-414)'
+)
+assert.match(
+  cockpitCss,
+  /\.deptList\s*\{[^}]*max-height:\s*none/s,
+  'Dept list must not cap height when expanded (CK-414)'
 )
 assert.match(
   cockpitCss,

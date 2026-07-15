@@ -210,6 +210,25 @@ export default function CockpitView(): React.ReactElement {
   const attentionPreview = attentionTasks.slice(0, 2)
   const projects = dashboard?.projects ?? []
   const worstProject = projects[0] ?? null
+  const departments = dashboard?.departments ?? []
+  const worstDepartment = useMemo(() => {
+    const withTasks = departments.filter((d) => d.taskCount > 0)
+    if (withTasks.length === 0) {
+      return departments[0] ?? null
+    }
+    return withTasks.reduce((worst, d) =>
+      d.completionPercent < worst.completionPercent ? d : worst
+    )
+  }, [departments])
+  const overallDeptCompletion = useMemo(() => {
+    const total = departments.reduce((n, d) => n + d.taskCount, 0)
+    const done = departments.reduce((n, d) => n + resolveDeptDoneCount(d), 0)
+    return {
+      total,
+      done,
+      percent: total === 0 ? 0 : Math.round((done / total) * 100)
+    }
+  }, [departments])
 
   const cockpitTotalTasks = useMemo(
     () => dashboard?.projects.reduce((n, p) => n + p.totalTasks, 0) ?? 0,
@@ -582,21 +601,48 @@ export default function CockpitView(): React.ReactElement {
       <Panel
         title={t('cockpit.deptCompletion')}
         className={styles.section}
+        defaultCollapsed
         extra={
-          (dashboard?.departments.length ?? 0) > 0 ? (
+          departments.length > 0 ? (
             <Text type="secondary" className={styles.panelCount}>
-              {t('cockpit.deptPanelCount', { count: dashboard?.departments.length ?? 0 })}
+              {t('cockpit.deptPanelCount', { count: departments.length })}
             </Text>
           ) : null
         }
+        summary={
+          departments.length === 0 || !worstDepartment ? (
+            <Text type="secondary">
+              {cockpitTotalTasks === 0 ? t('cockpit.noDeptNoTasks') : t('cockpit.noDeptData')}
+            </Text>
+          ) : (
+            <div className={styles.accordionSummary}>
+              <Text className={styles.accordionSummaryLead}>
+                {t('cockpit.deptSummary', {
+                  percent: overallDeptCompletion.percent,
+                  name: resolveDeptDisplayName(worstDepartment.department, t),
+                  worstPercent: worstDepartment.completionPercent
+                })}
+              </Text>
+              <div className={styles.accordionSummaryMetrics}>
+                <Progress
+                  className={styles.deptProgress}
+                  percent={worstDepartment.completionPercent}
+                  size="small"
+                  showInfo={false}
+                />
+                <span className={styles.deptPct}>{worstDepartment.completionPercent}%</span>
+              </div>
+            </div>
+          )
+        }
       >
-        {(dashboard?.departments.length ?? 0) === 0 ? (
+        {departments.length === 0 ? (
           <Text type="secondary">
             {cockpitTotalTasks === 0 ? t('cockpit.noDeptNoTasks') : t('cockpit.noDeptData')}
           </Text>
         ) : (
           <div className={styles.deptList}>
-            {dashboard?.departments.map((d) => (
+            {departments.map((d) => (
               <div
                 key={d.department}
                 className={`${styles.deptRow} ${d.department === COCKPIT_UNASSIGNED_DEPT ? styles.deptRowUnassigned : ''}`}

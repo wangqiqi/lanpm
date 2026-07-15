@@ -160,6 +160,7 @@ const zhCN = {
   'cockpit.deptCompletion': '部门完成率',
   'cockpit.deptUnassigned': '未分配',
   'cockpit.deptPanelCount': '{count} 个部门',
+  'cockpit.deptSummary': '整体 {percent}% · 最差 {name}（{worstPercent}%）',
   'cockpit.deptDoneRatio': '完成 {done}/{total}',
   'cockpit.deptZeroTasks': '暂无任务',
   'cockpit.noDeptNoTasks': '暂无任务，无法统计部门完成率',

@@ -484,6 +484,9 @@
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+  /* CK-414: follow scrollBody; never nest a competing vertical scrollbar */
+  overflow: visible;
+  max-height: none;
 }
 
 .deptRow {

@@ -159,6 +159,7 @@ export type MessageKey =
   | 'cockpit.deptCompletion'
   | 'cockpit.deptUnassigned'
   | 'cockpit.deptPanelCount'
+  | 'cockpit.deptSummary'
   | 'cockpit.deptDoneRatio'
   | 'cockpit.deptZeroTasks'
   | 'cockpit.noDeptNoTasks'

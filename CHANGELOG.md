@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **驾驶舱部门手风琴（TASK-CK-414）**：部门完成率默认摘要（整体% · 最差部门进度条），展开行列表；`deptList` 明确 `overflow:visible` / `max-height:none`，随 `scrollBody` 滚、不抢第二竖滚条。
 - **驾驶舱列表手风琴（TASK-CK-413）**：需关注任务默认摘要（条数 + Top 2），展开完整列表与操作；项目进度默认最差项目进度条，展开卡片列表；`verify:visual` 守卫默认收起。
 - **驾驶舱 Panel 手风琴基元（TASK-CK-412）**：`defaultCollapsed` / 受控 `expanded`+`onExpandedChange`；`summary` 摘要槽 + 详情 `children`；`aria-expanded` 与 Enter/Space 键盘可达；`verify:visual` 守卫。
 
