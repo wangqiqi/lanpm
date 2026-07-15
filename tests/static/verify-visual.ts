@@ -324,13 +324,26 @@ assert.match(
   /\.projectHealthMetrics\b[^}]*:global\(\.ant-progress\)/s,
   'Project health progress bar must share row with meta (CK-405)'
 )
-assert.match(cockpitSrc, /deptList/, 'CockpitView must render scrollable dept list (CK-406)')
+assert.match(cockpitSrc, /deptList/, 'CockpitView must render dept list (CK-406)')
 assert.match(
   cockpitSrc,
   /resolveDeptDoneCount/,
   'Cockpit must use dept doneCount fallback (CK-406)'
 )
-assert.match(cockpitCss, /\.deptList\b[^}]*overflow-y:\s*auto/s, 'Dept list must scroll in sub-region (CK-406)')
+assert.ok(
+  !/\.deptList\b[^}]*overflow-y:\s*auto/s.test(cockpitCss),
+  'Dept list must not nest vertical scroll by default (CK-410)'
+)
+assert.match(
+  cockpitCss,
+  /\.scrollBody\s*\{[^}]*overflow-x:\s*clip/s,
+  'Cockpit scrollBody must clip horizontal overflow (CK-410)'
+)
+assert.match(
+  cockpitSrc,
+  /data-lanpm-view-scroll/,
+  'Cockpit scrollBody must be marked as view scroll container (CK-410)'
+)
 assert.match(
   cockpitSrc,
   /formatWeekOverWeekDelta/,
@@ -367,6 +380,11 @@ assert.match(
   'mainCockpit must not scroll (CK-401)'
 )
 const mainLayoutSrc = readFileSync(join(renderer, 'layout/MainLayout.tsx'), 'utf8')
+assert.match(
+  mainLayoutCss,
+  /\.mainCockpit\s*\{[^}]*flex:\s*1\s+1\s+0/s,
+  'mainCockpit must participate in flex height chain (CK-410)'
+)
 assert.match(mainLayoutSrc, /mainCockpit/, 'MainLayout must apply mainCockpit on cockpit route (CK-401)')
 
 const chatCss = readFileSync(join(renderer, 'features/chat/chat.module.css'), 'utf8')

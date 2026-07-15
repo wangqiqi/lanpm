@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **驾驶舱主滚动（TASK-CK-410）**：`mainCockpit flex:1 1 0` 加固高度链；移除 `deptList` 默认嵌套 `overflow-y:auto`，部门列表随 `scrollBody` 统一纵向滚动；`verify:visual` 守卫。
+
 ## [1.32.0] - 2026-07-15
 
 ### Added
