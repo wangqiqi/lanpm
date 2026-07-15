@@ -364,6 +364,32 @@ assert.match(cockpitCss, /\.panelSummary\b/, 'Cockpit Panel summary slot styles 
 assert.match(cockpitCss, /\.panelChevron\b/, 'Cockpit Panel chevron styles (CK-412)')
 assert.match(
   cockpitSrc,
+  /attentionTasksTitle[\s\S]*?defaultCollapsed/,
+  'Attention tasks panel must default collapsed (CK-413)'
+)
+assert.match(
+  cockpitSrc,
+  /projectProgress[\s\S]*?defaultCollapsed/,
+  'Project progress panel must default collapsed (CK-413)'
+)
+assert.match(
+  cockpitSrc,
+  /attentionPreview|slice\(0,\s*2\)/,
+  'Attention summary must preview Top 2 only (CK-413)'
+)
+assert.match(
+  cockpitSrc,
+  /projectWorstSummary|worstProject/,
+  'Project summary must show worst project (CK-413)'
+)
+assert.match(
+  cockpitSrc,
+  /expanded \? <div className=\{styles\.panelBody\}>/,
+  'Panel must hide detail children when aria-expanded=false (CK-413)'
+)
+assert.match(cockpitCss, /\.accordionSummary\b/, 'Accordion summary styles (CK-413)')
+assert.match(
+  cockpitSrc,
   /projectHealthList/,
   'CockpitView must render project health cards (CK-405)'
 )

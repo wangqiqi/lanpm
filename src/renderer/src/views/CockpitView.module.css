@@ -267,6 +267,56 @@
   line-height: var(--lanpm-line-caption);
 }
 
+.accordionSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accordionSummaryLead {
+  color: var(--lanpm-text);
+  font-size: var(--lanpm-font-caption);
+  line-height: var(--lanpm-line-caption);
+}
+
+.accordionSummaryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accordionSummaryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.accordionSummaryTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lanpm-text);
+}
+
+.accordionSummaryMetrics {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.accordionSummaryMetrics :global(.ant-progress) {
+  flex: 1 1 auto;
+  margin: 0;
+  min-width: 0;
+}
+
 .panelBody {
   padding: 14px 16px 16px;
 }

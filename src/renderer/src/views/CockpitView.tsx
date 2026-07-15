@@ -206,6 +206,11 @@ export default function CockpitView(): React.ReactElement {
     return list.filter((p) => p.status === 'delayed' || p.status === 'risk')
   }, [dashboard?.projects])
 
+  const attentionTasks = dashboard?.attentionTasks ?? []
+  const attentionPreview = attentionTasks.slice(0, 2)
+  const projects = dashboard?.projects ?? []
+  const worstProject = projects[0] ?? null
+
   const cockpitTotalTasks = useMemo(
     () => dashboard?.projects.reduce((n, p) => n + p.totalTasks, 0) ?? 0,
     [dashboard?.projects]
@@ -389,12 +394,46 @@ export default function CockpitView(): React.ReactElement {
         </Text>
       </section>
 
-      <Panel title={t('cockpit.attentionTasksTitle')} className={styles.section}>
-        {(dashboard?.attentionTasks.length ?? 0) === 0 ? (
+      <Panel
+        title={t('cockpit.attentionTasksTitle')}
+        className={styles.section}
+        defaultCollapsed
+        summary={
+          attentionTasks.length === 0 ? (
+            <Text type="secondary">{t('cockpit.attentionTasksEmpty')}</Text>
+          ) : (
+            <div className={styles.accordionSummary}>
+              <Text className={styles.accordionSummaryLead}>
+                {t('cockpit.attentionTasksSummary', { count: attentionTasks.length })}
+              </Text>
+              <ul className={styles.accordionSummaryList}>
+                {attentionPreview.map((item) => {
+                  const kindTone = item.kind === 'overdue' ? 'delayed' : 'risk'
+                  const kindLabel =
+                    item.kind === 'overdue'
+                      ? t('cockpit.attentionTaskOverdue')
+                      : t('cockpit.attentionTaskBehind')
+                  return (
+                    <li key={item.taskId} className={styles.accordionSummaryRow}>
+                      <Text className={styles.accordionSummaryTitle}>{item.title}</Text>
+                      <span
+                        className={`${styles.statusPill} ${styles[`statusPill_${kindTone}`]}`}
+                      >
+                        {kindLabel}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )
+        }
+      >
+        {attentionTasks.length === 0 ? (
           <Text type="secondary">{t('cockpit.attentionTasksEmpty')}</Text>
         ) : (
           <ul className={styles.attentionTaskList}>
-            {dashboard?.attentionTasks.map((item) => {
+            {attentionTasks.map((item) => {
               const kindTone = item.kind === 'overdue' ? 'delayed' : 'risk'
               const kindLabel =
                 item.kind === 'overdue'
@@ -436,19 +475,49 @@ export default function CockpitView(): React.ReactElement {
       <Panel
         title={t('cockpit.projectProgress')}
         className={styles.section}
+        defaultCollapsed
         extra={
-          (dashboard?.projects.length ?? 0) > 0 ? (
+          projects.length > 0 ? (
             <Text type="secondary" className={styles.panelCount}>
-              {t('cockpit.projectCount', { count: dashboard?.projects.length ?? 0 })}
+              {t('cockpit.projectCount', { count: projects.length })}
             </Text>
           ) : null
         }
+        summary={
+          !worstProject ? (
+            <Text type="secondary">{t('cockpit.noProjects')}</Text>
+          ) : (
+            <div className={styles.accordionSummary}>
+              <Text className={styles.accordionSummaryLead}>
+                {t('cockpit.projectWorstSummary', {
+                  name: resolveGroupDisplayNameById(worstProject.groupId, worstProject.name, t),
+                  percent: worstProject.progressPercent
+                })}
+              </Text>
+              <div className={styles.accordionSummaryMetrics}>
+                <Progress
+                  className={
+                    worstProject.status === 'delayed'
+                      ? styles.projectProgressDelayed
+                      : worstProject.status === 'risk'
+                        ? styles.projectProgressRisk
+                        : styles.projectProgress
+                  }
+                  percent={worstProject.progressPercent}
+                  size="small"
+                  showInfo={false}
+                />
+                <span className={styles.projectProgressPct}>{worstProject.progressPercent}%</span>
+              </div>
+            </div>
+          )
+        }
       >
-        {(dashboard?.projects.length ?? 0) === 0 ? (
+        {projects.length === 0 ? (
           <Text type="secondary">{t('cockpit.noProjects')}</Text>
         ) : (
           <div className={styles.projectHealthList}>
-            {dashboard?.projects.map((p) => {
+            {projects.map((p) => {
               const meta = statusTags[p.status] ?? statusTags.normal
               const progressClass =
                 p.status === 'delayed'
