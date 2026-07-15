@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- **驾驶舱 Panel 手风琴基元（TASK-CK-412）**：`defaultCollapsed` / 受控 `expanded`+`onExpandedChange`；`summary` 摘要槽 + 详情 `children`；`aria-expanded` 与 Enter/Space 键盘可达；`verify:visual` 守卫。
+
 ### Changed
 - **驾驶舱领导摘要去重（TASK-CK-411）**：合并执行摘要与 KPI 四卡为**单一**领导摘要岛（八指标两排紧凑）；删除独立 `kpiGrid` 双岛；`verify:visual` 禁双岛回归；`docs/01` §12.1 · `docs/04` · `docs/05` 对齐。
 

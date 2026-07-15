@@ -341,6 +341,29 @@ assert.equal(
 )
 assert.match(
   cockpitSrc,
+  /defaultCollapsed\??:/,
+  'Cockpit Panel must support defaultCollapsed (CK-412)'
+)
+assert.match(
+  cockpitSrc,
+  /onExpandedChange\??:/,
+  'Cockpit Panel must support controlled onExpandedChange (CK-412)'
+)
+assert.match(
+  cockpitSrc,
+  /summary\??:\s*React\.ReactNode/,
+  'Cockpit Panel must expose summary slot (CK-412)'
+)
+assert.match(
+  cockpitSrc,
+  /type="button"[\s\S]*?aria-expanded=\{expanded\}/,
+  'Cockpit Panel toggle must be a button with aria-expanded (Enter/Space via native button, CK-412)'
+)
+assert.match(cockpitCss, /\.panelToggle\b/, 'Cockpit Panel accordion toggle styles (CK-412)')
+assert.match(cockpitCss, /\.panelSummary\b/, 'Cockpit Panel summary slot styles (CK-412)')
+assert.match(cockpitCss, /\.panelChevron\b/, 'Cockpit Panel chevron styles (CK-412)')
+assert.match(
+  cockpitSrc,
   /projectHealthList/,
   'CockpitView must render project health cards (CK-405)'
 )

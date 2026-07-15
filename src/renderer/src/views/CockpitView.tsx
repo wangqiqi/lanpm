@@ -1,8 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Progress, Space, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { ArrowLeftOutlined, CopyOutlined, KeyOutlined, RobotOutlined } from '@ant-design/icons'
+import {
+  ArrowLeftOutlined,
+  CopyOutlined,
+  DownOutlined,
+  KeyOutlined,
+  RobotOutlined
+} from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
 import { resolveDeptDoneCount } from '@shared/cockpit/departmentStats'
@@ -36,21 +42,77 @@ function Panel({
   extra,
   className = '',
   titleClassName = '',
-  children
+  children,
+  summary,
+  defaultCollapsed,
+  expanded: expandedControlled,
+  onExpandedChange
 }: {
   title: string
   extra?: React.ReactNode
   className?: string
   titleClassName?: string
   children: React.ReactNode
+  /** Collapsed-state teaser; presence (or expand props) enables accordion */
+  summary?: React.ReactNode
+  defaultCollapsed?: boolean
+  expanded?: boolean
+  onExpandedChange?: (expanded: boolean) => void
 }): React.ReactElement {
+  const regionId = useId()
+  const collapsible =
+    summary !== undefined ||
+    defaultCollapsed !== undefined ||
+    expandedControlled !== undefined ||
+    onExpandedChange !== undefined
+  const [uncontrolledExpanded, setUncontrolledExpanded] = useState(() => !defaultCollapsed)
+  const expanded = expandedControlled ?? uncontrolledExpanded
+
+  const setExpanded = (next: boolean): void => {
+    if (expandedControlled === undefined) {
+      setUncontrolledExpanded(next)
+    }
+    onExpandedChange?.(next)
+  }
+
+  const toggle = (): void => {
+    setExpanded(!expanded)
+  }
+
   return (
     <section className={`${styles.panel} ${className}`.trim()}>
-      <header className={styles.panelHeader}>
-        <h2 className={`${styles.panelTitle} ${titleClassName}`.trim()}>{title}</h2>
+      <header
+        className={`${styles.panelHeader} ${collapsible ? styles.panelHeaderCollapsible : ''}`.trim()}
+      >
+        {collapsible ? (
+          <button
+            type="button"
+            className={styles.panelToggle}
+            aria-expanded={expanded}
+            aria-controls={regionId}
+            onClick={toggle}
+          >
+            <DownOutlined
+              className={`${styles.panelChevron} ${expanded ? styles.panelChevronOpen : ''}`.trim()}
+              aria-hidden
+            />
+            <h2 className={`${styles.panelTitle} ${titleClassName}`.trim()}>{title}</h2>
+          </button>
+        ) : (
+          <h2 className={`${styles.panelTitle} ${titleClassName}`.trim()}>{title}</h2>
+        )}
         {extra ? <div className={styles.panelExtra}>{extra}</div> : null}
       </header>
-      <div className={styles.panelBody}>{children}</div>
+      {collapsible ? (
+        <div id={regionId}>
+          {!expanded && summary != null ? (
+            <div className={styles.panelSummary}>{summary}</div>
+          ) : null}
+          {expanded ? <div className={styles.panelBody}>{children}</div> : null}
+        </div>
+      ) : (
+        <div className={styles.panelBody}>{children}</div>
+      )}
     </section>
   )
 }
