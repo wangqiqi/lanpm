@@ -4,6 +4,7 @@
  */
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
+import { createServer } from 'node:net'
 import type { SyncEnvelope } from '../../src/shared/network/types.ts'
 import {
   UDP_DISCOVERY_PORT,
@@ -41,9 +42,33 @@ const sealed = sealEnvelope(aes, env)
 const opened = openEnvelope(aes, sealed)
 assert.deepEqual(opened.payload, env.payload)
 
+function reservePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = createServer()
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      const addr = server.address()
+      if (!addr || typeof addr === 'string') {
+        server.close()
+        reject(new Error('failed to reserve port'))
+        return
+      }
+      const port = addr.port
+      server.close((err) => (err ? reject(err) : resolve(port)))
+    })
+  })
+}
+
+async function reserveDistinctPorts(): Promise<[number, number]> {
+  const a = await reservePort()
+  let b = await reservePort()
+  while (b === a) b = await reservePort()
+  return [a, b]
+}
+
+const [portA, portB] = await reserveDistinctPorts()
+
 const GROUP = 'm6-loopback'
-const portA = 43_180
-const portB = 43_181
 
 const a = new RealNetworkTransport({
   deviceId: 'dev_m6_a',

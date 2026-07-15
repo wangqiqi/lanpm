@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.33.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.33.3-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -199,7 +199,7 @@ npm run verify:platform-matrix  # Win/mac/Linux × x64+arm64 wiring
 | Visual consistency gate | `npm run verify:visual` (see [06_ROADMAP](./docs/06_ROADMAP.md) §4) |
 | Feature verifiers | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
 | Cross-platform packages | `dist:win` / `dist:mac` / `dist:linux` (+ `:x64` / `:arm64`); matrix in [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) |
-| One-key menu | `./onekey_run.sh` → start / stop / status / build / check … |
+| One-key menu | `./onekey_run.sh` → start / stop / status / build / pack …; `11` for more (check / verify / rebuild …) |
 
 ### Browser stub vs Electron
 
@@ -254,7 +254,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.33.0` — **Cockpit density accordion** (CK-410–415): single leadership summary island · default-collapsed list accordions · `scrollBody` vertical reach · docs SSOT; prior **Cockpit leader view** (CK-401–409). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.33.3` — **onekey** slim menu + startup preflight; Windows verify/profile fixes; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (queue):** meeting implementation sprint · marketplace SPIKE.
 

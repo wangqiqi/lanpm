@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+- **README 版本漂移**：`v1.33.3` 打版后 `README.md` / `README.zh-CN.md` 徽章与 Current 行同步 `package.json`；`verify:project` 全绿。
+- **verify:m6 端口冲突**：集成测改用动态空闲端口，避免 `EADDRINUSE` 导致 `verify:m7` 假失败。
+
 ## [1.33.3] - 2026-07-15
 
 ### Changed
