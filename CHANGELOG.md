@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Fixed
+- **评估 P2 UX（SPRINT-05）**：示例插件默认关闭；文件页自动选中首项预览；顶栏状态点 tooltip 含网络+未读/看板角标说明；看板延期左边条+角标、meta 中性色。
 - **手工截图 UX Sprint（SPRINT-04）**：底栏选中态去掉底色块（`docs/04` §1.6）；聊天上下文条仅保留在线人数；甘特延期条深红对比度；日历 `dayMaxEvents=3` + popover；主进程桌面通知 IPC + `setName`/`AUMID`/`.ico`；`electron-builder` 改用 `signAndEditExecutable: false` 规避 winCodeSign 符号链接失败。
 - **打包版 UI 扁平/无边界（TASK-002）**：`global.module.css` 改为 `global.css`；生产构建单独输出 `global-*.css` 并由 `index.html` 引用，设计令牌（`--lanpm-border` 等）不再在 asar 中丢失。
 - **桌面通知 / 消息框 Electron 默认图标（TASK-001）**：Renderer 通知统一 `desktopNotification` 并传入 `resources/icon.png`；主进程 `Notification` 使用 `resolveAppIconPath()`；`electron-builder` 配置 `win.icon` + `sign: null`（保留 rcedit）；Windows `setAppUserModelId`。
