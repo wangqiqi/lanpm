@@ -1,4 +1,4 @@
-/** form-js 风格 demo schema（与 plugins/lanpm.formjs/demo-schema.json 对齐） */
+/** form-js 风格 demo schema（SSOT；`plugins/lanpm.formjs` POC 与 `verify:plugin-loader` 共用） */
 export const FORMJS_DEMO_SCHEMA = {
   type: 'default',
   components: [

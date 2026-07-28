@@ -241,15 +241,6 @@ export function getDependencyBlockersForStatus(
   return blockers
 }
 
-/** @deprecated 使用 getDependencyBlockersForStatus */
-export function getFsBlockersForStatus(
-  task: Task,
-  byId: Map<string, Task>,
-  targetStatus: TaskStatus
-): BoardRelationBlocker[] {
-  return getDependencyBlockersForStatus(task, byId, targetStatus).filter((b) => b.type === 'FS')
-}
-
 export function buildBoardRelationMap(tasks: Task[]): Map<string, BoardTaskRelation> {
   const byId = new Map(tasks.map((t) => [t.taskId, t]))
   const map = new Map<string, BoardTaskRelation>()

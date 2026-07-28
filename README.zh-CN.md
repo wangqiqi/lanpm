@@ -142,7 +142,7 @@
 - 不强制上云；AI 可按需、可脱敏外呼  
 - **跨平台安装包**：Win / macOS / Linux × **x64 + arm64**（`docs/05` §1.4，`verify:platform-matrix`）  
 - 发版前可跑 **`npm run verify:m7`** 全量回归  
-- 插件 **加载边界** 已 SPIKE 拍板；加载器尚未落地  
+- 插件 **loader 已落地**（见上文 `verify:plugin-loader` / `plugin-enable-ui`）；第三方市场仍规划中  
 
 ---
 
@@ -256,7 +256,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 
 **当前版本：** `1.33.5` — SPRINT-04～07 UX 评估闭环 · 截图 CI · P3 抛光 · `verify:release-gate` 全绿；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
-**进行中 / 队列：** 视觉抛光 II · 会议实现 Sprint · 插件市场 SPIKE。
+**进行中 / 队列：** 会议实现 Sprint · 插件市场 SPIKE。（视觉手验 backlog 见 [06_ROADMAP](./docs/06_ROADMAP.md) §4）
 
 **规划中（P1+）：** 可购会议插件（语音/视频/投屏）、思维导图、移动端 PWA 等 —— [完整列表 · §1/§3](./docs/06_ROADMAP.md)。
 

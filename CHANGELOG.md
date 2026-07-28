@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [Unreleased]
+
+### Removed
+- **死代码清理（SPRINT-09）**：删 `notificationService.ts` · `appStore.ts` · `getFsBlockersForStatus` · `plugins/lanpm.formjs/demo-schema.json`（form-js demo 以 `formJsDemoSchema.ts` 为 SSOT）。
+
+### Fixed
+- **死文档对齐（SPRINT-09）**：README 插件 loader 矛盾句；`docs/05` 生产包 `preview` 命令；`MIT开源替代` 七视图与插件 ✅；`docs/01` §1.3 存储与 §1.3.1 一致；`06_ROADMAP` 版本脚注；`00` 收录飞鸽；飞鸽 §8 链 MIT SSOT、去掉不可达 Growth 路径。
+
 ## [1.33.5] - 2026-07-28
 
 ### Fixed

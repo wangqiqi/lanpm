@@ -142,7 +142,7 @@
 - No mandatory cloud; optional AI can use **redacted** outbound calls  
 - **Cross-platform packages**: Win / macOS / Linux × **x64 + arm64** (`docs/05` §1.4, `verify:platform-matrix`)  
 - **`npm run verify:m7`** full RC regression before release  
-- Plugin **load-boundary** designed (SPIKE); loader not shipped yet  
+- Plugin **loader shipped** (see `verify:plugin-loader` / `plugin-enable-ui` above); third-party marketplace still planned  
 
 ---
 
