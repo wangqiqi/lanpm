@@ -29,6 +29,7 @@ coverage/
 # Dependencies
 node_modules/
 dist/
+dist-*
 build/
 out/
 *.tsbuildinfo

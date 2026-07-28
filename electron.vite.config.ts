@@ -159,6 +159,22 @@ export default defineConfig({
       lanpmDevCspPlugin(),
       lanpmDevOverlayGuardHtmlPlugin(),
       lanpmFullReloadGuardPlugin()
-    ]
+    ],
+    /**
+     * Vite 8 / Rolldown：chunkOptimization 会把 __commonJSMin 等 CJS helper
+     * 与 lazy chunk 打成循环依赖，打包后运行时报
+     * `TypeError: __commonJSMin is not a function`（见 rolldown#8361）。
+     * 走 rollupOptions（Vite 8 别名到 rolldownOptions），避免单独设
+     * build.rolldownOptions 导致 electron-vite 校验丢失 input。
+     */
+    build: {
+      rollupOptions: {
+        input: resolve('src/renderer/index.html'),
+        // @ts-expect-error Vite 8 / Rolldown experimental（rollupOptions 为别名）
+        experimental: {
+          chunkOptimization: false
+        }
+      }
+    }
   }
 })

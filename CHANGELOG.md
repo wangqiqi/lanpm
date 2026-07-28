@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+- **打包后 renderer 崩溃 `__commonJSMin is not a function`**：Vite 8 / Rolldown `chunkOptimization` 将 CJS helper 与 lazy chunk 打成循环依赖；`electron.vite.config.ts` 对 renderer 关闭该优化（rolldown#8361）。
+- **安装包虚胖**：`electron-builder.yml` 排除 `dist/**`、`src/**`、`tests/**`、`.cursor/**` 等，避免把旧产物与源码打进 asar；并排除已打进 renderer bundle 的 UI 大包（antd / excalidraw / jspdf 等），asar ~251 MB → ~53 MB（TASK-001）。
+
 ### Changed
 - **Super Cursor 母版**：`roles.json` 12 人格与 `run-start` Persona 注入；`master` 路由补 `review` / `debug` / `pencil-design`；`plan` 增 PRD 丰富与优先级参考；`review` / `pencil-design` skill 与 reference；`verify-super-cursor` · `cursor-coherence` 扩展；docs 目录与协作规则同步。
 
