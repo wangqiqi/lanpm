@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Fixed
+- **评估 P3 UX（SPRINT-07）**：群级任务视图去掉重复 `ViewHeader`（底栏 Tab 表达模块）；驾驶舱有需关注任务时默认展开手风琴 Panel；`docs/04` §1.4 与 `verify:visual` 守卫同步。
 - **无头截图种子（SPRINT-06）**：`visualCapture` 在 mock 任务已有排期时仍插入 `截图·设计评审`；甘特条等待改行去重计数；`verify:visual-screenshots` 本地稳定绿；暗色七页归档 `snapshot/dark/`。
 - **任务树详情叠字**：移除描述区 `flex:1`，详情字段 `flex-shrink:0`，避免检查项/插件区被压扁重叠。
 - **评估 P2 UX（SPRINT-05）**：示例插件默认关闭；文件页自动选中首项预览；顶栏状态点 tooltip 含网络+未读/看板角标说明；看板延期左边条+角标、meta 中性色。
