@@ -171,7 +171,8 @@ export default function CalendarView(): React.ReactElement {
           eventClick={handleEventClick}
           eventDrop={(arg) => void applyCalendarSchedule(arg)}
           eventResize={(arg) => void applyCalendarSchedule(arg)}
-          dayMaxEvents
+          dayMaxEvents={3}
+          moreLinkClick="popover"
         />
       </div>
 
