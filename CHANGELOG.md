@@ -6,7 +6,7 @@
 
 ### Fixed
 - **打包后 renderer 崩溃 `__commonJSMin is not a function`**：Vite 8 / Rolldown `chunkOptimization` 将 CJS helper 与 lazy chunk 打成循环依赖；`electron.vite.config.ts` 对 renderer 关闭该优化（rolldown#8361）。
-- **安装包虚胖**：`electron-builder.yml` 排除源码/旧产物与已 bundle UI 大包；renderer-only 依赖挪入 `devDependencies`（保留 `better-sqlite3` / `electron-screenshots` / `react*` / `yjs*`）；asar ~251 MB → ~30 MB（TASK-001/002）。
+- **安装包虚胖（SPRINT-02-pack-size）**：asar 排除已 bundle UI / 源码旧产物；renderer-only 依赖改 `devDependencies`；Electron locales 仅 en-US+zh-CN；白板/日历/甘特 `React.lazy` + 导出动态 import。**Setup x64 ~316 MB → ~192 MB**；asar ~251 MB → ~30 MB。
 
 ### Changed
 - **Super Cursor 母版**：`roles.json` 12 人格与 `run-start` Persona 注入；`master` 路由补 `review` / `debug` / `pencil-design`；`plan` 增 PRD 丰富与优先级参考；`review` / `pencil-design` skill 与 reference；`verify-super-cursor` · `cursor-coherence` 扩展；docs 目录与协作规则同步。
