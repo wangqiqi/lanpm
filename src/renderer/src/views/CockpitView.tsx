@@ -416,7 +416,7 @@ export default function CockpitView(): React.ReactElement {
       <Panel
         title={t('cockpit.attentionTasksTitle')}
         className={styles.section}
-        defaultCollapsed
+        defaultCollapsed={attentionTasks.length === 0}
         summary={
           attentionTasks.length === 0 ? (
             <Text type="secondary">{t('cockpit.attentionTasksEmpty')}</Text>
