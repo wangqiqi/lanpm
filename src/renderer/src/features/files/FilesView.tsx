@@ -250,6 +250,15 @@ export default function FilesView(): React.ReactElement {
   }, [location.pathname, location.state, navigate, files, gid, isNarrow])
 
   useEffect(() => {
+    if (filteredFiles.length === 0) {
+      if (selected) setSelected(null)
+      return
+    }
+    if (selected && filteredFiles.some((f) => f.fileId === selected.fileId)) return
+    setSelected(filteredFiles[0]!)
+  }, [filteredFiles, selected?.fileId])
+
+  useEffect(() => {
     if (!selected) return
     const fresh = files.find((f) => f.fileId === selected.fileId)
     if (!fresh) return
