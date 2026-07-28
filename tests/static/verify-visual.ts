@@ -713,6 +713,10 @@ assert.match(
   /transform var\(--lanpm-motion-fast\)/,
   'BottomNav icon motion uses fast token (VP-407)'
 )
+assert.ok(
+  !/\.tabActive\s*\{[\s\S]*?background:/.test(bottomNavCss),
+  'BottomNav tabActive must not use background block (docs/04 §1.6)'
+)
 
 const viewStateCss = readFileSync(join(renderer, 'ui/ViewState.module.css'), 'utf8')
 assert.match(viewStateCss, /\.iconRing/, 'ViewState empty/loading icon ring (VP-407)')

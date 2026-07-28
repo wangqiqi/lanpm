@@ -85,7 +85,6 @@
 .tabActive {
   color: var(--lanpm-accent);
   font-weight: 600;
-  background: var(--lanpm-selected-bg);
 }
 
 .tabActive .icon {
@@ -94,7 +93,6 @@
 
 .tabActive:hover:not(:disabled) {
   color: var(--lanpm-accent-hover);
-  background: var(--lanpm-accent-fill-strong);
 }
 
 .tabActive:hover:not(:disabled) .icon {
