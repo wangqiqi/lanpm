@@ -15,17 +15,24 @@ import { registerDataIpc } from './ipc/data'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { registerWhiteboardIpc } from './ipc/whiteboard'
 import { registerPluginIpc } from './ipc/plugin'
+import { registerNotificationIpc } from './ipc/notification'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { ensureProfileUserDataPath } from './storage/profilePaths'
-import { resolveAppIconPath } from './appIcon'
+import { resolveWindowIcon } from './appIcon'
 import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
 import { initScreenshotService, shutdownScreenshotService } from './screenshot/screenshotService'
 import { LANPM_MAIN_WINDOW_TITLE, setMainWindow } from './mainWindow'
 import { runVisualCaptureIfRequested } from './visualCapture'
 import { attachWebviewGuards } from './webviewGuard'
 import { isAllowedHttpUrl } from '../shared/security/httpUrl'
+
+/** Windows 通知 / 任务栏分组须在 ready 前设置；显示名避免 toast 标题为 Electron */
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.lanpm.app')
+}
+app.setName('LanPM')
 
 const isDev = !app.isPackaged
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
@@ -84,10 +91,11 @@ function registerAllIpcHandlers(): void {
   registerDataIpc()
   registerWhiteboardIpc()
   registerPluginIpc()
+  registerNotificationIpc()
 }
 
 function createWindow(): BrowserWindow {
-  const iconPath = resolveAppIconPath()
+  const windowIcon = resolveWindowIcon()
   const mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -99,7 +107,7 @@ function createWindow(): BrowserWindow {
       ? { backgroundColor: '#f5f5f7', paintWhenInitiallyHidden: true, show: true }
       : {}),
     title: LANPM_MAIN_WINDOW_TITLE,
-    ...(iconPath ? { icon: iconPath } : {}),
+    ...(windowIcon ? { icon: windowIcon } : {}),
     /** Linux/Windows：不显示 File/Edit/View 等原生菜单栏（应用内 TopBar 已承担导航） */
     autoHideMenuBar: true,
     webPreferences: {
@@ -112,9 +120,15 @@ function createWindow(): BrowserWindow {
 
   mainWindow.setMenu(null)
   mainWindow.setMenuBarVisibility(false)
+  if (windowIcon) {
+    mainWindow.setIcon(windowIcon)
+  }
 
   mainWindow.on('ready-to-show', () => {
-    if (!visualCaptureDir) mainWindow.show()
+    if (!visualCaptureDir) {
+      mainWindow.maximize()
+      mainWindow.show()
+    }
   })
 
   if (visualCaptureDir) {
@@ -154,9 +168,6 @@ function createWindow(): BrowserWindow {
 
 app.whenReady().then(() => {
   try {
-    if (process.platform === 'win32') {
-      app.setAppUserModelId('com.lanpm.app')
-    }
     Menu.setApplicationMenu(null)
 
     if (!visualCaptureDir) {

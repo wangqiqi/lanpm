@@ -44,6 +44,10 @@ export interface LanpmApi {
   getSuggestedDeviceName: () => string
   /** Main → renderer 轻提示（同步失败等） */
   onUserNotice: (handler: (notice: UserNotice) => void) => () => void
+  /** 主进程桌面通知（Windows 品牌 icon / 标题） */
+  notification: {
+    show: (title: string, body: string) => Promise<void>
+  }
   identity: {
     getSetupStatus: () => Promise<SetupStatus>
     completeSetup: (input: SetupInput) => Promise<SetupStatus>

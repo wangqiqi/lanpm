@@ -86,6 +86,8 @@ linux:
 extraResources:
   - from: resources/icon.png
     to: icon.png
+  - from: resources/icon.ico
+    to: icon.ico
   - from: plugins
     to: plugins
     filter:

@@ -25,6 +25,9 @@ const api: LanpmApi = {
     ipcRenderer.on(USER_NOTICE_CHANNEL, listener)
     return () => ipcRenderer.removeListener(USER_NOTICE_CHANNEL, listener)
   },
+  notification: {
+    show: (title: string, body: string) => ipcRenderer.invoke('notification:show', title, body)
+  },
   identity: {
     getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),
     completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input),
