@@ -1,12 +1,14 @@
 import { existsSync } from 'fs'
 import { join } from 'path'
-import { app } from 'electron'
 import type { Database } from 'better-sqlite3'
-import type { FileMeta } from '../../shared/file/types'
-import { isLocalRemovedPath, isRemotePendingPath } from '../../shared/file/sync'
+import type { FileMeta } from '../../shared/file/types.ts'
+import { isLocalRemovedPath, isRemotePendingPath } from '../../shared/file/sync.ts'
 
 function getUserDataPath(): string {
   if (process.env.LANPM_USER_DATA) return process.env.LANPM_USER_DATA
+  // Lazy require — ELECTRON_RUN_AS_NODE + LANPM_USER_DATA 测路径不触发 app
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { app } = require('electron') as typeof import('electron')
   return app.getPath('userData')
 }
 

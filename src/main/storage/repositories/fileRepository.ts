@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3'
-import type { FileCategory, FileMeta, FilePreviewStatus } from '../../../shared/file/types'
+import type { FileCategory, FileMeta, FilePreviewStatus } from '../../../shared/file/types.ts'
 import { isDirectPreviewReady } from '../../../shared/file/previewExtensions.ts'
 
 interface FileRow {

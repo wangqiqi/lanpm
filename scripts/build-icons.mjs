@@ -31,8 +31,6 @@ run(`convert -background none "${join(res, 'icon.svg')}" -resize 1024x1024 "${jo
 run(
   `convert "${join(res, 'icon.png')}" -define icon:auto-resize=256,128,64,48,32,16 "${join(res, 'icon.ico')}"`
 )
-for (const size of [32, 64]) {
-  run(`convert -background none "${join(res, 'logo.svg')}" -resize ${size}x${size} "${join(res, `logo-${size}.png`)}"`)
-}
+// UI 使用 logo.svg；不生成未引用的 logo-32/64.png（见 无用.md / SPRINT-10）
 
-console.log('Icons written to resources/')
+console.log('Icons written to resources/ (icon.png, icon.ico)')

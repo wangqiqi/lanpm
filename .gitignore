@@ -36,3 +36,8 @@ out/
 
 # Super Cursor 项目特化（plan / learn / archive）— 本地 only
 .cursorGrowth/
+
+# Raster icons from `npm run build:icons` (keep SVG sources in git)
+resources/icon.png
+resources/icon.ico
+resources/logo-*.png

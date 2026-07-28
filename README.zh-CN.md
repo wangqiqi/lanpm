@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.33.5-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.33.6-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -240,6 +240,9 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | [docs/04 — 交互](./docs/04_交互与UI约定.md) | 布局、主题、七视图主壳 |
 | [docs/05 — 测试](./docs/05_测试与联调发布.md) | Vitest、verify:*、联调发布 |
 | [docs/06 — ROADMAP](./docs/06_ROADMAP.md) | 未完成项 · 会议插件 · 市场 |
+| [MIT 开源替代](./docs/MIT开源替代.md) | 已实现 vs 开源选型对照 |
+| [CHANGELOG](./CHANGELOG.md) | 发版记录 |
+| [plugins/README](./plugins/README.md) | 官方插件目录与启用说明 |
 | [docs/05 §1.4 — 跨平台](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) | 跨平台构建与 CI |
 | [飞鸽 / 飞秋对照](./docs/飞鸽飞秋.md) | 与经典局域网 IM 的能力对照 |
 
@@ -254,7 +257,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.33.5` — SPRINT-04～07 UX 评估闭环 · 截图 CI · P3 抛光 · `verify:release-gate` 全绿；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.33.6` — SPRINT-09/10 死代码死文档清理 · 评估/审查稿归档；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
 **进行中 / 队列：** 会议实现 Sprint · 插件市场 SPIKE。（视觉手验 backlog 见 [06_ROADMAP](./docs/06_ROADMAP.md) §4）
 

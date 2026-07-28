@@ -11,6 +11,7 @@ export function presenceEmoji(presence: UserPresence): string {
   }
 }
 
+/** 中文 presence 文案；UI 用 emoji + i18n，本函数仅供 `verify:presence` 与单测。 */
 export function presenceLabel(presence: UserPresence): string {
   switch (presence) {
     case 'online':

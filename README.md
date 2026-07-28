@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.33.5-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.33.6-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -240,6 +240,9 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | [docs/04 — UI](./docs/04_交互与UI约定.md) | Layout, themes, seven-tab shell |
 | [docs/05 — Testing](./docs/05_测试与联调发布.md) | Vitest, verify:*, release QA |
 | [docs/06 — ROADMAP](./docs/06_ROADMAP.md) | Open backlog · meeting plugin · marketplace |
+| [MIT open-source map](./docs/MIT开源替代.md) | Implemented vs MIT alternatives |
+| [CHANGELOG](./CHANGELOG.md) | Release history |
+| [plugins/README](./plugins/README.md) | Official plugin layout & enablement |
 | [docs/05 §1.4 — Platform matrix](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) | Cross-platform build & CI |
 | [Feige / FeiQ mapping](./docs/飞鸽飞秋.md) | Feature parity notes vs classic LAN IM |
 
@@ -254,7 +257,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.33.5` — SPRINT-04～07 UX 评估闭环 · 截图 CI · P3 抛光 · `verify:release-gate` 全绿; **onekey** slim menu + preflight; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.33.6` — SPRINT-09/10 死代码死文档清理 · 评估/审查稿归档; **onekey** slim menu + preflight; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (queue):** meeting implementation sprint · marketplace SPIKE.
 

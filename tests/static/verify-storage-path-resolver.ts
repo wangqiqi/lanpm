@@ -1,8 +1,8 @@
 /**
  * Profile 迁移后 storage_path 回退解析
- * Run: node --experimental-strip-types tests/static/verify-storage-path-resolver.ts
+ * Run: npm run verify:storage-path-resolver
  */
-import { existsSync, mkdirSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import Database from 'better-sqlite3'
 import assert from 'node:assert/strict'
@@ -10,6 +10,11 @@ import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const dir = mkLanpmTemp('lanpm-storage-path-')
 process.env.LANPM_USER_DATA = dir
+
+const { repairFileStoragePaths, resolveFileDiskPath } = await import(
+  '../../src/main/file/storagePathResolver.ts'
+)
+const { getFileById } = await import('../../src/main/storage/repositories/fileRepository.ts')
 
 const groupId = 'demo-project'
 const fileId = 'file_test_txt'
@@ -49,16 +54,10 @@ db.prepare(
   ) VALUES (?, ?, ?, 'txt', 'document', 13, 'u', datetime('now'), 'x', ?, 'ready', ?, 0, datetime('now'))`
 ).run(fileId, groupId, name, stalePath, stalePath)
 
-const { readPreviewText } = await import('../../src/main/file/fileService.ts')
-const { repairFileStoragePaths, resolveFileDiskPath } = await import(
-  '../../src/main/file/storagePathResolver.ts'
-)
-const { getFileById } = await import('../../src/main/storage/repositories/fileRepository.ts')
-
 const before = getFileById(db, fileId)!
 assert.equal(existsSync(before.storagePath), false)
 assert.equal(resolveFileDiskPath(before), canonical)
-assert.equal(readPreviewText(db, fileId), 'hello preview')
+assert.equal(readFileSync(resolveFileDiskPath(before)!, 'utf8'), 'hello preview')
 
 const fixed = repairFileStoragePaths(db)
 assert.equal(fixed, 1)

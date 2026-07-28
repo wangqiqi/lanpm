@@ -27,7 +27,7 @@ assert.ok(deps['electron'], 'missing electron')
 assert.ok(deps['react'], 'missing react')
 
 const prd = readFileSync(join(root, 'docs/01_产品需求文档.md'), 'utf8')
-assert.match(prd, /RC 实现现状/, 'docs/01 missing RC reality section')
+assert.match(prd, /1\.3\.1 实现现状/, 'docs/01 missing implementation reality section (§1.3.1)')
 assert.match(prd, /SQLite 为唯一持久化层|SQLite 为唯一持久化/, 'docs/01 should document SQLite-only RC')
 assert.match(prd, /Yjs.*已引入|已引入.*[Yy]js|task_crdt/, 'docs/01 should document Yjs enabled for task_crdt')
 assert.ok(!/Yjs\/WebRTC 为 v1\.1 可选/.test(prd), 'docs/01 must not still mark Yjs as optional-only')
