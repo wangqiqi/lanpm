@@ -13,6 +13,7 @@ files:
   - '!.cursorGrowth/**'
   - '!.lanpm/**'
   - '!dist/**'
+  - '!dist-*/**'
   - '!dist-pack/**'
   - '!dist-pack2/**'
   - '!coverage/**'

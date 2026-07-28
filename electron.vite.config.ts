@@ -170,7 +170,6 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: resolve('src/renderer/index.html'),
-        // @ts-expect-error Vite 8 / Rolldown experimental（rollupOptions 为别名）
         experimental: {
           chunkOptimization: false
         }
