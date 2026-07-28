@@ -139,11 +139,11 @@ export const GANTT_BEHIND_BAR = {
   backgroundSelectedColor: '#a67c00'
 } as const
 
-/** 甘特条：延期（纯红） */
+/** 甘特条：延期（深红底 + 白字，避免 #ffcccc 浅粉对比不足） */
 export const GANTT_OVERDUE_BAR = {
-  backgroundColor: '#ffcccc',
-  backgroundSelectedColor: '#ff0000',
-  progressColor: '#ff0000',
+  backgroundColor: '#d70015',
+  backgroundSelectedColor: '#b50012',
+  progressColor: '#ff3b30',
   progressSelectedColor: '#d70015'
 } as const
 
