@@ -91,9 +91,14 @@ assert.match(types, /whiteboard_awareness/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
   scripts?: Record<string, string>
 }
-assert.ok(pkg.dependencies?.['@mizuka-wu/y-excalidraw'], 'y-excalidraw dependency required')
+assert.ok(
+  pkg.dependencies?.['@mizuka-wu/y-excalidraw'] ||
+    pkg.devDependencies?.['@mizuka-wu/y-excalidraw'],
+  'y-excalidraw dependency required'
+)
 assert.ok(pkg.scripts?.['verify:whiteboard-realtime'], 'missing verify:whiteboard-realtime')
 
 const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')

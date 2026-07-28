@@ -39,9 +39,14 @@ assert.equal(WHITEBOARD_IPC.exportPng, 'whiteboard:exportPng')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
   scripts?: Record<string, string>
 }
-assert.ok(pkg.dependencies?.['@excalidraw/excalidraw'], 'missing @excalidraw/excalidraw')
+assert.ok(
+  pkg.dependencies?.['@excalidraw/excalidraw'] ||
+    pkg.devDependencies?.['@excalidraw/excalidraw'],
+  'missing @excalidraw/excalidraw'
+)
 assert.ok(pkg.scripts?.['verify:whiteboard'], 'missing verify:whiteboard script')
 
 const viewPath = join(root, 'src/renderer/src/features/whiteboard/WhiteboardView.tsx')

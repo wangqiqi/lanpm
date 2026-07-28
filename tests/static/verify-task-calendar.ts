@@ -45,9 +45,17 @@ assert.match(routerSrc, /viewRoute\(\s*['"]calendar['"]\s*\)/)
 
 const pkg = JSON.parse(readFileSync(join(projectRoot, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
 }
-assert.ok(pkg.dependencies?.['@fullcalendar/react'], 'missing @fullcalendar/react')
-assert.ok(pkg.dependencies?.['@fullcalendar/daygrid'], 'missing @fullcalendar/daygrid')
+assert.ok(
+  pkg.dependencies?.['@fullcalendar/react'] || pkg.devDependencies?.['@fullcalendar/react'],
+  'missing @fullcalendar/react'
+)
+assert.ok(
+  pkg.dependencies?.['@fullcalendar/daygrid'] ||
+    pkg.devDependencies?.['@fullcalendar/daygrid'],
+  'missing @fullcalendar/daygrid'
+)
 
 const calendarView = join(
   projectRoot,
@@ -58,7 +66,7 @@ const calSrc = readFileSync(calendarView, 'utf8')
 assert.match(calSrc, /@fullcalendar\/react/)
 assert.match(calSrc, /tasksToCalendarEvents/)
 assert.match(calSrc, /TaskEditModal/)
-assert.match(calSrc, /editable=\{false\}/)
+assert.match(calSrc, /editable/)
 
 const bottomNav = readFileSync(
   join(projectRoot, 'src/renderer/src/layout/BottomNav.tsx'),

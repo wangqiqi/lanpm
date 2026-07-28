@@ -1,6 +1,3 @@
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
-
 function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -242,6 +239,7 @@ async function captureElement(
 ): Promise<HTMLCanvasElement> {
   await waitForLayout()
 
+  const { default: html2canvas } = await import('html2canvas')
   return html2canvas(element, {
     backgroundColor: ganttExportBackground(),
     scale: 2,
@@ -287,6 +285,7 @@ export async function exportGanttChart(
     const w = canvas.width
     const h = canvas.height
     const orientation = w > h ? 'landscape' : 'portrait'
+    const { jsPDF } = await import('jspdf')
     const pdf = new jsPDF({ orientation, unit: 'px', format: [w, h] })
     pdf.addImage(img, 'PNG', 0, 0, w, h)
     pdf.save(filename)

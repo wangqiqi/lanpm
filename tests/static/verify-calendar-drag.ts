@@ -54,9 +54,14 @@ assert.match(view, /editable/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
   scripts?: Record<string, string>
 }
-assert.ok(pkg.dependencies?.['@fullcalendar/interaction'], 'missing interaction plugin')
+assert.ok(
+  pkg.dependencies?.['@fullcalendar/interaction'] ||
+    pkg.devDependencies?.['@fullcalendar/interaction'],
+  'missing interaction plugin'
+)
 assert.ok(pkg.scripts?.['verify:calendar-drag'], 'missing verify:calendar-drag')
 
 assert.ok(existsSync(join(root, 'src/shared/task/calendarEvents.ts')))

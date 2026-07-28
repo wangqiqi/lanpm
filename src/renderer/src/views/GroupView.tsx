@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { Alert } from 'antd'
+import { Suspense, lazy, useEffect, useRef } from 'react'
+import { Alert, Spin } from 'antd'
 import { useParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
@@ -7,9 +7,6 @@ import { isDmGroupId } from '@shared/chat/dmSession'
 import BoardView from '@renderer/features/board/BoardView'
 import ChatView from '@renderer/features/chat/ChatView'
 import FilesView from '@renderer/features/files/FilesView'
-import GanttView from '@renderer/features/gantt/GanttView'
-import CalendarView from '@renderer/features/calendar/CalendarView'
-import WhiteboardView from '@renderer/features/whiteboard/WhiteboardView'
 import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
@@ -20,6 +17,18 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import styles from './GroupView.module.css'
+
+const GanttView = lazy(() => import('@renderer/features/gantt/GanttView'))
+const CalendarView = lazy(() => import('@renderer/features/calendar/CalendarView'))
+const WhiteboardView = lazy(() => import('@renderer/features/whiteboard/WhiteboardView'))
+
+function HeavyViewFallback(): React.ReactElement {
+  return (
+    <div style={{ display: 'grid', placeItems: 'center', minHeight: 160 }}>
+      <Spin />
+    </div>
+  )
+}
 
 /** 聊天页群名仅 TopBar；任务类视图为模块名（docs/04 §1.4） */
 export default function GroupView({ view }: { view: AppView }): React.ReactElement {
@@ -81,9 +90,11 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
         {view === 'chat' && <ChatView />}
         {view === 'board' && <BoardView />}
         {view === 'tree' && <TaskTreeView />}
-        {view === 'gantt' && <GanttView />}
-        {view === 'calendar' && <CalendarView />}
-        {view === 'whiteboard' && <WhiteboardView />}
+        <Suspense fallback={<HeavyViewFallback />}>
+          {view === 'gantt' && <GanttView />}
+          {view === 'calendar' && <CalendarView />}
+          {view === 'whiteboard' && <WhiteboardView />}
+        </Suspense>
         {view === 'files' && <FilesView />}
       </div>
     </div>
