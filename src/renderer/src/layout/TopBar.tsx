@@ -42,6 +42,7 @@ import GlobalSearch from '@renderer/layout/GlobalSearch'
 import ManualPeerModal from '@renderer/features/network/ManualPeerModal'
 import RegionButton from '@renderer/ui/RegionButton'
 import { useGroupPinStore } from '@renderer/stores/groupPinStore'
+import { useBadgeStore } from '@renderer/stores/badgeStore'
 import { LANPM_APP_VERSION } from '@shared/appVersion'
 import { matchesGroupSearch } from '@shared/group/matchGroupSearch'
 import { sortGroupsForSwitcher } from '@shared/group/sortGroups'
@@ -93,6 +94,9 @@ export default function TopBar(): React.ReactElement {
   const prevLinkStateRef = useRef<string | undefined>(undefined)
   const pinnedIds = useGroupPinStore((s) => s.pinnedIds)
   const togglePin = useGroupPinStore((s) => s.togglePin)
+  const badges = useBadgeStore((s) => s.badges)
+  const boardRecentDot = useBadgeStore((s) => s.boardRecentDot)
+  const refreshBadges = useBadgeStore((s) => s.refresh)
   const isPinned = useGroupPinStore((s) => s.isPinned)
 
   const refreshGroupActivity = (): void => {
@@ -111,6 +115,11 @@ export default function TopBar(): React.ReactElement {
   useEffect(() => {
     refreshGroupActivity()
   }, [activeGroupId, groups])
+
+  useEffect(() => {
+    if (!activeGroupId) return
+    void refreshBadges(activeGroupId)
+  }, [activeGroupId, refreshBadges])
 
   useEffect(() => {
     const next = networkStatus?.linkState
@@ -133,6 +142,19 @@ export default function TopBar(): React.ReactElement {
         { count: networkStatus.peerCount }
       )
     : t('topbar.networkUnknown')
+
+  const statusTooltip = useMemo(() => {
+    const lines = [networkTooltip]
+    if (badges.chatUnread > 0) {
+      lines.push(t('topbar.badgeChatUnread', { count: badges.chatUnread }))
+    }
+    if (badges.boardMineOpen > 0) {
+      lines.push(t('topbar.badgeBoardMine', { count: badges.boardMineOpen }))
+    } else if (boardRecentDot) {
+      lines.push(t('topbar.badgeBoardRecent'))
+    }
+    return lines.join('\n')
+  }, [networkTooltip, badges.chatUnread, badges.boardMineOpen, boardRecentDot, t])
 
   const navigateToGroup = (groupId: string): void => {
     setActiveGroupId(groupId)
@@ -485,11 +507,11 @@ export default function TopBar(): React.ReactElement {
             ]
           }}
         >
-          <Tooltip title={networkTooltip}>
+          <Tooltip title={statusTooltip}>
             <RegionButton
               variant="icon"
               className={styles.netBtn}
-              aria-label={networkTooltip}
+              aria-label={statusTooltip}
               disabled={networkLoading}
               onClick={() => {
                 if (networkStatus?.linkState === 'offline') void reconnectNetwork()
