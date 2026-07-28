@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { showDesktopNotification } from '@renderer/platform/desktopNotification'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNotificationPrefsStore } from '@renderer/stores/notificationPrefsStore'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -15,20 +16,6 @@ import {
 
 const SCAN_INTERVAL_MS = 5 * 60 * 1000
 const MAX_NOTIFY_PER_SCAN = 3
-
-function showDesktopNotification(title: string, body: string): void {
-  if (typeof Notification === 'undefined') return
-  const fire = (): void => {
-    new Notification(title, { body })
-  }
-  if (Notification.permission === 'granted') {
-    fire()
-  } else if (Notification.permission !== 'denied') {
-    void Notification.requestPermission().then((p) => {
-      if (p === 'granted') fire()
-    })
-  }
-}
 
 /** A1 — 扫描本机相关未完成任务的今日/逾期截止，桌面提醒（去重）。 */
 export function useDueTaskNotifications(): void {

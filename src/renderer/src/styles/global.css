@@ -1,6 +1,6 @@
-:global(html),
-:global(body),
-:global(#root) {
+html,
+body,
+#root {
   margin: 0;
   height: 100%;
   overflow: hidden;
@@ -9,7 +9,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-:global(*) {
+* {
   box-sizing: border-box;
 }
 
@@ -19,7 +19,7 @@
  * Windows：Segoe UI + 微软雅黑
  * Linux：system-ui / Noto Sans SC（未安装苹果字体时不会命中 SF Pro 名称）
  */
-:global(html) {
+html {
   --lanpm-font-family:
     system-ui,
     -apple-system,
@@ -58,7 +58,7 @@
 }
 
 /* Apple HIG + Excalidraw 外壳气质令牌 — 亮色（非画布手绘） */
-:global(html[data-theme='light']) {
+html[data-theme='light'] {
   --lanpm-bg: #f5f5f7;
   --lanpm-surface: rgba(255, 255, 255, 0.82);
   --lanpm-surface-solid: #ffffff;
@@ -119,7 +119,7 @@
 }
 
 /* 暗色 — 与亮色同变量名；阴影更深、选中 fill 略提亮 */
-:global(html[data-theme='dark']) {
+html[data-theme='dark'] {
   --lanpm-bg: #000000;
   --lanpm-surface: rgba(28, 28, 30, 0.82);
   --lanpm-surface-solid: #1c1c1e;
@@ -176,29 +176,29 @@
   --lanpm-radius-xl: 20px;
 }
 
-:global(body) {
+body {
   background: var(--lanpm-bg);
   color: var(--lanpm-text);
 }
 
-:global(body.lanpm-composer-resize),
-:global(body.lanpm-composer-resize *) {
+body.lanpm-composer-resize,
+body.lanpm-composer-resize * {
   cursor: ns-resize !important;
   user-select: none !important;
 }
 
-:global(body.lanpm-sidebar-resize),
-:global(body.lanpm-sidebar-resize *) {
+body.lanpm-sidebar-resize,
+body.lanpm-sidebar-resize * {
   cursor: ew-resize !important;
   user-select: none !important;
 }
 
-:global(:focus-visible) {
+:focus-visible {
   outline: 2px solid var(--lanpm-accent);
   outline-offset: 2px;
 }
 
-:global(pre.lanpm-fatal) {
+pre.lanpm-fatal {
   margin: 24px;
   padding: 12px;
   font: var(--lanpm-font-body) / 1.45 ui-monospace, monospace;

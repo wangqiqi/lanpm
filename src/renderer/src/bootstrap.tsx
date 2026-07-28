@@ -4,7 +4,7 @@ import 'antd/dist/reset.css'
 import App from './App'
 import RootErrorBoundary from './app/RootErrorBoundary'
 import ThemeProvider from './app/ThemeProvider'
-import './styles/global.module.css'
+import './styles/global.css'
 
 const rootEl = document.getElementById('root')
 if (!rootEl) {

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import { messagePreviewText } from '@shared/chat/messagePreview'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { showDesktopNotification } from '@renderer/platform/desktopNotification'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNotificationPrefsStore } from '@renderer/stores/notificationPrefsStore'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -31,20 +32,6 @@ function notificationBody(message: ChatMessage, t: ReturnType<typeof useI18n>['t
     return t('chat.notificationCodePreview', { language: message.content.language })
   }
   return t('chat.notificationNewMessage')
-}
-
-function showDesktopNotification(title: string, body: string): void {
-  if (typeof Notification === 'undefined') return
-  const fire = (): void => {
-    new Notification(title, { body })
-  }
-  if (Notification.permission === 'granted') {
-    fire()
-  } else if (Notification.permission !== 'denied') {
-    void Notification.requestPermission().then((p) => {
-      if (p === 'granted') fire()
-    })
-  }
 }
 
 /** WX-06 — @提及始终通知；可选「全部新消息」在非当前聊天或窗口失焦时通知。 */

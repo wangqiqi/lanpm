@@ -1,6 +1,6 @@
 import { installLanpmBridge } from '@renderer/platform/installLanpmBridge'
 import { installDevPreviewClientGuards } from '@renderer/platform/devPreviewClient'
-import './styles/global.module.css'
+import './styles/global.css'
 
 function readThemeDataset(): void {
   const fromQuery =

@@ -57,7 +57,7 @@ const FORBIDDEN_PATTERNS = [
 
 const BAD_TOKEN_FALLBACK = /var\(--lanpm-[^,)]+,\s*rgba\(\s*0\s*,\s*0\s*,\s*0/gi
 
-/** 业务 module.css 禁止散落硬编码色（令牌定义仅在 global.module.css） */
+/** 业务 module.css 禁止散落硬编码色（令牌定义仅在 global.css） */
 const FORBIDDEN_MODULE_HEX = [
   /#007a3d/i,
   /#0071e3/i,
@@ -158,7 +158,7 @@ function walkCssFiles(dir: string, out: string[] = []): string[] {
     if (statSync(p).isDirectory()) {
       if (name === 'node_modules') continue
       walkCssFiles(p, out)
-    } else if (name.endsWith('.module.css') || name === 'global.module.css') {
+    } else if (name.endsWith('.module.css')) {
       out.push(p)
     }
   }
@@ -170,17 +170,17 @@ function mustNotExist(rel: string): void {
 }
 
 // --- tokens in global ---
-const globalCss = readFileSync(join(renderer, 'styles/global.module.css'), 'utf8')
+const globalCss = readFileSync(join(renderer, 'styles/global.css'), 'utf8')
 for (const theme of ["html[data-theme='light']", "html[data-theme='dark']"]) {
   const block = globalCss.includes(theme)
-  assert.ok(block, `global.module.css missing ${theme}`)
+  assert.ok(block, `global.css missing ${theme}`)
 }
 for (const token of REQUIRED_FONT_TOKENS) {
-  assert.ok(globalCss.includes(token), `global.module.css missing font token ${token}`)
+  assert.ok(globalCss.includes(token), `global.css missing font token ${token}`)
 }
 
 for (const token of REQUIRED_TOKENS) {
-  assert.ok(globalCss.includes(token), `global.module.css missing ${token} in both themes`)
+  assert.ok(globalCss.includes(token), `global.css missing ${token} in both themes`)
   const lightIdx = globalCss.indexOf("html[data-theme='light']")
   const darkIdx = globalCss.indexOf("html[data-theme='dark']")
   const lightBlock = globalCss.slice(lightIdx, darkIdx)
@@ -206,7 +206,7 @@ for (const token of ['--lanpm-bg', '--lanpm-text', '--lanpm-bubble-bg'] as const
   assert.notEqual(lightVal, darkVal, `${token} light/dark must differ (AUTO-17)`)
 }
 
-// --- design token SSOT (global.module.css ↔ lanpmDesignTokens ↔ ThemeProvider) ---
+// --- design token SSOT (global.css ↔ lanpmDesignTokens ↔ ThemeProvider) ---
 const lightAccent = themeTokenValue(lightBlock, '--lanpm-accent')
 const darkAccent = themeTokenValue(darkBlock, '--lanpm-accent')
 assert.equal(lightAccent, LANPM_ACCENT.light, 'global light --lanpm-accent must match SSOT')
@@ -598,7 +598,7 @@ for (const file of cssFiles) {
   const rel = file.slice(renderer.length + 1)
   const content = readFileSync(file, 'utf8')
   scanned++
-  const isGlobal = rel === 'styles/global.module.css'
+  const isGlobal = rel === 'styles/global.css'
   for (const pat of FORBIDDEN_PATTERNS.slice(0, 6)) {
     const m = content.match(pat)
     assert.ok(!m, `${rel}: forbidden color pattern ${pat} → ${m?.[0] ?? ''}`)
@@ -688,10 +688,15 @@ for (const rel of VIS07B_CSS) {
   assert.ok(!pxFonts?.length, `${rel} must use --lanpm-font-* not ${pxFonts?.join(', ')} (VIS-07b)`)
 }
 
-for (const rel of ['app/AppRouter.tsx', 'views/GroupView.tsx'] as const) {
+for (const rel of ['app/AppRouter.tsx'] as const) {
   const src = readFileSync(join(renderer, rel), 'utf8')
   assert.ok(!/\blazy\s*\(/.test(src), `${rel} must not use React.lazy (Rolldown CJS chunk cycle)`)
 }
+const groupViewSrc = readFileSync(join(renderer, 'views/GroupView.tsx'), 'utf8')
+assert.ok(
+  /\blazy\s*\(/.test(groupViewSrc),
+  'GroupView should lazy-load Gantt/Calendar/Whiteboard (SPRINT-02-pack-size; chunkOptimization off)'
+)
 
 const bottomNavCss = readFileSync(join(renderer, 'layout/BottomNav.module.css'), 'utf8')
 assert.ok(
@@ -775,6 +780,32 @@ for (const { tsx, css, label } of SEVEN_PAGE_VIEWS) {
     TOKEN_PATTERN.test(tsxSrc) || TOKEN_PATTERN.test(cssSrc),
     `${label} view (${tsx}) must use LanPM design tokens`
   )
+}
+
+// --- production bundle: global design tokens must ship (global.css, not dev-only) ---
+const outAssets = join(root, 'out/renderer/assets')
+if (existsSync(outAssets)) {
+  const globalProdCss = readdirSync(outAssets).find(
+    (name) => name.startsWith('global-') && name.endsWith('.css')
+  )
+  assert.ok(globalProdCss, 'production build must emit global-*.css from styles/global.css')
+  const prodCss = readFileSync(join(outAssets, globalProdCss), 'utf8')
+  assert.ok(
+    prodCss.includes('--lanpm-border:'),
+    `production ${globalProdCss} must define --lanpm-border`
+  )
+  assert.ok(
+    prodCss.includes("html[data-theme='light']"),
+    `production ${globalProdCss} must include light theme token block`
+  )
+  const indexHtml = join(root, 'out/renderer/index.html')
+  if (existsSync(indexHtml)) {
+    const html = readFileSync(indexHtml, 'utf8')
+    assert.ok(
+      html.includes(globalProdCss),
+      'out/renderer/index.html must link global design-token stylesheet'
+    )
+  }
 }
 
 console.log(

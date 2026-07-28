@@ -154,6 +154,9 @@ function createWindow(): BrowserWindow {
 
 app.whenReady().then(() => {
   try {
+    if (process.platform === 'win32') {
+      app.setAppUserModelId('com.lanpm.app')
+    }
     Menu.setApplicationMenu(null)
 
     if (!visualCaptureDir) {

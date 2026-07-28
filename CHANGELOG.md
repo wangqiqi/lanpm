@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Fixed
+- **打包版 UI 扁平/无边界（TASK-002）**：`global.module.css` 改为 `global.css`；生产构建单独输出 `global-*.css` 并由 `index.html` 引用，设计令牌（`--lanpm-border` 等）不再在 asar 中丢失。
+- **桌面通知 / 消息框 Electron 默认图标（TASK-001）**：Renderer 通知统一 `desktopNotification` 并传入 `resources/icon.png`；主进程 `Notification` 使用 `resolveAppIconPath()`；`electron-builder` 配置 `win.icon` + `sign: null`（保留 rcedit）；Windows `setAppUserModelId`。
 - **打包后 renderer 崩溃 `__commonJSMin is not a function`**：Vite 8 / Rolldown `chunkOptimization` 将 CJS helper 与 lazy chunk 打成循环依赖；`electron.vite.config.ts` 对 renderer 关闭该优化（rolldown#8361）。
 - **安装包虚胖（SPRINT-02-pack-size）**：asar 排除已 bundle UI / 源码旧产物；renderer-only 依赖改 `devDependencies`；Electron locales 仅 en-US+zh-CN；白板/日历/甘特 `React.lazy` + 导出动态 import。**Setup x64 ~316 MB → ~192 MB**；asar ~251 MB → ~30 MB。
 
