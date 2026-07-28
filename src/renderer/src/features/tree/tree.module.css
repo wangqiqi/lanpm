@@ -128,8 +128,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: min-content;
   padding-left: 4px;
 }
 
@@ -156,6 +156,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .tagChipRow {
@@ -170,6 +171,7 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .detailFieldGrow {
@@ -210,21 +212,18 @@
   margin-bottom: 4px;
 }
 
+/* 勿 flex:1 — 侧栏定高时会挤压下方检查项/插件区导致文字叠压 */
 .detailDescriptionField {
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
 }
 
 .detailDescriptionHost {
   position: relative;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
+  display: block;
+  width: 100%;
 }
 
 .detailDescriptionInput {
-  flex: 1;
   min-height: 112px;
   resize: vertical;
 }
