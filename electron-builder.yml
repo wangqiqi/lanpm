@@ -3,6 +3,10 @@ productName: LanPM
 directories:
   buildResources: resources
   output: dist
+# 仅保留中英；可砍掉 ~40MB+ Chromium locales
+electronLanguages:
+  - en-US
+  - zh-CN
 asarUnpack:
   - '**/node_modules/better-sqlite3/**'
   - '**/node_modules/node-screenshots/**'
