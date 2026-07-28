@@ -89,7 +89,7 @@ async function waitForHealthyUi(win: BrowserWindow, timeoutMs = 25_000): Promise
 
 function loadUrl(win: BrowserWindow, url: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`load timeout: ${url}`)), 40_000)
+    const timer = setTimeout(() => reject(new Error(`load timeout: ${url}`)), 60_000)
     win.webContents.once('did-finish-load', () => {
       clearTimeout(timer)
       resolve()
@@ -109,7 +109,7 @@ async function navigateHash(win: BrowserWindow, hashPath: string): Promise<void>
       if (window.location.hash !== next) window.location.hash = next
     })()
   `)
-  await wait(hashPath.includes('gantt') ? 1_400 : 800)
+  await wait(hashPath.includes('gantt') ? 2_200 : 800)
   await waitForHealthyUi(win)
 }
 
@@ -127,7 +127,7 @@ async function waitForSeededTaskChrome(win: BrowserWindow, marker: string): Prom
       const hasMarker = () => {
         const text = document.body?.innerText ?? ''
         if (text.includes(marker)) return true
-        for (const el of document.querySelectorAll('[class*="cardTitle"]')) {
+        for (const el of document.querySelectorAll('[class*="cardTitle"], [data-task-title]')) {
           if ((el.textContent ?? '').includes(marker)) return true
         }
         return false
@@ -144,39 +144,67 @@ async function waitForSeededTaskChrome(win: BrowserWindow, marker: string): Prom
   `)
 }
 
-/** 日历网格也有大量 rect；须等 gantt-task-react 的 .bar 条（宽≥24px） */
+async function expandGanttViewport(win: BrowserWindow): Promise<void> {
+  await win.webContents.executeJavaScript(`
+    (function () {
+      const wrap = document.querySelector('[data-lanpm-visual="gantt-chart"]')
+      if (!wrap) return
+      const root = wrap.closest('[class*="root"]') ?? wrap.parentElement
+      if (root instanceof HTMLElement) {
+        root.style.minHeight = '820px'
+        root.style.height = '820px'
+      }
+      if (wrap instanceof HTMLElement) {
+        wrap.style.minHeight = '720px'
+        wrap.style.height = '720px'
+      }
+      window.dispatchEvent(new Event('resize'))
+    })()
+  `)
+  await wait(900)
+}
+
+/** 日历网格也有大量 rect；按行去重统计 gantt-task-react 任务条（宽≥12px） */
 async function countGanttTaskBars(win: BrowserWindow): Promise<number> {
   return win.webContents.executeJavaScript(`
     (function () {
       const wrap = document.querySelector('[data-lanpm-visual="gantt-chart"]')
       if (!wrap) return 0
-      let n = 0
+      const rowTops = new Set()
       for (const el of wrap.querySelectorAll('.bar')) {
         const r = el.getBoundingClientRect()
-        if (r.width >= 24 && r.height >= 6) n++
+        if (r.width >= 12 && r.height >= 4) rowTops.add(Math.round(r.y))
       }
-      return n
+      return rowTops.size
     })()
   `)
 }
 
-async function waitForGanttTaskBars(win: BrowserWindow, minBars = 2): Promise<number> {
-  const deadline = Date.now() + 30_000
+const MIN_GANTT_TASK_BAR_ROWS = 1
+
+async function waitForGanttTaskBars(
+  win: BrowserWindow,
+  minBars = MIN_GANTT_TASK_BAR_ROWS
+): Promise<number> {
+  const deadline = Date.now() + 45_000
   while (Date.now() < deadline) {
     const n = await countGanttTaskBars(win)
     if (n >= minBars) return n
-    await wait(250)
+    await wait(300)
   }
   const last = await countGanttTaskBars(win)
-  throw new Error(`gantt task bars not painted (wide .bar count=${last}, need ≥${minBars})`)
+  throw new Error(`gantt task bars not painted (row count=${last}, need ≥${minBars})`)
 }
+
+const VISUAL_CAPTURE_MARKER = '截图·设计评审'
 
 function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) return
 
   const existing = listTasksByGroup(db, GROUP_ID)
-  if (existing.some((t) => t.startDate && t.endDate)) return
+  // mock 目录任务已有排期时旧逻辑会整段跳过，导致看板/甘特等不到截图专用种子
+  if (existing.some((t) => t.title === VISUAL_CAPTURE_MARKER)) return
 
   const userId = status.user.userId
   const ts = new Date().toISOString()
@@ -189,7 +217,7 @@ function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
   const endB = new Date(today)
   endB.setDate(today.getDate() + 22)
 
-  const marker = '截图·设计评审'
+  const marker = VISUAL_CAPTURE_MARKER
   const rows: {
     title: string
     status: TaskStatus
@@ -258,9 +286,10 @@ async function capture(
   if (opts?.waitForText) await waitForSeededTaskChrome(win, opts.waitForText)
   let ganttBars: number | undefined
   if (opts?.waitForGanttBars) {
+    await expandGanttViewport(win)
     ganttBars = await waitForGanttTaskBars(win)
     console.info(`[lanpm:visual-capture] gantt task bars ready (${ganttBars})`)
-    await wait(800)
+    await wait(1_200)
   }
   win.setBackgroundColor(THEME_WINDOW_BG[theme])
   if (!win.isVisible()) win.show()
@@ -301,10 +330,11 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     completeSetup(db, { baseName: 'Visual', department: 'QA' })
     ensureSeedGroups(db)
   }
+  ensureSeedGroups(db)
   seedVisualCaptureTasks(db)
   broadcastTasksChanged(GROUP_ID)
-  await wait(1_500)
-  const taskMarker = '截图·设计评审'
+  await wait(2_000)
+  const taskMarker = VISUAL_CAPTURE_MARKER
   const ganttMeta: Record<string, number> = {}
 
   for (const theme of THEMES) {
@@ -313,11 +343,7 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     await applyTheme(win, theme)
     await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
     for (const page of rest) {
-      if (page.slug === 'gantt') {
-        await loadUrl(win, themedPageUrl(theme, page.hash))
-      } else {
-        await navigateHash(win, page.hash)
-      }
+      await navigateHash(win, page.hash)
       await applyTheme(win, theme)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
