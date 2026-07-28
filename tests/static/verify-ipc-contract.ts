@@ -18,6 +18,7 @@ import { DISCOVER_IPC } from '../../src/shared/discover/channels.ts'
 import { WHITEBOARD_IPC } from '../../src/shared/whiteboard/channels.ts'
 import { DATA_IPC } from '../../src/shared/data/channels.ts'
 import { PLUGIN_IPC } from '../../src/shared/plugin/channels.ts'
+import { NOTIFICATION_IPC } from '../../src/shared/notification/channels.ts'
 
 const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
@@ -42,6 +43,7 @@ const DECLARED = new Set<string>([
   ...Object.values(DATA_IPC),
   ...Object.values(WHITEBOARD_IPC),
   ...Object.values(PLUGIN_IPC),
+  ...Object.values(NOTIFICATION_IPC),
   ...Object.values(IDENTITY_CHANNELS)
 ])
 
@@ -72,6 +74,7 @@ function extractMainHandlers(): Set<string> {
     DATA_IPC,
     WHITEBOARD_IPC,
     PLUGIN_IPC,
+    NOTIFICATION_IPC,
     IDENTITY_CHANNELS
   }
 

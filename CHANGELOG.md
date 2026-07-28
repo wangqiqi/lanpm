@@ -2,7 +2,7 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
-## [Unreleased]
+## [1.33.5] - 2026-07-28
 
 ### Fixed
 - **评估 P3 UX（SPRINT-07）**：群级任务视图去掉重复 `ViewHeader`（底栏 Tab 表达模块）；驾驶舱有需关注任务时默认展开手风琴 Panel；`docs/04` §1.4 与 `verify:visual` 守卫同步。
@@ -14,9 +14,15 @@
 - **桌面通知 / 消息框 Electron 默认图标（TASK-001）**：Renderer 通知统一 `desktopNotification` 并传入 `resources/icon.png`；主进程 `Notification` 使用 `resolveAppIconPath()`；`electron-builder` 配置 `win.icon` + `sign: null`（保留 rcedit）；Windows `setAppUserModelId`。
 - **打包后 renderer 崩溃 `__commonJSMin is not a function`**：Vite 8 / Rolldown `chunkOptimization` 将 CJS helper 与 lazy chunk 打成循环依赖；`electron.vite.config.ts` 对 renderer 关闭该优化（rolldown#8361）。
 - **安装包虚胖（SPRINT-02-pack-size）**：asar 排除已 bundle UI / 源码旧产物；renderer-only 依赖改 `devDependencies`；Electron locales 仅 en-US+zh-CN；白板/日历/甘特 `React.lazy` + 导出动态 import。**Setup x64 ~316 MB → ~192 MB**；asar ~251 MB → ~30 MB。
+- **打版门禁（SPRINT-08）**：补全 `MessageKey`（顶栏角标 tooltip · 看板延期徽章）；`notification:show` 纳入 `NOTIFICATION_IPC` 契约；移除 `ChatView` 未使用 import。
 
 ### Changed
 - **Super Cursor 母版**：`roles.json` 12 人格与 `run-start` Persona 注入；`master` 路由补 `review` / `debug` / `pencil-design`；`plan` 增 PRD 丰富与优先级参考；`review` / `pencil-design` skill 与 reference；`verify-super-cursor` · `cursor-coherence` 扩展；docs 目录与协作规则同步。
+
+### Release
+- `v1.33.5` — SPRINT-04～07 UX 评估闭环 · 截图 CI · P3 抛光 · verify:release-gate 全绿
+
+## [Unreleased]
 
 ## [1.33.4] - 2026-07-15
 
