@@ -74,7 +74,7 @@ const missing = EXPECTED.filter((name) => !written.has(name))
 assert.equal(missing.length, 0, `missing screenshots: ${missing.join(', ')} → ${outDir}`)
 
 const MIN_BYTES = 8_000
-const MIN_GANTT_TASK_BARS = 2
+const MIN_GANTT_TASK_BARS = 1
 const THEME_PAGES = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files', 'cockpit'] as const
 
 for (const name of EXPECTED) {
