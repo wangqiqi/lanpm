@@ -267,6 +267,20 @@
   background: var(--lanpm-selected-bg);
 }
 
+.scheduleBadgeOverdue {
+  margin-inline-end: 0;
+  color: var(--lanpm-danger);
+  background: color-mix(in srgb, var(--lanpm-danger) 12%, var(--lanpm-bg));
+  font-weight: 600;
+}
+
+.scheduleBadgeBehind {
+  margin-inline-end: 0;
+  color: var(--lanpm-warning);
+  background: color-mix(in srgb, var(--lanpm-warning) 12%, var(--lanpm-bg));
+  font-weight: 600;
+}
+
 .cardDue {
   color: var(--lanpm-text-tertiary);
 }

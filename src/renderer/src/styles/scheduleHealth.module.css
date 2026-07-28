@@ -21,7 +21,7 @@
   border-top-color: color-mix(in srgb, var(--lanpm-danger) 35%, var(--lanpm-border)) !important;
   border-right-color: color-mix(in srgb, var(--lanpm-danger) 35%, var(--lanpm-border)) !important;
   border-bottom-color: color-mix(in srgb, var(--lanpm-danger) 35%, var(--lanpm-border)) !important;
-  box-shadow: none !important;
+  box-shadow: inset 3px 0 0 var(--lanpm-danger) !important;
 }
 
 .dueOnTrack {
@@ -35,8 +35,8 @@
 }
 
 .dueOverdue {
-  color: var(--lanpm-danger);
-  font-weight: 600;
+  color: var(--lanpm-text-tertiary);
+  font-weight: 500;
 }
 
 .progressOnTrack {
@@ -50,8 +50,8 @@
 }
 
 .progressOverdue {
-  color: var(--lanpm-danger);
-  font-weight: 600;
+  color: var(--lanpm-text-secondary);
+  font-weight: 500;
 }
 
 .treeRowOnTrack {

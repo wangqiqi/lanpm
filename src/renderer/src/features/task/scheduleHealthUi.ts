@@ -35,6 +35,12 @@ export function scheduleHealthHintKey(health: ScheduleHealth): MessageKey | null
   return null
 }
 
+export function kanbanScheduleBadgeKey(health: ScheduleHealth): MessageKey | null {
+  if (health === 'overdue') return 'board.scheduleOverdueBadge'
+  if (health === 'behind') return 'board.scheduleBehindBadge'
+  return null
+}
+
 export function scheduleHealthAlertKey(health: ScheduleHealth): MessageKey | null {
   if (health === 'overdue') return 'task.scheduleAlertOverdue'
   if (health === 'behind') return 'task.scheduleAlertBehind'

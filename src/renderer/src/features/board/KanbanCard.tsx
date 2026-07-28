@@ -16,6 +16,7 @@ import {
   kanbanCardScheduleClasses,
   kanbanDueScheduleClass,
   kanbanProgressScheduleClass,
+  kanbanScheduleBadgeKey,
   scheduleHealthHintKey
 } from '@renderer/features/task/scheduleHealthUi'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -93,6 +94,7 @@ export default function KanbanCard({
   const blocked = (relation?.blockedBy.length ?? 0) > 0
   const { health: scheduleHealth } = evaluateTaskSchedule(task)
   const scheduleHintKey = scheduleHealthHintKey(scheduleHealth)
+  const scheduleBadgeKey = kanbanScheduleBadgeKey(scheduleHealth)
 
   const menuItems: MenuProps['items'] = []
 
@@ -277,6 +279,16 @@ export default function KanbanCard({
         )}
       </div>
       <div className={styles.cardMeta}>
+        {scheduleBadgeKey && (
+          <Tag
+            bordered={false}
+            className={
+              scheduleHealth === 'overdue' ? styles.scheduleBadgeOverdue : styles.scheduleBadgeBehind
+            }
+          >
+            {t(scheduleBadgeKey)}
+          </Tag>
+        )}
         <Tag bordered={false} className={PRIORITY_CLASS[task.priority]}>
           {t(
             task.priority === 'low'
