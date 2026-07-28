@@ -8,8 +8,6 @@ import {
   CameraOutlined,
   CodeOutlined,
   EditOutlined,
-  FolderOutlined,
-  ProjectOutlined,
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
@@ -695,26 +693,6 @@ export default function ChatView(): React.ReactElement {
             <Text className={styles.chatContextMeta}>
               {t('chat.onlineStats', { online: onlineCount, total: members.length })}
             </Text>
-            {groupType === 'project' && (
-              <div className={styles.chatContextActions}>
-                <RegionButton
-                  variant="toolbar"
-                  className={styles.chatContextAction}
-                  onClick={() => navigate(groupViewPath(gid, 'board'))}
-                >
-                  <ProjectOutlined />
-                  {t('chat.openBoard')}
-                </RegionButton>
-                <RegionButton
-                  variant="toolbar"
-                  className={styles.chatContextAction}
-                  onClick={() => navigate(groupViewPath(gid, 'files'))}
-                >
-                  <FolderOutlined />
-                  {t('chat.openGroupFiles')}
-                </RegionButton>
-              </div>
-            )}
           </div>
         )}
         <div className={styles.chatStreamColumn}>

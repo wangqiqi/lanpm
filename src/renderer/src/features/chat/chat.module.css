@@ -797,24 +797,9 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   padding: 6px 12px 8px;
   border-bottom: 0.5px solid var(--lanpm-separator);
   background: var(--lanpm-surface-solid);
-}
-
-.chatContextActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.chatContextAction {
-  font-size: var(--lanpm-font-caption) !important;
-  padding: 4px 8px !important;
 }
 
 .chatContextMeta {
