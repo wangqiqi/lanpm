@@ -260,11 +260,16 @@ for (const rel of UI_COMPONENTS) {
   assert.ok(existsSync(join(renderer, rel)), `missing ${rel}`)
 }
 
-// --- views use ViewHeader ---
-for (const rel of ['views/GroupView.tsx', 'views/CockpitView.tsx']) {
+// --- views use ViewHeader (cockpit only; group views use bottom nav) ---
+for (const rel of ['views/CockpitView.tsx']) {
   const src = readFileSync(join(renderer, rel), 'utf8')
   assert.match(src, /ViewHeader/, `${rel} should use ViewHeader`)
 }
+const groupViewHeaderSrc = readFileSync(join(renderer, 'views/GroupView.tsx'), 'utf8')
+assert.ok(
+  !/import ViewHeader|<ViewHeader/.test(groupViewHeaderSrc),
+  'GroupView must not render ViewHeader (docs/04 §1.4 · bottom-nav context)'
+)
 
 const cockpitSrc = readFileSync(join(renderer, 'views/CockpitView.tsx'), 'utf8')
 const reportIdx = cockpitSrc.indexOf('cockpit.reportOutput')
