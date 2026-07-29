@@ -7,6 +7,7 @@ export type AiPromptPresetId =
   | 'taskRisk'
   | 'splitSubtasks'
   | 'patrolFollowUp'
+  | 'healthCheck'
   | 'globalHelp'
 
 export interface AiPromptPresetDef {
@@ -22,6 +23,7 @@ export const AI_PROMPT_PRESETS: readonly AiPromptPresetDef[] = [
   { id: 'taskRisk', requiresGroup: true },
   { id: 'splitSubtasks', requiresGroup: true },
   { id: 'patrolFollowUp', requiresGroup: false },
+  { id: 'healthCheck', requiresGroup: true },
   { id: 'globalHelp', requiresGroup: false }
 ] as const
 

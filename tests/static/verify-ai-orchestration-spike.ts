@@ -24,8 +24,8 @@ assert.match(aiDoc, /SPRINT-AI-05/)
 assert.match(aiDoc, /verify:ai-orchestration-spike/)
 assert.match(aiDoc, /自建轻量状态机/)
 
-assert.match(roadmap, /verify:ai-orchestration-spike/)
-assert.match(roadmap, /SPIKE-AI-05|L3 多步编排/)
+assert.match(roadmap, /verify:ai-pipeline|verify:ai-orchestration-spike/)
+assert.match(roadmap, /SPIKE-AI-05|L3 多步编排|L3a/)
 
 const deps = { ...pkg.dependencies, ...pkg.devDependencies }
 const forbidden = [/langgraph/i, /@langchain\//, /open-multi-agent/i]

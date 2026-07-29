@@ -183,6 +183,9 @@ const api: LanpmApi = {
     confirmSubtasks: (input) => ipcRenderer.invoke(AI_IPC.confirmSubtasks, input),
     listPatrolRuns: (limit) => ipcRenderer.invoke(AI_IPC.listPatrolRuns, limit),
     getLatestPatrolRun: () => ipcRenderer.invoke(AI_IPC.getLatestPatrolRun),
+    startPipeline: (input) => ipcRenderer.invoke(AI_IPC.startPipeline, input),
+    getPipelineRun: (runId) => ipcRenderer.invoke(AI_IPC.getPipelineRun, runId),
+    listPipelineRuns: (limit) => ipcRenderer.invoke(AI_IPC.listPipelineRuns, limit),
     onStreamChunk: (handler) => {
       const listener = (
         _event: Electron.IpcRendererEvent,

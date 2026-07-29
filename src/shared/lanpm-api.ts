@@ -256,6 +256,15 @@ export interface LanpmApi {
       limit?: number
     ) => Promise<import('./ai/patrolTypes').AiPatrolRunSummary[]>
     getLatestPatrolRun: () => Promise<import('./ai/patrolTypes').AiPatrolReport | null>
+    startPipeline: (
+      input: import('./ai/pipelineTypes').AiStartPipelineInput
+    ) => Promise<import('./ai/pipelineTypes').AiPipelineRun>
+    getPipelineRun: (
+      runId: string
+    ) => Promise<import('./ai/pipelineTypes').AiPipelineRun | null>
+    listPipelineRuns: (
+      limit?: number
+    ) => Promise<import('./ai/pipelineTypes').AiPipelineRunSummary[]>
     onStreamChunk: (
       handler: (payload: { requestId: string; delta: string }) => void
     ) => () => void

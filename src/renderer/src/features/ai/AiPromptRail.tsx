@@ -11,6 +11,7 @@ const PROMPT_LABEL_KEYS: Record<AiPromptPresetId, MessageKey> = {
   taskRisk: 'ai.prompt.taskRisk.label',
   splitSubtasks: 'ai.prompt.splitSubtasks.label',
   patrolFollowUp: 'ai.prompt.patrolFollowUp.label',
+  healthCheck: 'ai.prompt.healthCheck.label',
   globalHelp: 'ai.prompt.globalHelp.label'
 }
 
@@ -21,6 +22,7 @@ const PROMPT_MESSAGE_KEYS: Record<AiPromptPresetId, MessageKey> = {
   taskRisk: 'ai.prompt.taskRisk.message',
   splitSubtasks: 'ai.prompt.splitSubtasks.message',
   patrolFollowUp: 'ai.prompt.patrolFollowUp.message',
+  healthCheck: 'ai.prompt.healthCheck.message',
   globalHelp: 'ai.prompt.globalHelp.message'
 }
 

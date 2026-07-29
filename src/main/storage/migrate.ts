@@ -220,6 +220,30 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       `)
       db.exec(`CREATE INDEX idx_ai_patrol_runs_started ON ai_patrol_runs(started_at DESC)`)
     }
+  },
+  {
+    fromVersion: 13,
+    description: 'ai_pipeline_runs (SPRINT-AI-06)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE ai_pipeline_runs (
+          run_id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          group_id TEXT NOT NULL,
+          preset_id TEXT NOT NULL,
+          status TEXT NOT NULL CHECK (status IN ('running', 'completed', 'failed')),
+          started_at TEXT NOT NULL,
+          finished_at TEXT,
+          steps_json TEXT NOT NULL DEFAULT '[]',
+          final_markdown TEXT,
+          used_external_ai INTEGER NOT NULL DEFAULT 0,
+          degraded INTEGER NOT NULL DEFAULT 0
+        )
+      `)
+      db.exec(
+        `CREATE INDEX idx_ai_pipeline_runs_user_started ON ai_pipeline_runs(user_id, started_at DESC)`
+      )
+    }
   }
 ]
 

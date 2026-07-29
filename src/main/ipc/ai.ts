@@ -29,6 +29,13 @@ import { runAiStreamChat } from '../ai/aiStreamService.ts'
 import { reviewTaskStructured } from '../ai/aiReviewService.ts'
 import { confirmSubtasks, proposeSubtasks } from '../ai/aiSubtaskService.ts'
 import { getLatestPatrolRun, listPatrolRuns } from '../ai/aiPatrolScheduler.ts'
+import { startAiPipeline } from '../ai/aiPipelineRunner.ts'
+import {
+  getLatestPipelineRun,
+  getPipelineRun,
+  listPipelineRuns
+} from '../ai/aiPipelineRepository.ts'
+import type { AiStartPipelineInput } from '../../shared/ai/pipelineTypes.ts'
 import { sendAiShareMessage } from '../chat/chatService.ts'
 
 function requireUserId(): string {
@@ -105,5 +112,20 @@ export function registerAiIpc(): void {
 
   ipcMain.handle(AI_IPC.getLatestPatrolRun, () => {
     return getLatestPatrolRun(getDatabase())
+  })
+
+  ipcMain.handle(AI_IPC.startPipeline, async (_event, input: AiStartPipelineInput) => {
+    const userId = requireUserId()
+    return startAiPipeline(getDatabase(), userId, input)
+  })
+
+  ipcMain.handle(AI_IPC.getPipelineRun, (_event, runId: string) => {
+    const userId = requireUserId()
+    return getPipelineRun(getDatabase(), userId, runId)
+  })
+
+  ipcMain.handle(AI_IPC.listPipelineRuns, (_event, limit?: number) => {
+    const userId = requireUserId()
+    return listPipelineRuns(getDatabase(), userId, typeof limit === 'number' ? limit : 10)
   })
 }

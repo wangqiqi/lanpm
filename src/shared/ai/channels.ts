@@ -12,7 +12,10 @@ export const AI_IPC = {
   proposeSubtasks: 'ai:proposeSubtasks',
   confirmSubtasks: 'ai:confirmSubtasks',
   listPatrolRuns: 'ai:listPatrolRuns',
-  getLatestPatrolRun: 'ai:getLatestPatrolRun'
+  getLatestPatrolRun: 'ai:getLatestPatrolRun',
+  startPipeline: 'ai:startPipeline',
+  getPipelineRun: 'ai:getPipelineRun',
+  listPipelineRuns: 'ai:listPipelineRuns'
 } as const
 
 export const AI_STREAM_CHUNK_CHANNEL = 'ai:streamChunk' as const

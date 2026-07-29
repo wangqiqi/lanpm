@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import type { AiPatrolRunSummary } from '@shared/ai/patrolTypes'
+import type { AiPipelineRun } from '@shared/ai/pipelineTypes'
 import { formatPatrolSeedMarkdown } from '@shared/ai/patrolFormat'
 import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
 import { resolveDeptDoneCount } from '@shared/cockpit/departmentStats'
@@ -141,20 +142,33 @@ export default function CockpitView(): React.ReactElement {
   const [reportLoading, setReportLoading] = useState(false)
   const [reportExpanded, setReportExpanded] = useState(false)
   const [patrolLatest, setPatrolLatest] = useState<AiPatrolRunSummary | null>(null)
+  const [pipelineRun, setPipelineRun] = useState<AiPipelineRun | null>(null)
+  const [pipelineLoading, setPipelineLoading] = useState(false)
+  const [pipelineExpanded, setPipelineExpanded] = useState(false)
   const openAssistant = useAiAssistantStore((s) => s.openAssistant)
 
   const load = useCallback(async () => {
     setLoading(true)
     setLoadError(false)
     try {
-      const [dash, cfg, patrolRuns] = await Promise.all([
+      const [dash, cfg, patrolRuns, pipelineRuns] = await Promise.all([
         getLanpmApi().cockpit.getDashboard(),
         getLanpmApi().cockpit.getAiConfig(),
-        getLanpmApi().ai.listPatrolRuns(1)
+        getLanpmApi().ai.listPatrolRuns(1),
+        getLanpmApi().ai.listPipelineRuns(5)
       ])
       setDashboard(dash)
       setAiConfig(cfg)
       setPatrolLatest(patrolRuns[0] ?? null)
+      const latestPipeline = activeGroupId
+        ? pipelineRuns.find((r) => r.groupId === activeGroupId && r.status === 'completed')
+        : pipelineRuns.find((r) => r.status === 'completed')
+      if (latestPipeline) {
+        const full = await getLanpmApi().ai.getPipelineRun(latestPipeline.runId)
+        setPipelineRun(full)
+      } else {
+        setPipelineRun(null)
+      }
     } catch (err) {
       setDashboard(null)
       setLoadError(true)
@@ -162,7 +176,7 @@ export default function CockpitView(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [formatError, message])
+  }, [activeGroupId, formatError, message])
 
   useEffect(() => {
     void load()
@@ -730,6 +744,88 @@ export default function CockpitView(): React.ReactElement {
           </>
         ) : (
           <Text type="secondary">{t('ai.patrolLatestEmpty')}</Text>
+        )}
+      </Panel>
+
+      <Panel
+        title={t('ai.pipeline.title')}
+        className={styles.section}
+        extra={
+          <Space size={4}>
+            <Button
+              type="link"
+              size="small"
+              loading={pipelineLoading}
+              disabled={!activeGroupId}
+              onClick={() => {
+                if (!activeGroupId) {
+                  message.warning(t('ai.pipeline.needGroup'))
+                  return
+                }
+                void (async () => {
+                  setPipelineLoading(true)
+                  try {
+                    const run = await getLanpmApi().ai.startPipeline({
+                      groupId: activeGroupId,
+                      presetId: 'healthCheck'
+                    })
+                    setPipelineRun(run)
+                    setPipelineExpanded(true)
+                  } catch (err) {
+                    message.error(formatError(err, 'ai.sendFailed'))
+                  } finally {
+                    setPipelineLoading(false)
+                  }
+                })()
+              }}
+            >
+              {pipelineLoading ? t('ai.pipeline.running') : t('ai.pipeline.run')}
+            </Button>
+            {pipelineRun?.finalMarkdown ? (
+              <Button
+                type="link"
+                size="small"
+                icon={<RobotOutlined />}
+                onClick={() =>
+                  openAssistant({
+                    groupId: activeGroupId ?? null,
+                    context: {
+                      seedMarkdown: pipelineRun.finalMarkdown ?? undefined,
+                      reportKind: 'healthCheck'
+                    },
+                    layout: 'drawer',
+                    entrySource: 'cockpit'
+                  })
+                }
+              >
+                {t('cockpit.continueInAssistant')}
+              </Button>
+            ) : null}
+          </Space>
+        }
+      >
+        {pipelineLoading ? (
+          <Text type="secondary">{t('ai.pipeline.running')}</Text>
+        ) : pipelineRun?.finalMarkdown ? (
+          <>
+            <Text type="secondary" className={styles.reportMeta}>
+              {pipelineRun.finishedAt} ·{' '}
+              {pipelineRun.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
+              {pipelineRun.degraded ? ` · ${t('ai.pipeline.degraded')}` : ''}
+            </Text>
+            {pipelineExpanded ? (
+              <pre className={`${styles.reportPre} ${styles.reportPreExpanded}`}>
+                {pipelineRun.finalMarkdown}
+              </pre>
+            ) : (
+              <Text ellipsis>{pipelineRun.finalMarkdown.split('\n').find((l) => l.trim())}</Text>
+            )}
+            <RegionButton variant="caption" onClick={() => setPipelineExpanded((v) => !v)}>
+              {pipelineExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
+            </RegionButton>
+          </>
+        ) : (
+          <Text type="secondary">{t('ai.pipeline.empty')}</Text>
         )}
       </Panel>
 

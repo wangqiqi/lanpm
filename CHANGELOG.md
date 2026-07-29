@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.40.0] - 2026-07-29
+
+### Added
+
+- **L3a 项目健康检查流水线（SPRINT-AI-06）**：`aiPipelineRunner` + `healthCheck` preset（群概况 → LLM 风险摘要 → Top3 任务评审 → Markdown 报告）；`ai_pipeline_runs` 持久化；驾驶舱一键运行与助手续读
+
 ## [1.39.0] - 2026-07-29
 
 ### Added

@@ -375,6 +375,17 @@ IPC: ai:streamChat                Key 解密仅 main
 
 详表与对比 → `.cursorGrowth/archive/20260729_164100_SPRINT-AI-05_多智能体编排SPIKE.md`
 
+### 6.4 L3a 只读流水线（SPRINT-AI-06 · v1.40.0）
+
+| 能力 | 实现 |
+|------|------|
+| 类型与 preset | `pipelineTypes.ts` · `pipelinePresets.ts` · `healthCheck` 四步 |
+| 持久化 | schema v14 `ai_pipeline_runs` · `aiPipelineRepository` |
+| Runner | `aiPipelineRunner` · gate 降级 · Top3 `reviewTaskStructured` |
+| IPC | `ai:startPipeline` · `ai:getPipelineRun` · `ai:listPipelineRuns` |
+| UI | 驾驶舱「项目健康检查」·「在助手中继续」· preset `healthCheck` |
+| 验收 | `verify:ai-pipeline` |
+
 ---
 
 ## 7. 落地分期（建议 Sprint）
@@ -429,3 +440,4 @@ IPC: ai:streamChat                Key 解密仅 main
 | 2026-07-29 | SPRINT-AI-02：隐式上下文分层（系统/场景/对象）写入 §3.3.1 |
 | 2026-07-29 | 拍板：顶栏+浮层/Dock，非底栏第八 Tab；上下文默认绑当前群、历史个人本地 |
 | 2026-07-29 | SPRINT-AI-05 SPIKE：§6.3 L3 编排调研 · 推荐自建状态机 · `verify:ai-orchestration-spike` |
+| 2026-07-29 | SPRINT-AI-06：§6.4 L3a `healthCheck` 流水线 · `verify:ai-pipeline` |

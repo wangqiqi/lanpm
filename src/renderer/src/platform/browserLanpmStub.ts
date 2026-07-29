@@ -1352,6 +1352,21 @@ export function createBrowserLanpmStub(): LanpmApi {
       }),
       listPatrolRuns: async () => [],
       getLatestPatrolRun: async () => null,
+      startPipeline: async (input) => ({
+        runId: 'pipe_stub',
+        userId: 'stub-user',
+        groupId: input.groupId,
+        presetId: input.presetId,
+        status: 'completed' as const,
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        steps: [],
+        finalMarkdown: '# Stub health check\n\nPipeline stub report.',
+        usedExternalAi: false,
+        degraded: false
+      }),
+      getPipelineRun: async () => null,
+      listPipelineRuns: async () => [],
       shareToChat: async (input) => ({
         msgId: `msg_ai_${Date.now()}`,
         groupId: input.groupId,
