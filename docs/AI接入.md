@@ -360,6 +360,21 @@ IPC: ai:streamChat                Key 解密仅 main
 按 `飞鸽` §7.3 / §10.2 **第一波免费主路径**：**已齐**（M0–M5、`verify:m7` 自动化闭合）。  
 高级排程、敏捷包、会议 SFU、思维导图等为 **可购 / P1–P2**，非第一期缺口。
 
+### 6.3 L3 编排调研结论（SPRINT-AI-05 SPIKE · 2026-07-29）
+
+**拍板**：首条 L3 采用 **自建轻量状态机**（`aiPipelineRunner`）+ **复用**现有 L2 步骤（`reviewTask` · `proposeSubtasks` · 群概况规则），**不**默认引入 LangGraph.js / open-multi-agent 进核心依赖。
+
+| 项 | 结论 |
+|----|------|
+| L2 就绪度 | 流式 · 评审 · 拆分子任务 · 巡检已具备；缺统一 runner 与 `ai_pipeline_runs` |
+| 首条预设 | **项目健康检查**（只读）：规则 attention → LLM 风险摘要 → Markdown 报告 |
+| 入口 | 驾驶舱一键 + 助手续读（非后台 daemon） |
+| 人审 | 凡写库步骤须 UI 确认（`SubtaskPreviewModal` 模式） |
+| 后续 Sprint | `SPRINT-AI-06` · TASK-AI-070–077（见 SPIKE 归档） |
+| 验收锚点 | `verify:ai-orchestration-spike`（文档 · 无编排框架 deps） |
+
+详表与对比 → `.cursorGrowth/archive/20260729_164100_SPRINT-AI-05_多智能体编排SPIKE.md`
+
 ---
 
 ## 7. 落地分期（建议 Sprint）
