@@ -341,6 +341,25 @@ export async function sendTextMessage(
   )
 }
 
+export async function sendAiShareMessage(
+  db: Database,
+  groupId: string,
+  markdown: string,
+  aiThreadId?: string
+): Promise<ChatMessage> {
+  const trimmed = markdown.trim()
+  if (!trimmed) throwLanpm('stub.messageEmpty')
+  const text = trimmed.startsWith('**[AI 助手]**') ? trimmed : `**[AI 助手]**\n\n${trimmed}`
+  return publishChatMessage(db, groupId, 'text', {
+    kind: 'text',
+    text,
+    meta: {
+      source: 'ai-assistant',
+      ...(aiThreadId ? { aiThreadId } : {})
+    }
+  })
+}
+
 export { listGroupMembers, recallMessage }
 
 export async function pickAndSendFileMessage(

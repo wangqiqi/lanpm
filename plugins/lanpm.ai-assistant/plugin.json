@@ -1,0 +1,8 @@
+{
+  "id": "lanpm.ai-assistant",
+  "name": "LanPM AI Assistant",
+  "version": "0.1.0",
+  "slots": ["task.detail.section", "topbar.menu"],
+  "capabilities": ["ai.streamChat", "ai.getThread", "chat.sendMarkdown"],
+  "pricing": "free"
+}

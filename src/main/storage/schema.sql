@@ -233,3 +233,26 @@ CREATE TABLE task_checklist_items (
 );
 CREATE INDEX idx_checklist_items_task ON task_checklist_items(task_id);
 CREATE INDEX idx_checklist_items_checklist ON task_checklist_items(checklist_id);
+
+-- AI 助手会话（本机个人 · 不同步 P2P）
+CREATE TABLE ai_threads (
+  thread_id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  group_id TEXT,
+  title TEXT NOT NULL DEFAULT '',
+  context_json TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX idx_ai_threads_user ON ai_threads(user_id, updated_at DESC);
+CREATE INDEX idx_ai_threads_user_group ON ai_threads(user_id, group_id);
+
+CREATE TABLE ai_messages (
+  message_id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+  content TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (thread_id) REFERENCES ai_threads(thread_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_ai_messages_thread ON ai_messages(thread_id, created_at);

@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.33.9",
+  "version": "1.34.0",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -130,6 +130,10 @@
     "dist:linux": "npm run build && electron-builder --linux --x64 --arm64 --publish never",
     "dist:linux:x64": "npm run build && electron-builder --linux --x64 --publish never",
     "dist:linux:arm64": "npm run build && electron-builder --linux --arm64 --publish never",
+    "verify:ai-thread-service": "node --experimental-strip-types tests/static/verify-ai-thread-service.ts",
+    "verify:ai-stream-ipc": "node --experimental-strip-types tests/static/verify-ai-stream-ipc.ts",
+    "verify:ai-offline-gate": "node --experimental-strip-types tests/static/verify-ai-offline-gate.ts",
+    "verify:ai-desensitize": "node --experimental-strip-types tests/static/verify-ai-desensitize.ts",
     "verify:platform-matrix": "node --experimental-strip-types tests/static/verify-platform-matrix.ts",
     "postinstall": "node scripts/ensure-native-deps.mjs"
   },

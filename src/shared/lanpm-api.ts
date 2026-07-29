@@ -222,6 +222,37 @@ export interface LanpmApi {
     getAiConfig: () => Promise<AiConfigView | null>
     saveAiConfig: (input: AiConfigInput) => Promise<AiConfigView>
   }
+  ai: {
+    listThreads: (
+      input?: import('./ai/types').ListAiThreadsInput
+    ) => Promise<import('./ai/types').AiThread[]>
+    getThread: (
+      threadId: string
+    ) => Promise<{ thread: import('./ai/types').AiThread; messages: import('./ai/types').AiMessage[] }>
+    createThread: (
+      input?: import('./ai/types').CreateAiThreadInput
+    ) => Promise<import('./ai/types').AiThread>
+    deleteThread: (threadId: string) => Promise<{ ok: boolean }>
+    getGateStatus: () => Promise<import('./ai/types').AiGateStatus>
+    streamChat: (
+      input: import('./ai/types').AiStreamChatInput
+    ) => Promise<{ requestId: string }>
+    reviewTask: (
+      input: import('./ai/types').AiStructuredReviewInput
+    ) => Promise<import('./ai/types').AiStructuredReviewResult>
+    shareToChat: (
+      input: import('./ai/types').AiShareToChatInput
+    ) => Promise<ChatMessage>
+    onStreamChunk: (
+      handler: (payload: { requestId: string; delta: string }) => void
+    ) => () => void
+    onStreamDone: (
+      handler: (payload: { requestId: string; threadId: string; assistantText: string }) => void
+    ) => () => void
+    onStreamError: (
+      handler: (payload: { requestId: string; message: string }) => void
+    ) => () => void
+  }
   network: {
     getStatus: () => Promise<import('./network/status').NetworkStatusView>
     reconnect: () => Promise<import('./network/status').NetworkStatusView>

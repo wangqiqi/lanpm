@@ -1,0 +1,143 @@
+.shellInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--lanpm-surface, #fff);
+  color: var(--lanpm-text, #111);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--lanpm-border, #e8e8e8);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.threadList {
+  width: 140px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--lanpm-border, #e8e8e8);
+  padding: 8px;
+  overflow: auto;
+}
+
+.threadItem {
+  cursor: pointer;
+  padding: 4px 6px !important;
+  border-radius: 6px;
+}
+
+.threadActive {
+  cursor: pointer;
+  padding: 4px 6px !important;
+  border-radius: 6px;
+  background: var(--lanpm-accent-soft, rgba(22, 119, 255, 0.12));
+}
+
+.chatPane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.messages {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msgUser,
+.msgAssistant {
+  max-width: 92%;
+}
+
+.msgUser {
+  align-self: flex-end;
+}
+
+.msgAssistant {
+  align-self: flex-start;
+}
+
+.msgBody {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--lanpm-muted, #f5f5f5);
+}
+
+.msgUser .msgBody {
+  background: var(--lanpm-accent, #1677ff);
+  color: #fff;
+}
+
+.gateHint {
+  padding: 0 12px 8px;
+  font-size: 12px;
+}
+
+.suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+
+.suggestItem {
+  border: 1px solid var(--lanpm-border, #d9d9d9);
+  background: transparent;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.composer {
+  border-top: 1px solid var(--lanpm-border, #e8e8e8);
+  padding: 10px 12px;
+}
+
+.composerActions {
+  margin-top: 8px;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.dock {
+  position: fixed;
+  top: var(--lanpm-topbar-height, 52px);
+  right: 0;
+  bottom: var(--lanpm-bottomnav-height, 56px);
+  width: min(400px, 32vw);
+  z-index: 900;
+  border-left: 1px solid var(--lanpm-border, #e8e8e8);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.06);
+}
+
+.drawer :global(.ant-drawer-body) {
+  padding: 0 !important;
+}
+
+@media (max-width: 899px) {
+  .threadList {
+    display: none;
+  }
+}

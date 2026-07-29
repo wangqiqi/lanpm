@@ -168,6 +168,36 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       `)
       db.exec(`CREATE INDEX idx_sync_outbox_due ON sync_outbox(next_attempt_at)`)
     }
+  },
+  {
+    fromVersion: 11,
+    description: 'ai_threads + ai_messages: local AI assistant sessions (SPRINT-AI-01)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE ai_threads (
+          thread_id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          group_id TEXT,
+          title TEXT NOT NULL DEFAULT '',
+          context_json TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+      db.exec(`CREATE INDEX idx_ai_threads_user ON ai_threads(user_id, updated_at DESC)`)
+      db.exec(`CREATE INDEX idx_ai_threads_user_group ON ai_threads(user_id, group_id)`)
+      db.exec(`
+        CREATE TABLE ai_messages (
+          message_id TEXT PRIMARY KEY,
+          thread_id TEXT NOT NULL,
+          role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+          content TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          FOREIGN KEY (thread_id) REFERENCES ai_threads(thread_id) ON DELETE CASCADE
+        )
+      `)
+      db.exec(`CREATE INDEX idx_ai_messages_thread ON ai_messages(thread_id, created_at)`)
+    }
   }
 ]
 

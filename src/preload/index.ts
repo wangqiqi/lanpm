@@ -8,6 +8,7 @@ import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
 import { GROUP_PUSH_CHANNEL } from '../shared/group/channels'
 import { USER_NOTICE_CHANNEL } from '../shared/sync/userNotice'
 import type { UserNotice } from '../shared/sync/userNotice'
+import { AI_IPC, AI_STREAM_CHUNK_CHANNEL, AI_STREAM_DONE_CHANNEL, AI_STREAM_ERROR_CHANNEL } from '../shared/ai/channels'
 
 const api: LanpmApi = {
   platform: process.platform,
@@ -167,6 +168,40 @@ const api: LanpmApi = {
     evaluateProjects: () => ipcRenderer.invoke('cockpit:evaluateProjects'),
     getAiConfig: () => ipcRenderer.invoke('cockpit:getAiConfig'),
     saveAiConfig: (input) => ipcRenderer.invoke('cockpit:saveAiConfig', input)
+  },
+  ai: {
+    listThreads: (input) => ipcRenderer.invoke(AI_IPC.listThreads, input),
+    getThread: (threadId) => ipcRenderer.invoke(AI_IPC.getThread, threadId),
+    createThread: (input) => ipcRenderer.invoke(AI_IPC.createThread, input),
+    deleteThread: (threadId) => ipcRenderer.invoke(AI_IPC.deleteThread, threadId),
+    getGateStatus: () => ipcRenderer.invoke(AI_IPC.getGateStatus),
+    streamChat: (input) => ipcRenderer.invoke(AI_IPC.streamChat, input),
+    reviewTask: (input) => ipcRenderer.invoke(AI_IPC.reviewTask, input),
+    shareToChat: (input) => ipcRenderer.invoke(AI_IPC.shareToChat, input),
+    onStreamChunk: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { requestId: string; delta: string }
+      ) => handler(payload)
+      ipcRenderer.on(AI_STREAM_CHUNK_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(AI_STREAM_CHUNK_CHANNEL, listener)
+    },
+    onStreamDone: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { requestId: string; threadId: string; assistantText: string }
+      ) => handler(payload)
+      ipcRenderer.on(AI_STREAM_DONE_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(AI_STREAM_DONE_CHANNEL, listener)
+    },
+    onStreamError: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { requestId: string; message: string }
+      ) => handler(payload)
+      ipcRenderer.on(AI_STREAM_ERROR_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(AI_STREAM_ERROR_CHANNEL, listener)
+    }
   },
   search: {
     query: (query) => ipcRenderer.invoke('search:query', query)

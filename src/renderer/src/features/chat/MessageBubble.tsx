@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Dropdown, type MenuProps } from 'antd'
+import { Dropdown, Tag, type MenuProps } from 'antd'
 import UserAvatar from '@renderer/ui/UserAvatar'
 import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -178,6 +178,11 @@ export default function MessageBubble({
     <>
       {message.content.kind === 'text' && (
         <div>
+          {message.content.meta?.source === 'ai-assistant' ? (
+            <Tag className={styles.aiSourceTag} color="blue">
+              {t('ai.fromAssistant')}
+            </Tag>
+          ) : null}
           <MentionText
             text={message.content.text}
             members={members}

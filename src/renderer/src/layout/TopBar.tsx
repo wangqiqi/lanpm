@@ -17,6 +17,7 @@ import {
   PlusOutlined,
   PushpinFilled,
   PushpinOutlined,
+  RobotOutlined,
   SearchOutlined,
   SunOutlined
 } from '@ant-design/icons'
@@ -43,6 +44,7 @@ import ManualPeerModal from '@renderer/features/network/ManualPeerModal'
 import RegionButton from '@renderer/ui/RegionButton'
 import { useGroupPinStore } from '@renderer/stores/groupPinStore'
 import { useBadgeStore } from '@renderer/stores/badgeStore'
+import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
 import { LANPM_APP_VERSION } from '@shared/appVersion'
 import { matchesGroupSearch } from '@shared/group/matchGroupSearch'
 import { sortGroupsForSwitcher } from '@shared/group/sortGroups'
@@ -96,6 +98,7 @@ export default function TopBar(): React.ReactElement {
   const togglePin = useGroupPinStore((s) => s.togglePin)
   const badges = useBadgeStore((s) => s.badges)
   const boardRecentDot = useBadgeStore((s) => s.boardRecentDot)
+  const openAssistant = useAiAssistantStore((s) => s.openAssistant)
   const refreshBadges = useBadgeStore((s) => s.refresh)
   const isPinned = useGroupPinStore((s) => s.isPinned)
 
@@ -447,6 +450,21 @@ export default function TopBar(): React.ReactElement {
                 <span className={styles.barActionLabel}>{t('topbar.cockpit')}</span>
               </button>
             ) : null}
+            <button
+              type="button"
+              className={`${styles.barAction} ${styles.barActionSecondary}`}
+              onClick={() =>
+                openAssistant({
+                  groupId: activeGroupId ?? null,
+                  layout: window.matchMedia('(min-width: 1100px)').matches ? 'dock' : 'drawer'
+                })
+              }
+            >
+              <span className={styles.barActionIcon} aria-hidden>
+                <RobotOutlined />
+              </span>
+              <span className={styles.barActionLabel}>{t('topbar.aiAssistant')}</span>
+            </button>
             <button
               type="button"
               className={`${styles.barAction} ${styles.barActionSecondary}`}

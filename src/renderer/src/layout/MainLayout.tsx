@@ -6,6 +6,7 @@ import { useChatNotifications } from '@renderer/features/chat/useChatNotificatio
 import { useDueTaskNotifications } from '@renderer/features/task/useDueTaskNotifications'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useUiStore } from '@renderer/stores/uiStore'
+import AiAssistantShell from '@renderer/features/ai/AiAssistantShell'
 import styles from './MainLayout.module.css'
 
 export default function MainLayout(): React.ReactElement {
@@ -58,6 +59,7 @@ export default function MainLayout(): React.ReactElement {
           <BottomNav />
         </div>
       ) : null}
+      <AiAssistantShell />
     </div>
   )
 }

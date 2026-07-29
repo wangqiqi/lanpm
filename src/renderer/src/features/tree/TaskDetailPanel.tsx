@@ -22,6 +22,7 @@ import {
 } from '@shared/task/boardRelations'
 import TaskRelationSection from '@renderer/features/task/TaskRelationSection'
 import PluginSlot from '@renderer/plugin/PluginSlot'
+import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import {
@@ -104,7 +105,7 @@ export default function TaskDetailPanel({
   onLocateTask
 }: TaskDetailPanelProps): React.ReactElement {
   const { t, formatError } = useI18n()
-  const { message } = useLanpmApp()
+  const { message, modal } = useLanpmApp()
   const navigate = useNavigate()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
   const getMemberDisplayName = useChatMembersStore((s) => s.getMemberDisplayName)
@@ -757,6 +758,65 @@ export default function TaskDetailPanel({
             onClick={() => void handleAddChecklistItem()}
           >
             {t('tree.detailChecklistAdd')}
+          </Button>
+        </div>
+      </div>
+
+      <div className={styles.detailField}>
+        <Text type="secondary">{t('ai.taskSectionTitle')}</Text>
+        <div className={styles.checklistAddRow}>
+          <Button
+            type="default"
+            onClick={() =>
+              useAiAssistantStore.getState().openAssistant({
+                groupId,
+                composerPrefill: `#${task.title} `,
+                context: { taskId: task.taskId },
+                layout: window.matchMedia('(min-width: 1100px)').matches ? 'dock' : 'drawer'
+              })
+            }
+          >
+            {t('ai.askAboutTask')}
+          </Button>
+          <Button
+            type="default"
+            onClick={() => {
+              void (async () => {
+                try {
+                  const result = await getLanpmApi().ai.reviewTask({
+                    groupId,
+                    taskId: task.taskId
+                  })
+                  modal.info({
+                    title: t('ai.reviewTask'),
+                    content: (
+                      <div>
+                        <p>{result.summary}</p>
+                        {result.risks.length ? (
+                          <ul>
+                            {result.risks.map((r) => (
+                              <li key={r}>{r}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        {result.suggestions.length ? (
+                          <ul>
+                            {result.suggestions.map((s) => (
+                              <li key={s}>{s}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </div>
+                    ),
+                    okText: t('common.confirm')
+                  })
+                } catch (err) {
+                  message.error(formatError(err, 'ai.sendFailed'))
+                }
+              })()
+            }}
+          >
+            {t('ai.reviewTask')}
           </Button>
         </div>
       </div>

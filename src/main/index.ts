@@ -16,6 +16,7 @@ import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { registerWhiteboardIpc } from './ipc/whiteboard'
 import { registerPluginIpc } from './ipc/plugin'
 import { registerNotificationIpc } from './ipc/notification'
+import { registerAiIpc } from './ipc/ai'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
@@ -92,6 +93,7 @@ function registerAllIpcHandlers(): void {
   registerWhiteboardIpc()
   registerPluginIpc()
   registerNotificationIpc()
+  registerAiIpc()
 }
 
 function createWindow(): BrowserWindow {

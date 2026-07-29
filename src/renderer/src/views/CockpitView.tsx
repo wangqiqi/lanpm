@@ -23,6 +23,7 @@ import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
+import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
 import styles from './CockpitView.module.css'
 
 const { Text } = Typography
@@ -137,6 +138,7 @@ export default function CockpitView(): React.ReactElement {
   const [reportKind, setReportKind] = useState<'weekly' | 'monthly' | 'evaluate' | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
   const [reportExpanded, setReportExpanded] = useState(false)
+  const openAssistant = useAiAssistantStore((s) => s.openAssistant)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -698,6 +700,22 @@ export default function CockpitView(): React.ReactElement {
               <RegionButton variant="caption" onClick={() => setReportExpanded((v) => !v)}>
                 {reportExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
               </RegionButton>
+              <Button
+                type="link"
+                icon={<RobotOutlined />}
+                onClick={() =>
+                  openAssistant({
+                    groupId: activeGroupId ?? null,
+                    context: {
+                      seedMarkdown: report.content,
+                      reportKind: reportKind ?? undefined
+                    },
+                    layout: 'drawer'
+                  })
+                }
+              >
+                {t('cockpit.continueInAssistant')}
+              </Button>
             </Space>
           }
         >

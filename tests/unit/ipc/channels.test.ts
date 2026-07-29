@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { BADGE_IPC } from '@shared/badge/types'
 import { CHAT_IPC, CHAT_PUSH_CHANNEL } from '@shared/chat/channels'
 import { COCKPIT_IPC } from '@shared/cockpit/channels'
+import { AI_IPC } from '@shared/ai/channels'
 import { DATA_IPC } from '@shared/data/channels'
 import { DISCOVER_IPC } from '@shared/discover/channels'
 import {
@@ -61,5 +62,6 @@ describe('IPC channel contracts', () => {
     expect(DISCOVER_IPC.snapshot).toBe('discover:snapshot')
     expect(BADGE_IPC.getGroupTabBadges).toBe('badge:getGroupTabBadges')
     expect(COCKPIT_IPC.getDashboard).toBe('cockpit:getDashboard')
+    expect(AI_IPC.streamChat).toBe('ai:streamChat')
   })
 })

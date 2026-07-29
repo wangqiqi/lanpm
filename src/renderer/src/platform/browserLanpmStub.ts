@@ -1296,6 +1296,57 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
       }
     },
+    ai: {
+      listThreads: async () => [],
+      getThread: async (threadId) => ({
+        thread: {
+          threadId,
+          userId: 'stub-user',
+          groupId: 'demo-project',
+          title: 'Stub',
+          context: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        messages: []
+      }),
+      createThread: async (input) => ({
+        threadId: 'aith_stub',
+        userId: 'stub-user',
+        groupId: input?.groupId ?? null,
+        title: input?.title ?? 'Stub',
+        context: input?.context ?? null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }),
+      deleteThread: async () => ({ ok: true }),
+      getGateStatus: async () => ({ enabled: false, hasApiKey: false, canStream: false }),
+      streamChat: async () => ({ requestId: 'stub-req' }),
+      reviewTask: async () => ({
+        summary: 'Stub review',
+        risks: [],
+        suggestions: ['Stub suggestion'],
+        usedExternalAi: false
+      }),
+      shareToChat: async (input) => ({
+        msgId: `msg_ai_${Date.now()}`,
+        groupId: input.groupId,
+        senderUserId: 'stub-user',
+        senderDeviceId: 'stub-device',
+        type: 'text' as const,
+        content: {
+          kind: 'text' as const,
+          text: input.markdown,
+          meta: { source: 'ai-assistant' as const, aiThreadId: input.threadId }
+        },
+        lamportTs: Date.now(),
+        createdAt: new Date().toISOString(),
+        deliveryStatus: 'sent' as const
+      }),
+      onStreamChunk: () => () => undefined,
+      onStreamDone: () => () => undefined,
+      onStreamError: () => () => undefined
+    },
     search: {
       query: async (query) => {
         const q = query.trim()

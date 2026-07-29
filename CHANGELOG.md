@@ -2,6 +2,13 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.34.0] - 2026-07-29
+
+### Added
+
+- **AI 助手 MVP（SPRINT-AI-01）**：顶栏全局入口 + `AiAssistantShell`（Dock/Drawer/全屏）；主进程流式 IPC；本机 `ai_threads` / `ai_messages`；`#` 任务引用；驾驶舱「在助手中继续」；发到群聊（`meta.source: ai-assistant`）；任务详情提问与 AI 评审；`plugins/lanpm.ai-assistant` builtin 免费
+- 验收：`verify:ai-thread-service` · `verify:ai-stream-ipc` · `verify:ai-offline-gate` · `verify:ai-desensitize`
+
 ## [1.33.9] - 2026-07-29
 
 ### Removed
