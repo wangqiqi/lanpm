@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.36.0] - 2026-07-29
+
+### Added
+
+- **AI 助手对话区（SPRINT-AI-UI-02）**：`AiMessageRow` 双方头像 + 时间戳 + 单条复制；多选批量复制/发到群聊；全屏宽屏右侧 `AiPromptRail` 快捷提问（点击直发）；Dock/Drawer 上方 chips；`shared/ai/promptPresets.ts`
+
 ## [1.35.1] - 2026-07-29
 
 ### Changed

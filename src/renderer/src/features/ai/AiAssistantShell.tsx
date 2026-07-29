@@ -16,6 +16,8 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ComposerIconButton from '@renderer/ui/ComposerIconButton'
+import AiMessageRow from '@renderer/features/ai/AiMessageRow'
+import AiPromptRail from '@renderer/features/ai/AiPromptRail'
 import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
@@ -74,9 +76,12 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const [draft, setDraft] = useState('')
   const [streaming, setStreaming] = useState(false)
   const [streamBuffer, setStreamBuffer] = useState('')
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const requestIdRef = useRef<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const canSend = Boolean(gate?.canStream && online && !streaming)
+  const promptLayout = wideDock && layout === 'fullscreen' ? 'rail' : 'chips'
 
   const aiApi = open ? getLanpmApi().ai : null
   const apiMissing = open && !aiApi
@@ -178,12 +183,44 @@ export default function AiAssistantShell(): React.ReactElement | null {
     })
   }
 
-  const handleSend = async (): Promise<void> => {
-    const text = draft.trim()
+  const exitSelectMode = useCallback((): void => {
+    setSelectMode(false)
+    setSelectedIds(new Set())
+  }, [])
+
+  const toggleSelect = useCallback((messageId: string): void => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(messageId)) next.delete(messageId)
+      else next.add(messageId)
+      return next
+    })
+  }, [])
+
+  const copyText = useCallback(
+    async (text: string): Promise<void> => {
+      try {
+        await navigator.clipboard.writeText(text)
+        message.success(t('ai.copied'))
+      } catch {
+        message.error(t('ai.copyFailed'))
+      }
+    },
+    [message, t]
+  )
+
+  const shouldShowAvatar = useCallback((index: number, role: AiMessage['role']): boolean => {
+    if (index === 0) return true
+    return messages[index - 1]?.role !== role
+  }, [messages])
+
+  const handleSend = useCallback(async (overrideText?: string): Promise<void> => {
+    const text = (overrideText ?? draft).trim()
     if (!text || !canSend) return
-    setDraft('')
+    if (!overrideText) setDraft('')
     setStreaming(true)
     setStreamBuffer('')
+    exitSelectMode()
     setMessages((prev) => [
       ...prev,
       {
@@ -195,7 +232,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
       }
     ])
     try {
-      const { requestId } = await getLanpmApi().ai.streamChat({
+      const { requestId } = await getLanpmApi().ai!.streamChat({
         threadId: threadId ?? undefined,
         groupId: effectiveGroupId,
         userMessage: text,
@@ -211,21 +248,38 @@ export default function AiAssistantShell(): React.ReactElement | null {
       setStreaming(false)
       message.error(formatError(err, 'ai.sendFailed'))
     }
-  }
+  }, [
+    draft,
+    canSend,
+    exitSelectMode,
+    threadId,
+    effectiveGroupId,
+    context,
+    entrySource,
+    appView,
+    locale,
+    formatError,
+    message
+  ])
 
-  const handleShare = async (): Promise<void> => {
+  const handleShare = useCallback(async (markdown?: string): Promise<void> => {
     if (!effectiveGroupId) {
       message.warning(t('ai.pickGroupHint'))
       return
     }
-    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant')
-    const body = lastAssistant?.content ?? streamBuffer
+    const body =
+      markdown ??
+      [...messages]
+        .reverse()
+        .find((m) => m.role === 'assistant')
+        ?.content ??
+      streamBuffer
     if (!body.trim()) {
       message.warning(t('ai.nothingToShare'))
       return
     }
     try {
-      await getLanpmApi().ai.shareToChat({
+      await getLanpmApi().ai!.shareToChat({
         groupId: effectiveGroupId,
         markdown: body,
         threadId: threadId ?? undefined
@@ -234,7 +288,32 @@ export default function AiAssistantShell(): React.ReactElement | null {
     } catch (err) {
       message.error(formatError(err, 'ai.shareFailed'))
     }
-  }
+  }, [effectiveGroupId, messages, streamBuffer, threadId, formatError, message, t])
+
+  const handleCopySelected = useCallback(async (): Promise<void> => {
+    const selected = messages.filter((m) => selectedIds.has(m.messageId))
+    if (!selected.length) return
+    const text = selected
+      .map((m) => {
+        const label = m.role === 'user' ? t('ai.you') : t('ai.assistantName')
+        return `**${label}**: ${m.content}`
+      })
+      .join('\n\n')
+    await copyText(text)
+  }, [messages, selectedIds, copyText, t])
+
+  const handleShareSelected = useCallback(async (): Promise<void> => {
+    const selected = messages.filter((m) => selectedIds.has(m.messageId))
+    if (!selected.length) return
+    const markdown = selected
+      .map((m) => {
+        const label = m.role === 'user' ? t('ai.you') : t('ai.assistantName')
+        return `**${label}**\n\n${m.content}`
+      })
+      .join('\n\n---\n\n')
+    await handleShare(markdown)
+    exitSelectMode()
+  }, [messages, selectedIds, handleShare, exitSelectMode, t])
 
   const gateHint = !gate?.enabled
     ? t('ai.gateDisabled')
@@ -255,6 +334,18 @@ export default function AiAssistantShell(): React.ReactElement | null {
           </span>
         </div>
         <Space size={4}>
+          {messages.length > 0 ? (
+            <Button
+              type="text"
+              size="small"
+              onClick={() => {
+                if (selectMode) exitSelectMode()
+                else setSelectMode(true)
+              }}
+            >
+              {selectMode ? t('ai.cancelSelect') : t('ai.selectMode')}
+            </Button>
+          ) : null}
           {layout !== 'fullscreen' ? (
             <Button
               type="text"
@@ -278,6 +369,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
             onClick={() => {
               setThreadId(null)
               setMessages([])
+              exitSelectMode()
             }}
           >
             {t('ai.newThread')}
@@ -298,19 +390,45 @@ export default function AiAssistantShell(): React.ReactElement | null {
         </aside>
 
         <div className={styles.chatPane}>
-          <div className={styles.messages} ref={listRef}>
-            {messages.map((m) => (
-              <div
-                key={m.messageId}
-                className={m.role === 'user' ? styles.msgUser : styles.msgAssistant}
-              >
-                <div className={styles.msgBody}>{m.content}</div>
-              </div>
-            ))}
-            {streamBuffer ? (
-              <div className={styles.msgAssistant}>
-                <div className={styles.msgBody}>{streamBuffer}</div>
-              </div>
+          <div className={styles.chatMain}>
+            <div className={styles.messages} ref={listRef}>
+              {messages.map((m, index) => (
+                <AiMessageRow
+                  key={m.messageId}
+                  message={m}
+                  showAvatar={shouldShowAvatar(index, m.role)}
+                  selectMode={selectMode}
+                  selected={selectedIds.has(m.messageId)}
+                  onToggleSelect={toggleSelect}
+                  onCopy={(content) => void copyText(content)}
+                />
+              ))}
+              {streamBuffer ? (
+                <AiMessageRow
+                  message={{
+                    messageId: '__streaming__',
+                    role: 'assistant',
+                    content: streamBuffer,
+                    createdAt: new Date().toISOString()
+                  }}
+                  showAvatar={
+                    messages.length === 0 || messages[messages.length - 1]?.role !== 'assistant'
+                  }
+                  selectMode={false}
+                  selected={false}
+                  onToggleSelect={() => {}}
+                  onCopy={(content) => void copyText(content)}
+                />
+              ) : null}
+            </div>
+
+            {promptLayout === 'rail' ? (
+              <AiPromptRail
+                hasGroup={Boolean(effectiveGroupId)}
+                layout="rail"
+                disabled={!canSend}
+                onSendPreset={(text) => void handleSend(text)}
+              />
             ) : null}
           </div>
 
@@ -337,6 +455,37 @@ export default function AiAssistantShell(): React.ReactElement | null {
                   #{task.title}
                 </button>
               ))}
+            </div>
+          ) : null}
+
+          {promptLayout === 'chips' ? (
+            <AiPromptRail
+              hasGroup={Boolean(effectiveGroupId)}
+              layout="chips"
+              disabled={!canSend}
+              onSendPreset={(text) => void handleSend(text)}
+            />
+          ) : null}
+
+          {selectMode ? (
+            <div className={styles.selectBar}>
+              <Button
+                size="small"
+                disabled={selectedIds.size === 0}
+                onClick={() => void handleCopySelected()}
+              >
+                {t('ai.copySelected')}
+              </Button>
+              <Button
+                size="small"
+                disabled={selectedIds.size === 0 || !effectiveGroupId}
+                onClick={() => void handleShareSelected()}
+              >
+                {t('ai.shareSelected')}
+              </Button>
+              <Button size="small" type="text" onClick={exitSelectMode}>
+                {t('ai.cancelSelect')}
+              </Button>
             </div>
           ) : null}
 

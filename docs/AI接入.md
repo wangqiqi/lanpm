@@ -204,7 +204,8 @@ MainLayout
 
 | 区域 | 要点 |
 |------|------|
-| 消息列表 | 与聊天区类似的单滚动；代码块横向滚动 |
+| 消息列表 | `AiMessageRow`：用户/AI 头像 · 发送者 · `HH:mm` · 单条复制；连续同角色紧凑排列；**多选** → 复制选中 / 发到群聊 |
+| 快捷提示 | 全屏宽屏右侧 `promptRail`；Dock/Drawer/窄屏为 Composer 上方 `promptChips`；**点击即发送**（非填输入框） |
 | Composer | 多行输入；**与群聊同构** `composerIsland` + `inputComposeRow`（TextArea + 分享图标钮 + 圆形发送）；窄屏仅图标 + `aria-label` |
 | 工具条 | 评审 / 拆任务 / 发群 → 窄屏收成 `Dropdown` |
 | 主题 | 亮暗跟 `--lanpm-*`；**不**引入独立 shadcn 全站主题 |
