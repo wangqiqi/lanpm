@@ -244,6 +244,85 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `CREATE INDEX idx_ai_pipeline_runs_user_started ON ai_pipeline_runs(user_id, started_at DESC)`
       )
     }
+  },
+  {
+    fromVersion: 14,
+    description: 'ai_config scoped per local user_id (no shared singleton)',
+    up: (db) => {
+      const hasLegacy = db
+        .prepare(
+          `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'ai_config'`
+        )
+        .get() as { sql: string } | undefined
+      if (!hasLegacy?.sql?.includes('user_id')) {
+        db.exec(`
+          CREATE TABLE ai_config_user (
+            user_id TEXT PRIMARY KEY,
+            provider TEXT NOT NULL,
+            api_key_enc TEXT NOT NULL,
+            base_url TEXT NOT NULL,
+            model TEXT NOT NULL,
+            enabled INTEGER NOT NULL DEFAULT 0,
+            data_policy TEXT NOT NULL DEFAULT 'desensitized-only',
+            patrol_enabled INTEGER NOT NULL DEFAULT 1,
+            patrol_interval_hours INTEGER NOT NULL DEFAULT 24
+          )
+        `)
+        const legacy = db.prepare(`SELECT * FROM ai_config WHERE id = 1`).get() as
+          | {
+              provider: string
+              api_key_enc: string
+              base_url: string
+              model: string
+              enabled: number
+              data_policy: string
+              patrol_enabled: number
+              patrol_interval_hours: number
+            }
+          | undefined
+        if (legacy?.api_key_enc) {
+          let userId: string | null = null
+          const deviceRow = db
+            .prepare(`SELECT value FROM sync_meta WHERE key = ?`)
+            .get('local_device_id') as { value: string } | undefined
+          if (deviceRow?.value) {
+            const device = db
+              .prepare(`SELECT user_id FROM devices WHERE device_id = ?`)
+              .get(deviceRow.value) as { user_id: string } | undefined
+            userId = device?.user_id ?? null
+          }
+          if (!userId) {
+            const firstUser = db
+              .prepare(`SELECT user_id FROM users ORDER BY created_at ASC LIMIT 1`)
+              .get() as { user_id: string } | undefined
+            userId = firstUser?.user_id ?? null
+          }
+          if (userId) {
+            db.prepare(
+              `INSERT INTO ai_config_user (
+                user_id, provider, api_key_enc, base_url, model, enabled, data_policy,
+                patrol_enabled, patrol_interval_hours
+              ) VALUES (
+                @userId, @provider, @apiKeyEnc, @baseUrl, @model, @enabled, @dataPolicy,
+                @patrolEnabled, @patrolIntervalHours
+              )`
+            ).run({
+              userId,
+              provider: legacy.provider,
+              apiKeyEnc: legacy.api_key_enc,
+              baseUrl: legacy.base_url,
+              model: legacy.model,
+              enabled: legacy.enabled,
+              dataPolicy: legacy.data_policy,
+              patrolEnabled: legacy.patrol_enabled,
+              patrolIntervalHours: legacy.patrol_interval_hours
+            })
+          }
+        }
+        db.exec(`DROP TABLE ai_config`)
+        db.exec(`ALTER TABLE ai_config_user RENAME TO ai_config`)
+      }
+    }
   }
 ]
 

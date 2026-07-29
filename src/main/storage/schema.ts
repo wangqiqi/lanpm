@@ -45,4 +45,4 @@ export const EXPECTED_TABLES = [
   'ai_pipeline_runs'
 ] as const
 
-export const SCHEMA_VERSION = 14
+export const SCHEMA_VERSION = 15

@@ -143,7 +143,7 @@ CREATE TABLE file_transfers (
 CREATE INDEX idx_file_transfers_group ON file_transfers(group_id, status);
 
 CREATE TABLE ai_config (
-  id INTEGER PRIMARY KEY CHECK (id = 1),
+  user_id TEXT PRIMARY KEY,
   provider TEXT NOT NULL,
   api_key_enc TEXT NOT NULL,
   base_url TEXT NOT NULL,

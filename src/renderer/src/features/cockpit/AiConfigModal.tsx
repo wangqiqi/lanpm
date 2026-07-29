@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, Input, Modal, Select, Switch } from 'antd'
+import { Button, Form, Input, Modal, Select, Switch, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AiConfigInput, AiConfigView, AiProvider } from '@shared/cockpit/types'
 import {
@@ -128,6 +128,11 @@ export default function AiConfigModal({
           name="apiKey"
           label={config?.hasApiKey ? t('ai.apiKeyKeep') : t('ai.apiKey')}
           rules={config?.hasApiKey ? [] : [{ required: true, message: t('ai.apiKeyRequired') }]}
+          extra={
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {t('ai.apiKeyPersistHint')}
+            </Typography.Text>
+          }
         >
           <Input.Password
             placeholder={apiKeyPlaceholder}

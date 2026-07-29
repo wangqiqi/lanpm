@@ -3,8 +3,10 @@ import { app, safeStorage } from 'electron'
 import type { Database } from 'better-sqlite3'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import type { AiConfigInput, AiConfigView, AiProvider } from '../../shared/cockpit/types.ts'
+import { getLocalUserId } from '../identity/setup.ts'
 
 interface AiConfigRow {
+  user_id: string
   provider: string
   api_key_enc: string
   base_url: string
@@ -69,22 +71,33 @@ function rowToView(row: AiConfigRow): AiConfigView {
   }
 }
 
-function existingPatrolHours(db: Database): number {
-  const row = db.prepare(`SELECT patrol_interval_hours FROM ai_config WHERE id = 1`).get() as
-    | { patrol_interval_hours: number }
-    | undefined
+function requireLocalUserId(db: Database): string {
+  const userId = getLocalUserId(db)
+  if (!userId) throwLanpm('stub.identityRequired')
+  return userId
+}
+
+function existingPatrolHours(db: Database, userId: string): number {
+  const row = db
+    .prepare(`SELECT patrol_interval_hours FROM ai_config WHERE user_id = @userId`)
+    .get({ userId }) as { patrol_interval_hours: number } | undefined
   return row && row.patrol_interval_hours > 0 ? row.patrol_interval_hours : 24
 }
 
 export function getAiConfig(db: Database): AiConfigView | null {
-  const row = db.prepare(`SELECT * FROM ai_config WHERE id = 1`).get() as AiConfigRow | undefined
+  const userId = getLocalUserId(db)
+  if (!userId) return null
+  const row = db
+    .prepare(`SELECT * FROM ai_config WHERE user_id = @userId`)
+    .get({ userId }) as AiConfigRow | undefined
   return row ? rowToView(row) : null
 }
 
 export function saveAiConfig(db: Database, input: AiConfigInput): AiConfigView {
-  const existing = db.prepare(`SELECT api_key_enc FROM ai_config WHERE id = 1`).get() as
-    | { api_key_enc: string }
-    | undefined
+  const userId = requireLocalUserId(db)
+  const existing = db
+    .prepare(`SELECT api_key_enc FROM ai_config WHERE user_id = @userId`)
+    .get({ userId }) as { api_key_enc: string } | undefined
 
   let apiKeyEnc = existing?.api_key_enc ?? ''
   if (input.apiKey?.trim()) {
@@ -95,9 +108,15 @@ export function saveAiConfig(db: Database, input: AiConfigInput): AiConfigView {
   }
 
   db.prepare(
-    `INSERT INTO ai_config (id, provider, api_key_enc, base_url, model, enabled, data_policy, patrol_enabled, patrol_interval_hours)
-     VALUES (1, @provider, @apiKeyEnc, @baseUrl, @model, @enabled, 'desensitized-only', @patrolEnabled, @patrolIntervalHours)
-     ON CONFLICT(id) DO UPDATE SET
+    `INSERT INTO ai_config (
+       user_id, provider, api_key_enc, base_url, model, enabled, data_policy,
+       patrol_enabled, patrol_interval_hours
+     )
+     VALUES (
+       @userId, @provider, @apiKeyEnc, @baseUrl, @model, @enabled, 'desensitized-only',
+       @patrolEnabled, @patrolIntervalHours
+     )
+     ON CONFLICT(user_id) DO UPDATE SET
        provider = excluded.provider,
        api_key_enc = excluded.api_key_enc,
        base_url = excluded.base_url,
@@ -106,22 +125,25 @@ export function saveAiConfig(db: Database, input: AiConfigInput): AiConfigView {
        patrol_enabled = excluded.patrol_enabled,
        patrol_interval_hours = excluded.patrol_interval_hours`
   ).run({
+    userId,
     provider: input.provider,
     apiKeyEnc,
     baseUrl: input.baseUrl.trim(),
     model: input.model.trim(),
     enabled: input.enabled ? 1 : 0,
     patrolEnabled: input.patrolEnabled === false ? 0 : 1,
-    patrolIntervalHours: input.patrolIntervalHours ?? existingPatrolHours(db)
+    patrolIntervalHours: input.patrolIntervalHours ?? existingPatrolHours(db, userId)
   })
 
   return getAiConfig(db)!
 }
 
 export function getDecryptedApiKey(db: Database): string | null {
-  const row = db.prepare(`SELECT api_key_enc FROM ai_config WHERE id = 1`).get() as
-    | { api_key_enc: string }
-    | undefined
+  const userId = getLocalUserId(db)
+  if (!userId) return null
+  const row = db
+    .prepare(`SELECT api_key_enc FROM ai_config WHERE user_id = @userId`)
+    .get({ userId }) as { api_key_enc: string } | undefined
   if (!row?.api_key_enc) return null
   try {
     return decryptApiKey(row.api_key_enc)

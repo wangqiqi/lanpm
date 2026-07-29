@@ -43,6 +43,13 @@ export function getLocalDeviceId(db: Database): string | null {
   return getMeta(db, LOCAL_DEVICE_ID_KEY)
 }
 
+/** 当前本机登录身份 user_id；AI 密钥等仅按此隔离，不同步群组 */
+export function getLocalUserId(db: Database): string | null {
+  const deviceId = getLocalDeviceId(db)
+  if (!deviceId) return null
+  return getDeviceById(db, deviceId)?.userId ?? null
+}
+
 export function getSetupStatus(db: Database): SetupStatus {
   const deviceId = getLocalDeviceId(db)
   if (!deviceId) {

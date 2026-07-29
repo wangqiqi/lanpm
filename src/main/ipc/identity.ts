@@ -11,6 +11,7 @@ import {
 import { ensureSeedGroups } from '../group/groupService'
 import { initNetwork, refreshNetworkIdentity, shutdownNetwork } from '../network'
 import { getDatabase } from '../storage'
+import { bindProfileAfterSetup } from '../storage/profilePaths'
 
 export const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
@@ -32,6 +33,9 @@ export function registerIdentityIpc(): void {
   ipcMain.handle(IDENTITY_CHANNELS.complete, (_event, input: SetupInput) => {
     const db = getDatabase()
     const status = completeSetup(db, input)
+    if (status.configured && status.user?.userId) {
+      bindProfileAfterSetup(status.user.userId)
+    }
     ensureSeedGroups(db)
     refreshNetworkIdentity(db)
     return status

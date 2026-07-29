@@ -18,6 +18,8 @@ const bookmark = readFileSync(
 const httpUrl = readFileSync(join(root, 'src/shared/security/httpUrl.ts'), 'utf8')
 
 assert.match(ai, /app\.isPackaged/, 'aiConfigService must gate on app.isPackaged')
+assert.match(ai, /getLocalUserId/, 'aiConfigService must scope config per local user')
+assert.match(ai, /WHERE user_id = @userId/, 'ai_config queries must filter by user_id')
 assert.match(ai, /err\.apiKeySafeStorageRequired/, 'must throw when safeStorage unavailable in packaged')
 assert.match(ai, /err\.apiKeyDevFallbackForbidden/, 'must forbid decrypting dev: keys when packaged')
 assert.match(httpUrl, /isAllowedHttpUrl/, 'shared httpUrl helper required')
