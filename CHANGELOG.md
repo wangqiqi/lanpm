@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.41.1] - 2026-07-29
+
+### Fixed
+
+- **API Key 按身份持久化**：`ai_config` 由全局 singleton 改为按 `user_id` 隔离（schema v15）；迁移旧行到当前本机用户；`bindProfileAfterSetup` 写回 profile；配置弹窗展示 `apiKeyPersistHint`
+
 ## [1.41.0] - 2026-07-29
 
 ### Added
