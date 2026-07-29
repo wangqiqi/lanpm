@@ -25,7 +25,9 @@ import {
   seedWhiteboardDocFromSceneJson,
   whiteboardDocToSceneJson
 } from '@shared/whiteboard/whiteboardCrdtModel'
+import { WHITEBOARD_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
+import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import styles from './whiteboard.module.css'
 
 type ScenePayload = {
@@ -288,6 +290,13 @@ export default function WhiteboardView(): React.ReactElement {
   }, [gid, boardKey])
 
   useEffect(() => {
+    if (loading || !initialData) return
+    if (localStorage.getItem(WHITEBOARD_GUIDE_STORAGE_KEY)) return
+    localStorage.setItem(WHITEBOARD_GUIDE_STORAGE_KEY, '1')
+    message.info(t('whiteboard.toolbarHint'), 5)
+  }, [loading, initialData, message, t])
+
+  useEffect(() => {
     if (!whiteboardZen) return
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') setWhiteboardZen(false)
@@ -376,12 +385,21 @@ export default function WhiteboardView(): React.ReactElement {
 
   const zenLabel = whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')
   const exportLabel = t('whiteboard.exportPng')
+  const linkedTaskLabel = linkedTaskId
+    ? t('whiteboard.linkedHint', {
+        taskId: linkedTaskId.length > 14 ? `${linkedTaskId.slice(0, 14)}…` : linkedTaskId
+      })
+    : null
 
   const renderTopRightUI = useCallback(
     (isMobile: boolean) => {
       if (isMobile) return null
       return (
         <div className={styles.floatingActions} role="toolbar" aria-label={t('whiteboard.actionsAria')}>
+          <ViewHelpButton
+            buttonClassName={styles.actionBtn}
+            content={t('whiteboard.toolbarHint')}
+          />
           <Tooltip title={exportLabel}>
             <ExcalidrawButton
               className={styles.actionBtn}
@@ -424,6 +442,11 @@ export default function WhiteboardView(): React.ReactElement {
         <ViewLoadingCenter />
       ) : (
         <div className={styles.canvasHost} data-theme={theme} data-zen={whiteboardZen ? '1' : '0'}>
+          {linkedTaskLabel ? (
+            <span className={styles.linkedBadge} title={linkedTaskLabel}>
+              {linkedTaskLabel}
+            </span>
+          ) : null}
           <Excalidraw
             key={`${gid}-${boardKey}`}
             langCode={langCode}

@@ -67,6 +67,8 @@ assert.match(calSrc, /@fullcalendar\/react/)
 assert.match(calSrc, /tasksToCalendarEvents/)
 assert.match(calSrc, /TaskEditModal/)
 assert.match(calSrc, /editable/)
+assert.match(calSrc, /ViewHelpButton/, 'CalendarView should use ? help popover')
+assert.doesNotMatch(calSrc, /ViewToolbarHint/, 'CalendarView should not use permanent toolbar hint')
 
 const bottomNav = readFileSync(
   join(projectRoot, 'src/renderer/src/layout/BottomNav.tsx'),

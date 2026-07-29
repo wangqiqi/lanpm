@@ -1,0 +1,26 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0.5px solid var(--lanpm-separator);
+  border-radius: var(--lanpm-radius-sm);
+  background: var(--lanpm-surface-solid);
+  color: var(--lanpm-text-secondary);
+  cursor: pointer;
+  box-shadow: var(--lanpm-shadow-surface);
+}
+
+.btn:hover {
+  color: var(--lanpm-accent);
+  border-color: var(--lanpm-accent);
+}
+
+.popoverBody {
+  max-width: 280px;
+  font-size: var(--lanpm-font-body);
+  line-height: 1.5;
+  color: var(--lanpm-text);
+}

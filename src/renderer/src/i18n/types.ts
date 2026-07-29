@@ -19,6 +19,7 @@ export type MessageKey =
   | 'common.language'
   | 'common.autoDetect'
   | 'common.me'
+  | 'common.viewHelp'
   | 'topbar.logo'
   | 'topbar.logoAlt'
   | 'topbar.cockpit'

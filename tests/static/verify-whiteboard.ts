@@ -55,6 +55,11 @@ const viewSrc = readFileSync(viewPath, 'utf8')
 assert.match(viewSrc, /@excalidraw\/excalidraw/)
 assert.match(viewSrc, /exportToBlob/)
 assert.match(viewSrc, /exportPng/)
+assert.match(viewSrc, /ViewHelpButton/, 'WhiteboardView should use ? help popover')
+assert.match(viewSrc, /WHITEBOARD_GUIDE_STORAGE_KEY/, 'WhiteboardView should show first-visit guide')
+
+const guideSrc = readFileSync(join(root, 'src/shared/navigation/guide.ts'), 'utf8')
+assert.match(guideSrc, /WHITEBOARD_GUIDE_STORAGE_KEY/)
 
 const routerSrc = readFileSync(join(root, 'src/renderer/src/app/AppRouter.tsx'), 'utf8')
 assert.match(routerSrc, /viewRoute\(\s*['"]whiteboard['"]\s*\)/)

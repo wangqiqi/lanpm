@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.33.6-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.33.7-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -257,7 +257,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.33.6` — SPRINT-09/10 死代码死文档清理 · 评估/审查稿归档；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.33.7` — SPRINT-11 P3 UX 抛光（日历/白板 `?` 帮助 · 建群 placeholder i18n）；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
 **进行中 / 队列：** 会议实现 Sprint · 插件市场 SPIKE。（视觉手验 backlog 见 [06_ROADMAP](./docs/06_ROADMAP.md) §4）
 

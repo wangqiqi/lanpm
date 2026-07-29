@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.33.7] - 2026-07-29
+
+### Fixed
+- **评估 P3 UX（SPRINT-11）**：日历常驻说明收进右上角 `?` Popover（`ViewHelpButton`）；白板首次进入 toast + 浮动 `?`、关联任务底角紧凑徽章；建群名称 placeholder zh/en 纯本地化示例。
+
+### Changed
+- **文档**：`docs/04` 日历/白板帮助降噪约定；评估稿 §3.5/3.6/3.9 P3 标 ✅；`verify:task-calendar` / `verify:whiteboard` 守卫帮助模式。
+
+### Release
+- `v1.33.7` — SPRINT-11 零散 P3 UX 抛光
+
+## [Unreleased]
+
 ## [1.33.6] - 2026-07-28
 
 ### Removed

@@ -18,7 +18,7 @@ import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import TaskEditModal from '@renderer/features/board/TaskEditModal'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
-import ViewToolbar, { ViewToolbarHint } from '@renderer/ui/ViewToolbar'
+import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import styles from './calendar.module.css'
 
 function ymdFromFcStr(value: string | null | undefined): string | null {
@@ -147,13 +147,13 @@ export default function CalendarView(): React.ReactElement {
 
   return (
     <div className={styles.root}>
-      <ViewToolbar>
-        <ViewToolbarHint>{t('calendar.toolbarHint')}</ViewToolbarHint>
-      </ViewToolbar>
-
       {activeTasks.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
 
       <div className={styles.calendarHost} data-empty={activeTasks.length === 0 ? '1' : '0'}>
+        <ViewHelpButton
+          className={styles.helpBtn}
+          content={t('calendar.toolbarHint')}
+        />
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
