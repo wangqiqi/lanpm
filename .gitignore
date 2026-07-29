@@ -22,6 +22,7 @@ tmp/
 temp/
 .lanpm/
 .lanpm/visual-screenshots/
+docs/screenshots/generated/
 
 # Test artifacts
 coverage/

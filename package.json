@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.33.7",
+  "version": "1.33.8",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -108,6 +108,9 @@
     "verify:electron-smoke": "node --experimental-strip-types tests/integration/verify-electron-smoke.ts",
     "verify:visual-screenshots": "node --experimental-strip-types tests/integration/verify-visual-screenshots.ts",
     "verify:screenshots-layout": "node --experimental-strip-types tests/static/verify-screenshots-layout.ts",
+    "screenshots:capture": "node scripts/screenshots-capture.mjs",
+    "screenshots:sync-readme": "node scripts/sync-readme-screenshots.mjs",
+    "verify:screenshots-sync": "node --experimental-strip-types tests/static/verify-screenshots-sync.ts",
     "verify:project": "node --experimental-strip-types tests/runners/verify-project.ts",
     "verify:release-gate": "node --experimental-strip-types tests/runners/verify-release-gate.ts",
     "verify:m7-acceptance": "node --experimental-strip-types tests/static/verify-m7-acceptance.ts",

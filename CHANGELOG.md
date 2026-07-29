@@ -13,6 +13,19 @@
 ### Release
 - `v1.33.7` — SPRINT-11 零散 P3 UX 抛光
 
+## [1.33.8] - 2026-07-29
+
+### Added
+- **README 截图管线（SPRINT-13）**：`screenshots:capture` · `screenshots:sync-readme`；`light_*` → `assets/`（八视图 + 驾驶舱）；`verify:screenshots-sync`。
+
+### Changed
+- **README / README.zh-CN**：产品截图区扩展日历 · 白板 · 驾驶舱；移除过时 `export-gantt.png`。
+- **基线**：`docs/screenshots/baselines/light/` 入库（含 `whiteboard`）；暗色基线补 `dark_whiteboard.png`。
+- **发版**：`docs/05` · **release** skill 可选截图步（不进 `verify:release-gate`）。
+
+### Release
+- `v1.33.8` — SPRINT-13 README 截图同步
+
 ## [Unreleased]
 
 ### Changed

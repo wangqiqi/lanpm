@@ -17,7 +17,7 @@ npm run build && npm run verify:visual-screenshots
 | `dark_tree.png` | 任务树 |
 | `dark_gantt.png` | 甘特图 |
 | `dark_calendar.png` | 日历 |
-| `dark_whiteboard.png` | 白板（SPRINT-13 补全） |
+| `dark_whiteboard.png` | 白板 |
 | `dark_files.png` | 文件 |
 | `dark_cockpit.png` | 驾驶舱 |
 

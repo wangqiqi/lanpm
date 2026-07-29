@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.33.7-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.33.8-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -37,7 +37,7 @@
 <p align="center">
   <img src="assets/chat.png" alt="LanPM chat — member list, messages, and bottom navigation" width="920" />
 </p>
-<p align="center"><sub><b>Chat</b> — group &amp; DM, members, code highlights, seven-tab shell</sub></p>
+<p align="center"><sub><b>Chat</b> — group &amp; DM, members, code highlights, eight-tab shell</sub></p>
 
 <table>
   <tr>
@@ -46,7 +46,7 @@
   </tr>
   <tr>
     <td align="center"><sub><b>Board</b> — drag columns, family colors, tags &amp; schedule health</sub></td>
-    <td align="center"><sub><b>Gantt</b> — timeline, dependencies, milestones, export</sub></td>
+    <td align="center"><sub><b>Gantt</b> — timeline, dependencies, milestones, export PNG/PDF</sub></td>
   </tr>
   <tr>
     <td width="50%"><img src="assets/task-tree.png" alt="LanPM hierarchical task tree" width="100%" /></td>
@@ -56,12 +56,20 @@
     <td align="center"><sub><b>Task tree</b> — hierarchy, progress, cross-view locate</sub></td>
     <td align="center"><sub><b>Files</b> — uploads, bookmarks, deliverables by task</sub></td>
   </tr>
+  <tr>
+    <td width="50%"><img src="assets/calendar.png" alt="LanPM task calendar month view" width="100%" /></td>
+    <td width="50%"><img src="assets/whiteboard.png" alt="LanPM Excalidraw whiteboard" width="100%" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Calendar</b> — drag to reschedule · month/week</sub></td>
+    <td align="center"><sub><b>Whiteboard</b> — realtime collab · export to group files</sub></td>
+  </tr>
 </table>
 
 <p align="center">
-  <img src="assets/export-gantt.png" alt="LanPM Gantt export to PNG or PDF" width="720" />
+  <img src="assets/cockpit.png" alt="LanPM leadership cockpit dashboard" width="920" />
 </p>
-<p align="center"><sub><b>Gantt export</b> — PNG / PDF from the chart view · <i>also in-app: Calendar (month/week) · Whiteboard (Excalidraw realtime)</i></sub></p>
+<p align="center"><sub><b>Cockpit</b> — cross-group attention, KPI summary, project health</sub></p>
 
 ---
 
@@ -257,7 +265,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.33.7` — SPRINT-11 P3 UX polish (calendar/whiteboard `?` help · create-group placeholder i18n); **onekey** slim menu + preflight; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.33.8` — SPRINT-13 README screenshots sync (`screenshots:capture` · `screenshots:sync-readme`); **onekey** slim menu + preflight; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (queue):** meeting implementation sprint · marketplace SPIKE.
 

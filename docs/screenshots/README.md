@@ -21,7 +21,14 @@ npm run build && npm run verify:visual-screenshots
 ## 与 CI / 发版
 
 - **不进** `verify:release-gate` / PR 硬门禁（甘特在无头 GHA 曾不稳定）
-- 发版可选步见 `docs/05` §2 · SPRINT-13 `screenshots:capture` + `screenshots:sync-readme`
+- **发版可选**（见 `docs/05` §1.3）：
+
+```bash
+npm run screenshots:capture       # build + 18 PNG → docs/screenshots/generated/
+npm run screenshots:sync-readme   # light_* → assets/（README 引用）
+```
+
+- `generated/` 可清（gitignore）；入库基线用 `baselines/light/` · `baselines/dark/`
 
 ## 历史
 

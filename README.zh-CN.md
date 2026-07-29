@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.33.7-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.33.8-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -35,9 +35,9 @@
 ## 📸 产品截图
 
 <p align="center">
-  <img src="assets/chat.png" alt="LanPM 聊天 — 成员列表、消息区与底部七 Tab 导航" width="920" />
+  <img src="assets/chat.png" alt="LanPM 聊天 — 成员列表、消息区与底部八 Tab 导航" width="920" />
 </p>
-<p align="center"><sub><b>聊天</b> — 群聊 / 私聊、成员状态、代码高亮、七视图主壳</sub></p>
+<p align="center"><sub><b>聊天</b> — 群聊 / 私聊、成员状态、代码高亮、八视图主壳</sub></p>
 
 <table>
   <tr>
@@ -46,7 +46,7 @@
   </tr>
   <tr>
     <td align="center"><sub><b>看板</b> — 拖拽流转、任务族配色、标签与工期健康度</sub></td>
-    <td align="center"><sub><b>甘特图</b> — 时间轴、依赖、里程碑、导出</sub></td>
+    <td align="center"><sub><b>甘特图</b> — 时间轴、依赖、里程碑、导出 PNG/PDF</sub></td>
   </tr>
   <tr>
     <td width="50%"><img src="assets/task-tree.png" alt="LanPM 任务树层级结构" width="100%" /></td>
@@ -56,12 +56,20 @@
     <td align="center"><sub><b>任务树</b> — 父子层级、进度汇总、跨视图定位</sub></td>
     <td align="center"><sub><b>文件</b> — 上传下载、书签、按任务交付物</sub></td>
   </tr>
+  <tr>
+    <td width="50%"><img src="assets/calendar.png" alt="LanPM 任务日历月视图" width="100%" /></td>
+    <td width="50%"><img src="assets/whiteboard.png" alt="LanPM Excalidraw 白板" width="100%" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>日历</b> — 拖拽改期 · 月/周视图</sub></td>
+    <td align="center"><sub><b>白板</b> — 实时同画 · 导出到群文件</sub></td>
+  </tr>
 </table>
 
 <p align="center">
-  <img src="assets/export-gantt.png" alt="LanPM 甘特图导出 PNG / PDF" width="720" />
+  <img src="assets/cockpit.png" alt="LanPM 领导驾驶舱" width="920" />
 </p>
-<p align="center"><sub><b>甘特导出</b> — 图表视图一键导出 PNG / PDF · <i>应用内另有：日历（月/周）· 白板（Excalidraw 实时同画）</i></sub></p>
+<p align="center"><sub><b>驾驶舱</b> — 跨群需关注、领导摘要、项目健康度</sub></p>
 
 ---
 
@@ -257,7 +265,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.33.7` — SPRINT-11 P3 UX 抛光（日历/白板 `?` 帮助 · 建群 placeholder i18n）；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.33.8` — SPRINT-13 README 截图同步（`screenshots:capture` · `screenshots:sync-readme`）；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
 **进行中 / 队列：** 会议实现 Sprint · 插件市场 SPIKE。（视觉手验 backlog 见 [06_ROADMAP](./docs/06_ROADMAP.md) §4）
 

@@ -93,6 +93,7 @@ PR 生命周期（评论、CI、拆 PR）：`babysit` · `split-to-prs`（**mast
 - [ ] **security**（auth/PII）
 - [ ] UI/功能：**建议** **`/delivery`** 无 Blocker
 - [ ] CHANGELOG `[Unreleased]` · manifest bump · docs
+- [ ] **（可选）README 截图**：`npm run screenshots:capture` · `npm run screenshots:sync-readme` · 更新 `docs/screenshots/baselines/light/`（不进 release-gate）
 - [ ] Annotated tag · push 按团队策略
 
 ### 多架构打包（可选 · 桌面 / 原生产物）
