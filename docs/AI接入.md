@@ -334,6 +334,15 @@ IPC: ai:streamChat                Key 解密仅 main
 | 调度 | 启动 30s 后首次探 · 保存配置后立即探 · `ai:probeEndpoint` |
 | UI | 配置页「测试连接」· 助手 `ai.gateEndpointUnreachable` |
 
+### 5.6 A4++ 助手拆分与巡检续读（SPRINT-AI-03+ · v1.39.0）
+
+| 能力 | 实现 |
+|------|------|
+| 巡检续读 | `formatPatrolSeedMarkdown` · 驾驶舱巡检 Panel「在助手中继续」· `reportKind: 'patrol'` |
+| 助手拆分 | `resolveAssistantTaskId` · 助手头栏「AI 拆分」· 复用 `SubtaskPreviewModal` |
+| 快捷提示 | `splitSubtasks` · `patrolFollowUp` preset |
+| 验收 | `verify:ai-assistant-patrol-subtask` |
+
 ---
 
 ## 6. 智能体与 PM 工作覆盖（讨论结论）

@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
 import type { AiPatrolRunSummary } from '@shared/ai/patrolTypes'
+import { formatPatrolSeedMarkdown } from '@shared/ai/patrolFormat'
 import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
 import { resolveDeptDoneCount } from '@shared/cockpit/departmentStats'
 import { formatWeekOverWeekDelta } from '@shared/cockpit/weeklyTrend'
@@ -681,7 +682,43 @@ export default function CockpitView(): React.ReactElement {
         )}
       </Panel>
 
-      <Panel title={t('ai.patrolTitle')} className={styles.section}>
+      <Panel
+        title={t('ai.patrolTitle')}
+        className={styles.section}
+        extra={
+          patrolLatest ? (
+            <Button
+              type="link"
+              size="small"
+              icon={<RobotOutlined />}
+              onClick={() => {
+                void (async () => {
+                  try {
+                    const report = await getLanpmApi().ai.getLatestPatrolRun()
+                    if (!report) {
+                      message.warning(t('ai.patrolLatestEmpty'))
+                      return
+                    }
+                    openAssistant({
+                      groupId: activeGroupId ?? null,
+                      context: {
+                        seedMarkdown: formatPatrolSeedMarkdown(report),
+                        reportKind: 'patrol'
+                      },
+                      layout: 'drawer',
+                      entrySource: 'cockpit'
+                    })
+                  } catch (err) {
+                    message.error(formatError(err, 'ai.sendFailed'))
+                  }
+                })()
+              }}
+            >
+              {t('cockpit.continueInAssistant')}
+            </Button>
+          ) : null
+        }
+      >
         {patrolLatest ? (
           <>
             <Text type="secondary" className={styles.reportMeta}>

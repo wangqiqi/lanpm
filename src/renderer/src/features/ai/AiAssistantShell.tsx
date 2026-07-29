@@ -18,9 +18,15 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import AiMessageRow from '@renderer/features/ai/AiMessageRow'
 import AiPromptRail from '@renderer/features/ai/AiPromptRail'
+import SubtaskPreviewModal, {
+  proposalsToRows,
+  type SubtaskPreviewRow
+} from '@renderer/features/ai/SubtaskPreviewModal'
 import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
+import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
+import { resolveAssistantTaskId } from '@shared/ai/resolveAssistantTaskId'
 import styles from './aiAssistant.module.css'
 
 const { Text } = Typography
@@ -64,6 +70,10 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const tasks = useTaskStore((s) =>
     effectiveGroupId ? (s.tasksByGroup[effectiveGroupId] ?? []) : []
   )
+  const loadMembers = useChatMembersStore((s) => s.loadMembers)
+  const members = useChatMembersStore((s) =>
+    effectiveGroupId ? (s.membersByGroup[effectiveGroupId] ?? []) : []
+  )
 
   const wideDock = useMediaQuery('(min-width: 1100px)')
   const mediumDrawer = useMediaQuery('(min-width: 900px)')
@@ -78,6 +88,12 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const [streamBuffer, setStreamBuffer] = useState('')
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  const [subtaskModalOpen, setSubtaskModalOpen] = useState(false)
+  const [subtaskLoading, setSubtaskLoading] = useState(false)
+  const [subtaskConfirming, setSubtaskConfirming] = useState(false)
+  const [subtaskRows, setSubtaskRows] = useState<SubtaskPreviewRow[]>([])
+  const [subtaskUsedExternalAi, setSubtaskUsedExternalAi] = useState(false)
+  const [subtaskDegraded, setSubtaskDegraded] = useState(false)
   const requestIdRef = useRef<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const canSend = Boolean(gate?.canStream && online && !streaming)
@@ -112,12 +128,31 @@ export default function AiAssistantShell(): React.ReactElement | null {
 
   useEffect(() => {
     if (!open) return
-    if (effectiveGroupId) void loadTasks(effectiveGroupId)
+    if (effectiveGroupId) {
+      void loadTasks(effectiveGroupId)
+      void loadMembers(effectiveGroupId)
+    }
     void refreshGate()
     void refreshThreads()
     if (composerPrefill) setDraft(composerPrefill)
     if (threadId) void loadThread(threadId)
-  }, [open, composerPrefill, threadId, effectiveGroupId, loadTasks, refreshGate, refreshThreads, loadThread])
+  }, [open, composerPrefill, threadId, effectiveGroupId, loadTasks, loadMembers, refreshGate, refreshThreads, loadThread])
+
+  const memberOptions = useMemo(
+    () => [
+      { value: '', label: t('tree.detailUnassigned') },
+      ...members.map((m) => ({ value: m.userId, label: m.displayName }))
+    ],
+    [members, t]
+  )
+
+  const resolvedTaskId = useMemo(
+    () =>
+      effectiveGroupId
+        ? resolveAssistantTaskId(context?.taskId, draft, tasks as Task[])
+        : null,
+    [context?.taskId, draft, tasks, effectiveGroupId]
+  )
 
   useEffect(() => {
     const onOnline = (): void => setOnline(true)
@@ -315,6 +350,30 @@ export default function AiAssistantShell(): React.ReactElement | null {
     exitSelectMode()
   }, [messages, selectedIds, handleShare, exitSelectMode, t])
 
+  const handleOpenSubtaskSplit = useCallback((): void => {
+    if (!effectiveGroupId || !resolvedTaskId) return
+    setSubtaskModalOpen(true)
+    setSubtaskLoading(true)
+    setSubtaskRows([])
+    setSubtaskDegraded(false)
+    void (async () => {
+      try {
+        const result = await getLanpmApi().ai!.proposeSubtasks({
+          groupId: effectiveGroupId,
+          parentTaskId: resolvedTaskId
+        })
+        setSubtaskRows(proposalsToRows(result.proposals))
+        setSubtaskUsedExternalAi(result.usedExternalAi)
+        setSubtaskDegraded(Boolean(result.errorCode))
+      } catch (err) {
+        message.error(formatError(err, 'ai.sendFailed'))
+        setSubtaskModalOpen(false)
+      } finally {
+        setSubtaskLoading(false)
+      }
+    })()
+  }, [effectiveGroupId, resolvedTaskId, formatError, message])
+
   const gateHint = !gate?.enabled
     ? t('ai.gateDisabled')
     : !gate?.hasApiKey
@@ -336,6 +395,11 @@ export default function AiAssistantShell(): React.ReactElement | null {
           </span>
         </div>
         <Space size={4}>
+          {resolvedTaskId ? (
+            <Button type="text" size="small" disabled={!gate?.canStream} onClick={handleOpenSubtaskSplit}>
+              {t('ai.splitSubtasks')}
+            </Button>
+          ) : null}
           {messages.length > 0 ? (
             <Button
               type="text"
@@ -537,22 +601,68 @@ export default function AiAssistantShell(): React.ReactElement | null {
 
   if (!open) return null
 
+  const subtaskModal = (
+    <SubtaskPreviewModal
+      open={subtaskModalOpen}
+      loading={subtaskLoading}
+      proposals={subtaskRows}
+      memberOptions={memberOptions}
+      usedExternalAi={subtaskUsedExternalAi}
+      degraded={subtaskDegraded}
+      onChange={setSubtaskRows}
+      onCancel={() => setSubtaskModalOpen(false)}
+      confirming={subtaskConfirming}
+      onConfirm={(rows) => {
+        if (!effectiveGroupId || !resolvedTaskId) return
+        void (async () => {
+          setSubtaskConfirming(true)
+          try {
+            const result = await getLanpmApi().ai!.confirmSubtasks({
+              groupId: effectiveGroupId,
+              parentTaskId: resolvedTaskId,
+              items: rows.map((r) => ({
+                title: r.title.trim(),
+                assigneeUserId: r.suggestedAssigneeUserId,
+                endDate: r.suggestedEndDate
+              }))
+            })
+            message.success(t('ai.subtaskCreated', { count: String(result.createdTaskIds.length) }))
+            setSubtaskModalOpen(false)
+            if (effectiveGroupId) void loadTasks(effectiveGroupId)
+          } catch (err) {
+            message.error(formatError(err, 'ai.sendFailed'))
+          } finally {
+            setSubtaskConfirming(false)
+          }
+        })()
+      }}
+    />
+  )
+
   if (layout === 'dock') {
-    return <aside className={styles.dock}>{body}</aside>
+    return (
+      <>
+        <aside className={styles.dock}>{body}</aside>
+        {subtaskModal}
+      </>
+    )
   }
 
   return (
-    <Drawer
-      open={open}
-      onClose={closeAssistant}
-      width={layout === 'fullscreen' ? '100%' : 'min(420px, 85vw)'}
-      className={styles.drawer}
-      closable={false}
-      mask={layout !== 'fullscreen'}
-      placement="right"
-      styles={{ body: { padding: 0 } }}
-    >
-      {body}
-    </Drawer>
+    <>
+      <Drawer
+        open={open}
+        onClose={closeAssistant}
+        width={layout === 'fullscreen' ? '100%' : 'min(420px, 85vw)'}
+        className={styles.drawer}
+        closable={false}
+        mask={layout !== 'fullscreen'}
+        placement="right"
+        styles={{ body: { padding: 0 } }}
+      >
+        {body}
+      </Drawer>
+      {subtaskModal}
+    </>
   )
 }

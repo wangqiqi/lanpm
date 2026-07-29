@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.38.0",
+  "version": "1.39.0",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -138,6 +138,7 @@
     "verify:ai-subtask": "node --experimental-strip-types tests/static/verify-ai-subtask.ts",
     "verify:ai-patrol": "node --experimental-strip-types tests/static/verify-ai-patrol.ts",
     "verify:ai-endpoint-probe": "node --experimental-strip-types tests/static/verify-ai-endpoint-probe.ts",
+    "verify:ai-assistant-patrol-subtask": "node --experimental-strip-types tests/static/verify-ai-assistant-patrol-subtask.ts",
     "verify:platform-matrix": "node --experimental-strip-types tests/static/verify-platform-matrix.ts",
     "postinstall": "node scripts/ensure-native-deps.mjs"
   },

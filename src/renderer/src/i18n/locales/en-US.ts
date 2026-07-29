@@ -256,6 +256,12 @@ const enUS = {
   'ai.prompt.weekSummary.message': 'Draft a concise weekly summary I can share in the group.',
   'ai.prompt.taskRisk.label': 'Tasks at risk',
   'ai.prompt.taskRisk.message': 'Which tasks need attention in this group? Prioritize them.',
+  'ai.prompt.splitSubtasks.label': 'Split subtasks',
+  'ai.prompt.splitSubtasks.message':
+    'Based on the current task context, suggest executable subtasks (title, owner, due date).',
+  'ai.prompt.patrolFollowUp.label': 'Patrol follow-up',
+  'ai.prompt.patrolFollowUp.message':
+    'Interpret the patrol report above and list prioritized actions and next steps.',
   'ai.prompt.globalHelp.label': 'What you can do',
   'ai.prompt.globalHelp.message': 'What can you help me with in LanPM project collaboration?',
   'board.newTask': 'New task',

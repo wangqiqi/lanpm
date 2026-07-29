@@ -9,6 +9,8 @@ const PROMPT_LABEL_KEYS: Record<AiPromptPresetId, MessageKey> = {
   overdueTasks: 'ai.prompt.overdueTasks.label',
   weekSummary: 'ai.prompt.weekSummary.label',
   taskRisk: 'ai.prompt.taskRisk.label',
+  splitSubtasks: 'ai.prompt.splitSubtasks.label',
+  patrolFollowUp: 'ai.prompt.patrolFollowUp.label',
   globalHelp: 'ai.prompt.globalHelp.label'
 }
 
@@ -17,6 +19,8 @@ const PROMPT_MESSAGE_KEYS: Record<AiPromptPresetId, MessageKey> = {
   overdueTasks: 'ai.prompt.overdueTasks.message',
   weekSummary: 'ai.prompt.weekSummary.message',
   taskRisk: 'ai.prompt.taskRisk.message',
+  splitSubtasks: 'ai.prompt.splitSubtasks.message',
+  patrolFollowUp: 'ai.prompt.patrolFollowUp.message',
   globalHelp: 'ai.prompt.globalHelp.message'
 }
 

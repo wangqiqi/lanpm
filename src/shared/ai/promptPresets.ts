@@ -5,6 +5,8 @@ export type AiPromptPresetId =
   | 'overdueTasks'
   | 'weekSummary'
   | 'taskRisk'
+  | 'splitSubtasks'
+  | 'patrolFollowUp'
   | 'globalHelp'
 
 export interface AiPromptPresetDef {
@@ -18,6 +20,8 @@ export const AI_PROMPT_PRESETS: readonly AiPromptPresetDef[] = [
   { id: 'overdueTasks', requiresGroup: true },
   { id: 'weekSummary', requiresGroup: true },
   { id: 'taskRisk', requiresGroup: true },
+  { id: 'splitSubtasks', requiresGroup: true },
+  { id: 'patrolFollowUp', requiresGroup: false },
   { id: 'globalHelp', requiresGroup: false }
 ] as const
 

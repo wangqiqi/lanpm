@@ -251,6 +251,12 @@ const zhCN = {
   'ai.prompt.weekSummary.message': '帮我整理本周工作要点，适合发到群里的简短版本。',
   'ai.prompt.taskRisk.label': '需关注任务',
   'ai.prompt.taskRisk.message': '当前群有哪些需要关注的任务？请按优先级说明。',
+  'ai.prompt.splitSubtasks.label': '拆分子任务',
+  'ai.prompt.splitSubtasks.message':
+    '请根据当前上下文任务，给出可执行的子任务拆分建议（标题、负责人、截止时间）。',
+  'ai.prompt.patrolFollowUp.label': '解读巡检',
+  'ai.prompt.patrolFollowUp.message':
+    '请解读上方巡检报告，按优先级说明需要处理的事项与建议下一步。',
   'ai.prompt.globalHelp.label': '能做什么',
   'ai.prompt.globalHelp.message': '在 LanPM 项目协作场景下，你可以帮我做哪些事？',
   'board.newTask': '新建任务',
