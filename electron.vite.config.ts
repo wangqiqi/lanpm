@@ -1,6 +1,6 @@
 import dns from 'node:dns'
 import { readFileSync } from 'node:fs'
-import { copyFileSync, mkdirSync } from 'fs'
+import { copyFileSync, existsSync, mkdirSync } from 'fs'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
@@ -114,9 +114,25 @@ function copySchemaSqlPlugin(): Plugin {
   }
 }
 
+/** 打包后主进程从 out/resources 读取 icon（与 dev 的 ../../resources 双路径） */
+function copyAppIconsPlugin(): Plugin {
+  return {
+    name: 'copy-app-icons',
+    closeBundle() {
+      const res = join(root, 'resources')
+      const outRes = join(root, 'out/resources')
+      mkdirSync(outRes, { recursive: true })
+      for (const name of ['icon.ico', 'icon.png'] as const) {
+        const src = join(res, name)
+        if (existsSync(src)) copyFileSync(src, join(outRes, name))
+      }
+    }
+  }
+}
+
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin()],
+    plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin(), copyAppIconsPlugin()],
     server: { watch: devWatch }
   },
   preload: {

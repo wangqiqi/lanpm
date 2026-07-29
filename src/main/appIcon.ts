@@ -1,22 +1,39 @@
 import { app, nativeImage, type NativeImage } from 'electron'
 import { existsSync } from 'fs'
-import { join } from 'path'
+import { dirname, join, resolve } from 'path'
+import { fileURLToPath } from 'url'
 
-function resourcesDir(): string {
-  return app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources')
+/** Compiled main lives in out/main — reliable dev path to repo resources/ */
+const mainDir = dirname(fileURLToPath(import.meta.url))
+
+function iconCandidateDirs(): string[] {
+  const dirs: string[] = []
+  if (app.isPackaged) {
+    dirs.push(process.resourcesPath)
+    dirs.push(join(process.resourcesPath, 'resources'))
+  } else {
+    dirs.push(join(mainDir, '../../resources'))
+    dirs.push(join(mainDir, '../resources'))
+    dirs.push(join(app.getAppPath(), 'resources'))
+    dirs.push(join(process.cwd(), 'resources'))
+  }
+  return [...new Set(dirs)]
 }
 
-/** Dev / packaged path to icon file for BrowserWindow & notifications */
+/** Dev / packaged path to icon file for BrowserWindow, Tray & notifications */
 export function resolveAppIconPath(): string | undefined {
-  const dir = resourcesDir()
-  const candidates =
+  const names =
     process.platform === 'win32'
-      ? [join(dir, 'icon.ico'), join(dir, 'icon.png')]
-      : [join(dir, 'icon.png'), join(dir, 'icon.ico')]
-  if (app.isPackaged) {
-    candidates.push(join(process.resourcesPath, 'resources', 'icon.png'))
+      ? ['icon.ico', 'icon.png']
+      : ['icon.png', 'icon.ico']
+
+  for (const dir of iconCandidateDirs()) {
+    for (const name of names) {
+      const path = resolve(join(dir, name))
+      if (existsSync(path)) return path
+    }
   }
-  return candidates.find((p) => existsSync(p))
+  return undefined
 }
 
 /** Windows 任务栏优先 .ico；打包与 dev 共用 */
@@ -25,4 +42,13 @@ export function resolveWindowIcon(): NativeImage | undefined {
   if (!path) return undefined
   const image = nativeImage.createFromPath(path)
   return image.isEmpty() ? undefined : image
+}
+
+/** 系统托盘用小尺寸位图（Windows 通知区 16px） */
+export function resolveTrayIcon(): NativeImage | undefined {
+  const base = resolveWindowIcon()
+  if (!base) return undefined
+  const size = process.platform === 'darwin' ? 22 : 16
+  const resized = base.resize({ width: size, height: size })
+  return resized.isEmpty() ? base : resized
 }

@@ -60,7 +60,8 @@ files:
 # Explicit multi-arch (TASK-265) — do not rely on host default alone
 win:
   icon: resources/icon.ico
-  signAndEditExecutable: false
+  signAndEditExecutable: true
+  sign: null
   target:
     - target: nsis
       arch:

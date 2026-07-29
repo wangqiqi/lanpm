@@ -2,8 +2,9 @@
 /**
  * Ensure taskbar / exe / notification raster icons exist (generated from icon.svg).
  * No-op when icon.png + icon.ico are present; otherwise runs build-icons.mjs.
+ * Also mirrors icons into out/resources for packaged main resolution.
  */
-import { existsSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -12,12 +13,16 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const png = join(root, 'resources/icon.png')
 const ico = join(root, 'resources/icon.ico')
 
-if (existsSync(png) && existsSync(ico)) {
-  process.exit(0)
+if (!existsSync(png) || !existsSync(ico)) {
+  const r = spawnSync(process.execPath, [join(root, 'scripts/build-icons.mjs')], {
+    stdio: 'inherit',
+    cwd: root
+  })
+  if ((r.status ?? 1) !== 0) process.exit(r.status ?? 1)
 }
 
-const r = spawnSync(process.execPath, [join(root, 'scripts/build-icons.mjs')], {
-  stdio: 'inherit',
-  cwd: root
-})
-process.exit(r.status ?? 1)
+const outRes = join(root, 'out/resources')
+mkdirSync(outRes, { recursive: true })
+for (const name of ['icon.png', 'icon.ico']) {
+  copyFileSync(join(root, 'resources', name), join(outRes, name))
+}
