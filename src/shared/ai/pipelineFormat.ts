@@ -64,3 +64,39 @@ export function formatHealthCheckReportMarkdown(input: HealthCheckReportInput): 
 
   return lines.filter((line) => line !== undefined).join('\n')
 }
+
+export interface TaskRemediateReportInput {
+  groupName: string
+  parentTaskTitle: string
+  startedAt: string
+  finishedAt: string
+  createdTaskIds: string[]
+  createdTitles: string[]
+  usedExternalAi: boolean
+  degraded: boolean
+}
+
+/** Markdown summary after task-remediate pipeline confirms subtasks. */
+export function formatTaskRemediateReportMarkdown(input: TaskRemediateReportInput): string {
+  const lines: string[] = [
+    '# 任务补救拆分报告',
+    '',
+    `- 项目：${input.groupName}`,
+    `- 父任务：${input.parentTaskTitle}`,
+    `- 时间：${input.startedAt} → ${input.finishedAt}`,
+    `- 来源：${input.usedExternalAi ? '含外部 AI 提案' : '本地规则提案'}`,
+    input.degraded ? '- 状态：部分步骤已降级' : '',
+    '',
+    '## 已创建子任务',
+    ''
+  ]
+  if (input.createdTitles.length === 0) {
+    lines.push('（无）')
+  } else {
+    for (const title of input.createdTitles) {
+      lines.push(`- ${title}`)
+    }
+  }
+  lines.push('', `共创建 ${input.createdTaskIds.length} 项子任务。`)
+  return lines.filter((line) => line !== '').join('\n')
+}

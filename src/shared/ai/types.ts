@@ -7,7 +7,7 @@ export interface AiThreadContext {
   /** Cockpit report seed or task review seed */
   seedMarkdown?: string
   taskId?: string
-  reportKind?: 'weekly' | 'monthly' | 'evaluate' | 'patrol' | 'healthCheck'
+  reportKind?: 'weekly' | 'monthly' | 'evaluate' | 'patrol' | 'healthCheck' | 'taskRemediate'
 }
 
 export interface AiThread {

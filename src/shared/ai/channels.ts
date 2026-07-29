@@ -14,6 +14,8 @@ export const AI_IPC = {
   listPatrolRuns: 'ai:listPatrolRuns',
   getLatestPatrolRun: 'ai:getLatestPatrolRun',
   startPipeline: 'ai:startPipeline',
+  resumePipeline: 'ai:resumePipeline',
+  cancelPipeline: 'ai:cancelPipeline',
   getPipelineRun: 'ai:getPipelineRun',
   listPipelineRuns: 'ai:listPipelineRuns'
 } as const

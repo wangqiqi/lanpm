@@ -3,9 +3,10 @@ import type {
   AiPipelinePresetId,
   AiPipelineRun,
   AiPipelineRunStatus,
-  AiPipelineRunSummary,
-  AiPipelineStepResult
+  AiPipelineRunSummary
 } from '../../shared/ai/pipelineTypes.ts'
+import { parsePipelineStepsPayload } from '../../shared/ai/pipelineStepsPayload.ts'
+import { serializePipelineStepsPayload } from '../../shared/ai/pipelineStepsPayload.ts'
 
 const PIPELINE_RETENTION = 20
 
@@ -23,16 +24,8 @@ interface PipelineRunRow {
   degraded: number
 }
 
-function parseSteps(json: string): AiPipelineStepResult[] {
-  try {
-    const parsed = JSON.parse(json) as AiPipelineStepResult[]
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
 function rowToRun(row: PipelineRunRow): AiPipelineRun {
+  const payload = parsePipelineStepsPayload(row.steps_json)
   return {
     runId: row.run_id,
     userId: row.user_id,
@@ -41,10 +34,12 @@ function rowToRun(row: PipelineRunRow): AiPipelineRun {
     status: row.status as AiPipelineRunStatus,
     startedAt: row.started_at,
     finishedAt: row.finished_at,
-    steps: parseSteps(row.steps_json),
+    steps: payload.steps,
     finalMarkdown: row.final_markdown,
     usedExternalAi: row.used_external_ai === 1,
-    degraded: row.degraded === 1
+    degraded: row.degraded === 1,
+    pendingConfirm: payload.pendingConfirm ?? null,
+    createdTaskIds: payload.createdTaskIds ?? []
   }
 }
 
@@ -59,6 +54,14 @@ function rowToSummary(row: PipelineRunRow): AiPipelineRunSummary {
     usedExternalAi: row.used_external_ai === 1,
     degraded: row.degraded === 1
   }
+}
+
+function runToStepsJson(run: AiPipelineRun): string {
+  return serializePipelineStepsPayload({
+    steps: run.steps,
+    pendingConfirm: run.pendingConfirm,
+    createdTaskIds: run.createdTaskIds
+  })
 }
 
 export function insertPipelineRun(db: Database, run: AiPipelineRun): void {
@@ -78,7 +81,7 @@ export function insertPipelineRun(db: Database, run: AiPipelineRun): void {
     status: run.status,
     startedAt: run.startedAt,
     finishedAt: run.finishedAt,
-    stepsJson: JSON.stringify(run.steps),
+    stepsJson: runToStepsJson(run),
     finalMarkdown: run.finalMarkdown,
     usedExternalAi: run.usedExternalAi ? 1 : 0,
     degraded: run.degraded ? 1 : 0
@@ -110,7 +113,7 @@ export function updatePipelineRun(db: Database, run: AiPipelineRun): void {
     runId: run.runId,
     status: run.status,
     finishedAt: run.finishedAt,
-    stepsJson: JSON.stringify(run.steps),
+    stepsJson: runToStepsJson(run),
     finalMarkdown: run.finalMarkdown,
     usedExternalAi: run.usedExternalAi ? 1 : 0,
     degraded: run.degraded ? 1 : 0

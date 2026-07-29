@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.41.0] - 2026-07-29
+
+### Added
+
+- **L3b 人审写库流水线（SPRINT-AI-07）**：`awaiting_confirm` 状态 · `resumePipeline` / `cancelPipeline` IPC · `taskRemediate` preset（单父任务提案 → 人审 → `confirmSubtasks` 落库）；`steps_json` 内嵌 `pendingConfirm`；驾驶舱需关注任务「补救拆分」· 助手入口与 preset · `verify:ai-pipeline-human` · `docs/AI接入.md` §6.5
+
+## [1.40.1] - 2026-07-29
+
+### Fixed
+
+- **品牌图标一致性**：`appIcon` 多路径解析 + 绝对路径；`ensure-app-icons` 同步到 `out/resources`；Windows 打包恢复 `signAndEditExecutable` 以 rcedit 嵌入 exe 图标
+- **关闭隐藏到托盘**：系统托盘 + 点关闭隐藏主窗口；托盘单击/双击恢复；托盘「退出」才真正结束进程
+
 ## [1.40.0] - 2026-07-29
 
 ### Added

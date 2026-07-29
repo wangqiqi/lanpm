@@ -1352,18 +1352,77 @@ export function createBrowserLanpmStub(): LanpmApi {
       }),
       listPatrolRuns: async () => [],
       getLatestPatrolRun: async () => null,
-      startPipeline: async (input) => ({
-        runId: 'pipe_stub',
+      startPipeline: async (input) => {
+        if (input.presetId === 'taskRemediate') {
+          return {
+            runId: 'pipe_stub_remediate',
+            userId: 'stub-user',
+            groupId: input.groupId,
+            presetId: 'taskRemediate' as const,
+            status: 'awaiting_confirm' as const,
+            startedAt: new Date().toISOString(),
+            finishedAt: null,
+            steps: [],
+            finalMarkdown: null,
+            usedExternalAi: false,
+            degraded: false,
+            pendingConfirm: {
+              parentTaskId: input.parentTaskId ?? 'task_stub_parent',
+              parentTaskTitle: 'Stub parent task',
+              proposals: [
+                { title: 'Stub subtask A' },
+                { title: 'Stub subtask B', suggestedEndDate: '2026-08-15' }
+              ],
+              usedExternalAi: false
+            },
+            createdTaskIds: []
+          }
+        }
+        return {
+          runId: 'pipe_stub',
+          userId: 'stub-user',
+          groupId: input.groupId,
+          presetId: input.presetId,
+          status: 'completed' as const,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          steps: [],
+          finalMarkdown: '# Stub health check\n\nPipeline stub report.',
+          usedExternalAi: false,
+          degraded: false,
+          pendingConfirm: null,
+          createdTaskIds: []
+        }
+      },
+      resumePipeline: async (input) => ({
+        runId: input.runId,
         userId: 'stub-user',
-        groupId: input.groupId,
-        presetId: input.presetId,
+        groupId: 'demo-project',
+        presetId: 'taskRemediate' as const,
         status: 'completed' as const,
         startedAt: new Date().toISOString(),
         finishedAt: new Date().toISOString(),
         steps: [],
-        finalMarkdown: '# Stub health check\n\nPipeline stub report.',
+        finalMarkdown: '# Stub remediate report\n\nSubtasks created.',
         usedExternalAi: false,
-        degraded: false
+        degraded: false,
+        pendingConfirm: null,
+        createdTaskIds: input.items.map((_, i) => `task_stub_${i}`)
+      }),
+      cancelPipeline: async (input) => ({
+        runId: input.runId,
+        userId: 'stub-user',
+        groupId: 'demo-project',
+        presetId: 'taskRemediate' as const,
+        status: 'failed' as const,
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        steps: [],
+        finalMarkdown: null,
+        usedExternalAi: false,
+        degraded: false,
+        pendingConfirm: null,
+        createdTaskIds: []
       }),
       getPipelineRun: async () => null,
       listPipelineRuns: async () => [],

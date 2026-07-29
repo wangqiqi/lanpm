@@ -27,6 +27,11 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
+import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import SubtaskPreviewModal, {
+  proposalsToRows,
+  type SubtaskPreviewRow
+} from '@renderer/features/ai/SubtaskPreviewModal'
 import styles from './CockpitView.module.css'
 
 const { Text } = Typography
@@ -145,6 +150,18 @@ export default function CockpitView(): React.ReactElement {
   const [pipelineRun, setPipelineRun] = useState<AiPipelineRun | null>(null)
   const [pipelineLoading, setPipelineLoading] = useState(false)
   const [pipelineExpanded, setPipelineExpanded] = useState(false)
+  const [remediateModalOpen, setRemediateModalOpen] = useState(false)
+  const [remediateLoading, setRemediateLoading] = useState(false)
+  const [remediateConfirming, setRemediateConfirming] = useState(false)
+  const [remediateRows, setRemediateRows] = useState<SubtaskPreviewRow[]>([])
+  const [remediateRunId, setRemediateRunId] = useState<string | null>(null)
+  const [remediateGroupId, setRemediateGroupId] = useState<string | null>(null)
+  const [remediateUsedExternalAi, setRemediateUsedExternalAi] = useState(false)
+  const [remediateDegraded, setRemediateDegraded] = useState(false)
+  const members = useChatMembersStore((s) =>
+    remediateGroupId ? (s.membersByGroup[remediateGroupId] ?? []) : []
+  )
+  const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const openAssistant = useAiAssistantStore((s) => s.openAssistant)
 
   const load = useCallback(async () => {
@@ -161,11 +178,24 @@ export default function CockpitView(): React.ReactElement {
       setAiConfig(cfg)
       setPatrolLatest(patrolRuns[0] ?? null)
       const latestPipeline = activeGroupId
-        ? pipelineRuns.find((r) => r.groupId === activeGroupId && r.status === 'completed')
-        : pipelineRuns.find((r) => r.status === 'completed')
+        ? pipelineRuns.find(
+            (r) =>
+              r.groupId === activeGroupId &&
+              (r.status === 'completed' || r.status === 'awaiting_confirm')
+          )
+        : pipelineRuns.find((r) => r.status === 'completed' || r.status === 'awaiting_confirm')
       if (latestPipeline) {
         const full = await getLanpmApi().ai.getPipelineRun(latestPipeline.runId)
         setPipelineRun(full)
+        if (full?.status === 'awaiting_confirm' && full.pendingConfirm) {
+          setRemediateRunId(full.runId)
+          setRemediateGroupId(full.groupId)
+          setRemediateRows(proposalsToRows(full.pendingConfirm.proposals))
+          setRemediateUsedExternalAi(full.pendingConfirm.usedExternalAi)
+          setRemediateDegraded(Boolean(full.pendingConfirm.degraded || full.pendingConfirm.errorCode))
+          setRemediateModalOpen(true)
+          void loadMembers(full.groupId)
+        }
       } else {
         setPipelineRun(null)
       }
@@ -176,7 +206,48 @@ export default function CockpitView(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [activeGroupId, formatError, message])
+  }, [activeGroupId, formatError, loadMembers, message])
+
+  const memberOptions = useMemo(
+    () => members.map((m) => ({ value: m.userId, label: m.displayName })),
+    [members]
+  )
+
+  const startTaskRemediate = useCallback(
+    (groupId: string, parentTaskId: string): void => {
+      setRemediateModalOpen(true)
+      setRemediateLoading(true)
+      setRemediateRows([])
+      setRemediateDegraded(false)
+      setRemediateRunId(null)
+      setRemediateGroupId(groupId)
+      void loadMembers(groupId)
+      void (async () => {
+        try {
+          const run = await getLanpmApi().ai.startPipeline({
+            groupId,
+            presetId: 'taskRemediate',
+            parentTaskId
+          })
+          if (run.status === 'awaiting_confirm' && run.pendingConfirm) {
+            setRemediateRunId(run.runId)
+            setRemediateRows(proposalsToRows(run.pendingConfirm.proposals))
+            setRemediateUsedExternalAi(run.pendingConfirm.usedExternalAi)
+            setRemediateDegraded(Boolean(run.pendingConfirm.degraded || run.pendingConfirm.errorCode))
+          } else {
+            message.error(t('ai.pipeline.remediateFailed'))
+            setRemediateModalOpen(false)
+          }
+        } catch (err) {
+          message.error(formatError(err, 'ai.sendFailed'))
+          setRemediateModalOpen(false)
+        } finally {
+          setRemediateLoading(false)
+        }
+      })()
+    },
+    [formatError, loadMembers, message, t]
+  )
 
   useEffect(() => {
     void load()
@@ -497,6 +568,14 @@ export default function CockpitView(): React.ReactElement {
                   >
                     {kindLabel}
                   </span>
+                  <Button
+                    size="small"
+                    type="link"
+                    className={styles.attentionTaskAction}
+                    onClick={() => startTaskRemediate(item.groupId, item.taskId)}
+                  >
+                    {t('ai.pipeline.remediateRun')}
+                  </Button>
                   <Button
                     size="small"
                     type="link"
@@ -904,6 +983,51 @@ export default function CockpitView(): React.ReactElement {
           const saved = await getLanpmApi().cockpit.saveAiConfig(input)
           setAiConfig(saved)
           message.success(t('cockpit.configSaved'))
+        }}
+      />
+
+      <SubtaskPreviewModal
+        open={remediateModalOpen}
+        loading={remediateLoading}
+        proposals={remediateRows}
+        memberOptions={memberOptions}
+        usedExternalAi={remediateUsedExternalAi}
+        degraded={remediateDegraded}
+        onChange={setRemediateRows}
+        confirming={remediateConfirming}
+        onCancel={() => {
+          if (remediateRunId) {
+            void getLanpmApi().ai.cancelPipeline({ runId: remediateRunId })
+          }
+          setRemediateRunId(null)
+          setRemediateModalOpen(false)
+        }}
+        onConfirm={(rows) => {
+          if (!remediateRunId || !remediateGroupId) return
+          void (async () => {
+            setRemediateConfirming(true)
+            try {
+              const run = await getLanpmApi().ai.resumePipeline({
+                runId: remediateRunId,
+                items: rows.map((r) => ({
+                  title: r.title.trim(),
+                  assigneeUserId: r.suggestedAssigneeUserId,
+                  endDate: r.suggestedEndDate
+                }))
+              })
+              message.success(
+                t('ai.subtaskCreated', { count: String(run.createdTaskIds.length) })
+              )
+              setRemediateRunId(null)
+              setRemediateModalOpen(false)
+              setPipelineRun(run)
+              setPipelineExpanded(true)
+            } catch (err) {
+              message.error(formatError(err, 'ai.sendFailed'))
+            } finally {
+              setRemediateConfirming(false)
+            }
+          })()
         }}
       />
     </div>

@@ -259,6 +259,12 @@ export interface LanpmApi {
     startPipeline: (
       input: import('./ai/pipelineTypes').AiStartPipelineInput
     ) => Promise<import('./ai/pipelineTypes').AiPipelineRun>
+    resumePipeline: (
+      input: import('./ai/pipelineTypes').AiResumePipelineInput
+    ) => Promise<import('./ai/pipelineTypes').AiPipelineRun>
+    cancelPipeline: (
+      input: import('./ai/pipelineTypes').AiCancelPipelineInput
+    ) => Promise<import('./ai/pipelineTypes').AiPipelineRun>
     getPipelineRun: (
       runId: string
     ) => Promise<import('./ai/pipelineTypes').AiPipelineRun | null>

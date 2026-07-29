@@ -12,6 +12,7 @@ const PROMPT_LABEL_KEYS: Record<AiPromptPresetId, MessageKey> = {
   splitSubtasks: 'ai.prompt.splitSubtasks.label',
   patrolFollowUp: 'ai.prompt.patrolFollowUp.label',
   healthCheck: 'ai.prompt.healthCheck.label',
+  taskRemediate: 'ai.prompt.taskRemediate.label',
   globalHelp: 'ai.prompt.globalHelp.label'
 }
 
@@ -23,6 +24,7 @@ const PROMPT_MESSAGE_KEYS: Record<AiPromptPresetId, MessageKey> = {
   splitSubtasks: 'ai.prompt.splitSubtasks.message',
   patrolFollowUp: 'ai.prompt.patrolFollowUp.message',
   healthCheck: 'ai.prompt.healthCheck.message',
+  taskRemediate: 'ai.prompt.taskRemediate.message',
   globalHelp: 'ai.prompt.globalHelp.message'
 }
 
@@ -31,13 +33,16 @@ interface AiPromptRailProps {
   layout: 'rail' | 'chips'
   disabled?: boolean
   onSendPreset: (message: string) => void
+  /** Return true to skip sending the preset chat message. */
+  onPresetAction?: (presetId: AiPromptPresetId) => boolean
 }
 
 export default function AiPromptRail({
   hasGroup,
   layout,
   disabled,
-  onSendPreset
+  onSendPreset,
+  onPresetAction
 }: AiPromptRailProps): React.ReactElement {
   const { t } = useI18n()
   const presets = listAiPromptPresets(hasGroup)
@@ -48,7 +53,10 @@ export default function AiPromptRail({
       type="button"
       className={layout === 'rail' ? styles.promptRailItem : styles.promptChip}
       disabled={disabled}
-      onClick={() => onSendPreset(t(PROMPT_MESSAGE_KEYS[preset.id]))}
+      onClick={() => {
+        if (onPresetAction?.(preset.id)) return
+        onSendPreset(t(PROMPT_MESSAGE_KEYS[preset.id]))
+      }}
     >
       {t(PROMPT_LABEL_KEYS[preset.id])}
     </button>

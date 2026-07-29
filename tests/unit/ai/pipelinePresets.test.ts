@@ -13,7 +13,7 @@ describe('pipelinePresets', () => {
     ])
   })
 
-  it('registers only known presets', () => {
-    expect(AI_PIPELINE_PRESETS.map((p) => p.id)).toContain('healthCheck')
+  it('registers healthCheck and taskRemediate presets', () => {
+    expect(AI_PIPELINE_PRESETS.map((p) => p.id)).toEqual(['healthCheck', 'taskRemediate'])
   })
 })

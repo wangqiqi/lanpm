@@ -2,35 +2,49 @@ import type { Database } from 'better-sqlite3'
 import { randomUUID } from 'crypto'
 import { buildAttentionTasks } from '../../shared/cockpit/attentionTasks.ts'
 import type { AiGroupSummary } from '../../shared/cockpit/types.ts'
-import { formatHealthCheckReportMarkdown } from '../../shared/ai/pipelineFormat.ts'
+import {
+  formatHealthCheckReportMarkdown,
+  formatTaskRemediateReportMarkdown
+} from '../../shared/ai/pipelineFormat.ts'
 import { getPipelinePreset } from '../../shared/ai/pipelinePresets.ts'
 import type {
+  AiCancelPipelineInput,
   AiPipelinePresetId,
   AiPipelineRun,
   AiPipelineStepResult,
   AiPipelineStepStatus,
+  AiResumePipelineInput,
   AiStartPipelineInput
 } from '../../shared/ai/pipelineTypes.ts'
 import type { AiStructuredReviewResult } from '../../shared/ai/types.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { getGroupById } from '../storage/repositories/groupRepository.ts'
-import { listTasksByGroup } from '../storage/repositories/taskRepository.ts'
+import { getTaskById, listTasksByGroup } from '../storage/repositories/taskRepository.ts'
 import { getUserById } from '../storage/repositories/userRepository.ts'
 import { isExternalAiAvailable } from './aiEndpointProbeService.ts'
 import { getAiConfig, getDecryptedApiKey } from './aiConfigService.ts'
-import { insertPipelineRun, updatePipelineRun } from './aiPipelineRepository.ts'
+import { getPipelineRun, insertPipelineRun, updatePipelineRun } from './aiPipelineRepository.ts'
 import {
   buildGroupAiSummary,
+  desensitizeTask,
   formatAiGroupSummary,
   formatAiRuntimeContext
 } from './aiPromptService.ts'
 import { reviewTaskStructured } from './aiReviewService.ts'
+import { confirmSubtasks, proposeSubtasks } from './aiSubtaskService.ts'
 
 interface HealthCheckBag {
   groupName: string
   groupSummary: AiGroupSummary
   riskSummary: string
   taskReviews: { taskId: string; title: string; review: AiStructuredReviewResult }[]
+}
+
+interface TaskRemediateBag {
+  groupName: string
+  parentTaskId: string
+  parentTaskTitle: string
+  createdTitles: string[]
 }
 
 async function callExternalRiskSummary(db: Database, prompt: string): Promise<string | null> {
@@ -85,6 +99,28 @@ function stepResult(
   }
 }
 
+function createBaseRun(
+  userId: string,
+  groupId: string,
+  presetId: AiPipelinePresetId
+): AiPipelineRun {
+  return {
+    runId: `pipe_${randomUUID()}`,
+    userId,
+    groupId,
+    presetId,
+    status: 'running',
+    startedAt: new Date().toISOString(),
+    finishedAt: null,
+    steps: [],
+    finalMarkdown: null,
+    usedExternalAi: false,
+    degraded: false,
+    pendingConfirm: null,
+    createdTaskIds: []
+  }
+}
+
 async function runHealthCheckPipeline(
   db: Database,
   userId: string,
@@ -94,21 +130,7 @@ async function runHealthCheckPipeline(
   if (!group) throwLanpm('err.groupNotFound')
 
   const preset = getPipelinePreset('healthCheck')
-  const runId = `pipe_${randomUUID()}`
-  const startedAt = new Date().toISOString()
-  const run: AiPipelineRun = {
-    runId,
-    userId,
-    groupId,
-    presetId: 'healthCheck',
-    status: 'running',
-    startedAt,
-    finishedAt: null,
-    steps: [],
-    finalMarkdown: null,
-    usedExternalAi: false,
-    degraded: false
-  }
+  const run = createBaseRun(userId, groupId, 'healthCheck')
   insertPipelineRun(db, run)
 
   const bag: HealthCheckBag = {
@@ -160,7 +182,7 @@ async function runHealthCheckPipeline(
         run.steps.push(
           stepResult(
             'reviewTopTasks',
-            attention.length === 0 ? 'ok' : 'ok',
+            'ok',
             stepStarted,
             attention.length
               ? `已评审 ${attention.length} 项重点关注任务`
@@ -185,9 +207,7 @@ async function runHealthCheckPipeline(
       }
     } catch {
       run.degraded = true
-      run.steps.push(
-        stepResult(stepDef.stepId, 'failed', stepStarted, undefined, 'step_failed')
-      )
+      run.steps.push(stepResult(stepDef.stepId, 'failed', stepStarted, undefined, 'step_failed'))
       if (stepDef.stepId === 'assembleReport') {
         run.status = 'failed'
         run.finishedAt = new Date().toISOString()
@@ -205,6 +225,163 @@ async function runHealthCheckPipeline(
   return run
 }
 
+async function runTaskRemediateUntilPause(
+  db: Database,
+  userId: string,
+  groupId: string,
+  parentTaskId: string
+): Promise<AiPipelineRun> {
+  const group = getGroupById(db, groupId)
+  if (!group) throwLanpm('err.groupNotFound')
+
+  const parent = getTaskById(db, parentTaskId)
+  if (!parent || parent.groupId !== groupId || parent.deletedAt) {
+    throwLanpm('stub.taskNotFound')
+  }
+
+  const preset = getPipelinePreset('taskRemediate')
+  const run = createBaseRun(userId, groupId, 'taskRemediate')
+  insertPipelineRun(db, run)
+
+  const bag: TaskRemediateBag = {
+    groupName: group.name,
+    parentTaskId,
+    parentTaskTitle: parent.title,
+    createdTitles: []
+  }
+
+  for (const stepDef of preset.steps) {
+    if (stepDef.stepId === 'confirmSubtasks' || stepDef.stepId === 'assembleReport') {
+      break
+    }
+
+    const stepStarted = new Date().toISOString()
+    try {
+      if (stepDef.stepId === 'gatherContext') {
+        run.steps.push(
+          stepResult('gatherContext', 'ok', stepStarted, `父任务：${bag.parentTaskTitle}`)
+        )
+      } else if (stepDef.stepId === 'proposeSubtasks') {
+        const proposal = await proposeSubtasks(db, {
+          groupId,
+          parentTaskId: bag.parentTaskId
+        })
+        if (proposal.usedExternalAi) run.usedExternalAi = true
+        if (proposal.errorCode) run.degraded = true
+
+        run.pendingConfirm = {
+          parentTaskId: bag.parentTaskId,
+          parentTaskTitle: bag.parentTaskTitle,
+          proposals: proposal.proposals,
+          usedExternalAi: proposal.usedExternalAi,
+          degraded: Boolean(proposal.errorCode),
+          errorCode: proposal.errorCode
+        }
+        run.steps.push(
+          stepResult(
+            'proposeSubtasks',
+            proposal.proposals.length ? 'awaiting_confirm' : 'failed',
+            stepStarted,
+            proposal.proposals.length
+              ? `已生成 ${proposal.proposals.length} 条子任务提案，等待确认`
+              : '未生成可确认的子任务提案',
+            proposal.proposals.length ? undefined : 'no_proposals'
+          )
+        )
+        run.status = proposal.proposals.length ? 'awaiting_confirm' : 'failed'
+        if (!proposal.proposals.length) {
+          run.finishedAt = new Date().toISOString()
+        }
+        updatePipelineRun(db, run)
+        return run
+      }
+    } catch {
+      run.degraded = true
+      run.steps.push(stepResult(stepDef.stepId, 'failed', stepStarted, undefined, 'step_failed'))
+      run.status = 'failed'
+      run.finishedAt = new Date().toISOString()
+      updatePipelineRun(db, run)
+      return run
+    }
+    updatePipelineRun(db, run)
+  }
+
+  run.status = 'failed'
+  run.finishedAt = new Date().toISOString()
+  updatePipelineRun(db, run)
+  return run
+}
+
+async function finishTaskRemediateAfterConfirm(
+  db: Database,
+  run: AiPipelineRun,
+  items: AiResumePipelineInput['items']
+): Promise<AiPipelineRun> {
+  const pending = run.pendingConfirm
+  if (!pending) {
+    run.status = 'failed'
+    run.finishedAt = new Date().toISOString()
+    updatePipelineRun(db, run)
+    return run
+  }
+
+  const group = getGroupById(db, run.groupId)
+  const groupName = group?.name ?? run.groupId
+  const confirmStarted = new Date().toISOString()
+
+  try {
+    const result = confirmSubtasks(db, {
+      groupId: run.groupId,
+      parentTaskId: pending.parentTaskId,
+      items
+    })
+    run.createdTaskIds = result.createdTaskIds
+    const titles = items.map((i) => i.title.trim()).filter(Boolean)
+    run.steps.push(
+      stepResult(
+        'confirmSubtasks',
+        result.createdTaskIds.length ? 'ok' : 'failed',
+        confirmStarted,
+        `已创建 ${result.createdTaskIds.length} 项子任务`,
+        result.createdTaskIds.length ? undefined : 'no_tasks_created'
+      )
+    )
+    run.pendingConfirm = null
+
+    const finishedAt = new Date().toISOString()
+    run.finalMarkdown = formatTaskRemediateReportMarkdown({
+      groupName,
+      parentTaskTitle: pending.parentTaskTitle,
+      startedAt: run.startedAt,
+      finishedAt,
+      createdTaskIds: result.createdTaskIds,
+      createdTitles: titles,
+      usedExternalAi: run.usedExternalAi,
+      degraded: run.degraded
+    })
+    run.finishedAt = finishedAt
+    run.status = result.createdTaskIds.length ? 'completed' : 'failed'
+    run.steps.push(
+      stepResult(
+        'assembleReport',
+        result.createdTaskIds.length ? 'ok' : 'failed',
+        finishedAt,
+        '补救报告已生成'
+      )
+    )
+  } catch {
+    run.degraded = true
+    run.steps.push(
+      stepResult('confirmSubtasks', 'failed', confirmStarted, undefined, 'confirm_failed')
+    )
+    run.status = 'failed'
+    run.finishedAt = new Date().toISOString()
+  }
+
+  updatePipelineRun(db, run)
+  return run
+}
+
 export async function startAiPipeline(
   db: Database,
   userId: string,
@@ -213,7 +390,57 @@ export async function startAiPipeline(
   if (input.presetId === 'healthCheck') {
     return runHealthCheckPipeline(db, userId, input.groupId)
   }
+  if (input.presetId === 'taskRemediate') {
+    if (!input.parentTaskId) {
+      throw new Error('parentTaskId is required for taskRemediate preset')
+    }
+    return runTaskRemediateUntilPause(db, userId, input.groupId, input.parentTaskId)
+  }
   throw new Error(`Unsupported pipeline preset: ${String(input.presetId)}`)
+}
+
+export async function resumeAiPipeline(
+  db: Database,
+  userId: string,
+  input: AiResumePipelineInput
+): Promise<AiPipelineRun> {
+  const run = getPipelineRun(db, userId, input.runId)
+  if (!run) throwLanpm('stub.taskNotFound')
+  if (run.status !== 'awaiting_confirm') {
+    throw new Error(`Pipeline run is not awaiting confirm: ${run.status}`)
+  }
+  if (run.presetId !== 'taskRemediate') {
+    throw new Error(`Resume not supported for preset: ${run.presetId}`)
+  }
+  if (!input.items.length) {
+    throw new Error('At least one subtask item is required to resume')
+  }
+
+  const parentPayload = desensitizeTask(db, run.groupId, run.pendingConfirm?.parentTaskId ?? '')
+  if (!parentPayload) throwLanpm('stub.taskNotFound')
+
+  return finishTaskRemediateAfterConfirm(db, run, input.items)
+}
+
+export async function cancelAiPipeline(
+  db: Database,
+  userId: string,
+  input: AiCancelPipelineInput
+): Promise<AiPipelineRun> {
+  const run = getPipelineRun(db, userId, input.runId)
+  if (!run) throwLanpm('stub.taskNotFound')
+  if (run.status !== 'awaiting_confirm') {
+    return run
+  }
+
+  run.status = 'failed'
+  run.finishedAt = new Date().toISOString()
+  run.pendingConfirm = null
+  run.steps.push(
+    stepResult('confirmSubtasks', 'failed', new Date().toISOString(), '用户已取消，未写入子任务', 'cancelled')
+  )
+  updatePipelineRun(db, run)
+  return run
 }
 
 export async function runHealthCheckPipelineForVerify(
@@ -222,4 +449,13 @@ export async function runHealthCheckPipelineForVerify(
   groupId: string
 ): Promise<AiPipelineRun> {
   return runHealthCheckPipeline(db, userId, groupId)
+}
+
+export async function runTaskRemediateUntilPauseForVerify(
+  db: Database,
+  userId: string,
+  groupId: string,
+  parentTaskId: string
+): Promise<AiPipelineRun> {
+  return runTaskRemediateUntilPause(db, userId, groupId, parentTaskId)
 }

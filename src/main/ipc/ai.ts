@@ -29,13 +29,21 @@ import { runAiStreamChat } from '../ai/aiStreamService.ts'
 import { reviewTaskStructured } from '../ai/aiReviewService.ts'
 import { confirmSubtasks, proposeSubtasks } from '../ai/aiSubtaskService.ts'
 import { getLatestPatrolRun, listPatrolRuns } from '../ai/aiPatrolScheduler.ts'
-import { startAiPipeline } from '../ai/aiPipelineRunner.ts'
+import {
+  cancelAiPipeline,
+  resumeAiPipeline,
+  startAiPipeline
+} from '../ai/aiPipelineRunner.ts'
 import {
   getLatestPipelineRun,
   getPipelineRun,
   listPipelineRuns
 } from '../ai/aiPipelineRepository.ts'
-import type { AiStartPipelineInput } from '../../shared/ai/pipelineTypes.ts'
+import type {
+  AiCancelPipelineInput,
+  AiResumePipelineInput,
+  AiStartPipelineInput
+} from '../../shared/ai/pipelineTypes.ts'
 import { sendAiShareMessage } from '../chat/chatService.ts'
 
 function requireUserId(): string {
@@ -117,6 +125,16 @@ export function registerAiIpc(): void {
   ipcMain.handle(AI_IPC.startPipeline, async (_event, input: AiStartPipelineInput) => {
     const userId = requireUserId()
     return startAiPipeline(getDatabase(), userId, input)
+  })
+
+  ipcMain.handle(AI_IPC.resumePipeline, async (_event, input: AiResumePipelineInput) => {
+    const userId = requireUserId()
+    return resumeAiPipeline(getDatabase(), userId, input)
+  })
+
+  ipcMain.handle(AI_IPC.cancelPipeline, async (_event, input: AiCancelPipelineInput) => {
+    const userId = requireUserId()
+    return cancelAiPipeline(getDatabase(), userId, input)
   })
 
   ipcMain.handle(AI_IPC.getPipelineRun, (_event, runId: string) => {

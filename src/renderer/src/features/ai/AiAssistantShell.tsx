@@ -94,6 +94,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const [subtaskRows, setSubtaskRows] = useState<SubtaskPreviewRow[]>([])
   const [subtaskUsedExternalAi, setSubtaskUsedExternalAi] = useState(false)
   const [subtaskDegraded, setSubtaskDegraded] = useState(false)
+  const [subtaskPipelineRunId, setSubtaskPipelineRunId] = useState<string | null>(null)
   const requestIdRef = useRef<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const canSend = Boolean(gate?.canStream && online && !streaming)
@@ -352,6 +353,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
 
   const handleOpenSubtaskSplit = useCallback((): void => {
     if (!effectiveGroupId || !resolvedTaskId) return
+    setSubtaskPipelineRunId(null)
     setSubtaskModalOpen(true)
     setSubtaskLoading(true)
     setSubtaskRows([])
@@ -373,6 +375,53 @@ export default function AiAssistantShell(): React.ReactElement | null {
       }
     })()
   }, [effectiveGroupId, resolvedTaskId, formatError, message])
+
+  const handleOpenTaskRemediatePipeline = useCallback((): void => {
+    if (!effectiveGroupId || !resolvedTaskId) return
+    setSubtaskModalOpen(true)
+    setSubtaskLoading(true)
+    setSubtaskRows([])
+    setSubtaskDegraded(false)
+    setSubtaskPipelineRunId(null)
+    void (async () => {
+      try {
+        const run = await getLanpmApi().ai!.startPipeline({
+          groupId: effectiveGroupId,
+          presetId: 'taskRemediate',
+          parentTaskId: resolvedTaskId
+        })
+        if (run.status === 'awaiting_confirm' && run.pendingConfirm) {
+          setSubtaskPipelineRunId(run.runId)
+          setSubtaskRows(proposalsToRows(run.pendingConfirm.proposals))
+          setSubtaskUsedExternalAi(run.pendingConfirm.usedExternalAi)
+          setSubtaskDegraded(Boolean(run.pendingConfirm.degraded || run.pendingConfirm.errorCode))
+        } else {
+          message.error(t('ai.pipeline.remediateFailed'))
+          setSubtaskModalOpen(false)
+        }
+      } catch (err) {
+        message.error(formatError(err, 'ai.sendFailed'))
+        setSubtaskModalOpen(false)
+      } finally {
+        setSubtaskLoading(false)
+      }
+    })()
+  }, [effectiveGroupId, resolvedTaskId, formatError, message, t])
+
+  const handlePresetAction = useCallback(
+    (presetId: import('@shared/ai/promptPresets').AiPromptPresetId): boolean => {
+      if (presetId === 'taskRemediate') {
+        if (!resolvedTaskId) {
+          message.warning(t('ai.pipeline.remediateNeedTask'))
+          return true
+        }
+        handleOpenTaskRemediatePipeline()
+        return true
+      }
+      return false
+    },
+    [handleOpenTaskRemediatePipeline, message, resolvedTaskId, t]
+  )
 
   const gateHint = !gate?.enabled
     ? t('ai.gateDisabled')
@@ -396,9 +445,19 @@ export default function AiAssistantShell(): React.ReactElement | null {
         </div>
         <Space size={4}>
           {resolvedTaskId ? (
-            <Button type="text" size="small" disabled={!gate?.canStream} onClick={handleOpenSubtaskSplit}>
-              {t('ai.splitSubtasks')}
-            </Button>
+            <>
+              <Button type="text" size="small" disabled={!gate?.canStream} onClick={handleOpenSubtaskSplit}>
+                {t('ai.splitSubtasks')}
+              </Button>
+              <Button
+                type="text"
+                size="small"
+                disabled={!gate?.canStream}
+                onClick={handleOpenTaskRemediatePipeline}
+              >
+                {t('ai.pipeline.remediateRun')}
+              </Button>
+            </>
           ) : null}
           {messages.length > 0 ? (
             <Button
@@ -492,6 +551,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
                 layout="rail"
                 disabled={!canSend}
                 onSendPreset={(text) => void handleSend(text)}
+                onPresetAction={handlePresetAction}
               />
             ) : null}
           </div>
@@ -528,6 +588,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
               layout="chips"
               disabled={!canSend}
               onSendPreset={(text) => void handleSend(text)}
+              onPresetAction={handlePresetAction}
             />
           ) : null}
 
@@ -610,23 +671,41 @@ export default function AiAssistantShell(): React.ReactElement | null {
       usedExternalAi={subtaskUsedExternalAi}
       degraded={subtaskDegraded}
       onChange={setSubtaskRows}
-      onCancel={() => setSubtaskModalOpen(false)}
+      onCancel={() => {
+        if (subtaskPipelineRunId) {
+          void getLanpmApi().ai!.cancelPipeline({ runId: subtaskPipelineRunId })
+        }
+        setSubtaskPipelineRunId(null)
+        setSubtaskModalOpen(false)
+      }}
       confirming={subtaskConfirming}
       onConfirm={(rows) => {
         if (!effectiveGroupId || !resolvedTaskId) return
         void (async () => {
           setSubtaskConfirming(true)
           try {
-            const result = await getLanpmApi().ai!.confirmSubtasks({
-              groupId: effectiveGroupId,
-              parentTaskId: resolvedTaskId,
-              items: rows.map((r) => ({
-                title: r.title.trim(),
-                assigneeUserId: r.suggestedAssigneeUserId,
-                endDate: r.suggestedEndDate
-              }))
-            })
-            message.success(t('ai.subtaskCreated', { count: String(result.createdTaskIds.length) }))
+            const items = rows.map((r) => ({
+              title: r.title.trim(),
+              assigneeUserId: r.suggestedAssigneeUserId,
+              endDate: r.suggestedEndDate
+            }))
+            let createdCount = 0
+            if (subtaskPipelineRunId) {
+              const run = await getLanpmApi().ai!.resumePipeline({
+                runId: subtaskPipelineRunId,
+                items
+              })
+              createdCount = run.createdTaskIds.length
+            } else {
+              const result = await getLanpmApi().ai!.confirmSubtasks({
+                groupId: effectiveGroupId,
+                parentTaskId: resolvedTaskId,
+                items
+              })
+              createdCount = result.createdTaskIds.length
+            }
+            message.success(t('ai.subtaskCreated', { count: String(createdCount) }))
+            setSubtaskPipelineRunId(null)
             setSubtaskModalOpen(false)
             if (effectiveGroupId) void loadTasks(effectiveGroupId)
           } catch (err) {

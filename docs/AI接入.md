@@ -386,6 +386,17 @@ IPC: ai:streamChat                Key 解密仅 main
 | UI | 驾驶舱「项目健康检查」·「在助手中继续」· preset `healthCheck` |
 | 验收 | `verify:ai-pipeline` |
 
+### 6.5 L3b 人审写库流水线（SPRINT-AI-07 · v1.41.0）
+
+| 能力 | 实现 |
+|------|------|
+| 状态 | `awaiting_confirm` · 写库前暂停 |
+| IPC | `ai:resumePipeline` · `ai:cancelPipeline`（取消标记 `failed` 且不写库） |
+| Preset | `taskRemediate`：`gatherContext` → `proposeSubtasks`（`requiresHumanConfirm`）→ `confirmSubtasks` → `assembleReport` |
+| 持久化 | `steps_json` 包装对象：`steps` + `pendingConfirm` + `createdTaskIds`（兼容旧数组格式） |
+| UI | 驾驶舱需关注任务「补救拆分」· `SubtaskPreviewModal` · 助手「补救拆分」与 preset `taskRemediate` |
+| 验收 | `verify:ai-pipeline-human` |
+
 ---
 
 ## 7. 落地分期（建议 Sprint）
@@ -441,3 +452,4 @@ IPC: ai:streamChat                Key 解密仅 main
 | 2026-07-29 | 拍板：顶栏+浮层/Dock，非底栏第八 Tab；上下文默认绑当前群、历史个人本地 |
 | 2026-07-29 | SPRINT-AI-05 SPIKE：§6.3 L3 编排调研 · 推荐自建状态机 · `verify:ai-orchestration-spike` |
 | 2026-07-29 | SPRINT-AI-06：§6.4 L3a `healthCheck` 流水线 · `verify:ai-pipeline` |
+| 2026-07-29 | SPRINT-AI-07：§6.5 L3b `taskRemediate` 人审写库 · `verify:ai-pipeline-human` |
