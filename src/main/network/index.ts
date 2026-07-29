@@ -6,6 +6,7 @@ import { initChatService } from '../chat/chatService'
 import { listDiscoverableGroupsForAdvert } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { setDiscoverableGroupsProvider } from '../discover/advertProvider'
+import { connectDiscoverSeeds } from '../discover/discoverService'
 import { RealNetworkTransport } from './real/RealNetworkTransport'
 import {
   initNetworkStub,
@@ -73,6 +74,9 @@ export function initNetwork(db: Database): NetworkTransport | null {
 
   if (realTransport) return realTransport
   realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName)
+  void connectDiscoverSeeds(db).catch((err) => {
+    console.warn('[lanpm] connectDiscoverSeeds failed:', err instanceof Error ? err.message : err)
+  })
   return realTransport
 }
 
@@ -90,6 +94,9 @@ export function refreshNetworkIdentity(db: Database): void {
   realTransport?.stop()
   realTransport = null
   realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName)
+  void connectDiscoverSeeds(db).catch((err) => {
+    console.warn('[lanpm] connectDiscoverSeeds failed:', err instanceof Error ? err.message : err)
+  })
   initChatService(db)
 }
 

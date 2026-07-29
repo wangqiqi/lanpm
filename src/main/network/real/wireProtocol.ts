@@ -1,8 +1,19 @@
+import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
 import type { SyncEnvelope } from '../../../shared/network/types'
 
+/** TCP 握手 / 周期广播：跨子网手动节点也能填充「发现」列表 */
+export interface WirePeerProfile {
+  deviceId: string
+  userId: string
+  displayName: string
+  listenPort: number
+  groups?: DiscoverableGroupAdvert[]
+}
+
 export type WireMessage =
-  | { kind: 'handshake'; deviceId: string; userId: string; displayName: string; publicKey: string }
-  | { kind: 'handshake_ack'; publicKey: string }
+  | ({ kind: 'handshake'; publicKey: string } & WirePeerProfile)
+  | ({ kind: 'handshake_ack'; publicKey: string } & WirePeerProfile)
+  | ({ kind: 'peer_advert' } & WirePeerProfile)
   | { kind: 'envelope'; envelope: SyncEnvelope }
   | { kind: 'ping' }
 

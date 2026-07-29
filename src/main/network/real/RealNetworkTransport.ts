@@ -12,6 +12,8 @@ import {
   RECONNECT_BACKOFF_MS
 } from '../../../shared/network/constants.ts'
 import { generateDhKeyPair } from '../../crypto/dhSession.ts'
+import { rememberPeerGroups } from '../../discover/discoverGroupRegistry.ts'
+import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
 import { refreshLanUserIds } from '../peerDirectory.ts'
 import { MessageDedup } from '../stub/dedup.ts'
 import { LamportClock } from '../stub/lamport.ts'
@@ -20,7 +22,7 @@ import {
   touchLocalDevice,
   touchRemoteHeartbeat
 } from '../../presence/presenceRegistry.ts'
-import { createTcpServer, PeerLink } from './peerLink.ts'
+import { createTcpServer, PeerLink, type TcpPeerIdentity } from './peerLink.ts'
 import { UdpDiscovery } from './udpDiscovery.ts'
 
 type EnvelopeHandler = (envelope: SyncEnvelope) => void
@@ -49,11 +51,13 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly links = new Map<string, PeerLink>()
   private readonly reconnectAttempt = new Map<string, number>()
   private readonly reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
+  /** TCP 握手 / peer_advert 识别的对端（跨子网手动节点） */
+  private readonly tcpPeers = new Map<string, DiscoveryPayload>()
+  private readonly manualHosts = new Map<string, { host: string; port: number }>()
   private discovery: UdpDiscovery | null = null
   private tcpServer: net.Server | null = null
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private peerRefreshTimer: ReturnType<typeof setInterval> | null = null
-  private readonly manualPeers = new Map<string, DiscoveryPayload>()
   private started = false
 
   constructor(options: RealNetworkOptions) {
@@ -65,22 +69,54 @@ export class RealNetworkTransport implements NetworkTransport {
     this.disableUdp = options.disableUdp ?? false
   }
 
+  private registerTcpPeer(peer: TcpPeerIdentity): void {
+    if (!peer.deviceId || !peer.userId || peer.userId === '__lanpm_probe__') return
+    const payload: DiscoveryPayload = {
+      deviceId: peer.deviceId,
+      userId: peer.userId,
+      displayName: peer.displayName,
+      listenPort: peer.listenPort,
+      host: peer.host,
+      capabilities: this.capabilities,
+      groups: peer.groups
+    }
+    this.tcpPeers.set(peer.deviceId, payload)
+    rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
+    touchDiscoveryPeer(payload)
+  }
+
   private createPeerLink(options: {
+    remoteHost?: string
     onEnvelope: (env: SyncEnvelope) => void
-    onReady?: (remoteDeviceId: string) => void
+    onPeerReady?: (link: PeerLink, peer: TcpPeerIdentity) => void
     onClose: () => void
   }): PeerLink {
-    return new PeerLink({
+    const remoteHost = options.remoteHost
+    let link!: PeerLink
+    link = new PeerLink({
       local: {
         deviceId: this.deviceId,
         userId: this.userId,
         displayName: this.displayName
       },
+      listenPort: this.listenPort,
+      getAdvertGroups: () => getDiscoverableGroupsForAdvert(),
       keys: generateDhKeyPair(),
       onEnvelope: options.onEnvelope,
-      onReady: options.onReady,
+      onPeerIdentified: (peer) => {
+        this.registerTcpPeer({ ...peer, host: peer.host ?? remoteHost })
+      },
+      onReady: (peer) => {
+        this.registerTcpPeer({ ...peer, host: peer.host ?? remoteHost })
+        if (remoteHost) {
+          this.manualHosts.set(peer.deviceId, { host: remoteHost, port: peer.listenPort })
+        }
+        this.reconnectAttempt.delete(peer.deviceId)
+        options.onPeerReady?.(link, peer)
+      },
       onClose: options.onClose
     })
+    return link
   }
 
   start(): void {
@@ -119,6 +155,8 @@ export class RealNetworkTransport implements NetworkTransport {
     this.reconnectTimers.clear()
     for (const link of this.links.values()) link.close()
     this.links.clear()
+    this.tcpPeers.clear()
+    this.manualHosts.clear()
     this.tcpServer?.close()
     this.tcpServer = null
     this.subscriptions.clear()
@@ -153,7 +191,6 @@ export class RealNetworkTransport implements NetworkTransport {
     }
   }
 
-  /** 全局订阅（如 read_receipt）— 与 NetworkStub.subscribeAll 对齐 */
   subscribeAll(handler: (envelope: SyncEnvelope) => void): () => void {
     this.globalHandlers.add(handler)
     return () => this.globalHandlers.delete(handler)
@@ -165,7 +202,7 @@ export class RealNetworkTransport implements NetworkTransport {
     for (const peer of this.discovery?.listPeers() ?? []) {
       merged.set(peer.deviceId, peer)
     }
-    for (const peer of this.manualPeers.values()) {
+    for (const peer of this.tcpPeers.values()) {
       merged.set(peer.deviceId, peer)
     }
     const peers = [...merged.values()]
@@ -174,7 +211,6 @@ export class RealNetworkTransport implements NetworkTransport {
     return peers
   }
 
-  /** A5 · UDP / discovery transport signals for DiscoverSnapshot.health */
   getDiscoveryDiagnostics(): {
     udpDisabled: boolean
     bindOk: boolean
@@ -198,55 +234,52 @@ export class RealNetworkTransport implements NetworkTransport {
     }
   }
 
-  /** 测试辅助：手动接入对端 */
   async connectPeer(peer: DiscoveryPayload): Promise<void> {
     await this.ensureLink(peer)
   }
 
-  /** docs/02 §13.2 — 手动 IP:端口 建链（VPN / 跨子网） */
   async connectManualHost(host: string, port: number): Promise<void> {
     if (!this.started) this.start()
 
     const link = this.createPeerLink({
+      remoteHost: host,
       onEnvelope: (env) => this.deliver(env),
-      onReady: (remoteDeviceId) => {
-        const prev = this.links.get(remoteDeviceId)
-        if (prev && prev !== link) prev.close()
-        this.links.set(remoteDeviceId, link)
-        const peer: DiscoveryPayload = {
-          deviceId: remoteDeviceId,
-          userId: '',
-          displayName: `${host}:${port}`,
-          listenPort: port,
-          host,
-          capabilities: this.capabilities
-        }
-        this.manualPeers.set(remoteDeviceId, peer)
-        touchDiscoveryPeer(peer)
-        this.reconnectAttempt.delete(remoteDeviceId)
+      onPeerReady: (activeLink, peer) => {
+        const prev = this.links.get(peer.deviceId)
+        if (prev && prev !== activeLink) prev.close()
+        this.links.set(peer.deviceId, activeLink)
       },
       onClose: () => {
         const id = link.getRemoteDeviceId()
         if (id && this.links.get(id) === link) {
           this.links.delete(id)
-          const peer = this.manualPeers.get(id)
-          if (peer) this.scheduleReconnect(peer)
+          if (this.manualHosts.has(id)) {
+            const manual = this.manualHosts.get(id)!
+            this.scheduleReconnect({
+              deviceId: id,
+              userId: this.tcpPeers.get(id)?.userId ?? '',
+              displayName: this.tcpPeers.get(id)?.displayName ?? `${manual.host}:${manual.port}`,
+              listenPort: manual.port,
+              host: manual.host,
+              capabilities: this.capabilities
+            })
+          }
         }
       }
     })
 
     await link.connectHost(host, port)
-    const remoteId = link.getRemoteDeviceId()
-    if (remoteId) this.links.set(remoteId, link)
   }
 
-  private onIncomingSocket(socket: import('node:net').Socket): void {
+  private onIncomingSocket(socket: net.Socket): void {
+    const remoteHost = socket.remoteAddress ?? undefined
     const link = this.createPeerLink({
+      remoteHost,
       onEnvelope: (env) => this.deliver(env),
-      onReady: (remoteDeviceId) => {
-        const prev = this.links.get(remoteDeviceId)
-        if (prev && prev !== link) prev.close()
-        this.links.set(remoteDeviceId, link)
+      onPeerReady: (activeLink, peer) => {
+        const prev = this.links.get(peer.deviceId)
+        if (prev && prev !== activeLink) prev.close()
+        this.links.set(peer.deviceId, activeLink)
       },
       onClose: () => {
         const id = link.getRemoteDeviceId()
@@ -273,7 +306,13 @@ export class RealNetworkTransport implements NetworkTransport {
     if (existing) existing.close()
 
     const link = this.createPeerLink({
+      remoteHost: peer.host,
       onEnvelope: (env) => this.deliver(env),
+      onPeerReady: (activeLink, identified) => {
+        const prev = this.links.get(identified.deviceId)
+        if (prev && prev !== activeLink) prev.close()
+        this.links.set(identified.deviceId, activeLink)
+      },
       onClose: () => {
         this.links.delete(peer.deviceId)
         this.scheduleReconnect(peer)
@@ -293,7 +332,19 @@ export class RealNetworkTransport implements NetworkTransport {
   private scheduleReconnectByDevice(deviceId: string): void {
     const peer =
       this.discovery?.listPeers().find((p) => p.deviceId === deviceId) ??
-      this.manualPeers.get(deviceId)
+      this.tcpPeers.get(deviceId) ??
+      (() => {
+        const manual = this.manualHosts.get(deviceId)
+        if (!manual) return undefined
+        return {
+          deviceId,
+          userId: '',
+          displayName: `${manual.host}:${manual.port}`,
+          listenPort: manual.port,
+          host: manual.host,
+          capabilities: this.capabilities
+        } satisfies DiscoveryPayload
+      })()
     if (peer) this.scheduleReconnect(peer)
   }
 
@@ -313,7 +364,12 @@ export class RealNetworkTransport implements NetworkTransport {
   }
 
   private async reconnectPeer(peer: DiscoveryPayload): Promise<void> {
-    if (peer.host && this.manualPeers.has(peer.deviceId)) {
+    const manual = this.manualHosts.get(peer.deviceId)
+    if (manual) {
+      await this.connectManualHost(manual.host, manual.port)
+      return
+    }
+    if (peer.host) {
       await this.connectManualHost(peer.host, peer.listenPort)
       return
     }
@@ -323,13 +379,16 @@ export class RealNetworkTransport implements NetworkTransport {
   private refreshPeerConnections(): void {
     const merged = new Map<string, DiscoveryPayload>()
     for (const peer of this.discovery?.listPeers() ?? []) merged.set(peer.deviceId, peer)
-    for (const peer of this.manualPeers.values()) merged.set(peer.deviceId, peer)
+    for (const peer of this.tcpPeers.values()) merged.set(peer.deviceId, peer)
     const peers = [...merged.values()]
     refreshLanUserIds(peers)
     for (const peer of peers) {
       if (!this.links.get(peer.deviceId)?.isReady()) {
         void this.reconnectPeer(peer).catch(() => undefined)
       }
+    }
+    for (const link of this.links.values()) {
+      if (link.isReady()) link.sendPeerAdvert()
     }
   }
 

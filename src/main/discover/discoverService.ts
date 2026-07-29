@@ -41,6 +41,13 @@ async function tryConnectSeeds(seeds: string[]): Promise<void> {
   }
 }
 
+/** 网络就绪后自动连接已保存的发现种子（跨子网 / VPN） */
+export async function connectDiscoverSeeds(db: Database): Promise<void> {
+  const seeds = loadSeeds(db)
+  if (seeds.length === 0) return
+  await tryConnectSeeds(seeds)
+}
+
 function buildHealth(input: {
   peerCount: number
   groupCount: number
