@@ -56,6 +56,8 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly manualHosts = new Map<string, { host: string; port: number }>()
   private discovery: UdpDiscovery | null = null
   private tcpServer: net.Server | null = null
+  private tcpBindOk = false
+  private tcpBindError: string | null = null
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private peerRefreshTimer: ReturnType<typeof setInterval> | null = null
   private started = false
@@ -123,7 +125,27 @@ export class RealNetworkTransport implements NetworkTransport {
     if (this.started) return
     this.started = true
 
-    this.tcpServer = createTcpServer(this.listenPort, (socket) => this.onIncomingSocket(socket))
+    this.tcpBindOk = false
+    this.tcpBindError = null
+    this.tcpServer = createTcpServer(
+      this.listenPort,
+      (socket) => this.onIncomingSocket(socket),
+      (err) => {
+        this.tcpBindOk = false
+        this.tcpBindError = err.message
+        if (err.code === 'EADDRINUSE') {
+          console.warn(
+            `[lanpm] TCP port ${this.listenPort} already in use — inbound peers unavailable; outbound manual connect still works`
+          )
+          return
+        }
+        console.error('[lanpm] TCP listen failed:', err.message)
+      }
+    )
+    this.tcpServer.once('listening', () => {
+      this.tcpBindOk = true
+      this.tcpBindError = null
+    })
 
     if (!this.disableUdp) {
       this.discovery = new UdpDiscovery({
@@ -159,6 +181,8 @@ export class RealNetworkTransport implements NetworkTransport {
     this.manualHosts.clear()
     this.tcpServer?.close()
     this.tcpServer = null
+    this.tcpBindOk = false
+    this.tcpBindError = null
     this.subscriptions.clear()
     this.globalHandlers.clear()
   }
@@ -214,13 +238,17 @@ export class RealNetworkTransport implements NetworkTransport {
   getDiscoveryDiagnostics(): {
     udpDisabled: boolean
     bindOk: boolean
+    tcpBindOk: boolean
+    tcpBindError: string | null
     multicastOk: boolean | null
     lastBroadcastError: string | null
   } {
     if (this.disableUdp) {
       return {
         udpDisabled: true,
-        bindOk: false,
+        bindOk: this.tcpBindOk,
+        tcpBindOk: this.tcpBindOk,
+        tcpBindError: this.tcpBindError,
         multicastOk: null,
         lastBroadcastError: null
       }
@@ -228,7 +256,9 @@ export class RealNetworkTransport implements NetworkTransport {
     const d = this.discovery?.getDiagnostics()
     return {
       udpDisabled: false,
-      bindOk: d?.bindOk ?? false,
+      bindOk: (d?.bindOk ?? false) || this.tcpBindOk,
+      tcpBindOk: this.tcpBindOk,
+      tcpBindError: this.tcpBindError,
       multicastOk: d?.multicastOk ?? null,
       lastBroadcastError: d?.lastBroadcastError ?? null
     }

@@ -41,8 +41,25 @@ if (process.platform === 'win32') {
 }
 app.setName('LanPM')
 
-const isDev = !app.isPackaged
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
+
+/** 托盘隐藏时进程仍占用 43124；禁止多开导致 EADDRINUSE */
+if (!visualCaptureDir) {
+  const gotSingleInstanceLock = app.requestSingleInstanceLock()
+  if (!gotSingleInstanceLock) {
+    app.quit()
+  } else {
+    app.on('second-instance', () => {
+      const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
+      if (!win) return
+      if (!win.isVisible()) win.show()
+      if (win.isMinimized()) win.restore()
+      win.focus()
+    })
+  }
+}
+
+const isDev = !app.isPackaged
 
 if (visualCaptureDir) {
   // Prefer repo-local temp (gitignore) over OS /tmp — avoids disk clutter across CI/dev runs

@@ -246,9 +246,18 @@ export class PeerLink {
 
 export function createTcpServer(
   listenPort: number,
-  onConnection: (socket: net.Socket) => void
+  onConnection: (socket: net.Socket) => void,
+  onError?: (err: NodeJS.ErrnoException) => void
 ): net.Server {
   const server = net.createServer((socket) => onConnection(socket))
-  server.listen(listenPort, '0.0.0.0')
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    onError?.(err)
+  })
+  server.listen({
+    port: listenPort,
+    host: '0.0.0.0',
+    reuseAddress: true,
+    exclusive: false
+  })
   return server
 }
