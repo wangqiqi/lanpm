@@ -1,18 +1,58 @@
+/* AI 助手壳 — 对齐 chat.module.css · global.css 设计令牌 */
+
 .shellInner {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--lanpm-surface, #fff);
-  color: var(--lanpm-text, #111);
+  background: var(--lanpm-surface-solid);
+  color: var(--lanpm-text);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--lanpm-border, #e8e8e8);
+  min-height: 44px;
+  flex-shrink: 0;
+  border-bottom: 0.5px solid var(--lanpm-separator);
+  background: var(--lanpm-surface-solid);
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: var(--lanpm-font-title);
+  font-weight: 600;
+  line-height: var(--lanpm-line-title);
+  color: var(--lanpm-text);
+}
+
+.headerIcon {
+  color: var(--lanpm-accent);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.contextTag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 120px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--lanpm-font-caption);
+  font-weight: 500;
+  line-height: var(--lanpm-line-caption);
+  color: var(--lanpm-text-secondary);
+  background: var(--lanpm-fill-secondary);
+  border: 1px solid var(--lanpm-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .body {
@@ -22,24 +62,59 @@
 }
 
 .threadList {
-  width: 140px;
+  width: 148px;
   flex-shrink: 0;
-  border-right: 1px solid var(--lanpm-border, #e8e8e8);
-  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 8px;
   overflow: auto;
+  background: var(--lanpm-surface-solid);
+  border-right: 0.5px solid var(--lanpm-separator);
 }
 
-.threadItem {
+.newThreadBtn {
+  flex-shrink: 0;
+  border-radius: var(--lanpm-radius-md) !important;
+  font-size: var(--lanpm-font-body-secondary) !important;
+  color: var(--lanpm-text-secondary) !important;
+  border-color: var(--lanpm-border) !important;
+  background: var(--lanpm-fill-secondary) !important;
+}
+
+.newThreadBtn:hover {
+  color: var(--lanpm-text) !important;
+  border-color: color-mix(in srgb, var(--lanpm-accent) 28%, var(--lanpm-border)) !important;
+  background: var(--lanpm-fill-secondary-hover) !important;
+}
+
+.threadItem,
+.threadActive {
   cursor: pointer;
-  padding: 4px 6px !important;
-  border-radius: 6px;
+  padding: 6px 8px !important;
+  margin: 0 !important;
+  border-radius: var(--lanpm-radius-md);
+  border: 1px solid transparent;
+  transition: background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.threadItem:hover {
+  background: var(--lanpm-hover-bg);
 }
 
 .threadActive {
-  cursor: pointer;
-  padding: 4px 6px !important;
-  border-radius: 6px;
-  background: var(--lanpm-accent-soft, rgba(22, 119, 255, 0.12));
+  background: var(--lanpm-selected-bg);
+  border-color: color-mix(in srgb, var(--lanpm-accent) 18%, transparent);
+}
+
+.threadActive :global(.ant-typography) {
+  color: var(--lanpm-accent);
+  font-weight: 500;
+}
+
+.threadItem :global(.ant-typography) {
+  color: var(--lanpm-text-secondary);
+  font-size: var(--lanpm-font-body-secondary);
 }
 
 .chatPane {
@@ -48,20 +123,24 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  background: var(--lanpm-bg);
 }
 
 .messages {
   flex: 1;
   overflow: auto;
-  padding: 12px;
+  padding: 12px 12px 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  scrollbar-gutter: stable;
+  background: var(--lanpm-bg);
 }
 
 .msgUser,
 .msgAssistant {
-  max-width: 92%;
+  max-width: min(92%, 520px);
+  width: fit-content;
 }
 
 .msgUser {
@@ -72,26 +151,44 @@
   align-self: flex-start;
 }
 
+/* 与 MessageBubble .bubble / .bubbleOwn / .bubbleOther 一致 */
 .msgBody {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
   font-family: inherit;
-  font-size: 13px;
-  line-height: 1.5;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: var(--lanpm-muted, #f5f5f5);
+  font-size: var(--lanpm-font-body);
+  line-height: var(--lanpm-line-body);
+  padding: 8px 12px;
+  border-radius: var(--lanpm-radius-md);
+}
+
+.msgAssistant .msgBody {
+  background: var(--lanpm-bubble-bg);
+  color: var(--lanpm-text);
+  border: 1.5px solid transparent;
 }
 
 .msgUser .msgBody {
-  background: var(--lanpm-accent, #1677ff);
-  color: #fff;
+  background: var(--lanpm-selected-bg);
+  color: var(--lanpm-accent);
+  border: 1.5px solid color-mix(in srgb, var(--lanpm-accent) 12%, transparent);
+}
+
+:global(html[data-theme='dark']) .msgUser .msgBody {
+  border-color: color-mix(in srgb, var(--lanpm-accent) 24%, transparent);
 }
 
 .gateHint {
+  display: block;
   padding: 0 12px 8px;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body-secondary);
+  color: var(--lanpm-text-secondary);
+}
+
+.gateHintDanger {
+  color: var(--lanpm-danger);
 }
 
 .suggest {
@@ -99,26 +196,139 @@
   flex-wrap: wrap;
   gap: 6px;
   padding: 0 12px 8px;
+  background: var(--lanpm-bg);
 }
 
 .suggestItem {
-  border: 1px solid var(--lanpm-border, #d9d9d9);
-  background: transparent;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 12px;
+  border: 1px solid var(--lanpm-border);
+  background: var(--lanpm-surface-solid);
+  border-radius: var(--lanpm-radius-sm);
+  padding: 4px 10px;
+  font-size: var(--lanpm-font-body-secondary);
+  color: var(--lanpm-accent);
   cursor: pointer;
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.suggestItem:hover {
+  background: var(--lanpm-hover-bg);
+  border-color: color-mix(in srgb, var(--lanpm-accent) 28%, var(--lanpm-border));
 }
 
 .composer {
-  border-top: 1px solid var(--lanpm-border, #e8e8e8);
-  padding: 10px 12px;
+  flex-shrink: 0;
+  border-top: 0.5px solid var(--lanpm-separator);
+  padding: 8px 10px 10px;
+  background: var(--lanpm-surface-solid);
 }
 
-.composerActions {
-  margin-top: 8px;
-  justify-content: flex-end;
-  width: 100%;
+.composerIsland {
+  display: flex;
+  flex-direction: column;
+  background: var(--lanpm-fill-secondary);
+  border: 1.5px solid var(--lanpm-border);
+  border-radius: var(--lanpm-radius-lg);
+  transition:
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    border-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    box-shadow var(--lanpm-motion-fast) var(--lanpm-ease-standard);
+}
+
+.composerIsland:focus-within {
+  background: var(--lanpm-surface-solid);
+  border-color: color-mix(in srgb, var(--lanpm-accent) 36%, var(--lanpm-border));
+  box-shadow: 0 0 0 3px var(--lanpm-accent-ring);
+}
+
+.inputWrap {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  background: transparent;
+  padding: 6px;
+  box-shadow: none;
+}
+
+.inputComposeRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.inputComposeRow :global(.ant-input-textarea) {
+  flex: 1;
+  min-width: 0;
+}
+
+.inputTextarea {
+  flex: 1;
+  min-height: 0 !important;
+  resize: none;
+  font-family: inherit;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 4px 6px !important;
+  color: var(--lanpm-text) !important;
+  font-size: var(--lanpm-font-body) !important;
+  line-height: var(--lanpm-line-body) !important;
+}
+
+.inputTextarea::placeholder {
+  color: var(--lanpm-text-tertiary);
+}
+
+.inputTextarea:disabled {
+  color: var(--lanpm-text-tertiary);
+  cursor: not-allowed;
+}
+
+.shareIconBtn {
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+.sendIconBtn {
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: 2px;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: var(--lanpm-accent) !important;
+  color: var(--lanpm-on-accent) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  box-shadow: none !important;
+  transition:
+    transform var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    background-color var(--lanpm-motion-fast) var(--lanpm-ease-standard),
+    opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard) !important;
+}
+
+.sendIconBtn:hover:not(:disabled) {
+  background: var(--lanpm-accent-hover) !important;
+  transform: scale(1.08);
+}
+
+.sendIconBtn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.sendIconBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .dock {
@@ -128,12 +338,24 @@
   bottom: var(--lanpm-bottomnav-height, 56px);
   width: min(400px, 32vw);
   z-index: 900;
-  border-left: 1px solid var(--lanpm-border, #e8e8e8);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.06);
+  background: var(--lanpm-surface-solid);
+  border-left: 0.5px solid var(--lanpm-separator);
+  box-shadow: var(--lanpm-shadow-island);
+  backdrop-filter: var(--lanpm-blur);
+}
+
+.drawer :global(.ant-drawer-content) {
+  background: var(--lanpm-surface-solid) !important;
 }
 
 .drawer :global(.ant-drawer-body) {
   padding: 0 !important;
+  height: 100%;
+  background: var(--lanpm-surface-solid);
+}
+
+.drawer :global(.ant-drawer-mask) {
+  background: var(--lanpm-overlay) !important;
 }
 
 @media (max-width: 899px) {

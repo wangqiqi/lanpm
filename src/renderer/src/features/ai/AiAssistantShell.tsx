@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Button, Drawer, Input, List, Space, Tag, Typography } from 'antd'
+import { Button, Drawer, Input, List, Space, Typography } from 'antd'
 import {
   CloseOutlined,
   ExpandOutlined,
@@ -15,6 +15,7 @@ import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
@@ -246,12 +247,14 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const body = (
     <div className={styles.shellInner}>
       <header className={styles.header}>
-        <Space>
-          <RobotOutlined />
-          <Text strong>{t('ai.title')}</Text>
-          {effectiveGroupId ? <Tag>{t('ai.contextGroup')}</Tag> : <Tag>{t('ai.contextGlobal')}</Tag>}
-        </Space>
-        <Space>
+        <div className={styles.headerTitle}>
+          <RobotOutlined className={styles.headerIcon} aria-hidden />
+          <span>{t('ai.title')}</span>
+          <span className={styles.contextTag}>
+            {effectiveGroupId ? t('ai.contextGroup') : t('ai.contextGlobal')}
+          </span>
+        </div>
+        <Space size={4}>
           {layout !== 'fullscreen' ? (
             <Button
               type="text"
@@ -268,9 +271,10 @@ export default function AiAssistantShell(): React.ReactElement | null {
       <div className={styles.body}>
         <aside className={styles.threadList}>
           <Button
-            type="dashed"
+            type="default"
             block
             size="small"
+            className={styles.newThreadBtn}
             onClick={() => {
               setThreadId(null)
               setMessages([])
@@ -300,22 +304,26 @@ export default function AiAssistantShell(): React.ReactElement | null {
                 key={m.messageId}
                 className={m.role === 'user' ? styles.msgUser : styles.msgAssistant}
               >
-                <pre className={styles.msgBody}>{m.content}</pre>
+                <div className={styles.msgBody}>{m.content}</div>
               </div>
             ))}
             {streamBuffer ? (
               <div className={styles.msgAssistant}>
-                <pre className={styles.msgBody}>{streamBuffer}</pre>
+                <div className={styles.msgBody}>{streamBuffer}</div>
               </div>
             ) : null}
           </div>
 
           {apiMissing ? (
-            <Text type="danger" className={styles.gateHint}>
+            <Text className={`${styles.gateHint} ${styles.gateHintDanger}`}>
               {t('ai.apiUnavailable')}
             </Text>
           ) : null}
-          {gateHint ? <Text type="secondary" className={styles.gateHint}>{gateHint}</Text> : null}
+          {gateHint ? (
+            <Text type="secondary" className={styles.gateHint}>
+              {gateHint}
+            </Text>
+          ) : null}
 
           {taskSuggestions.length > 0 ? (
             <div className={styles.suggest}>
@@ -333,37 +341,45 @@ export default function AiAssistantShell(): React.ReactElement | null {
           ) : null}
 
           <div className={styles.composer}>
-            <TextArea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder={t('ai.composerPlaceholder')}
-              autoSize={{ minRows: 2, maxRows: 6 }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  void handleSend()
-                }
-              }}
-              disabled={!canSend}
-            />
-            <Space className={styles.composerActions}>
-              <Button
-                icon={<ShareAltOutlined />}
-                disabled={!effectiveGroupId || (!messages.length && !streamBuffer)}
-                onClick={() => void handleShare()}
-              >
-                {t('ai.sendToChat')}
-              </Button>
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                loading={streaming}
-                disabled={!canSend || !draft.trim()}
-                onClick={() => void handleSend()}
-              >
-                {t('ai.send')}
-              </Button>
-            </Space>
+            <div className={styles.composerIsland}>
+              <div className={styles.inputWrap}>
+                <div className={styles.inputComposeRow}>
+                  <TextArea
+                    className={styles.inputTextarea}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder={t('ai.composerPlaceholder')}
+                    autoSize={{ minRows: 2, maxRows: 6 }}
+                    variant="borderless"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        void handleSend()
+                      }
+                    }}
+                    disabled={!canSend}
+                  />
+                  <ComposerIconButton
+                    icon={<ShareAltOutlined />}
+                    label={t('ai.sendToChat')}
+                    className={styles.shareIconBtn}
+                    disabled={!effectiveGroupId || (!messages.length && !streamBuffer)}
+                    onClick={() => void handleShare()}
+                  />
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<SendOutlined />}
+                    className={styles.sendIconBtn}
+                    loading={streaming}
+                    disabled={!canSend || !draft.trim()}
+                    aria-label={t('ai.send')}
+                    title={t('ai.send')}
+                    onClick={() => void handleSend()}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
