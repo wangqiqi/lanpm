@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Form, Input, Modal, Select, Switch } from 'antd'
+import { Button, Form, Input, Modal, Select, Switch } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AiConfigInput, AiConfigView, AiProvider } from '@shared/cockpit/types'
 import {
@@ -8,6 +8,7 @@ import {
   getAiProviderPreset
 } from '@shared/cockpit/aiProviders'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
 interface AiConfigModalProps {
@@ -27,6 +28,7 @@ export default function AiConfigModal({
   const { message } = useLanpmApp()
   const [form] = Form.useForm<AiConfigInput & { apiKey?: string }>()
   const [saving, setSaving] = useState(false)
+  const [probing, setProbing] = useState(false)
   const [provider, setProvider] = useState<AiProvider>(defaultAiProviderPreset().value)
 
   useEffect(() => {
@@ -67,6 +69,31 @@ export default function AiConfigModal({
       message.error(formatError(err, 'ai.saveFailed'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const runProbe = async (): Promise<void> => {
+    const values = await form.validateFields(['baseUrl', 'apiKey'])
+    const api = getLanpmApi().ai
+    if (!api?.probeEndpoint) {
+      message.error(t('ai.apiUnavailable'))
+      return
+    }
+    setProbing(true)
+    try {
+      const result = await api.probeEndpoint({
+        baseUrl: values.baseUrl,
+        apiKey: values.apiKey?.trim() || undefined
+      })
+      if (result.reachable) {
+        message.success(t('ai.probeSuccess'))
+      } else {
+        message.warning(t('ai.probeFailed'))
+      }
+    } catch (err) {
+      message.error(formatError(err, 'ai.probeFailed'))
+    } finally {
+      setProbing(false)
     }
   }
 
@@ -116,6 +143,11 @@ export default function AiConfigModal({
         </Form.Item>
         <Form.Item name="patrolIntervalHours" label={t('ai.patrolIntervalHours')}>
           <Input type="number" min={1} max={168} />
+        </Form.Item>
+        <Form.Item>
+          <Button loading={probing} onClick={() => void runProbe()}>
+            {t('ai.probeConnection')}
+          </Button>
         </Form.Item>
       </Form>
     </Modal>

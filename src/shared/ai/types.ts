@@ -83,5 +83,8 @@ export interface AiShareToChatInput {
 export interface AiGateStatus {
   enabled: boolean
   hasApiKey: boolean
+  /** null when no key or not yet probed */
+  endpointReachable: boolean | null
+  endpointCheckedAt: string | null
   canStream: boolean
 }

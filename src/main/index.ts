@@ -18,6 +18,10 @@ import { registerPluginIpc } from './ipc/plugin'
 import { registerNotificationIpc } from './ipc/notification'
 import { registerAiIpc } from './ipc/ai'
 import { initAiPatrolScheduler, shutdownAiPatrolScheduler } from './ai/aiPatrolScheduler'
+import {
+  initAiEndpointProbeScheduler,
+  shutdownAiEndpointProbeScheduler
+} from './ai/aiEndpointProbeService'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
@@ -184,6 +188,7 @@ app.whenReady().then(() => {
     initNetwork(getDatabase())
     initChatService(getDatabase())
     initAiPatrolScheduler(getDatabase())
+    initAiEndpointProbeScheduler(getDatabase())
     initScreenshotService()
     registerAllIpcHandlers()
     if (!app.isPackaged) {
@@ -206,6 +211,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  shutdownAiEndpointProbeScheduler()
   shutdownAiPatrolScheduler()
   shutdownScreenshotService()
   shutdownChatService()

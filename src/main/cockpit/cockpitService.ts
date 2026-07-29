@@ -17,6 +17,7 @@ import { listProjectGroups } from '../storage/repositories/groupRepository'
 import { listTasksByGroup } from '../storage/repositories/taskRepository'
 import { getUserById } from '../storage/repositories/userRepository'
 import { getAiConfig, getDecryptedApiKey } from '../ai/aiConfigService'
+import { isExternalAiAvailable } from '../ai/aiEndpointProbeService'
 
 function projectHealthFromTasks(open: Task[]): ProjectHealth {
   if (open.some((t) => getTaskScheduleHealth(t) === 'overdue')) return 'delayed'
@@ -168,8 +169,8 @@ function localMonthlyMarkdown(db: Database): string {
 }
 
 async function callExternalAi(db: Database, prompt: string): Promise<string | null> {
-  const config = getAiConfig(db)
-  if (!config?.enabled) return null
+  if (!isExternalAiAvailable(db)) return null
+  const config = getAiConfig(db)!
   const apiKey = getDecryptedApiKey(db)
   if (!apiKey) return null
 

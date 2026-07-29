@@ -8,6 +8,7 @@ import type {
 } from '../../shared/ai/subtaskSchemas.ts'
 import { parseAiSubtaskLlmJson } from '../../shared/ai/subtaskSchemas.ts'
 import { getAiConfig, getDecryptedApiKey } from './aiConfigService.ts'
+import { isExternalAiAvailable } from './aiEndpointProbeService.ts'
 import { desensitizeTask, formatAiRuntimeContext } from './aiPromptService.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { listActiveChildTasks } from '../storage/repositories/taskRepository.ts'
@@ -27,8 +28,8 @@ async function callExternalSubtaskJson(
   db: Database,
   prompt: string
 ): Promise<string | null> {
-  const config = getAiConfig(db)
-  if (!config?.enabled) return null
+  if (!isExternalAiAvailable(db)) return null
+  const config = getAiConfig(db)!
   const apiKey = getDecryptedApiKey(db)
   if (!apiKey) return null
 
@@ -76,12 +77,18 @@ export async function proposeSubtasks(
       errorCode: 'ai_disabled'
     }
   }
-  const apiKey = getDecryptedApiKey(db)
-  if (!apiKey) {
+  if (!config.hasApiKey) {
     return {
       proposals: fallbackProposals(payload.title),
       usedExternalAi: false,
       errorCode: 'no_api_key'
+    }
+  }
+  if (!isExternalAiAvailable(db)) {
+    return {
+      proposals: fallbackProposals(payload.title),
+      usedExternalAi: false,
+      errorCode: 'external_failed'
     }
   }
 

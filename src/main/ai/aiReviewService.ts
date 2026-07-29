@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { AiStructuredReviewResult } from '../../shared/ai/types.ts'
+import { isExternalAiAvailable } from './aiEndpointProbeService.ts'
 import { getAiConfig, getDecryptedApiKey } from './aiConfigService.ts'
 import { desensitizeTask, formatAiRuntimeContext } from './aiPromptService.ts'
 import { getTaskScheduleHealth } from '../../shared/task/scheduleHealth.ts'
@@ -7,8 +8,8 @@ import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { listTasksByGroup } from '../storage/repositories/taskRepository.ts'
 
 async function callExternalAiText(db: Database, prompt: string): Promise<string | null> {
-  const config = getAiConfig(db)
-  if (!config?.enabled) return null
+  if (!isExternalAiAvailable(db)) return null
+  const config = getAiConfig(db)!
   const apiKey = getDecryptedApiKey(db)
   if (!apiKey) return null
 

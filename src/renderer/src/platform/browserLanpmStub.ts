@@ -1322,7 +1322,17 @@ export function createBrowserLanpmStub(): LanpmApi {
         updatedAt: new Date().toISOString()
       }),
       deleteThread: async () => ({ ok: true }),
-      getGateStatus: async () => ({ enabled: false, hasApiKey: false, canStream: false }),
+      getGateStatus: async () => ({
+        enabled: false,
+        hasApiKey: false,
+        endpointReachable: null,
+        endpointCheckedAt: null,
+        canStream: false
+      }),
+      probeEndpoint: async (input) => ({
+        reachable: Boolean(input?.baseUrl?.includes('ok')),
+        checkedAt: new Date().toISOString()
+      }),
       streamChat: async () => ({ requestId: 'stub-req' }),
       reviewTask: async () => ({
         summary: 'Stub review',

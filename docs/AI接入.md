@@ -322,7 +322,17 @@ IPC: ai:streamChat                Key 解密仅 main
 | 定时巡检 | `aiPatrolService` + `aiPatrolScheduler`（默认 24h · 启动延迟 5min） |
 | 通知与记录 | `showDesktopNotification` · SQLite `ai_patrol_runs` · 驾驶舱摘要 |
 | 配置 | `ai_config.patrol_enabled` · `patrol_interval_hours` · `AiConfigModal` |
-| 验收 | `verify:ai-subtask` · `verify:ai-patrol` |
+| 验收 | `verify:ai-subtask` · `verify:ai-patrol` · `verify:ai-endpoint-probe` |
+
+### 5.5 A4+ 端点探测（SPRINT-AI-04 · v1.38.0）
+
+| 能力 | 实现 |
+|------|------|
+| 探测 | `GET {baseUrl}/models` · 超时 5s · 5xx/网络/超时 → 不可达 |
+| 缓存 | 成功 5min · 失败 2min · 内存 TTL |
+| 门禁 | `AiGateStatus.endpointReachable` · `canStream` 须探测成功 |
+| 调度 | 启动 30s 后首次探 · 保存配置后立即探 · `ai:probeEndpoint` |
+| UI | 配置页「测试连接」· 助手 `ai.gateEndpointUnreachable` |
 
 ---
 

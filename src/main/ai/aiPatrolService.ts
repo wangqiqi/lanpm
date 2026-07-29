@@ -2,6 +2,7 @@ import type { Database } from 'better-sqlite3'
 import type { AiPatrolFinding, AiPatrolReport, AiPatrolRunSummary } from '../../shared/ai/patrolTypes.ts'
 import { buildGroupAiSummary, formatAiGroupSummary, formatAiRuntimeContext } from './aiPromptService.ts'
 import { getAiConfig, getDecryptedApiKey } from './aiConfigService.ts'
+import { isExternalAiAvailable } from './aiEndpointProbeService.ts'
 import { listUserGroups, resolveGroupType } from '../group/groupService.ts'
 import { buildAttentionTasks } from '../../shared/cockpit/attentionTasks.ts'
 import { listTasksByGroup } from '../storage/repositories/taskRepository.ts'
@@ -17,8 +18,8 @@ function groupAllowsTasks(db: Database, groupId: string): boolean {
 }
 
 async function callExternalPatrolSummary(db: Database, prompt: string): Promise<string | null> {
-  const config = getAiConfig(db)
-  if (!config?.enabled) return null
+  if (!isExternalAiAvailable(db)) return null
+  const config = getAiConfig(db)!
   const apiKey = getDecryptedApiKey(db)
   if (!apiKey) return null
 

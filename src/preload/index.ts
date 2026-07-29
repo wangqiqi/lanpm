@@ -175,6 +175,7 @@ const api: LanpmApi = {
     createThread: (input) => ipcRenderer.invoke(AI_IPC.createThread, input),
     deleteThread: (threadId) => ipcRenderer.invoke(AI_IPC.deleteThread, threadId),
     getGateStatus: () => ipcRenderer.invoke(AI_IPC.getGateStatus),
+    probeEndpoint: (input) => ipcRenderer.invoke(AI_IPC.probeEndpoint, input),
     streamChat: (input) => ipcRenderer.invoke(AI_IPC.streamChat, input),
     reviewTask: (input) => ipcRenderer.invoke(AI_IPC.reviewTask, input),
     shareToChat: (input) => ipcRenderer.invoke(AI_IPC.shareToChat, input),

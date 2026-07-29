@@ -234,6 +234,9 @@ export interface LanpmApi {
     ) => Promise<import('./ai/types').AiThread>
     deleteThread: (threadId: string) => Promise<{ ok: boolean }>
     getGateStatus: () => Promise<import('./ai/types').AiGateStatus>
+    probeEndpoint: (
+      input?: import('./ai/endpointProbe').AiProbeEndpointInput
+    ) => Promise<import('./ai/endpointProbe').AiEndpointProbeResult>
     streamChat: (
       input: import('./ai/types').AiStreamChatInput
     ) => Promise<{ requestId: string }>

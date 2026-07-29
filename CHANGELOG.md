@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.38.0] - 2026-07-29
+
+### Added
+
+- **AI 端点探测（SPRINT-AI-04）**：`GET {baseUrl}/models` 轻量探测 · TTL 缓存（成功 5min / 失败 2min）；`canStream` 须端点可达；保存配置/启动 30s 后自动探；`ai:probeEndpoint` · 配置页「测试连接」· 助手不可达文案
+
 ## [1.37.1] - 2026-07-29
 
 ### Fixed

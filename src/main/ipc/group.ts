@@ -19,6 +19,7 @@ import {
   listUserGroups
 } from '../group/groupService'
 import { getAiConfig, saveAiConfig } from '../ai/aiConfigService'
+import { probeAiEndpoint } from '../ai/aiEndpointProbeService'
 import { refreshAiPatrolScheduler } from '../ai/aiPatrolScheduler'
 import { getDatabase } from '../storage'
 import { listLastMessageAtByGroup } from '../storage/repositories/messageRepository'
@@ -76,6 +77,9 @@ export function registerCockpitIpc(): void {
     if (!input || typeof input.provider !== 'string') throw new Error('invalid ai config')
     const saved = saveAiConfig(getDatabase(), input)
     refreshAiPatrolScheduler(getDatabase())
+    void probeAiEndpoint(getDatabase(), { force: true }).catch((err) => {
+      console.warn('[ai-endpoint-probe] post-save probe failed:', err)
+    })
     return saved
   })
 }

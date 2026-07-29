@@ -5,6 +5,7 @@ export const AI_IPC = {
   appendMessage: 'ai:appendMessage',
   deleteThread: 'ai:deleteThread',
   getGateStatus: 'ai:getGateStatus',
+  probeEndpoint: 'ai:probeEndpoint',
   streamChat: 'ai:streamChat',
   reviewTask: 'ai:reviewTask',
   shareToChat: 'ai:shareToChat',

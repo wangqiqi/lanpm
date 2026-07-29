@@ -319,9 +319,11 @@ export default function AiAssistantShell(): React.ReactElement | null {
     ? t('ai.gateDisabled')
     : !gate?.hasApiKey
       ? t('ai.gateNoKey')
-      : !online
-        ? t('ai.gateOffline')
-        : null
+      : gate.endpointReachable === false
+        ? t('ai.gateEndpointUnreachable')
+        : !online
+          ? t('ai.gateOffline')
+          : null
 
   const body = (
     <div className={styles.shellInner}>

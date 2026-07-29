@@ -13,6 +13,7 @@ import type {
   AiConfirmSubtasksInput,
   AiProposeSubtasksInput
 } from '../../shared/ai/subtaskSchemas.ts'
+import type { AiProbeEndpointInput } from '../../shared/ai/endpointProbe.ts'
 import { getDatabase } from '../storage/index.ts'
 import { getSetupStatus } from '../identity/setup.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
@@ -23,7 +24,8 @@ import {
   getAiThreadWithMessages,
   listAiThreads
 } from '../ai/aiThreadService.ts'
-import { getAiGateStatus, runAiStreamChat } from '../ai/aiStreamService.ts'
+import { getAiGateStatus, probeAiEndpoint } from '../ai/aiEndpointProbeService.ts'
+import { runAiStreamChat } from '../ai/aiStreamService.ts'
 import { reviewTaskStructured } from '../ai/aiReviewService.ts'
 import { confirmSubtasks, proposeSubtasks } from '../ai/aiSubtaskService.ts'
 import { getLatestPatrolRun, listPatrolRuns } from '../ai/aiPatrolScheduler.ts'
@@ -63,6 +65,10 @@ export function registerAiIpc(): void {
   })
 
   ipcMain.handle(AI_IPC.getGateStatus, () => getAiGateStatus(getDatabase()))
+
+  ipcMain.handle(AI_IPC.probeEndpoint, (_event, input?: AiProbeEndpointInput) => {
+    return probeAiEndpoint(getDatabase(), { ...input, force: true })
+  })
 
   ipcMain.handle(AI_IPC.streamChat, async (event, input: AiStreamChatInput) => {
     const userId = requireUserId()
