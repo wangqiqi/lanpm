@@ -15,6 +15,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **截图 SSOT（SPRINT-12）**：`snapshot/` → `docs/screenshots/`（`baselines/dark` · `manual/`）；`verify:visual-screenshots` EXPECTED 对齐八视图（18 PNG）；`verify:screenshots-layout` 入 `verify:p0`；`docs/04`/`docs/05` 路径与页数对齐。
+
 ## [1.33.6] - 2026-07-28
 
 ### Removed
