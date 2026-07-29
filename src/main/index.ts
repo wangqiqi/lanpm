@@ -26,7 +26,8 @@ import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { ensureProfileUserDataPath } from './storage/profilePaths'
-import { resolveWindowIcon } from './appIcon'
+import { resolveWindowIcon, resolveAppIconPath } from './appIcon'
+import { attachCloseToTray, hasSystemTray, initSystemTray } from './systemTray'
 import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
 import { initScreenshotService, shutdownScreenshotService } from './screenshot/screenshotService'
 import { LANPM_MAIN_WINDOW_TITLE, setMainWindow } from './mainWindow'
@@ -103,6 +104,9 @@ function registerAllIpcHandlers(): void {
 
 function createWindow(): BrowserWindow {
   const windowIcon = resolveWindowIcon()
+  if (!app.isPackaged) {
+    console.info('[lanpm] window icon:', resolveAppIconPath() ?? '(missing — npm run build:icons)')
+  }
   const mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -162,6 +166,7 @@ function createWindow(): BrowserWindow {
     return { action: 'deny' }
   })
   attachWebviewGuards(mainWindow)
+  attachCloseToTray(mainWindow)
 
   if (isDev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
@@ -194,6 +199,7 @@ app.whenReady().then(() => {
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
     }
+    initSystemTray()
     createWindow()
   } catch (err) {
     console.error('[lanpm] startup failed:', err)
@@ -202,12 +208,21 @@ app.whenReady().then(() => {
   }
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    const existing = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
+    if (existing) {
+      if (!existing.isVisible()) existing.show()
+      if (existing.isMinimized()) existing.restore()
+      existing.focus()
+      return
+    }
+    createWindow()
   })
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform === 'darwin') return
+  if (hasSystemTray()) return
+  app.quit()
 })
 
 app.on('will-quit', () => {
