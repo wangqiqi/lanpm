@@ -1,10 +1,12 @@
 import { randomUUID } from 'crypto'
+import { app } from 'electron'
 import type { Database } from 'better-sqlite3'
 import type { ChatMessage, MessageType } from '../../shared/chat/types'
 import type { Task } from '../../shared/task/types'
 import { MOCK_CATALOG_VERSION, MOCK_GROUPS, isMockGroupId } from '../../shared/group/mock'
 import { getSetupStatus } from '../identity/setup'
 import {
+  deleteGroupCascade,
   getGroupById,
   insertGroup,
   insertGroupMember,
@@ -335,8 +337,33 @@ function markSeeded(db: Database): void {
   setMeta(db, MOCK_CATALOG_META_KEY, MOCK_CATALOG_VERSION)
 }
 
+/** 开发 / 演示 / 截图流水线注入 mock；正式打包安装包默认不注入 */
+export function shouldSeedMockCatalog(): boolean {
+  if (process.env.LANPM_DEMO === '1') return true
+  if (process.env.LANPM_VISUAL_CAPTURE_DIR) return true
+  return !app.isPackaged
+}
+
+/** 移除本地演示群及 mock 内容（打包版启动时保持干净库） */
+export function purgeMockCatalog(db: Database): void {
+  for (const mock of MOCK_GROUPS) {
+    if (!getGroupById(db, mock.groupId)) continue
+    wipeMockGroupContent(db, mock.groupId, mock.type)
+    if (mock.type === 'anonymous') {
+      clearAnonymousSession(mock.groupId)
+    }
+    deleteGroupCascade(db, mock.groupId)
+  }
+  setMeta(db, MOCK_CATALOG_META_KEY, 'purged')
+}
+
 /** 启动 / Setup 后：确保演示群存在、当前用户为群主，并注入 mock 内容 */
 export function ensureMockCatalog(db: Database): void {
+  if (!shouldSeedMockCatalog()) {
+    purgeMockCatalog(db)
+    return
+  }
+
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) return
 

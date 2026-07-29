@@ -5,12 +5,6 @@ import { isDmGroupId } from '@shared/chat/dmSession'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { pickDefaultGroupId } from '@renderer/routes/paths'
 
-const FALLBACK_GROUPS: NavGroup[] = [
-  { groupId: 'demo-project', name: '示例项目', type: 'project', createdBy: 'system' },
-  { groupId: 'demo-function', name: '示例职能群', type: 'function', createdBy: 'system' },
-  { groupId: 'demo-anonymous', name: '示例匿名群', type: 'anonymous', createdBy: 'system' }
-]
-
 function toNavGroup(record: GroupRecord): NavGroup {
   return {
     groupId: record.groupId,
@@ -40,10 +34,9 @@ interface NavigationState {
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({
-  groups: FALLBACK_GROUPS,
-  activeGroupId: FALLBACK_GROUPS[0].groupId,
-  /** 已有占位群列表，避免未完成身份配置时首页永远卡在加载 */
-  groupsLoaded: true,
+  groups: [],
+  activeGroupId: '',
+  groupsLoaded: false,
   groupsLoadFailed: false,
   lastNonCockpitPath: null,
   setActiveGroupId: (groupId) => set({ activeGroupId: groupId }),
@@ -61,7 +54,12 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
           activeGroupId: pickDefaultGroupId(groups, s.activeGroupId)
         }))
       } else {
-        set({ groupsLoaded: true, groupsLoadFailed: false })
+        set({
+          groups: [],
+          groupsLoaded: true,
+          groupsLoadFailed: false,
+          activeGroupId: ''
+        })
       }
       return true
     } catch {

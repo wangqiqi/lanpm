@@ -2,6 +2,17 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.41.3] - 2026-07-29
+
+### Fixed
+
+- **打包版干净首启**：正式安装包（`app.isPackaged`）不再注入 `demo-*` 演示群，启动时 `purgeMockCatalog` 清除已有 mock；前端移除 `FALLBACK_GROUPS` 占位，无群时进入驾驶舱；开发环境 / `LANPM_DEMO=1` / 截图流水线行为不变
+- **Windows exe 图标嵌入**：本地 `signAndEditExecutable: false` 规避 winCodeSign 符号链接问题；`rcedit` + `scripts/embed-win-exe-icon.mjs` 在 `--dir` 后嵌入 `resources/icon.ico`；`dist:win:x64` 改为 dir → embed → prepackaged NSIS
+
+### Added
+
+- `tests/unit/mock/seedMockData.test.ts` — `shouldSeedMockCatalog` 分支覆盖
+
 ## [1.41.2] - 2026-07-29
 
 ### Fixed
