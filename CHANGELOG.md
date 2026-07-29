@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.41.2] - 2026-07-29
+
+### Fixed
+
+- **发版门禁**：README 版本徽章与中英文尾注同步至 `1.41.2`；`ai_messages` 外键移除 `ON DELETE CASCADE`（与 `verify:schema-fk` · 应用层 `deleteThread` 一致）
+
+### Changed
+
+- ESLint：清理未使用 import（`aiPatrolService` · `ipc/ai` · `systemTray` · verify 脚本）
+
 ## [1.41.1] - 2026-07-29
 
 ### Fixed

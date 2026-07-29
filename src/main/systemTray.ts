@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, Tray } from 'electron'
-import { resolveAppIconPath, resolveTrayIcon } from './appIcon'
+import { resolveTrayIcon } from './appIcon'
 import { getMainWindow } from './mainWindow'
 
 let tray: Tray | null = null

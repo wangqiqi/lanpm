@@ -193,7 +193,7 @@ export const MIGRATIONS: readonly MigrationStep[] = [
           role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
           content TEXT NOT NULL,
           created_at TEXT NOT NULL,
-          FOREIGN KEY (thread_id) REFERENCES ai_threads(thread_id) ON DELETE CASCADE
+          FOREIGN KEY (thread_id) REFERENCES ai_threads(thread_id)
         )
       `)
       db.exec(`CREATE INDEX idx_ai_messages_thread ON ai_messages(thread_id, created_at)`)

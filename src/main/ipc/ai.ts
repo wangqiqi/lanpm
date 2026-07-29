@@ -35,7 +35,6 @@ import {
   startAiPipeline
 } from '../ai/aiPipelineRunner.ts'
 import {
-  getLatestPipelineRun,
   getPipelineRun,
   listPipelineRuns
 } from '../ai/aiPipelineRepository.ts'

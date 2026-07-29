@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs'
-import { AI_IPC, AI_STREAM_CHUNK_CHANNEL } from '../../src/shared/ai/channels.ts'
 
 const preload = readFileSync('src/preload/index.ts', 'utf8')
 const ipcAi = readFileSync('src/main/ipc/ai.ts', 'utf8')

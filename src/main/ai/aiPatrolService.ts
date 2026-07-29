@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3'
-import type { AiPatrolFinding, AiPatrolReport, AiPatrolRunSummary } from '../../shared/ai/patrolTypes.ts'
+import type { AiPatrolFinding, AiPatrolReport } from '../../shared/ai/patrolTypes.ts'
 import { buildGroupAiSummary, formatAiGroupSummary, formatAiRuntimeContext } from './aiPromptService.ts'
 import { getAiConfig, getDecryptedApiKey } from './aiConfigService.ts'
 import { isExternalAiAvailable } from './aiEndpointProbeService.ts'
