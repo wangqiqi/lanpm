@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.33.8-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.33.9-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -71,13 +71,15 @@
 </p>
 <p align="center"><sub><b>Cockpit</b> — cross-group attention, KPI summary, project health</sub></p>
 
+<p align="center"><sub>Headless screenshots — <code>npm run screenshots:capture</code> · <code>npm run screenshots:sync-readme</code> (<a href="docs/screenshots/README.md">docs/screenshots</a>). No manual Snipaste needed.</sub></p>
+
 ---
 
 ## 🎯 Why LanPM
 
 | Pain today | LanPM answer |
 |------------|----------------|
-| IM tools don’t do real project views | **7 views in one shell**: Chat · Board · Tree · Gantt · Calendar · Whiteboard · Files |
+| IM tools don’t do real project views | **8 views**: Chat · Board · Tree · Gantt · Calendar · Whiteboard · Files · Cockpit |
 | Project tools need cloud & accounts | **Peer-to-peer in the group** — discover nodes on the LAN, sync in-group |
 | Sensitive files forced through SaaS | **Local-first SQLite**, encrypted transport, **LibreOffice preview on device** |
 | “FeiQ / Feige” feel but no tasks | **Familiar IM UX** plus boards, calendar, whiteboard, dependencies, cockpit |
@@ -205,6 +207,7 @@ npm run verify:platform-matrix  # Win/mac/Linux × x64+arm64 wiring
 |-------|----------------|
 | Browser UI stub only | `npm run dev:web` — **Electron is the source of truth** for IPC & SQLite |
 | Visual consistency gate | `npm run verify:visual` (see [06_ROADMAP](./docs/06_ROADMAP.md) §4) |
+| README screenshots | `npm run screenshots:capture` then `npm run screenshots:sync-readme` — [docs/screenshots](./docs/screenshots/README.md) |
 | Feature verifiers | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
 | Cross-platform packages | `dist:win` / `dist:mac` / `dist:linux` (+ `:x64` / `:arm64`); matrix in [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) |
 | One-key menu | `./onekey_run.sh` → start / stop / status / build / pack …; `11` for more (check / verify / rebuild …) |
@@ -265,7 +268,7 @@ Stub error strings go through i18n (`verify:i18n-en` guard).
 | **M6–M7** | Real network paths, perf & release gates |
 | **v1.1–v1.19** | CRDT · tags · Presence · calendar · whiteboard realtime · deliverables · discover · transfer UX · platform matrix |
 
-**Current:** `1.33.8` — SPRINT-13 README screenshots sync (`screenshots:capture` · `screenshots:sync-readme`); **onekey** slim menu + preflight; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
+**Current:** `1.33.9` — headless README screenshots only (`screenshots:capture` · `screenshots:sync-readme`); removed manual Snipaste; **eight views** including cockpit. Prior: **onekey** slim menu; **Cockpit density accordion** (CK-410–415). M0–M7 closed in automation; true-device hand tests still deferred ([06_ROADMAP](./docs/06_ROADMAP.md) §4). License: [AGPL-3.0-or-later](./LICENSE).
 
 **Next (queue):** meeting implementation sprint · marketplace SPIKE.
 

@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.33.8-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.33.9-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -71,13 +71,15 @@
 </p>
 <p align="center"><sub><b>驾驶舱</b> — 跨群需关注、领导摘要、项目健康度</sub></p>
 
+<p align="center"><sub>无头自动生成截图 — <code>npm run screenshots:capture</code> · <code>npm run screenshots:sync-readme</code>（<a href="docs/screenshots/README.md">docs/screenshots</a>），无需手工 Snipaste。</sub></p>
+
 ---
 
 ## 🎯 为什么选择 LanPM
 
 | 常见痛点 | LanPM 的做法 |
 |----------|----------------|
-| 聊天工具做不了正经项目视图 | **七大视图一体**：聊天 · 看板 · 任务树 · 甘特 · 日历 · 白板 · 文件 |
+| 聊天工具做不了正经项目视图 | **八大视图**：聊天 · 看板 · 任务树 · 甘特 · 日历 · 白板 · 文件 · 驾驶舱 |
 | 项目管理强依赖云端账号 | **群组内 P2P 同步**，局域网发现节点，不绑公有云 |
 | 敏感文件只能走 SaaS | **本地 SQLite 优先**，传输加密，**Office 本地 LibreOffice 预览** |
 | 飞秋 / 飞鸽好用但没有任务 | **保留 IM 体验**，叠加看板、日历、白板、依赖关系、领导驾驶舱 |
@@ -205,6 +207,7 @@ npm run verify:platform-matrix  # 跨平台发版矩阵静态验收
 |------|-------------|
 | 仅浏览器 UI 预览 | `npm run dev:web` — **验收以 Electron 为准**（IPC / SQLite） |
 | 视觉一致性门禁 | `npm run verify:visual`（见 [06_ROADMAP](./docs/06_ROADMAP.md) §4） |
+| README 截图 | `npm run screenshots:capture` → `npm run screenshots:sync-readme` — [docs/screenshots](./docs/screenshots/README.md) |
 | 功能验收脚本 | `verify:transfer-a4` · `verify:project-files` · `verify:discover-a5` · `verify:whiteboard-realtime` · `verify:calendar-drag` · `verify:checklist` · `verify:message-task` · … |
 | 跨平台安装包 | `dist:win` / `dist:mac` / `dist:linux`（可加 `:x64` / `:arm64`）；矩阵见 [docs/05 §1.4](./docs/05_测试与联调发布.md#14-跨平台发版矩阵) |
 | 一键脚本菜单 | `./onekey_run.sh` 交互菜单：主屏 `start`/`stop`/`build`/`pack` 等；`11` 进入「更多维护」（`check`/`verify`/`rebuild`…）；CLI 子命令不变 |
@@ -265,7 +268,7 @@ Stub 错误文案走 i18n（`verify:i18n-en` 守卫）。
 | **M6–M7** | 真网路径、性能与发布门禁 |
 | **v1.1–v1.19** | CRDT · 标签 · Presence · 日历 · 白板实时 · 交付物 · 发现加固 · 传输 UX · 跨平台矩阵 |
 
-**当前版本：** `1.33.8` — SPRINT-13 README 截图同步（`screenshots:capture` · `screenshots:sync-readme`）；**onekey** 菜单精简 + 预检；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
+**当前版本：** `1.33.9` — README 截图仅无头管线（`screenshots:capture` · `screenshots:sync-readme`）；移除手工 Snipaste；**八大视图**含驾驶舱。此前：**onekey** 菜单精简；**驾驶舱密度手风琴**（CK-410–415）。许可：[AGPL-3.0-or-later](./LICENSE)。真机手验仍延期，见 [06_ROADMAP](./docs/06_ROADMAP.md) §4。
 
 **进行中 / 队列：** 会议实现 Sprint · 插件市场 SPIKE。（视觉手验 backlog 见 [06_ROADMAP](./docs/06_ROADMAP.md) §4）
 

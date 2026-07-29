@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.33.9] - 2026-07-29
+
+### Removed
+- **手工截图**：删除 `docs/screenshots/manual/`（9 张 Snipaste）；不再保留手工对照图目录。
+
+### Changed
+- **README / README.zh-CN**：截图区注明无头 `screenshots:capture` · `screenshots:sync-readme`；开发者表补 README 截图命令；八大视图（含驾驶舱）。
+- **文档**：`docs/screenshots/README.md` · `docs/05` · 评估归档去掉 `manual/` 引用。
+
+### Release
+- `v1.33.9` — 截图全自动 · 清理手工 Snipaste
+
 ## [1.33.7] - 2026-07-29
 
 ### Fixed
@@ -29,7 +41,7 @@
 ## [Unreleased]
 
 ### Changed
-- **截图 SSOT（SPRINT-12）**：`snapshot/` → `docs/screenshots/`（`baselines/dark` · `manual/`）；`verify:visual-screenshots` EXPECTED 对齐八视图（18 PNG）；`verify:screenshots-layout` 入 `verify:p0`；`docs/04`/`docs/05` 路径与页数对齐。
+- **截图 SSOT（SPRINT-12）**：`snapshot/` → `docs/screenshots/`（`baselines/dark`）；`verify:visual-screenshots` EXPECTED 对齐八视图（18 PNG）；`verify:screenshots-layout` 入 `verify:p0`；`docs/04`/`docs/05` 路径与页数对齐。
 
 ## [1.33.6] - 2026-07-28
 
