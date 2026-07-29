@@ -643,6 +643,11 @@
   padding: 0 4px;
 }
 
+.chatMarkdownWrap {
+  display: block;
+  width: 100%;
+}
+
 .taskRef {
   color: var(--lanpm-success);
   font-weight: 600;

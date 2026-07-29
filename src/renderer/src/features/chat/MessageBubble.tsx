@@ -13,7 +13,7 @@ import { useUiStore } from '@renderer/stores/uiStore'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
-import MentionText from '@renderer/features/chat/MentionText'
+import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import styles from './chat.module.css'
 
@@ -183,11 +183,12 @@ export default function MessageBubble({
               {t('ai.fromAssistant')}
             </Tag>
           ) : null}
-          <MentionText
+          <ChatMessageText
             text={message.content.text}
             members={members}
             tasks={tasks}
             own={own}
+            meta={message.content.meta}
             onTaskRefClick={groupId ? (taskId) => locateTask(taskId, 'board') : undefined}
           />
         </div>

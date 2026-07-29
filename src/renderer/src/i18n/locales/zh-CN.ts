@@ -216,6 +216,8 @@ const zhCN = {
   'ai.assistantName': 'AI 助手',
   'ai.you': '我',
   'ai.copyMessage': '复制',
+  'ai.copyMarkdown': '复制 Markdown',
+  'ai.copyPlainText': '复制纯文本',
   'ai.copied': '已复制',
   'ai.copyFailed': '复制失败',
   'ai.selectMode': '多选',

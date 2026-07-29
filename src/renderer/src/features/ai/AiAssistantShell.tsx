@@ -400,7 +400,6 @@ export default function AiAssistantShell(): React.ReactElement | null {
                   selectMode={selectMode}
                   selected={selectedIds.has(m.messageId)}
                   onToggleSelect={toggleSelect}
-                  onCopy={(content) => void copyText(content)}
                 />
               ))}
               {streamBuffer ? (
@@ -417,7 +416,6 @@ export default function AiAssistantShell(): React.ReactElement | null {
                   selectMode={false}
                   selected={false}
                   onToggleSelect={() => {}}
-                  onCopy={(content) => void copyText(content)}
                 />
               ) : null}
             </div>

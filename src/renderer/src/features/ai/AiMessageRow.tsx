@@ -1,7 +1,11 @@
-import { Checkbox } from 'antd'
+import { Checkbox, Dropdown } from 'antd'
+import type { MenuProps } from 'antd'
 import { CopyOutlined, RobotOutlined } from '@ant-design/icons'
 import type { AiMessage } from '@shared/ai/types'
+import { markdownToPlainText } from '@shared/markdown/plainText'
+import AiMessageBody from '@renderer/features/ai/AiMessageBody'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import UserAvatar from '@renderer/ui/UserAvatar'
 import { formatAiMessageTime } from '@renderer/features/ai/formatAiMessageTime'
@@ -13,7 +17,6 @@ export interface AiMessageRowProps {
   selectMode: boolean
   selected: boolean
   onToggleSelect: (messageId: string) => void
-  onCopy: (content: string) => void
 }
 
 export default function AiMessageRow({
@@ -21,13 +24,68 @@ export default function AiMessageRow({
   showAvatar,
   selectMode,
   selected,
-  onToggleSelect,
-  onCopy
+  onToggleSelect
 }: AiMessageRowProps): React.ReactElement {
   const { t } = useI18n()
+  const { message: toast } = useLanpmApp()
   const user = useIdentityStore((s) => s.user)
   const isUser = message.role === 'user'
+  const isAssistant = !isUser
   const timeLabel = formatAiMessageTime(message.createdAt)
+
+  const copyText = async (text: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(t('ai.copied'))
+    } catch {
+      toast.error(t('ai.copyFailed'))
+    }
+  }
+
+  const handleCopy = (mode: 'markdown' | 'plain'): void => {
+    const text = mode === 'plain' ? markdownToPlainText(message.content) : message.content
+    void copyText(text)
+  }
+
+  const copyMenuItems: MenuProps['items'] = [
+    { key: 'markdown', label: t('ai.copyMarkdown') },
+    { key: 'plain', label: t('ai.copyPlainText') }
+  ]
+
+  const renderCopyControl = (): React.ReactElement => {
+    if (isAssistant) {
+      return (
+        <Dropdown
+          menu={{
+            items: copyMenuItems,
+            onClick: ({ key }) => handleCopy(key as 'markdown' | 'plain')
+          }}
+          trigger={['click']}
+        >
+          <button
+            type="button"
+            className={styles.msgCopyBtn}
+            aria-label={t('ai.copyMessage')}
+            title={t('ai.copyMessage')}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CopyOutlined />
+          </button>
+        </Dropdown>
+      )
+    }
+    return (
+      <button
+        type="button"
+        className={styles.msgCopyBtn}
+        aria-label={t('ai.copyMessage')}
+        title={t('ai.copyMessage')}
+        onClick={() => void copyText(message.content)}
+      >
+        <CopyOutlined />
+      </button>
+    )
+  }
 
   const avatarCol = isUser ? (
     <div className={styles.msgAvatarCol}>
@@ -60,23 +118,13 @@ export default function AiMessageRow({
         {isUser ? (user?.displayName ?? t('ai.you')) : t('ai.assistantName')}
       </span>
       {timeLabel ? <span className={styles.msgTime}>{timeLabel}</span> : null}
-      {!selectMode ? (
-        <button
-          type="button"
-          className={styles.msgCopyBtn}
-          aria-label={t('ai.copyMessage')}
-          title={t('ai.copyMessage')}
-          onClick={() => onCopy(message.content)}
-        >
-          <CopyOutlined />
-        </button>
-      ) : null}
+      {!selectMode ? renderCopyControl() : null}
     </div>
   )
 
   const bubble = (
     <div className={isUser ? styles.msgBubbleUser : styles.msgBubbleAssistant}>
-      <div className={styles.msgBody}>{message.content}</div>
+      <AiMessageBody content={message.content} markdown={isAssistant} />
     </div>
   )
 
@@ -100,16 +148,7 @@ export default function AiMessageRow({
           {!showAvatar ? (
             <div className={styles.msgMetaFooter}>
               {timeLabel}
-              {!selectMode ? (
-                <button
-                  type="button"
-                  className={styles.msgCopyBtn}
-                  aria-label={t('ai.copyMessage')}
-                  onClick={() => onCopy(message.content)}
-                >
-                  <CopyOutlined />
-                </button>
-              ) : null}
+              {!selectMode ? renderCopyControl() : null}
             </div>
           ) : null}
         </div>
@@ -137,16 +176,7 @@ export default function AiMessageRow({
         {bubble}
         <div className={styles.msgMetaFooter}>
           {!showAvatar ? timeLabel : null}
-          {!selectMode ? (
-            <button
-              type="button"
-              className={styles.msgCopyBtn}
-              aria-label={t('ai.copyMessage')}
-              onClick={() => onCopy(message.content)}
-            >
-              <CopyOutlined />
-            </button>
-          ) : null}
+          {!selectMode ? renderCopyControl() : null}
         </div>
       </div>
     </div>

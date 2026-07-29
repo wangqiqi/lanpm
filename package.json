@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.36.1",
+  "version": "1.36.2",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -178,7 +178,9 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "pinyin-pro": "^3.28.1",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^6.30.0",
+    "remark-gfm": "^4.0.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1",
     "vite": "^8.0.14",

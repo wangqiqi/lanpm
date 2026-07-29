@@ -215,6 +215,8 @@ export type MessageKey =
   | 'ai.assistantName'
   | 'ai.you'
   | 'ai.copyMessage'
+  | 'ai.copyMarkdown'
+  | 'ai.copyPlainText'
   | 'ai.copied'
   | 'ai.copyFailed'
   | 'ai.selectMode'

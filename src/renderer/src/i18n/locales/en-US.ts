@@ -218,6 +218,8 @@ const enUS = {
   'ai.assistantName': 'AI Assistant',
   'ai.you': 'You',
   'ai.copyMessage': 'Copy',
+  'ai.copyMarkdown': 'Copy Markdown',
+  'ai.copyPlainText': 'Copy plain text',
   'ai.copied': 'Copied',
   'ai.copyFailed': 'Copy failed',
   'ai.selectMode': 'Select',

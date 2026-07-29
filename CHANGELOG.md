@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.36.2] - 2026-07-29
+
+### Added
+
+- **Markdown 渲染（SPRINT-MD-01）**：共享 `MarkdownView`（`react-markdown` + GFM）；AI 助手消息渲染 MD，复制可选 Markdown / 纯文本；群聊 `ChatMessageText` 启发式 + `ai-assistant` 来源同样渲染（保留 `@` / `#任务`）
+
 ## [1.36.1] - 2026-07-29
 
 ### Fixed
