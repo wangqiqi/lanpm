@@ -243,6 +243,16 @@ export interface LanpmApi {
     shareToChat: (
       input: import('./ai/types').AiShareToChatInput
     ) => Promise<ChatMessage>
+    proposeSubtasks: (
+      input: import('./ai/subtaskSchemas').AiProposeSubtasksInput
+    ) => Promise<import('./ai/subtaskSchemas').AiProposeSubtasksResult>
+    confirmSubtasks: (
+      input: import('./ai/subtaskSchemas').AiConfirmSubtasksInput
+    ) => Promise<import('./ai/subtaskSchemas').AiConfirmSubtasksResult>
+    listPatrolRuns: (
+      limit?: number
+    ) => Promise<import('./ai/patrolTypes').AiPatrolRunSummary[]>
+    getLatestPatrolRun: () => Promise<import('./ai/patrolTypes').AiPatrolReport | null>
     onStreamChunk: (
       handler: (payload: { requestId: string; delta: string }) => void
     ) => () => void

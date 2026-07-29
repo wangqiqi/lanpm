@@ -178,6 +178,10 @@ const api: LanpmApi = {
     streamChat: (input) => ipcRenderer.invoke(AI_IPC.streamChat, input),
     reviewTask: (input) => ipcRenderer.invoke(AI_IPC.reviewTask, input),
     shareToChat: (input) => ipcRenderer.invoke(AI_IPC.shareToChat, input),
+    proposeSubtasks: (input) => ipcRenderer.invoke(AI_IPC.proposeSubtasks, input),
+    confirmSubtasks: (input) => ipcRenderer.invoke(AI_IPC.confirmSubtasks, input),
+    listPatrolRuns: (limit) => ipcRenderer.invoke(AI_IPC.listPatrolRuns, limit),
+    getLatestPatrolRun: () => ipcRenderer.invoke(AI_IPC.getLatestPatrolRun),
     onStreamChunk: (handler) => {
       const listener = (
         _event: Electron.IpcRendererEvent,

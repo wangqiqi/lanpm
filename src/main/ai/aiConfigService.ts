@@ -11,6 +11,8 @@ interface AiConfigRow {
   model: string
   enabled: number
   data_policy: string
+  patrol_enabled: number
+  patrol_interval_hours: number
 }
 
 const DEV_FALLBACK_SECRET = createHash('sha256').update('lanpm-dev-ai-key').digest()
@@ -61,8 +63,17 @@ function rowToView(row: AiConfigRow): AiConfigView {
     model: row.model,
     enabled: row.enabled === 1,
     dataPolicy: 'desensitized-only',
-    hasApiKey: Boolean(row.api_key_enc)
+    hasApiKey: Boolean(row.api_key_enc),
+    patrolEnabled: row.patrol_enabled !== 0,
+    patrolIntervalHours: row.patrol_interval_hours > 0 ? row.patrol_interval_hours : 24
   }
+}
+
+function existingPatrolHours(db: Database): number {
+  const row = db.prepare(`SELECT patrol_interval_hours FROM ai_config WHERE id = 1`).get() as
+    | { patrol_interval_hours: number }
+    | undefined
+  return row && row.patrol_interval_hours > 0 ? row.patrol_interval_hours : 24
 }
 
 export function getAiConfig(db: Database): AiConfigView | null {
@@ -84,20 +95,24 @@ export function saveAiConfig(db: Database, input: AiConfigInput): AiConfigView {
   }
 
   db.prepare(
-    `INSERT INTO ai_config (id, provider, api_key_enc, base_url, model, enabled, data_policy)
-     VALUES (1, @provider, @apiKeyEnc, @baseUrl, @model, @enabled, 'desensitized-only')
+    `INSERT INTO ai_config (id, provider, api_key_enc, base_url, model, enabled, data_policy, patrol_enabled, patrol_interval_hours)
+     VALUES (1, @provider, @apiKeyEnc, @baseUrl, @model, @enabled, 'desensitized-only', @patrolEnabled, @patrolIntervalHours)
      ON CONFLICT(id) DO UPDATE SET
        provider = excluded.provider,
        api_key_enc = excluded.api_key_enc,
        base_url = excluded.base_url,
        model = excluded.model,
-       enabled = excluded.enabled`
+       enabled = excluded.enabled,
+       patrol_enabled = excluded.patrol_enabled,
+       patrol_interval_hours = excluded.patrol_interval_hours`
   ).run({
     provider: input.provider,
     apiKeyEnc,
     baseUrl: input.baseUrl.trim(),
     model: input.model.trim(),
-    enabled: input.enabled ? 1 : 0
+    enabled: input.enabled ? 1 : 0,
+    patrolEnabled: input.patrolEnabled === false ? 0 : 1,
+    patrolIntervalHours: input.patrolIntervalHours ?? existingPatrolHours(db)
   })
 
   return getAiConfig(db)!

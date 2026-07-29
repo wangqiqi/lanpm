@@ -82,6 +82,8 @@ export interface AiConfigView {
   enabled: boolean
   dataPolicy: 'desensitized-only'
   hasApiKey: boolean
+  patrolEnabled: boolean
+  patrolIntervalHours: number
 }
 
 export interface AiConfigInput {
@@ -90,6 +92,8 @@ export interface AiConfigInput {
   baseUrl: string
   model: string
   enabled: boolean
+  patrolEnabled?: boolean
+  patrolIntervalHours?: number
 }
 
 export interface AiChecklistItemSummary {

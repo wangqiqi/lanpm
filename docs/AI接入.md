@@ -313,6 +313,17 @@ IPC: ai:streamChat                Key 解密仅 main
 
 **拆子任务落库**：第二期 · 必须 **预览 + 人审** 后 `insert`，禁止静默改 CRDT。
 
+### 5.4 A4 实现（SPRINT-AI-03 · v1.37.0）
+
+| 能力 | 实现 |
+|------|------|
+| 子任务提案 | `ai:proposeSubtasks` · `shared/ai/subtaskSchemas.ts`（Zod）· `aiSubtaskService` |
+| 人审落库 | `SubtaskPreviewModal` · `ai:confirmSubtasks` → `createGroupTask(parentTaskId)` |
+| 定时巡检 | `aiPatrolService` + `aiPatrolScheduler`（默认 24h · 启动延迟 5min） |
+| 通知与记录 | `showDesktopNotification` · SQLite `ai_patrol_runs` · 驾驶舱摘要 |
+| 配置 | `ai_config.patrol_enabled` · `patrol_interval_hours` · `AiConfigModal` |
+| 验收 | `verify:ai-subtask` · `verify:ai-patrol` |
+
 ---
 
 ## 6. 智能体与 PM 工作覆盖（讨论结论）

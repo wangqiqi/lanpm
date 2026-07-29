@@ -149,7 +149,9 @@ CREATE TABLE ai_config (
   base_url TEXT NOT NULL,
   model TEXT NOT NULL,
   enabled INTEGER NOT NULL DEFAULT 0,
-  data_policy TEXT NOT NULL DEFAULT 'desensitized-only'
+  data_policy TEXT NOT NULL DEFAULT 'desensitized-only',
+  patrol_enabled INTEGER NOT NULL DEFAULT 1,
+  patrol_interval_hours INTEGER NOT NULL DEFAULT 24
 );
 
 -- 同步时钟 / 去重
@@ -256,3 +258,15 @@ CREATE TABLE ai_messages (
   FOREIGN KEY (thread_id) REFERENCES ai_threads(thread_id) ON DELETE CASCADE
 );
 CREATE INDEX idx_ai_messages_thread ON ai_messages(thread_id, created_at);
+
+-- AI 定时巡检记录（本机 · 不同步 P2P）
+CREATE TABLE ai_patrol_runs (
+  run_id TEXT PRIMARY KEY,
+  started_at TEXT NOT NULL,
+  finished_at TEXT NOT NULL,
+  finding_count INTEGER NOT NULL DEFAULT 0,
+  summary TEXT NOT NULL,
+  used_external_ai INTEGER NOT NULL DEFAULT 0,
+  findings_json TEXT NOT NULL DEFAULT '[]'
+);
+CREATE INDEX idx_ai_patrol_runs_started ON ai_patrol_runs(started_at DESC);

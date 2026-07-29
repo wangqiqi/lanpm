@@ -40,6 +40,8 @@ export default function AiConfigModal({
       baseUrl: config?.baseUrl ?? preset?.baseUrl ?? fallback.baseUrl,
       model: config?.model ?? preset?.model ?? fallback.model,
       enabled: config?.enabled ?? false,
+      patrolEnabled: config?.patrolEnabled ?? true,
+      patrolIntervalHours: config?.patrolIntervalHours ?? 24,
       apiKey: ''
     })
   }, [open, config, form])
@@ -56,6 +58,8 @@ export default function AiConfigModal({
         baseUrl: values.baseUrl,
         model: values.model,
         enabled: values.enabled,
+        patrolEnabled: values.patrolEnabled,
+        patrolIntervalHours: Number(values.patrolIntervalHours) || 24,
         apiKey: values.apiKey?.trim() || undefined
       })
       onClose()
@@ -106,6 +110,12 @@ export default function AiConfigModal({
         </Form.Item>
         <Form.Item name="enabled" label={t('ai.enableExternal')} valuePropName="checked">
           <Switch />
+        </Form.Item>
+        <Form.Item name="patrolEnabled" label={t('ai.patrolEnable')} valuePropName="checked">
+          <Switch />
+        </Form.Item>
+        <Form.Item name="patrolIntervalHours" label={t('ai.patrolIntervalHours')}>
+          <Input type="number" min={1} max={168} />
         </Form.Item>
       </Form>
     </Modal>

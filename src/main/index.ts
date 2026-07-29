@@ -17,6 +17,7 @@ import { registerWhiteboardIpc } from './ipc/whiteboard'
 import { registerPluginIpc } from './ipc/plugin'
 import { registerNotificationIpc } from './ipc/notification'
 import { registerAiIpc } from './ipc/ai'
+import { initAiPatrolScheduler, shutdownAiPatrolScheduler } from './ai/aiPatrolScheduler'
 import { ensureSeedGroups } from './group/groupService'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
@@ -182,6 +183,7 @@ app.whenReady().then(() => {
     ensureSeedGroups(getDatabase())
     initNetwork(getDatabase())
     initChatService(getDatabase())
+    initAiPatrolScheduler(getDatabase())
     initScreenshotService()
     registerAllIpcHandlers()
     if (!app.isPackaged) {
@@ -204,6 +206,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  shutdownAiPatrolScheduler()
   shutdownScreenshotService()
   shutdownChatService()
   shutdownNetwork()

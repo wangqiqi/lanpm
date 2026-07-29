@@ -10,6 +10,7 @@ import {
   RobotOutlined
 } from '@ant-design/icons'
 import type { AiConfigView, AiReportResult, CockpitDashboard } from '@shared/cockpit/types'
+import type { AiPatrolRunSummary } from '@shared/ai/patrolTypes'
 import { COCKPIT_UNASSIGNED_DEPT } from '@shared/cockpit/constants'
 import { resolveDeptDoneCount } from '@shared/cockpit/departmentStats'
 import { formatWeekOverWeekDelta } from '@shared/cockpit/weeklyTrend'
@@ -138,18 +139,21 @@ export default function CockpitView(): React.ReactElement {
   const [reportKind, setReportKind] = useState<'weekly' | 'monthly' | 'evaluate' | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
   const [reportExpanded, setReportExpanded] = useState(false)
+  const [patrolLatest, setPatrolLatest] = useState<AiPatrolRunSummary | null>(null)
   const openAssistant = useAiAssistantStore((s) => s.openAssistant)
 
   const load = useCallback(async () => {
     setLoading(true)
     setLoadError(false)
     try {
-      const [dash, cfg] = await Promise.all([
+      const [dash, cfg, patrolRuns] = await Promise.all([
         getLanpmApi().cockpit.getDashboard(),
-        getLanpmApi().cockpit.getAiConfig()
+        getLanpmApi().cockpit.getAiConfig(),
+        getLanpmApi().ai.listPatrolRuns(1)
       ])
       setDashboard(dash)
       setAiConfig(cfg)
+      setPatrolLatest(patrolRuns[0] ?? null)
     } catch (err) {
       setDashboard(null)
       setLoadError(true)
@@ -674,6 +678,21 @@ export default function CockpitView(): React.ReactElement {
               </div>
             ))}
           </div>
+        )}
+      </Panel>
+
+      <Panel title={t('ai.patrolTitle')} className={styles.section}>
+        {patrolLatest ? (
+          <>
+            <Text type="secondary" className={styles.reportMeta}>
+              {patrolLatest.finishedAt} · {patrolLatest.findingCount}{' '}
+              {t('ai.prompt.taskRisk.label')} ·{' '}
+              {patrolLatest.usedExternalAi ? t('cockpit.sourceExternal') : t('cockpit.sourceLocal')}
+            </Text>
+            <Text>{patrolLatest.summary}</Text>
+          </>
+        ) : (
+          <Text type="secondary">{t('ai.patrolLatestEmpty')}</Text>
         )}
       </Panel>
 

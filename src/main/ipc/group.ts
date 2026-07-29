@@ -19,6 +19,7 @@ import {
   listUserGroups
 } from '../group/groupService'
 import { getAiConfig, saveAiConfig } from '../ai/aiConfigService'
+import { refreshAiPatrolScheduler } from '../ai/aiPatrolScheduler'
 import { getDatabase } from '../storage'
 import { listLastMessageAtByGroup } from '../storage/repositories/messageRepository'
 
@@ -73,7 +74,9 @@ export function registerCockpitIpc(): void {
 
   ipcMain.handle(COCKPIT_IPC.saveAiConfig, (_event, input: AiConfigInput) => {
     if (!input || typeof input.provider !== 'string') throw new Error('invalid ai config')
-    return saveAiConfig(getDatabase(), input)
+    const saved = saveAiConfig(getDatabase(), input)
+    refreshAiPatrolScheduler(getDatabase())
+    return saved
   })
 }
 

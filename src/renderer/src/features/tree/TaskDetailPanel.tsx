@@ -23,6 +23,10 @@ import {
 import TaskRelationSection from '@renderer/features/task/TaskRelationSection'
 import PluginSlot from '@renderer/plugin/PluginSlot'
 import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
+import SubtaskPreviewModal, {
+  proposalsToRows,
+  type SubtaskPreviewRow
+} from '@renderer/features/ai/SubtaskPreviewModal'
 import type { TaskLocateView } from '@renderer/features/task/useLocateTask'
 import { taskFamilyStripeClass } from '@renderer/features/task/taskFamilyUi'
 import {
@@ -168,6 +172,12 @@ export default function TaskDetailPanel({
   const [checklistLoading, setChecklistLoading] = useState(false)
   const [newChecklistText, setNewChecklistText] = useState('')
   const [checklistBusy, setChecklistBusy] = useState(false)
+  const [subtaskModalOpen, setSubtaskModalOpen] = useState(false)
+  const [subtaskLoading, setSubtaskLoading] = useState(false)
+  const [subtaskConfirming, setSubtaskConfirming] = useState(false)
+  const [subtaskRows, setSubtaskRows] = useState<SubtaskPreviewRow[]>([])
+  const [subtaskUsedExternalAi, setSubtaskUsedExternalAi] = useState(false)
+  const [subtaskDegraded, setSubtaskDegraded] = useState(false)
 
   const reloadChecklist = async (): Promise<void> => {
     const view = await getLanpmApi().task.listChecklist(groupId, task.taskId)
@@ -783,6 +793,33 @@ export default function TaskDetailPanel({
             type="default"
             onClick={() => {
               void (async () => {
+                setSubtaskModalOpen(true)
+                setSubtaskLoading(true)
+                setSubtaskRows([])
+                setSubtaskDegraded(false)
+                try {
+                  const result = await getLanpmApi().ai.proposeSubtasks({
+                    groupId,
+                    parentTaskId: task.taskId
+                  })
+                  setSubtaskRows(proposalsToRows(result.proposals))
+                  setSubtaskUsedExternalAi(result.usedExternalAi)
+                  setSubtaskDegraded(Boolean(result.errorCode))
+                } catch (err) {
+                  message.error(formatError(err, 'ai.sendFailed'))
+                  setSubtaskModalOpen(false)
+                } finally {
+                  setSubtaskLoading(false)
+                }
+              })()
+            }}
+          >
+            {t('ai.splitSubtasks')}
+          </Button>
+          <Button
+            type="default"
+            onClick={() => {
+              void (async () => {
                 try {
                   const result = await getLanpmApi().ai.reviewTask({
                     groupId,
@@ -905,6 +942,42 @@ export default function TaskDetailPanel({
           {t('common.delete')}
         </Button>
       </div>
+
+      <SubtaskPreviewModal
+        open={subtaskModalOpen}
+        loading={subtaskLoading}
+        proposals={subtaskRows}
+        memberOptions={memberOptions}
+        usedExternalAi={subtaskUsedExternalAi}
+        degraded={subtaskDegraded}
+        onChange={setSubtaskRows}
+        onCancel={() => setSubtaskModalOpen(false)}
+        confirming={subtaskConfirming}
+        onConfirm={(rows) => {
+          void (async () => {
+            setSubtaskConfirming(true)
+            try {
+              const result = await getLanpmApi().ai.confirmSubtasks({
+                groupId,
+                parentTaskId: task.taskId,
+                items: rows.map((r) => ({
+                  title: r.title.trim(),
+                  assigneeUserId: r.suggestedAssigneeUserId,
+                  endDate: r.suggestedEndDate
+                }))
+              })
+              message.success(
+                t('ai.subtaskCreated', { count: String(result.createdTaskIds.length) })
+              )
+              setSubtaskModalOpen(false)
+            } catch (err) {
+              message.error(formatError(err, 'ai.sendFailed'))
+            } finally {
+              setSubtaskConfirming(false)
+            }
+          })()
+        }}
+      />
     </div>
   )
 }

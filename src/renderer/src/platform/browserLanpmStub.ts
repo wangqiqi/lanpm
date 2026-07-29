@@ -1292,7 +1292,9 @@ export function createBrowserLanpmStub(): LanpmApi {
           model: input.model,
           enabled: input.enabled,
           dataPolicy: 'desensitized-only' as const,
-          hasApiKey: true
+          hasApiKey: true,
+          patrolEnabled: input.patrolEnabled ?? true,
+          patrolIntervalHours: input.patrolIntervalHours ?? 24
         }
       }
     },
@@ -1328,6 +1330,18 @@ export function createBrowserLanpmStub(): LanpmApi {
         suggestions: ['Stub suggestion'],
         usedExternalAi: false
       }),
+      proposeSubtasks: async () => ({
+        proposals: [
+          { title: 'Stub subtask A' },
+          { title: 'Stub subtask B', suggestedEndDate: '2026-08-15' }
+        ],
+        usedExternalAi: false
+      }),
+      confirmSubtasks: async (input) => ({
+        createdTaskIds: input.items.map((_, i) => `task_stub_${i}`)
+      }),
+      listPatrolRuns: async () => [],
+      getLatestPatrolRun: async () => null,
       shareToChat: async (input) => ({
         msgId: `msg_ai_${Date.now()}`,
         groupId: input.groupId,

@@ -7,7 +7,11 @@ export const AI_IPC = {
   getGateStatus: 'ai:getGateStatus',
   streamChat: 'ai:streamChat',
   reviewTask: 'ai:reviewTask',
-  shareToChat: 'ai:shareToChat'
+  shareToChat: 'ai:shareToChat',
+  proposeSubtasks: 'ai:proposeSubtasks',
+  confirmSubtasks: 'ai:confirmSubtasks',
+  listPatrolRuns: 'ai:listPatrolRuns',
+  getLatestPatrolRun: 'ai:getLatestPatrolRun'
 } as const
 
 export const AI_STREAM_CHUNK_CHANNEL = 'ai:streamChunk' as const

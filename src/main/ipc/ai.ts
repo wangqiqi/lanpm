@@ -9,6 +9,10 @@ import type {
   CreateAiThreadInput,
   ListAiThreadsInput
 } from '../../shared/ai/types.ts'
+import type {
+  AiConfirmSubtasksInput,
+  AiProposeSubtasksInput
+} from '../../shared/ai/subtaskSchemas.ts'
 import { getDatabase } from '../storage/index.ts'
 import { getSetupStatus } from '../identity/setup.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
@@ -21,6 +25,8 @@ import {
 } from '../ai/aiThreadService.ts'
 import { getAiGateStatus, runAiStreamChat } from '../ai/aiStreamService.ts'
 import { reviewTaskStructured } from '../ai/aiReviewService.ts'
+import { confirmSubtasks, proposeSubtasks } from '../ai/aiSubtaskService.ts'
+import { getLatestPatrolRun, listPatrolRuns } from '../ai/aiPatrolScheduler.ts'
 import { sendAiShareMessage } from '../chat/chatService.ts'
 
 function requireUserId(): string {
@@ -77,5 +83,21 @@ export function registerAiIpc(): void {
       input.markdown,
       input.threadId
     )
+  })
+
+  ipcMain.handle(AI_IPC.proposeSubtasks, (_event, input: AiProposeSubtasksInput) => {
+    return proposeSubtasks(getDatabase(), input)
+  })
+
+  ipcMain.handle(AI_IPC.confirmSubtasks, (_event, input: AiConfirmSubtasksInput) => {
+    return confirmSubtasks(getDatabase(), input)
+  })
+
+  ipcMain.handle(AI_IPC.listPatrolRuns, (_event, limit?: number) => {
+    return listPatrolRuns(getDatabase(), typeof limit === 'number' ? limit : 10)
+  })
+
+  ipcMain.handle(AI_IPC.getLatestPatrolRun, () => {
+    return getLatestPatrolRun(getDatabase())
   })
 }

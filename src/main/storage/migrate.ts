@@ -198,6 +198,28 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       `)
       db.exec(`CREATE INDEX idx_ai_messages_thread ON ai_messages(thread_id, created_at)`)
     }
+  },
+  {
+    fromVersion: 12,
+    description: 'ai_config patrol columns + ai_patrol_runs (SPRINT-AI-03)',
+    up: (db) => {
+      db.exec(`ALTER TABLE ai_config ADD COLUMN patrol_enabled INTEGER NOT NULL DEFAULT 1`)
+      db.exec(
+        `ALTER TABLE ai_config ADD COLUMN patrol_interval_hours INTEGER NOT NULL DEFAULT 24`
+      )
+      db.exec(`
+        CREATE TABLE ai_patrol_runs (
+          run_id TEXT PRIMARY KEY,
+          started_at TEXT NOT NULL,
+          finished_at TEXT NOT NULL,
+          finding_count INTEGER NOT NULL DEFAULT 0,
+          summary TEXT NOT NULL,
+          used_external_ai INTEGER NOT NULL DEFAULT 0,
+          findings_json TEXT NOT NULL DEFAULT '[]'
+        )
+      `)
+      db.exec(`CREATE INDEX idx_ai_patrol_runs_started ON ai_patrol_runs(started_at DESC)`)
+    }
   }
 ]
 
