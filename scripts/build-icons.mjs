@@ -1,36 +1,39 @@
 #!/usr/bin/env node
 /**
- * Regenerate raster icons from resources/*.svg (requires ImageMagick `convert`).
+ * Regenerate raster icons from resources/icon.svg (pure Node — no ImageMagick).
  * Usage: node scripts/build-icons.mjs
  */
-import { execSync } from 'child_process'
-import { existsSync } from 'fs'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { Resvg } from '@resvg/resvg-js'
+import toIco from 'to-ico'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const res = join(root, 'resources')
+const publicDir = join(root, 'src/renderer/public')
 
-function run(cmd) {
-  execSync(cmd, { stdio: 'inherit', cwd: root })
+const ICO_SIZES = [256, 128, 64, 48, 32, 16]
+
+function renderPng(svg, size) {
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: 'width', value: size }
+  })
+  return resvg.render().asPng()
 }
 
-if (!existsSync(join(res, 'icon.svg'))) {
-  console.error('Missing resources/icon.svg')
-  process.exit(1)
-}
+const svgPath = join(res, 'icon.svg')
+const svg = readFileSync(svgPath, 'utf8')
 
-try {
-  execSync('convert -version', { stdio: 'pipe' })
-} catch {
-  console.error('ImageMagick `convert` not found. Install imagemagick or export PNGs manually.')
-  process.exit(1)
-}
+const png1024 = renderPng(svg, 1024)
+writeFileSync(join(res, 'icon.png'), png1024)
 
-run(`convert -background none "${join(res, 'icon.svg')}" -resize 1024x1024 "${join(res, 'icon.png')}"`)
-run(
-  `convert "${join(res, 'icon.png')}" -define icon:auto-resize=256,128,64,48,32,16 "${join(res, 'icon.ico')}"`
-)
-// UI 使用 logo.svg；不生成未引用的 logo-32/64.png（见 无用.md / SPRINT-10）
+const icoBuffers = ICO_SIZES.map((size) => renderPng(svg, size))
+const ico = await toIco(icoBuffers)
+writeFileSync(join(res, 'icon.ico'), ico)
 
-console.log('Icons written to resources/ (icon.png, icon.ico)')
+mkdirSync(publicDir, { recursive: true })
+copyFileSync(svgPath, join(publicDir, 'favicon.svg'))
+writeFileSync(join(publicDir, 'favicon.png'), renderPng(svg, 32))
+
+console.log('Icons written: resources/icon.png, resources/icon.ico, src/renderer/public/favicon.*')

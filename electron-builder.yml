@@ -67,12 +67,14 @@ win:
         - x64
         - arm64
 mac:
+  icon: resources/icon.png
   target:
     - target: dmg
       arch:
         - x64
         - arm64
 linux:
+  icon: resources/icon.png
   target:
     - target: AppImage
       arch:

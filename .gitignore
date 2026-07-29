@@ -42,3 +42,5 @@ out/
 resources/icon.png
 resources/icon.ico
 resources/logo-*.png
+src/renderer/public/favicon.svg
+src/renderer/public/favicon.png

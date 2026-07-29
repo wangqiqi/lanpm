@@ -2,18 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.37.1] - 2026-07-29
+
+### Fixed
+
+- **品牌图标一致性**：`build:icons` 改为纯 Node（`@resvg/resvg-js` + `to-ico`），不再依赖 ImageMagick；`predev` / `prebuild` 自动 `ensure-app-icons` 生成 `icon.png` / `icon.ico`；任务栏、exe、桌面通知与页内 favicon 均使用 `icon.svg` 同源图标
+
 ## [1.37.0] - 2026-07-29
 
 ### Added
 
 - **AI 子任务拆分（SPRINT-AI-03）**：任务详情「AI 拆分」→ `proposeSubtasks` 结构化草案（Zod）→ `SubtaskPreviewModal` 勾选/编辑 → `confirmSubtasks` 批量 `createTask(parentTaskId)`；无 Key/外呼失败时本地规则降级
 - **AI 定时巡检**：`aiPatrolService` 规则扫描逾期/落后/需关注；启动 5min 后首次跑、可配置 24h 间隔；Electron 通知 + `ai_patrol_runs` 持久化；驾驶舱最近巡检摘要；AI 配置页巡检开关
-
-## [1.36.3] - 2026-07-29
-
-### Fixed
-
-- **品牌图标一致性**：`build:icons` 改为纯 Node（`@resvg/resvg-js` + `to-ico`），不再依赖 ImageMagick；`predev` / `prebuild` 自动 `ensure-app-icons` 生成 `icon.png` / `icon.ico`；任务栏、exe、桌面通知与页内 favicon 均使用 `icon.svg` 同源图标
 
 ## [1.36.2] - 2026-07-29
 
