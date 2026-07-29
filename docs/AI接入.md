@@ -176,6 +176,21 @@ MainLayout
 
 从任务详情点「就此任务提问」时，Composer **预填 `#${task.title} `**，等价于用户手动 `#` 引用。
 
+### 3.3.1 隐式上下文（SPRINT-AI-02 · Main 每次外呼注入）
+
+用户界面**不展示**；写入 system prompt，遵守 `desensitized-only`。
+
+| 层 | 字段 | 时机 |
+|----|------|------|
+| **系统** | 当前日期时间 · 时区 · ISO · locale · 网络在线 · 当前用户显示名 | 每条消息 |
+| **场景** | 群名 · 群 KPI（进行中/完成/逾期/落后）· attention Top5 | 有 `groupId` |
+| **场景** | `entrySource`（topbar/cockpit/task-detail/global）· `appView`（board/chat/…） | 每条消息 |
+| **对象** | `#` 解析任务 + `context.taskId` 入口绑定任务 | 合并去重 |
+| **对象** | 任务扩展：`scheduleHealth` · `daysUntilDeadline` · 负责人 · checklist 标题+done · 父任务标题 · tags | 对象层任务 |
+| **显式** | `seedMarkdown`（驾驶舱报告）· 多轮历史 | 入口/线程 |
+
+**禁止隐式注入**：群聊全文 · 文件内容 · API Key/密码 · 未授权他群任务全表 · 其他用户 AI 会话。
+
 ### 3.4 全自适应布局
 
 对齐现有断点（`useMediaQuery` · `chat.module.css` / `CockpitView.module.css` 约 **900 / 960 / 1100px**）：
@@ -364,4 +379,5 @@ IPC: ai:streamChat                Key 解密仅 main
 |------|------|
 | 2026-07-29 | 初稿：驾驶舱现状、第二期流式全入口、开源选型、离线门禁、架构与 Sprint 建议 |
 | 2026-07-29 | 拍板：内置免费 · 会话本地不同步 · 发群标记 · `#` 引用任务（复用 `taskRefs`） |
+| 2026-07-29 | SPRINT-AI-02：隐式上下文分层（系统/场景/对象）写入 §3.3.1 |
 | 2026-07-29 | 拍板：顶栏+浮层/Dock，非底栏第八 Tab；上下文默认绑当前群、历史个人本地 |

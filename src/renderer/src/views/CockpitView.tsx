@@ -710,7 +710,8 @@ export default function CockpitView(): React.ReactElement {
                       seedMarkdown: report.content,
                       reportKind: reportKind ?? undefined
                     },
-                    layout: 'drawer'
+                    layout: 'drawer',
+                    entrySource: 'cockpit'
                   })
                 }
               >

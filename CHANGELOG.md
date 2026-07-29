@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.35.0] - 2026-07-29
+
+### Added
+
+- **AI 隐式上下文（SPRINT-AI-02）**：每次外呼 system 注入当前时间/用户/入口/网络；单群 KPI + attention Top5；任务载荷扩展 `scheduleHealth`/`daysUntilDeadline`/负责人/checklist；`context.taskId` 自动注入；`verify:ai-context`
+
+### Fixed
+
+- AI 助手：`window.lanpm` 缺 `ai` 命名空间时补齐桥接，避免 `onStreamChunk` 白屏
+
 ## [1.34.0] - 2026-07-29
 
 ### Added

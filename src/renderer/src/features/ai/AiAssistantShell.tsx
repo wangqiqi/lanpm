@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Button, Drawer, Input, List, Space, Tag, Typography } from 'antd'
 import {
   CloseOutlined,
@@ -35,7 +36,7 @@ function pickLayout(
 }
 
 export default function AiAssistantShell(): React.ReactElement | null {
-  const { t, formatError } = useI18n()
+  const { t, formatError, locale } = useI18n()
   const { message } = useLanpmApp()
   const open = useAiAssistantStore((s) => s.open)
   const closeAssistant = useAiAssistantStore((s) => s.closeAssistant)
@@ -46,6 +47,14 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const composerPrefill = useAiAssistantStore((s) => s.composerPrefill)
   const forcedLayout = useAiAssistantStore((s) => s.layout)
   const setLayout = useAiAssistantStore((s) => s.setLayout)
+  const entrySource = useAiAssistantStore((s) => s.entrySource)
+  const location = useLocation()
+  const appView = useMemo(() => {
+    const match = /\/g\/[^/]+\/([^/?]+)/.exec(location.pathname)
+    if (match?.[1]) return match[1]
+    if (location.pathname.includes('/cockpit')) return 'cockpit'
+    return null
+  }, [location.pathname])
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const effectiveGroupId = groupId ?? activeGroupId ?? null
   const loadTasks = useTaskStore((s) => s.loadTasks)
@@ -68,13 +77,18 @@ export default function AiAssistantShell(): React.ReactElement | null {
   const listRef = useRef<HTMLDivElement>(null)
   const canSend = Boolean(gate?.canStream && online && !streaming)
 
+  const aiApi = open ? getLanpmApi().ai : null
+  const apiMissing = open && !aiApi
+
   const refreshGate = useCallback(async () => {
-    const status = await getLanpmApi().ai.getGateStatus()
+    if (!getLanpmApi().ai) return
+    const status = await getLanpmApi().ai!.getGateStatus()
     setGate(status)
   }, [])
 
   const refreshThreads = useCallback(async () => {
-    const list = await getLanpmApi().ai.listThreads(
+    if (!getLanpmApi().ai) return
+    const list = await getLanpmApi().ai!.listThreads(
       effectiveGroupId ? { groupId: effectiveGroupId } : {}
     )
     setThreads(list)
@@ -82,7 +96,8 @@ export default function AiAssistantShell(): React.ReactElement | null {
 
   const loadThread = useCallback(
     async (id: string) => {
-      const data = await getLanpmApi().ai.getThread(id)
+      if (!getLanpmApi().ai) return
+      const data = await getLanpmApi().ai!.getThread(id)
       setThreadId(id)
       setMessages(data.messages)
     },
@@ -111,11 +126,13 @@ export default function AiAssistantShell(): React.ReactElement | null {
 
   useEffect(() => {
     if (!open) return
-    const unsubChunk = getLanpmApi().ai.onStreamChunk(({ requestId, delta }) => {
+    const aiApi = getLanpmApi().ai
+    if (!aiApi?.onStreamChunk) return
+    const unsubChunk = aiApi.onStreamChunk(({ requestId, delta }) => {
       if (requestIdRef.current !== requestId) return
       setStreamBuffer((prev) => prev + delta)
     })
-    const unsubDone = getLanpmApi().ai.onStreamDone(({ requestId, threadId: tid, assistantText }) => {
+    const unsubDone = aiApi.onStreamDone(({ requestId, threadId: tid, assistantText }) => {
       if (requestIdRef.current !== requestId) return
       requestIdRef.current = null
       setStreaming(false)
@@ -125,7 +142,7 @@ export default function AiAssistantShell(): React.ReactElement | null {
       void refreshThreads()
       if (!assistantText) return
     })
-    const unsubErr = getLanpmApi().ai.onStreamError(({ requestId, message: errMsg }) => {
+    const unsubErr = aiApi.onStreamError(({ requestId, message: errMsg }) => {
       if (requestIdRef.current !== requestId) return
       requestIdRef.current = null
       setStreaming(false)
@@ -182,7 +199,11 @@ export default function AiAssistantShell(): React.ReactElement | null {
         groupId: effectiveGroupId,
         userMessage: text,
         context: context ?? undefined,
-        createThreadTitle: text.slice(0, 40)
+        createThreadTitle: text.slice(0, 40),
+        entrySource,
+        appView,
+        locale,
+        networkOnline: navigator.onLine
       })
       requestIdRef.current = requestId
     } catch (err) {
@@ -289,6 +310,11 @@ export default function AiAssistantShell(): React.ReactElement | null {
             ) : null}
           </div>
 
+          {apiMissing ? (
+            <Text type="danger" className={styles.gateHint}>
+              {t('ai.apiUnavailable')}
+            </Text>
+          ) : null}
           {gateHint ? <Text type="secondary" className={styles.gateHint}>{gateHint}</Text> : null}
 
           {taskSuggestions.length > 0 ? (

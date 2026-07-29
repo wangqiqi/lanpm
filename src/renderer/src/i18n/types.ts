@@ -211,6 +211,7 @@ export type MessageKey =
   | 'ai.reviewTask'
   | 'ai.reviewDone'
   | 'ai.fromAssistant'
+  | 'ai.apiUnavailable'
   | 'board.newTask'
   | 'board.treeViewLink'
   | 'board.createTitle'

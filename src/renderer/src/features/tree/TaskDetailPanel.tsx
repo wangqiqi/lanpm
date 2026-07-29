@@ -772,7 +772,8 @@ export default function TaskDetailPanel({
                 groupId,
                 composerPrefill: `#${task.title} `,
                 context: { taskId: task.taskId },
-                layout: window.matchMedia('(min-width: 1100px)').matches ? 'dock' : 'drawer'
+                layout: window.matchMedia('(min-width: 1100px)').matches ? 'dock' : 'drawer',
+                entrySource: 'task-detail'
               })
             }
           >

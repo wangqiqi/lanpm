@@ -1,5 +1,8 @@
 export type AiMessageRole = 'user' | 'assistant' | 'system'
 
+/** 助手打开入口（隐式上下文） */
+export type AiEntrySource = 'topbar' | 'cockpit' | 'task-detail' | 'global'
+
 export interface AiThreadContext {
   /** Cockpit report seed or task review seed */
   seedMarkdown?: string
@@ -49,6 +52,14 @@ export interface AiStreamChatInput {
   taskIds?: string[]
   createThreadTitle?: string
   context?: AiThreadContext | null
+  /** 打开助手时的入口（隐式注入 system） */
+  entrySource?: AiEntrySource
+  /** 当前路由视图，如 board / chat / cockpit */
+  appView?: string | null
+  /** UI 语言，如 zh-CN */
+  locale?: string
+  /** 客户端在线状态 */
+  networkOnline?: boolean
 }
 
 export interface AiStructuredReviewInput {

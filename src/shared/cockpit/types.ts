@@ -92,6 +92,11 @@ export interface AiConfigInput {
   enabled: boolean
 }
 
+export interface AiChecklistItemSummary {
+  text: string
+  done: boolean
+}
+
 export interface AiTaskAuditPayload {
   taskId: string
   title: string
@@ -101,6 +106,31 @@ export interface AiTaskAuditPayload {
   startDate?: string
   endDate?: string
   descriptionSummary?: string
+  scheduleHealth?: 'none' | 'on_track' | 'behind' | 'overdue'
+  /** 距截止日天数；负值表示已逾期；无排期或已完成则为 undefined */
+  daysUntilDeadline?: number
+  assigneeName?: string
+  milestone?: boolean
+  parentTitle?: string
+  tags?: string[]
+  checklistProgress?: { done: number; total: number }
+  checklistItems?: AiChecklistItemSummary[]
+}
+
+export interface AiGroupSummary {
+  groupName: string
+  totalTasks: number
+  inProgressCount: number
+  doneCount: number
+  overdueCount: number
+  behindCount: number
+  attentionTasks: {
+    title: string
+    kind: 'overdue' | 'behind'
+    progressPercent: number
+    assigneeName?: string
+    endDate?: string
+  }[]
 }
 
 export interface AiReportResult {

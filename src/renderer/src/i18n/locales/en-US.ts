@@ -214,6 +214,7 @@ const enUS = {
   'ai.reviewTask': 'AI review',
   'ai.reviewDone': 'Review complete',
   'ai.fromAssistant': 'From AI assistant',
+  'ai.apiUnavailable': 'AI API not loaded — quit the app and run npm run dev again',
   'board.newTask': 'New task',
   'board.treeViewLink': 'Tree view',
   'board.createTitle': 'New task',

@@ -1,7 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import type { AiStructuredReviewResult } from '../../shared/ai/types.ts'
 import { getAiConfig, getDecryptedApiKey } from './aiConfigService.ts'
-import { desensitizeTask } from './aiPromptService.ts'
+import { desensitizeTask, formatAiRuntimeContext } from './aiPromptService.ts'
 import { getTaskScheduleHealth } from '../../shared/task/scheduleHealth.ts'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { listTasksByGroup } from '../storage/repositories/taskRepository.ts'
@@ -57,7 +57,7 @@ export async function reviewTaskStructured(
 
   const ai = await callExternalAiText(
     db,
-    `对以下脱敏任务做简短评审，输出 3 条以内建议（勿编造未提供的数据）：\n${JSON.stringify(payload)}`
+    `${formatAiRuntimeContext({ now: new Date() })}\n\n对以下脱敏任务做简短评审，输出 3 条以内建议（勿编造未提供的数据；时间判断以上述当前日期为准）：\n${JSON.stringify(payload)}`
   )
 
   return {

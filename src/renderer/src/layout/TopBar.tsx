@@ -456,7 +456,8 @@ export default function TopBar(): React.ReactElement {
               onClick={() =>
                 openAssistant({
                   groupId: activeGroupId ?? null,
-                  layout: window.matchMedia('(min-width: 1100px)').matches ? 'dock' : 'drawer'
+                  layout: window.matchMedia('(min-width: 1100px)').matches ? 'dock' : 'drawer',
+                  entrySource: 'topbar'
                 })
               }
             >

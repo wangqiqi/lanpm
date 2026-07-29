@@ -7,7 +7,12 @@ function isElectronRenderer(): boolean {
 
 /** 在 Electron preload 未注入时（如浏览器打开 :5173）安装开发桩 */
 export function installLanpmBridge(): void {
-  if (typeof window === 'undefined' || window.lanpm) return
+  if (typeof window === 'undefined') return
+
+  if (window.lanpm) {
+    patchIncompleteLanpmApi(window.lanpm)
+    return
+  }
 
   if (import.meta.env.DEV) {
     if (isElectronRenderer()) {
@@ -36,10 +41,23 @@ export function installLanpmBridge(): void {
   )
 }
 
+/** preload 热更新/旧构建可能缺少新命名空间（如 ai）— 用开发桩补齐避免白屏 */
+function patchIncompleteLanpmApi(api: LanpmApi): LanpmApi {
+  if (api.ai) return api
+  const stub = createBrowserLanpmStub()
+  if (!stub.ai) return api
+  console.warn(
+    '[lanpm] window.lanpm 缺少 ai API，已从开发桩补齐。请重启 npm run dev 以加载最新 preload。'
+  )
+  const patched = { ...api, ai: stub.ai }
+  window.lanpm = patched
+  return patched
+}
+
 export function getLanpmApi(): LanpmApi {
   const api = window.lanpm
   if (!api) {
     throw new Error('LanPM API 不可用：请在 Electron 环境中运行，或启用开发模式预览桩。')
   }
-  return api
+  return patchIncompleteLanpmApi(api)
 }

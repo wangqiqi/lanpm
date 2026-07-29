@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { AiThreadContext } from '@shared/ai/types'
+import type { AiEntrySource, AiThreadContext } from '@shared/ai/types'
 
 export type AiShellLayout = 'dock' | 'drawer' | 'fullscreen'
 
@@ -9,6 +9,7 @@ export interface OpenAiAssistantOptions {
   context?: AiThreadContext | null
   composerPrefill?: string
   layout?: AiShellLayout
+  entrySource?: AiEntrySource
 }
 
 interface AiAssistantState {
@@ -18,6 +19,7 @@ interface AiAssistantState {
   threadId: string | null
   context: AiThreadContext | null
   composerPrefill: string
+  entrySource: AiEntrySource
   openAssistant: (opts?: OpenAiAssistantOptions) => void
   closeAssistant: () => void
   setThreadId: (threadId: string | null) => void
@@ -31,6 +33,7 @@ export const useAiAssistantStore = create<AiAssistantState>((set) => ({
   threadId: null,
   context: null,
   composerPrefill: '',
+  entrySource: 'global',
   openAssistant: (opts = {}) =>
     set({
       open: true,
@@ -38,7 +41,8 @@ export const useAiAssistantStore = create<AiAssistantState>((set) => ({
       groupId: opts.groupId ?? null,
       threadId: opts.threadId ?? null,
       context: opts.context ?? null,
-      composerPrefill: opts.composerPrefill ?? ''
+      composerPrefill: opts.composerPrefill ?? '',
+      entrySource: opts.entrySource ?? 'global'
     }),
   closeAssistant: () => set({ open: false }),
   setThreadId: (threadId) => set({ threadId }),

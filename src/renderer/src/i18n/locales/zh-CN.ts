@@ -212,6 +212,7 @@ const zhCN = {
   'ai.reviewTask': 'AI 评审',
   'ai.reviewDone': '评审完成',
   'ai.fromAssistant': '来自 AI 助手',
+  'ai.apiUnavailable': 'AI 接口未加载，请完全退出后重新运行 npm run dev',
   'board.newTask': '新建任务',
   'board.treeViewLink': '任务树视图',
   'board.createTitle': '新建任务',
