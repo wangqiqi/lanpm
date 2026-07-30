@@ -1641,7 +1641,8 @@ export function createBrowserLanpmStub(): LanpmApi {
         groups: [
           { groupId: 'stub-remote-project', name: 'LanPM 协作组', type: 'project' as const }
         ],
-        localIp: '127.0.0.1'
+        localIp: '127.0.0.1',
+        localIpTail: '1'
       }),
       cancel: async () => ({ ok: true as const }),
       join: async () => ({

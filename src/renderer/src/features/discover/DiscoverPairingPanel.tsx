@@ -108,6 +108,7 @@ export default function DiscoverPairingPanel({
     try {
       const result = await getLanpmApi().pairing.join({
         code,
+        crossSubnet,
         unicastHost: crossSubnet ? unicastHost.trim() || undefined : undefined
       })
       onSnapshot(result.snapshot)
@@ -152,7 +153,14 @@ export default function DiscoverPairingPanel({
         <p className={styles.pairingCode}>{session.codeDisplay}</p>
         <Text type="secondary" className={styles.pairingMeta}>
           {t('discover.pairingExpires', { time: formatCountdown(countdownMs) })}
-          {session.localIp ? ` · ${session.localIp}` : ''}
+          {session.localIp ? (
+            <>
+              {' · '}
+              {session.localIpTail
+                ? t('discover.pairingHostTail', { tail: session.localIpTail, ip: session.localIp })
+                : session.localIp}
+            </>
+          ) : null}
         </Text>
         {session.groups.length > 0 ? (
           <List
@@ -200,6 +208,11 @@ export default function DiscoverPairingPanel({
           onChange={(e) => setUnicastHost(e.target.value)}
           onPressEnter={() => void handleFind()}
         />
+      ) : null}
+      {crossSubnet ? (
+        <Text type="secondary" className={styles.seedsHint}>
+          {t('discover.pairingTailHint')}
+        </Text>
       ) : null}
       <Space>
         <Button type="primary" loading={findLoading} onClick={() => void handleFind()}>

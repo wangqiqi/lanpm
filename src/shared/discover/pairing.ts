@@ -9,11 +9,15 @@ export interface PairingSessionView {
   groups: DiscoverableGroupAdvert[]
   /** 跨网段时展示给对方的本机 IP */
   localIp?: string
+  /** 跨网段时可只报尾段（如 `109`） */
+  localIpTail?: string
 }
 
 export interface PairingJoinInput {
   code: string
-  /** 跨网段：对方 IP 或 host:port */
+  /** 勾选跨网段：启用尾段解析 / 子网广播探测 */
+  crossSubnet?: boolean
+  /** 跨网段：对方完整 IP、尾段（如 `109`）或 host:port */
   unicastHost?: string
   port?: number
 }

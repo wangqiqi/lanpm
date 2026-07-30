@@ -6,6 +6,7 @@
 
 ### Added
 
+- **跨网段 IP/尾段配对（TASK-PAIR-05）**：`pairingHostResolve` 尾段展开（如 `109`→各子网候选）与子网广播 lookup；`joinWithPairingCode` 多候选循环；发现页 `crossSubnet` + 分享屏展示 `localIpTail`；`verify:pairing-cross-subnet`
 - **发现页群组中心 + 连接码 UI（TASK-PAIR-04）**：`DiscoverPairingPanel`（分享/查找连接码）；空态「用连接码查找群组」CTA；单群「申请加入」快捷条；高级折叠（种子/邀请码/手动节点）；`verify:discover` 扩展
 - **群邀请码（TASK-PAIR-11）**：`group_invite_offer` / `lookup` / `found` UDP 报文；`GroupInviteSessionHost`（6 位码 · TTL · 一次性）；`GROUP_IPC` `startInvite` / `joinWithInvite`；发现页凭码直入群；`verify:group-invite`
 - **入群申请 + 管理员审批（TASK-PAIR-10）**：`join_request` / `join_request_decision` P2P 报文；`group_join_requests` 表（schema v16）；发现群改为「申请加入」；群主审批/拒绝；`GROUP_IPC` 审批通道；`verify:join-request`

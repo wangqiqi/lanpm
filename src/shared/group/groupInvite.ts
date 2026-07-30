@@ -8,7 +8,7 @@ import {
   PAIRING_OFFER_INTERVAL_MS,
   PAIRING_TTL_MS,
   type PairingResolveFailReason
-} from '../network/pairingTypes'
+} from '../network/pairingTypes.ts'
 
 export {
   formatPairingCode,
