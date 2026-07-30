@@ -1,4 +1,5 @@
-# AUTO-18 — 三平台 CI 矩阵（verify:m7 全量回归）
+# 三平台 CI 矩阵（verify:m7 全量回归）
+# 注：verify:discover-sim-full（VirtualLan 12 场景）为发版前本地/手跑路径，默认不在此 workflow 中。
 name: verify
 
 on:

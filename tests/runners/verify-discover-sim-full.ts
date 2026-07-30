@@ -14,6 +14,11 @@ import {
   runSubnetScanSim,
   runThreeNodeRelaySim
 } from '../integration/discover-sim/scenarios.ts'
+import {
+  runPairingRateLimitSim,
+  runTcpOnlyFallbackSim,
+  runUdpBlackholeSim
+} from '../integration/discover-sim/fault-scenarios.ts'
 
 const root = projectRoot
 
@@ -24,7 +29,10 @@ const scenarios: Array<[string, () => Promise<void>]> = [
   ['cross-subnet-tail', runCrossSubnetTailSim],
   ['subnet-scan', runSubnetScanSim],
   ['group-invite', runGroupInviteSim],
-  ['peer-file', runPeerFileSim]
+  ['peer-file', runPeerFileSim],
+  ['tcp-only-fallback', runTcpOnlyFallbackSim],
+  ['udp-blackhole', runUdpBlackholeSim],
+  ['pairing-rate-limit', runPairingRateLimitSim]
 ]
 
 for (const [name, fn] of scenarios) {

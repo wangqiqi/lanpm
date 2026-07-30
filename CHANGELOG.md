@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.51.0] - 2026-07-30
+
+### Added
+
+- **VirtualLan 故障注入（SPRINT-DISCOVER-TEST-04）**：`VirtualLanBus` 支持 `udpDropRate` / `udpDelayMs`；`verify:discover-sim-full` 追加 TCP-only 兜底 · UDP 黑洞 · 配对限流场景；`docs/05` §1.2.3–1.2.4 自动化 vs 手验对照 ✅
+
 ## [1.50.0] - 2026-07-30
 
 ### Added

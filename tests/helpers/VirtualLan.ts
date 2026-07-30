@@ -11,6 +11,19 @@ export type VirtualLanHandler = (
   rinfo: { address: string; port: number }
 ) => void
 
+export interface VirtualLanFaultOptions {
+  /** 0–1：随机丢弃入站 UDP（默认 0） */
+  udpDropRate?: number
+  /** 投递延迟毫秒（默认 0） */
+  udpDelayMs?: number
+}
+
+function clampDropRate(rate: number): number {
+  if (rate <= 0) return 0
+  if (rate >= 1) return 1
+  return rate
+}
+
 function parseIpv4(ip: string): [number, number, number, number] | null {
   const parts = ip.split('.').map(Number)
   if (parts.length !== 4 || parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)) return null
@@ -46,6 +59,17 @@ function matchesSubnetBroadcast(nodeIp: string, broadcastDest: string): boolean 
 /** Central registry — routes unicast, subnet broadcast, global broadcast, and multicast. */
 export class VirtualLanBus {
   private readonly nodes = new Map<string, VirtualLanHandler>()
+  private udpDropRate = 0
+  private udpDelayMs = 0
+
+  constructor(options?: VirtualLanFaultOptions) {
+    this.setFaultOptions(options ?? {})
+  }
+
+  setFaultOptions(options: VirtualLanFaultOptions): void {
+    this.udpDropRate = clampDropRate(options.udpDropRate ?? 0)
+    this.udpDelayMs = Math.max(0, options.udpDelayMs ?? 0)
+  }
 
   register(ip: string, handler: VirtualLanHandler): () => void {
     this.nodes.set(ip, handler)
@@ -65,7 +89,13 @@ export class VirtualLanBus {
       if (toIp === fromIp) return
       const handler = this.nodes.get(toIp)
       if (!handler) return
-      handler(buf, { address: fromIp, port: UDP_DISCOVERY_PORT })
+      if (this.udpDropRate > 0 && Math.random() < this.udpDropRate) return
+      const rinfo = { address: fromIp, port: UDP_DISCOVERY_PORT }
+      if (this.udpDelayMs > 0) {
+        setTimeout(() => handler(buf, rinfo), this.udpDelayMs)
+      } else {
+        handler(buf, rinfo)
+      }
     }
 
     if (isGlobalBroadcast(destIp) || destIp === UDP_MULTICAST_ADDR) {

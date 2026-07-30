@@ -68,4 +68,35 @@ describe('VirtualLanBus', () => {
     expect(onSameSubnet24('10.0.1.10', '10.0.1.99')).toBe(true)
     expect(onSameSubnet24('10.0.1.10', '10.0.2.10')).toBe(false)
   })
+
+  it('drops all packets when udpDropRate is 1', async () => {
+    const bus = new VirtualLanBus({ udpDropRate: 1 })
+    const a = fixtureVirtualIp(1, 10)
+    const b = fixtureVirtualIp(1, 11)
+    const received: string[] = []
+    bus.register(b, (buf) => received.push(buf.toString('utf8')))
+
+    const sock = new VirtualUdpSocket(bus, a)
+    await new Promise<void>((resolve) => sock.bind(UDP_DISCOVERY_PORT, () => resolve()))
+    sock.send(Buffer.from('lost'), UDP_DISCOVERY_PORT, b, () => undefined)
+    await new Promise((r) => setTimeout(r, 20))
+    expect(received).toEqual([])
+    sock.close()
+  })
+
+  it('delays packet delivery when udpDelayMs is set', async () => {
+    const bus = new VirtualLanBus({ udpDelayMs: 40 })
+    const a = fixtureVirtualIp(1, 10)
+    const b = fixtureVirtualIp(1, 11)
+    const received: string[] = []
+    bus.register(b, (buf) => received.push(buf.toString('utf8')))
+
+    const sock = new VirtualUdpSocket(bus, a)
+    await new Promise<void>((resolve) => sock.bind(UDP_DISCOVERY_PORT, () => resolve()))
+    sock.send(Buffer.from('late'), UDP_DISCOVERY_PORT, b, () => undefined)
+    expect(received).toEqual([])
+    await new Promise((r) => setTimeout(r, 55))
+    expect(received).toEqual(['late'])
+    sock.close()
+  })
 })
