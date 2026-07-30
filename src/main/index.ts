@@ -11,6 +11,7 @@ import { repairFileStoragePaths } from './file/storagePathResolver'
 import { registerGroupIpc, registerCockpitIpc } from './ipc/group'
 import { registerSearchIpc } from './ipc/search'
 import { registerDiscoverIpc } from './ipc/discover'
+import { registerPairingIpc } from './ipc/pairing'
 import { registerDataIpc } from './ipc/data'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { registerWhiteboardIpc } from './ipc/whiteboard'
@@ -112,6 +113,7 @@ function registerAllIpcHandlers(): void {
   registerNetworkIpc()
   registerBadgeIpc()
   registerDiscoverIpc()
+  registerPairingIpc()
   registerDataIpc()
   registerWhiteboardIpc()
   registerPluginIpc()

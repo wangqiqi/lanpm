@@ -293,6 +293,16 @@ export interface LanpmApi {
     snapshot: () => Promise<DiscoverSnapshot>
     setSeeds: (seeds: string[]) => Promise<DiscoverSnapshot>
   }
+  pairing: {
+    start: () => Promise<import('./discover/pairing').PairingSessionView>
+    cancel: () => Promise<{ ok: true }>
+    join: (
+      input: import('./discover/pairing').PairingJoinInput
+    ) => Promise<{
+      join: import('./discover/pairing').PairingJoinResult
+      snapshot: DiscoverSnapshot
+    }>
+  }
   whiteboard: {
     getScene: (groupId: string) => Promise<import('./whiteboard/types').WhiteboardScene | null>
     saveScene: (

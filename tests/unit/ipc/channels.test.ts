@@ -4,7 +4,7 @@ import { CHAT_IPC, CHAT_PUSH_CHANNEL } from '@shared/chat/channels'
 import { COCKPIT_IPC } from '@shared/cockpit/channels'
 import { AI_IPC } from '@shared/ai/channels'
 import { DATA_IPC } from '@shared/data/channels'
-import { DISCOVER_IPC } from '@shared/discover/channels'
+import { DISCOVER_IPC, PAIRING_IPC } from '@shared/discover/channels'
 import {
   FILE_CHUNK_SIZE,
   FILE_IPC,
@@ -60,6 +60,8 @@ describe('IPC channel contracts', () => {
     expect(NETWORK_IPC.connectManualPeer).toBe('network:connectManualPeer')
     expect(SEARCH_IPC.query).toBe('search:query')
     expect(DISCOVER_IPC.snapshot).toBe('discover:snapshot')
+    expect(PAIRING_IPC.start).toBe('pairing:start')
+    expect(PAIRING_IPC.join).toBe('pairing:join')
     expect(BADGE_IPC.getGroupTabBadges).toBe('badge:getGroupTabBadges')
     expect(COCKPIT_IPC.getDashboard).toBe('cockpit:getDashboard')
     expect(AI_IPC.streamChat).toBe('ai:streamChat')

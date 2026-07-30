@@ -228,6 +228,11 @@ const api: LanpmApi = {
     snapshot: () => ipcRenderer.invoke('discover:snapshot'),
     setSeeds: (seeds) => ipcRenderer.invoke('discover:setSeeds', seeds)
   },
+  pairing: {
+    start: () => ipcRenderer.invoke('pairing:start'),
+    cancel: () => ipcRenderer.invoke('pairing:cancel'),
+    join: (input) => ipcRenderer.invoke('pairing:join', input)
+  },
   whiteboard: {
     getScene: (groupId) => ipcRenderer.invoke('whiteboard:getScene', groupId),
     saveScene: (input) => ipcRenderer.invoke('whiteboard:saveScene', input),
