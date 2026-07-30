@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.48.0] - 2026-07-30
+
+### Added
+
+- **配对门禁纳入发版路径（SPRINT-DISCOVER-TEST-01）**：`verify:release-gate` 追加 `verify:pairing-code`（13 步协议/UI 回归）；`docs/05` §1.2.1 配对/发现自动化矩阵与 §6 真网边界说明 ✅
+
 ## [1.47.0] - 2026-07-30
 
 ### Added

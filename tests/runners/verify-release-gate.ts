@@ -19,6 +19,7 @@ const steps = [
   'npm run verify:visual',
   'npm run verify:profile-panel',
   'npm run verify:discover',
+  'npm run verify:pairing-code',
   'npm run verify:project',
   'npm run verify:m7'
 ] as const
