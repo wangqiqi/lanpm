@@ -147,8 +147,7 @@ export class RealNetworkTransport implements NetworkTransport {
     onClose: () => void
   }): PeerLink {
     const remoteHost = options.remoteHost
-    let link!: PeerLink
-    link = new PeerLink({
+    const link = new PeerLink({
       local: {
         deviceId: this.deviceId,
         userId: this.userId,
