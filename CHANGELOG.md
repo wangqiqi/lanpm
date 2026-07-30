@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.49.0] - 2026-07-30
+
+### Added
+
+- **VirtualLan 测试总线（SPRINT-DISCOVER-TEST-02）**：`tests/helpers/VirtualLan.ts` 内存 UDP 转发；`RealNetworkTransport` 注入 `lanIp` / `createUdpSocket`；`verify:discover-sim`（2 节点 UDP 发现 + 配对码全链）；`docs/05` §1.2.2 ✅
+
 ## [1.48.0] - 2026-07-30
 
 ### Added

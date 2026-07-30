@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.48.0",
+  "version": "1.49.0",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -106,6 +106,7 @@
     "verify:profile-panel": "node --experimental-strip-types tests/static/verify-profile-panel.ts",
     "verify:discover": "node --experimental-strip-types tests/static/verify-discover.ts",
     "verify:discover-help": "node --experimental-strip-types tests/static/verify-discover-help.ts",
+    "verify:discover-sim": "node --experimental-strip-types tests/integration/verify-discover-sim.ts && vitest run tests/unit/network/virtualLan.test.ts",
     "verify:setup-net": "node --experimental-strip-types tests/static/verify-setup-net.ts",
     "verify:discover-a5": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-discover-a5.ts",
     "verify:m1": "npm run verify:routes && npm run verify:topbar && npm run verify:profile-panel && npm run verify:discover",

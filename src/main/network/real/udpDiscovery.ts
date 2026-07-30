@@ -21,6 +21,10 @@ export interface UdpDiscoveryOptions {
   pairingHost?: PairingSessionHost
   /** 可选：群邀请码会话 */
   groupInviteHost?: GroupInviteSessionHost
+  /** 测试：固定 LAN IP（VirtualLan） */
+  getLanIp?: () => string | undefined
+  /** 测试：自定义 UDP socket（VirtualLan） */
+  createSocket?: () => dgram.Socket
 }
 
 export interface UdpDiscoveryDiagnostics {
@@ -77,7 +81,7 @@ export class UdpDiscovery {
 
   start(): void {
     if (this.socket) return
-    const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+    const socket = this.opts.createSocket?.() ?? dgram.createSocket({ type: 'udp4', reuseAddr: true })
     this.socket = socket
 
     socket.on('message', (buf, rinfo) => {
@@ -207,7 +211,7 @@ export class UdpDiscovery {
   }
 
   private payload(): DiscoveryPayload {
-    const host = getLocalLanIp() ?? undefined
+    const host = this.opts.getLanIp?.() ?? getLocalLanIp() ?? undefined
     return {
       deviceId: this.opts.deviceId,
       userId: this.opts.userId,

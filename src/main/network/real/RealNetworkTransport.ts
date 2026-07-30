@@ -1,4 +1,5 @@
 import type net from 'node:net'
+import type dgram from 'node:dgram'
 import type {
   DiscoveryPayload,
   HeartbeatPayload,
@@ -66,6 +67,10 @@ export interface RealNetworkOptions {
   getRelaySeeds?: () => string[]
   /** 从中继学到的新种子写入持久化（由 main 注入） */
   onRelaySeedsLearned?: (addresses: string[]) => void
+  /** 测试：固定虚拟 LAN IP（VirtualLan 仿真） */
+  lanIp?: string
+  /** 测试：自定义 UDP socket 工厂（VirtualLan 仿真） */
+  createUdpSocket?: () => dgram.Socket
 }
 
 export class RealNetworkTransport implements NetworkTransport {
@@ -77,6 +82,8 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly disableUdp: boolean
   private readonly getRelaySeeds: (() => string[]) | undefined
   private readonly onRelaySeedsLearned: ((addresses: string[]) => void) | undefined
+  private readonly lanIp: string | undefined
+  private readonly createUdpSocket: (() => dgram.Socket) | undefined
   private readonly dedup = new MessageDedup()
   private readonly lamport = new LamportClock()
   private readonly subscriptions = new Map<string, Set<EnvelopeHandler>>()
@@ -107,21 +114,27 @@ export class RealNetworkTransport implements NetworkTransport {
     this.disableUdp = options.disableUdp ?? false
     this.getRelaySeeds = options.getRelaySeeds
     this.onRelaySeedsLearned = options.onRelaySeedsLearned
+    this.lanIp = options.lanIp
+    this.createUdpSocket = options.createUdpSocket
     this.pairingHost = new PairingSessionHost({
       deviceId: this.deviceId,
       userId: this.userId,
       displayName: this.displayName,
       listenPort: this.listenPort,
       getGroups: () => getDiscoverableGroupsForAdvert(),
-      getHost: () => getLocalLanIp() ?? undefined
+      getHost: () => this.resolveLanIp()
     })
     this.groupInviteHost = new GroupInviteSessionHost({
       deviceId: this.deviceId,
       userId: this.userId,
       displayName: this.displayName,
       listenPort: this.listenPort,
-      getHost: () => getLocalLanIp() ?? undefined
+      getHost: () => this.resolveLanIp()
     })
+  }
+
+  private resolveLanIp(): string | undefined {
+    return this.lanIp ?? getLocalLanIp() ?? undefined
   }
 
   private registerTcpPeer(peer: TcpPeerIdentity): void {
@@ -236,7 +249,9 @@ export class RealNetworkTransport implements NetworkTransport {
         capabilities: this.capabilities,
         onPeer: (peer) => this.onDiscoveredPeer(peer),
         pairingHost: this.pairingHost,
-        groupInviteHost: this.groupInviteHost
+        groupInviteHost: this.groupInviteHost,
+        getLanIp: () => this.resolveLanIp(),
+        createSocket: this.createUdpSocket
       })
       this.discovery.start()
     }
