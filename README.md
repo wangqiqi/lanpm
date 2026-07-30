@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.53.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.54.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -115,7 +115,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.53.0`** — E2E dual-instance pairing (Playwright share→join, `verify:e2e-pairing`). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.54.0`** — E2E cross-subnet pairing on dual-instance harness (`verify:e2e-pairing`, 2 scenarios). License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

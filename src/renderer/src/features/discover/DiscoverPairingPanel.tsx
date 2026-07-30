@@ -211,7 +211,7 @@ export default function DiscoverPairingPanel({
         </Title>
         {netHelpLink}
         <p className={styles.pairingCode} data-testid="discover-pairing-code-display">{session.codeDisplay}</p>
-        <Text type="secondary" className={styles.pairingMeta}>
+        <Text type="secondary" className={styles.pairingMeta} data-testid="discover-pairing-share-meta">
           {t('discover.pairingExpires', { time: formatCountdown(countdownMs) })}
           {session.localIp ? (
             <>
@@ -302,6 +302,7 @@ export default function DiscoverPairingPanel({
                     value={unicastHost}
                     onChange={(e) => setUnicastHost(e.target.value)}
                     onPressEnter={() => void handleFind()}
+                    data-testid="discover-pairing-unicast-host"
                   />
                   <Text type="secondary" className={styles.seedsHint}>
                     {t('discover.pairingTailHint')}

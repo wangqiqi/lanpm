@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.54.0] - 2026-07-30
+
+### Added
+
+- **E2E 跨子网配对（SPRINT-DISCOVER-E2E-03）**：双实例 Playwright 勾选 `crossSubnet` share→join；`readHostShareEndpoint` / `joinWithPairingCodeCrossSubnet` helper；`discover-pairing-share-meta` · `discover-pairing-unicast-host` testid；`verify:e2e-pairing` 2 场景 ✅
+
 ## [1.53.0] - 2026-07-30
 
 ### Added
