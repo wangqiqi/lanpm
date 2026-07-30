@@ -269,6 +269,7 @@ export default function DiscoverModal({
       destroyOnHidden
       width={560}
       className={styles.modal}
+      data-testid="discover-modal"
     >
       <div className={styles.toolbar}>
         <Text type="secondary">{t('discover.hint')}</Text>

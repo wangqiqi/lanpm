@@ -470,6 +470,7 @@ export default function TopBar(): React.ReactElement {
               type="button"
               className={`${styles.barAction} ${styles.barActionSecondary}`}
               onClick={() => setDiscoverOpen(true)}
+              data-testid="topbar-discover"
             >
               <span className={styles.barActionIcon} aria-hidden>
                 <CompassOutlined />

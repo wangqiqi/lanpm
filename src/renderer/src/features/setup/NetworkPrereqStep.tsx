@@ -28,7 +28,7 @@ export default function NetworkPrereqStep({
       <Button type="primary" block className={styles.submitBtn} onClick={onContinue}>
         {t('setup.netContinue')}
       </Button>
-      <Button type="link" block className={styles.skipBtn} onClick={onSkip}>
+      <Button type="link" block className={styles.skipBtn} onClick={onSkip} data-testid="setup-net-skip">
         {t('setup.netSkip')}
       </Button>
     </div>

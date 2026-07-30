@@ -18,6 +18,7 @@ export function requestAppQuit(): void {
 
 /** 关闭主窗口时隐藏到托盘，而非退出进程 */
 export function attachCloseToTray(mainWindow: BrowserWindow): void {
+  if (isolatedTestLaunch()) return
   mainWindow.on('close', (event) => {
     if (quitting || visualCaptureMode()) return
     event.preventDefault()
@@ -25,8 +26,12 @@ export function attachCloseToTray(mainWindow: BrowserWindow): void {
   })
 }
 
+function isolatedTestLaunch(): boolean {
+  return Boolean(process.env.LANPM_VISUAL_CAPTURE_DIR || process.env.LANPM_E2E === '1')
+}
+
 function visualCaptureMode(): boolean {
-  return Boolean(process.env.LANPM_VISUAL_CAPTURE_DIR)
+  return isolatedTestLaunch()
 }
 
 function showMainWindow(): void {
@@ -38,7 +43,7 @@ function showMainWindow(): void {
 }
 
 export function initSystemTray(): boolean {
-  if (visualCaptureMode()) return false
+  if (isolatedTestLaunch()) return false
 
   const icon = resolveTrayIcon()
   if (!icon) {

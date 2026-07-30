@@ -168,10 +168,11 @@ export class VirtualUdpSocket extends EventEmitter {
   }
 
   setBroadcast(_flag: boolean): void {
-    // no-op
+    void _flag
   }
 
   addMembership(_addr: string): void {
+    void _addr
     // no-op
   }
 

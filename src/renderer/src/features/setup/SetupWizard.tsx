@@ -149,7 +149,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
                 { min: 2, max: 20, message: t('setup.usernameLength') }
               ]}
             >
-              <div className={styles.row}>
+              <div className={styles.row} data-testid="setup-base-name">
                 <span className={styles.rowLabel}>{t('setup.username')}</span>
                 <Input
                   variant="borderless"
@@ -188,6 +188,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
             block
             loading={submitting}
             className={styles.submitBtn}
+            data-testid="setup-submit"
           >
             {t('setup.continue')}
           </Button>

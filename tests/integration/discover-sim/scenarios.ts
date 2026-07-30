@@ -4,7 +4,6 @@
 import assert from 'node:assert/strict'
 import { setDiscoverableGroupsProvider } from '../../../src/main/discover/advertProvider.ts'
 import { listCachedDiscoverGroups } from '../../../src/main/discover/discoverGroupRegistry.ts'
-import { setRouteSubnetPrefixOverride } from '../../../src/main/network/routeTable.ts'
 import { DISCOVERY_INTERVAL_MS } from '../../../src/shared/network/constants.ts'
 import { buildPairingHostCandidates } from '../../../src/shared/network/pairingHostResolve.ts'
 import { buildLanpmPeerFile } from '../../../src/shared/network/peerFile.ts'

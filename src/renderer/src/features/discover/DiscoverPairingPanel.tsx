@@ -167,7 +167,7 @@ export default function DiscoverPairingPanel({
   )
 
   const netHelpLink = (
-    <Button type="link" size="small" className={styles.netHelpLink} onClick={() => setNetHelpOpen(true)}>
+    <Button type="link" size="small" className={styles.netHelpLink} onClick={() => setNetHelpOpen(true)} data-testid="discover-net-help-link">
       {t('discover.netHelpLink')}
     </Button>
   )
@@ -181,10 +181,11 @@ export default function DiscoverPairingPanel({
           icon={<ShareAltOutlined />}
           loading={shareLoading}
           onClick={() => void handleStartShare()}
+          data-testid="discover-share-pairing"
         >
           {t('discover.sharePairingCode')}
         </Button>
-        <Button icon={<LinkOutlined />} onClick={() => onModeChange('find')}>
+        <Button icon={<LinkOutlined />} onClick={() => onModeChange('find')} data-testid="discover-find-pairing">
           {t('discover.findGroupsByCode')}
         </Button>
         <Button
@@ -209,7 +210,7 @@ export default function DiscoverPairingPanel({
           {t('discover.pairingShareTitle')}
         </Title>
         {netHelpLink}
-        <p className={styles.pairingCode}>{session.codeDisplay}</p>
+        <p className={styles.pairingCode} data-testid="discover-pairing-code-display">{session.codeDisplay}</p>
         <Text type="secondary" className={styles.pairingMeta}>
           {t('discover.pairingExpires', { time: formatCountdown(countdownMs) })}
           {session.localIp ? (
@@ -267,8 +268,9 @@ export default function DiscoverPairingPanel({
         onChange={(e) => setFindCode(e.target.value)}
         onPressEnter={() => void handleFind()}
         maxLength={8}
+        data-testid="discover-pairing-code-input"
       />
-      <Checkbox checked={crossSubnet} onChange={(e) => setCrossSubnet(e.target.checked)}>
+      <Checkbox checked={crossSubnet} onChange={(e) => setCrossSubnet(e.target.checked)} data-testid="discover-pairing-cross-subnet">
         {t('discover.pairingCrossSubnet')}
       </Checkbox>
       {crossSubnet ? (

@@ -23,6 +23,7 @@ export default function NetworkHelpModal({
       footer={null}
       destroyOnHidden
       className={styles.netHelpModal}
+      data-testid="discover-net-help-modal"
     >
       <p className={styles.netHelpIntro}>{t('setup.netSubtitle')}</p>
       <NetworkPrereqContent />

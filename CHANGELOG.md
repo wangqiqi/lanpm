@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.52.0] - 2026-07-30
+
+### Added
+
+- **Renderer 发现弹窗 E2E（SPRINT-DISCOVER-E2E-01）**：Playwright + Electron；`data-testid` 发现/配对/组网帮助；`verify:e2e-discover`；`LANPM_E2E` 隔离启动；`docs/05` §1.2.5 ✅
+
 ## [1.51.0] - 2026-07-30
 
 ### Added

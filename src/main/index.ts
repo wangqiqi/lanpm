@@ -24,6 +24,7 @@ import {
   shutdownAiEndpointProbeScheduler
 } from './ai/aiEndpointProbeService'
 import { ensureSeedGroups } from './group/groupService'
+import { completeSetup, getSetupStatus } from './identity/setup'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { ensureProfileUserDataPath } from './storage/profilePaths'
@@ -43,9 +44,23 @@ if (process.platform === 'win32') {
 app.setName('LanPM')
 
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
+const e2eMode = process.env.LANPM_E2E === '1'
+const isolatedLaunch = Boolean(visualCaptureDir || e2eMode)
+
+if (visualCaptureDir || e2eMode) {
+  // Prefer repo-local temp (gitignore) over OS /tmp — avoids disk clutter across CI/dev runs
+  const fallbackRoot = join(process.cwd(), '.lanpm', 'tmp')
+  mkdirSync(fallbackRoot, { recursive: true })
+  const prefix = e2eMode ? 'lanpm-e2e-' : 'lanpm-visual-cap-'
+  const userData =
+    process.env.LANPM_USER_DATA ?? mkdtempSync(join(fallbackRoot, prefix))
+  process.env.LANPM_USER_DATA = userData
+  app.setPath('userData', userData)
+  process.env.LANPM_NETWORK = process.env.LANPM_NETWORK ?? 'stub'
+}
 
 /** 托盘隐藏时进程仍占用 43124；禁止多开导致 EADDRINUSE */
-if (!visualCaptureDir) {
+if (!isolatedLaunch) {
   const gotSingleInstanceLock = app.requestSingleInstanceLock()
   if (!gotSingleInstanceLock) {
     app.quit()
@@ -60,20 +75,9 @@ if (!visualCaptureDir) {
   }
 }
 
-const isDev = !app.isPackaged
-
-if (visualCaptureDir) {
-  // Prefer repo-local temp (gitignore) over OS /tmp — avoids disk clutter across CI/dev runs
-  const fallbackRoot = join(process.cwd(), '.lanpm', 'tmp')
-  mkdirSync(fallbackRoot, { recursive: true })
-  const userData =
-    process.env.LANPM_USER_DATA ?? mkdtempSync(join(fallbackRoot, 'lanpm-visual-cap-'))
-  process.env.LANPM_USER_DATA = userData
-  app.setPath('userData', userData)
-  process.env.LANPM_NETWORK = process.env.LANPM_NETWORK ?? 'stub'
-}
-
 registerPreviewScheme()
+
+const isDev = !app.isPackaged
 
 /** Linux 无可用 GPU/Vulkan 时 Electron 会直接 FATAL 退出；开发环境禁用硬件加速 */
 if (process.platform === 'linux') {
@@ -201,10 +205,13 @@ app.whenReady().then(() => {
   try {
     Menu.setApplicationMenu(null)
 
-    if (!visualCaptureDir) {
+    if (!visualCaptureDir && !e2eMode) {
       ensureProfileUserDataPath()
     }
     initDatabase()
+    if (e2eMode && !getSetupStatus(getDatabase()).configured) {
+      completeSetup(getDatabase(), { baseName: 'E2ETest' })
+    }
     repairFilePreviewPaths(getDatabase())
     repairFileStoragePaths(getDatabase())
     registerPreviewProtocol(getDatabase)
