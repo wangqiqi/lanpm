@@ -16,6 +16,15 @@ const pairingPanel = readFileSync(
 )
 const homeRedirect = readFileSync(join(root, 'src/renderer/src/routes/HomeRedirect.tsx'), 'utf8')
 const uiStore = readFileSync(join(root, 'src/renderer/src/stores/uiStore.ts'), 'utf8')
+const setupWizard = readFileSync(join(root, 'src/renderer/src/features/setup/SetupWizard.tsx'), 'utf8')
+const coachmark = readFileSync(
+  join(root, 'src/renderer/src/features/discover/DiscoverCoachmark.tsx'),
+  'utf8'
+)
+const pairingClipboard = readFileSync(
+  join(root, 'src/shared/discover/pairingShareClipboard.ts'),
+  'utf8'
+)
 const cockpit = readFileSync(join(root, 'src/renderer/src/views/CockpitView.tsx'), 'utf8')
 const preload = readFileSync(join(root, 'src/preload/index.ts'), 'utf8')
 const discoverIpc = readFileSync(join(root, 'src/main/ipc/discover.ts'), 'utf8')
@@ -47,7 +56,17 @@ assert.match(modal, /importPeerFileDialog/)
 assert.match(modal, /pickSingleJoinableGroup/)
 assert.match(modal, /data-testid="discover-connect-peer-cta"/)
 assert.match(homeRedirect, /requestDiscoverOpen/)
+assert.match(pairingPanel, /formatPairingShareClipboard/)
+assert.match(pairingPanel, /data-testid="discover-copy-pairing-info"/)
 assert.match(uiStore, /discoverOpenPending/)
+assert.match(uiStore, /discoverCoachmarkPending/)
+assert.match(uiStore, /requestDiscoverCoachmark/)
+assert.match(setupWizard, /requestDiscoverCoachmark/)
+assert.match(setupWizard, /networkSkipped/)
+assert.match(topbar, /DiscoverCoachmark/)
+assert.match(topbar, /isDiscoverCoachmarkSeen/)
+assert.match(coachmark, /data-testid="discover-coachmark-tour"/)
+assert.match(pairingClipboard, /formatPairingShareClipboard/)
 assert.match(cockpit, /cockpit-join-with-code/)
 assert.match(cockpit, /requestDiscoverOpen/)
 assert.match(topbar, /data-testid="topbar-discover"/)

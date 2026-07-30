@@ -27,7 +27,9 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
+  const requestDiscoverCoachmark = useUiStore((s) => s.requestDiscoverCoachmark)
   const [step, setStep] = useState<SetupStep>('network')
+  const [networkSkipped, setNetworkSkipped] = useState(false)
   const [form] = Form.useForm<FormValues>()
   const [avatarUrl, setAvatarUrl] = useState(() => defaultAvatarDataUrl('LP', theme))
   const [submitting, setSubmitting] = useState(false)
@@ -89,6 +91,9 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
         avatarUrl
       })
       message.success(t('setup.saved'))
+      if (networkSkipped) {
+        requestDiscoverCoachmark()
+      }
       onComplete(status)
     } catch (err) {
       message.error(formatError(err, 'setup.saveFailed'))
@@ -101,8 +106,14 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     return (
       <div className={styles.wrap}>
         <NetworkPrereqStep
-          onContinue={() => setStep('profile')}
-          onSkip={() => setStep('profile')}
+          onContinue={() => {
+            setNetworkSkipped(false)
+            setStep('profile')
+          }}
+          onSkip={() => {
+            setNetworkSkipped(true)
+            setStep('profile')
+          }}
         />
       </div>
     )

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Checkbox, Collapse, Input, List, Segmented, Space, Tag, Typography } from 'antd'
 import type { InputRef } from 'antd'
-import { ShareAltOutlined, DownloadOutlined } from '@ant-design/icons'
+import { ShareAltOutlined, DownloadOutlined, CopyOutlined } from '@ant-design/icons'
+import { formatPairingShareClipboard } from '@shared/discover/pairingShareClipboard'
 import type { DiscoverSnapshot } from '@shared/discover/types'
 import type { PairingSessionView } from '@shared/discover/pairing'
 import type { GroupType } from '@shared/navigation/types'
@@ -185,6 +186,34 @@ export default function DiscoverPairingPanel({
     }
   }
 
+  const handleCopyPairingInfo = async (): Promise<void> => {
+    if (!session) return
+    const text = formatPairingShareClipboard(
+      {
+        code: session.code,
+        localIp: session.localIp,
+        localIpTail: session.localIpTail,
+        groupNames: session.groups.map((g) => g.name)
+      },
+      {
+        lineCode: (code) => t('discover.copyPairingLineCode', { code }),
+        lineIp: (ip) => t('discover.copyPairingLineIp', { ip }),
+        lineIpTail: (tail, ip) => t('discover.copyPairingLineIpTail', { tail, ip }),
+        lineGroups: (names) => t('discover.copyPairingLineGroups', { names })
+      }
+    )
+    if (!text) {
+      message.error(t('discover.copyPairingFailed'))
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      message.success(t('discover.copyPairingSuccess'))
+    } catch {
+      message.error(t('discover.copyPairingFailed'))
+    }
+  }
+
   const netHelpModal = (
     <NetworkHelpModal open={netHelpOpen} onClose={() => setNetHelpOpen(false)} />
   )
@@ -289,6 +318,14 @@ export default function DiscoverPairingPanel({
             <Alert type="info" showIcon message={t('discover.pairingNoDiscoverableGroups')} />
           )}
           <Space wrap>
+            <Button
+              type="primary"
+              icon={<CopyOutlined />}
+              onClick={() => void handleCopyPairingInfo()}
+              data-testid="discover-copy-pairing-info"
+            >
+              {t('discover.copyPairingInfo')}
+            </Button>
             <Button onClick={() => void cancelShare()}>{t('discover.pairingCancel')}</Button>
             <Button
               icon={<DownloadOutlined />}

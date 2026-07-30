@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.56.0] - 2026-07-30
+
+### Added
+
+- **发现 P1 余量（SPRINT-UX-DISCOVER-PATH-02）**：分享态「复制配对信息」（码+IP+群名）；Setup 跳过网络页 / 零群组首启 **Discover Coachmark**（antd Tour → `topbar-discover`）；`formatPairingShareClipboard` · `verify:discover` · `verify:e2e-discover` ✅
+
 ## [1.55.0] - 2026-07-30
 
 ### Changed

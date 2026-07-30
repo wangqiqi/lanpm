@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { markDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
 
 export type ThemeMode = 'light' | 'dark'
 
@@ -36,6 +37,8 @@ interface UiState {
   whiteboardZen: boolean
   /** TopBar 应打开发现弹窗（零群组首启等） */
   discoverOpenPending: boolean
+  /** 顶栏「发现」Coachmark 待展示 */
+  discoverCoachmarkPending: boolean
   setTheme: (theme: ThemeMode) => void
   toggleTheme: () => void
   setLocale: (locale: 'zh-CN' | 'en-US') => void
@@ -44,6 +47,8 @@ interface UiState {
   setWhiteboardZen: (on: boolean) => void
   requestDiscoverOpen: () => void
   ackDiscoverOpen: () => void
+  requestDiscoverCoachmark: () => void
+  ackDiscoverCoachmark: () => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -53,6 +58,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   tagColorOverridesByGroup: readTagColorOverrides(),
   whiteboardZen: false,
   discoverOpenPending: false,
+  discoverCoachmarkPending: false,
   setTheme: (theme) => {
     localStorage.setItem('theme', theme)
     set({ theme })
@@ -89,7 +95,12 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
   setWhiteboardZen: (on) => set({ whiteboardZen: on }),
   requestDiscoverOpen: () => set({ discoverOpenPending: true }),
-  ackDiscoverOpen: () => set({ discoverOpenPending: false })
+  ackDiscoverOpen: () => set({ discoverOpenPending: false }),
+  requestDiscoverCoachmark: () => set({ discoverCoachmarkPending: true }),
+  ackDiscoverCoachmark: () => {
+    markDiscoverCoachmarkSeen()
+    set({ discoverCoachmarkPending: false })
+  }
 }))
 
 /** AUTO-20：无头截图在同一会话内切换主题时同步 Ant ConfigProvider */

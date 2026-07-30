@@ -28,6 +28,7 @@ test.describe('discover modal E2E', () => {
     const code = dialog.getByTestId('discover-pairing-code-display')
     await expect(code).toBeVisible({ timeout: 15_000 })
     await expect(code).toHaveText(/\d{3}\s\d{3}/)
+    await expect(dialog.getByTestId('discover-copy-pairing-info')).toBeVisible()
     await dialog.getByRole('button', { name: /停止分享|Stop sharing/i }).click()
     await expect(dialog.getByTestId('discover-share-pairing')).toBeVisible()
   })

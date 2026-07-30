@@ -35,6 +35,8 @@ import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
 import DiscoverModal from '@renderer/features/discover/DiscoverModal'
+import DiscoverCoachmark from '@renderer/features/discover/DiscoverCoachmark'
+import { isDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
@@ -67,6 +69,7 @@ export default function TopBar(): React.ReactElement {
   const { t, formatError } = useI18n()
   const { modal, message } = useLanpmApp()
   const groups = useNavigationStore((s) => s.groups)
+  const groupsLoaded = useNavigationStore((s) => s.groupsLoaded)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const setActiveGroupId = useNavigationStore((s) => s.setActiveGroupId)
   const createGroup = useNavigationStore((s) => s.createGroup)
@@ -103,6 +106,11 @@ export default function TopBar(): React.ReactElement {
   const isPinned = useGroupPinStore((s) => s.isPinned)
   const discoverOpenPending = useUiStore((s) => s.discoverOpenPending)
   const ackDiscoverOpen = useUiStore((s) => s.ackDiscoverOpen)
+  const discoverCoachmarkPending = useUiStore((s) => s.discoverCoachmarkPending)
+  const requestDiscoverCoachmark = useUiStore((s) => s.requestDiscoverCoachmark)
+  const ackDiscoverCoachmark = useUiStore((s) => s.ackDiscoverCoachmark)
+  const discoverBtnRef = useRef<HTMLButtonElement>(null)
+  const [discoverCoachmarkOpen, setDiscoverCoachmarkOpen] = useState(false)
 
   const refreshGroupActivity = (): void => {
     void getLanpmApi()
@@ -116,6 +124,22 @@ export default function TopBar(): React.ReactElement {
     setDiscoverOpen(true)
     ackDiscoverOpen()
   }, [discoverOpenPending, ackDiscoverOpen])
+
+  useEffect(() => {
+    if (isDiscoverCoachmarkSeen()) return
+    if (!discoverCoachmarkPending) {
+      if (groupsLoaded && groups.length === 0) {
+        requestDiscoverCoachmark()
+      }
+      return
+    }
+    setDiscoverCoachmarkOpen(true)
+  }, [discoverCoachmarkPending, groupsLoaded, groups.length, requestDiscoverCoachmark])
+
+  const closeDiscoverCoachmark = (): void => {
+    setDiscoverCoachmarkOpen(false)
+    ackDiscoverCoachmark()
+  }
 
   useEffect(() => {
     void refreshNetwork()
@@ -476,6 +500,7 @@ export default function TopBar(): React.ReactElement {
             </button>
             <button
               type="button"
+              ref={discoverBtnRef}
               className={`${styles.barAction} ${styles.barActionSecondary}`}
               onClick={() => setDiscoverOpen(true)}
               data-testid="topbar-discover"
@@ -601,6 +626,11 @@ export default function TopBar(): React.ReactElement {
         </Dropdown>
         </div>
       </div>
+      <DiscoverCoachmark
+        open={discoverCoachmarkOpen}
+        targetRef={discoverBtnRef}
+        onClose={closeDiscoverCoachmark}
+      />
       <DiscoverModal
         open={discoverOpen}
         onClose={() => setDiscoverOpen(false)}
