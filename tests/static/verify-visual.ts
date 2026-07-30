@@ -78,6 +78,7 @@ const HEX_FALLBACK_IN_VAR = /var\(--lanpm-[^,)]+,\s*#[0-9a-fA-F]{3,8}/gi
 
 const UI_COMPONENTS = [
   'ui/ViewHeader.tsx',
+  'ui/IslandPanel.tsx',
   'ui/ViewToolbar.tsx',
   'ui/ViewState.tsx',
   'ui/cssVar.ts',
@@ -305,7 +306,10 @@ assert.ok(
   'CockpitView must not use Ant Card/Statistic/Row/Col/Tag'
 )
 const cockpitCss = readFileSync(join(renderer, 'views/CockpitView.module.css'), 'utf8')
-assert.match(cockpitCss, /\.panel\b/, 'CockpitView must use island panel styles')
+const islandPanelCss = readFileSync(join(renderer, 'ui/IslandPanel.module.css'), 'utf8')
+const islandPanelSrc = readFileSync(join(renderer, 'ui/IslandPanel.tsx'), 'utf8')
+assert.match(cockpitSrc, /IslandPanel/, 'CockpitView must use IslandPanel (SP-403)')
+assert.match(islandPanelCss, /\.panel\b/, 'IslandPanel must define island panel styles (CK-412)')
 assert.ok(
   !/\.kpiGrid\b/.test(cockpitCss) && !/\.kpiTile\b/.test(cockpitCss),
   'Cockpit CSS must drop dual-island kpiGrid/kpiTile (CK-411)'
@@ -344,32 +348,32 @@ assert.equal(
   'CockpitView must render exactly one leadership summary island (CK-411)'
 )
 assert.match(
-  cockpitSrc,
+  islandPanelSrc,
   /defaultCollapsed\??:/,
-  'Cockpit Panel must support defaultCollapsed (CK-412)'
+  'IslandPanel must support defaultCollapsed (CK-412)'
 )
 assert.match(
-  cockpitSrc,
+  islandPanelSrc,
   /onExpandedChange\??:/,
-  'Cockpit Panel must support controlled onExpandedChange (CK-412)'
+  'IslandPanel must support controlled onExpandedChange (CK-412)'
 )
 assert.match(
-  cockpitSrc,
+  islandPanelSrc,
   /summary\??:\s*React\.ReactNode/,
-  'Cockpit Panel must expose summary slot (CK-412)'
+  'IslandPanel must expose summary slot (CK-412)'
 )
 assert.match(
-  cockpitSrc,
+  islandPanelSrc,
   /type="button"[\s\S]*?aria-expanded=\{expanded\}/,
-  'Cockpit Panel toggle must be a button with aria-expanded (Enter/Space via native button, CK-412)'
+  'IslandPanel toggle must be a button with aria-expanded (Enter/Space via native button, CK-412)'
 )
-assert.match(cockpitCss, /\.panelToggle\b/, 'Cockpit Panel accordion toggle styles (CK-412)')
-assert.match(cockpitCss, /\.panelSummary\b/, 'Cockpit Panel summary slot styles (CK-412)')
-assert.match(cockpitCss, /\.panelChevron\b/, 'Cockpit Panel chevron styles (CK-412)')
+assert.match(islandPanelCss, /\.panelToggle\b/, 'IslandPanel accordion toggle styles (CK-412)')
+assert.match(islandPanelCss, /\.panelSummary\b/, 'IslandPanel summary slot styles (CK-412)')
+assert.match(islandPanelCss, /\.panelChevron\b/, 'IslandPanel chevron styles (CK-412)')
 assert.match(
-  cockpitCss,
+  islandPanelCss,
   /\.panelChevron\s*\{[^}]*var\(--lanpm-font-body-secondary\)/s,
-  'Cockpit panelChevron must use font token (cockpit-delivery)'
+  'IslandPanel panelChevron must use font token (cockpit-delivery)'
 )
 assert.match(
   cockpitSrc,
@@ -407,9 +411,9 @@ assert.match(
   'Project summary must show worst project (CK-413)'
 )
 assert.match(
-  cockpitSrc,
-  /expanded \? <div className=\{styles\.panelBody\}>/,
-  'Panel must hide detail children when aria-expanded=false (CK-413)'
+  islandPanelSrc,
+  /expanded \? \(\s*<div className=\{`\$\{styles\.panelBody\}/,
+  'IslandPanel must hide detail children when aria-expanded=false (CK-413)'
 )
 assert.match(cockpitCss, /\.accordionSummary\b/, 'Accordion summary styles (CK-413)')
 assert.match(
@@ -821,6 +825,52 @@ for (const phantom of FORBIDDEN_PHANTOM_TOKENS) {
     `SubtaskPreviewModal must not use phantom token ${phantom}`
   )
 }
+
+// --- SP-401~405 spacing tokens + IslandPanel (design-tokens sprint) ---
+const REQUIRED_SPACING_TOKENS = [
+  '--lanpm-space-1',
+  '--lanpm-space-3',
+  '--lanpm-space-5',
+  '--lanpm-space-6',
+  '--lanpm-spacing-module',
+  '--lanpm-spacing-panel-x'
+] as const
+for (const token of REQUIRED_SPACING_TOKENS) {
+  assert.ok(globalCss.includes(token), `global.css missing spacing token ${token} (SP-401)`)
+}
+const spacingViewCss = [
+  'views/CockpitView.module.css',
+  'features/board/board.module.css',
+  'features/calendar/calendar.module.css'
+] as const
+for (const rel of spacingViewCss) {
+  const css = readFileSync(join(renderer, rel), 'utf8')
+  assert.ok(
+    css.includes('var(--lanpm-space-'),
+    `${rel} must use --lanpm-space-* spacing tokens (SP-402)`
+  )
+  assert.ok(
+    !/\bgap:\s*12px\b/.test(css),
+    `${rel} must not use gap: 12px literal (SP-402)`
+  )
+  assert.ok(
+    !/\bpadding:\s*12px\b/.test(css),
+    `${rel} must not use padding: 12px literal (SP-402)`
+  )
+}
+assert.match(islandPanelSrc, /export default function IslandPanel/, 'IslandPanel must be exported (SP-403)')
+const boardSrc = readFileSync(join(renderer, 'features/board/BoardView.tsx'), 'utf8')
+assert.match(boardSrc, /IslandPanel/, 'BoardView must import IslandPanel (SP-403)')
+assert.match(
+  boardSrc,
+  /data-testid="board-column-island-pilot"/,
+  'Board todo column must pilot IslandPanel (SP-403)'
+)
+assert.match(
+  islandPanelSrc,
+  /defaultCollapsed\??:/,
+  'IslandPanel must support defaultCollapsed (SP-404 / CK-412)'
+)
 
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')

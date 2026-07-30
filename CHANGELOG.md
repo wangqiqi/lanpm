@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.59.0] - 2026-07-31
+
+### Added
+
+- **设计令牌 · 间距体系（SPRINT design-tokens · TASK-588～595）**：`global.css` 新增 `--lanpm-space-1`～`--lanpm-space-6` 及语义别名；`docs/04` §1.2 间距表
+- **`ui/IslandPanel`**：从驾驶舱内联手风琴 Panel 抽出；Board「待办」列试点
+
+### Changed
+
+- **Cockpit / Board / Calendar**：岛式面板 padding/gap 改用语义 spacing 令牌
+- **Setup**：圆角字面量收敛至 `--lanpm-radius-*`
+- **`verify:visual`**：SP-401～405 间距与 IslandPanel 守卫；CK-412 断言迁至 `IslandPanel`
+
 ## [1.58.0] - 2026-07-31
 
 ### Changed

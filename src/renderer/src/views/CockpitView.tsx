@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Alert, Progress, Space, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
@@ -6,7 +6,6 @@ import {
   ArrowLeftOutlined,
   CompassOutlined,
   CopyOutlined,
-  DownOutlined,
   KeyOutlined,
   RobotOutlined
 } from '@ant-design/icons'
@@ -34,6 +33,7 @@ import SubtaskPreviewModal, {
   proposalsToRows,
   type SubtaskPreviewRow
 } from '@renderer/features/ai/SubtaskPreviewModal'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import styles from './CockpitView.module.css'
 
 const { Text } = Typography
@@ -46,86 +46,6 @@ const STATUS_KEYS: Record<string, { tone: 'normal' | 'risk' | 'delayed'; key: Me
 
 function resolveDeptDisplayName(department: string, t: (key: MessageKey) => string): string {
   return department === COCKPIT_UNASSIGNED_DEPT ? t('cockpit.deptUnassigned') : department
-}
-
-function Panel({
-  title,
-  extra,
-  className = '',
-  titleClassName = '',
-  children,
-  summary,
-  defaultCollapsed,
-  expanded: expandedControlled,
-  onExpandedChange
-}: {
-  title: string
-  extra?: React.ReactNode
-  className?: string
-  titleClassName?: string
-  children: React.ReactNode
-  /** Collapsed-state teaser; presence (or expand props) enables accordion */
-  summary?: React.ReactNode
-  defaultCollapsed?: boolean
-  expanded?: boolean
-  onExpandedChange?: (expanded: boolean) => void
-}): React.ReactElement {
-  const regionId = useId()
-  const collapsible =
-    summary !== undefined ||
-    defaultCollapsed !== undefined ||
-    expandedControlled !== undefined ||
-    onExpandedChange !== undefined
-  const [uncontrolledExpanded, setUncontrolledExpanded] = useState(() => !defaultCollapsed)
-  const expanded = expandedControlled ?? uncontrolledExpanded
-
-  const setExpanded = (next: boolean): void => {
-    if (expandedControlled === undefined) {
-      setUncontrolledExpanded(next)
-    }
-    onExpandedChange?.(next)
-  }
-
-  const toggle = (): void => {
-    setExpanded(!expanded)
-  }
-
-  return (
-    <section className={`${styles.panel} ${className}`.trim()}>
-      <header
-        className={`${styles.panelHeader} ${collapsible ? styles.panelHeaderCollapsible : ''}`.trim()}
-      >
-        {collapsible ? (
-          <button
-            type="button"
-            className={styles.panelToggle}
-            aria-expanded={expanded}
-            aria-controls={regionId}
-            onClick={toggle}
-          >
-            <DownOutlined
-              className={`${styles.panelChevron} ${expanded ? styles.panelChevronOpen : ''}`.trim()}
-              aria-hidden
-            />
-            <h2 className={`${styles.panelTitle} ${titleClassName}`.trim()}>{title}</h2>
-          </button>
-        ) : (
-          <h2 className={`${styles.panelTitle} ${titleClassName}`.trim()}>{title}</h2>
-        )}
-        {extra ? <div className={styles.panelExtra}>{extra}</div> : null}
-      </header>
-      {collapsible ? (
-        <div id={regionId}>
-          {!expanded && summary != null ? (
-            <div className={styles.panelSummary}>{summary}</div>
-          ) : null}
-          {expanded ? <div className={styles.panelBody}>{children}</div> : null}
-        </div>
-      ) : (
-        <div className={styles.panelBody}>{children}</div>
-      )}
-    </section>
-  )
 }
 
 export default function CockpitView(): React.ReactElement {
@@ -528,7 +448,7 @@ export default function CockpitView(): React.ReactElement {
         </Text>
       </section>
 
-      <Panel
+      <IslandPanel
         title={t('cockpit.attentionTasksTitle')}
         className={styles.section}
         defaultCollapsed={attentionTasks.length === 0}
@@ -612,9 +532,9 @@ export default function CockpitView(): React.ReactElement {
             })}
           </ul>
         )}
-      </Panel>
+      </IslandPanel>
 
-      <Panel
+      <IslandPanel
         title={t('cockpit.projectProgress')}
         className={styles.section}
         defaultCollapsed
@@ -719,9 +639,9 @@ export default function CockpitView(): React.ReactElement {
             })}
           </div>
         )}
-      </Panel>
+      </IslandPanel>
 
-      <Panel
+      <IslandPanel
         title={t('cockpit.deptCompletion')}
         className={styles.section}
         defaultCollapsed
@@ -796,9 +716,9 @@ export default function CockpitView(): React.ReactElement {
             ))}
           </div>
         )}
-      </Panel>
+      </IslandPanel>
 
-      <Panel
+      <IslandPanel
         title={t('ai.patrolTitle')}
         className={styles.section}
         defaultCollapsed
@@ -848,9 +768,9 @@ export default function CockpitView(): React.ReactElement {
         ) : (
           <Text type="secondary">{t('ai.patrolLatestEmpty')}</Text>
         )}
-      </Panel>
+      </IslandPanel>
 
-      <Panel
+      <IslandPanel
         title={t('ai.pipeline.title')}
         className={styles.section}
         defaultCollapsed
@@ -931,13 +851,14 @@ export default function CockpitView(): React.ReactElement {
         ) : (
           <Text type="secondary">{t('ai.pipeline.empty')}</Text>
         )}
-      </Panel>
+      </IslandPanel>
 
       {report ? (
-        <Panel
+        <IslandPanel
           title={t('cockpit.reportOutput')}
           titleClassName={styles.reportPanelTitle}
           className={`${styles.section} ${styles.reportPanel}`}
+          bodyClassName={styles.reportPanelBody}
           data-testid="cockpit-report-panel"
           extra={
             <Space size={4}>
@@ -997,7 +918,7 @@ export default function CockpitView(): React.ReactElement {
               </Text>
             </button>
           )}
-        </Panel>
+        </IslandPanel>
       ) : null}
       </div>
 

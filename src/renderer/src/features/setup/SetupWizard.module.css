@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px 56px;
+  padding: var(--lanpm-space-6) 24px 56px;
   background: var(--lanpm-bg);
 }
 
@@ -25,7 +25,7 @@
   width: 64px;
   height: 64px;
   margin-bottom: 16px;
-  border-radius: 14px;
+  border-radius: var(--lanpm-radius-md);
   box-shadow:
     var(--lanpm-shadow-lg),
     0 0 0 3px var(--lanpm-accent-fill);
@@ -57,7 +57,7 @@
 }
 
 .avatar {
-  margin-bottom: 12px;
+  margin-bottom: var(--lanpm-space-3);
   box-shadow:
     var(--lanpm-shadow-lg),
     0 0 0 3px var(--lanpm-accent-fill);
@@ -80,7 +80,7 @@
   font-weight: 500;
   color: var(--lanpm-accent);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--lanpm-radius-sm);
   transition: background 0.15s ease;
 }
 
@@ -91,12 +91,12 @@
 /* —— iOS 风格分组列表 —— */
 .group {
   background: var(--lanpm-surface-group);
-  border-radius: 12px;
+  border-radius: var(--lanpm-radius-md);
   overflow: hidden;
   box-shadow:
     0 0 0 0.5px var(--lanpm-separator),
     var(--lanpm-shadow);
-  margin-bottom: 12px;
+  margin-bottom: var(--lanpm-space-3);
 }
 
 .rowItem {
@@ -213,7 +213,7 @@
 .netIllustration {
   margin-bottom: 16px;
   padding: 16px 12px;
-  border-radius: 12px;
+  border-radius: var(--lanpm-radius-md);
   background: var(--lanpm-surface-group);
   box-shadow:
     0 0 0 0.5px var(--lanpm-separator),

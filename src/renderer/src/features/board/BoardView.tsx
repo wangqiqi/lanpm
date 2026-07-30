@@ -60,6 +60,7 @@ import {
   type AwarenessPeer
 } from '@renderer/stores/taskAwarenessStore'
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -153,6 +154,69 @@ function KanbanColumn({
   const { t } = useI18n()
   const { setNodeRef } = useDroppable({ id: status })
 
+  const columnCards = (
+    <>
+      {tasks.length === 0 && (
+        <div className={styles.columnDropHint}>{t('board.dropHere')}</div>
+      )}
+      {tasks.map((task) => (
+        <KanbanCard
+          key={task.taskId}
+          task={task}
+          relation={relationMap.get(task.taskId)}
+          assigneeName={
+            task.assigneeUserId
+              ? getMemberDisplayName(groupId, task.assigneeUserId)
+              : undefined
+          }
+          relationDimmed={relatedSet !== null && !relatedSet.has(task.taskId)}
+          relationFocused={relationFocusId === task.taskId}
+          onDelete={onDeleteTask}
+          onDiscuss={onDiscuss}
+          onMoveTo={onMoveTo}
+          onEdit={onEdit}
+          onHighlightRelations={onHighlightRelations}
+          onPinRelations={onPinRelations}
+          onLocateTask={onLocateTask}
+          highlighted={isTaskHighlighted(task.taskId)}
+          focusPeers={peersByTask.get(task.taskId) ?? []}
+          tagColorOverrides={tagColorOverrides}
+        />
+      ))}
+    </>
+  )
+
+  const columnExtra = onAddTask ? (
+    <Button
+      type="text"
+      size="small"
+      icon={<PlusOutlined />}
+      className={styles.columnAddBtn}
+      aria-label={t('board.newTask')}
+      onClick={onAddTask}
+    />
+  ) : null
+
+  if (status === 'todo') {
+    return (
+      <div ref={setNodeRef} className={styles.columnIsland} data-testid="board-column-island-pilot">
+        <IslandPanel
+          title={t(COLUMN_TITLE_KEYS[status])}
+          extra={
+            <>
+              <span className={styles.columnCount}>{tasks.length}</span>
+              {columnExtra}
+            </>
+          }
+          className={`${styles.columnIslandPanel} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
+          bodyClassName={styles.columnIslandBody}
+        >
+          {columnCards}
+        </IslandPanel>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -163,46 +227,9 @@ function KanbanColumn({
           {t(COLUMN_TITLE_KEYS[status])}
           <span className={styles.columnCount}>{tasks.length}</span>
         </div>
-        {onAddTask ? (
-          <Button
-            type="text"
-            size="small"
-            icon={<PlusOutlined />}
-            className={styles.columnAddBtn}
-            aria-label={t('board.newTask')}
-            onClick={onAddTask}
-          />
-        ) : null}
+        {columnExtra}
       </div>
-      <div className={styles.columnBody}>
-        {tasks.length === 0 && (
-          <div className={styles.columnDropHint}>{t('board.dropHere')}</div>
-        )}
-        {tasks.map((task) => (
-          <KanbanCard
-            key={task.taskId}
-            task={task}
-            relation={relationMap.get(task.taskId)}
-            assigneeName={
-              task.assigneeUserId
-                ? getMemberDisplayName(groupId, task.assigneeUserId)
-                : undefined
-            }
-            relationDimmed={relatedSet !== null && !relatedSet.has(task.taskId)}
-            relationFocused={relationFocusId === task.taskId}
-            onDelete={onDeleteTask}
-            onDiscuss={onDiscuss}
-            onMoveTo={onMoveTo}
-            onEdit={onEdit}
-            onHighlightRelations={onHighlightRelations}
-            onPinRelations={onPinRelations}
-            onLocateTask={onLocateTask}
-            highlighted={isTaskHighlighted(task.taskId)}
-            focusPeers={peersByTask.get(task.taskId) ?? []}
-            tagColorOverrides={tagColorOverrides}
-          />
-        ))}
-      </div>
+      <div className={styles.columnBody}>{columnCards}</div>
     </div>
   )
 }
