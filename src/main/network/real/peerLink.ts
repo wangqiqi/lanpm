@@ -1,4 +1,5 @@
 import net from 'node:net'
+import type { DiscoverRelayPacket } from '../../../shared/discover/discoverRelay.ts'
 import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
 import type { DiscoveryPayload } from '../../../shared/network/types'
 import type { SyncEnvelope } from '../../../shared/network/types'
@@ -28,6 +29,7 @@ export interface PeerLinkOptions {
   onPeerIdentified?: (peer: TcpPeerIdentity) => void
   onReady?: (peer: TcpPeerIdentity) => void
   onClose: () => void
+  onDiscoverRelay?: (packet: DiscoverRelayPacket, fromDeviceId: string) => void
   /** 服务端：校验 TCP pairing_resolve */
   resolvePairingCode?: (
     code: string,
@@ -186,6 +188,11 @@ export class PeerLink {
     this.sendWire(this.localProfile())
   }
 
+  sendDiscoverRelay(packet: DiscoverRelayPacket): void {
+    if (this.state !== 'ready') return
+    this.sendWire(packet)
+  }
+
   send(envelope: SyncEnvelope): void {
     if (this.state !== 'ready' || !this.aesKey) return
     const sealed = sealEnvelope(this.aesKey, envelope)
@@ -340,6 +347,12 @@ export class PeerLink {
 
     if (msg.kind === 'peer_advert' && this.state === 'ready') {
       this.rememberRemote(msg)
+      return
+    }
+
+    if (msg.kind === 'discover_relay' && this.state === 'ready') {
+      const fromId = this.remoteDeviceId ?? msg.viaDeviceId
+      this.opts.onDiscoverRelay?.(msg, fromId)
       return
     }
 

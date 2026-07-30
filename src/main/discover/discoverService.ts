@@ -23,6 +23,10 @@ function loadSeeds(db: Database): string[] {
   return normalizeDiscoverSeeds(getMeta(db, DISCOVER_SEEDS_META_KEY))
 }
 
+export function loadDiscoverSeeds(db: Database): string[] {
+  return loadSeeds(db)
+}
+
 export function setDiscoverSeeds(db: Database, seeds: unknown): string[] {
   const next = normalizeDiscoverSeeds(seeds)
   setMeta(db, DISCOVER_SEEDS_META_KEY, JSON.stringify(next))

@@ -1,4 +1,5 @@
 import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
+import type { DiscoverRelayPacket } from '../../../shared/discover/discoverRelay.ts'
 import type { SyncEnvelope } from '../../../shared/network/types'
 import type { PairingResolveFailReason } from '../../../shared/network/pairingTypes.ts'
 
@@ -15,6 +16,7 @@ export type WireMessage =
   | ({ kind: 'handshake'; publicKey: string } & WirePeerProfile)
   | ({ kind: 'handshake_ack'; publicKey: string } & WirePeerProfile)
   | ({ kind: 'peer_advert' } & WirePeerProfile)
+  | DiscoverRelayPacket
   | {
       kind: 'pairing_resolve'
       code: string

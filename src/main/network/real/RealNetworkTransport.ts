@@ -13,7 +13,8 @@ import {
   RECONNECT_BACKOFF_MS
 } from '../../../shared/network/constants.ts'
 import { generateDhKeyPair } from '../../crypto/dhSession.ts'
-import { rememberPeerGroups } from '../../discover/discoverGroupRegistry.ts'
+import { rememberPeerGroups, listCachedDiscoverGroups } from '../../discover/discoverGroupRegistry.ts'
+import { parseHostPort } from '../../../shared/network/manualPeer.ts'
 import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
 import { refreshLanUserIds } from '../peerDirectory.ts'
 import { MessageDedup } from '../stub/dedup.ts'
@@ -31,6 +32,16 @@ import {
 import { pairingFoundToDiscovery } from '../../../shared/network/pairingTypes.ts'
 import { createTcpServer, PeerLink, type TcpPeerIdentity } from './peerLink.ts'
 import { UdpDiscovery } from './udpDiscovery.ts'
+import {
+  DISCOVER_RELAY_HOP_MAX,
+  type DiscoverRelayPacket
+} from '../../../shared/discover/discoverRelay.ts'
+import {
+  applyRelayGroups,
+  collectNewSeedAddresses,
+  mergeRelayPeers,
+  relayPacketForForward
+} from './discoverRelayApply.ts'
 
 export type { PairingSessionView } from './pairingSession.ts'
 
@@ -44,6 +55,8 @@ export interface RealNetworkOptions {
   capabilities?: string[]
   /** 测试模式：跳过 UDP，仅 TCP */
   disableUdp?: boolean
+  /** 持久化发现种子（host:port），用于 discover_relay */
+  getRelaySeeds?: () => string[]
 }
 
 export class RealNetworkTransport implements NetworkTransport {
@@ -53,6 +66,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly capabilities: string[]
   private readonly listenPort: number
   private readonly disableUdp: boolean
+  private readonly getRelaySeeds: (() => string[]) | undefined
   private readonly dedup = new MessageDedup()
   private readonly lamport = new LamportClock()
   private readonly subscriptions = new Map<string, Set<EnvelopeHandler>>()
@@ -70,6 +84,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private peerRefreshTimer: ReturnType<typeof setInterval> | null = null
   private readonly pairingHost: PairingSessionHost
+  private readonly knownSeedAddresses = new Set<string>()
   private started = false
 
   constructor(options: RealNetworkOptions) {
@@ -79,6 +94,7 @@ export class RealNetworkTransport implements NetworkTransport {
     this.capabilities = options.capabilities ?? ['chat', 'file', 'task']
     this.listenPort = options.listenPort ?? 43_124
     this.disableUdp = options.disableUdp ?? false
+    this.getRelaySeeds = options.getRelaySeeds
     this.pairingHost = new PairingSessionHost({
       deviceId: this.deviceId,
       userId: this.userId,
@@ -133,8 +149,13 @@ export class RealNetworkTransport implements NetworkTransport {
         }
         this.reconnectAttempt.delete(peer.deviceId)
         options.onPeerReady?.(link, peer)
+        link.sendPeerAdvert()
+        link.sendDiscoverRelay(this.buildDiscoverRelayPacket())
       },
       onClose: options.onClose,
+      onDiscoverRelay: (packet, fromDeviceId) => {
+        this.handleDiscoverRelay(packet, fromDeviceId, link)
+      },
       resolvePairingCode: (code, joinerDeviceId, joinerDisplayName) => {
         const result = this.pairingHost.handleResolve({
           code,
@@ -219,6 +240,7 @@ export class RealNetworkTransport implements NetworkTransport {
     this.links.clear()
     this.tcpPeers.clear()
     this.manualHosts.clear()
+    this.knownSeedAddresses.clear()
     this.tcpServer?.close()
     this.tcpServer = null
     this.tcpBindOk = false
@@ -563,7 +585,76 @@ export class RealNetworkTransport implements NetworkTransport {
       }
     }
     for (const link of this.links.values()) {
-      if (link.isReady()) link.sendPeerAdvert()
+      if (link.isReady()) {
+        link.sendPeerAdvert()
+        link.sendDiscoverRelay(this.buildDiscoverRelayPacket())
+      }
+    }
+  }
+
+  private buildDiscoverRelayPacket(hop = DISCOVER_RELAY_HOP_MAX): DiscoverRelayPacket {
+    const peerMap = new Map<string, DiscoveryPayload>()
+    for (const peer of this.discovery?.listPeers() ?? []) peerMap.set(peer.deviceId, peer)
+    for (const peer of this.tcpPeers.values()) peerMap.set(peer.deviceId, peer)
+    peerMap.delete(this.deviceId)
+
+    const peers = [...peerMap.values()]
+      .filter((p) => p.userId && p.host)
+      .map((p) => ({
+        deviceId: p.deviceId,
+        userId: p.userId,
+        displayName: p.displayName,
+        host: p.host!,
+        listenPort: p.listenPort
+      }))
+
+    const groups = listCachedDiscoverGroups().map((cached) => ({
+      ...cached.advert,
+      ownerUserId: cached.ownerUserId,
+      ownerDisplayName: cached.ownerDisplayName
+    }))
+
+    const seeds = new Set<string>(this.getRelaySeeds?.() ?? [])
+    for (const manual of this.manualHosts.values()) {
+      seeds.add(`${manual.host}:${manual.port}`)
+    }
+
+    return {
+      v: 1,
+      kind: 'discover_relay',
+      hop,
+      viaDeviceId: this.deviceId,
+      peers,
+      groups,
+      seeds: seeds.size > 0 ? [...seeds] : undefined
+    }
+  }
+
+  private handleDiscoverRelay(
+    packet: DiscoverRelayPacket,
+    fromDeviceId: string,
+    sourceLink: PeerLink
+  ): void {
+    if (packet.viaDeviceId === this.deviceId) return
+
+    mergeRelayPeers(this.tcpPeers, packet.peers, this.capabilities)
+    applyRelayGroups(packet.groups)
+
+    const newSeeds = collectNewSeedAddresses(packet.seeds, this.knownSeedAddresses)
+    for (const address of newSeeds) {
+      try {
+        const { host, port } = parseHostPort(address)
+        void this.connectManualHost(host, port).catch(() => undefined)
+      } catch {
+        // skip malformed seed
+      }
+    }
+
+    const forward = relayPacketForForward(packet, this.deviceId)
+    if (!forward) return
+    for (const link of this.links.values()) {
+      if (!link.isReady() || link === sourceLink) continue
+      link.sendDiscoverRelay(forward)
     }
   }
 

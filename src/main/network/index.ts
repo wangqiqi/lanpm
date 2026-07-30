@@ -6,7 +6,7 @@ import { initChatService } from '../chat/chatService'
 import { listDiscoverableGroupsForAdvert } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { setDiscoverableGroupsProvider } from '../discover/advertProvider'
-import { connectDiscoverSeeds } from '../discover/discoverService'
+import { connectDiscoverSeeds, loadDiscoverSeeds } from '../discover/discoverService'
 import { RealNetworkTransport } from './real/RealNetworkTransport'
 import {
   initNetworkStub,
@@ -37,7 +37,12 @@ export function resolveNetworkMode(): NetworkMode {
   return 'real'
 }
 
-function buildReal(deviceId: string, userId: string, displayName: string): RealNetworkTransport {
+function buildReal(
+  deviceId: string,
+  userId: string,
+  displayName: string,
+  db?: Database
+): RealNetworkTransport {
   const rawPort = process.env.LANPM_TCP_PORT
   const port = resolveLanpmTcpPort(rawPort)
   if (
@@ -55,7 +60,8 @@ function buildReal(deviceId: string, userId: string, displayName: string): RealN
     userId,
     displayName,
     listenPort: port,
-    disableUdp: process.env.LANPM_DISABLE_UDP === '1'
+    disableUdp: process.env.LANPM_DISABLE_UDP === '1',
+    getRelaySeeds: db ? () => loadDiscoverSeeds(db) : undefined
   })
   transport.start()
   return transport
@@ -73,7 +79,7 @@ export function initNetwork(db: Database): NetworkTransport | null {
   }
 
   if (realTransport) return realTransport
-  realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName)
+  realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName, db)
   void connectDiscoverSeeds(db).catch((err) => {
     console.warn('[lanpm] connectDiscoverSeeds failed:', err instanceof Error ? err.message : err)
   })
@@ -93,7 +99,7 @@ export function refreshNetworkIdentity(db: Database): void {
 
   realTransport?.stop()
   realTransport = null
-  realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName)
+  realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName, db)
   void connectDiscoverSeeds(db).catch((err) => {
     console.warn('[lanpm] connectDiscoverSeeds failed:', err instanceof Error ? err.message : err)
   })
