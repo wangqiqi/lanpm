@@ -413,7 +413,12 @@ export class RealNetworkTransport implements NetworkTransport {
    */
   async joinWithPairingCode(
     code: string,
-    options?: { unicastHost?: string; unicastHosts?: string[]; port?: number }
+    options?: {
+      unicastHost?: string
+      unicastHosts?: string[]
+      port?: number
+      subnetScanBatch?: boolean
+    }
   ): Promise<DiscoveryPayload> {
     if (!this.started) this.start()
 
@@ -426,14 +431,17 @@ export class RealNetworkTransport implements NetworkTransport {
 
     if (this.discovery) {
       try {
-        const found = await this.discovery.lookupPairingCode(
-          code,
-          hosts && hosts.length > 1
-            ? { unicastHosts: hosts }
-            : hosts?.length === 1
-              ? { unicastHost: hosts[0] }
-              : undefined
-        )
+        const found =
+          options?.subnetScanBatch && hosts?.length
+            ? await this.discovery.lookupPairingCodeBatched(code, hosts)
+            : await this.discovery.lookupPairingCode(
+                code,
+                hosts && hosts.length > 1
+                  ? { unicastHosts: hosts }
+                  : hosts?.length === 1
+                    ? { unicastHost: hosts[0] }
+                    : undefined
+              )
         const peer = pairingFoundToDiscovery(found, this.capabilities)
         rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
         touchDiscoveryPeer(peer)
@@ -441,11 +449,11 @@ export class RealNetworkTransport implements NetworkTransport {
         this.tcpPeers.set(peer.deviceId, peer)
         return peer
       } catch {
-        if (!hosts?.length) throw new Error('pairing_lookup_failed')
+        if (!hosts?.length || options?.subnetScanBatch) throw new Error('pairing_lookup_failed')
       }
     }
 
-    if (hosts?.length) {
+    if (hosts?.length && !options?.subnetScanBatch) {
       let lastError: unknown
       for (const host of hosts) {
         try {

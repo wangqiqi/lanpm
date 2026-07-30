@@ -16,7 +16,11 @@ import {
   buildPairingHostCandidates,
   hostTail
 } from '../../shared/network/pairingHostResolve.ts'
-import { listRouteGuidedBroadcastAddresses } from '../../shared/network/routeGuidedResolve.ts'
+import {
+  listRouteGuidedBroadcastAddresses,
+  listRouteGuidedSubnetPrefixes
+} from '../../shared/network/routeGuidedResolve.ts'
+import { listSubnetScanHosts } from '../../shared/network/subnetScanHosts.ts'
 import { getNetworkTransport, RealNetworkTransport } from '../network'
 import { getLocalLanIp, listLanCandidates } from '../network/localIp'
 import { listRouteSubnetPrefixes } from '../network/routeTable.ts'
@@ -58,10 +62,17 @@ function pairingHostContext(db: Database): { localLanIps: string[]; seedHosts: s
   }
 }
 
+type PairingJoinTarget = {
+  unicastHost?: string
+  unicastHosts?: string[]
+  port?: number
+  subnetScanBatch?: boolean
+}
+
 async function resolveJoinTargets(
   db: Database,
   input: PairingJoinInput
-): Promise<{ unicastHost?: string; unicastHosts?: string[]; port?: number }[]> {
+): Promise<PairingJoinTarget[]> {
   const ctx = pairingHostContext(db)
 
   if (!input.crossSubnet) {
@@ -80,20 +91,32 @@ async function resolveJoinTargets(
   }
 
   const routePrefixes = await listRouteSubnetPrefixes()
-  const broadcasts = listRouteGuidedBroadcastAddresses({
+  const routeCtx = {
     routeSubnetPrefixes: routePrefixes,
     localLanIps: ctx.localLanIps,
     seedHosts: ctx.seedHosts
-  })
+  }
+  const broadcasts = listRouteGuidedBroadcastAddresses(routeCtx)
   const port = input.port ?? DEFAULT_TCP_LISTEN_PORT
+  const targets: PairingJoinTarget[] = []
 
   if (broadcasts.length > 1) {
-    return [{ unicastHosts: broadcasts, port }]
+    targets.push({ unicastHosts: broadcasts, port })
+  } else if (broadcasts.length === 1) {
+    targets.push({ unicastHost: broadcasts[0], port })
+  } else {
+    targets.push({})
   }
-  if (broadcasts.length === 1) {
-    return [{ unicastHost: broadcasts[0], port }]
+
+  if (input.subnetScan) {
+    const prefixes = listRouteGuidedSubnetPrefixes(routeCtx)
+    const scanHosts = listSubnetScanHosts(prefixes, { excludeHosts: ctx.localLanIps })
+    if (scanHosts.length > 0) {
+      targets.push({ unicastHosts: scanHosts, port, subnetScanBatch: true })
+    }
   }
-  return [{}]
+
+  return targets
 }
 
 export async function joinWithPairingCode(

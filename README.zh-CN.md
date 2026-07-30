@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.45.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.46.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -115,7 +115,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.45.0`** — 首次 Setup 增加局域网组网说明（交换机/路由器/热点图示）再填身份。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.46.0`** — 跨网段配对补齐 macOS 路由解析与可选 `/24` 主机扫描。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

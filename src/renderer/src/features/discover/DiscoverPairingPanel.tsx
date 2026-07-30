@@ -44,6 +44,7 @@ export default function DiscoverPairingPanel({
   const [shareLoading, setShareLoading] = useState(false)
   const [findCode, setFindCode] = useState('')
   const [crossSubnet, setCrossSubnet] = useState(false)
+  const [subnetScan, setSubnetScan] = useState(false)
   const [unicastHost, setUnicastHost] = useState('')
   const [findLoading, setFindLoading] = useState(false)
   const [peerFileLoading, setPeerFileLoading] = useState(false)
@@ -54,6 +55,7 @@ export default function DiscoverPairingPanel({
       setSession(null)
       setFindCode('')
       setCrossSubnet(false)
+      setSubnetScan(false)
       setUnicastHost('')
     }
   }, [mode])
@@ -110,7 +112,8 @@ export default function DiscoverPairingPanel({
       const result = await getLanpmApi().pairing.join({
         code,
         crossSubnet,
-        unicastHost: crossSubnet ? unicastHost.trim() || undefined : undefined
+        unicastHost: crossSubnet ? unicastHost.trim() || undefined : undefined,
+        subnetScan: crossSubnet ? subnetScan : undefined
       })
       onSnapshot(result.snapshot)
       message.success(
@@ -261,6 +264,15 @@ export default function DiscoverPairingPanel({
               label: t('discover.pairingAdvancedHost'),
               children: (
                 <>
+                  <Checkbox
+                    checked={subnetScan}
+                    onChange={(e) => setSubnetScan(e.target.checked)}
+                  >
+                    {t('discover.pairingSubnetScan')}
+                  </Checkbox>
+                  <Text type="secondary" className={styles.seedsHint}>
+                    {t('discover.pairingSubnetScanHint')}
+                  </Text>
                   <Input
                     placeholder={t('discover.pairingHostPlaceholder')}
                     value={unicastHost}

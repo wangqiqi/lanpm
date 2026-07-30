@@ -183,12 +183,23 @@ export class UdpDiscovery {
 
   lookupPairingCode(
     code: string,
-    options?: { unicastHost?: string; unicastHosts?: string[] }
+    options?: { unicastHost?: string; unicastHosts?: string[]; timeoutMs?: number }
   ): Promise<PairingFoundBody> {
     if (!this.pairingController) {
       return Promise.reject(new Error('pairing_udp_unavailable'))
     }
     return this.pairingController.lookupPairingCode(code, options)
+  }
+
+  lookupPairingCodeBatched(
+    code: string,
+    hosts: string[],
+    options?: { batchSize?: number; batchTimeoutMs?: number }
+  ): Promise<PairingFoundBody> {
+    if (!this.pairingController) {
+      return Promise.reject(new Error('pairing_udp_unavailable'))
+    }
+    return this.pairingController.lookupPairingCodeBatched(code, hosts, options)
   }
 
   cancelPairingLookup(): void {

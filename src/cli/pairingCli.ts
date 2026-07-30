@@ -40,7 +40,8 @@ export async function runPairingJoin(db: Database, options: PairingCliJoinOption
   const result = await joinWithPairingCode(db, {
     code: options.code,
     crossSubnet: options.crossSubnet,
-    unicastHost: options.host
+    unicastHost: options.host,
+    subnetScan: options.subnetScan
   })
   console.log(`connected=${result.displayName}`)
   console.log(`host=${result.host}:${result.listenPort}`)

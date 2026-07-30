@@ -102,3 +102,50 @@ export function parseLinuxIpRoute(output: string): string[] {
 
   return [...prefixes]
 }
+
+/** macOS `netstat -rn -f inet` 输出 */
+export function parseMacOsNetstatRn(output: string): string[] {
+  const prefixes = new Set<string>()
+  let inInternet = false
+
+  for (const line of output.split(/\r?\n/)) {
+    const trimmed = line.trim()
+    if (/^Internet:\s*$/i.test(trimmed)) {
+      inInternet = true
+      continue
+    }
+    if (/^Internet6:/i.test(trimmed)) {
+      inInternet = false
+      continue
+    }
+    if (!inInternet || !trimmed || /^Destination\b/i.test(trimmed)) continue
+
+    const dest = trimmed.split(/\s+/)[0]
+    if (!dest || dest === 'default' || dest.startsWith('link#')) continue
+
+    const fullCidr = dest.match(/^(\d+\.\d+\.\d+\.\d+)\/(\d{1,2})$/)
+    if (fullCidr) {
+      addPrefix(prefixes, parseIpv4Cidr(fullCidr[1]!, fullCidr[2]!))
+      continue
+    }
+
+    const shortCidr = dest.match(/^(\d+\.\d+\.\d+)\/(\d{1,2})$/)
+    if (shortCidr) {
+      addPrefix(prefixes, parseIpv4Cidr(`${shortCidr[1]}.0`, shortCidr[2]!))
+      continue
+    }
+
+    const threeOct = dest.match(/^(\d+\.\d+\.\d+)$/)
+    if (threeOct) {
+      addPrefix(prefixes, threeOct[1]!)
+      continue
+    }
+
+    const hostRoute = dest.match(/^(\d+\.\d+\.\d+\.\d+)$/)
+    if (hostRoute) {
+      addPrefix(prefixes, subnetPrefix(hostRoute[1]!))
+    }
+  }
+
+  return [...prefixes]
+}

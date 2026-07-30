@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { parseLinuxIpRoute, parseWindowsRoutePrint } from '../../../src/shared/network/routeTableParse'
+import {
+  parseLinuxIpRoute,
+  parseMacOsNetstatRn,
+  parseWindowsRoutePrint
+} from '../../../src/shared/network/routeTableParse'
 
 const WIN_FIXTURE = `
 ===========================================================================
@@ -19,6 +23,18 @@ default via 192.168.30.1 dev wlan0 proto dhcp src 192.168.30.170
 192.168.30.0/24 dev wlan0 proto kernel scope link src 192.168.30.170
 `
 
+const MAC_FIXTURE = `
+Routing tables
+
+Internet:
+Destination        Gateway            Flags        Netif Expire
+default            192.168.30.1       UGScg         en0
+127                127.0.0.1          UCS           lo0
+169.254            link#6             UCS           en0
+192.168.20/24      link#6             UCS           en0
+192.168.30         192.168.30.1       UGScg         en0
+`
+
 describe('routeTableParse', () => {
   it('parses Windows route print into /24 prefixes', () => {
     expect(parseWindowsRoutePrint(WIN_FIXTURE).sort()).toEqual(
@@ -32,8 +48,15 @@ describe('routeTableParse', () => {
     )
   })
 
+  it('parses macOS netstat -rn into /24 prefixes', () => {
+    expect(parseMacOsNetstatRn(MAC_FIXTURE).sort()).toEqual(
+      ['192.168.20', '192.168.30'].sort()
+    )
+  })
+
   it('returns empty for blank output', () => {
     expect(parseWindowsRoutePrint('')).toEqual([])
     expect(parseLinuxIpRoute('')).toEqual([])
+    expect(parseMacOsNetstatRn('')).toEqual([])
   })
 })

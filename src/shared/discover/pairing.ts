@@ -20,6 +20,8 @@ export interface PairingJoinInput {
   /** 跨网段：对方完整 IP、尾段（如 `109`）或 host:port */
   unicastHost?: string
   port?: number
+  /** 高级：对路由可达 /24 逐 host 扫描（慢，默认关） */
+  subnetScan?: boolean
 }
 
 export interface PairingJoinResult {

@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import {
   parseLinuxIpRoute,
+  parseMacOsNetstatRn,
   parseWindowsRoutePrint
 } from '../../shared/network/routeTableParse.ts'
 
@@ -25,6 +26,14 @@ export async function listRouteSubnetPrefixes(): Promise<string[]> {
         maxBuffer: 2 * 1024 * 1024
       })
       return parseLinuxIpRoute(stdout)
+    }
+
+    if (process.platform === 'darwin') {
+      const { stdout } = await execFileAsync('netstat', ['-rn', '-f', 'inet'], {
+        timeout: 5_000,
+        maxBuffer: 2 * 1024 * 1024
+      })
+      return parseMacOsNetstatRn(stdout)
     }
 
     return []

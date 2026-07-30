@@ -2,6 +2,7 @@ export interface PairingCliJoinOptions {
   code: string
   crossSubnet?: boolean
   host?: string
+  subnetScan?: boolean
 }
 
 export function parsePairingCliArgs(argv: string[]): {
@@ -23,10 +24,16 @@ export function parsePairingCliArgs(argv: string[]): {
     const code = args[2]
     if (!code) throw new Error('pairing_code_required')
     let crossSubnet = false
+    let subnetScan = false
     let host: string | undefined
     for (let i = 3; i < args.length; i++) {
       const token = args[i]
       if (token === '--cross-subnet') {
+        crossSubnet = true
+        continue
+      }
+      if (token === '--subnet-scan') {
+        subnetScan = true
         crossSubnet = true
         continue
       }
@@ -37,7 +44,15 @@ export function parsePairingCliArgs(argv: string[]): {
       }
       throw new Error(`unknown_flag:${token}`)
     }
-    return { command: 'join', join: { code, crossSubnet, host } }
+    return {
+      command: 'join',
+      join: {
+        code,
+        crossSubnet,
+        ...(host ? { host } : {}),
+        ...(subnetScan ? { subnetScan: true } : {})
+      }
+    }
   }
   throw new Error(`unknown_pairing_subcommand:${sub ?? ''}`)
 }
@@ -47,7 +62,7 @@ export function pairingCliHelp(): string {
     'LanPM pairing CLI',
     '',
     '  lanpm pairing start',
-    '  lanpm pairing join <code> [--cross-subnet] [--host <ip-or-tail>]',
+    '  lanpm pairing join <code> [--cross-subnet] [--subnet-scan] [--host <ip-or-tail>]',
     ''
   ].join('\n')
 }

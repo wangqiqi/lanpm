@@ -31,6 +31,11 @@ assert.deepEqual(parsePairingCliArgs(['pairing', 'join', '847293', '--cross-subn
   command: 'join',
   join: { code: '847293', crossSubnet: true, host: '109' }
 })
+assert.deepEqual(parsePairingCliArgs(['pairing', 'join', '847293', '--subnet-scan']), {
+  command: 'join',
+  join: { code: '847293', crossSubnet: true, subnetScan: true }
+})
+assert.match(pairingCliHelp(), /--subnet-scan/)
 
 function reservePort(): Promise<number> {
   return new Promise((resolve, reject) => {

@@ -61,7 +61,7 @@ export class PairingUdpController {
 
   lookupPairingCode(
     code: string,
-    options?: { unicastHost?: string; unicastHosts?: string[] }
+    options?: { unicastHost?: string; unicastHosts?: string[]; timeoutMs?: number }
   ): Promise<PairingFoundBody> {
     this.cancelPendingLookup()
     const normalized = normalizePairingCode(code)
@@ -79,11 +79,13 @@ export class PairingUdpController {
           ? [options.unicastHost]
           : null
 
+    const timeoutMs = options?.timeoutMs ?? PAIRING_LOOKUP_TIMEOUT_MS
+
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingLookup = null
         reject(new Error('pairing_lookup_timeout'))
-      }, PAIRING_LOOKUP_TIMEOUT_MS)
+      }, timeoutMs)
 
       this.pendingLookup = { code: normalized, resolve, reject, timer }
 
@@ -95,6 +97,31 @@ export class PairingUdpController {
         this.broadcast(packet)
       }
     })
+  }
+
+  /** 分批单播 lookup（P2 网段扫描） */
+  async lookupPairingCodeBatched(
+    code: string,
+    hosts: string[],
+    options?: { batchSize?: number; batchTimeoutMs?: number }
+  ): Promise<PairingFoundBody> {
+    const batchSize = options?.batchSize ?? 32
+    const batchTimeoutMs = options?.batchTimeoutMs ?? 800
+    let lastError: Error | undefined
+
+    for (let i = 0; i < hosts.length; i += batchSize) {
+      const batch = hosts.slice(i, i + batchSize)
+      try {
+        return await this.lookupPairingCode(code, {
+          unicastHosts: batch,
+          timeoutMs: batchTimeoutMs
+        })
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error('pairing_lookup_failed')
+      }
+    }
+
+    throw lastError ?? new Error('pairing_lookup_failed')
   }
 
   /** @returns true if packet consumed */

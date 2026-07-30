@@ -929,6 +929,8 @@ const enUS = {
   'discover.pairingCodePlaceholder': 'e.g. 847 293',
   'discover.pairingCrossSubnet': 'Peer is on a different subnet',
   'discover.pairingRouteHint': 'Code only is usually enough; we probe subnets from your route table',
+  'discover.pairingSubnetScan': 'Advanced: scan hosts on reachable /24 subnets (slow)',
+  'discover.pairingSubnetScanHint': 'Probes .1–.254 per subnet when enabled; off by default',
   'discover.pairingAdvancedHost': 'Advanced: specify IP or tail',
   'discover.pairingHostPlaceholder': 'Peer IP or tail, e.g. 192.168.20.109 or 109',
   'discover.pairingTailHint': 'Tail-only (e.g. 109) expands using your subnets and saved seeds',

@@ -27,6 +27,11 @@ function collectSubnetPrefixes(ctx: RouteGuidedContext): string[] {
   return [...prefixes]
 }
 
+/** 路由表 + 网卡 + 种子 → 去重后的 /24 子网前缀 */
+export function listRouteGuidedSubnetPrefixes(ctx: RouteGuidedContext): string[] {
+  return collectSubnetPrefixes(ctx)
+}
+
 /** 路由表 + 网卡 + 种子 → 各 /24 广播地址（如 `192.168.20.255`） */
 export function listRouteGuidedBroadcastAddresses(ctx: RouteGuidedContext): string[] {
   const fromRoutes = collectSubnetPrefixes(ctx).map((p) => `${p}.255`)

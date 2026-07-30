@@ -9,6 +9,7 @@ const steps = [
   'verify:pairing-tcp',
   'verify:pairing-cross-subnet',
   'verify:pairing-route',
+  'verify:pairing-subnet-scan',
   'verify:pairing-peer',
   'verify:pairing-cli',
   'verify:pairing-security',

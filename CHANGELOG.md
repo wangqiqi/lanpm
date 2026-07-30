@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.46.0] - 2026-07-30
+
+### Added
+
+- **macOS 路由 + `/24` 扫描（SPRINT-PAIR-04）**：`netstat -rn -f inet` 解析；可选 `subnetScan` 分批 `pairing_lookup`（发现页高级 · CLI `--subnet-scan`）；`verify:pairing-subnet-scan`；`docs/配对码.md` §5.3 P2 ✅
+
 ## [1.45.0] - 2026-07-30
 
 ### Added
