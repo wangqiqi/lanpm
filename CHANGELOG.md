@@ -6,6 +6,7 @@
 
 ### Added
 
+- **发现页群组中心 + 连接码 UI（TASK-PAIR-04）**：`DiscoverPairingPanel`（分享/查找连接码）；空态「用连接码查找群组」CTA；单群「申请加入」快捷条；高级折叠（种子/邀请码/手动节点）；`verify:discover` 扩展
 - **群邀请码（TASK-PAIR-11）**：`group_invite_offer` / `lookup` / `found` UDP 报文；`GroupInviteSessionHost`（6 位码 · TTL · 一次性）；`GROUP_IPC` `startInvite` / `joinWithInvite`；发现页凭码直入群；`verify:group-invite`
 - **入群申请 + 管理员审批（TASK-PAIR-10）**：`join_request` / `join_request_decision` P2P 报文；`group_join_requests` 表（schema v16）；发现群改为「申请加入」；群主审批/拒绝；`GROUP_IPC` 审批通道；`verify:join-request`
 - **群组连接码 · UDP 配对（TASK-PAIR-01）**：`pairing_offer` / `pairing_lookup` / `pairing_found` 报文；`PairingSessionHost` 状态机（6 位码 · 5min TTL · 一次性）；`RealNetworkTransport.startPairingSession` / `joinWithPairingCode`；`verify:pairing-udp`

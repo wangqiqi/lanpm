@@ -1632,6 +1632,56 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
       }
     },
+    pairing: {
+      start: async () => ({
+        pairingId: 'stub-pairing',
+        code: '847293',
+        codeDisplay: '847 293',
+        expiresAt: new Date(Date.now() + 300_000).toISOString(),
+        groups: [
+          { groupId: 'stub-remote-project', name: 'LanPM 协作组', type: 'project' as const }
+        ],
+        localIp: '127.0.0.1'
+      }),
+      cancel: async () => ({ ok: true as const }),
+      join: async () => ({
+        join: {
+          deviceId: 'stub-peer',
+          userId: 'demo-alice',
+          displayName: 'Alice',
+          host: '127.0.0.1',
+          listenPort: 43_124,
+          groupIds: ['stub-remote-project']
+        },
+        snapshot: {
+          peers: [
+            {
+              userId: 'demo-alice',
+              displayName: 'Alice',
+              deviceCount: 1,
+              online: true
+            }
+          ],
+          groups: [
+            {
+              groupId: 'stub-remote-project',
+              name: 'LanPM 协作组',
+              type: 'project' as const,
+              ownerUserId: 'demo-alice',
+              ownerDisplayName: 'Alice',
+              joined: false
+            }
+          ],
+          health: {
+            reason: 'ok' as const,
+            ok: true,
+            suggestManualPeer: false,
+            multicastOk: null
+          },
+          seeds: stubDiscoverSeeds.slice()
+        }
+      })
+    },
     whiteboard: {
       getScene: async (groupId) => readStubWhiteboards()[groupId] ?? null,
       saveScene: async (input: SaveWhiteboardSceneInput) => {

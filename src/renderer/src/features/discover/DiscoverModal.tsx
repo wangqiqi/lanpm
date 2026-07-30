@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Avatar, Button, Empty, Input, List, Modal, Space, Tabs, Tag, Typography } from 'antd'
+import { Alert, Avatar, Button, Collapse, Empty, Input, List, Modal, Space, Tabs, Tag, Typography } from 'antd'
 import { PlusOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import type { DiscoverGroupView, DiscoverPeerView, DiscoverSnapshot } from '@shared/discover/types'
 import type { DiscoveryReasonCode } from '@shared/discover/discoveryHealth'
@@ -16,6 +16,7 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { defaultViewForGroup } from '@shared/navigation/tabRules'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useNavigate } from 'react-router-dom'
+import DiscoverPairingPanel, { type PairingPanelMode } from './DiscoverPairingPanel'
 import styles from './discover.module.css'
 
 const { Text } = Typography
@@ -78,6 +79,7 @@ export default function DiscoverModal({
   const [inviteCodeInput, setInviteCodeInput] = useState('')
   const [inviteJoining, setInviteJoining] = useState(false)
   const [sharingInviteGroupId, setSharingInviteGroupId] = useState<string | null>(null)
+  const [pairingMode, setPairingMode] = useState<PairingPanelMode>('idle')
 
   const refresh = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -106,6 +108,7 @@ export default function DiscoverModal({
   useEffect(() => {
     if (!open) return
     setTab('groups')
+    setPairingMode('idle')
     void refresh()
   }, [open, refresh])
 
@@ -255,6 +258,8 @@ export default function DiscoverModal({
 
   const health = snapshot.health
   const showHealthAlert = health.reason !== 'ok' || health.suggestManualPeer
+  const joinableGroups = snapshot.groups.filter((g) => !g.joined && !g.joinPending)
+  const singleJoinableGroup = joinableGroups.length === 1 ? joinableGroups[0]! : null
 
   return (
     <Modal
@@ -306,61 +311,33 @@ export default function DiscoverModal({
         />
       ) : null}
 
-      <div className={styles.seedsBlock}>
-        <Text strong>{t('discover.seedsTitle')}</Text>
-        <Text type="secondary" className={styles.seedsHint}>
-          {t('discover.seedsHint')}
-        </Text>
-        <Space.Compact className={styles.seedsInput}>
-          <Input
-            placeholder={t('discover.seedsPlaceholder')}
-            value={seedInput}
-            onChange={(e) => setSeedInput(e.target.value)}
-            onPressEnter={handleAddSeed}
-          />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            loading={seedSaving}
-            onClick={handleAddSeed}
-          >
-            {t('discover.seedsAdd')}
-          </Button>
-        </Space.Compact>
-        {snapshot.seeds.length > 0 ? (
-          <Space size={[4, 4]} wrap className={styles.seedTags}>
-            {snapshot.seeds.map((seed) => (
-              <Tag key={seed} closable onClose={() => handleRemoveSeed(seed)}>
-                {seed}
-              </Tag>
-            ))}
-          </Space>
-        ) : (
-          <Text type="secondary">{t('discover.seedsEmpty')}</Text>
-        )}
-      </div>
+      <DiscoverPairingPanel
+        mode={pairingMode}
+        onModeChange={setPairingMode}
+        onSnapshot={(data) => {
+          setSnapshot(data)
+          setTab('groups')
+        }}
+      />
 
-      <div className={styles.seedsBlock}>
-        <Text strong>{t('discover.groupInviteTitle')}</Text>
-        <Text type="secondary" className={styles.seedsHint}>
-          {t('discover.groupInviteHint')}
-        </Text>
-        <Space.Compact className={styles.seedsInput}>
-          <Input
-            placeholder={t('discover.groupInvitePlaceholder')}
-            value={inviteCodeInput}
-            onChange={(e) => setInviteCodeInput(e.target.value)}
-            onPressEnter={() => void handleJoinWithInvite()}
-          />
-          <Button
-            type="primary"
-            loading={inviteJoining}
-            onClick={() => void handleJoinWithInvite()}
-          >
-            {t('discover.groupInviteJoin')}
-          </Button>
-        </Space.Compact>
-      </div>
+      {singleJoinableGroup ? (
+        <Alert
+          className={styles.singleGroupAlert}
+          type="info"
+          showIcon
+          message={t('discover.singleGroupHint', { name: singleJoinableGroup.name })}
+          action={
+            <Button
+              size="small"
+              type="primary"
+              loading={joiningId === singleJoinableGroup.groupId}
+              onClick={() => void handleJoinGroup(singleJoinableGroup)}
+            >
+              {t('discover.requestJoinNamed', { name: singleJoinableGroup.name })}
+            </Button>
+          }
+        />
+      ) : null}
 
       {incomingRequests.length > 0 ? (
         <div className={styles.seedsBlock}>
@@ -401,6 +378,79 @@ export default function DiscoverModal({
         </div>
       ) : null}
 
+      <Collapse
+        className={styles.advancedCollapse}
+        items={[
+          {
+            key: 'advanced',
+            label: t('discover.advancedTitle'),
+            children: (
+              <>
+                <div className={styles.seedsBlock}>
+                  <Text strong>{t('discover.seedsTitle')}</Text>
+                  <Text type="secondary" className={styles.seedsHint}>
+                    {t('discover.seedsHint')}
+                  </Text>
+                  <Space.Compact className={styles.seedsInput}>
+                    <Input
+                      placeholder={t('discover.seedsPlaceholder')}
+                      value={seedInput}
+                      onChange={(e) => setSeedInput(e.target.value)}
+                      onPressEnter={handleAddSeed}
+                    />
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      loading={seedSaving}
+                      onClick={handleAddSeed}
+                    >
+                      {t('discover.seedsAdd')}
+                    </Button>
+                  </Space.Compact>
+                  {snapshot.seeds.length > 0 ? (
+                    <Space size={[4, 4]} wrap className={styles.seedTags}>
+                      {snapshot.seeds.map((seed) => (
+                        <Tag key={seed} closable onClose={() => handleRemoveSeed(seed)}>
+                          {seed}
+                        </Tag>
+                      ))}
+                    </Space>
+                  ) : (
+                    <Text type="secondary">{t('discover.seedsEmpty')}</Text>
+                  )}
+                </div>
+                <div className={styles.seedsBlock}>
+                  <Text strong>{t('discover.groupInviteTitle')}</Text>
+                  <Text type="secondary" className={styles.seedsHint}>
+                    {t('discover.groupInviteHint')}
+                  </Text>
+                  <Space.Compact className={styles.seedsInput}>
+                    <Input
+                      placeholder={t('discover.groupInvitePlaceholder')}
+                      value={inviteCodeInput}
+                      onChange={(e) => setInviteCodeInput(e.target.value)}
+                      onPressEnter={() => void handleJoinWithInvite()}
+                    />
+                    <Button
+                      type="primary"
+                      loading={inviteJoining}
+                      onClick={() => void handleJoinWithInvite()}
+                    >
+                      {t('discover.groupInviteJoin')}
+                    </Button>
+                  </Space.Compact>
+                </div>
+                {onOpenManualPeer ? (
+                  <Button type="link" onClick={() => { onClose(); onOpenManualPeer() }}>
+                    {t('discover.openManualPeer')}
+                  </Button>
+                ) : null}
+              </>
+            )
+          }
+        ]}
+      />
+
       <Tabs
         activeKey={tab}
         onChange={(key) => setTab(key as 'groups' | 'people')}
@@ -410,17 +460,22 @@ export default function DiscoverModal({
             label: t('discover.tabGroups'),
             children: snapshot.groups.length === 0 ? (
               <Empty description={t('discover.emptyGroups')}>
-                {onOpenManualPeer && health.suggestManualPeer ? (
-                  <Button
-                    type="link"
-                    onClick={() => {
-                      onClose()
-                      onOpenManualPeer()
-                    }}
-                  >
-                    {t('discover.openManualPeer')}
+                <Space direction="vertical">
+                  <Button type="primary" onClick={() => setPairingMode('find')}>
+                    {t('discover.findGroupsByCode')}
                   </Button>
-                ) : null}
+                  {onOpenManualPeer && health.suggestManualPeer ? (
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        onClose()
+                        onOpenManualPeer()
+                      }}
+                    >
+                      {t('discover.openManualPeer')}
+                    </Button>
+                  ) : null}
+                </Space>
               </Empty>
             ) : (
               <List
