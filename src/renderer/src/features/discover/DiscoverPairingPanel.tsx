@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Checkbox, Collapse, Input, List, Space, Tag, Typography } from 'antd'
-import { LinkOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { ShareAltOutlined, LinkOutlined, UploadOutlined, DownloadOutlined } from '@ant-design/icons'
 import type { DiscoverSnapshot } from '@shared/discover/types'
 import type { PairingSessionView } from '@shared/discover/pairing'
 import type { GroupType } from '@shared/navigation/types'
@@ -46,6 +46,7 @@ export default function DiscoverPairingPanel({
   const [crossSubnet, setCrossSubnet] = useState(false)
   const [unicastHost, setUnicastHost] = useState('')
   const [findLoading, setFindLoading] = useState(false)
+  const [peerFileLoading, setPeerFileLoading] = useState(false)
   const [countdownMs, setCountdownMs] = useState(0)
 
   useEffect(() => {
@@ -126,6 +127,36 @@ export default function DiscoverPairingPanel({
     }
   }
 
+  const handleExportPeerFile = async (): Promise<void> => {
+    setPeerFileLoading(true)
+    try {
+      const result = await getLanpmApi().pairing.exportPeerFileDialog()
+      if (!result) return
+      message.success(t('discover.peerFileExportSuccess', { path: result.path }))
+    } catch (err) {
+      message.error(formatError(err, 'discover.peerFileExportFailed'))
+    } finally {
+      setPeerFileLoading(false)
+    }
+  }
+
+  const handleImportPeerFile = async (): Promise<void> => {
+    setPeerFileLoading(true)
+    try {
+      const result = await getLanpmApi().pairing.importPeerFileDialog()
+      if (!result) return
+      onSnapshot(result.snapshot)
+      message.success(
+        t('discover.peerFileImportSuccess', { name: result.file.displayName })
+      )
+      onModeChange('idle')
+    } catch (err) {
+      message.error(formatError(err, 'discover.peerFileImportFailed'))
+    } finally {
+      setPeerFileLoading(false)
+    }
+  }
+
   if (mode === 'idle') {
     return (
       <Space wrap className={styles.pairingActions}>
@@ -139,6 +170,13 @@ export default function DiscoverPairingPanel({
         </Button>
         <Button icon={<LinkOutlined />} onClick={() => onModeChange('find')}>
           {t('discover.findGroupsByCode')}
+        </Button>
+        <Button
+          icon={<UploadOutlined />}
+          loading={peerFileLoading}
+          onClick={() => void handleImportPeerFile()}
+        >
+          {t('discover.importPeerFile')}
         </Button>
       </Space>
     )
@@ -180,6 +218,13 @@ export default function DiscoverPairingPanel({
           <Alert type="info" showIcon message={t('discover.pairingNoDiscoverableGroups')} />
         )}
         <Button onClick={() => void cancelShare()}>{t('discover.pairingCancel')}</Button>
+        <Button
+          icon={<DownloadOutlined />}
+          loading={peerFileLoading}
+          onClick={() => void handleExportPeerFile()}
+        >
+          {t('discover.exportPeerFile')}
+        </Button>
       </div>
     )
   }

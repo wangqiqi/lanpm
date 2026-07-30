@@ -1681,6 +1681,34 @@ export function createBrowserLanpmStub(): LanpmApi {
           },
           seeds: stubDiscoverSeeds.slice()
         }
+      }),
+      exportPeerFileDialog: async () => ({
+        path: '/tmp/lanpm-peer.json',
+        file: {
+          v: 1 as const,
+          host: '127.0.0.1',
+          port: 43_124,
+          deviceId: 'stub-device',
+          displayName: 'Stub',
+          fingerprint: '0'.repeat(64)
+        }
+      }),
+      importPeerFileDialog: async () => ({
+        path: '/tmp/lanpm-peer.json',
+        file: {
+          v: 1 as const,
+          host: '127.0.0.1',
+          port: 43_124,
+          deviceId: 'stub-peer',
+          displayName: 'Alice',
+          fingerprint: '0'.repeat(64)
+        },
+        snapshot: {
+          peers: [],
+          groups: [],
+          health: { reason: 'ok' as const, ok: true, suggestManualPeer: false, multicastOk: null },
+          seeds: []
+        }
       })
     },
     whiteboard: {

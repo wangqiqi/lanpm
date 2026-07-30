@@ -353,6 +353,10 @@ export class RealNetworkTransport implements NetworkTransport {
   }
 
   /** 发起方：开始分享群组连接码 */
+  getListenPort(): number {
+    return this.listenPort
+  }
+
   startPairingSession(): PairingSessionView {
     if (!this.started) this.start()
     const view = this.pairingHost.start()

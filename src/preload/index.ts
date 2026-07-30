@@ -242,7 +242,9 @@ const api: LanpmApi = {
   pairing: {
     start: () => ipcRenderer.invoke('pairing:start'),
     cancel: () => ipcRenderer.invoke('pairing:cancel'),
-    join: (input) => ipcRenderer.invoke('pairing:join', input)
+    join: (input) => ipcRenderer.invoke('pairing:join', input),
+    exportPeerFileDialog: () => ipcRenderer.invoke('pairing:exportPeerFileDialog'),
+    importPeerFileDialog: () => ipcRenderer.invoke('pairing:importPeerFileDialog')
   },
   whiteboard: {
     getScene: (groupId) => ipcRenderer.invoke('whiteboard:getScene', groupId),

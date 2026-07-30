@@ -315,6 +315,15 @@ export interface LanpmApi {
       join: import('./discover/pairing').PairingJoinResult
       snapshot: DiscoverSnapshot
     }>
+    exportPeerFileDialog: () => Promise<{
+      path: string
+      file: import('./network/peerFile').LanpmPeerFileV1
+    } | null>
+    importPeerFileDialog: () => Promise<{
+      path: string
+      file: import('./network/peerFile').LanpmPeerFileV1
+      snapshot: DiscoverSnapshot
+    } | null>
   }
   whiteboard: {
     getScene: (groupId: string) => Promise<import('./whiteboard/types').WhiteboardScene | null>

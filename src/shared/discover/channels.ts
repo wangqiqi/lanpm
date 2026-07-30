@@ -6,5 +6,9 @@ export const DISCOVER_IPC = {
 export const PAIRING_IPC = {
   start: 'pairing:start',
   cancel: 'pairing:cancel',
-  join: 'pairing:join'
+  join: 'pairing:join',
+  exportPeerFile: 'pairing:exportPeerFile',
+  importPeerFile: 'pairing:importPeerFile',
+  exportPeerFileDialog: 'pairing:exportPeerFileDialog',
+  importPeerFileDialog: 'pairing:importPeerFileDialog'
 } as const

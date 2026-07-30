@@ -2,7 +2,7 @@
 
 > **只保留未完成工作。** `docs/` 不存历史；已交付叙事见根目录 `CHANGELOG.md`。  
 > 手验步骤见 [05_测试与联调发布.md](./05_测试与联调发布.md)。版本以 `package.json` / `CHANGELOG` 为准。  
-> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准（当前：**SPRINT-PAIR-02** ✅ · 路由表引导单播 · **1.43.0** 已交付）。
+> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准（当前：**SPRINT-PAIR-03** ✅ · U 盘配对文件 + CLI · **1.44.0** 已交付）。
 
 ---
 
@@ -12,7 +12,7 @@
 |--------|------|------|
 | **SPRINT-PAIR-01** | 连接码 · `discover_relay`（hop≤2）· 入群申请/审批 · 群邀请码 | [配对码.md](./配对码.md) · `plan.md` |
 
-**候选下一 Sprint**：SPRINT-PAIR-02（路由表单播）· SPRINT-PAIR-03（U 盘/CLI）· 见 `plan.md` 候选表。
+**候选下一 Sprint**：SPRINT-SETUP-NET（网络图示向导）· SPRINT-PAIR-04（macOS 路由 / `/24` 扫描）· 见 `plan.md` 候选表。
 
 ---
 

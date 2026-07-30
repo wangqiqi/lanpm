@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.44.0] - 2026-07-30
+
+### Added
+
+- **U 盘配对文件 + CLI（SPRINT-PAIR-03）**：`lanpm-peer.json` v1 schema（SHA-256 fingerprint）；GUI 导出/导入；`lanpm pairing start|join` CLI；`verify:pairing-peer` · `verify:pairing-cli`；`docs/配对码.md` §8 ✅
+
 ## [1.43.0] - 2026-07-30
 
 ### Added
