@@ -16,10 +16,10 @@
 
 .title {
   margin: 0 !important;
-  font-size: 22px !important;
+  font-size: var(--lanpm-font-title) !important;
   font-weight: 600 !important;
   letter-spacing: -0.022em !important;
-  line-height: 1.2 !important;
+  line-height: var(--lanpm-line-title) !important;
   color: var(--lanpm-text) !important;
 }
 

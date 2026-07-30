@@ -1,5 +1,6 @@
 import type { Task, TaskStatus } from '@shared/task/types'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
 const STATUS_KEYS: Record<TaskStatus, MessageKey> = {
@@ -22,10 +23,11 @@ export default function TaskSuggest({
   onPick,
   statusLabel
 }: TaskSuggestProps): React.ReactElement | null {
+  const { t } = useI18n()
   if (candidates.length === 0) return null
 
   return (
-    <div className={styles.mentionSuggest} role="listbox" aria-label="Task suggestions">
+    <div className={styles.mentionSuggest} role="listbox" aria-label={t('chat.taskSuggestAria')}>
       {candidates.map((task, idx) => (
         <button
           key={task.taskId}

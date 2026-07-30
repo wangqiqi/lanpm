@@ -83,7 +83,6 @@ const UI_COMPONENTS = [
   'ui/cssVar.ts',
   'ui/regionInteract.module.css',
   'ui/RegionButton.tsx',
-  'ui/RegionTabBar.tsx',
   'ui/ViewSegment.tsx'
 ] as const
 
@@ -726,17 +725,6 @@ assert.ok(
 const viewStateCss = readFileSync(join(renderer, 'ui/ViewState.module.css'), 'utf8')
 assert.match(viewStateCss, /\.iconRing/, 'ViewState empty/loading icon ring (VP-407)')
 
-const regionTabBarCss = readFileSync(join(renderer, 'ui/RegionTabBar.module.css'), 'utf8')
-assert.ok(
-  !/composes:\s*region.*regionInteract/.test(regionTabBarCss),
-  'RegionTabBar uses dedicated tab styles (not regionInteract composes)'
-)
-assert.match(
-  regionTabBarCss,
-  /var\(--lanpm-separator\)/,
-  'RegionTabBar should use hairline --lanpm-separator'
-)
-
 const regionCss = readFileSync(join(renderer, 'ui/regionInteract.module.css'), 'utf8')
 assert.match(regionCss, /--lanpm-hover-bg/, 'regionInteract hover must use --lanpm-hover-bg (V-14b-HOV static)')
 assert.match(regionCss, /--lanpm-accent-fill/, 'regionInteract selected must use accent fill tokens')
@@ -788,6 +776,29 @@ for (const { tsx, css, label } of SEVEN_PAGE_VIEWS) {
   assert.ok(
     TOKEN_PATTERN.test(tsxSrc) || TOKEN_PATTERN.test(cssSrc),
     `${label} view (${tsx}) must use LanPM design tokens`
+  )
+}
+
+// --- QA audit guards: font tokens + phantom CSS vars in TSX ---
+const viewHeaderCss = readFileSync(join(renderer, 'ui/ViewHeader.module.css'), 'utf8')
+assert.match(
+  viewHeaderCss,
+  /var\(--lanpm-font-title\)/,
+  'ViewHeader title must use --lanpm-font-title token (TASK-579)'
+)
+assert.ok(
+  !/font-size:\s*22px/.test(viewHeaderCss),
+  'ViewHeader must not use hardcoded 22px title'
+)
+
+const subtaskPreviewModal = readFileSync(
+  join(renderer, 'features/ai/SubtaskPreviewModal.tsx'),
+  'utf8'
+)
+for (const phantom of FORBIDDEN_PHANTOM_TOKENS) {
+  assert.ok(
+    !subtaskPreviewModal.includes(phantom),
+    `SubtaskPreviewModal must not use phantom token ${phantom}`
   )
 }
 

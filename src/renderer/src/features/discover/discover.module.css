@@ -2,6 +2,15 @@
   padding-top: 12px;
 }
 
+.inviteCodeDisplay {
+  font-size: var(--lanpm-font-display);
+  font-weight: 600;
+  letter-spacing: 2px;
+  line-height: var(--lanpm-line-display);
+  margin: 0;
+}
+
+
 .toolbar {
   display: flex;
   align-items: center;

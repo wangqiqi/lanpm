@@ -21,7 +21,7 @@ export default function DiscoverCoachmark({
       {
         title: t('discover.coachmarkTitle'),
         description: t('discover.coachmarkDescription'),
-        target: () => targetRef.current,
+        target: () => targetRef.current ?? document.body,
         placement: 'bottom'
       }
     ],

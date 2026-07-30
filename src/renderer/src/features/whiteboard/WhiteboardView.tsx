@@ -28,6 +28,7 @@ import {
 import { WHITEBOARD_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
+import { readCssVar } from '@renderer/ui/cssVar'
 import styles from './whiteboard.module.css'
 
 type ScenePayload = {
@@ -230,7 +231,9 @@ export default function WhiteboardView(): React.ReactElement {
         awarenessRef.current = awareness
         setInitialData({
           elements: [],
-          appState: { viewBackgroundColor: '#ffffff' },
+          appState: {
+            viewBackgroundColor: readCssVar('--lanpm-surface-solid', '#ffffff')
+          },
           files: {}
         })
         setCollabReady(true)

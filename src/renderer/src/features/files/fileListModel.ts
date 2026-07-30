@@ -1,5 +1,4 @@
 import type { FileMeta } from '@shared/file/types'
-import { formatFileTypeLabel } from '@shared/file/formatFileType'
 import {
   filterDeliverableFiles,
   filterFilesByTaskId
@@ -10,11 +9,6 @@ export type FileSortField = 'name' | 'type' | 'size' | 'uploadedAt'
 export type FileSortOrder = 'ascend' | 'descend'
 /** 全部群文件 vs 已挂任务的交付物（A3） */
 export type FileLibraryScope = 'all' | 'deliverables'
-
-type CategoryLabels = Record<
-  'document' | 'image' | 'video' | 'code' | 'bookmark' | 'other',
-  string
->
 
 export function filterFiles(files: FileMeta[], query: string): FileMeta[] {
   const q = query.trim().toLowerCase()
@@ -45,41 +39,6 @@ export function applyLibraryFilters(
   if (opts.taskId) {
     list = filterFilesByTaskId(list, opts.taskId, opts.taskToFileIds)
   }
-  return list
-}
-
-export function sortFiles(
-  files: FileMeta[],
-  field: FileSortField,
-  order: FileSortOrder,
-  categoryLabels: CategoryLabels
-): FileMeta[] {
-  const dir = order === 'ascend' ? 1 : -1
-  const list = [...files]
-  list.sort((a, b) => {
-    let cmp = 0
-    switch (field) {
-      case 'name':
-        cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-        break
-      case 'type':
-        cmp = formatFileTypeLabel(a, categoryLabels).localeCompare(
-          formatFileTypeLabel(b, categoryLabels),
-          undefined,
-          { sensitivity: 'base' }
-        )
-        break
-      case 'size':
-        cmp = a.size - b.size
-        break
-      case 'uploadedAt':
-        cmp = a.uploadedAt.localeCompare(b.uploadedAt)
-        break
-      default:
-        cmp = 0
-    }
-    return cmp * dir
-  })
   return list
 }
 

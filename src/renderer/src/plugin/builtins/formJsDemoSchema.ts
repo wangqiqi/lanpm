@@ -4,18 +4,18 @@ export const FORMJS_DEMO_SCHEMA = {
   components: [
     {
       key: 'summary',
-      label: '摘要',
+      labelKey: 'plugin.formField.summary',
       type: 'textfield',
       validate: { required: true }
     },
     {
       key: 'notes',
-      label: '备注',
+      labelKey: 'plugin.formField.notes',
       type: 'textarea'
     },
     {
       key: 'accepted',
-      label: '已确认',
+      labelKey: 'plugin.formField.accepted',
       type: 'checkbox'
     }
   ]

@@ -8,6 +8,7 @@ import {
   getAiProviderPreset
 } from '@shared/cockpit/aiProviders'
 import { useI18n } from '@renderer/i18n/useI18n'
+import type { MessageKey } from '@renderer/i18n/messages'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
 
@@ -48,8 +49,10 @@ export default function AiConfigModal({
     })
   }, [open, config, form])
 
-  const apiKeyPlaceholder =
-    getAiProviderPreset(provider)?.apiKeyPlaceholder ?? 'sk-...'
+  const apiKeyPlaceholderKey = getAiProviderPreset(provider)?.apiKeyPlaceholderKey
+  const apiKeyPlaceholder = apiKeyPlaceholderKey
+    ? t(apiKeyPlaceholderKey as MessageKey)
+    : 'sk-...'
 
   const submit = async (): Promise<void> => {
     const values = await form.validateFields()
@@ -110,7 +113,10 @@ export default function AiConfigModal({
       <Form form={form} layout="vertical" onFinish={() => void submit()}>
         <Form.Item name="provider" label={t('ai.provider')} rules={[{ required: true }]}>
           <Select
-            options={AI_PROVIDER_PRESETS.map((p) => ({ label: p.label, value: p.value }))}
+            options={AI_PROVIDER_PRESETS.map((p) => ({
+              label: t(p.labelKey as MessageKey),
+              value: p.value
+            }))}
             onChange={(v: AiProvider) => {
               setProvider(v)
               const preset = getAiProviderPreset(v)
@@ -118,7 +124,7 @@ export default function AiConfigModal({
             }}
           />
         </Form.Item>
-        <Form.Item name="baseUrl" label="Base URL" rules={[{ required: true }]}>
+        <Form.Item name="baseUrl" label={t('ai.baseUrl')} rules={[{ required: true }]}>
           <Input onPressEnter={submitFormOnEnter(form)} />
         </Form.Item>
         <Form.Item name="model" label={t('ai.model')} rules={[{ required: true }]}>

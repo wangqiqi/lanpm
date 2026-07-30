@@ -35,8 +35,8 @@
 }
 
 .dueOverdue {
-  color: var(--lanpm-text-tertiary);
-  font-weight: 500;
+  color: var(--lanpm-danger);
+  font-weight: 600;
 }
 
 .progressOnTrack {

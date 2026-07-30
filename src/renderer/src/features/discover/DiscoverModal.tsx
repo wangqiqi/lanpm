@@ -290,7 +290,7 @@ export default function DiscoverModal({
         content: (
           <div>
             <p>{group.name}</p>
-            <p style={{ fontSize: 24, fontWeight: 600, letterSpacing: 2 }}>{view.codeDisplay}</p>
+            <p className={styles.inviteCodeDisplay}>{view.codeDisplay}</p>
             <Text type="secondary">
               {t('discover.inviteCodeExpires', {
                 at: new Date(view.expiresAt).toLocaleTimeString()

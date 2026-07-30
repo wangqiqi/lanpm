@@ -90,7 +90,7 @@ export default function SubtaskPreviewModal({
               <li
                 key={row.key}
                 style={{
-                  border: '1px solid var(--lanpm-border-subtle, #e8e8e8)',
+                  border: '1px solid var(--lanpm-border)',
                   borderRadius: 8,
                   padding: 12
                 }}

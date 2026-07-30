@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CODE_LANGUAGE_OPTIONS, detectLanguage } from '@shared/chat/detectLanguage'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { onCtrlEnter } from '@renderer/lib/inputKeyboard'
+import styles from './chat.module.css'
 
 const { TextArea } = Input
 
@@ -65,7 +66,7 @@ export default function CodeSendModal({
           }))}
           onChange={setLanguage}
         />
-        <span style={{ marginLeft: 12, opacity: 0.65, fontSize: 12 }}>
+        <span className={styles.codeDetectHint}>
           {t('chat.detectResult', { lang: previewLang })}
         </span>
       </div>

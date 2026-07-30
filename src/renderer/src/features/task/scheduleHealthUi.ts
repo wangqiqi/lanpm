@@ -85,7 +85,3 @@ export function treeProgressScheduleProps(
   if (health === 'on_track') return { status: 'success', strokeColor: SCHEDULE_ON_TRACK_STROKE }
   return { status: 'active' }
 }
-
-export function shouldShowScheduleHealthVisual(health: ScheduleHealth): boolean {
-  return health === 'on_track' || health === 'behind' || health === 'overdue'
-}

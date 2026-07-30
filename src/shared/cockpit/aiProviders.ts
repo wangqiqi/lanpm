@@ -1,58 +1,59 @@
 import type { AiProvider } from './types'
 
 export interface AiProviderPreset {
-  label: string
+  /** i18n MessageKey（renderer 侧 `t()` 解析） */
+  labelKey: string
   value: AiProvider
   baseUrl: string
   model: string
-  /** API Key 输入框占位提示 */
-  apiKeyPlaceholder?: string
+  /** API Key 占位符 MessageKey */
+  apiKeyPlaceholderKey?: string
 }
 
 /** 国内模型优先；DeepSeek 为默认推荐（OpenAI 兼容 /chat/completions） */
 export const AI_PROVIDER_PRESETS: AiProviderPreset[] = [
   {
-    label: 'DeepSeek（推荐）',
+    labelKey: 'ai.provider.deepseek',
     value: 'deepseek',
     baseUrl: 'https://api.deepseek.com/v1',
     model: 'deepseek-chat',
-    apiKeyPlaceholder: 'sk-...（platform.deepseek.com）'
+    apiKeyPlaceholderKey: 'ai.provider.apiKey.deepseek'
   },
   {
-    label: '通义千问 · DashScope',
+    labelKey: 'ai.provider.qwen',
     value: 'qwen',
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     model: 'qwen-plus',
-    apiKeyPlaceholder: 'sk-...（阿里云百炼）'
+    apiKeyPlaceholderKey: 'ai.provider.apiKey.qwen'
   },
   {
-    label: '智谱 GLM',
+    labelKey: 'ai.provider.zhipu',
     value: 'zhipu',
     baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
     model: 'glm-4-flash',
-    apiKeyPlaceholder: '...（open.bigmodel.cn）'
+    apiKeyPlaceholderKey: 'ai.provider.apiKey.zhipu'
   },
   {
-    label: 'Moonshot · Kimi',
+    labelKey: 'ai.provider.moonshot',
     value: 'moonshot',
     baseUrl: 'https://api.moonshot.cn/v1',
     model: 'moonshot-v1-8k',
-    apiKeyPlaceholder: 'sk-...（platform.moonshot.cn）'
+    apiKeyPlaceholderKey: 'ai.provider.apiKey.moonshot'
   },
   {
-    label: 'OpenAI',
+    labelKey: 'ai.provider.openai',
     value: 'openai',
     baseUrl: 'https://api.openai.com/v1',
     model: 'gpt-4o-mini'
   },
   {
-    label: 'Anthropic',
+    labelKey: 'ai.provider.anthropic',
     value: 'anthropic',
     baseUrl: 'https://api.anthropic.com/v1',
     model: 'claude-3-5-sonnet-latest'
   },
   {
-    label: '自定义',
+    labelKey: 'ai.provider.custom',
     value: 'custom',
     baseUrl: 'https://api.deepseek.com/v1',
     model: 'deepseek-chat'

@@ -2,6 +2,17 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.57.0] - 2026-07-31
+
+### Changed
+
+- **质量审查修复（SPRINT quality-audit · TASK-571～582）**：首屏主题与 `uiStore` 共用 `readInitialTheme`（消除 FOUC）；亮色 `--lanpm-text-tertiary` 加深至 WCAG AA；移除 `MentionText` / `RegionTabBar` 死代码；AI 提供商预设与边缘 UI 全面 i18n；白板暗色背景随主题；消灭幻影 CSS 变量；聊天/看板 opacity 叠加可读性修复；`ViewHeader` 字号令牌化；扩展 `verify:visual`；引入 `knip` 死代码扫描
+
+### Fixed
+
+- **对比度**：`.dueOverdue` 改用语义色 `--lanpm-danger`；发送钮禁用态、mention 状态、图例分隔符去除低对比 opacity 叠加
+- **类型**：`DiscoverCoachmark` Tour `target` 回退 `document.body`（`tsc` 绿）
+
 ## [1.56.0] - 2026-07-30
 
 ### Added

@@ -28,7 +28,7 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
 
   const components = FORMJS_DEMO_SCHEMA.components as ReadonlyArray<{
     key: string
-    label: string
+    labelKey: string
     type: string
   }>
 
@@ -77,7 +77,7 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
         if (c.type === 'textarea') {
           return (
             <label key={c.key} className={styles.formField}>
-              <Text type="secondary">{c.label}</Text>
+              <Text type="secondary">{t(c.labelKey as Parameters<typeof t>[0])}</Text>
               <TextArea
                 rows={2}
                 value={String(values[c.key] ?? '')}
@@ -93,14 +93,14 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
                 checked={Boolean(values[c.key])}
                 onChange={(e) => setField(c.key, e.target.checked)}
               >
-                {c.label}
+                {t(c.labelKey as Parameters<typeof t>[0])}
               </Checkbox>
             </label>
           )
         }
         return (
           <label key={c.key} className={styles.formField}>
-            <Text type="secondary">{c.label}</Text>
+            <Text type="secondary">{t(c.labelKey as Parameters<typeof t>[0])}</Text>
             <Input
               value={String(values[c.key] ?? '')}
               onChange={(e) => setField(c.key, e.target.value)}

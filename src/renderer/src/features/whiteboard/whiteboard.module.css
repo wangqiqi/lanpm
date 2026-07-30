@@ -39,7 +39,7 @@
   flex: 1;
   min-height: 360px;
   position: relative;
-  border-radius: var(--lanpm-radius-panel, 8px);
+  border-radius: var(--lanpm-radius-sm);
   overflow: hidden;
   border: 0.5px solid var(--lanpm-separator);
   background: var(--lanpm-surface-solid);

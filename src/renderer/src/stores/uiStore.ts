@@ -1,15 +1,8 @@
 import { create } from 'zustand'
 import { markDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
+import { readInitialTheme, type ThemeMode } from '@renderer/theme/initialTheme'
 
-export type ThemeMode = 'light' | 'dark'
-
-function readInitialTheme(): ThemeMode {
-  const saved = localStorage.getItem('theme')
-  if (saved === 'dark') return 'dark'
-  if (saved === 'light') return 'light'
-  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  return prefersDark ? 'dark' : 'light'
-}
+export type { ThemeMode }
 
 function readBoardShowAllFsLines(): boolean {
   return localStorage.getItem('board.showAllFsLines') === 'true'

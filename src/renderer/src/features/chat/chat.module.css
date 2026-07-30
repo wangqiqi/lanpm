@@ -748,7 +748,7 @@
 
 .mentionOptionId {
   font-size: var(--lanpm-font-caption);
-  opacity: 0.55;
+  color: var(--lanpm-text-secondary);
   margin-left: 8px;
 }
 
@@ -811,7 +811,6 @@
   font-size: var(--lanpm-font-caption);
   font-weight: 400;
   color: var(--lanpm-text-secondary);
-  opacity: 0.82;
 }
 
 .systemMessageRow {
@@ -1050,9 +1049,15 @@
   max-height: none;
 }
 
+.codeDetectHint {
+  margin-left: 12px;
+  font-size: var(--lanpm-font-body-secondary);
+  color: var(--lanpm-text-secondary);
+}
+
 .status {
   font-size: var(--lanpm-font-caption);
-  opacity: 0.75;
+  color: var(--lanpm-text-secondary);
   text-align: right;
   display: flex;
   align-items: center;
@@ -1346,7 +1351,6 @@
   color: var(--lanpm-text-tertiary) !important;
   cursor: not-allowed;
   transform: none;
-  opacity: 0.6;
 }
 
 .voicePanel {
