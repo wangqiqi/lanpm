@@ -6,6 +6,7 @@
 
 ### Added
 
+- **配对码全链路验收（TASK-PAIR-08）**：`verify:pairing-code` 聚合 UDP/TCP/跨网段/安全/中继/入群/发现 UI；`docs/02` §13.7
 - **配对安全 TTL/限流（TASK-PAIR-07）**：`isPairingLookupRateLimited` 每分钟 lookup 上限；`PairingSessionHost` 记录 `lookupTimestamps`；失败 5 次锁定 + 一次性 `pairingId`；`verify:pairing-security`
 - **跨网段 IP/尾段配对（TASK-PAIR-05）**：`pairingHostResolve` 尾段展开（如 `109`→各子网候选）与子网广播 lookup；`joinWithPairingCode` 多候选循环；发现页 `crossSubnet` + 分享屏展示 `localIpTail`；`verify:pairing-cross-subnet`
 - **发现页群组中心 + 连接码 UI（TASK-PAIR-04）**：`DiscoverPairingPanel`（分享/查找连接码）；空态「用连接码查找群组」CTA；单群「申请加入」快捷条；高级折叠（种子/邀请码/手动节点）；`verify:discover` 扩展
