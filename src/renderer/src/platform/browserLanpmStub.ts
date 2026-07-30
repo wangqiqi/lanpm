@@ -1204,20 +1204,27 @@ export function createBrowserLanpmStub(): LanpmApi {
         autoDiscover: input.autoDiscover ?? DEFAULT_GROUP_AUTO_DISCOVER
       }),
       join: async (groupId) => ({
-        groupId,
-        type: 'project' as const,
-        name: 'LanPM 协作组',
-        createdBy: 'demo-alice',
-        createdAt: new Date().toISOString(),
-        autoDiscover: true
+        status: 'already_member' as const,
+        group: {
+          groupId,
+          type: 'project' as const,
+          name: 'LanPM 协作组',
+          createdBy: 'demo-alice',
+          createdAt: new Date().toISOString(),
+          autoDiscover: true
+        }
       }),
+      listJoinRequests: async () => [],
+      approveJoinRequest: async () => undefined,
+      rejectJoinRequest: async () => undefined,
       enterAnonymous: async () => undefined,
       leaveAnonymous: async () => undefined,
       dissolve: async (groupId) => {
         stubDissolvedGroups.add(groupId)
         persistStubDissolvedGroups()
       },
-      onListChanged: () => () => undefined
+      onListChanged: () => () => undefined,
+      onJoinRequestsChanged: () => () => undefined
     },
     cockpit: {
       getDashboard: async () => ({

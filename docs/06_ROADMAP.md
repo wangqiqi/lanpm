@@ -1,8 +1,18 @@
 # 06_ROADMAP
 
 > **只保留未完成工作。** `docs/` 不存历史；已交付叙事见根目录 `CHANGELOG.md`。  
-> 手验步骤见 [05_测试与联调发布.md](./05_测试与联调发布.md)。版本以 `package.json` / `CHANGELOG` 为准（当前 **1.33.x**）。  
-> 收费边界见 [飞鸽飞秋.md](./飞鸽飞秋.md) §7 / §10。执行面板以 `.cursorGrowth/plan.md` 为准。
+> 手验步骤见 [05_测试与联调发布.md](./05_测试与联调发布.md)。版本以 `package.json` / `CHANGELOG` 为准。  
+> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准（当前：**SPRINT-PAIR-01** · 群组互联 · 目标 1.42.0）。
+
+---
+
+## 0. 进行中（执行面板在 Growth）
+
+| Sprint | Goal | 文档 |
+|--------|------|------|
+| **SPRINT-PAIR-01** | 连接码 · `discover_relay`（hop≤2）· 入群申请/审批 · 群邀请码 | [配对码.md](./配对码.md) · `plan.md` |
+
+**候选下一 Sprint**：SPRINT-PAIR-02（路由表单播）· SPRINT-PAIR-03（U 盘/CLI）· 见 `plan.md` 候选表。
 
 ---
 
@@ -26,7 +36,7 @@
 | 完整插件市场 | 发布/安装/更新 / 签名目录 / **离线许可证** |
 | 原生移动 App | iOS + Android |
 | WebRTC DataChannel | 可选；默认仍 TCP+UDP（见 [01](./01_产品需求文档.md) §1.3.1） |
-| 群组发现增强 | 中心化目录 / 更深跨子网（现有：UDP + 组播 + 发现种子） |
+| 群组发现增强 | **SPRINT-PAIR-01 进行中**：连接码 · 跨网段子网中继 · 入群治理；后续 SPRINT-PAIR-02 路由表单播 | 见 [配对码.md](./配对码.md) |
 | 匿名群可持久化历史 | 可选；现状退出即失、无文件 Tab |
 
 ---

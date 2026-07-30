@@ -24,6 +24,8 @@ export type SyncMessageType =
   | 'file_pull_request'
   | 'file_chunk'
   | 'member_event'
+  | 'join_request'
+  | 'join_request_decision'
   | 'group_key_rotate'
   | 'chat_sync_request'
   | 'chat_sync_batch'

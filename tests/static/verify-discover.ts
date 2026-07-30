@@ -12,7 +12,7 @@ const topbar = readFileSync(join(root, 'src/renderer/src/layout/TopBar.tsx'), 'u
 const modal = readFileSync(join(root, 'src/renderer/src/features/discover/DiscoverModal.tsx'), 'utf8')
 const preload = readFileSync(join(root, 'src/preload/index.ts'), 'utf8')
 const discoverIpc = readFileSync(join(root, 'src/main/ipc/discover.ts'), 'utf8')
-const groupService = readFileSync(join(root, 'src/main/group/groupService.ts'), 'utf8')
+const groupIpc = readFileSync(join(root, 'src/main/ipc/group.ts'), 'utf8')
 
 assert.match(topbar, /DiscoverModal/)
 assert.match(topbar, /topbar\.discover/)
@@ -22,7 +22,7 @@ assert.match(modal, /joinGroup/)
 assert.match(preload, /discover:snapshot/)
 assert.match(preload, /group:join/)
 assert.match(discoverIpc, /DISCOVER_IPC\.snapshot/)
-assert.match(groupService, /joinDiscoverableGroup/)
+assert.match(groupIpc, /requestJoinDiscoverableGroup/)
 assert.match(groupService, /listDiscoverableGroupsForAdvert/)
 
 console.log('verify:discover: ok')

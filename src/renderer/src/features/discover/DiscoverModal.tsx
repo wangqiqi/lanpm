@@ -68,6 +68,10 @@ export default function DiscoverModal({
   })
   const [loading, setLoading] = useState(false)
   const [joiningId, setJoiningId] = useState<string | null>(null)
+  const [incomingRequests, setIncomingRequests] = useState<
+    Awaited<ReturnType<typeof getLanpmApi>['group']['listJoinRequests']>
+  >([])
+  const [actingRequestId, setActingRequestId] = useState<string | null>(null)
   const [tab, setTab] = useState<'groups' | 'people'>('groups')
   const [seedInput, setSeedInput] = useState('')
   const [seedSaving, setSeedSaving] = useState(false)
@@ -75,14 +79,26 @@ export default function DiscoverModal({
   const refresh = useCallback(async (): Promise<void> => {
     setLoading(true)
     try {
-      const data = await getLanpmApi().discover.snapshot()
+      const [data, requests] = await Promise.all([
+        getLanpmApi().discover.snapshot(),
+        getLanpmApi().group.listJoinRequests()
+      ])
       setSnapshot(data)
+      setIncomingRequests(requests)
     } catch (err) {
       message.error(formatError(err, 'discover.loadFailed'))
     } finally {
       setLoading(false)
     }
   }, [message, formatError])
+
+  useEffect(() => {
+    if (!open) return
+    const unsub = getLanpmApi().group.onJoinRequestsChanged(() => {
+      void refresh()
+    })
+    return unsub
+  }, [open, refresh])
 
   useEffect(() => {
     if (!open) return
@@ -107,6 +123,11 @@ export default function DiscoverModal({
       navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
       onClose()
     } catch (err) {
+      if (err instanceof Error && (err as Error & { code?: string }).code === 'join_pending') {
+        message.success(t('discover.joinRequestSent', { name: group.name }))
+        await refresh()
+        return
+      }
       message.error(formatError(err, 'discover.joinFailed'))
     } finally {
       setJoiningId(null)
@@ -132,6 +153,32 @@ export default function DiscoverModal({
 
   const handleRemoveSeed = (address: string): void => {
     void persistSeeds(removeDiscoverSeed(snapshot.seeds, address))
+  }
+
+  const handleApproveRequest = async (requestId: string): Promise<void> => {
+    setActingRequestId(requestId)
+    try {
+      await getLanpmApi().group.approveJoinRequest(requestId)
+      message.success(t('discover.joinRequestApproved'))
+      await refresh()
+    } catch (err) {
+      message.error(formatError(err, 'discover.joinRequestActionFailed'))
+    } finally {
+      setActingRequestId(null)
+    }
+  }
+
+  const handleRejectRequest = async (requestId: string): Promise<void> => {
+    setActingRequestId(requestId)
+    try {
+      await getLanpmApi().group.rejectJoinRequest(requestId)
+      message.success(t('discover.joinRequestRejected'))
+      await refresh()
+    } catch (err) {
+      message.error(formatError(err, 'discover.joinRequestActionFailed'))
+    } finally {
+      setActingRequestId(null)
+    }
   }
 
   const dmOriginGroupId = activeGroupId.startsWith('dm:')
@@ -244,6 +291,45 @@ export default function DiscoverModal({
         )}
       </div>
 
+      {incomingRequests.length > 0 ? (
+        <div className={styles.seedsBlock}>
+          <Text strong>{t('discover.incomingJoinRequests')}</Text>
+          <List
+            className={styles.list}
+            dataSource={incomingRequests}
+            renderItem={(req) => (
+              <List.Item
+                className={styles.row}
+                actions={[
+                  <Button
+                    key="approve"
+                    type="primary"
+                    size="small"
+                    loading={actingRequestId === req.requestId}
+                    onClick={() => void handleApproveRequest(req.requestId)}
+                  >
+                    {t('discover.approveJoin')}
+                  </Button>,
+                  <Button
+                    key="reject"
+                    size="small"
+                    loading={actingRequestId === req.requestId}
+                    onClick={() => void handleRejectRequest(req.requestId)}
+                  >
+                    {t('discover.rejectJoin')}
+                  </Button>
+                ]}
+              >
+                <List.Item.Meta
+                  title={req.applicantDisplayName}
+                  description={t('discover.joinRequestForGroup', { groupId: req.groupId })}
+                />
+              </List.Item>
+            )}
+          />
+        </div>
+      ) : null}
+
       <Tabs
         activeKey={tab}
         onChange={(key) => setTab(key as 'groups' | 'people')}
@@ -278,9 +364,14 @@ export default function DiscoverModal({
                         type={group.joined ? 'default' : 'primary'}
                         size="small"
                         loading={joiningId === group.groupId}
+                        disabled={group.joinPending}
                         onClick={() => void handleJoinGroup(group)}
                       >
-                        {group.joined ? t('discover.open') : t('discover.join')}
+                        {group.joined
+                          ? t('discover.open')
+                          : group.joinPending
+                            ? t('discover.joinPending')
+                            : t('discover.requestJoin')}
                       </Button>
                     ]}
                   >

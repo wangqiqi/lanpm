@@ -60,6 +60,7 @@ describe('IPC channel contracts', () => {
     expect(NETWORK_IPC.connectManualPeer).toBe('network:connectManualPeer')
     expect(SEARCH_IPC.query).toBe('search:query')
     expect(DISCOVER_IPC.snapshot).toBe('discover:snapshot')
+    expect(GROUP_IPC.join).toBe('group:join')
     expect(PAIRING_IPC.start).toBe('pairing:start')
     expect(PAIRING_IPC.join).toBe('pairing:join')
     expect(BADGE_IPC.getGroupTabBadges).toBe('badge:getGroupTabBadges')

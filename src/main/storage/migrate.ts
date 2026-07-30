@@ -323,6 +323,31 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         db.exec(`ALTER TABLE ai_config_user RENAME TO ai_config`)
       }
     }
+  },
+  {
+    fromVersion: 15,
+    description: 'group_join_requests for discover join approval (TASK-PAIR-10)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE group_join_requests (
+          request_id TEXT PRIMARY KEY,
+          group_id TEXT NOT NULL,
+          applicant_user_id TEXT NOT NULL,
+          applicant_display_name TEXT NOT NULL,
+          owner_user_id TEXT NOT NULL,
+          status TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          decided_at TEXT,
+          decided_by TEXT
+        )
+      `)
+      db.exec(
+        `CREATE INDEX idx_group_join_requests_owner ON group_join_requests(owner_user_id, status)`
+      )
+      db.exec(
+        `CREATE INDEX idx_group_join_requests_applicant ON group_join_requests(applicant_user_id, group_id, status)`
+      )
+    }
   }
 ]
 

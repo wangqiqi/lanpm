@@ -32,6 +32,10 @@ import { showOpenDialog } from '../systemDialog'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import {
+  initJoinRequestService,
+  shutdownJoinRequestService
+} from '../group/joinRequestService'
+import {
   handleReadReceiptSyncBatch,
   handleReadReceiptSyncRequest,
   requestReadReceiptOfflineSync
@@ -161,6 +165,7 @@ export function initChatService(db: Database): void {
 
   refreshGroupSubscriptions(db, transport)
   initReadReceiptService(db)
+  initJoinRequestService(db)
   initGroupKeyService(db)
   ensureLocalRetentionMeta(db)
   initMessageRetentionScheduler(db)
@@ -180,6 +185,7 @@ export function shutdownChatService(): void {
   shutdownFileSyncService()
   shutdownGroupKeyService()
   shutdownReadReceiptService()
+  shutdownJoinRequestService()
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
 }

@@ -6,6 +6,7 @@
 
 ### Added
 
+- **入群申请 + 管理员审批（TASK-PAIR-10）**：`join_request` / `join_request_decision` P2P 报文；`group_join_requests` 表（schema v16）；发现群改为「申请加入」；群主审批/拒绝；`GROUP_IPC` 审批通道；`verify:join-request`
 - **群组连接码 · UDP 配对（TASK-PAIR-01）**：`pairing_offer` / `pairing_lookup` / `pairing_found` 报文；`PairingSessionHost` 状态机（6 位码 · 5min TTL · 一次性）；`RealNetworkTransport.startPairingSession` / `joinWithPairingCode`；`verify:pairing-udp`
 - **TCP `pairing_resolve` 兜底（TASK-PAIR-02）**：`pairing_resolve` / `pairing_resolve_ok` / `pairing_resolve_fail` wire 消息；`PeerLink.connectHostWithPairing`；`connectManualHostWithPairing`；跨网段 UDP 失败时凭 IP+码 建链；`verify:pairing-tcp`
 - **IPC pairing + preload（TASK-PAIR-03）**：`PAIRING_IPC`（`pairing:start` / `pairing:cancel` / `pairing:join`）；`pairingService` 包装 transport；join 成功后写发现种子并刷新 snapshot；`verify:ipc-contract`

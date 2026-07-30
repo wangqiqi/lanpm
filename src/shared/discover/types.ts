@@ -23,6 +23,8 @@ export interface DiscoverGroupView {
   ownerDisplayName: string
   /** 本机是否已是成员 */
   joined: boolean
+  /** 已提交入群申请、待群主审批 */
+  joinPending?: boolean
 }
 
 /** Serialized discovery health for DiscoverModal (A5). */

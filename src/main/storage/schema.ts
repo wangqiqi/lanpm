@@ -24,6 +24,7 @@ export const EXPECTED_TABLES = [
   'devices',
   'groups',
   'group_members',
+  'group_join_requests',
   'messages',
   'read_receipts',
   'tasks',
@@ -45,4 +46,4 @@ export const EXPECTED_TABLES = [
   'ai_pipeline_runs'
 ] as const
 
-export const SCHEMA_VERSION = 15
+export const SCHEMA_VERSION = 16

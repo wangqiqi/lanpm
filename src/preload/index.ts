@@ -5,7 +5,7 @@ import type { LanpmApi } from '../shared/lanpm-api'
 import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { GROUP_TAG_META_PUSH_CHANNEL, TASK_AWARENESS_PUSH_CHANNEL, TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
-import { GROUP_PUSH_CHANNEL } from '../shared/group/channels'
+import { GROUP_PUSH_CHANNEL, GROUP_JOIN_REQUEST_PUSH_CHANNEL } from '../shared/group/channels'
 import { USER_NOTICE_CHANNEL } from '../shared/sync/userNotice'
 import type { UserNotice } from '../shared/sync/userNotice'
 import { AI_IPC, AI_STREAM_CHUNK_CHANNEL, AI_STREAM_DONE_CHANNEL, AI_STREAM_ERROR_CHANNEL } from '../shared/ai/channels'
@@ -152,6 +152,9 @@ const api: LanpmApi = {
     listLastActivity: () => ipcRenderer.invoke('group:listLastActivity'),
     create: (input) => ipcRenderer.invoke('group:create', input),
     join: (groupId) => ipcRenderer.invoke('group:join', groupId),
+    listJoinRequests: () => ipcRenderer.invoke('group:listJoinRequests'),
+    approveJoinRequest: (requestId) => ipcRenderer.invoke('group:approveJoinRequest', requestId),
+    rejectJoinRequest: (requestId) => ipcRenderer.invoke('group:rejectJoinRequest', requestId),
     enterAnonymous: (groupId) => ipcRenderer.invoke('group:enterAnonymous', groupId),
     leaveAnonymous: (groupId) => ipcRenderer.invoke('group:leaveAnonymous', groupId),
     dissolve: (groupId) => ipcRenderer.invoke('group:dissolve', groupId),
@@ -159,6 +162,11 @@ const api: LanpmApi = {
       const listener = () => handler()
       ipcRenderer.on(GROUP_PUSH_CHANNEL, listener)
       return () => ipcRenderer.removeListener(GROUP_PUSH_CHANNEL, listener)
+    },
+    onJoinRequestsChanged: (handler) => {
+      const listener = () => handler()
+      ipcRenderer.on(GROUP_JOIN_REQUEST_PUSH_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(GROUP_JOIN_REQUEST_PUSH_CHANNEL, listener)
     }
   },
   cockpit: {

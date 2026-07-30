@@ -39,6 +39,21 @@ CREATE TABLE group_members (
   PRIMARY KEY (group_id, user_id)
 );
 
+CREATE TABLE group_join_requests (
+  request_id TEXT PRIMARY KEY,
+  group_id TEXT NOT NULL,
+  applicant_user_id TEXT NOT NULL,
+  applicant_display_name TEXT NOT NULL,
+  owner_user_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  decided_at TEXT,
+  decided_by TEXT
+);
+
+CREATE INDEX idx_group_join_requests_owner ON group_join_requests(owner_user_id, status);
+CREATE INDEX idx_group_join_requests_applicant ON group_join_requests(applicant_user_id, group_id, status);
+
 -- 聊天
 CREATE TABLE messages (
   msg_id TEXT PRIMARY KEY,

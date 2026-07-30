@@ -81,8 +81,13 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   },
 
   joinGroup: async (groupId) => {
-    const record = await getLanpmApi().group.join(groupId)
-    const nav = toNavGroup(record)
+    const result = await getLanpmApi().group.join(groupId)
+    if (result.status === 'pending') {
+      const err = new Error('join_pending') as Error & { code?: string }
+      err.code = 'join_pending'
+      throw err
+    }
+    const nav = toNavGroup(result.group)
     set((s) => {
       const exists = s.groups.some((g) => g.groupId === nav.groupId)
       return {

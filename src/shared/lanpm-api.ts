@@ -12,6 +12,7 @@ import type {
 } from './task/types'
 import type { TaskDependency, UpsertDependencyInput } from './task/dependency'
 import type { CreateGroupInput, GroupRecord } from './group/types'
+import type { JoinGroupResult, JoinRequestRecord } from './group/joinRequest'
 import type {
   AiConfigInput,
   AiConfigView,
@@ -208,11 +209,15 @@ export interface LanpmApi {
     /** groupId → 最后一条消息 ISO 时间 */
     listLastActivity: () => Promise<Record<string, string>>
     create: (input: CreateGroupInput) => Promise<GroupRecord>
-    join: (groupId: string) => Promise<GroupRecord>
+    join: (groupId: string) => Promise<JoinGroupResult>
+    listJoinRequests: () => Promise<JoinRequestRecord[]>
+    approveJoinRequest: (requestId: string) => Promise<void>
+    rejectJoinRequest: (requestId: string) => Promise<void>
     enterAnonymous: (groupId: string) => Promise<void>
     leaveAnonymous: (groupId: string) => Promise<void>
     dissolve: (groupId: string) => Promise<void>
     onListChanged: (handler: () => void) => () => void
+    onJoinRequestsChanged: (handler: () => void) => () => void
   }
   cockpit: {
     getDashboard: () => Promise<CockpitDashboard>

@@ -109,12 +109,11 @@ export function listDiscoverableGroupsForAdvert(db: Database): {
     .map((g) => ({ groupId: g.groupId, name: g.name, type: g.type }))
 }
 
-export function joinDiscoverableGroup(db: Database, groupId: string): GroupRecord {
-  const status = getSetupStatus(db)
-  if (!status.configured || !status.user) {
-    throwLanpm('stub.identityRequired')
-  }
-
+export function applyApprovedDiscoverableJoin(
+  db: Database,
+  groupId: string,
+  memberUserId: string
+): GroupRecord {
   let group = getGroupById(db, groupId)
   if (!group) {
     const cached = getCachedGroup(groupId)
@@ -133,9 +132,17 @@ export function joinDiscoverableGroup(db: Database, groupId: string): GroupRecor
     insertGroup(db, group)
   }
 
-  joinGroupMember(db, groupId, status.user.userId, group.type === 'anonymous')
+  joinGroupMember(db, groupId, memberUserId, group.type === 'anonymous')
   broadcastGroupsChanged()
   return group
+}
+
+export function joinDiscoverableGroup(db: Database, groupId: string): GroupRecord {
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user) {
+    throwLanpm('stub.identityRequired')
+  }
+  return applyApprovedDiscoverableJoin(db, groupId, status.user.userId)
 }
 
 export function createUserGroup(db: Database, input: CreateGroupInput): GroupRecord {

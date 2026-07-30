@@ -19,6 +19,7 @@ import {
 } from '../network'
 import { getAggregatedUserPresence } from '../presence/presenceRegistry'
 import { listCachedDiscoverGroups } from './discoverGroupRegistry'
+import { listPendingJoinRequestGroupIds } from '../storage/repositories/groupJoinRequestRepository'
 
 function loadSeeds(db: Database): string[] {
   return normalizeDiscoverSeeds(getMeta(db, DISCOVER_SEEDS_META_KEY))
@@ -172,6 +173,9 @@ export async function fetchDiscoverSnapshot(
     }
   }
 
+  const pendingJoinGroupIds =
+    localUserId != null ? listPendingJoinRequestGroupIds(db, localUserId) : new Set<string>()
+
   const groupMap = new Map<string, DiscoverSnapshot['groups'][number]>()
   for (const cached of listCachedDiscoverGroups()) {
     const { advert, ownerUserId, ownerDisplayName } = cached
@@ -181,7 +185,8 @@ export async function fetchDiscoverSnapshot(
       type: advert.type,
       ownerUserId,
       ownerDisplayName,
-      joined: joinedGroupIds.has(advert.groupId)
+      joined: joinedGroupIds.has(advert.groupId),
+      joinPending: pendingJoinGroupIds.has(advert.groupId)
     })
   }
 
