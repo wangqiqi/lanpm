@@ -245,7 +245,7 @@
 
 .panelChevron {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body-secondary);
   color: var(--lanpm-text-secondary);
   transition: transform 0.15s ease;
   transform: rotate(-90deg);

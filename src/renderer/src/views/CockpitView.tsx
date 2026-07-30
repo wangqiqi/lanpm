@@ -801,6 +801,7 @@ export default function CockpitView(): React.ReactElement {
       <Panel
         title={t('ai.patrolTitle')}
         className={styles.section}
+        defaultCollapsed
         extra={
           patrolLatest ? (
             <Button
@@ -852,6 +853,7 @@ export default function CockpitView(): React.ReactElement {
       <Panel
         title={t('ai.pipeline.title')}
         className={styles.section}
+        defaultCollapsed
         extra={
           <Space size={4}>
             <Button
@@ -936,6 +938,7 @@ export default function CockpitView(): React.ReactElement {
           title={t('cockpit.reportOutput')}
           titleClassName={styles.reportPanelTitle}
           className={`${styles.section} ${styles.reportPanel}`}
+          data-testid="cockpit-report-panel"
           extra={
             <Space size={4}>
               <Button

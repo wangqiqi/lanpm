@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.58.0] - 2026-07-31
+
+### Changed
+
+- **驾驶舱交付走查（SPRINT cockpit-delivery · TASK-583～587）**：AI 巡检与流水线 Panel 默认折叠，矮视口更易滚至「报表输出」；手风琴 chevron 字号改用语义令牌；报表 Panel 增加 `data-testid`；`verify:visual` 补强 cockpit-delivery 守卫
+
 ## [1.57.0] - 2026-07-31
 
 ### Changed

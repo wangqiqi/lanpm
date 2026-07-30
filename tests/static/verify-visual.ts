@@ -367,6 +367,26 @@ assert.match(cockpitCss, /\.panelToggle\b/, 'Cockpit Panel accordion toggle styl
 assert.match(cockpitCss, /\.panelSummary\b/, 'Cockpit Panel summary slot styles (CK-412)')
 assert.match(cockpitCss, /\.panelChevron\b/, 'Cockpit Panel chevron styles (CK-412)')
 assert.match(
+  cockpitCss,
+  /\.panelChevron\s*\{[^}]*var\(--lanpm-font-body-secondary\)/s,
+  'Cockpit panelChevron must use font token (cockpit-delivery)'
+)
+assert.match(
+  cockpitSrc,
+  /title=\{t\('ai\.patrolTitle'\)\}[\s\S]*?defaultCollapsed/,
+  'Cockpit patrol panel must default collapsed (cockpit-delivery)'
+)
+assert.match(
+  cockpitSrc,
+  /title=\{t\('ai\.pipeline\.title'\)\}[\s\S]*?defaultCollapsed/,
+  'Cockpit pipeline panel must default collapsed (cockpit-delivery)'
+)
+assert.match(
+  cockpitSrc,
+  /data-testid="cockpit-report-panel"/,
+  'Cockpit report panel must expose test id (cockpit-delivery)'
+)
+assert.match(
   cockpitSrc,
   /attentionTasksTitle[\s\S]*?defaultCollapsed/,
   'Attention tasks panel must default collapsed (CK-413)'
