@@ -15,8 +15,8 @@ import { GROUP_JOIN_REQUEST_PUSH_CHANNEL } from '../../shared/group/channels'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { USER_NOTICE_CHANNEL, type UserNotice } from '../../shared/sync/userNotice'
 import { getSetupStatus } from '../identity/setup'
+import type { NetworkTransport } from '../../shared/network'
 import { getNetworkTransport } from '../network'
-import type { NetworkTransport } from '../network'
 import { broadcastToAllWindows } from '../utils/broadcast'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 import { getCachedGroup } from '../discover/discoverGroupRegistry'
@@ -224,7 +224,7 @@ export function handleIncomingJoinRequest(db: Database, envelope: SyncEnvelope):
   })
   broadcastJoinRequestsChanged()
   notifyUser({
-    level: 'info',
+    level: 'warning',
     messageKey: 'group.joinRequestReceived',
     params: {
       name: payload.applicantDisplayName,
@@ -254,7 +254,7 @@ export function handleIncomingJoinDecision(db: Database, envelope: SyncEnvelope)
     }
     broadcastJoinRequestsChanged()
     notifyUser({
-      level: 'success',
+      level: 'warning',
       messageKey: 'group.joinRequestApproved',
       params: { name: getGroupDisplayNameForNotice(db, payload.groupId) }
     })
@@ -337,7 +337,7 @@ export function initJoinRequestService(db: Database): void {
   }
   if (typeof withGlobal.subscribeAll !== 'function') return
 
-  joinRequestUnsub = withGlobal.subscribeAll((env) => {
+  joinRequestUnsub = withGlobal.subscribeAll((env: SyncEnvelope) => {
     handleIncomingJoinRequest(db, env)
     handleIncomingJoinDecision(db, env)
   })

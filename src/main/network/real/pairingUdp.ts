@@ -86,7 +86,7 @@ export class PairingUdpController {
   }
 
   /** @returns true if packet consumed */
-  handleMessage(buf: Buffer, rinfo: { address: string }): boolean {
+  handleMessage(buf: Buffer, rinfo: { address: string; port?: number }): boolean {
     let raw: unknown
     try {
       raw = JSON.parse(buf.toString('utf8'))
@@ -104,7 +104,7 @@ export class PairingUdpController {
         const found = this.host.handleLookup(raw.payload)
         if (found) {
           const reply: PairingUdpPacket = { v: 1, kind: 'pairing_found', payload: found }
-          this.send(reply, rinfo.address, rinfo.port)
+          this.send(reply, rinfo.address, rinfo.port ?? UDP_DISCOVERY_PORT)
         }
       }
       return true

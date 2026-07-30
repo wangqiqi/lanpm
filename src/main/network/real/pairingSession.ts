@@ -9,6 +9,7 @@ import {
   isPairingLookupRateLimited,
   type PairingFoundBody,
   type PairingLookupBody,
+  type PairingOfferBody,
   type PairingResolveFailReason
 } from '../../../shared/network/pairingTypes.ts'
 

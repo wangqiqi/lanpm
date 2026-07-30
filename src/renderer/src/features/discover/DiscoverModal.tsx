@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Avatar, Button, Collapse, Empty, Input, List, Modal, Space, Tabs, Tag, Typography } from 'antd'
 import { PlusOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
+import type { JoinRequestRecord } from '@shared/group/joinRequest'
 import type { DiscoverGroupView, DiscoverPeerView, DiscoverSnapshot } from '@shared/discover/types'
 import type { DiscoveryReasonCode } from '@shared/discover/discoveryHealth'
 import { addDiscoverSeed, removeDiscoverSeed } from '@shared/discover/discoverSeeds'
@@ -69,9 +70,7 @@ export default function DiscoverModal({
   })
   const [loading, setLoading] = useState(false)
   const [joiningId, setJoiningId] = useState<string | null>(null)
-  const [incomingRequests, setIncomingRequests] = useState<
-    Awaited<ReturnType<typeof getLanpmApi>['group']['listJoinRequests']>
-  >([])
+  const [incomingRequests, setIncomingRequests] = useState<JoinRequestRecord[]>([])
   const [actingRequestId, setActingRequestId] = useState<string | null>(null)
   const [tab, setTab] = useState<'groups' | 'people'>('groups')
   const [seedInput, setSeedInput] = useState('')
