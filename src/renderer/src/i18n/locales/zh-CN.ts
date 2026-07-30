@@ -913,6 +913,8 @@ const zhCN = {
   'discover.pairingCodePlaceholder': '例如 847 293',
   'discover.pairingCrossSubnet': '对方和我不在同一 WiFi（跨网段）',
   'discover.pairingRouteHint': '通常只需连接码；将按本机路由表向各子网发送查找',
+  'discover.netHelpLink': '组网帮助？',
+  'discover.netHelpTitle': '局域网组网说明',
   'discover.pairingSubnetScan': '高级：网段主机扫描（较慢）',
   'discover.pairingSubnetScanHint': '广播查找失败时可逐地址扫描可达 /24；默认关闭',
   'discover.pairingAdvancedHost': '高级：指定 IP 或尾段',

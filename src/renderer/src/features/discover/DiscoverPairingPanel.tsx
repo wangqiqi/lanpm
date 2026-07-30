@@ -9,6 +9,7 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import styles from './discover.module.css'
+import NetworkHelpModal from './NetworkHelpModal'
 
 const { Text, Title } = Typography
 
@@ -48,6 +49,7 @@ export default function DiscoverPairingPanel({
   const [unicastHost, setUnicastHost] = useState('')
   const [findLoading, setFindLoading] = useState(false)
   const [peerFileLoading, setPeerFileLoading] = useState(false)
+  const [netHelpOpen, setNetHelpOpen] = useState(false)
   const [countdownMs, setCountdownMs] = useState(0)
 
   useEffect(() => {
@@ -160,9 +162,20 @@ export default function DiscoverPairingPanel({
     }
   }
 
+  const netHelpModal = (
+    <NetworkHelpModal open={netHelpOpen} onClose={() => setNetHelpOpen(false)} />
+  )
+
+  const netHelpLink = (
+    <Button type="link" size="small" className={styles.netHelpLink} onClick={() => setNetHelpOpen(true)}>
+      {t('discover.netHelpLink')}
+    </Button>
+  )
+
   if (mode === 'idle') {
     return (
-      <Space wrap className={styles.pairingActions}>
+      <>
+        <Space wrap className={styles.pairingActions}>
         <Button
           type="primary"
           icon={<ShareAltOutlined />}
@@ -182,15 +195,20 @@ export default function DiscoverPairingPanel({
           {t('discover.importPeerFile')}
         </Button>
       </Space>
+        {netHelpLink}
+        {netHelpModal}
+      </>
     )
   }
 
   if (mode === 'share' && session) {
     return (
+      <>
       <div className={styles.pairingPanel}>
         <Title level={5} className={styles.pairingTitle}>
           {t('discover.pairingShareTitle')}
         </Title>
+        {netHelpLink}
         <p className={styles.pairingCode}>{session.codeDisplay}</p>
         <Text type="secondary" className={styles.pairingMeta}>
           {t('discover.pairingExpires', { time: formatCountdown(countdownMs) })}
@@ -229,14 +247,18 @@ export default function DiscoverPairingPanel({
           {t('discover.exportPeerFile')}
         </Button>
       </div>
+        {netHelpModal}
+      </>
     )
   }
 
   return (
+    <>
     <div className={styles.pairingPanel}>
       <Title level={5} className={styles.pairingTitle}>
         {t('discover.pairingFindTitle')}
       </Title>
+      {netHelpLink}
       <Text type="secondary">{t('discover.pairingFindHint')}</Text>
       <Input
         className={styles.pairingCodeInput}
@@ -295,5 +317,7 @@ export default function DiscoverPairingPanel({
         <Button onClick={() => onModeChange('idle')}>{t('common.cancel')}</Button>
       </Space>
     </div>
+      {netHelpModal}
+    </>
   )
 }

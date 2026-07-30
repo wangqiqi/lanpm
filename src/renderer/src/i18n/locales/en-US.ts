@@ -929,6 +929,8 @@ const enUS = {
   'discover.pairingCodePlaceholder': 'e.g. 847 293',
   'discover.pairingCrossSubnet': 'Peer is on a different subnet',
   'discover.pairingRouteHint': 'Code only is usually enough; we probe subnets from your route table',
+  'discover.netHelpLink': 'LAN wiring help?',
+  'discover.netHelpTitle': 'LAN wiring guide',
   'discover.pairingSubnetScan': 'Advanced: scan hosts on reachable /24 subnets (slow)',
   'discover.pairingSubnetScanHint': 'Probes .1–.254 per subnet when enabled; off by default',
   'discover.pairingAdvancedHost': 'Advanced: specify IP or tail',

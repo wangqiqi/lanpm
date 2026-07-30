@@ -926,6 +926,8 @@ export type MessageKey =
   | 'discover.pairingCodePlaceholder'
   | 'discover.pairingCrossSubnet'
   | 'discover.pairingRouteHint'
+  | 'discover.netHelpLink'
+  | 'discover.netHelpTitle'
   | 'discover.pairingSubnetScan'
   | 'discover.pairingSubnetScanHint'
   | 'discover.pairingAdvancedHost'

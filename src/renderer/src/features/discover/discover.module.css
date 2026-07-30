@@ -136,3 +136,20 @@
 .advancedCollapse {
   margin-bottom: 12px;
 }
+
+.netHelpLink {
+  align-self: flex-start;
+  padding: 0;
+  height: auto;
+  font-size: var(--lanpm-font-caption);
+}
+
+.netHelpIntro {
+  margin: 0 0 12px;
+  color: var(--lanpm-text-secondary);
+  font-size: var(--lanpm-font-body);
+}
+
+.netHelpModal :global(.ant-modal-body) {
+  padding-top: 8px;
+}

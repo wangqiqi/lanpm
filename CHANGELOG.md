@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.47.0] - 2026-07-30
+
+### Added
+
+- **发现页组网帮助（SPRINT-DISCOVER-HELP）**：抽取 `NetworkPrereqContent`；`NetworkHelpModal` 只读弹层；配对面板「组网帮助？」链接触发；`verify:discover-help`；`docs/配对码.md` §10 ✅
+
 ## [1.46.0] - 2026-07-30
 
 ### Added

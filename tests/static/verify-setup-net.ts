@@ -13,6 +13,10 @@ const netStep = readFileSync(
   join(root, 'src/renderer/src/features/setup/NetworkPrereqStep.tsx'),
   'utf8'
 )
+const netContent = readFileSync(
+  join(root, 'src/renderer/src/features/setup/NetworkPrereqContent.tsx'),
+  'utf8'
+)
 const css = readFileSync(
   join(root, 'src/renderer/src/features/setup/SetupWizard.module.css'),
   'utf8'
@@ -24,10 +28,11 @@ const pairingDoc = readFileSync(join(root, 'docs/配对码.md'), 'utf8')
 assert.match(wizard, /NetworkPrereqStep/)
 assert.match(wizard, /step === 'network'/)
 assert.match(wizard, /setStep\('profile'\)/)
-assert.match(netStep, /Segmented/)
-assert.match(netStep, /SwitchIllustration/)
-assert.match(netStep, /RouterIllustration/)
-assert.match(netStep, /HotspotIllustration/)
+assert.match(netStep, /NetworkPrereqContent/)
+assert.match(netContent, /Segmented/)
+assert.match(netContent, /SwitchIllustration/)
+assert.match(netContent, /RouterIllustration/)
+assert.match(netContent, /HotspotIllustration/)
 assert.match(netStep, /setup\.netContinue/)
 assert.match(netStep, /setup\.netSkip/)
 assert.match(css, /\.netIllustration/)

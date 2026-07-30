@@ -2,7 +2,7 @@
 
 > **只保留未完成工作。** `docs/` 不存历史；已交付叙事见根目录 `CHANGELOG.md`。  
 > 手验步骤见 [05_测试与联调发布.md](./05_测试与联调发布.md)。版本以 `package.json` / `CHANGELOG` 为准。  
-> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准（当前：**SPRINT-PAIR-04** ✅ · macOS 路由 + `/24` 扫描 · **1.46.0** 已交付）。
+> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准（当前：**SPRINT-DISCOVER-HELP** ✅ · 发现页组网帮助 · **1.47.0** 已交付）。
 
 ---
 
