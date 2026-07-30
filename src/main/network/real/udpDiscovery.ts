@@ -108,7 +108,15 @@ export class UdpDiscovery {
       this.lastBroadcastError = err.message
     })
 
-    socket.bind(UDP_DISCOVERY_PORT, () => {
+    this.bindUdpSocket(socket)
+
+    this.broadcastTimer = setInterval(() => this.broadcast(), DISCOVERY_INTERVAL_MS)
+    this.pruneTimer = setInterval(() => this.prune(), PEER_TTL_MS)
+    this.broadcast()
+  }
+
+  private bindUdpSocket(socket: dgram.Socket): void {
+    const onBound = (): void => {
       this.bindOk = true
       socket.setBroadcast(true)
       if (!this.disableMulticast) {
@@ -121,11 +129,25 @@ export class UdpDiscovery {
           this.multicastOk = false
         }
       }
+    }
+
+    socket.once('error', (err: NodeJS.ErrnoException) => {
+      if (process.env.LANPM_E2E === '1' && err.code === 'EADDRINUSE') {
+        socket.removeAllListeners('error')
+        socket.on('error', (bindErr) => {
+          console.warn('[lanpm] UDP discovery error:', bindErr.message)
+          this.bindOk = false
+          this.lastBroadcastError = bindErr.message
+        })
+        socket.bind(0, onBound)
+        return
+      }
+      console.warn('[lanpm] UDP discovery error:', err.message)
+      this.bindOk = false
+      this.lastBroadcastError = err.message
     })
 
-    this.broadcastTimer = setInterval(() => this.broadcast(), DISCOVERY_INTERVAL_MS)
-    this.pruneTimer = setInterval(() => this.prune(), PEER_TTL_MS)
-    this.broadcast()
+    socket.bind(UDP_DISCOVERY_PORT, onBound)
   }
 
   stop(): void {

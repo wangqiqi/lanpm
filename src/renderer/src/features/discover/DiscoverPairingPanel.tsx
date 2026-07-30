@@ -313,7 +313,12 @@ export default function DiscoverPairingPanel({
         />
       ) : null}
       <Space>
-        <Button type="primary" loading={findLoading} onClick={() => void handleFind()}>
+        <Button
+          type="primary"
+          loading={findLoading}
+          onClick={() => void handleFind()}
+          data-testid="discover-pairing-connect"
+        >
           {t('discover.pairingConnect')}
         </Button>
         <Button onClick={() => onModeChange('idle')}>{t('common.cancel')}</Button>

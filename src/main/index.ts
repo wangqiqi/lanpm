@@ -210,7 +210,8 @@ app.whenReady().then(() => {
     }
     initDatabase()
     if (e2eMode && !getSetupStatus(getDatabase()).configured) {
-      completeSetup(getDatabase(), { baseName: 'E2ETest' })
+      const baseName = process.env.LANPM_E2E_NAME?.trim() || 'E2ETest'
+      completeSetup(getDatabase(), { baseName })
     }
     repairFilePreviewPaths(getDatabase())
     repairFileStoragePaths(getDatabase())

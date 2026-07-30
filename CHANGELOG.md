@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.53.0] - 2026-07-30
+
+### Added
+
+- **E2E 双实例配对（SPRINT-DISCOVER-E2E-02）**：Playwright 双 Electron `share→join` 全链；`LANPM_E2E_NAME` · UDP ephemeral 回退；`verify:e2e-pairing`；`docs/05` §1.2.6 ✅
+
 ## [1.52.0] - 2026-07-30
 
 ### Added

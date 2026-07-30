@@ -1,5 +1,5 @@
 # 三平台 CI 矩阵（verify:m7 全量回归）
-# 注：verify:discover-sim-full（VirtualLan 12 场景）与 verify:e2e-discover（Playwright Electron）为发版前本地/手跑路径，默认不在此 workflow 中。
+# 注：verify:discover-sim-full（VirtualLan 12 场景）与 verify:e2e-discover / verify:e2e-pairing（Playwright Electron）为发版前本地/手跑路径，默认不在此 workflow 中。
 name: verify
 
 on:
