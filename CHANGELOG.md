@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.50.0] - 2026-07-30
+
+### Added
+
+- **VirtualLan 拓扑矩阵（SPRINT-DISCOVER-TEST-03）**：`verify:discover-sim-full`（9 场景：3 节点中继 · 跨子网路由/尾段/扫描 · 种子 SQLite · 群邀请 · 配对文件 · 入群申请）；`setRouteSubnetPrefixOverride` 测试 hook；`docs/配对码.md` §7 测试矩阵 ✅
+
 ## [1.49.0] - 2026-07-30
 
 ### Added

@@ -122,6 +122,15 @@ export function shutdownNetwork(): void {
   shutdownNetworkStub()
 }
 
+/** 测试专用：注入 RealNetworkTransport（勿在生产路径调用） */
+export function setRealNetworkTransportForTest(transport: RealNetworkTransport | null): void {
+  realTransport = transport
+}
+
+export function clearRealNetworkTransportForTest(): void {
+  realTransport = null
+}
+
 export async function fetchNetworkStatus(): Promise<NetworkStatusView> {
   const mode = resolveNetworkMode()
   const localIp = getLocalLanIp()
