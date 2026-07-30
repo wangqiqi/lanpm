@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Avatar, Button, Collapse, Empty, Input, List, Modal, Space, Tabs, Tag, Typography } from 'antd'
-import { PlusOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
+import { DownloadOutlined, PlusOutlined, ReloadOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
 import type { JoinRequestRecord } from '@shared/group/joinRequest'
 import type { DiscoverGroupView, DiscoverPeerView, DiscoverSnapshot } from '@shared/discover/types'
 import type { DiscoveryReasonCode } from '@shared/discover/discoveryHealth'
 import { addDiscoverSeed, removeDiscoverSeed } from '@shared/discover/discoverSeeds'
+import { pickSingleJoinableGroup } from '@shared/discover/joinableGroups'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
 import type { GroupType } from '@shared/navigation/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -17,7 +18,10 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { defaultViewForGroup } from '@shared/navigation/tabRules'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useNavigate } from 'react-router-dom'
-import DiscoverPairingPanel, { type PairingPanelMode } from './DiscoverPairingPanel'
+import DiscoverPairingPanel, {
+  type PairingJoinPayload,
+  type PairingPanelMode
+} from './DiscoverPairingPanel'
 import styles from './discover.module.css'
 
 const { Text } = Typography
@@ -79,6 +83,7 @@ export default function DiscoverModal({
   const [inviteJoining, setInviteJoining] = useState(false)
   const [sharingInviteGroupId, setSharingInviteGroupId] = useState<string | null>(null)
   const [pairingMode, setPairingMode] = useState<PairingPanelMode>('idle')
+  const [peerFileLoading, setPeerFileLoading] = useState(false)
 
   const refresh = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -116,27 +121,96 @@ export default function DiscoverModal({
     onClose()
   }
 
-  const handleJoinGroup = async (group: DiscoverGroupView): Promise<void> => {
-    if (group.joined) {
-      openGroup(group)
-      return
-    }
-    setJoiningId(group.groupId)
-    try {
-      const nav = await joinGroup(group.groupId)
-      message.success(t('discover.joinSuccess', { name: nav.name }))
-      navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
-      onClose()
-    } catch (err) {
-      if (err instanceof Error && (err as Error & { code?: string }).code === 'join_pending') {
-        message.success(t('discover.joinRequestSent', { name: group.name }))
-        await refresh()
+  const handleJoinGroup = useCallback(
+    async (group: DiscoverGroupView): Promise<boolean> => {
+      if (group.joined) {
+        openGroup(group)
+        return true
+      }
+      setJoiningId(group.groupId)
+      try {
+        const nav = await joinGroup(group.groupId)
+        message.success(t('discover.joinSuccess', { name: nav.name }))
+        navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
+        onClose()
+        return true
+      } catch (err) {
+        if (err instanceof Error && (err as Error & { code?: string }).code === 'join_pending') {
+          message.success(t('discover.joinRequestSent', { name: group.name }))
+          await refresh()
+          return true
+        }
+        message.error(formatError(err, 'discover.joinFailed'))
+        return false
+      } finally {
+        setJoiningId(null)
+      }
+    },
+    [formatError, joinGroup, message, navigate, onClose, refresh, t]
+  )
+
+  const tryAutoJoinAfterSnapshot = useCallback(
+    async (data: DiscoverSnapshot): Promise<void> => {
+      setSnapshot(data)
+      setTab('groups')
+      const single = pickSingleJoinableGroup(data.groups)
+      if (single) {
+        await handleJoinGroup(single)
+      }
+    },
+    [handleJoinGroup]
+  )
+
+  const handlePairingJoined = useCallback(
+    async ({ snapshot: data, peerName, groupCount }: PairingJoinPayload): Promise<void> => {
+      const single = pickSingleJoinableGroup(data.groups)
+      if (single) {
+        await tryAutoJoinAfterSnapshot(data)
         return
       }
-      message.error(formatError(err, 'discover.joinFailed'))
+      setSnapshot(data)
+      setTab('groups')
+      message.success(
+        t('discover.pairingJoinSuccess', {
+          name: peerName,
+          count: groupCount
+        })
+      )
+    },
+    [message, t, tryAutoJoinAfterSnapshot]
+  )
+
+  const handleImportPeerFile = async (): Promise<void> => {
+    setPeerFileLoading(true)
+    try {
+      const result = await getLanpmApi().pairing.importPeerFileDialog()
+      if (!result) return
+      message.success(t('discover.peerFileImportSuccess', { name: result.file.displayName }))
+      await tryAutoJoinAfterSnapshot(result.snapshot)
+      setPairingMode('idle')
+    } catch (err) {
+      message.error(formatError(err, 'discover.peerFileImportFailed'))
     } finally {
-      setJoiningId(null)
+      setPeerFileLoading(false)
     }
+  }
+
+  const handleExportPeerFile = async (): Promise<void> => {
+    setPeerFileLoading(true)
+    try {
+      const result = await getLanpmApi().pairing.exportPeerFileDialog()
+      if (!result) return
+      message.success(t('discover.peerFileExportSuccess', { path: result.path }))
+    } catch (err) {
+      message.error(formatError(err, 'discover.peerFileExportFailed'))
+    } finally {
+      setPeerFileLoading(false)
+    }
+  }
+
+  const openManualPeerFlow = (): void => {
+    onClose()
+    onOpenManualPeer?.()
   }
 
   const persistSeeds = async (next: string[]): Promise<void> => {
@@ -290,22 +364,10 @@ export default function DiscoverModal({
           showIcon
           message={t(HEALTH_REASON_KEYS[health.reason])}
           description={
-            health.suggestManualPeer ? (
-              <Space wrap>
-                <Text type="secondary">{t('discover.manualPeerHint')}</Text>
-                {onOpenManualPeer ? (
-                  <Button
-                    size="small"
-                    type="primary"
-                    onClick={() => {
-                      onClose()
-                      onOpenManualPeer()
-                    }}
-                  >
-                    {t('discover.openManualPeer')}
-                  </Button>
-                ) : null}
-              </Space>
+            health.suggestManualPeer && onOpenManualPeer ? (
+              <Button size="small" type="primary" onClick={openManualPeerFlow} data-testid="discover-connect-peer-cta">
+                {t('discover.connectPeerCta')}
+              </Button>
             ) : null
           }
         />
@@ -314,10 +376,7 @@ export default function DiscoverModal({
       <DiscoverPairingPanel
         mode={pairingMode}
         onModeChange={setPairingMode}
-        onSnapshot={(data) => {
-          setSnapshot(data)
-          setTab('groups')
-        }}
+        onPairingJoined={handlePairingJoined}
       />
 
       {singleJoinableGroup ? (
@@ -387,6 +446,30 @@ export default function DiscoverModal({
             children: (
               <>
                 <div className={styles.seedsBlock}>
+                  <Text strong>{t('discover.advancedPeerFileTitle')}</Text>
+                  <Text type="secondary" className={styles.seedsHint}>
+                    {t('discover.advancedPeerFileHint')}
+                  </Text>
+                  <Space wrap>
+                    <Button
+                      icon={<UploadOutlined />}
+                      loading={peerFileLoading}
+                      onClick={() => void handleImportPeerFile()}
+                      data-testid="discover-import-peer-file"
+                    >
+                      {t('discover.importPeerFile')}
+                    </Button>
+                    <Button
+                      icon={<DownloadOutlined />}
+                      loading={peerFileLoading}
+                      onClick={() => void handleExportPeerFile()}
+                      data-testid="discover-export-peer-file"
+                    >
+                      {t('discover.exportPeerFile')}
+                    </Button>
+                  </Space>
+                </div>
+                <div className={styles.seedsBlock}>
                   <Text strong>{t('discover.seedsTitle')}</Text>
                   <Text type="secondary" className={styles.seedsHint}>
                     {t('discover.seedsHint')}
@@ -440,11 +523,6 @@ export default function DiscoverModal({
                     </Button>
                   </Space.Compact>
                 </div>
-                {onOpenManualPeer ? (
-                  <Button type="link" onClick={() => { onClose(); onOpenManualPeer() }}>
-                    {t('discover.openManualPeer')}
-                  </Button>
-                ) : null}
               </>
             )
           }
@@ -460,22 +538,9 @@ export default function DiscoverModal({
             label: t('discover.tabGroups'),
             children: snapshot.groups.length === 0 ? (
               <Empty description={t('discover.emptyGroups')}>
-                <Space direction="vertical">
-                  <Button type="primary" onClick={() => setPairingMode('find')}>
-                    {t('discover.findGroupsByCode')}
-                  </Button>
-                  {onOpenManualPeer && health.suggestManualPeer ? (
-                    <Button
-                      type="link"
-                      onClick={() => {
-                        onClose()
-                        onOpenManualPeer()
-                      }}
-                    >
-                      {t('discover.openManualPeer')}
-                    </Button>
-                  ) : null}
-                </Space>
+                <Button type="primary" onClick={() => setPairingMode('find')}>
+                  {t('discover.findGroupsByCode')}
+                </Button>
               </Empty>
             ) : (
               <List

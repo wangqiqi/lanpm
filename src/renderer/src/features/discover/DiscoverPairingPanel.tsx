@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Alert, Button, Checkbox, Collapse, Input, List, Space, Tag, Typography } from 'antd'
-import { ShareAltOutlined, LinkOutlined, UploadOutlined, DownloadOutlined } from '@ant-design/icons'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, Button, Checkbox, Collapse, Input, List, Segmented, Space, Tag, Typography } from 'antd'
+import type { InputRef } from 'antd'
+import { ShareAltOutlined, DownloadOutlined } from '@ant-design/icons'
 import type { DiscoverSnapshot } from '@shared/discover/types'
 import type { PairingSessionView } from '@shared/discover/pairing'
 import type { GroupType } from '@shared/navigation/types'
@@ -21,10 +22,18 @@ const GROUP_TYPE_KEYS: Record<GroupType, MessageKey> = {
 
 export type PairingPanelMode = 'idle' | 'share' | 'find'
 
+type PairingIdleRole = 'share' | 'join'
+
+export type PairingJoinPayload = {
+  snapshot: DiscoverSnapshot
+  peerName: string
+  groupCount: number
+}
+
 interface DiscoverPairingPanelProps {
   mode: PairingPanelMode
   onModeChange: (mode: PairingPanelMode) => void
-  onSnapshot: (snapshot: DiscoverSnapshot) => void
+  onPairingJoined: (payload: PairingJoinPayload) => void | Promise<void>
 }
 
 function formatCountdown(ms: number): string {
@@ -34,10 +43,14 @@ function formatCountdown(ms: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
+function digitsOnly(raw: string): string {
+  return raw.replace(/\D/g, '').slice(0, 6)
+}
+
 export default function DiscoverPairingPanel({
   mode,
   onModeChange,
-  onSnapshot
+  onPairingJoined
 }: DiscoverPairingPanelProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
@@ -51,6 +64,8 @@ export default function DiscoverPairingPanel({
   const [peerFileLoading, setPeerFileLoading] = useState(false)
   const [netHelpOpen, setNetHelpOpen] = useState(false)
   const [countdownMs, setCountdownMs] = useState(0)
+  const [idleRole, setIdleRole] = useState<PairingIdleRole>('share')
+  const codeInputRef = useRef<InputRef>(null)
 
   useEffect(() => {
     if (mode === 'idle') {
@@ -59,7 +74,14 @@ export default function DiscoverPairingPanel({
       setCrossSubnet(false)
       setSubnetScan(false)
       setUnicastHost('')
+      setIdleRole('share')
     }
+  }, [mode])
+
+  useEffect(() => {
+    if (mode !== 'find') return
+    const id = window.setTimeout(() => codeInputRef.current?.focus(), 0)
+    return () => window.clearTimeout(id)
   }, [mode])
 
   useEffect(() => {
@@ -106,30 +128,48 @@ export default function DiscoverPairingPanel({
     }
   }
 
-  const handleFind = async (): Promise<void> => {
-    const code = findCode.trim()
-    if (!code) return
-    setFindLoading(true)
-    try {
-      const result = await getLanpmApi().pairing.join({
-        code,
-        crossSubnet,
-        unicastHost: crossSubnet ? unicastHost.trim() || undefined : undefined,
-        subnetScan: crossSubnet ? subnetScan : undefined
-      })
-      onSnapshot(result.snapshot)
-      message.success(
-        t('discover.pairingJoinSuccess', {
-          name: result.join.displayName,
-          count: result.join.groupIds.length
+  const runFind = useCallback(
+    async (codeRaw: string): Promise<void> => {
+      const code = digitsOnly(codeRaw)
+      if (code.length < 6) return
+      setFindLoading(true)
+      try {
+        const result = await getLanpmApi().pairing.join({
+          code,
+          crossSubnet,
+          unicastHost: crossSubnet ? unicastHost.trim() || undefined : undefined,
+          subnetScan: crossSubnet ? subnetScan : undefined
         })
-      )
-      onModeChange('idle')
-    } catch (err) {
-      message.error(formatError(err, 'discover.pairingJoinFailed'))
-    } finally {
-      setFindLoading(false)
-    }
+        await onPairingJoined({
+          snapshot: result.snapshot,
+          peerName: result.join.displayName,
+          groupCount: result.join.groupIds.length
+        })
+        onModeChange('idle')
+      } catch (err) {
+        message.error(formatError(err, 'discover.pairingJoinFailed'))
+      } finally {
+        setFindLoading(false)
+      }
+    },
+    [crossSubnet, subnetScan, unicastHost, formatError, message, onModeChange, onPairingJoined]
+  )
+
+  const handleFind = (): void => {
+    void runFind(findCode)
+  }
+
+  const handleCodeChange = (raw: string): void => {
+    setFindCode(digitsOnly(raw))
+  }
+
+  const handleCodePaste = (e: React.ClipboardEvent<HTMLInputElement>): void => {
+    const pasted = e.clipboardData.getData('text')
+    const code = digitsOnly(pasted)
+    if (code.length !== 6) return
+    e.preventDefault()
+    setFindCode(code)
+    void runFind(code)
   }
 
   const handleExportPeerFile = async (): Promise<void> => {
@@ -145,57 +185,64 @@ export default function DiscoverPairingPanel({
     }
   }
 
-  const handleImportPeerFile = async (): Promise<void> => {
-    setPeerFileLoading(true)
-    try {
-      const result = await getLanpmApi().pairing.importPeerFileDialog()
-      if (!result) return
-      onSnapshot(result.snapshot)
-      message.success(
-        t('discover.peerFileImportSuccess', { name: result.file.displayName })
-      )
-      onModeChange('idle')
-    } catch (err) {
-      message.error(formatError(err, 'discover.peerFileImportFailed'))
-    } finally {
-      setPeerFileLoading(false)
-    }
-  }
-
   const netHelpModal = (
     <NetworkHelpModal open={netHelpOpen} onClose={() => setNetHelpOpen(false)} />
   )
 
   const netHelpLink = (
-    <Button type="link" size="small" className={styles.netHelpLink} onClick={() => setNetHelpOpen(true)} data-testid="discover-net-help-link">
+    <Button
+      type="link"
+      size="small"
+      className={styles.netHelpLink}
+      onClick={() => setNetHelpOpen(true)}
+      data-testid="discover-net-help-link"
+    >
       {t('discover.netHelpLink')}
     </Button>
+  )
+
+  const codesExplainer = (
+    <Alert
+      type="info"
+      showIcon
+      className={styles.codesExplainer}
+      message={t('discover.codesExplainer')}
+      data-testid="discover-codes-explainer"
+    />
   )
 
   if (mode === 'idle') {
     return (
       <>
-        <Space wrap className={styles.pairingActions}>
-        <Button
-          type="primary"
-          icon={<ShareAltOutlined />}
-          loading={shareLoading}
-          onClick={() => void handleStartShare()}
-          data-testid="discover-share-pairing"
-        >
-          {t('discover.sharePairingCode')}
-        </Button>
-        <Button icon={<LinkOutlined />} onClick={() => onModeChange('find')} data-testid="discover-find-pairing">
-          {t('discover.findGroupsByCode')}
-        </Button>
-        <Button
-          icon={<UploadOutlined />}
-          loading={peerFileLoading}
-          onClick={() => void handleImportPeerFile()}
-        >
-          {t('discover.importPeerFile')}
-        </Button>
-      </Space>
+        {codesExplainer}
+        <Segmented<PairingIdleRole>
+          className={styles.pairingRoleSegment}
+          block
+          value={idleRole}
+          onChange={(value) => {
+            const role = value as PairingIdleRole
+            setIdleRole(role)
+            if (role === 'join') onModeChange('find')
+          }}
+          options={[
+            { label: t('discover.pairingRoleShare'), value: 'share' },
+            { label: t('discover.pairingRoleJoin'), value: 'join' }
+          ]}
+          data-testid="discover-pairing-role"
+        />
+        {idleRole === 'share' ? (
+          <Button
+            type="primary"
+            icon={<ShareAltOutlined />}
+            loading={shareLoading}
+            onClick={() => void handleStartShare()}
+            data-testid="discover-share-pairing"
+            block
+            className={styles.pairingPrimaryAction}
+          >
+            {t('discover.sharePairingCode')}
+          </Button>
+        ) : null}
         {netHelpLink}
         {netHelpModal}
       </>
@@ -205,49 +252,53 @@ export default function DiscoverPairingPanel({
   if (mode === 'share' && session) {
     return (
       <>
-      <div className={styles.pairingPanel}>
-        <Title level={5} className={styles.pairingTitle}>
-          {t('discover.pairingShareTitle')}
-        </Title>
-        {netHelpLink}
-        <p className={styles.pairingCode} data-testid="discover-pairing-code-display">{session.codeDisplay}</p>
-        <Text type="secondary" className={styles.pairingMeta} data-testid="discover-pairing-share-meta">
-          {t('discover.pairingExpires', { time: formatCountdown(countdownMs) })}
-          {session.localIp ? (
-            <>
-              {' · '}
-              {session.localIpTail
-                ? t('discover.pairingHostTail', { tail: session.localIpTail, ip: session.localIp })
-                : session.localIp}
-            </>
-          ) : null}
-        </Text>
-        {session.groups.length > 0 ? (
-          <List
-            size="small"
-            className={styles.pairingGroupList}
-            dataSource={session.groups}
-            renderItem={(group) => (
-              <List.Item>
-                <Text>
-                  {group.name}{' '}
-                  <Tag className={styles.typeTag}>{t(GROUP_TYPE_KEYS[group.type])}</Tag>
-                </Text>
-              </List.Item>
-            )}
-          />
-        ) : (
-          <Alert type="info" showIcon message={t('discover.pairingNoDiscoverableGroups')} />
-        )}
-        <Button onClick={() => void cancelShare()}>{t('discover.pairingCancel')}</Button>
-        <Button
-          icon={<DownloadOutlined />}
-          loading={peerFileLoading}
-          onClick={() => void handleExportPeerFile()}
-        >
-          {t('discover.exportPeerFile')}
-        </Button>
-      </div>
+        <div className={styles.pairingPanel}>
+          <Title level={5} className={styles.pairingTitle}>
+            {t('discover.pairingShareTitle')}
+          </Title>
+          {netHelpLink}
+          <p className={styles.pairingCode} data-testid="discover-pairing-code-display">
+            {session.codeDisplay}
+          </p>
+          <Text type="secondary" className={styles.pairingMeta} data-testid="discover-pairing-share-meta">
+            {t('discover.pairingExpires', { time: formatCountdown(countdownMs) })}
+            {session.localIp ? (
+              <>
+                {' · '}
+                {session.localIpTail
+                  ? t('discover.pairingHostTail', { tail: session.localIpTail, ip: session.localIp })
+                  : session.localIp}
+              </>
+            ) : null}
+          </Text>
+          {session.groups.length > 0 ? (
+            <List
+              size="small"
+              className={styles.pairingGroupList}
+              dataSource={session.groups}
+              renderItem={(group) => (
+                <List.Item>
+                  <Text>
+                    {group.name}{' '}
+                    <Tag className={styles.typeTag}>{t(GROUP_TYPE_KEYS[group.type])}</Tag>
+                  </Text>
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Alert type="info" showIcon message={t('discover.pairingNoDiscoverableGroups')} />
+          )}
+          <Space wrap>
+            <Button onClick={() => void cancelShare()}>{t('discover.pairingCancel')}</Button>
+            <Button
+              icon={<DownloadOutlined />}
+              loading={peerFileLoading}
+              onClick={() => void handleExportPeerFile()}
+            >
+              {t('discover.exportPeerFile')}
+            </Button>
+          </Space>
+        </div>
         {netHelpModal}
       </>
     )
@@ -255,76 +306,84 @@ export default function DiscoverPairingPanel({
 
   return (
     <>
-    <div className={styles.pairingPanel}>
-      <Title level={5} className={styles.pairingTitle}>
-        {t('discover.pairingFindTitle')}
-      </Title>
-      {netHelpLink}
-      <Text type="secondary">{t('discover.pairingFindHint')}</Text>
-      <Input
-        className={styles.pairingCodeInput}
-        placeholder={t('discover.pairingCodePlaceholder')}
-        value={findCode}
-        onChange={(e) => setFindCode(e.target.value)}
-        onPressEnter={() => void handleFind()}
-        maxLength={8}
-        data-testid="discover-pairing-code-input"
-      />
-      <Checkbox checked={crossSubnet} onChange={(e) => setCrossSubnet(e.target.checked)} data-testid="discover-pairing-cross-subnet">
-        {t('discover.pairingCrossSubnet')}
-      </Checkbox>
-      {crossSubnet ? (
-        <Text type="secondary" className={styles.seedsHint}>
-          {t('discover.pairingRouteHint')}
-        </Text>
-      ) : null}
-      {crossSubnet ? (
-        <Collapse
-          ghost
-          size="small"
-          items={[
-            {
-              key: 'advanced-host',
-              label: t('discover.pairingAdvancedHost'),
-              children: (
-                <>
-                  <Checkbox
-                    checked={subnetScan}
-                    onChange={(e) => setSubnetScan(e.target.checked)}
-                  >
-                    {t('discover.pairingSubnetScan')}
-                  </Checkbox>
-                  <Text type="secondary" className={styles.seedsHint}>
-                    {t('discover.pairingSubnetScanHint')}
-                  </Text>
-                  <Input
-                    placeholder={t('discover.pairingHostPlaceholder')}
-                    value={unicastHost}
-                    onChange={(e) => setUnicastHost(e.target.value)}
-                    onPressEnter={() => void handleFind()}
-                    data-testid="discover-pairing-unicast-host"
-                  />
-                  <Text type="secondary" className={styles.seedsHint}>
-                    {t('discover.pairingTailHint')}
-                  </Text>
-                </>
-              )
-            }
-          ]}
+      <div className={styles.pairingPanel}>
+        <Title level={5} className={styles.pairingTitle}>
+          {t('discover.pairingFindTitle')}
+        </Title>
+        {netHelpLink}
+        <Text type="secondary">{t('discover.pairingFindHint')}</Text>
+        <Input
+          ref={codeInputRef}
+          className={styles.pairingCodeInput}
+          placeholder={t('discover.pairingCodePlaceholder')}
+          value={findCode}
+          onChange={(e) => handleCodeChange(e.target.value)}
+          onPaste={handleCodePaste}
+          onPressEnter={() => void handleFind()}
+          maxLength={8}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          data-testid="discover-pairing-code-input"
         />
-      ) : null}
-      <Space>
-        <Button
-          type="primary"
-          loading={findLoading}
-          onClick={() => void handleFind()}
-          data-testid="discover-pairing-connect"
+        <Checkbox
+          checked={crossSubnet}
+          onChange={(e) => setCrossSubnet(e.target.checked)}
+          data-testid="discover-pairing-cross-subnet"
         >
-          {t('discover.pairingConnect')}
-        </Button>
-        <Button onClick={() => onModeChange('idle')}>{t('common.cancel')}</Button>
-      </Space>
-    </div>
+          {t('discover.pairingCrossSubnet')}
+        </Checkbox>
+        {crossSubnet ? (
+          <>
+            <Text type="secondary" className={styles.seedsHint}>
+              {t('discover.pairingRouteHint')}
+            </Text>
+            <Input
+              placeholder={t('discover.pairingHostPlaceholder')}
+              value={unicastHost}
+              onChange={(e) => setUnicastHost(e.target.value)}
+              onPressEnter={() => void handleFind()}
+              data-testid="discover-pairing-unicast-host"
+            />
+            <Text type="secondary" className={styles.seedsHint}>
+              {t('discover.pairingTailHint')}
+            </Text>
+            <Collapse
+              ghost
+              size="small"
+              items={[
+                {
+                  key: 'subnet-scan',
+                  label: t('discover.pairingMoreOptions'),
+                  children: (
+                    <>
+                      <Checkbox
+                        checked={subnetScan}
+                        onChange={(e) => setSubnetScan(e.target.checked)}
+                      >
+                        {t('discover.pairingSubnetScan')}
+                      </Checkbox>
+                      <Text type="secondary" className={styles.seedsHint}>
+                        {t('discover.pairingSubnetScanHint')}
+                      </Text>
+                    </>
+                  )
+                }
+              ]}
+            />
+          </>
+        ) : null}
+        <Space>
+          <Button
+            type="primary"
+            loading={findLoading}
+            onClick={() => void handleFind()}
+            data-testid="discover-pairing-connect"
+          >
+            {t('discover.pairingConnect')}
+          </Button>
+          <Button onClick={() => onModeChange('idle')}>{t('common.cancel')}</Button>
+        </Space>
+      </div>
       {netHelpModal}
     </>
   )

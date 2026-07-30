@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Button, Progress, Space, Typography } from 'antd'
+import { Button, Alert, Progress, Space, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   ArrowLeftOutlined,
+  CompassOutlined,
   CopyOutlined,
   DownOutlined,
   KeyOutlined,
@@ -18,6 +19,7 @@ import { resolveDeptDoneCount } from '@shared/cockpit/departmentStats'
 import { formatWeekOverWeekDelta } from '@shared/cockpit/weeklyTrend'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { useUiStore } from '@renderer/stores/uiStore'
 import { cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
@@ -133,6 +135,7 @@ export default function CockpitView(): React.ReactElement {
   const location = useLocation()
   const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
+  const groups = useNavigationStore((s) => s.groups)
   const getActiveGroup = useNavigationStore((s) => s.getActiveGroup)
   const activeGroup = getActiveGroup()
   const returnToActiveProject = () =>
@@ -395,6 +398,26 @@ export default function CockpitView(): React.ReactElement {
           </Space>
         }
       />
+
+      {groups.length === 0 ? (
+        <Alert
+          type="info"
+          showIcon
+          className={styles.emptyGroupsBanner}
+          message={t('discover.cockpitNoGroupsTitle')}
+          description={t('discover.cockpitNoGroupsHint')}
+          action={
+            <Button
+              type="primary"
+              icon={<CompassOutlined />}
+              onClick={() => useUiStore.getState().requestDiscoverOpen()}
+              data-testid="cockpit-join-with-code"
+            >
+              {t('discover.cockpitJoinWithCode')}
+            </Button>
+          }
+        />
+      ) : null}
 
       <div className={styles.scrollBody} data-lanpm-view-scroll>
       <div

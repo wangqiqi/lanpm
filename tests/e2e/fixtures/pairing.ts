@@ -39,6 +39,12 @@ export type CrossSubnetJoinOptions = {
   unicastHost?: string
 }
 
+async function selectJoinRole(dialog: ReturnType<typeof discoverDialog>): Promise<void> {
+  const role = dialog.getByTestId('discover-pairing-role')
+  await role.getByText(/加入|Join/i).click()
+  await expect(dialog.getByTestId('discover-pairing-code-input')).toBeVisible()
+}
+
 async function fillFindPairingCode(dialog: ReturnType<typeof discoverDialog>, code: string): Promise<void> {
   const input = dialog.getByTestId('discover-pairing-code-input')
   await expect(input).toBeVisible()
@@ -46,8 +52,10 @@ async function fillFindPairingCode(dialog: ReturnType<typeof discoverDialog>, co
 }
 
 async function expandAdvancedHost(dialog: ReturnType<typeof discoverDialog>): Promise<void> {
-  const header = dialog.getByText(/高级.*IP|Advanced.*IP/i)
-  await header.click()
+  const crossSubnet = dialog.getByTestId('discover-pairing-cross-subnet')
+  if (!(await crossSubnet.isChecked())) {
+    await crossSubnet.check()
+  }
   await expect(dialog.getByTestId('discover-pairing-unicast-host')).toBeVisible()
 }
 
@@ -55,7 +63,7 @@ async function expandAdvancedHost(dialog: ReturnType<typeof discoverDialog>): Pr
 export async function joinWithPairingCode(page: Page, code: string): Promise<void> {
   await openDiscoverModal(page)
   const dialog = discoverDialog(page)
-  await dialog.getByTestId('discover-find-pairing').click()
+  await selectJoinRole(dialog)
   await fillFindPairingCode(dialog, code)
   await dialog.getByTestId('discover-pairing-connect').click()
 }
@@ -68,7 +76,7 @@ export async function joinWithPairingCodeCrossSubnet(
 ): Promise<void> {
   await openDiscoverModal(page)
   const dialog = discoverDialog(page)
-  await dialog.getByTestId('discover-find-pairing').click()
+  await selectJoinRole(dialog)
   const crossSubnet = dialog.getByTestId('discover-pairing-cross-subnet')
   await crossSubnet.check()
   await expect(crossSubnet).toBeChecked()

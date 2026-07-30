@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { useUiStore } from '@renderer/stores/uiStore'
 import { cockpitPath, groupViewPath, pickDefaultGroupId } from '@renderer/routes/paths'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 
@@ -16,6 +17,7 @@ export default function HomeRedirect(): React.ReactElement {
     if (redirectedRef.current) return
     redirectedRef.current = true
     if (groups.length === 0) {
+      useUiStore.getState().requestDiscoverOpen()
       navigate(cockpitPath(), { replace: true })
       return
     }

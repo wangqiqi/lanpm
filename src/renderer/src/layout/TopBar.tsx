@@ -101,6 +101,8 @@ export default function TopBar(): React.ReactElement {
   const openAssistant = useAiAssistantStore((s) => s.openAssistant)
   const refreshBadges = useBadgeStore((s) => s.refresh)
   const isPinned = useGroupPinStore((s) => s.isPinned)
+  const discoverOpenPending = useUiStore((s) => s.discoverOpenPending)
+  const ackDiscoverOpen = useUiStore((s) => s.ackDiscoverOpen)
 
   const refreshGroupActivity = (): void => {
     void getLanpmApi()
@@ -108,6 +110,12 @@ export default function TopBar(): React.ReactElement {
       .then(setLastActivity)
       .catch(() => setLastActivity({}))
   }
+
+  useEffect(() => {
+    if (!discoverOpenPending) return
+    setDiscoverOpen(true)
+    ackDiscoverOpen()
+  }, [discoverOpenPending, ackDiscoverOpen])
 
   useEffect(() => {
     void refreshNetwork()
@@ -518,11 +526,6 @@ export default function TopBar(): React.ReactElement {
                 label: t('topbar.networkOffline'),
                 disabled: networkLoading,
                 onClick: () => void reconnectNetwork()
-              },
-              {
-                key: 'manual',
-                label: t('topbar.addManualPeer'),
-                onClick: () => setManualPeerOpen(true)
               }
             ]
           }}

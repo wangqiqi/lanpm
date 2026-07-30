@@ -91,6 +91,18 @@
   margin-bottom: 12px;
 }
 
+.codesExplainer {
+  margin-bottom: 10px;
+}
+
+.pairingRoleSegment {
+  margin-bottom: 10px;
+}
+
+.pairingPrimaryAction {
+  margin-bottom: 4px;
+}
+
 .pairingPanel {
   display: flex;
   flex-direction: column;

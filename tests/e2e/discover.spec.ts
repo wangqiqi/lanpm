@@ -17,7 +17,8 @@ test.describe('discover modal E2E', () => {
     await openDiscoverModal(appPage)
     const dialog = discoverDialog(appPage)
     await expect(dialog.getByTestId('discover-share-pairing')).toBeVisible()
-    await expect(dialog.getByTestId('discover-find-pairing')).toBeVisible()
+    await expect(dialog.getByTestId('discover-pairing-role')).toBeVisible()
+    await expect(dialog.getByTestId('discover-codes-explainer')).toBeVisible()
   })
 
   test('share pairing code shows formatted code', async ({ appPage }) => {
@@ -34,7 +35,7 @@ test.describe('discover modal E2E', () => {
   test('find pairing form and cross-subnet toggle', async ({ appPage }) => {
     await openDiscoverModal(appPage)
     const dialog = discoverDialog(appPage)
-    await dialog.getByTestId('discover-find-pairing').click()
+    await dialog.getByTestId('discover-pairing-role').getByText(/加入|Join/i).click()
     const input = dialog.getByPlaceholder('例如 847 293')
     await expect(input).toBeVisible()
     await input.fill('123456')

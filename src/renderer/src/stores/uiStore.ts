@@ -34,12 +34,16 @@ interface UiState {
   tagColorOverridesByGroup: Record<string, Record<string, string>>
   /** Whiteboard immersive chrome-off mode */
   whiteboardZen: boolean
+  /** TopBar 应打开发现弹窗（零群组首启等） */
+  discoverOpenPending: boolean
   setTheme: (theme: ThemeMode) => void
   toggleTheme: () => void
   setLocale: (locale: 'zh-CN' | 'en-US') => void
   setBoardShowAllFsLines: (on: boolean) => void
   setTagColorOverride: (groupId: string, tagKey: string, color: string | null) => void
   setWhiteboardZen: (on: boolean) => void
+  requestDiscoverOpen: () => void
+  ackDiscoverOpen: () => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -48,6 +52,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   boardShowAllFsLines: readBoardShowAllFsLines(),
   tagColorOverridesByGroup: readTagColorOverrides(),
   whiteboardZen: false,
+  discoverOpenPending: false,
   setTheme: (theme) => {
     localStorage.setItem('theme', theme)
     set({ theme })
@@ -82,7 +87,9 @@ export const useUiStore = create<UiState>((set, get) => ({
     localStorage.setItem('board.tagColorOverrides', JSON.stringify(next))
     set({ tagColorOverridesByGroup: next })
   },
-  setWhiteboardZen: (on) => set({ whiteboardZen: on })
+  setWhiteboardZen: (on) => set({ whiteboardZen: on }),
+  requestDiscoverOpen: () => set({ discoverOpenPending: true }),
+  ackDiscoverOpen: () => set({ discoverOpenPending: false })
 }))
 
 /** AUTO-20：无头截图在同一会话内切换主题时同步 Ant ConfigProvider */

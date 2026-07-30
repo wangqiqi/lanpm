@@ -8,6 +8,11 @@
   overflow: hidden;
 }
 
+.emptyGroupsBanner {
+  margin: 0 0 12px;
+  flex-shrink: 0;
+}
+
 .scrollBody {
   display: flex;
   flex-direction: column;
