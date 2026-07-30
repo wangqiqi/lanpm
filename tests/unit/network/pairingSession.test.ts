@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { PairingSessionHost } from '../../../src/main/network/real/pairingSession'
 import {
   formatPairingCode,
+  isPairingLookupRateLimited,
   normalizePairingCode,
+  PAIRING_LOOKUP_RATE_WINDOW_MS,
   PAIRING_TTL_MS
 } from '../../../src/shared/network/pairingTypes'
 
@@ -43,6 +45,27 @@ describe('pairingSession', () => {
       joinerDisplayName: 'Joiner 2'
     })
     expect(again).toBeNull()
+  })
+
+  it('rate-limits lookups per joiner per minute', () => {
+    const host = new PairingSessionHost(identity)
+    host.start()
+    for (let i = 0; i < 4; i++) {
+      expect(
+        host.handleResolve({
+          code: '000000',
+          joinerDeviceId: 'dev_spam',
+          joinerDisplayName: 'Spam'
+        })
+      ).toEqual({ status: 'fail', reason: 'mismatch' })
+    }
+    expect(
+      host.handleResolve({
+        code: '000000',
+        joinerDeviceId: 'dev_spam',
+        joinerDisplayName: 'Spam'
+      })
+    ).toEqual({ status: 'fail', reason: 'rate_limit' })
   })
 
   it('rejects wrong code and locks after repeated failures', () => {
@@ -91,6 +114,15 @@ describe('pairingTypes', () => {
   it('normalizes pairing code input', () => {
     expect(normalizePairingCode('847 293')).toBe('847293')
     expect(normalizePairingCode('84')).toBe('000084')
+  })
+
+  it('detects per-minute lookup rate limit', () => {
+    const now = 1_000_000
+    const stamps = Array.from({ length: 12 }, (_, i) => now - i * 1000)
+    expect(isPairingLookupRateLimited(stamps, now)).toBe(true)
+    expect(isPairingLookupRateLimited(stamps, now + PAIRING_LOOKUP_RATE_WINDOW_MS + 1)).toBe(
+      false
+    )
   })
 })
 

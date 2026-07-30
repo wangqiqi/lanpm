@@ -12,6 +12,18 @@ export const PAIRING_LOOKUP_TIMEOUT_MS = 8_000
 export const PAIRING_RESOLVE_TIMEOUT_MS = 8_000
 /** 单加入方对同一码的失败上限 */
 export const MAX_PAIRING_FAIL_PER_JOINER = 5
+/** 单加入方每分钟 lookup/resolve 次数上限（含错误码） */
+export const MAX_PAIRING_LOOKUPS_PER_JOINER_PER_MINUTE = 12
+export const PAIRING_LOOKUP_RATE_WINDOW_MS = 60_000
+
+export function isPairingLookupRateLimited(
+  recentTimestamps: number[],
+  now: number,
+  maxPerMinute: number = MAX_PAIRING_LOOKUPS_PER_JOINER_PER_MINUTE
+): boolean {
+  const recent = recentTimestamps.filter((t) => now - t < PAIRING_LOOKUP_RATE_WINDOW_MS)
+  return recent.length >= maxPerMinute
+}
 
 export interface PairingOfferBody {
   code: string

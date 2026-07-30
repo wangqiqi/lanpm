@@ -67,6 +67,7 @@
     "verify:pairing-udp": "node --experimental-strip-types tests/integration/verify-pairing-udp.ts",
     "verify:pairing-tcp": "node --experimental-strip-types tests/integration/verify-pairing-tcp.ts",
     "verify:pairing-cross-subnet": "node --experimental-strip-types tests/integration/verify-pairing-cross-subnet.ts && vitest run tests/unit/network/pairingHostResolve.test.ts",
+    "verify:pairing-security": "node --experimental-strip-types tests/static/verify-pairing-security.ts && vitest run tests/unit/network/pairingSession.test.ts",
     "verify:discover-relay": "node --experimental-strip-types tests/integration/verify-discover-relay.ts",
     "verify:discover-seeds-restart": "node --experimental-strip-types tests/integration/verify-discover-seeds-restart.ts",
     "verify:join-request": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-join-request.ts",

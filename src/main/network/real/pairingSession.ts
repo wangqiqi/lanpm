@@ -6,9 +6,9 @@ import {
   MAX_PAIRING_FAIL_PER_JOINER,
   normalizePairingCode,
   PAIRING_TTL_MS,
+  isPairingLookupRateLimited,
   type PairingFoundBody,
   type PairingLookupBody,
-  type PairingOfferBody,
   type PairingResolveFailReason
 } from '../../../shared/network/pairingTypes.ts'
 
@@ -35,6 +35,7 @@ interface ActiveSession {
   expiresAt: number
   consumed: boolean
   failCounts: Map<string, number>
+  lookupTimestamps: Map<string, number[]>
 }
 
 /** 发起方「分享群组连接码」会话 */
@@ -56,7 +57,8 @@ export class PairingSessionHost {
       code,
       expiresAt,
       consumed: false,
-      failCounts: new Map()
+      failCounts: new Map(),
+      lookupTimestamps: new Map()
     }
     const groups = this.identity.getGroups()
     return {
@@ -111,6 +113,14 @@ export class PairingSessionHost {
     if (s.consumed) {
       return { status: 'fail', reason: 'expired' }
     }
+
+    const joinerId = lookup.joinerDeviceId
+    const now = Date.now()
+    const recent = s.lookupTimestamps.get(joinerId) ?? []
+    if (isPairingLookupRateLimited(recent, now)) {
+      return { status: 'fail', reason: 'rate_limit' }
+    }
+    s.lookupTimestamps.set(joinerId, [...recent, now])
 
     const normalized = normalizePairingCode(lookup.code)
     if (normalized !== s.code) {
