@@ -27,6 +27,7 @@ export interface PeerLinkOptions {
   keys: DhKeyPair
   onEnvelope: (envelope: SyncEnvelope) => void
   onPeerIdentified?: (peer: TcpPeerIdentity) => void
+  onPeerAdvert?: (peer: TcpPeerIdentity) => void
   onReady?: (peer: TcpPeerIdentity) => void
   onClose: () => void
   onDiscoverRelay?: (packet: DiscoverRelayPacket, fromDeviceId: string) => void
@@ -347,6 +348,9 @@ export class PeerLink {
 
     if (msg.kind === 'peer_advert' && this.state === 'ready') {
       this.rememberRemote(msg)
+      if (this.remoteProfile) {
+        this.opts.onPeerAdvert?.(this.remoteProfile)
+      }
       return
     }
 

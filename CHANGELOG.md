@@ -10,6 +10,7 @@
 - **TCP `pairing_resolve` 兜底（TASK-PAIR-02）**：`pairing_resolve` / `pairing_resolve_ok` / `pairing_resolve_fail` wire 消息；`PeerLink.connectHostWithPairing`；`connectManualHostWithPairing`；跨网段 UDP 失败时凭 IP+码 建链；`verify:pairing-tcp`
 - **IPC pairing + preload（TASK-PAIR-03）**：`PAIRING_IPC`（`pairing:start` / `pairing:cancel` / `pairing:join`）；`pairingService` 包装 transport；join 成功后写发现种子并刷新 snapshot；`verify:ipc-contract`
 - **发现中继 `discover_relay`（TASK-PAIR-09）**：TCP 对端周期互推 peers/groups/seeds；`hop`≤2 转发；合并 `discoverGroupRegistry` 并自动连种子；`verify:discover-relay`
+- **种子重连与群组缓存（TASK-PAIR-06）**：启动/发现时连接种子并等待 `peer_advert` 填充缓存；中继新种子持久化；`verify:discover-seeds-restart`
 
 ## [1.41.5] - 2026-07-29
 

@@ -57,6 +57,8 @@ export interface RealNetworkOptions {
   disableUdp?: boolean
   /** 持久化发现种子（host:port），用于 discover_relay */
   getRelaySeeds?: () => string[]
+  /** 从中继学到的新种子写入持久化（由 main 注入） */
+  onRelaySeedsLearned?: (addresses: string[]) => void
 }
 
 export class RealNetworkTransport implements NetworkTransport {
@@ -67,6 +69,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly listenPort: number
   private readonly disableUdp: boolean
   private readonly getRelaySeeds: (() => string[]) | undefined
+  private readonly onRelaySeedsLearned: ((addresses: string[]) => void) | undefined
   private readonly dedup = new MessageDedup()
   private readonly lamport = new LamportClock()
   private readonly subscriptions = new Map<string, Set<EnvelopeHandler>>()
@@ -95,6 +98,7 @@ export class RealNetworkTransport implements NetworkTransport {
     this.listenPort = options.listenPort ?? 43_124
     this.disableUdp = options.disableUdp ?? false
     this.getRelaySeeds = options.getRelaySeeds
+    this.onRelaySeedsLearned = options.onRelaySeedsLearned
     this.pairingHost = new PairingSessionHost({
       deviceId: this.deviceId,
       userId: this.userId,
@@ -140,6 +144,9 @@ export class RealNetworkTransport implements NetworkTransport {
       keys: generateDhKeyPair(),
       onEnvelope: options.onEnvelope,
       onPeerIdentified: (peer) => {
+        this.registerTcpPeer({ ...peer, host: peer.host ?? remoteHost })
+      },
+      onPeerAdvert: (peer) => {
         this.registerTcpPeer({ ...peer, host: peer.host ?? remoteHost })
       },
       onReady: (peer) => {
@@ -641,6 +648,9 @@ export class RealNetworkTransport implements NetworkTransport {
     applyRelayGroups(packet.groups)
 
     const newSeeds = collectNewSeedAddresses(packet.seeds, this.knownSeedAddresses)
+    if (newSeeds.length > 0) {
+      this.onRelaySeedsLearned?.(newSeeds)
+    }
     for (const address of newSeeds) {
       try {
         const { host, port } = parseHostPort(address)

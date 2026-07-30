@@ -3,6 +3,7 @@ import type { DiscoverHealthView, DiscoverSnapshot } from '../../shared/discover
 import { evaluateDiscoveryHealth } from '../../shared/discover/discoveryHealth'
 import {
   DISCOVER_SEEDS_META_KEY,
+  addDiscoverSeed,
   normalizeDiscoverSeeds
 } from '../../shared/discover/discoverSeeds'
 import { parseHostPort } from '../../shared/network/manualPeer'
@@ -33,7 +34,29 @@ export function setDiscoverSeeds(db: Database, seeds: unknown): string[] {
   return next
 }
 
-async function tryConnectSeeds(seeds: string[]): Promise<void> {
+export function appendDiscoverSeeds(db: Database, addresses: string[]): string[] {
+  let next = loadSeeds(db)
+  for (const address of addresses) {
+    next = addDiscoverSeed(next, address)
+  }
+  return setDiscoverSeeds(db, next)
+}
+
+const SEED_CACHE_WAIT_MS = 2_500
+const SEED_CACHE_POLL_MS = 100
+
+async function waitForDiscoverGroups(minCount: number, timeoutMs: number): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    if (listCachedDiscoverGroups().length >= minCount) return
+    await new Promise((resolve) => setTimeout(resolve, SEED_CACHE_POLL_MS))
+  }
+}
+
+async function tryConnectSeeds(
+  seeds: string[],
+  options?: { waitForGroups?: boolean }
+): Promise<void> {
   for (const address of seeds) {
     try {
       const { host, port } = parseHostPort(address)
@@ -43,13 +66,19 @@ async function tryConnectSeeds(seeds: string[]): Promise<void> {
       console.warn('[lanpm] discover seed connect failed:', address, msg)
     }
   }
+  if (options?.waitForGroups && seeds.length > 0) {
+    await waitForDiscoverGroups(1, SEED_CACHE_WAIT_MS)
+  }
 }
 
 /** 网络就绪后自动连接已保存的发现种子（跨子网 / VPN） */
-export async function connectDiscoverSeeds(db: Database): Promise<void> {
+export async function connectDiscoverSeeds(
+  db: Database,
+  options?: { waitForGroups?: boolean }
+): Promise<void> {
   const seeds = loadSeeds(db)
   if (seeds.length === 0) return
-  await tryConnectSeeds(seeds)
+  await tryConnectSeeds(seeds, options)
 }
 
 function buildHealth(input: {
@@ -104,7 +133,8 @@ export async function fetchDiscoverSnapshot(
   const seeds = loadSeeds(db)
 
   if (options?.connectSeeds !== false && seeds.length > 0) {
-    await tryConnectSeeds(seeds)
+    const hadGroups = listCachedDiscoverGroups().length > 0
+    await tryConnectSeeds(seeds, { waitForGroups: !hadGroups })
   }
 
   const transport = getNetworkTransport()

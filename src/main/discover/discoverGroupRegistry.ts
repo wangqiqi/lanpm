@@ -45,3 +45,8 @@ export function getCachedGroup(groupId: string): CachedGroup | undefined {
   }
   return entry
 }
+
+/** 集成测试：模拟进程重启后内存缓存清空 */
+export function clearDiscoverGroupCacheForTests(): void {
+  cache.clear()
+}
