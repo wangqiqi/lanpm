@@ -1,9 +1,12 @@
 import dgram from 'node:dgram'
 import type { DiscoveryPayload } from '../../../shared/network/types.ts'
 import { DISCOVERY_INTERVAL_MS, PEER_TTL_MS, UDP_DISCOVERY_PORT, UDP_MULTICAST_ADDR } from '../../../shared/network/constants.ts'
+import type { PairingFoundBody } from '../../../shared/network/pairingTypes.ts'
 import { getLocalLanIp, resolvePeerHost } from '../localIp.ts'
 import { rememberPeerGroups } from '../../discover/discoverGroupRegistry.ts'
 import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
+import type { PairingSessionHost } from './pairingSession.ts'
+import { PairingUdpController } from './pairingUdp.ts'
 
 export interface UdpDiscoveryOptions {
   deviceId: string
@@ -12,6 +15,8 @@ export interface UdpDiscoveryOptions {
   listenPort: number
   capabilities?: string[]
   onPeer: (peer: DiscoveryPayload) => void
+  /** 可选：发起方配对会话 */
+  pairingHost?: PairingSessionHost
 }
 
 export interface UdpDiscoveryDiagnostics {
@@ -30,6 +35,7 @@ export class UdpDiscovery {
   private readonly opts: UdpDiscoveryOptions
   private readonly peers = new Map<string, PeerCacheEntry>()
   private readonly disableMulticast: boolean
+  private pairingController: PairingUdpController | null = null
   private socket: dgram.Socket | null = null
   private broadcastTimer: ReturnType<typeof setInterval> | null = null
   private pruneTimer: ReturnType<typeof setInterval> | null = null
@@ -41,6 +47,21 @@ export class UdpDiscovery {
     this.opts = opts
     this.disableMulticast = process.env.LANPM_DISABLE_MULTICAST === '1'
     this.multicastOk = this.disableMulticast ? null : true
+    if (opts.pairingHost) {
+      this.pairingController = new PairingUdpController(
+        () => this.socket,
+        this.disableMulticast,
+        opts.pairingHost,
+        { deviceId: opts.deviceId, displayName: opts.displayName }
+      )
+    } else {
+      this.pairingController = new PairingUdpController(
+        () => this.socket,
+        this.disableMulticast,
+        null,
+        { deviceId: opts.deviceId, displayName: opts.displayName }
+      )
+    }
   }
 
   start(): void {
@@ -49,6 +70,7 @@ export class UdpDiscovery {
     this.socket = socket
 
     socket.on('message', (buf, rinfo) => {
+      if (this.pairingController?.handleMessage(buf, rinfo)) return
       try {
         const packet = JSON.parse(buf.toString('utf8')) as {
           v?: number
@@ -95,6 +117,8 @@ export class UdpDiscovery {
     if (this.pruneTimer) clearInterval(this.pruneTimer)
     this.broadcastTimer = null
     this.pruneTimer = null
+    this.pairingController?.stopOfferBroadcast()
+    this.pairingController?.cancelPendingLookup()
     this.socket?.close()
     this.socket = null
     this.peers.clear()
@@ -114,6 +138,25 @@ export class UdpDiscovery {
       lastBroadcastError: this.lastBroadcastError,
       peerCount: this.peers.size
     }
+  }
+
+  startPairingOffers(): void {
+    this.pairingController?.startOfferBroadcast()
+  }
+
+  stopPairingOffers(): void {
+    this.pairingController?.stopOfferBroadcast()
+  }
+
+  lookupPairingCode(code: string, options?: { unicastHost?: string }): Promise<PairingFoundBody> {
+    if (!this.pairingController) {
+      return Promise.reject(new Error('pairing_udp_unavailable'))
+    }
+    return this.pairingController.lookupPairingCode(code, options)
+  }
+
+  cancelPairingLookup(): void {
+    this.pairingController?.cancelPendingLookup()
   }
 
   private payload(): DiscoveryPayload {

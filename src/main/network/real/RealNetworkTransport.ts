@@ -22,8 +22,16 @@ import {
   touchLocalDevice,
   touchRemoteHeartbeat
 } from '../../presence/presenceRegistry.ts'
+import { getLocalLanIp } from '../localIp.ts'
+import {
+  PairingSessionHost,
+  type PairingSessionView
+} from './pairingSession.ts'
+import { pairingFoundToDiscovery } from '../../../shared/network/pairingTypes.ts'
 import { createTcpServer, PeerLink, type TcpPeerIdentity } from './peerLink.ts'
 import { UdpDiscovery } from './udpDiscovery.ts'
+
+export type { PairingSessionView } from './pairingSession.ts'
 
 type EnvelopeHandler = (envelope: SyncEnvelope) => void
 
@@ -60,6 +68,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private tcpBindError: string | null = null
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private peerRefreshTimer: ReturnType<typeof setInterval> | null = null
+  private readonly pairingHost: PairingSessionHost
   private started = false
 
   constructor(options: RealNetworkOptions) {
@@ -69,6 +78,14 @@ export class RealNetworkTransport implements NetworkTransport {
     this.capabilities = options.capabilities ?? ['chat', 'file', 'task']
     this.listenPort = options.listenPort ?? 43_124
     this.disableUdp = options.disableUdp ?? false
+    this.pairingHost = new PairingSessionHost({
+      deviceId: this.deviceId,
+      userId: this.userId,
+      displayName: this.displayName,
+      listenPort: this.listenPort,
+      getGroups: () => getDiscoverableGroupsForAdvert(),
+      getHost: () => getLocalLanIp() ?? undefined
+    })
   }
 
   private registerTcpPeer(peer: TcpPeerIdentity): void {
@@ -154,7 +171,8 @@ export class RealNetworkTransport implements NetworkTransport {
         displayName: this.displayName,
         listenPort: this.listenPort,
         capabilities: this.capabilities,
-        onPeer: (peer) => this.onDiscoveredPeer(peer)
+        onPeer: (peer) => this.onDiscoveredPeer(peer),
+        pairingHost: this.pairingHost
       })
       this.discovery.start()
     }
@@ -173,6 +191,7 @@ export class RealNetworkTransport implements NetworkTransport {
     this.peerRefreshTimer = null
     this.discovery?.stop()
     this.discovery = null
+    this.pairingHost.cancel()
     for (const t of this.reconnectTimers.values()) clearTimeout(t)
     this.reconnectTimers.clear()
     for (const link of this.links.values()) link.close()
@@ -266,6 +285,44 @@ export class RealNetworkTransport implements NetworkTransport {
 
   async connectPeer(peer: DiscoveryPayload): Promise<void> {
     await this.ensureLink(peer)
+  }
+
+  /** 发起方：开始分享群组连接码 */
+  startPairingSession(): PairingSessionView {
+    if (!this.started) this.start()
+    if (!this.discovery) {
+      throw new Error('pairing_requires_udp')
+    }
+    const view = this.pairingHost.start()
+    this.discovery.startPairingOffers()
+    return view
+  }
+
+  /** 取消进行中的连接码分享 */
+  cancelPairingSession(): void {
+    this.pairingHost.cancel()
+    this.discovery?.stopPairingOffers()
+  }
+
+  /**
+   * 加入方：凭连接码查找对端并建立 TCP。
+   * @param unicastHost 跨网段时可单播到指定 IP
+   */
+  async joinWithPairingCode(
+    code: string,
+    options?: { unicastHost?: string }
+  ): Promise<DiscoveryPayload> {
+    if (!this.started) this.start()
+    if (!this.discovery) {
+      throw new Error('pairing_requires_udp')
+    }
+    const found = await this.discovery.lookupPairingCode(code, options)
+    const peer = pairingFoundToDiscovery(found, this.capabilities)
+    rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
+    touchDiscoveryPeer(peer)
+    await this.connectManualHost(peer.host, peer.listenPort)
+    this.tcpPeers.set(peer.deviceId, peer)
+    return peer
   }
 
   async connectManualHost(host: string, port: number): Promise<void> {
