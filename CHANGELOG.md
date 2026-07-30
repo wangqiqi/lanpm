@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.43.0] - 2026-07-30
+
+### Added
+
+- **路由表引导单播配对（SPRINT-PAIR-02）**：Win `route print` / Linux `ip route` 解析可达 `/24` 子网；`listRouteGuidedBroadcastAddresses` 合并路由前缀 + 网卡 + 种子；跨网段无 IP 时并行 `pairing_lookup` 到各子网 `.255`；`unicastHosts` 并行 UDP + TCP 逐 host 兜底；发现页跨网段默认只填码，IP/尾段收进高级折叠；`verify:pairing-route` 纳入 `verify:pairing-code`；`docs/配对码.md` §5.3 P1 ✅
+
 ## [1.42.0] - 2026-07-30
 
 ### Added

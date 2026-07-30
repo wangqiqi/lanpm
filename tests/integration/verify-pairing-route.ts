@@ -1,14 +1,14 @@
 /**
- * 跨网段配对：IP 尾段展开 + TCP pairing_resolve 兜底。
- * Run: npm run verify:pairing-cross-subnet
+ * 路由表引导单播配对（TASK-PAIR-15/17）。
+ * Run: npm run verify:pairing-route
  */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
 import { createServer } from 'node:net'
-import { readFileSync } from 'fs'
-import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { setDiscoverableGroupsProvider } from '../../src/main/discover/advertProvider.ts'
-import { buildPairingHostCandidates } from '../../src/shared/network/pairingHostResolve.ts'
+import { listRouteGuidedBroadcastAddresses } from '../../src/shared/network/routeGuidedResolve.ts'
 import { RealNetworkTransport } from '../../src/main/network/real/RealNetworkTransport.ts'
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -16,9 +16,21 @@ const pairingServiceSrc = readFileSync(
   join(projectRoot, 'src/main/discover/pairingService.ts'),
   'utf8'
 )
-assert.match(pairingServiceSrc, /buildPairingHostCandidates/)
-assert.match(pairingServiceSrc, /listRouteGuidedBroadcastAddresses/)
+const pairingUdpSrc = readFileSync(
+  join(projectRoot, 'src/main/network/real/pairingUdp.ts'),
+  'utf8'
+)
+
 assert.match(pairingServiceSrc, /listRouteSubnetPrefixes/)
+assert.match(pairingServiceSrc, /listRouteGuidedBroadcastAddresses/)
+assert.match(pairingUdpSrc, /unicastHosts/)
+
+const broadcasts = listRouteGuidedBroadcastAddresses({
+  routeSubnetPrefixes: ['192.168.20', '192.168.30'],
+  localLanIps: ['192.168.30.170'],
+  seedHosts: []
+})
+assert.deepEqual(broadcasts.sort(), ['192.168.20.255', '192.168.30.255'])
 
 function reservePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -38,29 +50,23 @@ function reservePort(): Promise<number> {
 }
 
 setDiscoverableGroupsProvider(() => [
-  { groupId: 'cross-subnet-group', name: '跨网段群', type: 'project' }
+  { groupId: 'route-pair-group', name: '路由配对群', type: 'project' }
 ])
-
-const candidates = buildPairingHostCandidates('1', {
-  localLanIps: ['127.0.0.1'],
-  seedHosts: ['192.168.20.109']
-})
-assert.deepEqual(candidates, ['127.0.0.1', '192.168.20.1'])
 
 const portA = await reservePort()
 const portB = await reservePort()
 
 const hostA = new RealNetworkTransport({
-  deviceId: 'dev_cross_host',
-  userId: 'user_cross_host',
-  displayName: 'Cross Host',
+  deviceId: 'dev_route_host',
+  userId: 'user_route_host',
+  displayName: 'Route Host',
   listenPort: portA,
   disableUdp: true
 })
 const hostB = new RealNetworkTransport({
-  deviceId: 'dev_cross_joiner',
-  userId: 'user_cross_joiner',
-  displayName: 'Cross Joiner',
+  deviceId: 'dev_route_joiner',
+  userId: 'user_route_joiner',
+  displayName: 'Route Joiner',
   listenPort: portB,
   disableUdp: true
 })
@@ -71,20 +77,12 @@ hostB.start()
 const session = hostA.startPairingSession()
 
 try {
-  let connected = false
-  for (const target of candidates) {
-    try {
-      const peer = await hostB.connectManualHostWithPairing(target, portA, session.code)
-      assert.equal(peer.userId, 'user_cross_host')
-      connected = true
-      break
-    } catch {
-      // try next candidate
-    }
-  }
-  assert.ok(connected, 'should connect via tail-expanded host 127.0.0.1')
-
-  console.log('verify:pairing-cross-subnet OK')
+  const peer = await hostB.joinWithPairingCode(session.code, {
+    unicastHosts: ['127.0.0.1'],
+    port: portA
+  })
+  assert.equal(peer.userId, 'user_route_host')
+  console.log('verify:pairing-route OK')
 } finally {
   hostA.stop()
   hostB.stop()

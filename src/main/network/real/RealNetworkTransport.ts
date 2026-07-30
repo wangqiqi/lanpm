@@ -409,15 +409,27 @@ export class RealNetworkTransport implements NetworkTransport {
    */
   async joinWithPairingCode(
     code: string,
-    options?: { unicastHost?: string; port?: number }
+    options?: { unicastHost?: string; unicastHosts?: string[]; port?: number }
   ): Promise<DiscoveryPayload> {
     if (!this.started) this.start()
 
+    const hosts =
+      options?.unicastHosts && options.unicastHosts.length > 0
+        ? options.unicastHosts
+        : options?.unicastHost
+          ? [options.unicastHost]
+          : undefined
+
     if (this.discovery) {
       try {
-        const found = await this.discovery.lookupPairingCode(code, {
-          unicastHost: options?.unicastHost
-        })
+        const found = await this.discovery.lookupPairingCode(
+          code,
+          hosts && hosts.length > 1
+            ? { unicastHosts: hosts }
+            : hosts?.length === 1
+              ? { unicastHost: hosts[0] }
+              : undefined
+        )
         const peer = pairingFoundToDiscovery(found, this.capabilities)
         rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
         touchDiscoveryPeer(peer)
@@ -425,16 +437,25 @@ export class RealNetworkTransport implements NetworkTransport {
         this.tcpPeers.set(peer.deviceId, peer)
         return peer
       } catch {
-        if (!options?.unicastHost) throw new Error('pairing_lookup_failed')
+        if (!hosts?.length) throw new Error('pairing_lookup_failed')
       }
     }
 
-    if (options?.unicastHost) {
-      return this.connectManualHostWithPairing(
-        options.unicastHost,
-        options.port ?? DEFAULT_TCP_LISTEN_PORT,
-        code
-      )
+    if (hosts?.length) {
+      let lastError: unknown
+      for (const host of hosts) {
+        try {
+          return await this.connectManualHostWithPairing(
+            host,
+            options?.port ?? DEFAULT_TCP_LISTEN_PORT,
+            code
+          )
+        } catch (err) {
+          lastError = err
+        }
+      }
+      if (lastError instanceof Error) throw lastError
+      throw new Error('pairing_lookup_failed')
     }
 
     throw new Error('pairing_requires_udp_or_host')

@@ -901,6 +901,8 @@ const zhCN = {
   'discover.pairingFindHint': '输入对方屏幕上的 6 位连接码',
   'discover.pairingCodePlaceholder': '例如 847 293',
   'discover.pairingCrossSubnet': '对方和我不在同一 WiFi（跨网段）',
+  'discover.pairingRouteHint': '通常只需连接码；将按本机路由表向各子网发送查找',
+  'discover.pairingAdvancedHost': '高级：指定 IP 或尾段',
   'discover.pairingHostPlaceholder': '对方 IP 或尾段，如 192.168.20.109 或 109',
   'discover.pairingTailHint': '可只填 IP 最后一段（如 109），将按本机网段与种子自动补全',
   'discover.pairingHostTail': '尾码 {tail}（{ip}）',

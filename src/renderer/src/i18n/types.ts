@@ -914,6 +914,8 @@ export type MessageKey =
   | 'discover.pairingFindHint'
   | 'discover.pairingCodePlaceholder'
   | 'discover.pairingCrossSubnet'
+  | 'discover.pairingRouteHint'
+  | 'discover.pairingAdvancedHost'
   | 'discover.pairingHostPlaceholder'
   | 'discover.pairingTailHint'
   | 'discover.pairingHostTail'

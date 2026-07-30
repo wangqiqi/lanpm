@@ -59,7 +59,10 @@ export class PairingUdpController {
     this.pendingLookup = null
   }
 
-  lookupPairingCode(code: string, options?: { unicastHost?: string }): Promise<PairingFoundBody> {
+  lookupPairingCode(
+    code: string,
+    options?: { unicastHost?: string; unicastHosts?: string[] }
+  ): Promise<PairingFoundBody> {
     this.cancelPendingLookup()
     const normalized = normalizePairingCode(code)
     const payload: PairingLookupBody = {
@@ -69,6 +72,13 @@ export class PairingUdpController {
     }
     const packet: PairingUdpPacket = { v: 1, kind: 'pairing_lookup', payload }
 
+    const hosts =
+      options?.unicastHosts && options.unicastHosts.length > 0
+        ? options.unicastHosts
+        : options?.unicastHost
+          ? [options.unicastHost]
+          : null
+
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingLookup = null
@@ -77,8 +87,10 @@ export class PairingUdpController {
 
       this.pendingLookup = { code: normalized, resolve, reject, timer }
 
-      if (options?.unicastHost) {
-        this.send(packet, options.unicastHost)
+      if (hosts) {
+        for (const host of hosts) {
+          this.send(packet, host)
+        }
       } else {
         this.broadcast(packet)
       }

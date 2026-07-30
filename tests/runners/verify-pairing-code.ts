@@ -8,6 +8,7 @@ const steps = [
   'verify:pairing-udp',
   'verify:pairing-tcp',
   'verify:pairing-cross-subnet',
+  'verify:pairing-route',
   'verify:pairing-security',
   'verify:discover-relay',
   'verify:discover-seeds-restart',

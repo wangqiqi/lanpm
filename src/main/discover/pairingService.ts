@@ -14,11 +14,12 @@ import { DEFAULT_TCP_LISTEN_PORT } from '../../shared/network/constants.ts'
 import { parseHostPort } from '../../shared/network/manualPeer'
 import {
   buildPairingHostCandidates,
-  hostTail,
-  listSubnetBroadcastAddresses
+  hostTail
 } from '../../shared/network/pairingHostResolve.ts'
+import { listRouteGuidedBroadcastAddresses } from '../../shared/network/routeGuidedResolve.ts'
 import { getNetworkTransport, RealNetworkTransport } from '../network'
 import { getLocalLanIp, listLanCandidates } from '../network/localIp'
+import { listRouteSubnetPrefixes } from '../network/routeTable.ts'
 import { fetchDiscoverSnapshot, setDiscoverSeeds } from './discoverService'
 import { getMeta } from '../storage/repositories/syncMetaRepository'
 
@@ -57,10 +58,10 @@ function pairingHostContext(db: Database): { localLanIps: string[]; seedHosts: s
   }
 }
 
-function resolveJoinTargets(
+async function resolveJoinTargets(
   db: Database,
   input: PairingJoinInput
-): { unicastHost?: string; port?: number }[] {
+): Promise<{ unicastHost?: string; unicastHosts?: string[]; port?: number }[]> {
   const ctx = pairingHostContext(db)
 
   if (!input.crossSubnet) {
@@ -78,10 +79,21 @@ function resolveJoinTargets(
     return hosts.map((unicastHost) => ({ unicastHost, port }))
   }
 
-  return listSubnetBroadcastAddresses(ctx.localLanIps).map((unicastHost) => ({
-    unicastHost,
-    port: input.port ?? DEFAULT_TCP_LISTEN_PORT
-  }))
+  const routePrefixes = await listRouteSubnetPrefixes()
+  const broadcasts = listRouteGuidedBroadcastAddresses({
+    routeSubnetPrefixes: routePrefixes,
+    localLanIps: ctx.localLanIps,
+    seedHosts: ctx.seedHosts
+  })
+  const port = input.port ?? DEFAULT_TCP_LISTEN_PORT
+
+  if (broadcasts.length > 1) {
+    return [{ unicastHosts: broadcasts, port }]
+  }
+  if (broadcasts.length === 1) {
+    return [{ unicastHost: broadcasts[0], port }]
+  }
+  return [{}]
 }
 
 export async function joinWithPairingCode(
@@ -94,7 +106,7 @@ export async function joinWithPairingCode(
   }
 
   const transport = requireRealTransport()
-  const targets = resolveJoinTargets(db, input)
+  const targets = await resolveJoinTargets(db, input)
   let lastError: unknown
 
   for (const target of targets) {

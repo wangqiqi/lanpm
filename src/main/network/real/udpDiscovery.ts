@@ -181,7 +181,10 @@ export class UdpDiscovery {
     this.groupInviteController?.cancelPendingLookup()
   }
 
-  lookupPairingCode(code: string, options?: { unicastHost?: string }): Promise<PairingFoundBody> {
+  lookupPairingCode(
+    code: string,
+    options?: { unicastHost?: string; unicastHosts?: string[] }
+  ): Promise<PairingFoundBody> {
     if (!this.pairingController) {
       return Promise.reject(new Error('pairing_udp_unavailable'))
     }

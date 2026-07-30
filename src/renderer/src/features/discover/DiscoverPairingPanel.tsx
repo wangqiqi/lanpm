@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Checkbox, Input, List, Space, Tag, Typography } from 'antd'
+import { Alert, Button, Checkbox, Collapse, Input, List, Space, Tag, Typography } from 'antd'
 import { LinkOutlined, ShareAltOutlined } from '@ant-design/icons'
 import type { DiscoverSnapshot } from '@shared/discover/types'
 import type { PairingSessionView } from '@shared/discover/pairing'
@@ -202,17 +202,34 @@ export default function DiscoverPairingPanel({
         {t('discover.pairingCrossSubnet')}
       </Checkbox>
       {crossSubnet ? (
-        <Input
-          placeholder={t('discover.pairingHostPlaceholder')}
-          value={unicastHost}
-          onChange={(e) => setUnicastHost(e.target.value)}
-          onPressEnter={() => void handleFind()}
-        />
+        <Text type="secondary" className={styles.seedsHint}>
+          {t('discover.pairingRouteHint')}
+        </Text>
       ) : null}
       {crossSubnet ? (
-        <Text type="secondary" className={styles.seedsHint}>
-          {t('discover.pairingTailHint')}
-        </Text>
+        <Collapse
+          ghost
+          size="small"
+          items={[
+            {
+              key: 'advanced-host',
+              label: t('discover.pairingAdvancedHost'),
+              children: (
+                <>
+                  <Input
+                    placeholder={t('discover.pairingHostPlaceholder')}
+                    value={unicastHost}
+                    onChange={(e) => setUnicastHost(e.target.value)}
+                    onPressEnter={() => void handleFind()}
+                  />
+                  <Text type="secondary" className={styles.seedsHint}>
+                    {t('discover.pairingTailHint')}
+                  </Text>
+                </>
+              )
+            }
+          ]}
+        />
       ) : null}
       <Space>
         <Button type="primary" loading={findLoading} onClick={() => void handleFind()}>
