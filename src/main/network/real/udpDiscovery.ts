@@ -7,6 +7,8 @@ import { rememberPeerGroups } from '../../discover/discoverGroupRegistry.ts'
 import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
 import type { PairingSessionHost } from './pairingSession.ts'
 import { PairingUdpController } from './pairingUdp.ts'
+import type { GroupInviteSessionHost } from './groupInviteSession.ts'
+import { GroupInviteUdpController } from './groupInviteUdp.ts'
 
 export interface UdpDiscoveryOptions {
   deviceId: string
@@ -17,6 +19,8 @@ export interface UdpDiscoveryOptions {
   onPeer: (peer: DiscoveryPayload) => void
   /** 可选：发起方配对会话 */
   pairingHost?: PairingSessionHost
+  /** 可选：群邀请码会话 */
+  groupInviteHost?: GroupInviteSessionHost
 }
 
 export interface UdpDiscoveryDiagnostics {
@@ -36,6 +40,7 @@ export class UdpDiscovery {
   private readonly peers = new Map<string, PeerCacheEntry>()
   private readonly disableMulticast: boolean
   private pairingController: PairingUdpController | null = null
+  private groupInviteController: GroupInviteUdpController | null = null
   private socket: dgram.Socket | null = null
   private broadcastTimer: ReturnType<typeof setInterval> | null = null
   private pruneTimer: ReturnType<typeof setInterval> | null = null
@@ -62,6 +67,12 @@ export class UdpDiscovery {
         { deviceId: opts.deviceId, displayName: opts.displayName }
       )
     }
+    this.groupInviteController = new GroupInviteUdpController(
+      () => this.socket,
+      this.disableMulticast,
+      opts.groupInviteHost ?? null,
+      { deviceId: opts.deviceId, displayName: opts.displayName }
+    )
   }
 
   start(): void {
@@ -70,6 +81,7 @@ export class UdpDiscovery {
     this.socket = socket
 
     socket.on('message', (buf, rinfo) => {
+      if (this.groupInviteController?.handleMessage(buf, rinfo)) return
       if (this.pairingController?.handleMessage(buf, rinfo)) return
       try {
         const packet = JSON.parse(buf.toString('utf8')) as {
@@ -118,7 +130,9 @@ export class UdpDiscovery {
     this.broadcastTimer = null
     this.pruneTimer = null
     this.pairingController?.stopOfferBroadcast()
+    this.groupInviteController?.stopOfferBroadcast()
     this.pairingController?.cancelPendingLookup()
+    this.groupInviteController?.cancelPendingLookup()
     this.socket?.close()
     this.socket = null
     this.peers.clear()
@@ -146,6 +160,25 @@ export class UdpDiscovery {
 
   stopPairingOffers(): void {
     this.pairingController?.stopOfferBroadcast()
+  }
+
+  stopGroupInviteOffers(): void {
+    this.groupInviteController?.stopOfferBroadcast()
+  }
+
+  startGroupInviteOffers(): void {
+    this.groupInviteController?.startOfferBroadcast()
+  }
+
+  lookupGroupInviteCode(code: string, options?: { unicastHost?: string }) {
+    if (!this.groupInviteController) {
+      return Promise.reject(new Error('group_invite_udp_unavailable'))
+    }
+    return this.groupInviteController.lookupGroupInviteCode(code, options)
+  }
+
+  cancelGroupInviteLookup(): void {
+    this.groupInviteController?.cancelPendingLookup()
   }
 
   lookupPairingCode(code: string, options?: { unicastHost?: string }): Promise<PairingFoundBody> {

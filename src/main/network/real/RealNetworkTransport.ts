@@ -5,6 +5,7 @@ import type {
   NetworkTransport,
   SyncEnvelope
 } from '../../../shared/network/types'
+import type { GroupType } from '../../../shared/navigation/types'
 import { assertPublishableSyncType } from '../../../shared/network/unimplementedSync.ts'
 import {
   DISCOVERY_INTERVAL_MS,
@@ -29,6 +30,11 @@ import {
   PairingSessionHost,
   type PairingSessionView
 } from './pairingSession.ts'
+import {
+  GroupInviteSessionHost,
+  type GroupInviteSessionView
+} from './groupInviteSession.ts'
+import type { GroupInviteFoundBody } from '../../../shared/group/groupInvite.ts'
 import { pairingFoundToDiscovery } from '../../../shared/network/pairingTypes.ts'
 import { createTcpServer, PeerLink, type TcpPeerIdentity } from './peerLink.ts'
 import { UdpDiscovery } from './udpDiscovery.ts'
@@ -44,6 +50,7 @@ import {
 } from './discoverRelayApply.ts'
 
 export type { PairingSessionView } from './pairingSession.ts'
+export type { GroupInviteSessionView } from './groupInviteSession.ts'
 
 type EnvelopeHandler = (envelope: SyncEnvelope) => void
 
@@ -87,6 +94,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private peerRefreshTimer: ReturnType<typeof setInterval> | null = null
   private readonly pairingHost: PairingSessionHost
+  private readonly groupInviteHost: GroupInviteSessionHost
   private readonly knownSeedAddresses = new Set<string>()
   private started = false
 
@@ -105,6 +113,13 @@ export class RealNetworkTransport implements NetworkTransport {
       displayName: this.displayName,
       listenPort: this.listenPort,
       getGroups: () => getDiscoverableGroupsForAdvert(),
+      getHost: () => getLocalLanIp() ?? undefined
+    })
+    this.groupInviteHost = new GroupInviteSessionHost({
+      deviceId: this.deviceId,
+      userId: this.userId,
+      displayName: this.displayName,
+      listenPort: this.listenPort,
       getHost: () => getLocalLanIp() ?? undefined
     })
   }
@@ -221,7 +236,8 @@ export class RealNetworkTransport implements NetworkTransport {
         listenPort: this.listenPort,
         capabilities: this.capabilities,
         onPeer: (peer) => this.onDiscoveredPeer(peer),
-        pairingHost: this.pairingHost
+        pairingHost: this.pairingHost,
+        groupInviteHost: this.groupInviteHost
       })
       this.discovery.start()
     }
@@ -349,6 +365,43 @@ export class RealNetworkTransport implements NetworkTransport {
   cancelPairingSession(): void {
     this.pairingHost.cancel()
     this.discovery?.stopPairingOffers()
+  }
+
+  /** 群主：开始分享群邀请码 */
+  startGroupInviteSession(
+    groupId: string,
+    groupName: string,
+    groupType: GroupType
+  ): GroupInviteSessionView {
+    if (!this.started) this.start()
+    const view = this.groupInviteHost.start(groupId, groupName, groupType)
+    this.discovery?.startGroupInviteOffers()
+    return view
+  }
+
+  cancelGroupInviteSession(groupId: string): void {
+    this.groupInviteHost.cancel(groupId)
+    if (this.groupInviteHost.listActiveGroupIds().length === 0) {
+      this.discovery?.stopGroupInviteOffers()
+    }
+  }
+
+  /**
+   * 加入方：凭群邀请码查找群主广播的群组信息。
+   */
+  async joinWithGroupInviteCode(
+    code: string,
+    options?: { unicastHost?: string }
+  ): Promise<GroupInviteFoundBody> {
+    if (!this.started) this.start()
+
+    if (!this.discovery) {
+      throw new Error('group_invite_requires_udp')
+    }
+
+    return this.discovery.lookupGroupInviteCode(code, {
+      unicastHost: options?.unicastHost
+    })
   }
 
   /**

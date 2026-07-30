@@ -69,6 +69,7 @@
     "verify:discover-relay": "node --experimental-strip-types tests/integration/verify-discover-relay.ts",
     "verify:discover-seeds-restart": "node --experimental-strip-types tests/integration/verify-discover-seeds-restart.ts",
     "verify:join-request": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-join-request.ts",
+    "verify:group-invite": "node --experimental-strip-types tests/static/verify-group-invite.ts && vitest run tests/unit/group/groupInviteSession.test.ts",
     "verify:offline-sync": "node --experimental-strip-types tests/static/verify-offline-sync.ts",
     "verify:offline-sync-integration": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-offline-sync-integration.ts",
     "verify:file-concurrency": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-file-concurrency.ts",

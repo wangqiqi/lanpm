@@ -13,6 +13,7 @@ import type {
 import type { TaskDependency, UpsertDependencyInput } from './task/dependency'
 import type { CreateGroupInput, GroupRecord } from './group/types'
 import type { JoinGroupResult, JoinRequestRecord } from './group/joinRequest'
+import type { GroupInviteSessionView } from './group/groupInvite'
 import type {
   AiConfigInput,
   AiConfigView,
@@ -213,6 +214,13 @@ export interface LanpmApi {
     listJoinRequests: () => Promise<JoinRequestRecord[]>
     approveJoinRequest: (requestId: string) => Promise<void>
     rejectJoinRequest: (requestId: string) => Promise<void>
+    startInvite: (groupId: string) => Promise<GroupInviteSessionView>
+    cancelInvite: (groupId: string) => Promise<{ ok: true }>
+    joinWithInvite: (input: {
+      code: string
+      unicastHost?: string
+      port?: number
+    }) => Promise<JoinGroupResult>
     enterAnonymous: (groupId: string) => Promise<void>
     leaveAnonymous: (groupId: string) => Promise<void>
     dissolve: (groupId: string) => Promise<void>

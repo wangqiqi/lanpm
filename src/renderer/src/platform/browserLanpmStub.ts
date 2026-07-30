@@ -1217,6 +1217,26 @@ export function createBrowserLanpmStub(): LanpmApi {
       listJoinRequests: async () => [],
       approveJoinRequest: async () => undefined,
       rejectJoinRequest: async () => undefined,
+      startInvite: async (groupId) => ({
+        inviteId: 'stub-invite',
+        groupId,
+        groupName: 'LanPM 协作组',
+        code: '123456',
+        codeDisplay: '123 456',
+        expiresAt: new Date(Date.now() + 300_000).toISOString()
+      }),
+      cancelInvite: async () => ({ ok: true as const }),
+      joinWithInvite: async ({ code }) => ({
+        status: 'joined' as const,
+        group: {
+          groupId: `grp_invite_${code}`,
+          type: 'project' as const,
+          name: '邀请入群',
+          createdBy: 'demo-alice',
+          createdAt: new Date().toISOString(),
+          autoDiscover: true
+        }
+      }),
       enterAnonymous: async () => undefined,
       leaveAnonymous: async () => undefined,
       dissolve: async (groupId) => {

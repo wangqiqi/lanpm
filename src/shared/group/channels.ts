@@ -10,6 +10,9 @@ export const GROUP_IPC = {
   listJoinRequests: 'group:listJoinRequests',
   approveJoinRequest: 'group:approveJoinRequest',
   rejectJoinRequest: 'group:rejectJoinRequest',
+  startInvite: 'group:startInvite',
+  cancelInvite: 'group:cancelInvite',
+  joinWithInvite: 'group:joinWithInvite',
   enterAnonymous: 'group:enterAnonymous',
   leaveAnonymous: 'group:leaveAnonymous',
   dissolve: 'group:dissolve'

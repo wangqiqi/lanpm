@@ -75,6 +75,9 @@ export default function DiscoverModal({
   const [tab, setTab] = useState<'groups' | 'people'>('groups')
   const [seedInput, setSeedInput] = useState('')
   const [seedSaving, setSeedSaving] = useState(false)
+  const [inviteCodeInput, setInviteCodeInput] = useState('')
+  const [inviteJoining, setInviteJoining] = useState(false)
+  const [sharingInviteGroupId, setSharingInviteGroupId] = useState<string | null>(null)
 
   const refresh = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -178,6 +181,52 @@ export default function DiscoverModal({
       message.error(formatError(err, 'discover.joinRequestActionFailed'))
     } finally {
       setActingRequestId(null)
+    }
+  }
+
+  const handleJoinWithInvite = async (): Promise<void> => {
+    const code = inviteCodeInput.trim()
+    if (!code) return
+    setInviteJoining(true)
+    try {
+      const result = await getLanpmApi().group.joinWithInvite({ code })
+      if (result.status === 'joined' || result.status === 'already_member') {
+        message.success(t('discover.groupInviteJoined', { name: result.group.name }))
+        navigate(groupViewPath(result.group.groupId, defaultViewForGroup(result.group.type)))
+        onClose()
+        return
+      }
+      message.info(t('discover.joinPending'))
+      await refresh()
+    } catch (err) {
+      message.error(formatError(err, 'discover.groupInviteFailed'))
+    } finally {
+      setInviteJoining(false)
+    }
+  }
+
+  const handleShareInvite = async (group: DiscoverGroupView): Promise<void> => {
+    setSharingInviteGroupId(group.groupId)
+    try {
+      const view = await getLanpmApi().group.startInvite(group.groupId)
+      Modal.info({
+        title: t('discover.shareInviteCode'),
+        content: (
+          <div>
+            <p>{group.name}</p>
+            <p style={{ fontSize: 24, fontWeight: 600, letterSpacing: 2 }}>{view.codeDisplay}</p>
+            <Text type="secondary">
+              {t('discover.inviteCodeExpires', {
+                at: new Date(view.expiresAt).toLocaleTimeString()
+              })}
+            </Text>
+          </div>
+        )
+      })
+    } catch (err) {
+      message.error(formatError(err, 'discover.groupInviteShareFailed'))
+    } finally {
+      setSharingInviteGroupId(null)
     }
   }
 
@@ -291,6 +340,28 @@ export default function DiscoverModal({
         )}
       </div>
 
+      <div className={styles.seedsBlock}>
+        <Text strong>{t('discover.groupInviteTitle')}</Text>
+        <Text type="secondary" className={styles.seedsHint}>
+          {t('discover.groupInviteHint')}
+        </Text>
+        <Space.Compact className={styles.seedsInput}>
+          <Input
+            placeholder={t('discover.groupInvitePlaceholder')}
+            value={inviteCodeInput}
+            onChange={(e) => setInviteCodeInput(e.target.value)}
+            onPressEnter={() => void handleJoinWithInvite()}
+          />
+          <Button
+            type="primary"
+            loading={inviteJoining}
+            onClick={() => void handleJoinWithInvite()}
+          >
+            {t('discover.groupInviteJoin')}
+          </Button>
+        </Space.Compact>
+      </div>
+
       {incomingRequests.length > 0 ? (
         <div className={styles.seedsBlock}>
           <Text strong>{t('discover.incomingJoinRequests')}</Text>
@@ -359,6 +430,16 @@ export default function DiscoverModal({
                   <List.Item
                     className={styles.row}
                     actions={[
+                      group.joined && group.ownerUserId === localUserId ? (
+                        <Button
+                          key="invite"
+                          size="small"
+                          loading={sharingInviteGroupId === group.groupId}
+                          onClick={() => void handleShareInvite(group)}
+                        >
+                          {t('discover.shareInviteCode')}
+                        </Button>
+                      ) : null,
                       <Button
                         key="action"
                         type={group.joined ? 'default' : 'primary'}

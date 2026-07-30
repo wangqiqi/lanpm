@@ -23,6 +23,12 @@ import {
   rejectJoinRequest,
   requestJoinDiscoverableGroup
 } from '../group/joinRequestService'
+import {
+  cancelGroupInvite,
+  joinWithGroupInviteCode,
+  startGroupInvite,
+  type GroupInviteJoinInput
+} from '../group/groupInviteService'
 import { getAiConfig, saveAiConfig } from '../ai/aiConfigService'
 import { probeAiEndpoint } from '../ai/aiEndpointProbeService'
 import { refreshAiPatrolScheduler } from '../ai/aiPatrolScheduler'
@@ -61,6 +67,24 @@ export function registerGroupIpc(): void {
   ipcMain.handle(GROUP_IPC.rejectJoinRequest, (_event, requestId: string) => {
     if (typeof requestId !== 'string' || !requestId) throw new Error('requestId required')
     return rejectJoinRequest(getDatabase(), requestId)
+  })
+
+  ipcMain.handle(GROUP_IPC.startInvite, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return startGroupInvite(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(GROUP_IPC.cancelInvite, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    cancelGroupInvite(groupId)
+    return { ok: true as const }
+  })
+
+  ipcMain.handle(GROUP_IPC.joinWithInvite, (_event, input: GroupInviteJoinInput) => {
+    if (!input || typeof input.code !== 'string') {
+      throw new Error('group_invite_code_required')
+    }
+    return joinWithGroupInviteCode(getDatabase(), input)
   })
 
   ipcMain.handle(GROUP_IPC.leaveAnonymous, (_event, groupId: string) => {
