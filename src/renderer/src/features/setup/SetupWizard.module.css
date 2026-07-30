@@ -204,3 +204,66 @@
 .form :global(.ant-btn-primary.submitBtn:active:not(:disabled)) {
   transform: scale(0.98);
 }
+
+/* —— 网络前置步骤 —— */
+.netSegmented {
+  margin-bottom: 16px;
+}
+
+.netIllustration {
+  margin-bottom: 16px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  background: var(--lanpm-surface-group);
+  box-shadow:
+    0 0 0 0.5px var(--lanpm-separator),
+    var(--lanpm-shadow);
+}
+
+.netSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.netDevice {
+  fill: var(--lanpm-accent-fill);
+  stroke: var(--lanpm-accent);
+  stroke-width: 1.5;
+}
+
+.netPc {
+  fill: var(--lanpm-surface);
+  stroke: var(--lanpm-separator);
+  stroke-width: 1.5;
+}
+
+.netWire {
+  stroke: var(--lanpm-text-tertiary);
+  stroke-width: 1.5;
+}
+
+.netWave {
+  stroke: var(--lanpm-accent);
+}
+
+.netSvgLabel {
+  fill: var(--lanpm-accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.netScenarioDesc {
+  margin: 0 0 12px;
+  padding: 0 8px;
+  font-size: var(--lanpm-font-body);
+  line-height: 1.5;
+  color: var(--lanpm-text);
+  text-align: center;
+}
+
+.skipBtn {
+  margin-top: 8px !important;
+  color: var(--lanpm-text-secondary) !important;
+  font-size: var(--lanpm-font-body) !important;
+}

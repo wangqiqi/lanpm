@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.45.0] - 2026-07-30
+
+### Added
+
+- **Setup 组网说明步（SPRINT-SETUP-NET）**：身份表单前增加 `NetworkPrereqStep`（交换机 / 路由器 / 热点三场景 · 内联 SVG · Segmented 切换）；「已接好，继续」/「跳过」；纯教育 UI、不做真实网络检测；`verify:setup-net`；`docs/配对码.md` §10 · `docs/04` §1.7 ✅
+
 ## [1.44.0] - 2026-07-30
 
 ### Added

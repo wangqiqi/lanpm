@@ -9,6 +9,7 @@ import { useUiStore } from '@renderer/stores/uiStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import logoUrl from '@resources/logo.svg'
 import { submitFormOnEnter } from '@renderer/lib/inputKeyboard'
+import NetworkPrereqStep from './NetworkPrereqStep'
 import styles from './SetupWizard.module.css'
 
 interface SetupWizardProps {
@@ -20,10 +21,13 @@ interface FormValues {
   department?: string
 }
 
+type SetupStep = 'network' | 'profile'
+
 export default function SetupWizard({ onComplete }: SetupWizardProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
+  const [step, setStep] = useState<SetupStep>('network')
   const [form] = Form.useForm<FormValues>()
   const [avatarUrl, setAvatarUrl] = useState(() => defaultAvatarDataUrl('LP', theme))
   const [submitting, setSubmitting] = useState(false)
@@ -91,6 +95,17 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (step === 'network') {
+    return (
+      <div className={styles.wrap}>
+        <NetworkPrereqStep
+          onContinue={() => setStep('profile')}
+          onSkip={() => setStep('profile')}
+        />
+      </div>
+    )
   }
 
   return (
