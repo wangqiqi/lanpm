@@ -5,7 +5,11 @@ export const PAIRING_TTL_MS = 5 * 60 * 1000
 /** 发起方周期广播 pairing_offer */
 export const PAIRING_OFFER_INTERVAL_MS = 2_000
 /** 加入方等待 pairing_found */
+export type PairingResolveFailReason = 'expired' | 'mismatch' | 'rate_limit'
+
 export const PAIRING_LOOKUP_TIMEOUT_MS = 8_000
+/** TCP pairing_resolve 等待超时 */
+export const PAIRING_RESOLVE_TIMEOUT_MS = 8_000
 /** 单加入方对同一码的失败上限 */
 export const MAX_PAIRING_FAIL_PER_JOINER = 5
 

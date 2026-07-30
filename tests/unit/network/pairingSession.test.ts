@@ -93,3 +93,20 @@ describe('pairingTypes', () => {
     expect(normalizePairingCode('84')).toBe('000084')
   })
 })
+
+describe('pairingResolve', () => {
+  it('handleResolve returns fail reasons', () => {
+    const host = new PairingSessionHost(identity)
+    const view = host.start()
+    expect(host.handleResolve({
+      code: '000000',
+      joinerDeviceId: 'bad',
+      joinerDisplayName: 'Bad'
+    })).toEqual({ status: 'fail', reason: 'mismatch' })
+    expect(host.handleResolve({
+      code: view.code,
+      joinerDeviceId: 'good',
+      joinerDisplayName: 'Good'
+    }).status).toBe('ok')
+  })
+})

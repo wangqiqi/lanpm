@@ -2,6 +2,8 @@ import net from 'node:net'
 import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
 import type { DiscoveryPayload } from '../../../shared/network/types'
 import type { SyncEnvelope } from '../../../shared/network/types'
+import type { PairingResolveFailReason } from '../../../shared/network/pairingTypes.ts'
+import { PAIRING_RESOLVE_TIMEOUT_MS } from '../../../shared/network/pairingTypes.ts'
 import { deriveAesKey, deriveSharedSecret, type DhKeyPair } from '../../crypto/dhSession.ts'
 import { openEnvelope, sealEnvelope } from '../../crypto/envelopeCrypto.ts'
 import {
@@ -13,6 +15,10 @@ import {
 
 export type TcpPeerIdentity = WirePeerProfile & { host?: string }
 
+export type PairingResolveResult =
+  | { ok: true; profile: WirePeerProfile }
+  | { ok: false; reason: PairingResolveFailReason }
+
 export interface PeerLinkOptions {
   local: { deviceId: string; userId: string; displayName: string }
   listenPort: number
@@ -22,6 +28,12 @@ export interface PeerLinkOptions {
   onPeerIdentified?: (peer: TcpPeerIdentity) => void
   onReady?: (peer: TcpPeerIdentity) => void
   onClose: () => void
+  /** 服务端：校验 TCP pairing_resolve */
+  resolvePairingCode?: (
+    code: string,
+    joinerDeviceId: string,
+    joinerDisplayName: string
+  ) => PairingResolveResult
 }
 
 type LinkState = 'idle' | 'handshaking' | 'ready' | 'closed'
@@ -48,6 +60,12 @@ export class PeerLink {
   private remoteProfile: TcpPeerIdentity | null = null
   private isInitiator = false
   private readyNotified = false
+  private connectCompletion: {
+    resolve: () => void
+    reject: (err: Error) => void
+    timer: ReturnType<typeof setTimeout>
+  } | null = null
+  private awaitingPairingOk = false
 
   constructor(opts: PeerLinkOptions) {
     this.opts = opts
@@ -121,6 +139,48 @@ export class PeerLink {
     })
   }
 
+  /**
+   * 跨网段兜底：先 TCP pairing_resolve，再 DH 握手。
+   */
+  async connectHostWithPairing(
+    host: string,
+    port: number,
+    pairing: { code: string; joinerDeviceId: string; joinerDisplayName: string }
+  ): Promise<void> {
+    if (this.state !== 'idle') return
+    this.isInitiator = true
+    this.remoteHost = host
+    this.state = 'handshaking'
+    this.awaitingPairingOk = true
+
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.failConnect(new Error('pairing_resolve_timeout'))
+      }, PAIRING_RESOLVE_TIMEOUT_MS)
+
+      this.connectCompletion = {
+        resolve,
+        reject,
+        timer
+      }
+
+      const socket = net.connect({ host, port }, () => {
+        this.socket = socket
+        this.sendWire({
+          kind: 'pairing_resolve',
+          code: pairing.code,
+          joinerDeviceId: pairing.joinerDeviceId,
+          joinerDisplayName: pairing.joinerDisplayName
+        })
+      })
+      socket.on('data', (chunk) => this.decoder.feed(chunk))
+      socket.on('close', () => this.close())
+      socket.on('error', (err) => {
+        this.failConnect(err)
+      })
+    })
+  }
+
   sendPeerAdvert(): void {
     if (this.state !== 'ready') return
     this.sendWire(this.localProfile())
@@ -135,6 +195,7 @@ export class PeerLink {
   close(): void {
     if (this.state === 'closed') return
     this.state = 'closed'
+    this.clearConnectCompletion()
     this.socket?.destroy()
     this.socket = null
     this.aesKey = null
@@ -199,10 +260,68 @@ export class PeerLink {
     if (this.readyNotified || !this.remoteProfile) return
     this.readyNotified = true
     this.opts.onReady?.(this.remoteProfile)
+    this.completeConnect()
+  }
+
+  private completeConnect(): void {
+    if (!this.connectCompletion) return
+    clearTimeout(this.connectCompletion.timer)
+    this.connectCompletion.resolve()
+    this.connectCompletion = null
+  }
+
+  private failConnect(err: Error): void {
+    this.clearConnectCompletion(err)
+    if (this.state !== 'closed') {
+      this.state = 'closed'
+      this.socket?.destroy()
+      this.socket = null
+      this.opts.onClose()
+    }
+  }
+
+  private clearConnectCompletion(err?: Error): void {
+    if (!this.connectCompletion) return
+    clearTimeout(this.connectCompletion.timer)
+    if (err) {
+      this.connectCompletion.reject(err)
+    }
+    this.connectCompletion = null
   }
 
   private handleWire(msg: WireMessage): void {
     if (this.state === 'closed') return
+
+    if (msg.kind === 'pairing_resolve' && this.state === 'handshaking' && !this.isInitiator) {
+      const resolver = this.opts.resolvePairingCode
+      if (!resolver) {
+        this.sendWire({ kind: 'pairing_resolve_fail', reason: 'expired' })
+        return
+      }
+      const result = resolver(msg.code, msg.joinerDeviceId, msg.joinerDisplayName)
+      if (result.ok) {
+        this.sendWire({
+          kind: 'pairing_resolve_ok',
+          ...result.profile
+        })
+      } else {
+        this.sendWire({ kind: 'pairing_resolve_fail', reason: result.reason })
+      }
+      return
+    }
+
+    if (msg.kind === 'pairing_resolve_ok' && this.isInitiator && this.awaitingPairingOk) {
+      this.awaitingPairingOk = false
+      this.rememberRemote(msg)
+      this.sendWire(this.localHandshake())
+      return
+    }
+
+    if (msg.kind === 'pairing_resolve_fail' && this.isInitiator && this.awaitingPairingOk) {
+      this.awaitingPairingOk = false
+      this.failConnect(new Error(`pairing_resolve_${msg.reason}`))
+      return
+    }
 
     if (msg.kind === 'handshake') {
       this.rememberRemote(msg)

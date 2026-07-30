@@ -1,5 +1,6 @@
 import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
 import type { SyncEnvelope } from '../../../shared/network/types'
+import type { PairingResolveFailReason } from '../../../shared/network/pairingTypes.ts'
 
 /** TCP 握手 / 周期广播：跨子网手动节点也能填充「发现」列表 */
 export interface WirePeerProfile {
@@ -14,6 +15,14 @@ export type WireMessage =
   | ({ kind: 'handshake'; publicKey: string } & WirePeerProfile)
   | ({ kind: 'handshake_ack'; publicKey: string } & WirePeerProfile)
   | ({ kind: 'peer_advert' } & WirePeerProfile)
+  | {
+      kind: 'pairing_resolve'
+      code: string
+      joinerDeviceId: string
+      joinerDisplayName: string
+    }
+  | ({ kind: 'pairing_resolve_ok' } & WirePeerProfile)
+  | { kind: 'pairing_resolve_fail'; reason: PairingResolveFailReason }
   | { kind: 'envelope'; envelope: SyncEnvelope }
   | { kind: 'ping' }
 

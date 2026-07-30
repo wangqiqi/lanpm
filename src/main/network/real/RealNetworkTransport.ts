@@ -8,6 +8,7 @@ import type {
 import { assertPublishableSyncType } from '../../../shared/network/unimplementedSync.ts'
 import {
   DISCOVERY_INTERVAL_MS,
+  DEFAULT_TCP_LISTEN_PORT,
   HEARTBEAT_INTERVAL_MS,
   RECONNECT_BACKOFF_MS
 } from '../../../shared/network/constants.ts'
@@ -133,7 +134,27 @@ export class RealNetworkTransport implements NetworkTransport {
         this.reconnectAttempt.delete(peer.deviceId)
         options.onPeerReady?.(link, peer)
       },
-      onClose: options.onClose
+      onClose: options.onClose,
+      resolvePairingCode: (code, joinerDeviceId, joinerDisplayName) => {
+        const result = this.pairingHost.handleResolve({
+          code,
+          joinerDeviceId,
+          joinerDisplayName
+        })
+        if (result.status === 'ok') {
+          return {
+            ok: true,
+            profile: {
+              deviceId: result.body.deviceId,
+              userId: result.body.userId,
+              displayName: result.body.displayName,
+              listenPort: result.body.listenPort,
+              groups: result.body.groups
+            }
+          }
+        }
+        return { ok: false, reason: result.reason }
+      }
     })
     return link
   }
@@ -290,11 +311,8 @@ export class RealNetworkTransport implements NetworkTransport {
   /** 发起方：开始分享群组连接码 */
   startPairingSession(): PairingSessionView {
     if (!this.started) this.start()
-    if (!this.discovery) {
-      throw new Error('pairing_requires_udp')
-    }
     const view = this.pairingHost.start()
-    this.discovery.startPairingOffers()
+    this.discovery?.startPairingOffers()
     return view
   }
 
@@ -310,17 +328,87 @@ export class RealNetworkTransport implements NetworkTransport {
    */
   async joinWithPairingCode(
     code: string,
-    options?: { unicastHost?: string }
+    options?: { unicastHost?: string; port?: number }
   ): Promise<DiscoveryPayload> {
     if (!this.started) this.start()
-    if (!this.discovery) {
-      throw new Error('pairing_requires_udp')
+
+    if (this.discovery) {
+      try {
+        const found = await this.discovery.lookupPairingCode(code, {
+          unicastHost: options?.unicastHost
+        })
+        const peer = pairingFoundToDiscovery(found, this.capabilities)
+        rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
+        touchDiscoveryPeer(peer)
+        await this.connectManualHost(peer.host, peer.listenPort)
+        this.tcpPeers.set(peer.deviceId, peer)
+        return peer
+      } catch {
+        if (!options?.unicastHost) throw new Error('pairing_lookup_failed')
+      }
     }
-    const found = await this.discovery.lookupPairingCode(code, options)
-    const peer = pairingFoundToDiscovery(found, this.capabilities)
+
+    if (options?.unicastHost) {
+      return this.connectManualHostWithPairing(
+        options.unicastHost,
+        options.port ?? DEFAULT_TCP_LISTEN_PORT,
+        code
+      )
+    }
+
+    throw new Error('pairing_requires_udp_or_host')
+  }
+
+  /** TCP pairing_resolve 兜底（跨网段 UDP 不可达时） */
+  async connectManualHostWithPairing(
+    host: string,
+    port: number,
+    code: string
+  ): Promise<DiscoveryPayload> {
+    if (!this.started) this.start()
+
+    const link = this.createPeerLink({
+      remoteHost: host,
+      onEnvelope: (env) => this.deliver(env),
+      onPeerReady: (activeLink, peer) => {
+        const prev = this.links.get(peer.deviceId)
+        if (prev && prev !== activeLink) prev.close()
+        this.links.set(peer.deviceId, activeLink)
+        this.manualHosts.set(peer.deviceId, { host, port: peer.listenPort })
+      },
+      onClose: () => {
+        const id = link.getRemoteDeviceId()
+        if (id && this.links.get(id) === link) {
+          this.links.delete(id)
+        }
+      }
+    })
+
+    await link.connectHostWithPairing(host, port, {
+      code,
+      joinerDeviceId: this.deviceId,
+      joinerDisplayName: this.displayName
+    })
+
+    const profile = link.getRemoteProfile()
+    if (!profile?.userId) {
+      throw new Error('pairing_resolve_no_profile')
+    }
+
+    const peer = pairingFoundToDiscovery(
+      {
+        pairingId: '',
+        deviceId: profile.deviceId,
+        userId: profile.userId,
+        displayName: profile.displayName,
+        listenPort: profile.listenPort,
+        host,
+        groups: profile.groups
+      },
+      this.capabilities
+    )
     rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
     touchDiscoveryPeer(peer)
-    await this.connectManualHost(peer.host, peer.listenPort)
     this.tcpPeers.set(peer.deviceId, peer)
     return peer
   }

@@ -8,7 +8,8 @@ import {
   PAIRING_TTL_MS,
   type PairingFoundBody,
   type PairingLookupBody,
-  type PairingOfferBody
+  type PairingOfferBody,
+  type PairingResolveFailReason
 } from '../../../shared/network/pairingTypes.ts'
 
 export interface PairingSessionView {
@@ -92,27 +93,49 @@ export class PairingSessionHost {
   }
 
   handleLookup(lookup: PairingLookupBody): PairingFoundBody | null {
-    const s = this.getSession()
-    if (!s || s.consumed) return null
+    const result = this.handleResolve(lookup)
+    return result.status === 'ok' ? result.body : null
+  }
+
+  handleResolve(
+    lookup: PairingLookupBody
+  ): { status: 'ok'; body: PairingFoundBody } | { status: 'fail'; reason: PairingResolveFailReason } {
+    const s = this.session
+    if (!s) {
+      return { status: 'fail', reason: 'expired' }
+    }
+    if (Date.now() > s.expiresAt) {
+      this.session = null
+      return { status: 'fail', reason: 'expired' }
+    }
+    if (s.consumed) {
+      return { status: 'fail', reason: 'expired' }
+    }
 
     const normalized = normalizePairingCode(lookup.code)
     if (normalized !== s.code) {
       const fails = (s.failCounts.get(lookup.joinerDeviceId) ?? 0) + 1
       s.failCounts.set(lookup.joinerDeviceId, fails)
-      if (fails >= MAX_PAIRING_FAIL_PER_JOINER) this.cancel()
-      return null
+      if (fails >= MAX_PAIRING_FAIL_PER_JOINER) {
+        this.cancel()
+        return { status: 'fail', reason: 'rate_limit' }
+      }
+      return { status: 'fail', reason: 'mismatch' }
     }
 
     s.consumed = true
     const host = this.identity.getHost() ?? '127.0.0.1'
     return {
-      pairingId: s.pairingId,
-      deviceId: this.identity.deviceId,
-      userId: this.identity.userId,
-      displayName: this.identity.displayName,
-      listenPort: this.identity.listenPort,
-      host,
-      groups: this.identity.getGroups()
+      status: 'ok',
+      body: {
+        pairingId: s.pairingId,
+        deviceId: this.identity.deviceId,
+        userId: this.identity.userId,
+        displayName: this.identity.displayName,
+        listenPort: this.identity.listenPort,
+        host,
+        groups: this.identity.getGroups()
+      }
     }
   }
 

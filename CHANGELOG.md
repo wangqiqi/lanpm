@@ -7,6 +7,7 @@
 ### Added
 
 - **群组连接码 · UDP 配对（TASK-PAIR-01）**：`pairing_offer` / `pairing_lookup` / `pairing_found` 报文；`PairingSessionHost` 状态机（6 位码 · 5min TTL · 一次性）；`RealNetworkTransport.startPairingSession` / `joinWithPairingCode`；`verify:pairing-udp`
+- **TCP `pairing_resolve` 兜底（TASK-PAIR-02）**：`pairing_resolve` / `pairing_resolve_ok` / `pairing_resolve_fail` wire 消息；`PeerLink.connectHostWithPairing`；`connectManualHostWithPairing`；跨网段 UDP 失败时凭 IP+码 建链；`verify:pairing-tcp`
 
 ## [1.41.5] - 2026-07-29
 
