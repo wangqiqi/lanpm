@@ -32,7 +32,7 @@
 | 模块 | 功能 |
 |------|------|
 | 会议 Pro 扩展 | 多人视频会议、录制、日程入会（同一可购包升级档） |
-| 完整插件市场 | 发布/安装/更新 / 签名目录（侧载+离线许可证 ✅ v1.75–1.76） |
+| 完整插件市场 | **暂不做**（2026-07-31）：无盈利前不单独投商店；侧载+离线许可证 ✅ v1.75–1.76 保留 |
 | 原生移动 App | iOS + Android |
 | WebRTC DataChannel | 可选；默认仍 TCP+UDP（见 [01](./01_产品需求文档.md) §1.3.1） |
 | 匿名群可持久化历史 | 可选；现状退出即失、无文件 Tab |
@@ -89,7 +89,7 @@
 | 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | **已交付** · `verify:meeting-mesh-poc` · v1.68.0 |
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | **已交付** · `verify:meeting-livekit-pro` · v1.71.0 |
 | 5 | 离线许可证（内网可购） | P1～P2 | **已交付** · `verify:plugin-market-spike` · `verify:offline-license-cli` · v1.75–1.76 |
-| 6 | 插件市场安装/更新 | P2 · M8 | 待 |
+| 6 | 插件市场安装/更新 | — | **暂缓** · 等盈利后再议（侧载路径已够用） |
 
 验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro`。
 
@@ -117,7 +117,7 @@
 | 候选 | 说明 | 备注 |
 |------|------|------|
 | **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
-| 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | 侧载+许可 ✅；**商店 UI** P2 |
+| 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | 侧载+许可 ✅；**商店 UI 暂不做**（等盈利） |
 | 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |
 | PWA | 移动端 Web | 后置 |
 | 真机手验补测 | §4 延期项 | 有设备再开 |

@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.78.7",
+  "version": "1.78.8",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -109,6 +109,7 @@
     "verify:nav-preferences": "node --experimental-strip-types tests/static/verify-nav-preferences.ts",
     "verify:nav-per-group": "node --experimental-strip-types tests/static/verify-nav-per-group.ts",
     "verify:command-palette": "node --experimental-strip-types tests/static/verify-command-palette.ts",
+    "verify:plugin-menus": "node --experimental-strip-types tests/static/verify-plugin-menus.ts",
     "verify:view-slot-hosts": "node --experimental-strip-types tests/static/verify-view-slot-hosts.ts",
     "verify:sync-outbox": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-sync-outbox.ts",
     "verify:bundle": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-bundle.ts",

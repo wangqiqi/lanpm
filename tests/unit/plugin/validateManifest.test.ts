@@ -76,6 +76,57 @@ describe('parsePluginManifest', () => {
     expect(m?.commands).toEqual([{ id: 'hello', titleKey: 'command.example.hello' }])
   })
 
+  it('accepts menus[] referencing declared commands', () => {
+    const m = parsePluginManifest({
+      id: 'lanpm.menu',
+      name: 'Menu',
+      version: '0.1.0',
+      slots: [],
+      capabilities: [],
+      pricing: 'free',
+      commands: [{ id: 'hello', titleKey: 'command.example.hello' }],
+      menus: [
+        {
+          location: 'topbar.user',
+          items: [{ command: 'hello' }]
+        }
+      ]
+    })
+    expect(m?.menus).toEqual([
+      {
+        location: 'topbar.user',
+        items: [{ command: 'hello' }]
+      }
+    ])
+  })
+
+  it('rejects menus with unknown command or invalid location', () => {
+    expect(
+      parsePluginManifest({
+        id: 'x',
+        name: 'x',
+        version: '1',
+        slots: [],
+        capabilities: [],
+        pricing: 'free',
+        commands: [{ id: 'hello', titleKey: 'a' }],
+        menus: [{ location: 'topbar.user', items: [{ command: 'missing' }] }]
+      })
+    ).toBeNull()
+    expect(
+      parsePluginManifest({
+        id: 'x',
+        name: 'x',
+        version: '1',
+        slots: [],
+        capabilities: [],
+        pricing: 'free',
+        commands: [{ id: 'hello', titleKey: 'a' }],
+        menus: [{ location: 'magic.menu', items: [{ command: 'hello' }] }]
+      })
+    ).toBeNull()
+  })
+
   it('rejects duplicate or invalid command ids', () => {
     expect(
       parsePluginManifest({

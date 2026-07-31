@@ -1,5 +1,6 @@
 import type { PluginContributionView } from './contributions.ts'
 import type { PluginCommand } from './commands.ts'
+import type { PluginMenu } from './menus.ts'
 
 /**
  * Plugin system SPIKE stubs（SPIKE-276–278）+ loader runtime views（TASK-289+）。
@@ -65,6 +66,8 @@ export type PluginManifest = {
   }
   /** 命令面板贡献（POC） */
   commands?: PluginCommand[]
+  /** UI 菜单贡献：将 commands 挂到固定锚点 */
+  menus?: PluginMenu[]
 }
 
 /** Renderer / IPC 可见视图 */

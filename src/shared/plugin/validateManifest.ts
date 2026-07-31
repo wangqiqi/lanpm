@@ -5,6 +5,8 @@ import {
   type PluginContributionView
 } from './contributions.ts'
 import type { PluginCommand } from './commands.ts'
+import type { PluginMenu, PluginMenuLocation } from './menus.ts'
+import { isPluginMenuLocation } from './menus.ts'
 import {
   PLUGIN_CAPABILITY_IDS,
   PLUGIN_SLOT_IDS,
@@ -79,6 +81,30 @@ function parseCommands(raw: unknown): PluginCommand[] | null {
   return commands
 }
 
+function parseMenus(raw: unknown, commandIds: Set<string>): PluginMenu[] | null {
+  if (raw === undefined) return []
+  if (!Array.isArray(raw)) return null
+  const menus: PluginMenu[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') return null
+    const o = item as Record<string, unknown>
+    if (typeof o.location !== 'string' || !isPluginMenuLocation(o.location.trim())) return null
+    if (!Array.isArray(o.items) || o.items.length === 0) return null
+    const items: PluginMenu['items'] = []
+    for (const rawItem of o.items) {
+      if (!rawItem || typeof rawItem !== 'object') return null
+      const entry = rawItem as Record<string, unknown>
+      if (typeof entry.command !== 'string' || !entry.command.trim()) return null
+      const command = entry.command.trim()
+      if (!/^[a-z][a-z0-9.-]{0,63}$/.test(command)) return null
+      if (!commandIds.has(command)) return null
+      items.push({ command })
+    }
+    menus.push({ location: o.location.trim() as PluginMenuLocation, items })
+  }
+  return menus
+}
+
 /**
  * 校验 plugin.json；非法返回 null（发现阶段跳过）。
  */
@@ -96,13 +122,16 @@ export function parsePluginManifest(raw: unknown): PluginManifest | null {
   if (contributionViews === null) return null
   const commands = parseCommands(o.commands)
   if (commands === null) return null
+  const commandIds = new Set(commands.map((cmd) => cmd.id))
+  const menus = parseMenus(o.menus, commandIds)
+  if (menus === null) return null
 
   const slots: PluginSlotId[] = []
   for (const s of o.slots) {
     if (typeof s !== 'string' || !SLOT_SET.has(s)) return null
     slots.push(s as PluginSlotId)
   }
-  if (slots.length === 0 && contributionViews.length === 0 && commands.length === 0) {
+  if (slots.length === 0 && contributionViews.length === 0 && commands.length === 0 && menus.length === 0) {
     return null
   }
 
@@ -131,6 +160,9 @@ export function parsePluginManifest(raw: unknown): PluginManifest | null {
   }
   if (commands.length > 0) {
     manifest.commands = commands
+  }
+  if (menus.length > 0) {
+    manifest.menus = menus
   }
   return manifest
 }

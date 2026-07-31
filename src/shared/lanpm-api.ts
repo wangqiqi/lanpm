@@ -354,6 +354,7 @@ export interface LanpmApi {
     ) => Promise<import('./plugin/types').PluginView[]>
     listContributedViews: () => Promise<import('./plugin/contributions').ContributedPluginView[]>
     listCommands: () => Promise<import('./plugin/commands').ListedCommand[]>
+    listMenus: () => Promise<import('./plugin/menus').ListedMenuItem[]>
     invokeCommand: (
       commandId: string
     ) => Promise<import('./plugin/commands').InvokeCommandResult>

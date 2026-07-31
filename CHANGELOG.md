@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.8] - 2026-07-31
+
+### Added
+
+- **Manifest `menus[]` POC**：`PluginMenu` · `ListedMenuItem` · `resolveMenuCommandId`
+- **锚点**：`topbar.user` · `chat.message.context`（点击复用 `invokeCommand`）
+- **IPC**：`plugin:listMenus` · `usePluginMenus` hook
+- **`verify:plugin-menus`** · `lanpm.example` 演示菜单项
+
+### Changed
+
+- **`plugins/lanpm.example` v0.3.1**：声明 `menus[]` 挂接 `hello` 命令
+- **`docs/插件开发.md`**：§5 `menus[]` ✅
+
 ## [1.78.7] - 2026-07-31
 
 ### Added

@@ -6,6 +6,7 @@ export const PLUGIN_IPC = {
   listSlotPlugins: 'plugin:listSlotPlugins',
   listContributedViews: 'plugin:listContributedViews',
   listCommands: 'plugin:listCommands',
+  listMenus: 'plugin:listMenus',
   invokeCommand: 'plugin:invokeCommand',
   setEnabled: 'plugin:setEnabled',
   invokeCapability: 'plugin:invokeCapability',

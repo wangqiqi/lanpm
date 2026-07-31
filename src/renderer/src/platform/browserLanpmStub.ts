@@ -146,7 +146,7 @@ const STUB_PLUGINS: PluginView[] = [
   {
     id: 'lanpm.example',
     name: 'Example Slot Stub',
-    version: '0.3.0',
+    version: '0.3.1',
     slots: ['task.detail.section', 'chat.composer.action'],
     capabilities: [
       'task.get',
@@ -165,7 +165,11 @@ const STUB_PLUGINS: PluginView[] = [
     source: 'builtin',
     signatureValid: true,
     licensed: null,
-    commands: [{ id: 'hello', titleKey: 'command.example.hello' }]
+    commands: [{ id: 'hello', titleKey: 'command.example.hello' }],
+    menus: [
+      { location: 'topbar.user', items: [{ command: 'hello' }] },
+      { location: 'chat.message.context', items: [{ command: 'hello' }] }
+    ]
   },
   {
     id: 'lanpm.formjs',
@@ -243,6 +247,31 @@ function listStubCommands(): import('@shared/plugin/commands').ListedCommand[] {
         pluginId: plugin.id,
         enabled: true
       })
+    }
+  }
+  return listed
+}
+
+function listStubMenus(): import('@shared/plugin/menus').ListedMenuItem[] {
+  const listed: import('@shared/plugin/menus').ListedMenuItem[] = []
+  for (const plugin of STUB_PLUGINS) {
+    if (!plugin.enabled) continue
+    const titleByCommandId = new Map(
+      (plugin.commands ?? []).map((cmd) => [cmd.id, cmd.titleKey] as const)
+    )
+    for (const menu of plugin.menus ?? []) {
+      for (const item of menu.items) {
+        const titleKey = titleByCommandId.get(item.command)
+        if (!titleKey) continue
+        listed.push({
+          location: menu.location,
+          commandId: `${plugin.id}:${item.command}`,
+          titleKey,
+          source: 'plugin',
+          pluginId: plugin.id,
+          enabled: true
+        })
+      }
     }
   }
   return listed
@@ -1954,6 +1983,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         return views.sort((a, b) => a.route.localeCompare(b.route))
       },
       listCommands: async () => listStubCommands(),
+      listMenus: async () => listStubMenus(),
       invokeCommand: async (commandId) => {
         const listed = listStubCommands()
         const pluginOnly = listed.filter((c) => c.source === 'plugin')

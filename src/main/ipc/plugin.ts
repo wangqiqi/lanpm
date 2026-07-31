@@ -6,6 +6,7 @@ import {
   discoverPlugins,
   listContributedViews,
   listCommands,
+  listMenus,
   listSlotPlugins
 } from '../plugin/discover'
 import { setPluginEnabled } from '../plugin/enabledStore'
@@ -29,6 +30,8 @@ export function registerPluginIpc(): void {
   ipcMain.handle(PLUGIN_IPC.listContributedViews, () => listContributedViews())
 
   ipcMain.handle(PLUGIN_IPC.listCommands, () => listCommands())
+
+  ipcMain.handle(PLUGIN_IPC.listMenus, () => listMenus())
 
   ipcMain.handle(PLUGIN_IPC.invokeCommand, (_event, commandId: string) => {
     if (typeof commandId !== 'string' || !commandId.trim()) {

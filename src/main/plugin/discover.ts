@@ -3,11 +3,13 @@ import { join } from 'path'
 import type { PluginSlotId, PluginSource, PluginView } from '../../shared/plugin/types.ts'
 import type { ContributedPluginView } from '../../shared/plugin/contributions.ts'
 import type { ListedCommand } from '../../shared/plugin/commands.ts'
+import type { ListedMenuItem } from '../../shared/plugin/menus.ts'
 import {
   parsePluginManifest,
   resolveContributionGroupTypes
 } from '../../shared/plugin/validateManifest.ts'
 import { listAllCommands } from './commandRegistry.ts'
+import { listAllMenus } from './menuRegistry.ts'
 import { isPluginEnabled, readEnabledMap } from './enabledStore.ts'
 import { isPluginLicensed } from './licenseStore.ts'
 import { resolvePluginsRoot, resolveSideloadPluginsRoot } from './paths.ts'
@@ -94,5 +96,9 @@ export function findContributedViewByRoute(route: string): ContributedPluginView
 
 export function listCommands(): ListedCommand[] {
   return listAllCommands(discoverPlugins())
+}
+
+export function listMenus(): ListedMenuItem[] {
+  return listAllMenus(discoverPlugins())
 }
 

@@ -16,6 +16,7 @@ import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
+import { usePluginMenus } from '@renderer/plugin/usePluginMenus'
 import styles from './chat.module.css'
 
 function formatFileSize(bytes: number): string {
@@ -108,6 +109,8 @@ export default function MessageBubble({
       : recalledBy
   }, [message.content, members, currentUserId, t])
 
+  const pluginContextMenuItems = usePluginMenus('chat.message.context')
+
   const senderMenu: MenuProps = useMemo(() => {
     if (own) return { items: [] }
     const items: MenuProps['items'] = [
@@ -171,15 +174,32 @@ export default function MessageBubble({
     }
     if (createTaskItem) items.push(createTaskItem)
     if (linkFileItem) items.push(linkFileItem)
+    if (pluginContextMenuItems?.length) {
+      if (items.length > 0) items.push({ type: 'divider' })
+      items.push(...pluginContextMenuItems)
+    }
     return { items }
-  }, [own, currentUserId, onRecall, message, t, createTaskItem, linkFileItem])
+  }, [
+    own,
+    currentUserId,
+    onRecall,
+    message,
+    t,
+    createTaskItem,
+    linkFileItem,
+    pluginContextMenuItems
+  ])
 
   const otherBubbleMenu: MenuProps = useMemo(() => {
     const items: MenuProps['items'] = []
     if (createTaskItem) items.push(createTaskItem)
     if (linkFileItem) items.push(linkFileItem)
+    if (pluginContextMenuItems?.length) {
+      if (items.length > 0) items.push({ type: 'divider' })
+      items.push(...pluginContextMenuItems)
+    }
     return { items }
-  }, [createTaskItem, linkFileItem])
+  }, [createTaskItem, linkFileItem, pluginContextMenuItems])
 
   const bubbleBody = (
     <>

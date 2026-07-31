@@ -43,6 +43,7 @@ import {
   LANPM_OPEN_PROFILE_EVENT,
   type OpenProfileDetail
 } from '@renderer/plugin/commandEffects'
+import { usePluginMenus } from '@renderer/plugin/usePluginMenus'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
 import { useNetworkStore } from '@renderer/stores/networkStore'
@@ -354,73 +355,92 @@ export default function TopBar(): React.ReactElement {
     t
   ])
 
-  const userMenu: MenuProps['items'] = [
-    {
-      key: 'theme',
-      label: theme === 'dark' ? t('topbar.themeToLight') : t('topbar.themeToDark'),
-      icon: theme === 'dark' ? <SunOutlined /> : <MoonOutlined />,
-      onClick: () => toggleTheme()
-    },
-    {
-      key: 'locale',
-      label: t('topbar.language'),
-      icon: <GlobalOutlined />,
-      children: [
-        {
-          key: 'zh-CN',
-          label: t('topbar.localeZh'),
-          onClick: () => setLocale('zh-CN')
-        },
-        {
-          key: 'en-US',
-          label: t('topbar.localeEn'),
-          onClick: () => setLocale('en-US')
-        }
-      ]
-    },
-    { type: 'divider' },
-    { key: 'profile', label: t('topbar.profile'), onClick: () => setProfileOpen(true) },
-    {
-      key: 'device',
-      label: t('topbar.deviceWithName', { name: device?.deviceName ?? '—' })
-    },
-    {
-      key: 'ip',
-      label: t('topbar.ipWithAddress', { ip: networkStatus?.localIp ?? '—' })
-    },
-    {
-      key: 'version',
-      label: t('topbar.versionWithNumber', { version: LANPM_APP_VERSION }),
-      disabled: true
-    },
-    { type: 'divider' },
-    {
-      key: 'api',
-      label: t('topbar.apiKey'),
-      onClick: () => navigate(cockpitPath(), { state: { openAiConfig: true } })
-    },
-    { type: 'divider' },
-    {
-      key: 'reset',
-      label: t('topbar.resetIdentity'),
-      danger: true,
-      onClick: () => {
-        modal.confirm({
-          title: t('topbar.resetIdentityTitle'),
-          content: t('topbar.resetIdentityContent'),
-          okText: t('topbar.resetIdentityConfirm'),
-          cancelText: t('common.cancel'),
-          okButtonProps: { danger: true },
-          onOk: async () => {
-            const status = await getLanpmApi().identity.resetIdentity()
-            useIdentityStore
-              .getState()
-              .setFromStatus(status.configured, status.user, status.device)
+  const pluginUserMenuItems = usePluginMenus('topbar.user')
+
+  const userMenu: MenuProps['items'] = useMemo(
+    () => [
+      {
+        key: 'theme',
+        label: theme === 'dark' ? t('topbar.themeToLight') : t('topbar.themeToDark'),
+        icon: theme === 'dark' ? <SunOutlined /> : <MoonOutlined />,
+        onClick: () => toggleTheme()
+      },
+      {
+        key: 'locale',
+        label: t('topbar.language'),
+        icon: <GlobalOutlined />,
+        children: [
+          {
+            key: 'zh-CN',
+            label: t('topbar.localeZh'),
+            onClick: () => setLocale('zh-CN')
+          },
+          {
+            key: 'en-US',
+            label: t('topbar.localeEn'),
+            onClick: () => setLocale('en-US')
           }
-        })
+        ]
+      },
+      ...(pluginUserMenuItems?.length
+        ? [{ type: 'divider' as const }, ...pluginUserMenuItems]
+        : []),
+      { type: 'divider' },
+      { key: 'profile', label: t('topbar.profile'), onClick: () => setProfileOpen(true) },
+      {
+        key: 'device',
+        label: t('topbar.deviceWithName', { name: device?.deviceName ?? '—' })
+      },
+      {
+        key: 'ip',
+        label: t('topbar.ipWithAddress', { ip: networkStatus?.localIp ?? '—' })
+      },
+      {
+        key: 'version',
+        label: t('topbar.versionWithNumber', { version: LANPM_APP_VERSION }),
+        disabled: true
+      },
+      { type: 'divider' },
+      {
+        key: 'api',
+        label: t('topbar.apiKey'),
+        onClick: () => navigate(cockpitPath(), { state: { openAiConfig: true } })
+      },
+      { type: 'divider' },
+      {
+        key: 'reset',
+        label: t('topbar.resetIdentity'),
+        danger: true,
+        onClick: () => {
+          modal.confirm({
+            title: t('topbar.resetIdentityTitle'),
+            content: t('topbar.resetIdentityContent'),
+            okText: t('topbar.resetIdentityConfirm'),
+            cancelText: t('common.cancel'),
+            okButtonProps: { danger: true },
+            onOk: async () => {
+              const status = await getLanpmApi().identity.resetIdentity()
+              useIdentityStore
+                .getState()
+                .setFromStatus(status.configured, status.user, status.device)
+            }
+          })
+        }
       }
-    }
-  ]
+    ],
+    [
+      device?.deviceName,
+      modal,
+      navigate,
+      networkStatus?.localIp,
+      pluginUserMenuItems,
+      setLocale,
+      setProfileOpen,
+      t,
+      theme,
+      toggleTheme
+    ]
+  )
 
   return (
     <header className={styles.bar}>
