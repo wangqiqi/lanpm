@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.4] - 2026-07-31
+
+### Added
+
+- **`MeetingToolbar`**：聊天区紧凑会议工具条（图标行 + Popover 详情）
+- **许可闸**：`isPluginLicenseActive` · paid 未授权禁 join + 导入许可 CTA
+- **Profile 深链**：`openProfileTab` · 未启用/未配置一键跳转扩展/会议旁路
+- **`verify:meeting-ux`**：工具条 · 许可闸 · 深链静态守卫
+
+### Changed
+
+- **`MeetingStub`**：收敛为 `MeetingToolbar` 宿主
+- **`ChatVoiceMediaPanel`**：未启用时展示「打开扩展管理」CTA
+- **`docs/插件开发.md`**：§8.3/§12 会议体验产品化 ✅ v1.78.4
+
 ## [1.78.3] - 2026-07-31
 
 ### Added
