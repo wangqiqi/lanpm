@@ -197,39 +197,21 @@ function KanbanColumn({
     />
   ) : null
 
-  if (status === 'todo') {
-    return (
-      <div ref={setNodeRef} className={styles.columnIsland} data-testid="board-column-island-pilot">
-        <IslandPanel
-          title={t(COLUMN_TITLE_KEYS[status])}
-          extra={
-            <>
-              <span className={styles.columnCount}>{tasks.length}</span>
-              {columnExtra}
-            </>
-          }
-          className={`${styles.columnIslandPanel} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
-          bodyClassName={styles.columnIslandBody}
-        >
-          {columnCards}
-        </IslandPanel>
-      </div>
-    )
-  }
-
   return (
-    <div
-      ref={setNodeRef}
-      className={`${styles.column} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
-    >
-      <div className={styles.columnHeader}>
-        <div className={styles.columnHeaderTitle}>
-          {t(COLUMN_TITLE_KEYS[status])}
-          <span className={styles.columnCount}>{tasks.length}</span>
-        </div>
-        {columnExtra}
-      </div>
-      <div className={styles.columnBody}>{columnCards}</div>
+    <div ref={setNodeRef} className={styles.columnShell} data-testid="board-column-island">
+      <IslandPanel
+        title={t(COLUMN_TITLE_KEYS[status])}
+        extra={
+          <>
+            <span className={styles.columnCount}>{tasks.length}</span>
+            {columnExtra}
+          </>
+        }
+        className={`${styles.columnPanel} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
+        bodyClassName={styles.columnBody}
+      >
+        {columnCards}
+      </IslandPanel>
     </div>
   )
 }

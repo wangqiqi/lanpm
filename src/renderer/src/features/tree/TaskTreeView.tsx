@@ -14,6 +14,7 @@ import ViewToolbar, {
   ViewToolbarPair
 } from '@renderer/ui/ViewToolbar'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { ancestorKeysForTask, useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
@@ -438,7 +439,13 @@ export default function TaskTreeView(): React.ReactElement {
       )}
 
       <div className={styles.body}>
-        <div className={styles.treeWrap}>
+        <IslandPanel
+          hideHeader
+          aria-label={t('nav.tree')}
+          className={styles.treeIsland}
+          bodyClassName={styles.treeWrap}
+          data-testid="tree-island-surface"
+        >
           {loading && tasks.length === 0 ? (
             <ViewLoadingCenter />
           ) : treeData.length === 0 ? (
@@ -456,7 +463,7 @@ export default function TaskTreeView(): React.ReactElement {
               defaultExpandAll={false}
             />
           )}
-        </div>
+        </IslandPanel>
         <aside className={styles.detailPanel}>
           {selectedTask ? (
             <TaskDetailPanel

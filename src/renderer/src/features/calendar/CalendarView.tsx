@@ -19,6 +19,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import TaskEditModal from '@renderer/features/board/TaskEditModal'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import styles from './calendar.module.css'
 
 function ymdFromFcStr(value: string | null | undefined): string | null {
@@ -149,7 +150,14 @@ export default function CalendarView(): React.ReactElement {
     <div className={styles.root}>
       {activeTasks.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
 
-      <div className={styles.calendarHost} data-empty={activeTasks.length === 0 ? '1' : '0'}>
+      <IslandPanel
+        hideHeader
+        aria-label={t('nav.calendar')}
+        className={styles.calendarIsland}
+        bodyClassName={styles.calendarHost}
+        data-testid="calendar-island-surface"
+        data-empty={activeTasks.length === 0 ? '1' : '0'}
+      >
         <ViewHelpButton
           className={styles.helpBtn}
           content={t('calendar.toolbarHint')}
@@ -174,7 +182,7 @@ export default function CalendarView(): React.ReactElement {
           dayMaxEvents={3}
           moreLinkClick="popover"
         />
-      </div>
+      </IslandPanel>
 
       <TaskEditModal
         open={!!editTask}

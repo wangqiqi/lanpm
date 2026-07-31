@@ -6,17 +6,20 @@
   min-height: 0;
 }
 
+.treeIsland {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .treeWrap {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: auto;
-  padding: 8px;
-  border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-elevated);
-  border: 0.5px solid var(--lanpm-separator);
-  box-shadow: var(--lanpm-shadow-island);
+  padding: var(--lanpm-space-1);
 }
 
 /* blockNode + full-width title so progress column aligns on the right */

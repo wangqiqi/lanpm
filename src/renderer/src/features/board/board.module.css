@@ -15,19 +15,7 @@
   padding-bottom: calc(var(--lanpm-space-1) / 2);
 }
 
-.column {
-  flex: 1;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
-  border-radius: var(--lanpm-radius-lg);
-  background: var(--lanpm-surface-elevated);
-  border: 0.5px solid var(--lanpm-separator);
-  box-shadow: var(--lanpm-shadow-island);
-}
-
-.columnIsland {
+.columnShell {
   flex: 1;
   min-width: 280px;
   min-height: 200px;
@@ -35,29 +23,11 @@
   flex-direction: column;
 }
 
-.columnIslandPanel {
+.columnPanel {
   flex: 1;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-}
-
-.columnIslandPanel :global(section) {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   min-height: 0;
-}
-
-.columnIslandBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--lanpm-space-1);
   display: flex;
   flex-direction: column;
-  gap: var(--lanpm-space-1);
-  min-height: 120px;
-  background: var(--lanpm-bg);
 }
 
 .columnOver {
@@ -68,24 +38,6 @@
 .columnInvalid {
   border-color: var(--lanpm-danger);
   box-shadow: 0 0 0 2px var(--lanpm-danger-ring);
-}
-
-.columnHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--lanpm-space-1);
-  padding: var(--lanpm-space-2) var(--lanpm-space-3);
-  font-weight: 600;
-  font-size: var(--lanpm-font-body);
-  border-bottom: 1px solid var(--lanpm-border);
-  flex-shrink: 0;
-}
-
-.columnHeaderTitle {
-  display: flex;
-  align-items: center;
-  min-width: 0;
 }
 
 .columnAddBtn {
@@ -514,14 +466,7 @@
     overflow-y: auto;
   }
 
-  .column {
-    flex: none;
-    min-width: 0;
-    width: 100%;
-    max-width: none;
-  }
-
-  .columnIsland {
+  .columnShell {
     flex: none;
     min-width: 0;
     width: 100%;

@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.60.0] - 2026-07-31
+
+### Added
+
+- **`IslandPanel.hideHeader`**：无标题岛面模式（`aria-label` + `panelBodyFlush`）；日历、任务树宿主收敛
+- **`verify:visual` UC-401～404**：Board 四列 IslandPanel、Calendar/Tree surface、legacy columnHeader 清理
+
+### Changed
+
+- **看板**：todo/doing/done/other 四列统一 `IslandPanel`（移除 todo 试点分支）；`data-testid="board-column-island"`
+- **日历 / 任务树**：`calendarHost` / `treeWrap` 改 `IslandPanel hideHeader`；重复岛面 CSS 从 module 移除
+- **`docs/04` §1.3.1**：IslandPanel 三种模式约定
+
 ## [1.59.0] - 2026-07-31
 
 ### Added

@@ -78,3 +78,11 @@
 .panelBody {
   padding: var(--lanpm-space-4) var(--lanpm-space-5) var(--lanpm-space-5);
 }
+
+.panelBodyFlush {
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

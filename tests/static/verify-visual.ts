@@ -412,7 +412,7 @@ assert.match(
 )
 assert.match(
   islandPanelSrc,
-  /expanded \? \(\s*<div className=\{`\$\{styles\.panelBody\}/,
+  /expanded \? <div className=\{bodyClass\}>/,
   'IslandPanel must hide detail children when aria-expanded=false (CK-413)'
 )
 assert.match(cockpitCss, /\.accordionSummary\b/, 'Accordion summary styles (CK-413)')
@@ -568,7 +568,12 @@ assert.ok(
 )
 
 const calendarCss = readFileSync(join(renderer, 'features/calendar/calendar.module.css'), 'utf8')
-assert.match(calendarCss, /--lanpm-shadow-island/, 'calendar host uses island shadow (VP-406)')
+const calendarSrc = readFileSync(join(renderer, 'features/calendar/CalendarView.tsx'), 'utf8')
+assert.match(
+  calendarSrc,
+  /IslandPanel[\s\S]*hideHeader/,
+  'calendar island chrome via IslandPanel hideHeader (VP-406)'
+)
 assert.ok(
   !/\.light\b|\.dark\b/.test(calendarCss),
   'calendar FC theme should scope under .calendarHost not .light/.dark (VP-406)'
@@ -862,14 +867,38 @@ assert.match(islandPanelSrc, /export default function IslandPanel/, 'IslandPanel
 const boardSrc = readFileSync(join(renderer, 'features/board/BoardView.tsx'), 'utf8')
 assert.match(boardSrc, /IslandPanel/, 'BoardView must import IslandPanel (SP-403)')
 assert.match(
-  boardSrc,
-  /data-testid="board-column-island-pilot"/,
-  'Board todo column must pilot IslandPanel (SP-403)'
-)
-assert.match(
   islandPanelSrc,
   /defaultCollapsed\??:/,
   'IslandPanel must support defaultCollapsed (SP-404 / CK-412)'
+)
+
+// --- UC-401~404 unified-card sprint (IslandPanel rollout) ---
+assert.match(islandPanelSrc, /hideHeader\??:/, 'IslandPanel must support hideHeader (UC-401)')
+assert.match(
+  boardSrc,
+  /data-testid="board-column-island"/,
+  'Board columns must use IslandPanel with board-column-island testid (UC-402)'
+)
+assert.ok(
+  !/if \(status === 'todo'\)/.test(boardSrc),
+  'BoardView must not branch columns on todo-only IslandPanel (UC-402)'
+)
+const treeSrc = readFileSync(join(renderer, 'features/tree/TaskTreeView.tsx'), 'utf8')
+assert.match(calendarSrc, /hideHeader/, 'CalendarView must use IslandPanel hideHeader (UC-403)')
+assert.match(
+  calendarSrc,
+  /data-testid="calendar-island-surface"/,
+  'CalendarView must expose calendar-island-surface testid (UC-403)'
+)
+assert.match(treeSrc, /hideHeader/, 'TaskTreeView must use IslandPanel hideHeader (UC-403)')
+assert.match(
+  treeSrc,
+  /data-testid="tree-island-surface"/,
+  'TaskTreeView must expose tree-island-surface testid (UC-403)'
+)
+assert.ok(
+  !boardCss.includes('.columnHeader'),
+  'board.module.css must not retain legacy .columnHeader selectors (UC-404)'
 )
 
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---

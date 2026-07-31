@@ -14,19 +14,22 @@
   z-index: 5;
 }
 
+.calendarIsland {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarIsland[data-empty='1'] {
+  min-height: 480px;
+}
+
 .calendarHost {
   flex: 1;
   min-height: 480px;
   position: relative;
-  border-radius: var(--lanpm-radius-lg);
   overflow: hidden;
-  background: var(--lanpm-surface-elevated);
-  box-shadow: var(--lanpm-shadow-island);
-  border: 0.5px solid var(--lanpm-separator);
-}
-
-.calendarHost[data-empty='1'] {
-  min-height: 480px;
 }
 
 .calendarHost :global(.fc) {
