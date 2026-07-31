@@ -2,6 +2,15 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.76.0] - 2026-07-31
+
+### Added
+
+- **签名离线许可证**：`SignedPluginLicense` · 机器绑定 · Ed25519 验签
+- **授权策略**：整插件 · **试用 90 天** · **永久**（`term: trial | perpetual`）
+- **CLI**：`tools/lanpm-license/` — `collect` · `issue` · `verify`（C++/CMake/OpenSSL）
+- **验收**：`verify:offline-license-cli` · `docs/插件开发.md` §8.2.2
+
 ## [1.75.0] - 2026-07-31
 
 ### Added

@@ -3,6 +3,8 @@ import { dirname, join } from 'path'
 import { app } from 'electron'
 import type { PluginLicenseGrant, PluginLicenseStatus, PluginLicenseStore } from '../../shared/plugin/licenseTypes.ts'
 import { PLUGIN_LICENSES_FILE } from '../../shared/plugin/sideloadFormat.ts'
+import { isSignedPluginLicense } from '../../shared/plugin/licenseCanonical.ts'
+import { extractGrantsFromSignedLicense } from './licenseVerify.ts'
 
 function licensesPath(): string {
   return join(app.getPath('userData'), PLUGIN_LICENSES_FILE)
@@ -67,34 +69,13 @@ export function getPluginLicenseStatus(pluginId: string, now = Date.now()): Plug
   }
 }
 
-function parseLicenseGrant(raw: unknown): PluginLicenseGrant | null {
-  if (!raw || typeof raw !== 'object') return null
-  const o = raw as PluginLicenseGrant
-  if (typeof o.pluginId !== 'string' || !o.pluginId.trim()) return null
-  if (!Array.isArray(o.features)) return null
-  const features = o.features.filter((f): f is string => typeof f === 'string')
-  if (features.length === 0) return null
-  return {
-    pluginId: o.pluginId.trim(),
-    features,
-    issuedAt: typeof o.issuedAt === 'number' ? o.issuedAt : Date.now(),
-    expiresAt: typeof o.expiresAt === 'number' ? o.expiresAt : undefined
-  }
-}
-
-/** 导入单条或 `{ grants: [...] }` 离线许可证 JSON */
+/** 导入签名离线许可证 JSON（`SignedPluginLicense`） */
 export function importPluginLicense(raw: unknown): PluginLicenseStatus {
-  const incoming: PluginLicenseGrant[] = []
-  if (raw && typeof raw === 'object' && Array.isArray((raw as PluginLicenseStore).grants)) {
-    for (const item of (raw as PluginLicenseStore).grants) {
-      const grant = parseLicenseGrant(item)
-      if (grant) incoming.push(grant)
-    }
-  } else {
-    const grant = parseLicenseGrant(raw)
-    if (grant) incoming.push(grant)
+  if (!isSignedPluginLicense(raw)) {
+    throw new Error('plugin.licenseInvalidPayload')
   }
-  if (incoming.length === 0) throw new Error('invalid license payload')
+  const incoming = extractGrantsFromSignedLicense(raw)
+  if (incoming.length === 0) throw new Error('plugin.licenseInvalidPayload')
   const store = readLicenseStore()
   for (const grant of incoming) {
     const idx = store.grants.findIndex((g) => g.pluginId === grant.pluginId)

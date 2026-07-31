@@ -1,5 +1,9 @@
 export type {
+  LicenseTerm,
+  MachineLicenseRequest,
   PluginLicenseGrant,
   PluginLicenseStatus,
-  PluginLicenseStore
+  PluginLicenseStore,
+  SignedPluginLicense,
+  UnsignedPluginLicense
 } from './sideloadFormat.ts'

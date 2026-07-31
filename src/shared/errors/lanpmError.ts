@@ -5,7 +5,7 @@
 export function isLanpmErrorCode(message: string): boolean {
   const m = message.trim()
   if (!m || m.includes(' ')) return false
-  return /^(stub|err|board|setup|files|chat|group|data|member|gantt)\.[a-zA-Z][\w.]*$/.test(m)
+  return /^(stub|err|board|setup|files|chat|group|data|member|gantt|plugin)\.[a-zA-Z][\w.]*$/.test(m)
 }
 
 export function throwLanpm(code: string): never {
