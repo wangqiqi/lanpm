@@ -927,6 +927,14 @@ export default function FilesView(): React.ReactElement {
           </>
         )}
       </div>
+      <PluginZoneHost
+        zone="preview"
+        context={{
+          groupId: gid,
+          view: 'files',
+          selection: { fileId: selected.fileId }
+        }}
+      />
       {selected && !selected.isBookmark
         ? (() => {
             const linked = tasksForFile(selected.fileId, deliverableIndex.fileToTasks)

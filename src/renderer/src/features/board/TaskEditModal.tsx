@@ -27,6 +27,7 @@ import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import awarenessStyles from '@renderer/features/task/taskAwareness.module.css'
 import { whiteboardPathForTask } from '@renderer/features/whiteboard/whiteboardLink'
+import { PluginTaskSlot } from '@renderer/plugin/PluginSlot'
 
 const { TextArea } = Input
 
@@ -391,6 +392,16 @@ export default function TaskEditModal({
             />
           </div>
         </label>
+
+        {task ? (
+          <PluginTaskSlot
+            slot="task.detail.section"
+            groupId={groupId}
+            taskId={task.taskId}
+            view="board"
+            showSectionLabel
+          />
+        ) : null}
       </div>
     </Modal>
   )

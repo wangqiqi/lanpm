@@ -163,6 +163,7 @@ function KanbanColumn({
       {tasks.map((task) => (
         <KanbanCard
           key={task.taskId}
+          groupId={groupId}
           task={task}
           relation={relationMap.get(task.taskId)}
           assigneeName={

@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.70.0] - 2026-07-31
+
+### Added
+
+- **多视图 Slot 接线**：按 `viewSlotMap` 接齐 chat composer/context · board card · gantt/calendar context · files preview
+- **TaskEditModal**：`task.detail.section` 与任务树详情对齐
+- **验收**：`verify:view-slot-hosts` 扩展为遍历全 zone
+
 ## [1.69.0] - 2026-07-31
 
 ### Added

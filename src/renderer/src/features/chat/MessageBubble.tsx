@@ -15,6 +15,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './chat.module.css'
 
 function formatFileSize(bytes: number): string {
@@ -72,7 +73,13 @@ export default function MessageBubble({
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const navigate = useNavigate()
   const { groupId } = useParams<{ groupId: string }>()
-  const locateTask = useLocateTask(groupId ?? '')
+  const gid = groupId ?? ''
+  const locateTask = useLocateTask(gid)
+  const messageContext = {
+    groupId: gid,
+    view: 'chat' as const,
+    selection: { messageId: message.msgId }
+  }
   const isRecalled = message.content.kind === 'recalled'
   const isCode = message.content.kind === 'code'
   const isSystem =
@@ -309,6 +316,7 @@ export default function MessageBubble({
               </button>
             ) : null}
           </div>
+          <PluginZoneHost zone="context" context={messageContext} />
         </div>
       </div>
     )
@@ -365,6 +373,7 @@ export default function MessageBubble({
         ) : (
           <div className={bubbleClass}>{bubbleBody}</div>
         )}
+        <PluginZoneHost zone="context" context={messageContext} />
       </div>
     </div>
   )

@@ -1,11 +1,13 @@
 /**
- * TASK-836 — ViewHost M1.5：7 核心 Tab toolbar zone 锚点 + viewSlotMap SSOT。
+ * ViewHost M1.5+ — viewSlotMap SSOT · 全 zone 锚点 + toolbar 基线。
  * Run: npm run verify:view-slot-hosts
  */
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
+import type { AppView } from '../../src/shared/navigation/types.ts'
+import type { ViewPluginZone } from '../../src/shared/plugin/viewHost.ts'
 import { PLUGIN_SLOT_IDS } from '../../src/shared/plugin/types.ts'
 import { VIEW_SLOT_MAP } from '../../src/renderer/src/plugin/viewSlotMap.ts'
 
@@ -19,7 +21,7 @@ const CORE_VIEWS = [
   'calendar',
   'whiteboard',
   'files'
-] as const
+] as const satisfies readonly AppView[]
 
 const VIEW_FILES: Record<(typeof CORE_VIEWS)[number], string> = {
   chat: 'src/renderer/src/features/chat/ChatView.tsx',
@@ -31,59 +33,91 @@ const VIEW_FILES: Record<(typeof CORE_VIEWS)[number], string> = {
   files: 'src/renderer/src/features/files/FilesView.tsx'
 }
 
+/** zone 接线落点与主视图文件不一致时在此登记 */
+const ZONE_FILE_OVERRIDES: Partial<
+  Record<AppView, Partial<Record<ViewPluginZone, string | readonly string[]>>>
+> = {
+  chat: { context: 'src/renderer/src/features/chat/MessageBubble.tsx' },
+  board: {
+    card: 'src/renderer/src/features/board/KanbanCard.tsx',
+    detail: 'src/renderer/src/features/board/TaskEditModal.tsx'
+  },
+  tree: { detail: 'src/renderer/src/features/tree/TaskDetailPanel.tsx' }
+}
+
+function readSrc(rel: string): string {
+  const abs = join(root, rel)
+  assert.ok(existsSync(abs), `missing file ${rel}`)
+  return readFileSync(abs, 'utf8')
+}
+
+function zoneFiles(view: AppView, zone: ViewPluginZone): string[] {
+  const override = ZONE_FILE_OVERRIDES[view]?.[zone]
+  if (override) return Array.isArray(override) ? [...override] : [override]
+  return [VIEW_FILES[view as (typeof CORE_VIEWS)[number]]]
+}
+
+function assertZoneWired(view: AppView, zone: ViewPluginZone, rel: string, src: string): void {
+  if (zone === 'detail') {
+    const hasZoneHost =
+      /PluginZoneHost/.test(src) && new RegExp(`zone="${zone}"`).test(src)
+    const hasTaskDetailSlot =
+      /task\.detail\.section/.test(src) &&
+      (/PluginTaskSlot/.test(src) || /PluginSlot/.test(src))
+    assert.ok(
+      hasZoneHost || hasTaskDetailSlot,
+      `${rel} must wire detail zone for view '${view}'`
+    )
+    if (hasZoneHost) {
+      assert.match(src, new RegExp(`view:\\s*'${view}'`), `${rel} must pass view: '${view}'`)
+    }
+    return
+  }
+
+  assert.match(
+    src,
+    /PluginZoneHost|PluginTaskSlot|PluginSlotHost/,
+    `${rel} must use PluginZoneHost (or task slot) for zone '${zone}'`
+  )
+  assert.match(src, new RegExp(`zone="${zone}"`), `${rel} must wire zone="${zone}"`)
+  assert.match(src, new RegExp(`view:\\s*'${view}'`), `${rel} must pass view: '${view}'`)
+}
+
 assert.ok(existsSync(join(root, 'src/shared/plugin/viewHost.ts')), 'missing viewHost.ts')
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/viewSlotMap.ts')), 'missing viewSlotMap.ts')
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/PluginSlot.tsx')), 'missing PluginSlot.tsx')
 
-const viewHost = readFileSync(join(root, 'src/shared/plugin/viewHost.ts'), 'utf8')
+const viewHost = readSrc('src/shared/plugin/viewHost.ts')
 assert.match(viewHost, /export type ViewPluginZone/)
 assert.match(viewHost, /export type ViewPluginContext/)
 assert.match(viewHost, /export type PluginSlotHostProps/)
 
-const pluginSlot = readFileSync(join(root, 'src/renderer/src/plugin/PluginSlot.tsx'), 'utf8')
+const pluginSlot = readSrc('src/renderer/src/plugin/PluginSlot.tsx')
 assert.match(pluginSlot, /export function PluginSlotHost/)
 assert.match(pluginSlot, /export function PluginZoneHost/)
 assert.match(pluginSlot, /export function PluginGroupSlot/)
 assert.match(pluginSlot, /export function PluginTaskSlot/)
 
-const plannedSlots = [
-  'chat.toolbar.media',
-  'chat.composer.action',
-  'chat.message.action',
-  'board.toolbar',
-  'board.card.footer',
-  'tree.toolbar',
-  'gantt.toolbar',
-  'gantt.bar.context',
-  'calendar.toolbar',
-  'calendar.event.action',
-  'whiteboard.toolbar',
-  'files.toolbar'
-] as const
-
-for (const slot of plannedSlots) {
-  assert.ok(PLUGIN_SLOT_IDS.includes(slot), `PLUGIN_SLOT_IDS missing ${slot}`)
-}
-
+const allMappedSlots = new Set<string>()
 for (const view of CORE_VIEWS) {
-  const toolbarSlots = VIEW_SLOT_MAP[view]?.toolbar
-  assert.ok(toolbarSlots && toolbarSlots.length > 0, `viewSlotMap missing toolbar for ${view}`)
-
-  const rel = VIEW_FILES[view]
-  const abs = join(root, rel)
-  assert.ok(existsSync(abs), `missing view file ${rel}`)
-  const src = readFileSync(abs, 'utf8')
-  assert.match(src, /PluginZoneHost/, `${rel} must use PluginZoneHost`)
-  assert.match(src, /zone="toolbar"/, `${rel} must wire toolbar zone`)
-  assert.match(src, new RegExp(`view:\\s*'${view}'`), `${rel} must pass view: '${view}'`)
+  const zones = VIEW_SLOT_MAP[view]
+  assert.ok(zones, `VIEW_SLOT_MAP missing view ${view}`)
+  for (const [zone, slots] of Object.entries(zones) as [
+    ViewPluginZone,
+    readonly string[] | undefined
+  ][]) {
+    if (!slots?.length) continue
+    for (const slot of slots) {
+      allMappedSlots.add(slot)
+      assert.ok(PLUGIN_SLOT_IDS.includes(slot), `PLUGIN_SLOT_IDS missing ${slot}`)
+    }
+    for (const rel of zoneFiles(view, zone)) {
+      assertZoneWired(view, zone, rel, readSrc(rel))
+    }
+  }
 }
 
-const detail = readFileSync(
-  join(root, 'src/renderer/src/features/tree/TaskDetailPanel.tsx'),
-  'utf8'
-)
-assert.match(detail, /PluginSlot/)
-assert.match(detail, /task\.detail\.section/)
+assert.ok(allMappedSlots.has('task.detail.section'), 'viewSlotMap must map task.detail.section')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

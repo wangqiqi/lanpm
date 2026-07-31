@@ -79,6 +79,7 @@ export default function GanttView(): React.ReactElement {
   const [scheduleStart, setScheduleStart] = useState('')
   const [scheduleEnd, setScheduleEnd] = useState('')
   const [scheduleSaving, setScheduleSaving] = useState(false)
+  const [contextTaskId, setContextTaskId] = useState<string | null>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const suppressClickRef = useRef(false)
   const themeMode = useUiStore((s) => s.theme)
@@ -364,6 +365,14 @@ export default function GanttView(): React.ReactElement {
       />
 
       <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'gantt' }} />
+      <PluginZoneHost
+        zone="context"
+        context={{
+          groupId: gid,
+          view: 'gantt',
+          ...(contextTaskId ? { selection: { taskId: contextTaskId } } : {})
+        }}
+      />
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />
@@ -393,7 +402,10 @@ export default function GanttView(): React.ReactElement {
             onClick={(bar) => {
               if (suppressClickRef.current) return
               const task = tasks.find((item) => item.taskId === bar.id)
-              if (task) openScheduleModal(task)
+              if (task) {
+                setContextTaskId(task.taskId)
+                openScheduleModal(task)
+              }
             }}
             onDoubleClick={(bar) => {
               const task = tasks.find((t) => t.taskId === bar.id)

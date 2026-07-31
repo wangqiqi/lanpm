@@ -21,6 +21,7 @@ import {
 } from '@renderer/features/task/scheduleHealthUi'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './board.module.css'
 
 const PRIORITY_CLASS: Record<TaskPriority, string> = {
@@ -37,6 +38,7 @@ const MOVE_COLUMN_KEYS: Record<TaskStatus, MessageKey> = {
 }
 
 interface KanbanCardProps {
+  groupId: string
   task: Task
   relation?: BoardTaskRelation
   assigneeName?: string
@@ -55,6 +57,7 @@ interface KanbanCardProps {
 }
 
 export default function KanbanCard({
+  groupId,
   task,
   relation,
   assigneeName,
@@ -327,6 +330,14 @@ export default function KanbanCard({
       {task.status === 'other' && task.otherReason && (
         <div className={styles.otherReason}>{task.otherReason}</div>
       )}
+      <PluginZoneHost
+        zone="card"
+        context={{
+          groupId,
+          view: 'board',
+          selection: { taskId: task.taskId }
+        }}
+      />
       <TaskAwarenessBadges peers={focusPeers} />
     </div>
   )

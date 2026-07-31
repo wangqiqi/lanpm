@@ -152,6 +152,14 @@ export default function CalendarView(): React.ReactElement {
       {activeTasks.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
 
       <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'calendar' }} />
+      <PluginZoneHost
+        zone="context"
+        context={{
+          groupId: gid,
+          view: 'calendar',
+          ...(editTask ? { selection: { taskId: editTask.taskId } } : {})
+        }}
+      />
 
       <IslandPanel
         hideHeader

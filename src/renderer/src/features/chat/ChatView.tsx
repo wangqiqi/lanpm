@@ -808,6 +808,7 @@ export default function ChatView(): React.ReactElement {
           <div className={styles.inputRow}>
             <div className={styles.composerIsland}>
             <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
+            <PluginZoneHost zone="composer" context={{ groupId: gid, view: 'chat' }} />
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>
                 <EmojiPicker onPick={insertEmoji} />
