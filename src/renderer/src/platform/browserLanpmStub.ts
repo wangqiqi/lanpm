@@ -96,6 +96,39 @@ function writeStubLiveKitConfig(input: LiveKitConfig): ReturnType<typeof toLiveK
   return toLiveKitConfigPublic(normalized)
 }
 
+const STUB_PLUGIN_LICENSES_KEY = 'lanpm.stub.pluginLicenses'
+
+function readStubPluginLicenses(): Record<string, { features: string[]; expiresAt?: number }> {
+  try {
+    const raw = localStorage.getItem(STUB_PLUGIN_LICENSES_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, { features: string[]; expiresAt?: number }>
+  } catch {
+    return {}
+  }
+}
+
+function writeStubPluginLicenses(map: Record<string, { features: string[]; expiresAt?: number }>): void {
+  localStorage.setItem(STUB_PLUGIN_LICENSES_KEY, JSON.stringify(map))
+}
+
+function isStubPluginLicensed(pluginId: string): boolean {
+  const grant = readStubPluginLicenses()[pluginId]
+  if (!grant) return false
+  if (grant.expiresAt != null && grant.expiresAt <= Date.now()) return false
+  return grant.features.length > 0
+}
+
+function refreshStubPluginLicenseFields(): void {
+  for (let i = 0; i < STUB_PLUGINS.length; i++) {
+    const p = STUB_PLUGINS[i]!
+    STUB_PLUGINS[i] = {
+      ...p,
+      licensed: p.pricing === 'free' ? null : isStubPluginLicensed(p.id)
+    }
+  }
+}
+
 const STUB_PLUGINS: PluginView[] = [
   {
     id: 'lanpm.example',
@@ -108,31 +141,41 @@ const STUB_PLUGINS: PluginView[] = [
       'chat.listMessages',
       'task.getChecklist',
       'member.list',
-      'chat.sendTaskRef'
+      'chat.sendTaskRef',
+      'license.feature'
     ],
     pricing: 'free',
     enabled: true,
-    dirName: 'lanpm.example'
+    dirName: 'lanpm.example',
+    source: 'builtin',
+    signatureValid: true,
+    licensed: null
   },
   {
     id: 'lanpm.formjs',
     name: 'Advanced Form (form-js)',
     version: '0.1.0',
     slots: ['task.detail.section'],
-    capabilities: ['task.get'],
+    capabilities: ['task.get', 'license.feature'],
     pricing: 'paid',
     enabled: true,
-    dirName: 'lanpm.formjs'
+    dirName: 'lanpm.formjs',
+    source: 'builtin',
+    signatureValid: true,
+    licensed: false
   },
   {
     id: 'lanpm.mindmap',
     name: 'Mind Map',
     version: '0.1.0',
     slots: ['mindmap.toolbar'],
-    capabilities: ['task.list'],
+    capabilities: ['task.list', 'license.feature'],
     pricing: 'paid',
     enabled: true,
     dirName: 'lanpm.mindmap',
+    source: 'builtin',
+    signatureValid: true,
+    licensed: false,
     contributions: {
       views: [
         {
@@ -147,6 +190,8 @@ const STUB_PLUGINS: PluginView[] = [
     }
   }
 ]
+
+refreshStubPluginLicenseFields()
 
 function mutateStubPluginEnabled(pluginId: string, enabled: boolean): PluginView[] {
   const idx = STUB_PLUGINS.findIndex((p) => p.id === pluginId)
@@ -1854,11 +1899,74 @@ export function createBrowserLanpmStub(): LanpmApi {
         return views.sort((a, b) => a.route.localeCompare(b.route))
       },
       setEnabled: async (pluginId, enabled) => mutateStubPluginEnabled(pluginId, enabled),
+      importLicense: async (payload) => {
+        let raw: unknown
+        try {
+          raw = JSON.parse(payload)
+        } catch {
+          throw new Error('invalid license JSON')
+        }
+        const grants =
+          raw && typeof raw === 'object' && Array.isArray((raw as { grants?: unknown }).grants)
+            ? ((raw as { grants: unknown[] }).grants ?? [])
+            : [raw]
+        const map = readStubPluginLicenses()
+        let lastId = ''
+        for (const item of grants) {
+          if (!item || typeof item !== 'object') continue
+          const o = item as { pluginId?: string; features?: unknown[]; expiresAt?: number }
+          if (typeof o.pluginId !== 'string' || !o.pluginId.trim()) continue
+          const features = Array.isArray(o.features)
+            ? o.features.filter((f): f is string => typeof f === 'string')
+            : ['license.feature']
+          if (features.length === 0) continue
+          map[o.pluginId.trim()] = {
+            features,
+            expiresAt: typeof o.expiresAt === 'number' ? o.expiresAt : undefined
+          }
+          lastId = o.pluginId.trim()
+        }
+        if (!lastId) throw new Error('invalid license payload')
+        writeStubPluginLicenses(map)
+        refreshStubPluginLicenseFields()
+        const grant = map[lastId]!
+        return {
+          pluginId: lastId,
+          licensed: isStubPluginLicensed(lastId),
+          features: grant.features,
+          expiresAt: grant.expiresAt
+        }
+      },
+      getLicenseStatus: async (pluginId) => {
+        const grant = readStubPluginLicenses()[pluginId]
+        return {
+          pluginId,
+          licensed: isStubPluginLicensed(pluginId),
+          features: grant?.features ?? [],
+          expiresAt: grant?.expiresAt
+        }
+      },
       invokeCapability: async (pluginId, capability, args) => {
         const plugin = STUB_PLUGINS.find((p) => p.id === pluginId)
         if (!plugin?.enabled) throw new Error(`plugin disabled: ${pluginId}`)
         if (!plugin.capabilities.includes(capability)) {
           throw new Error(`capability not granted: ${capability}`)
+        }
+        if (
+          capability !== 'license.feature' &&
+          plugin.pricing === 'paid' &&
+          !isStubPluginLicensed(pluginId)
+        ) {
+          throw new Error(`license required for paid plugin: ${pluginId}`)
+        }
+        if (capability === 'license.feature') {
+          const grant = readStubPluginLicenses()[pluginId]
+          return {
+            pluginId,
+            licensed: isStubPluginLicensed(pluginId),
+            features: grant?.features ?? [],
+            expiresAt: grant?.expiresAt
+          }
         }
         if (capability === 'task.get') {
           const taskId = String(args?.taskId ?? '')

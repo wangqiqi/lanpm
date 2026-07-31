@@ -5,6 +5,7 @@ import { PLUGIN_CAPABILITY_IDS, PLUGIN_SLOT_IDS } from '../../shared/plugin/type
 import { discoverPlugins, listContributedViews, listSlotPlugins } from '../plugin/discover'
 import { setPluginEnabled } from '../plugin/enabledStore'
 import { invokePluginCapability } from '../plugin/capabilityProxy'
+import { getPluginLicenseStatus, importPluginLicense } from '../plugin/licenseStore'
 
 const SLOT_SET = new Set<string>(PLUGIN_SLOT_IDS)
 const CAP_SET = new Set<string>(PLUGIN_CAPABILITY_IDS)
@@ -20,6 +21,24 @@ export function registerPluginIpc(): void {
   })
 
   ipcMain.handle(PLUGIN_IPC.listContributedViews, () => listContributedViews())
+
+  ipcMain.handle(PLUGIN_IPC.importLicense, (_event, payload: string) => {
+    if (typeof payload !== 'string' || !payload.trim()) {
+      throw new Error('license payload required')
+    }
+    let raw: unknown
+    try {
+      raw = JSON.parse(payload)
+    } catch {
+      throw new Error('invalid license JSON')
+    }
+    return importPluginLicense(raw)
+  })
+
+  ipcMain.handle(PLUGIN_IPC.getLicenseStatus, (_event, pluginId: string) => {
+    if (typeof pluginId !== 'string' || !pluginId) throw new Error('pluginId required')
+    return getPluginLicenseStatus(pluginId)
+  })
 
   ipcMain.handle(PLUGIN_IPC.setEnabled, (_event, pluginId: string, enabled: boolean) => {
     if (typeof pluginId !== 'string' || !pluginId) throw new Error('pluginId required')

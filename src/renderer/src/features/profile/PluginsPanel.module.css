@@ -18,3 +18,12 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.licenseInput {
+  margin-top: 8px;
+}

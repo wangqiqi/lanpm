@@ -13,6 +13,10 @@ import { getGroupById } from '../group/groupService'
 import { listGroupFiles } from '../file/fileService'
 import { findPluginById } from './discover.ts'
 import {
+  assertPaidPluginLicensed,
+  getPluginLicenseStatus
+} from './licenseStore.ts'
+import {
   listGroupMessages,
   listOlderGroupMessages,
   sendTaskRefMessage
@@ -42,9 +46,15 @@ export async function invokePluginCapability(
   if (!pluginDeclaresCapability(plugin, capability)) {
     throw new Error(`capability not granted: ${capability}`)
   }
+  if (capability !== 'license.feature') {
+    assertPaidPluginLicensed(pluginId, plugin.pricing)
+  }
 
   const db = getDatabase()
   switch (capability) {
+    case 'license.feature': {
+      return getPluginLicenseStatus(pluginId)
+    }
     case 'task.list': {
       const groupId = String(args.groupId ?? '')
       if (!groupId) throw new Error('groupId required')

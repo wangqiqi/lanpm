@@ -41,6 +41,9 @@ export type PluginCapabilityId =
   | 'task.getChecklist'
   | 'member.list'
   | 'chat.sendTaskRef'
+  | 'license.feature'
+
+export type PluginSource = 'builtin' | 'sideload'
 
 export type PluginManifest = {
   /** 稳定 id，如 `lanpm.formjs` */
@@ -64,6 +67,11 @@ export type PluginView = PluginManifest & {
   enabled: boolean
   /** 插件目录相对名（如 lanpm.example） */
   dirName: string
+  source: PluginSource
+  /** `paid` 插件是否已导入有效离线许可；`free` 为 null */
+  licensed: boolean | null
+  /** 侧载签名校验是否通过；builtin 恒 true */
+  signatureValid: boolean
 }
 
 /** 安全红线（文档/verify 对照用常量） */
@@ -111,5 +119,6 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'chat.listMessages',
   'task.getChecklist',
   'member.list',
-  'chat.sendTaskRef'
+  'chat.sendTaskRef',
+  'license.feature'
 ] as const

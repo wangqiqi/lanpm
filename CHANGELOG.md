@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.75.0] - 2026-07-31
+
+### Added
+
+- **插件侧载 POC**：`userData/sideload-plugins/` · `signature.json` Ed25519 验签（`LANPM_PLUGIN_SKIP_VERIFY=1` 可跳过）
+- **离线许可证**：`plugin-licenses.json` · `license.feature` capability · paid 插件能力闸
+- **Profile 扩展**：导入许可证 · 许可/侧载状态展示
+- **IPC**：`plugin:importLicense` · `plugin:getLicenseStatus`
+- **验收**：`verify:plugin-market-spike`
+
 ## [1.74.0] - 2026-07-31
 
 ### Added

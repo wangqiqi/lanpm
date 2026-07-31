@@ -280,6 +280,8 @@ const api: LanpmApi = {
     listPlugins: () => ipcRenderer.invoke('plugin:listPlugins'),
     listSlotPlugins: (slotId) => ipcRenderer.invoke('plugin:listSlotPlugins', slotId),
     listContributedViews: () => ipcRenderer.invoke('plugin:listContributedViews'),
+    importLicense: (payload) => ipcRenderer.invoke('plugin:importLicense', payload),
+    getLicenseStatus: (pluginId) => ipcRenderer.invoke('plugin:getLicenseStatus', pluginId),
     setEnabled: (pluginId, enabled) =>
       ipcRenderer.invoke('plugin:setEnabled', pluginId, enabled),
     invokeCapability: (pluginId, capability, args) =>

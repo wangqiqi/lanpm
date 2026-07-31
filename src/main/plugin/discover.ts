@@ -1,23 +1,33 @@
 import { existsSync, readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
-import type { PluginSlotId, PluginView } from '../../shared/plugin/types.ts'
+import type { PluginSlotId, PluginSource, PluginView } from '../../shared/plugin/types.ts'
 import type { ContributedPluginView } from '../../shared/plugin/contributions.ts'
 import {
   parsePluginManifest,
   resolveContributionGroupTypes
 } from '../../shared/plugin/validateManifest.ts'
 import { isPluginEnabled, readEnabledMap } from './enabledStore.ts'
-import { resolvePluginsRoot } from './paths.ts'
+import { isPluginLicensed } from './licenseStore.ts'
+import { resolvePluginsRoot, resolveSideloadPluginsRoot } from './paths.ts'
+import { verifyPluginDirectorySignature } from './signatureVerify.ts'
 
-export function discoverPlugins(): PluginView[] {
-  const root = resolvePluginsRoot()
+function resolveLicensed(pricing: 'free' | 'paid', pluginId: string): boolean | null {
+  if (pricing === 'free') return null
+  return isPluginLicensed(pluginId)
+}
+
+function scanPluginRoot(root: string, source: PluginSource): PluginView[] {
   if (!existsSync(root)) return []
   const enabledMap = readEnabledMap()
   const views: PluginView[] = []
   for (const dirName of readdirSync(root, { withFileTypes: true })) {
     if (!dirName.isDirectory()) continue
-    const manifestPath = join(root, dirName.name, 'plugin.json')
+    const pluginDir = join(root, dirName.name)
+    const manifestPath = join(pluginDir, 'plugin.json')
     if (!existsSync(manifestPath)) continue
+    const signatureValid =
+      source === 'builtin' ? true : verifyPluginDirectorySignature(pluginDir)
+    if (source === 'sideload' && !signatureValid) continue
     let raw: unknown
     try {
       raw = JSON.parse(readFileSync(manifestPath, 'utf8'))
@@ -29,11 +39,24 @@ export function discoverPlugins(): PluginView[] {
     views.push({
       ...manifest,
       dirName: dirName.name,
+      source,
+      signatureValid,
+      licensed: resolveLicensed(manifest.pricing, manifest.id),
       enabled: isPluginEnabled(manifest.id, enabledMap)
     })
   }
-  views.sort((a, b) => a.id.localeCompare(b.id))
   return views
+}
+
+export function discoverPlugins(): PluginView[] {
+  const byId = new Map<string, PluginView>()
+  for (const plugin of scanPluginRoot(resolvePluginsRoot(), 'builtin')) {
+    byId.set(plugin.id, plugin)
+  }
+  for (const plugin of scanPluginRoot(resolveSideloadPluginsRoot(), 'sideload')) {
+    byId.set(plugin.id, plugin)
+  }
+  return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id))
 }
 
 export function listSlotPlugins(slotId: PluginSlotId): PluginView[] {
