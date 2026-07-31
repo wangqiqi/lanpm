@@ -284,6 +284,10 @@ const api: LanpmApi = {
     invokeCapability: (pluginId, capability, args) =>
       ipcRenderer.invoke('plugin:invokeCapability', pluginId, capability, args)
   },
+  nav: {
+    getPreferences: () => ipcRenderer.invoke('nav:getPreferences'),
+    setPreferences: (prefs) => ipcRenderer.invoke('nav:setPreferences', prefs)
+  },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
     getStorageUsage: () => ipcRenderer.invoke('data:getStorageUsage'),

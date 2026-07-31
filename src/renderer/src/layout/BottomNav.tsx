@@ -16,8 +16,10 @@ import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { NAV_DISABLED_HINT_KEYS, VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
+import { resolveVisibleViews } from '@shared/navigation/navPreferences'
 import type { AppView } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
 import { groupViewPath, VIEW_TABS } from '@renderer/routes/paths'
 import { useBadgeStore } from '@renderer/stores/badgeStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -85,14 +87,16 @@ export default function BottomNav(): React.ReactElement {
   }, [gid, activeView, markBoardSeenAndRefresh])
 
   const groupType = groupId ? getGroupType(groupId) : null
+  const navPreferences = useNavPreferencesStore((s) => s.preferences)
 
   const visibleTabs = useMemo(() => {
     if (!groupId || !groupType) return []
-    if (groupType === 'anonymous') {
-      return VIEW_TABS.filter((tab) => isViewAllowedForGroup(groupType, tab.view))
-    }
-    return VIEW_TABS
-  }, [groupId, groupType])
+    const visibleViews = resolveVisibleViews(groupType, navPreferences, groupId)
+    const order = new Map(visibleViews.map((view, index) => [view, index]))
+    return VIEW_TABS.filter((tab) => visibleViews.includes(tab.view)).sort(
+      (a, b) => (order.get(a.view) ?? 0) - (order.get(b.view) ?? 0)
+    )
+  }, [groupId, groupType, navPreferences])
 
   if (!groupId || !groupType) return <></>
 

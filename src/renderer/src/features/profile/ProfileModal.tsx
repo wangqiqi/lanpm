@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button, Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
 import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
+import NavPreferencesPanel from '@renderer/features/profile/NavPreferencesPanel'
 import PluginsPanel from '@renderer/features/profile/PluginsPanel'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -191,6 +192,11 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
                 </Form>
               </>
             )
+          },
+          {
+            key: 'nav',
+            label: t('profile.tabNav'),
+            children: <NavPreferencesPanel />
           },
           {
             key: 'plugins',

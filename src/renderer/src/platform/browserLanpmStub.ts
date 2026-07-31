@@ -39,6 +39,11 @@ import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta
 import type { SaveWhiteboardSceneInput, WhiteboardScene } from '@shared/whiteboard/types'
 import { buildWhiteboardScene, emptyWhiteboardSceneJson, normalizeSceneJson } from '@shared/whiteboard/types'
 import type { PluginView } from '@shared/plugin/types'
+import {
+  DEFAULT_NAV_PREFERENCES,
+  normalizeNavPreferences,
+  type NavPreferences
+} from '@shared/navigation/navPreferences'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -49,6 +54,23 @@ const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
 const FILE_STORAGE_KEY = 'lanpm.dev.files'
 const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
+const NAV_PREFS_STORAGE_KEY = 'lanpm.dev.navPreferences'
+
+function readStubNavPreferences(): NavPreferences {
+  try {
+    const raw = localStorage.getItem(NAV_PREFS_STORAGE_KEY)
+    if (!raw) return normalizeNavPreferences(DEFAULT_NAV_PREFERENCES)
+    return normalizeNavPreferences(JSON.parse(raw) as unknown)
+  } catch {
+    return normalizeNavPreferences(DEFAULT_NAV_PREFERENCES)
+  }
+}
+
+function writeStubNavPreferences(prefs: NavPreferences): NavPreferences {
+  const normalized = normalizeNavPreferences(prefs)
+  localStorage.setItem(NAV_PREFS_STORAGE_KEY, JSON.stringify(normalized))
+  return normalized
+}
 
 const STUB_PLUGINS: PluginView[] = [
   {
@@ -1775,6 +1797,10 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         throw new Error(`capability not granted: ${capability}`)
       }
+    },
+    nav: {
+      getPreferences: async () => readStubNavPreferences(),
+      setPreferences: async (prefs) => writeStubNavPreferences(prefs)
     },
     data: {
       getStorageSettings: async () => ({

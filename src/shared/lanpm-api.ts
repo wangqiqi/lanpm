@@ -362,4 +362,10 @@ export interface LanpmApi {
       args?: Record<string, unknown>
     ) => Promise<unknown>
   }
+  nav: {
+    getPreferences: () => Promise<import('./navigation/navPreferences').NavPreferences>
+    setPreferences: (
+      prefs: import('./navigation/navPreferences').NavPreferences
+    ) => Promise<import('./navigation/navPreferences').NavPreferences>
+  }
 }

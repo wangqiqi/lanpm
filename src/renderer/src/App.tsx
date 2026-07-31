@@ -10,6 +10,7 @@ import type { SetupStatus } from '@shared/identity'
 import { translate } from '@renderer/i18n/messages'
 import type { MessageKey } from '@renderer/i18n/types'
 import { useUiStore } from '@renderer/stores/uiStore'
+import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import {
   unwireTaskAwarenessPush,
@@ -71,6 +72,11 @@ export default function App(): React.ReactElement {
     if (!configured) return
     const unsub = getLanpmApi().group.onListChanged(() => void loadGroupsRef.current())
     return unsub
+  }, [configured])
+
+  useEffect(() => {
+    if (!configured) return
+    void useNavPreferencesStore.getState().hydrate()
   }, [configured])
 
   useEffect(() => {

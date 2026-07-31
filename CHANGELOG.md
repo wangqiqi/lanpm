@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.69.0] - 2026-07-31
+
+### Added
+
+- **导航偏好 MVP（Layer A）**：`NavPreferences` · `userData/nav-preferences.json` · IPC `nav.get/setPreferences`
+- **BottomNav**：按用户 `order` / `hiddenViews` 与 `tabRules` 交集渲染
+- **深链守卫**：隐藏 Tab URL 回落默认可见视图 + Toast
+- **Profile「导航与视图」**：拖拽排序 + Switch 显隐
+- **验收**：`verify:nav-preferences`
+
 ## [1.68.0] - 2026-07-31
 
 ### Added
