@@ -1,8 +1,15 @@
 {
   "id": "lanpm.example",
   "name": "Example Slot Stub",
-  "version": "0.1.0",
-  "slots": ["task.detail.section"],
-  "capabilities": ["task.get"],
+  "version": "0.2.0",
+  "slots": ["task.detail.section", "chat.composer.action"],
+  "capabilities": [
+    "task.get",
+    "task.list",
+    "chat.listMessages",
+    "task.getChecklist",
+    "member.list",
+    "chat.sendTaskRef"
+  ],
   "pricing": "free"
 }

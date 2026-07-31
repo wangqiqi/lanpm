@@ -33,6 +33,13 @@
   color: var(--lanpm-text-secondary);
 }
 
+.composerAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
 .crash {
   border: 1px dashed var(--lanpm-danger);
   border-radius: 8px;

@@ -100,9 +100,16 @@ const STUB_PLUGINS: PluginView[] = [
   {
     id: 'lanpm.example',
     name: 'Example Slot Stub',
-    version: '0.1.0',
-    slots: ['task.detail.section'],
-    capabilities: ['task.get'],
+    version: '0.2.0',
+    slots: ['task.detail.section', 'chat.composer.action'],
+    capabilities: [
+      'task.get',
+      'task.list',
+      'chat.listMessages',
+      'task.getChecklist',
+      'member.list',
+      'chat.sendTaskRef'
+    ],
     pricing: 'free',
     enabled: true,
     dirName: 'lanpm.example'
@@ -1818,6 +1825,72 @@ export function createBrowserLanpmStub(): LanpmApi {
           const taskId = String(args?.taskId ?? '')
           const groupTasks = Object.values(readAllTasks()).flat()
           return groupTasks.find((t) => t.taskId === taskId) ?? null
+        }
+        if (capability === 'task.list') {
+          const groupId = String(args?.groupId ?? '')
+          if (!groupId) throw new Error('groupId required')
+          return readAllTasks()[groupId] ?? []
+        }
+        if (capability === 'chat.listMessages') {
+          const groupId = String(args?.groupId ?? '')
+          if (!groupId) throw new Error('groupId required')
+          const status = readStatus()
+          const localUserId = status.configured && status.user ? status.user.userId : undefined
+          const beforeLamportTs = args?.beforeLamportTs
+          if (beforeLamportTs != null && Number.isFinite(Number(beforeLamportTs))) {
+            const all = applyReadStatus(readChatMessages(groupId), localUserId).filter(
+              (m) => m.lamportTs < Number(beforeLamportTs)
+            )
+            const hasMore = all.length > CHAT_HISTORY_PAGE_SIZE
+            const messages = hasMore ? all.slice(-CHAT_HISTORY_PAGE_SIZE) : all
+            return { messages, hasMore }
+          }
+          const all = applyReadStatus(readChatMessages(groupId), localUserId)
+          const hasMore = all.length > CHAT_HISTORY_PAGE_SIZE
+          const messages = hasMore ? all.slice(-CHAT_HISTORY_PAGE_SIZE) : all
+          return { messages, hasMore }
+        }
+        if (capability === 'task.getChecklist') {
+          const groupId = String(args?.groupId ?? '')
+          const taskId = String(args?.taskId ?? '')
+          if (!groupId) throw new Error('groupId required')
+          if (!taskId) throw new Error('taskId required')
+          return stubListChecklist(groupId, taskId)
+        }
+        if (capability === 'member.list') {
+          const groupId = String(args?.groupId ?? '')
+          if (!groupId) throw new Error('groupId required')
+          return listStubMembers(groupId)
+        }
+        if (capability === 'chat.sendTaskRef') {
+          const groupId = String(args?.groupId ?? '')
+          const taskId = String(args?.taskId ?? '')
+          if (!groupId) throw new Error('groupId required')
+          if (!taskId) throw new Error('taskId required')
+          const all = readAllTasks()
+          const list = all[groupId] ?? []
+          const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
+          if (!task) throw stubError('stub.taskNotFound')
+          const status = readStatus()
+          if (!status.configured || !status.user || !status.device) {
+            throw stubError('stub.identityRequired')
+          }
+          const prev = readChatMessages(groupId)
+          const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+          const msg: ChatMessage = {
+            msgId: `msg_${crypto.randomUUID()}`,
+            groupId,
+            senderUserId: status.user.userId,
+            senderDeviceId: status.device.deviceId,
+            type: 'task_ref',
+            content: { kind: 'task_ref', taskId: task.taskId, title: task.title },
+            lamportTs,
+            createdAt: new Date().toISOString(),
+            deliveryStatus: 'sent'
+          }
+          writeChatMessages(groupId, [...prev, msg])
+          for (const fn of chatListeners) fn(msg)
+          return msg
         }
         if (capability === 'media.livekit.createToken') {
           const config = readStubLiveKitConfig()

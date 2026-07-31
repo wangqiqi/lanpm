@@ -2,6 +2,15 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.72.0] - 2026-07-31
+
+### Added
+
+- **Extension API v0.2**：`chat.listMessages` · `task.getChecklist` · `member.list`（读）· `chat.sendTaskRef`（受控写）
+- **capabilityTypes**：v0.2 参数/返回类型共享定义
+- **lanpm.example**：`chat.composer.action` demo（探测读能力 · 发送任务引用）
+- **验收**：`verify:extension-api-v0.2`
+
 ## [1.71.0] - 2026-07-31
 
 ### Added

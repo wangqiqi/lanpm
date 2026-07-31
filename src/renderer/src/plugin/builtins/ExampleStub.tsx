@@ -1,5 +1,10 @@
-import { Typography } from 'antd'
+import { useCallback, useState } from 'react'
+import { Button, Typography, message } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
+import type { ViewPluginContext } from '@shared/plugin/viewHost'
+import type { Task } from '@shared/task/types'
+import type { ChatMessagePage } from '@shared/chat/pagination'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from '../plugin.module.css'
 
@@ -9,10 +14,10 @@ interface Props {
   plugin: PluginView
   groupId: string
   taskId?: string
+  context?: ViewPluginContext
 }
 
-/** 免费官方 stub — 证明 Host→Slot 端到端 */
-export default function ExampleStub({ plugin, taskId }: Props): React.ReactElement {
+function ExampleTaskSection({ plugin, taskId }: Props): React.ReactElement {
   const { t } = useI18n()
   const label = taskId ?? '—'
   return (
@@ -24,4 +29,74 @@ export default function ExampleStub({ plugin, taskId }: Props): React.ReactEleme
       <Text type="secondary">{t('plugin.exampleHint', { taskId: label })}</Text>
     </div>
   )
+}
+
+function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
+  const { t } = useI18n()
+  const [busy, setBusy] = useState(false)
+
+  const onSendTaskRef = useCallback(async () => {
+    setBusy(true)
+    try {
+      const tasks = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.list', {
+        groupId
+      })) as Task[]
+      const first = tasks.find((task) => !task.deletedAt)
+      if (!first) {
+        message.info(t('plugin.exampleNoTasks'))
+        return
+      }
+      await getLanpmApi().plugin.invokeCapability(plugin.id, 'chat.sendTaskRef', {
+        groupId,
+        taskId: first.taskId
+      })
+      message.success(t('plugin.exampleTaskRefSent', { title: first.title }))
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [groupId, plugin.id, t])
+
+  const onProbeRead = useCallback(async () => {
+    setBusy(true)
+    try {
+      const page = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'chat.listMessages', {
+        groupId
+      })) as ChatMessagePage
+      const members = await getLanpmApi().plugin.invokeCapability(plugin.id, 'member.list', {
+        groupId
+      })
+      const memberCount = Array.isArray(members) ? members.length : 0
+      message.info(
+        t('plugin.exampleReadProbe', {
+          messages: page.messages.length,
+          members: memberCount
+        })
+      )
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [groupId, plugin.id, t])
+
+  return (
+    <div className={styles.composerAction} data-plugin-id={plugin.id}>
+      <Button size="small" loading={busy} onClick={() => void onProbeRead()}>
+        {t('plugin.exampleProbeRead')}
+      </Button>
+      <Button size="small" type="primary" loading={busy} onClick={() => void onSendTaskRef()}>
+        {t('plugin.exampleSendTaskRef')}
+      </Button>
+    </div>
+  )
+}
+
+/** 免费官方 stub — 证明 Host→Slot 端到端 + Extension API v0.2 demo */
+export default function ExampleStub(props: Props): React.ReactElement {
+  if (props.context?.view === 'chat' && !props.taskId) {
+    return <ExampleComposerAction {...props} />
+  }
+  return <ExampleTaskSection {...props} />
 }

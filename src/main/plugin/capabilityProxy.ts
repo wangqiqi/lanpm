@@ -1,11 +1,23 @@
 import type { PluginCapabilityId } from '../../shared/plugin/types.ts'
+import type {
+  ChatListMessagesArgs,
+  ChatSendTaskRefArgs,
+  MemberListArgs,
+  TaskGetChecklistArgs
+} from '../../shared/plugin/capabilityTypes.ts'
 import { pluginDeclaresCapability } from '../../shared/plugin/validateManifest.ts'
 import { getDatabase } from '../storage'
-import { listGroupTasks } from '../task/taskService'
+import { listGroupTasks, listTaskChecklist } from '../task/taskService'
 import { getTaskById } from '../storage/repositories/taskRepository'
 import { getGroupById } from '../group/groupService'
 import { listGroupFiles } from '../file/fileService'
 import { findPluginById } from './discover.ts'
+import {
+  listGroupMessages,
+  listOlderGroupMessages,
+  sendTaskRefMessage
+} from '../chat/chatService'
+import { listGroupMembers } from '../chat/memberService'
 import {
   getMediaRoomState,
   pollMediaSignals,
@@ -74,6 +86,31 @@ export async function invokePluginCapability(
       if (!identity) throw new Error('identity required')
       const roomName = args.roomName != null ? String(args.roomName) : undefined
       return createLiveKitTokenForGroup({ groupId, identity, roomName })
+    }
+    case 'chat.listMessages': {
+      const { groupId, beforeLamportTs } = args as ChatListMessagesArgs
+      if (!groupId) throw new Error('groupId required')
+      if (beforeLamportTs != null && Number.isFinite(beforeLamportTs)) {
+        return listOlderGroupMessages(db, groupId, beforeLamportTs)
+      }
+      return listGroupMessages(db, groupId)
+    }
+    case 'task.getChecklist': {
+      const { groupId, taskId } = args as TaskGetChecklistArgs
+      if (!groupId) throw new Error('groupId required')
+      if (!taskId) throw new Error('taskId required')
+      return listTaskChecklist(db, groupId, taskId)
+    }
+    case 'member.list': {
+      const { groupId } = args as MemberListArgs
+      if (!groupId) throw new Error('groupId required')
+      return listGroupMembers(db, groupId)
+    }
+    case 'chat.sendTaskRef': {
+      const { groupId, taskId } = args as ChatSendTaskRefArgs
+      if (!groupId) throw new Error('groupId required')
+      if (!taskId) throw new Error('taskId required')
+      return sendTaskRefMessage(db, groupId, taskId)
     }
     default: {
       const _exhaustive: never = capability
