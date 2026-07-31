@@ -12,6 +12,13 @@
 - **核心命令**：打开个人设置 / 导航偏好 / 扩展管理
 - **样例**：`lanpm.example` → `hello`；`verify:command-palette`
 
+### Fixed
+
+- **README / README.zh-CN**：版本徽章与 Current 对齐 **1.78.0**（`verify:project` 门禁）
+- **覆盖率**：补 `validateManifest` contributions/commands · notificationPreferences · discoverCoachmark · joinRequest 单测（≥85%）
+- **视觉令牌**：`CommandPalette.module.css` 改用已定义 `--lanpm-*`（无 rgba/#hex fallback）
+- **knip**：渐进规则（exports/types 等 warn）· `ignoreExportsUsedInFile`，避免历史债阻塞 `verify:m7`
+
 ## [1.77.0] - 2026-07-31
 
 ### Added

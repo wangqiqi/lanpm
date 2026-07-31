@@ -2,7 +2,7 @@
 
 import type { InvokeCommandResult, ListedCommand } from '../../shared/plugin/commands.ts'
 
-export const CORE_COMMANDS: ListedCommand[] = [
+const CORE_COMMANDS: ListedCommand[] = [
   {
     commandId: 'core:open-profile',
     titleKey: 'command.core.openProfile',

@@ -19,11 +19,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px !important;
-  border-radius: var(--lanpm-radius-sm, 6px);
+  border-radius: var(--lanpm-radius-sm);
 }
 
 .itemActive {
-  background: var(--lanpm-bg-muted, rgba(0, 0, 0, 0.04));
+  background: var(--lanpm-fill-secondary);
 }
 
 .itemTitle {
@@ -31,6 +31,6 @@
 }
 
 .itemMeta {
-  color: var(--lanpm-text-secondary, #888);
-  font-size: var(--lanpm-font-caption, 12px);
+  color: var(--lanpm-text-secondary);
+  font-size: var(--lanpm-font-caption);
 }

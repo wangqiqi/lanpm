@@ -15,5 +15,17 @@
   ],
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{mjs,js,ts}"],
   "ignore": ["out/**", "dist/**", "node_modules/**"],
-  "ignoreDependencies": ["@electron/rebuild", "@resvg/resvg-js"]
+  "ignoreDependencies": ["@electron/rebuild", "@resvg/resvg-js"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "files": "warn",
+    "dependencies": "error",
+    "devDependencies": "warn",
+    "unlisted": "warn",
+    "binaries": "warn",
+    "unresolved": "error",
+    "exports": "warn",
+    "types": "warn",
+    "duplicates": "warn"
+  }
 }
