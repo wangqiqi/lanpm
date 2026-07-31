@@ -18,6 +18,23 @@ describe('parsePluginManifest', () => {
     expect(m?.pricing).toBe('free')
   })
 
+  it('accepts meeting manifest with media capabilities', () => {
+    const m = parsePluginManifest({
+      id: 'lanpm.meeting',
+      name: 'Meeting',
+      version: '0.1.0',
+      slots: ['chat.toolbar.media'],
+      capabilities: [
+        'media.signal.send',
+        'media.signal.poll',
+        'media.captureDesktop',
+        'media.room.state'
+      ],
+      pricing: 'paid'
+    })
+    expect(m?.id).toBe('lanpm.meeting')
+  })
+
   it('rejects unknown capability or slot', () => {
     expect(
       parsePluginManifest({

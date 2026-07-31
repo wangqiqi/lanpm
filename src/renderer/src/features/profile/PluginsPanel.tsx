@@ -12,10 +12,11 @@ const { Text } = Typography
 function localizedPluginName(
   pluginId: string,
   fallback: string,
-  t: (key: 'plugin.name.example' | 'plugin.name.formjs', params?: never) => string
+  t: (key: 'plugin.name.example' | 'plugin.name.formjs' | 'plugin.name.meeting', params?: never) => string
 ): string {
   if (pluginId === 'lanpm.example') return t('plugin.name.example')
   if (pluginId === 'lanpm.formjs') return t('plugin.name.formjs')
+  if (pluginId === 'lanpm.meeting') return t('plugin.name.meeting')
   return fallback
 }
 

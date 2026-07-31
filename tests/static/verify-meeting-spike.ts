@@ -34,9 +34,10 @@ for (const name of Object.keys(deps ?? {})) {
   assert.ok(!/^@livekit\//.test(name) && !name.includes('jitsi'), `meeting SDK must not be core dep: ${name}`)
 }
 
-// Host baseline unchanged until implementation sprint
-assert.match(pluginTypes, /task\.detail\.section/)
-assert.match(pluginTypes, /no-plugin-ipcMain/)
-assert.match(chatView, /voiceComingSoon/)
+// Host extended — media capabilities + voice panel wired to Slot (meeting-plugin-host)
+assert.match(pluginTypes, /media\.signal\.send/)
+assert.match(pluginTypes, /media\.captureDesktop/)
+assert.match(chatView, /ChatVoiceMediaPanel/)
+assert.ok(!chatView.includes('voiceComingSoon'), 'voice panel must use plugin slot path')
 
-console.log('verify:meeting-spike OK (docs · no core media deps · host baseline)')
+console.log('verify:meeting-spike OK (docs · no core media deps · meeting host baseline)')

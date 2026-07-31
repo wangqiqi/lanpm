@@ -58,3 +58,16 @@
   gap: 8px;
   margin-top: 4px;
 }
+
+.meetingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.meetingState {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}

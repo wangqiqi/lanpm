@@ -46,6 +46,34 @@ export function invokePluginCapability(
       if (!groupId) throw new Error('groupId required')
       return listGroupFiles(db, groupId)
     }
+    case 'media.signal.send': {
+      const groupId = String(args.groupId ?? '')
+      if (!groupId) throw new Error('groupId required')
+      return {
+        ok: true,
+        stub: true,
+        groupId,
+        envelopeId: String(args.envelopeId ?? `stub-${Date.now()}`)
+      }
+    }
+    case 'media.signal.poll': {
+      const groupId = String(args.groupId ?? '')
+      if (!groupId) throw new Error('groupId required')
+      return { stub: true, groupId, messages: [] as unknown[] }
+    }
+    case 'media.captureDesktop': {
+      return { stub: true, sources: [] as { id: string; name: string }[] }
+    }
+    case 'media.room.state': {
+      const groupId = String(args.groupId ?? '')
+      if (!groupId) throw new Error('groupId required')
+      return {
+        stub: true,
+        groupId,
+        phase: 'idle' as const,
+        participants: [] as string[]
+      }
+    }
     default: {
       const _exhaustive: never = capability
       throw new Error(`unknown capability: ${_exhaustive}`)

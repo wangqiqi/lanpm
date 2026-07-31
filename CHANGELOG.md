@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.67.0] - 2026-07-31
+
+### Added
+
+- **会议插件 stub**：`plugins/lanpm.meeting` · `MeetingStub` · 媒体 capability（`media.signal.*` · `media.captureDesktop` · `media.room.state`）Host stub 代理
+- **聊天语音面板**：`ChatVoiceMediaPanel` 接 `chat.toolbar.media`；未启用时展示扩展 CTA（替代 `voiceComingSoon`）
+- **验收**：`verify:meeting-plugin`
+
+### Changed
+
+- **`verify:meeting-spike`**：断言更新为 meeting-host 基线（无核心媒体 SDK）
+
 ## [1.66.0] - 2026-07-31
 
 ### Added

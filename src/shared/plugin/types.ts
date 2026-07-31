@@ -29,6 +29,10 @@ export type PluginCapabilityId =
   | 'task.get'
   | 'group.get'
   | 'file.listMeta'
+  | 'media.signal.send'
+  | 'media.signal.poll'
+  | 'media.captureDesktop'
+  | 'media.room.state'
 
 export type PluginManifest = {
   /** 稳定 id，如 `lanpm.formjs` */
@@ -85,5 +89,9 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'task.list',
   'task.get',
   'group.get',
-  'file.listMeta'
+  'file.listMeta',
+  'media.signal.send',
+  'media.signal.poll',
+  'media.captureDesktop',
+  'media.room.state'
 ] as const

@@ -51,6 +51,7 @@ import IslandPanel from '@renderer/ui/IslandPanel'
 import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
+import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
 import styles from './chat.module.css'
 
 function ChatWorkspaceFrame({
@@ -931,14 +932,7 @@ export default function ChatView(): React.ReactElement {
                     </div>
                   </div>
                 ) : (
-                  <div className={styles.voicePanel}>
-                    <Button className={styles.voiceHoldBtn} disabled block>
-                      {t('chat.voiceHoldHint')}
-                    </Button>
-                    <Text type="secondary" className={styles.voiceHint}>
-                      {t('chat.voiceComingSoon')}
-                    </Text>
-                  </div>
+                  <ChatVoiceMediaPanel groupId={gid} />
                 )}
               </div>
             </div>

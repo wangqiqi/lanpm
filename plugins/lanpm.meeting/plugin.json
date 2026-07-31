@@ -1,0 +1,13 @@
+{
+  "id": "lanpm.meeting",
+  "name": "LanPM Meeting",
+  "version": "0.1.0",
+  "slots": ["chat.toolbar.media"],
+  "capabilities": [
+    "media.signal.send",
+    "media.signal.poll",
+    "media.captureDesktop",
+    "media.room.state"
+  ],
+  "pricing": "paid"
+}

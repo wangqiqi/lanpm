@@ -6,6 +6,7 @@ Host（main）从本目录发现 `*/plugin.json`。
 |------|-----|------|
 | `lanpm.example/` | `lanpm.example` | 免费 stub，验证 Slot |
 | `lanpm.formjs/` | `lanpm.formjs` | 可购 form-js POC（schema 兼容；不进核心 deps） |
+| `lanpm.meeting/` | `lanpm.meeting` | 可购会议 stub（`chat.toolbar.media` · 媒体 capability；默认关闭） |
 
 启用态：`userData/plugin-enabled.json`（默认启用）。
 
