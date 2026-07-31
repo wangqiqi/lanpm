@@ -64,7 +64,7 @@ assert.ok(pkg.scripts?.['verify:project-files'], 'missing verify:project-files')
 const docs01 = readFileSync(join(root, 'docs/01_产品需求文档.md'), 'utf8')
 assert.match(docs01, /交付物（A3）/)
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:project-files/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:project-files/)
 
 console.log('verify:project-files OK (deliverables index · FilesView · docs)')

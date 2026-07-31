@@ -40,9 +40,9 @@ assert.match(webviewGuard, /delete[\s\S]*preload/)
 const csp = readFileSync(join(root, 'src/renderer/index.html'), 'utf8')
 assert.match(csp, /Content-Security-Policy/)
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:plugin-spike/)
-assert.match(feige, /插件加载边界/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:plugin-spike/)
+assert.match(roadmap, /插件加载边界/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

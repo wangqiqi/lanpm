@@ -91,7 +91,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 assert.ok(pkg.scripts?.['verify:a1-nudge'], 'missing verify:a1-nudge')
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:a1-nudge/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:a1-nudge/)
 
 console.log('verify:a1-nudge OK (due · @assignee · nudge)')

@@ -59,7 +59,7 @@ assert.ok(pkg.scripts?.['verify:plugin-loader'], 'missing verify:plugin-loader')
 const builder = readFileSync(join(root, 'electron-builder.yml'), 'utf8')
 assert.match(builder, /plugins/)
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:plugin-loader/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:plugin-loader/)
 
 console.log('verify:plugin-loader OK')

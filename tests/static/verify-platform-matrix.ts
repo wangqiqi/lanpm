@@ -70,8 +70,8 @@ assert.match(docBody, /冒烟清单/)
 assert.match(docBody, /arm64/)
 assert.match(docBody, /统信|麒麟/)
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /05_测试与联调发布|verify:platform-matrix/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /05_测试与联调发布|verify:platform-matrix/)
 
 const nav = readFileSync(join(root, 'docs/00_文档导航.md'), 'utf8')
 assert.match(nav, /跨平台发版矩阵/)

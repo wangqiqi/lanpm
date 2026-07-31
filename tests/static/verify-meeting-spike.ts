@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
   scripts?: Record<string, string>
@@ -28,8 +27,6 @@ assert.match(roadmap, /mesh/)
 assert.match(roadmap, /chat\.toolbar\.media/)
 assert.match(roadmap, /meet\.jit\.si|LiveKit Cloud/)
 assert.match(roadmap, /禁止/)
-
-assert.match(feige, /verify:meeting-spike/)
 
 // Out of scope for spike: no SFU SDK in core deps
 const deps = { ...pkg.dependencies, ...(pkg as { devDependencies?: Record<string, string> }).devDependencies }

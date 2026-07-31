@@ -82,7 +82,7 @@ assert.match(view, /@mizuka-wu\/y-excalidraw/)
 assert.match(view, /onPointerUpdate/)
 
 const schemaTs = readFileSync(join(root, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*11/)
+assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*16/)
 assert.match(schemaTs, /whiteboard_crdt_docs/)
 
 const types = readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8')
@@ -101,8 +101,8 @@ assert.ok(
 )
 assert.ok(pkg.scripts?.['verify:whiteboard-realtime'], 'missing verify:whiteboard-realtime')
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:whiteboard-realtime|whiteboard_crdt/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:whiteboard-realtime|whiteboard_crdt/)
 
 console.log(
   'verify:whiteboard-realtime OK (contract · schema v10 · Binding · sync types · docs)'

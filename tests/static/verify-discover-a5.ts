@@ -49,7 +49,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 assert.ok(pkg.scripts?.['verify:discover-a5'], 'missing verify:discover-a5')
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:discover-a5/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:discover-a5/)
 
 console.log('verify:discover-a5 OK (health · seeds · DiscoverModal · docs)')

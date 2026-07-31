@@ -80,7 +80,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 assert.ok(pkg.scripts?.['verify:transfer-a4'], 'missing verify:transfer-a4')
 
-const feige = readFileSync(join(root, 'docs/飞鸽飞秋.md'), 'utf8')
-assert.match(feige, /verify:transfer-a4/)
+const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(roadmap, /verify:transfer-a4/)
 
 console.log('verify:transfer-a4 OK (cancel · retry · rate/ETA · push wiring)')

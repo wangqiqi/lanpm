@@ -2,6 +2,15 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.65.2] - 2026-07-31
+
+### Changed
+
+- **飞鸽飞秋**：`飞鸽飞秋.md` 全文融入 `docs/01`–`06`；归档 `archive/20260731_102000_飞鸽飞秋_并入01-06正文.md`
+- **飞鸽飞秋**：`01` §13（品类定位 · 信创）· `06` §6（吸收 A1–A6 · 免费/收费 · verify 锚点）· `插件开发.md` 链更新；开源实现态仍以 `MIT开源替代.md` 为准
+- **验收脚本**：`verify-a1-nudge` · `verify-project-files` · `verify-transfer-a4` · `verify-discover-a5` · `verify-platform-matrix` · `verify-plugin-spike` · `verify-plugin-loader` · `verify-meeting-spike` · `verify-whiteboard-realtime` 改读 `06_ROADMAP` §6
+- **验收脚本**：`verify:whiteboard-realtime` 对齐 `SCHEMA_VERSION=16`
+
 ## [1.65.1] - 2026-07-31
 
 ### Changed
