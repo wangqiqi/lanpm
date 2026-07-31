@@ -148,10 +148,11 @@ export default function ChatView(): React.ReactElement {
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
-  const [linkFileModal, setLinkFileModal] = useState<{
-    fileId: string
-    fileName: string
-  } | null>(null)
+  const [linkToTaskModal, setLinkToTaskModal] = useState<
+    | { kind: 'file'; fileId: string; fileName: string }
+    | { kind: 'message'; msgId: string; preview: string }
+    | null
+  >(null)
   const [linkTaskId, setLinkTaskId] = useState<string | undefined>()
   const [linkSaving, setLinkSaving] = useState(false)
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
@@ -542,25 +543,33 @@ export default function ChatView(): React.ReactElement {
     [gid, taskAllowed, createFromChat, upsertMessage, t, message, formatError]
   )
 
-  const handleConfirmLinkFile = useCallback(async () => {
-    if (!gid || !linkFileModal || !linkTaskId) return
+  const handleConfirmLinkToTask = useCallback(async () => {
+    if (!gid || !linkToTaskModal || !linkTaskId) return
     const task = tasks.find((x) => x.taskId === linkTaskId)
     if (!task) return
     setLinkSaving(true)
     try {
-      await updateTask({
-        taskId: linkTaskId,
-        linkedFileIds: mergeLinkedFileId(task.linkedFileIds, linkFileModal.fileId)
-      })
-      message.success(t('chat.linkFileToTaskDone'))
-      setLinkFileModal(null)
+      if (linkToTaskModal.kind === 'file') {
+        await updateTask({
+          taskId: linkTaskId,
+          linkedFileIds: mergeLinkedFileId(task.linkedFileIds, linkToTaskModal.fileId)
+        })
+        message.success(t('chat.linkFileToTaskDone'))
+      } else {
+        await updateTask({
+          taskId: linkTaskId,
+          sourceMsgId: linkToTaskModal.msgId
+        })
+        message.success(t('chat.linkMessageToTaskDone'))
+      }
+      setLinkToTaskModal(null)
       setLinkTaskId(undefined)
     } catch (err) {
       message.error(formatError(err, 'tree.updateFailed'))
     } finally {
       setLinkSaving(false)
     }
-  }, [gid, linkFileModal, linkTaskId, tasks, updateTask, message, t, formatError])
+  }, [gid, linkToTaskModal, linkTaskId, tasks, updateTask, message, t, formatError])
 
   const handleSendCode = useCallback(
     async (code: string, languageHint: string) => {
@@ -775,7 +784,12 @@ export default function ChatView(): React.ReactElement {
                         taskCreateAllowed={taskAllowed}
                         onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
                         onLinkFileToTask={(fileId, fileName) => {
-                          setLinkFileModal({ fileId, fileName })
+                          setLinkToTaskModal({ kind: 'file', fileId, fileName })
+                          setLinkTaskId(undefined)
+                        }}
+                        onLinkMessageToTask={(m) => {
+                          const preview = titleFromChatMessage(m) ?? m.msgId
+                          setLinkToTaskModal({ kind: 'message', msgId: m.msgId, preview })
                           setLinkTaskId(undefined)
                         }}
                       />
@@ -968,22 +982,28 @@ export default function ChatView(): React.ReactElement {
         )}
 
         <Modal
-          open={linkFileModal != null}
-          title={t('chat.linkFileToTaskTitle')}
+          open={linkToTaskModal != null}
+          title={
+            linkToTaskModal?.kind === 'message'
+              ? t('chat.linkMessageToTaskTitle')
+              : t('chat.linkFileToTaskTitle')
+          }
           okText={t('chat.linkFileToTaskConfirm')}
           cancelText={t('common.cancel')}
           confirmLoading={linkSaving}
           okButtonProps={{ disabled: !linkTaskId }}
           onCancel={() => {
-            setLinkFileModal(null)
+            setLinkToTaskModal(null)
             setLinkTaskId(undefined)
           }}
-          onOk={() => void handleConfirmLinkFile()}
+          onOk={() => void handleConfirmLinkToTask()}
         >
           <Text type="secondary">
-            {linkFileModal
-              ? t('chat.linkFileToTaskHint', { name: linkFileModal.fileName })
-              : null}
+            {linkToTaskModal?.kind === 'message'
+              ? t('chat.linkMessageToTaskHint', { preview: linkToTaskModal.preview })
+              : linkToTaskModal?.kind === 'file'
+                ? t('chat.linkFileToTaskHint', { name: linkToTaskModal.fileName })
+                : null}
           </Text>
           <Select
             style={{ width: '100%', marginTop: 12 }}

@@ -6,14 +6,21 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
 import type { Task } from '@shared/task/types'
-import { canRecallMessage } from '@shared/chat/recall'
+import {
+  buildMessageContextMenuActions,
+  getMessageCopyCodeText,
+  getMessageCopyPayload,
+  type MessageContextMenuActionId
+} from '@shared/chat/messageContextMenu'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
+import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { usePluginMenus } from '@renderer/plugin/usePluginMenus'
@@ -46,6 +53,7 @@ interface MessageBubbleProps {
   taskCreateAllowed?: boolean
   onCreateTaskFromMessage?: (message: ChatMessage) => void
   onLinkFileToTask?: (fileId: string, fileName: string) => void
+  onLinkMessageToTask?: (message: ChatMessage) => void
 }
 
 export default function MessageBubble({
@@ -67,9 +75,11 @@ export default function MessageBubble({
   onRetrySend,
   taskCreateAllowed = false,
   onCreateTaskFromMessage,
-  onLinkFileToTask
+  onLinkFileToTask,
+  onLinkMessageToTask
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
+  const { message: appMessage } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const navigate = useNavigate()
@@ -135,71 +145,125 @@ export default function MessageBubble({
     return { items }
   }, [own, senderName, senderMember, dmAllowed, onDmSender, onMentionSender, onViewSender, t])
 
-  const createTaskItem = useMemo((): NonNullable<MenuProps['items']>[number] | null => {
-    if (!taskCreateAllowed || !onCreateTaskFromMessage) return null
-    if (
-      message.content.kind === 'recalled' ||
-      message.content.kind === 'system' ||
-      message.content.kind === 'task_ref'
-    ) {
-      return null
-    }
-    return {
-      key: 'createTask',
-      label: t('chat.createTaskFromMessage'),
-      onClick: () => onCreateTaskFromMessage(message)
-    }
-  }, [taskCreateAllowed, onCreateTaskFromMessage, message, t])
+  const bubbleMenu: MenuProps = useMemo(() => {
+    const coreActions = buildMessageContextMenuActions({
+      message,
+      own,
+      currentUserId,
+      taskCreateAllowed,
+      showMention: !own && Boolean(onMentionSender)
+    })
 
-  const linkFileItem = useMemo((): NonNullable<MenuProps['items']>[number] | null => {
-    if (!taskCreateAllowed || !onLinkFileToTask || message.content.kind !== 'file') return null
-    return {
-      key: 'linkFile',
-      label: t('chat.linkFileToTask'),
-      onClick: () => {
-        if (message.content.kind !== 'file') return
-        onLinkFileToTask(message.content.fileId, message.content.fileName)
+    const labelFor = (id: MessageContextMenuActionId): string => {
+      switch (id) {
+        case 'copy':
+          return t('chat.copyMessage')
+        case 'copyCode':
+          return t('chat.copyCode')
+        case 'openTask':
+          return t('chat.openTask')
+        case 'openFile':
+          return t('chat.openInFiles')
+        case 'createTask':
+          return t('chat.createTaskFromMessage')
+        case 'linkExistingTask':
+          return t('chat.linkMessageToTask')
+        case 'linkFile':
+          return t('chat.linkFileToTask')
+        case 'mention':
+          return t('chat.mentionMember', { name: senderName })
+        case 'recall':
+          return t('chat.recallMessage')
+        default:
+          return id
       }
     }
-  }, [taskCreateAllowed, onLinkFileToTask, message, t])
 
-  const ownMenu: MenuProps = useMemo(() => {
-    const items: MenuProps['items'] = []
-    if (own && currentUserId && onRecall && canRecallMessage(message, currentUserId)) {
-      items.push({
-        key: 'recall',
-        label: t('chat.recallMessage'),
-        onClick: () => onRecall(message.msgId)
-      })
+    const onAction = (id: MessageContextMenuActionId): void => {
+      switch (id) {
+        case 'copy': {
+          const payload = getMessageCopyPayload(message)
+          if (!payload) return
+          void copyTextToClipboard(payload.text).then((ok) => {
+            if (ok) appMessage.success(t('chat.copyMessageDone'))
+            else appMessage.error(t('chat.copyMessageFailed'))
+          })
+          break
+        }
+        case 'copyCode': {
+          const code = getMessageCopyCodeText(message)
+          if (!code) return
+          void copyTextToClipboard(code).then((ok) => {
+            if (ok) appMessage.success(t('chat.copyCodeDone'))
+            else appMessage.error(t('chat.copyMessageFailed'))
+          })
+          break
+        }
+        case 'openTask':
+          if (message.content.kind === 'task_ref') {
+            locateTask(message.content.taskId, 'board')
+          }
+          break
+        case 'openFile':
+          if (message.content.kind === 'file' && groupId) {
+            navigate(groupViewPath(groupId, 'files'), {
+              state: { selectFileId: message.content.fileId }
+            })
+          }
+          break
+        case 'createTask':
+          onCreateTaskFromMessage?.(message)
+          break
+        case 'linkExistingTask':
+          onLinkMessageToTask?.(message)
+          break
+        case 'linkFile':
+          if (message.content.kind === 'file') {
+            onLinkFileToTask?.(message.content.fileId, message.content.fileName)
+          }
+          break
+        case 'mention':
+          onMentionSender?.(senderName)
+          break
+        case 'recall':
+          onRecall?.(message.msgId)
+          break
+        default:
+          break
+      }
     }
-    if (createTaskItem) items.push(createTaskItem)
-    if (linkFileItem) items.push(linkFileItem)
+
+    const items: MenuProps['items'] = coreActions.map((action) => ({
+      key: action.id,
+      label: labelFor(action.id),
+      onClick: () => onAction(action.id)
+    }))
+
     if (pluginContextMenuItems?.length) {
-      if (items.length > 0) items.push({ type: 'divider' })
       items.push(...pluginContextMenuItems)
     }
+
     return { items }
   }, [
+    message,
     own,
     currentUserId,
-    onRecall,
-    message,
+    taskCreateAllowed,
+    onMentionSender,
+    senderName,
     t,
-    createTaskItem,
-    linkFileItem,
+    appMessage,
+    locateTask,
+    groupId,
+    navigate,
+    onCreateTaskFromMessage,
+    onLinkMessageToTask,
+    onLinkFileToTask,
+    onRecall,
     pluginContextMenuItems
   ])
 
-  const otherBubbleMenu: MenuProps = useMemo(() => {
-    const items: MenuProps['items'] = []
-    if (createTaskItem) items.push(createTaskItem)
-    if (linkFileItem) items.push(linkFileItem)
-    if (pluginContextMenuItems?.length) {
-      if (items.length > 0) items.push({ type: 'divider' })
-      items.push(...pluginContextMenuItems)
-    }
-    return { items }
-  }, [createTaskItem, linkFileItem, pluginContextMenuItems])
+  const hasBubbleMenu = (bubbleMenu.items?.length ?? 0) > 0
 
   const bubbleBody = (
     <>
@@ -306,12 +370,11 @@ export default function MessageBubble({
   }
 
   if (own) {
-    const hasOwnMenu = (ownMenu.items?.length ?? 0) > 0
     return (
       <div className={styles.messageRowOwn} data-own="1" data-msg-id={message.msgId}>
         <div className={styles.messageColOwn}>
-          {hasOwnMenu ? (
-            <Dropdown menu={ownMenu} trigger={['contextMenu']}>
+          {hasBubbleMenu ? (
+            <Dropdown menu={bubbleMenu} trigger={['contextMenu']}>
               <div className={bubbleClass}>{bubbleBody}</div>
             </Dropdown>
           ) : (
@@ -341,8 +404,6 @@ export default function MessageBubble({
       </div>
     )
   }
-
-  const hasOtherBubbleMenu = (otherBubbleMenu.items?.length ?? 0) > 0
 
   return (
     <div
@@ -386,8 +447,8 @@ export default function MessageBubble({
             </div>
           </Dropdown>
         ) : null}
-        {hasOtherBubbleMenu ? (
-          <Dropdown menu={otherBubbleMenu} trigger={['contextMenu']}>
+        {hasBubbleMenu ? (
+          <Dropdown menu={bubbleMenu} trigger={['contextMenu']}>
             <div className={bubbleClass}>{bubbleBody}</div>
           </Dropdown>
         ) : (
