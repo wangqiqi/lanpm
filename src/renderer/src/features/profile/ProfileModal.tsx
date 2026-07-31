@@ -213,7 +213,7 @@ export default function ProfileModal({
           {
             key: 'nav',
             label: t('profile.tabNav'),
-            children: <NavPreferencesPanel />
+            children: <NavPreferencesPanel activeGroupId={activeGroupId} />
           },
           {
             key: 'meeting',

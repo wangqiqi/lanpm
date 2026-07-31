@@ -31,6 +31,81 @@ export const DEFAULT_NAV_PREFERENCES: NavPreferences = {
   contributedOrder: []
 }
 
+/** 持久化文档：全局偏好 + 按群整包覆盖 */
+export interface NavPreferencesDocument {
+  global: NavPreferences
+  byGroup: Record<string, NavPreferences>
+}
+
+export const DEFAULT_NAV_PREFERENCES_DOCUMENT: NavPreferencesDocument = {
+  global: DEFAULT_NAV_PREFERENCES,
+  byGroup: {}
+}
+
+const MAX_GROUP_ID_LENGTH = 256
+
+function isGroupIdKey(value: string): boolean {
+  const trimmed = value.trim()
+  return trimmed.length > 0 && trimmed.length <= MAX_GROUP_ID_LENGTH
+}
+
+function isLegacyNavPreferencesRaw(record: Record<string, unknown>): boolean {
+  return (
+    !('global' in record) &&
+    (Array.isArray(record.hiddenViews) ||
+      Array.isArray(record.order) ||
+      Array.isArray(record.hiddenContributedRoutes) ||
+      Array.isArray(record.contributedOrder))
+  )
+}
+
+/** 校验文档；旧版扁平 `NavPreferences` JSON 自动迁移为 `{ global, byGroup: {} }` */
+export function normalizeNavPreferencesDocument(raw: unknown): NavPreferencesDocument {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      global: normalizeNavPreferences(DEFAULT_NAV_PREFERENCES),
+      byGroup: {}
+    }
+  }
+
+  const record = raw as Record<string, unknown>
+  if (isLegacyNavPreferencesRaw(record)) {
+    return {
+      global: normalizeNavPreferences(record),
+      byGroup: {}
+    }
+  }
+
+  const global = normalizeNavPreferences(record.global ?? DEFAULT_NAV_PREFERENCES)
+  const byGroup: Record<string, NavPreferences> = {}
+  if (record.byGroup && typeof record.byGroup === 'object') {
+    for (const [groupId, prefs] of Object.entries(record.byGroup as Record<string, unknown>)) {
+      if (!isGroupIdKey(groupId)) continue
+      byGroup[groupId.trim()] = normalizeNavPreferences(prefs)
+    }
+  }
+
+  return { global, byGroup }
+}
+
+/** 本群有效偏好：有整包覆盖则用覆盖，否则回落 global */
+export function resolveNavPreferencesForGroup(
+  doc: NavPreferencesDocument,
+  groupId?: string | null
+): NavPreferences {
+  const normalized = normalizeNavPreferencesDocument(doc)
+  if (!groupId || !isGroupIdKey(groupId)) {
+    return normalized.global
+  }
+  const override = normalized.byGroup[groupId]
+  return override ?? normalized.global
+}
+
+export function hasGroupNavOverride(doc: NavPreferencesDocument, groupId: string): boolean {
+  const normalized = normalizeNavPreferencesDocument(doc)
+  return isGroupIdKey(groupId) && Object.prototype.hasOwnProperty.call(normalized.byGroup, groupId)
+}
+
 function isAppView(value: unknown): value is AppView {
   return typeof value === 'string' && (ALL_APP_VIEWS as string[]).includes(value)
 }

@@ -290,8 +290,13 @@ const api: LanpmApi = {
       ipcRenderer.invoke('plugin:invokeCapability', pluginId, capability, args)
   },
   nav: {
+    getDocument: () => ipcRenderer.invoke('nav:getDocument'),
     getPreferences: () => ipcRenderer.invoke('nav:getPreferences'),
-    setPreferences: (prefs) => ipcRenderer.invoke('nav:setPreferences', prefs)
+    setPreferences: (prefs) => ipcRenderer.invoke('nav:setPreferences', prefs),
+    getGroupPreferences: (groupId) => ipcRenderer.invoke('nav:getGroupPreferences', groupId),
+    setGroupPreferences: (groupId, prefs) =>
+      ipcRenderer.invoke('nav:setGroupPreferences', groupId, prefs),
+    clearGroupOverride: (groupId) => ipcRenderer.invoke('nav:clearGroupOverride', groupId)
   },
   meeting: {
     getLiveKitConfig: () => ipcRenderer.invoke('meeting:getLiveKitConfig'),

@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.7] - 2026-07-31
+
+### Added
+
+- **每群导航覆盖（Layer A）**：`NavPreferencesDocument`（`global` + `byGroup`）· `resolveNavPreferencesForGroup`
+- **IPC**：`getDocument` · `getGroupPreferences` · `setGroupPreferences` · `clearGroupOverride`
+- **Profile UI**：「导航与视图」全局 / 当前群 Segmented ·「恢复跟随全局」
+- **`verify:nav-per-group`** · 迁移/resolve 单元测试
+
+### Changed
+
+- **`nav-preferences.json`**：旧扁平 JSON 自动迁移为文档格式
+- **Renderer store**：随 `activeGroupId` 解析有效偏好；BottomNav / 路由守卫使用本群有效 prefs
+- **`docs/插件开发.md`**：§2.2 / §3.7 / §12 每群覆盖 ✅
+
 ## [1.78.6] - 2026-07-31
 
 ### Added

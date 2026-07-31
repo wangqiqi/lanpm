@@ -81,6 +81,19 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     if (!configured) return
+    const syncGroup = (groupId: string): void => {
+      useNavPreferencesStore.getState().setActiveGroupId(groupId || null)
+    }
+    syncGroup(useNavigationStore.getState().activeGroupId)
+    return useNavigationStore.subscribe((state, prev) => {
+      if (state.activeGroupId !== prev.activeGroupId) {
+        syncGroup(state.activeGroupId)
+      }
+    })
+  }, [configured])
+
+  useEffect(() => {
+    if (!configured) return
     wireTaskAwarenessPush()
     wireGroupTagPush()
     return () => {

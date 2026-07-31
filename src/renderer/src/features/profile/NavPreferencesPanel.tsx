@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { List, Switch, Typography } from 'antd'
+import { Button, List, Segmented, Switch, Typography } from 'antd'
 import { HolderOutlined } from '@ant-design/icons'
 import type { AppView } from '@shared/navigation/types'
 import {
@@ -10,7 +10,12 @@ import {
 import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
-import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
+import {
+  hasGroupNavOverride,
+  selectEditingPreferences,
+  useNavPreferencesStore,
+  type NavEditScope
+} from '@renderer/stores/navPreferencesStore'
 import { useContributedViews } from '@renderer/plugin/useContributedViews'
 import type { MessageKey } from '@renderer/i18n/types'
 import styles from './NavPreferencesPanel.module.css'
@@ -28,15 +33,26 @@ function moveItem<T>(order: T[], from: number, to: number): T[] {
 }
 
 /** Profile「导航与视图」— 核心 + 插件贡献 Tab 排序与显隐 */
-export default function NavPreferencesPanel(): React.ReactElement {
+export default function NavPreferencesPanel({
+  activeGroupId
+}: {
+  activeGroupId?: string | null
+}): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
-  const preferences = useNavPreferencesStore((s) => s.preferences)
+  const document = useNavPreferencesStore((s) => s.document)
+  const preferences = useNavPreferencesStore(selectEditingPreferences)
+  const editScope = useNavPreferencesStore((s) => s.editScope)
+  const setEditScope = useNavPreferencesStore((s) => s.setEditScope)
   const setPreferences = useNavPreferencesStore((s) => s.setPreferences)
+  const clearGroupOverride = useNavPreferencesStore((s) => s.clearGroupOverride)
   const contributedViews = useContributedViews()
   const [busy, setBusy] = useState(false)
   const [dragCoreIndex, setDragCoreIndex] = useState<number | null>(null)
   const [dragPluginIndex, setDragPluginIndex] = useState<number | null>(null)
+
+  const groupId = activeGroupId?.trim() || null
+  const hasOverride = groupId ? hasGroupNavOverride(document, groupId) : false
 
   const pluginRoutes = useMemo(() => {
     const known = contributedViews.map((v) => v.route)
@@ -100,7 +116,39 @@ export default function NavPreferencesPanel(): React.ReactElement {
 
   return (
     <div className={styles.panel}>
-      <Text type="secondary">{t('profile.navHint')}</Text>
+      {groupId ? (
+        <div className={styles.scopeRow}>
+          <Segmented<NavEditScope>
+            value={editScope}
+            disabled={busy}
+            options={[
+              { label: t('profile.navScopeGlobal'), value: 'global' },
+              { label: t('profile.navScopeGroup'), value: 'group' }
+            ]}
+            onChange={(value) => setEditScope(value)}
+          />
+          {editScope === 'group' && hasOverride ? (
+            <Button
+              size="small"
+              disabled={busy}
+              onClick={() => {
+                setBusy(true)
+                void clearGroupOverride(groupId)
+                  .then(() => message.success(t('profile.navFollowGlobalDone')))
+                  .catch((err) =>
+                    message.error(err instanceof Error ? err.message : t('profile.navSaveFailed'))
+                  )
+                  .finally(() => setBusy(false))
+              }}
+            >
+              {t('profile.navFollowGlobal')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      <Text type="secondary">
+        {editScope === 'group' && groupId ? t('profile.navHintGroup') : t('profile.navHint')}
+      </Text>
       <List
         className={styles.list}
         dataSource={preferences.order}

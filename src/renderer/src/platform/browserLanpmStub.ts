@@ -43,7 +43,9 @@ import { getDisallowedTaskPatchFields } from '@shared/plugin/taskPatchWhitelist'
 import {
   DEFAULT_NAV_PREFERENCES,
   normalizeNavPreferences,
-  type NavPreferences
+  normalizeNavPreferencesDocument,
+  type NavPreferences,
+  type NavPreferencesDocument
 } from '@shared/navigation/navPreferences'
 import {
   isLiveKitConfigComplete,
@@ -65,20 +67,30 @@ const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
 const NAV_PREFS_STORAGE_KEY = 'lanpm.dev.navPreferences'
 const LIVEKIT_CONFIG_STORAGE_KEY = 'lanpm.dev.livekitConfig'
 
-function readStubNavPreferences(): NavPreferences {
+function readStubNavDocument(): NavPreferencesDocument {
   try {
     const raw = localStorage.getItem(NAV_PREFS_STORAGE_KEY)
-    if (!raw) return normalizeNavPreferences(DEFAULT_NAV_PREFERENCES)
-    return normalizeNavPreferences(JSON.parse(raw) as unknown)
+    if (!raw) return normalizeNavPreferencesDocument(DEFAULT_NAV_PREFERENCES)
+    return normalizeNavPreferencesDocument(JSON.parse(raw) as unknown)
   } catch {
-    return normalizeNavPreferences(DEFAULT_NAV_PREFERENCES)
+    return normalizeNavPreferencesDocument(DEFAULT_NAV_PREFERENCES)
   }
 }
 
-function writeStubNavPreferences(prefs: NavPreferences): NavPreferences {
-  const normalized = normalizeNavPreferences(prefs)
+function writeStubNavDocument(doc: NavPreferencesDocument): NavPreferencesDocument {
+  const normalized = normalizeNavPreferencesDocument(doc)
   localStorage.setItem(NAV_PREFS_STORAGE_KEY, JSON.stringify(normalized))
   return normalized
+}
+
+function readStubNavPreferences(): NavPreferences {
+  return readStubNavDocument().global
+}
+
+function writeStubNavPreferences(prefs: NavPreferences): NavPreferences {
+  const doc = readStubNavDocument()
+  doc.global = normalizeNavPreferences(prefs)
+  return writeStubNavDocument(doc).global
 }
 
 function readStubLiveKitConfig(): LiveKitConfig {
@@ -2169,8 +2181,28 @@ export function createBrowserLanpmStub(): LanpmApi {
       }
     },
     nav: {
+      getDocument: async () => readStubNavDocument(),
       getPreferences: async () => readStubNavPreferences(),
-      setPreferences: async (prefs) => writeStubNavPreferences(prefs)
+      setPreferences: async (prefs) => writeStubNavPreferences(prefs),
+      getGroupPreferences: async (groupId) => {
+        const trimmed = groupId.trim()
+        if (!trimmed) return null
+        return readStubNavDocument().byGroup[trimmed] ?? null
+      },
+      setGroupPreferences: async (groupId, prefs) => {
+        const trimmed = groupId.trim()
+        if (!trimmed) throw new Error('invalid group id')
+        const doc = readStubNavDocument()
+        doc.byGroup[trimmed] = normalizeNavPreferences(prefs)
+        return writeStubNavDocument(doc).byGroup[trimmed]!
+      },
+      clearGroupOverride: async (groupId) => {
+        const trimmed = groupId.trim()
+        if (!trimmed) throw new Error('invalid group id')
+        const doc = readStubNavDocument()
+        delete doc.byGroup[trimmed]
+        return writeStubNavDocument(doc)
+      }
     },
     meeting: {
       getLiveKitConfig: async () => toLiveKitConfigPublic(readStubLiveKitConfig()),

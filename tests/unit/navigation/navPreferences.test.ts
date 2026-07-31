@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_NAV_PREFERENCES,
+  hasGroupNavOverride,
   isContributedRouteVisible,
   isViewHideLocked,
   isViewVisibleForGroup,
   normalizeNavPreferences,
+  normalizeNavPreferencesDocument,
+  resolveNavPreferencesForGroup,
   resolveVisibleContributedRoutes,
   resolveVisibleViews,
   sanitizeNavPreferences
@@ -135,5 +138,49 @@ describe('isContributedRouteVisible', () => {
     })
     expect(isContributedRouteVisible(prefs, 'mindmap')).toBe(false)
     expect(isContributedRouteVisible(prefs, 'form')).toBe(true)
+  })
+})
+
+describe('normalizeNavPreferencesDocument', () => {
+  it('migrates legacy flat NavPreferences JSON', () => {
+    const doc = normalizeNavPreferencesDocument({
+      hiddenViews: ['gantt'],
+      order: ['chat', 'board']
+    })
+    expect(doc.byGroup).toEqual({})
+    expect(doc.global.hiddenViews).toEqual(['gantt'])
+  })
+
+  it('reads document with byGroup overrides', () => {
+    const doc = normalizeNavPreferencesDocument({
+      global: { hiddenViews: [], order: DEFAULT_NAV_PREFERENCES.order },
+      byGroup: {
+        'grp-a': { hiddenViews: ['whiteboard'], order: DEFAULT_NAV_PREFERENCES.order }
+      }
+    })
+    expect(hasGroupNavOverride(doc, 'grp-a')).toBe(true)
+    expect(hasGroupNavOverride(doc, 'grp-b')).toBe(false)
+  })
+})
+
+describe('resolveNavPreferencesForGroup', () => {
+  it('falls back to global when no override', () => {
+    const doc = normalizeNavPreferencesDocument({
+      global: { hiddenViews: ['calendar'], order: DEFAULT_NAV_PREFERENCES.order }
+    })
+    const resolved = resolveNavPreferencesForGroup(doc, 'grp-1')
+    expect(resolved.hiddenViews).toEqual(['calendar'])
+  })
+
+  it('uses full group override when present', () => {
+    const doc = normalizeNavPreferencesDocument({
+      global: { hiddenViews: ['calendar'], order: DEFAULT_NAV_PREFERENCES.order },
+      byGroup: {
+        'grp-1': { hiddenViews: ['gantt'], order: DEFAULT_NAV_PREFERENCES.order }
+      }
+    })
+    const resolved = resolveNavPreferencesForGroup(doc, 'grp-1')
+    expect(resolved.hiddenViews).toEqual(['gantt'])
+    expect(resolved.hiddenViews).not.toContain('calendar')
   })
 })

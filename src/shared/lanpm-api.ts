@@ -372,10 +372,21 @@ export interface LanpmApi {
     ) => Promise<unknown>
   }
   nav: {
+    getDocument: () => Promise<import('./navigation/navPreferences').NavPreferencesDocument>
     getPreferences: () => Promise<import('./navigation/navPreferences').NavPreferences>
     setPreferences: (
       prefs: import('./navigation/navPreferences').NavPreferences
     ) => Promise<import('./navigation/navPreferences').NavPreferences>
+    getGroupPreferences: (
+      groupId: string
+    ) => Promise<import('./navigation/navPreferences').NavPreferences | null>
+    setGroupPreferences: (
+      groupId: string,
+      prefs: import('./navigation/navPreferences').NavPreferences
+    ) => Promise<import('./navigation/navPreferences').NavPreferences>
+    clearGroupOverride: (
+      groupId: string
+    ) => Promise<import('./navigation/navPreferences').NavPreferencesDocument>
   }
   meeting: {
     getLiveKitConfig: () => Promise<import('./media/livekitConfig').LiveKitConfigPublic>
