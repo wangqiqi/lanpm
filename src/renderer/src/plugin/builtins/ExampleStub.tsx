@@ -103,11 +103,12 @@ function ExampleProfileTab({ plugin }: Props): React.ReactElement {
 }
 
 /** 免费官方 stub — 证明 Host→Slot 端到端 + Extension API v0.2 demo */
-export default function ExampleStub(props: Props): React.ReactElement {
+export default function ExampleStub(props: Props): React.ReactElement | null {
   if (props.context?.view === 'profile') {
     return <ExampleProfileTab {...props} />
   }
   if (props.context?.view === 'chat' && !props.taskId) {
+    if (props.context.zone !== 'composer') return null
     return <ExampleComposerAction {...props} />
   }
   return <ExampleTaskSection {...props} />

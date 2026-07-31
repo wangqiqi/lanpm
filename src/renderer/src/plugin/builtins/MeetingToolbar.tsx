@@ -20,6 +20,7 @@ import {
   VideoCameraOutlined
 } from '@ant-design/icons'
 import type { PluginView } from '@shared/plugin/types'
+import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
@@ -32,10 +33,11 @@ const { Text } = Typography
 interface Props {
   plugin: PluginView
   groupId: string
+  context?: ViewPluginContext
 }
 
 /** 聊天 `chat.toolbar.media` 紧凑会议工具条 + Popover 详情 */
-export default function MeetingToolbar({ plugin, groupId }: Props): React.ReactElement {
+export default function MeetingToolbar({ plugin, groupId, context }: Props): React.ReactElement | null {
   const { t } = useI18n()
   const licenseActive = isPluginLicenseActive(plugin)
 
@@ -172,6 +174,8 @@ export default function MeetingToolbar({ plugin, groupId }: Props): React.ReactE
       ) : null}
     </div>
   )
+
+  if (context?.zone !== undefined && context.zone !== 'toolbar') return null
 
   return (
     <div className={styles.meetingToolbar} data-plugin-id={plugin.id} data-testid="meeting-toolbar">
