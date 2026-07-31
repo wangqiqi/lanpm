@@ -39,6 +39,7 @@ import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta
 import type { SaveWhiteboardSceneInput, WhiteboardScene } from '@shared/whiteboard/types'
 import { buildWhiteboardScene, emptyWhiteboardSceneJson, normalizeSceneJson } from '@shared/whiteboard/types'
 import type { PluginView } from '@shared/plugin/types'
+import { getDisallowedTaskPatchFields } from '@shared/plugin/taskPatchWhitelist'
 import {
   DEFAULT_NAV_PREFERENCES,
   normalizeNavPreferences,
@@ -133,7 +134,7 @@ const STUB_PLUGINS: PluginView[] = [
   {
     id: 'lanpm.example',
     name: 'Example Slot Stub',
-    version: '0.2.0',
+    version: '0.3.0',
     slots: ['task.detail.section', 'chat.composer.action'],
     capabilities: [
       'task.get',
@@ -142,6 +143,8 @@ const STUB_PLUGINS: PluginView[] = [
       'task.getChecklist',
       'member.list',
       'chat.sendTaskRef',
+      'task.patch',
+      'board.moveTask',
       'license.feature'
     ],
     pricing: 'free',
@@ -2087,6 +2090,67 @@ export function createBrowserLanpmStub(): LanpmApi {
           writeChatMessages(groupId, [...prev, msg])
           for (const fn of chatListeners) fn(msg)
           return msg
+        }
+        if (capability === 'task.patch') {
+          const groupId = String(args?.groupId ?? '')
+          const taskId = String(args?.taskId ?? '')
+          const patch = args?.patch
+          if (!groupId) throw new Error('groupId required')
+          if (!taskId) throw new Error('taskId required')
+          if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+            throw new Error('patch required')
+          }
+          const disallowed = getDisallowedTaskPatchFields(patch as Record<string, unknown>)
+          if (disallowed.length > 0) {
+            throw new Error(`patch field not allowed: ${disallowed.join(', ')}`)
+          }
+          const all = readAllTasks()
+          const list = all[groupId] ?? []
+          if (!list.some((t) => t.taskId === taskId && !t.deletedAt)) {
+            throw stubError('stub.taskNotFound')
+          }
+          const patchBody = patch as {
+            title?: string
+            status?: TaskStatus
+            progressPercent?: number
+            priority?: Task['priority']
+            tags?: string[]
+          }
+          return stubUpdateTask({
+            taskId,
+            ...patchBody
+          })
+        }
+        if (capability === 'board.moveTask') {
+          const groupId = String(args?.groupId ?? '')
+          const taskId = String(args?.taskId ?? '')
+          const status = args?.status as import('@shared/task/types').TaskStatus | undefined
+          if (!groupId) throw new Error('groupId required')
+          if (!taskId) throw new Error('taskId required')
+          if (!status) throw new Error('status required')
+          const all = readAllTasks()
+          const list = all[groupId] ?? []
+          if (!list.some((t) => t.taskId === taskId && !t.deletedAt)) {
+            throw stubError('stub.taskNotFound')
+          }
+          const existing = list.find((t) => t.taskId === taskId)!
+          const sortOrder =
+            args?.sortOrder != null && Number.isFinite(Number(args.sortOrder))
+              ? Number(args.sortOrder)
+              : status !== existing.status
+                ? maxSortInColumn(list, status) + 1
+                : existing.sortOrder
+          return stubUpdateTask({
+            taskId,
+            status,
+            sortOrder,
+            otherReason:
+              status === 'other' && args?.otherReason != null
+                ? String(args.otherReason)
+                : status === 'other'
+                  ? existing.otherReason ?? null
+                  : null
+          })
         }
         if (capability === 'media.livekit.createToken') {
           const config = readStubLiveKitConfig()
