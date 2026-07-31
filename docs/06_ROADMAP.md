@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：会议插件 Host 扩展 · 见 `plan.md` 候选表 · §3.5。
+**候选下一 Sprint**：会议体验下一刀 · Slot 残余 / 命令 invoke · API v0.3 · 见 `plan.md` 候选表 · [插件开发](./插件开发.md) §12。
 
 ---
 
@@ -20,8 +20,7 @@
 
 | 模块 | 功能 | 备注 |
 |------|------|------|
-| **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 | **不进核心**；见 **§3** · **§6.4** |
-| 思维导图 | 独立编辑器 | 可购插件候选 |
+| **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 · **体验产品化** | Host/stub/mesh/LiveKit 路径已交付；见 **§3** · **§6.4** |
 | 表情、书签浏览器导入导出 | 聊天/书签体验糖 | 低优先级（原 B6 体验） |
 | **高级 Agent 编排** | LangGraph / 多角色 DAG 等 | L3a/L3b 已交付（`verify:ai-pipeline*`）；**可选** 外框架后置 |
 | 移动端 Web | PWA 基础版本 | 后置 |
@@ -33,7 +32,7 @@
 | 模块 | 功能 |
 |------|------|
 | 会议 Pro 扩展 | 多人视频会议、录制、日程入会（同一可购包升级档） |
-| 完整插件市场 | 发布/安装/更新 / 签名目录 / **离线许可证** |
+| 完整插件市场 | 发布/安装/更新 / 签名目录（侧载+离线许可证 ✅ v1.75–1.76） |
 | 原生移动 App | iOS + Android |
 | WebRTC DataChannel | 可选；默认仍 TCP+UDP（见 [01](./01_产品需求文档.md) §1.3.1） |
 | 匿名群可持久化历史 | 可选；现状退出即失、无文件 Tab |
@@ -69,7 +68,7 @@
 
 | 已有 | 会议插件还需（SPIKE-374–376 已拍板） |
 |------|--------------------------------------|
-| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 | **新增** `chat.toolbar.media` Slot · `PluginGroupSlot`（无 taskId）· 媒体 capability（`media.signal.*` · `media.captureDesktop` · `media.room.state`）· **离线许可证真正拦功能**（当前 `paid` 仅为展示） |
+| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **深化** 会议 UX · 媒体 capability 产品化 · LiveKit 旁路运维体验；Slot `chat.toolbar.media` / `PluginGroupSlot` **已有** |
 | 安全红线：禁插件直连 DB / `ipcMain` | 维持；媒体经 Host 代理；**builtin registry** 注册 `lanpm.meeting`；LiveKit SDK **不进**核心 `dependencies` |
 
 ### 3.4 架构注意（无中心 vs SFU）
@@ -89,12 +88,12 @@
 | 2 | Host 扩展 + `lanpm.meeting` stub：`PluginGroupSlot` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | **已交付** · `verify:meeting-plugin` · v1.67.0 |
 | 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | **已交付** · `verify:meeting-mesh-poc` · v1.68.0 |
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | **已交付** · `verify:meeting-livekit-pro` · v1.71.0 |
-| 5 | 离线许可证（内网可购） | P1～P2 | 可与插件市场并行 |
+| 5 | 离线许可证（内网可购） | P1～P2 | **已交付** · `verify:plugin-market-spike` · `verify:offline-license-cli` · v1.75–1.76 |
 | 6 | 插件市场安装/更新 | P2 · M8 | 待 |
 
-验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc`。
+验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro`。
 
-**下一实现 Sprint Goal（一句话）**：离线许可证 / 插件市场（§3 序 5–6），或 `extension-api-v0.2` / `form-js` 真库（见 `plan.md` 候选）。
+**下一实现 Sprint Goal（一句话）**：会议体验产品化，或命令 invoke / API v0.3 / Slot 残余（见 `plan.md` 候选 · [插件开发](./插件开发.md) §12）。
 
 ---
 
@@ -118,8 +117,8 @@
 | 候选 | 说明 | 备注 |
 |------|------|------|
 | **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
-| 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | P2 |
-| 思维导图 | 可购插件 | P1 |
+| 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | 侧载+许可 ✅；**商店 UI** P2 |
+| 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |
 | PWA | 移动端 Web | 后置 |
 | 真机手验补测 | §4 延期项 | 有设备再开 |
 | WebRTC DataChannel | 可选 | 非默认路径 |
