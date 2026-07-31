@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.78.2",
+  "version": "1.78.3",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",

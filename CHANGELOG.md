@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.3] - 2026-07-31
+
+### Added
+
+- **命令 invoke 真执行**：`CommandAction` · main `invokeListedCommand` 返回结构化 action
+- **`commandEffects`**：`applyCommandAction` 统一消费 core / plugin 副作用
+- **`commandHandlerRegistry`**：renderer builtin handler 表 · `lanpm.example:hello` 可见反馈
+- **`resolveCommandAction`**（shared SSOT）· `verify:command-palette` 禁 stub 文案
+
+### Changed
+
+- **`CommandPalette`**：单一 invoke 路径（移除 core 硬编码分支）
+- **`docs/插件开发.md`**：§commands / §8.3 / §12 对齐 v1.78.3
+
 ## [1.78.2] - 2026-07-31
 
 ### Added
