@@ -23,7 +23,7 @@ const css = readFileSync(
 )
 const zh = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
 const en = readFileSync(join(root, 'src/renderer/src/i18n/locales/en-US.ts'), 'utf8')
-const pairingDoc = readFileSync(join(root, 'docs/配对码.md'), 'utf8')
+const pairingDoc = readFileSync(join(root, 'docs/04_交互与UI约定.md'), 'utf8')
 
 assert.match(wizard, /NetworkPrereqStep/)
 assert.match(wizard, /step === 'network'/)
@@ -49,6 +49,6 @@ for (const key of [
   assert.match(en, new RegExp(`'${key}'`))
 }
 
-assert.match(pairingDoc, /SPRINT-SETUP-NET.*✅/)
+assert.match(pairingDoc, /NetworkPrereqStep.*组网|组网说明/s)
 
 console.log('verify:setup-net OK')

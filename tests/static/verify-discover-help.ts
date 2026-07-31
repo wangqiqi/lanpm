@@ -25,7 +25,7 @@ const pairingPanel = readFileSync(
   'utf8'
 )
 const zh = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
-const pairingDoc = readFileSync(join(root, 'docs/配对码.md'), 'utf8')
+const pairingDoc = readFileSync(join(root, 'docs/04_交互与UI约定.md'), 'utf8')
 
 assert.match(content, /NetworkPrereqContent/)
 assert.match(content, /SwitchIllustration/)
@@ -37,6 +37,6 @@ assert.match(pairingPanel, /NetworkHelpModal/)
 assert.match(pairingPanel, /discover\.netHelpLink/)
 assert.match(zh, /discover\.netHelpLink/)
 assert.match(zh, /discover\.netHelpTitle/)
-assert.match(pairingDoc, /发现页.*组网|组网.*发现页/s)
+assert.match(pairingDoc, /发现页.*组网|组网.*发现|NetworkHelpModal/s)
 
 console.log('verify:discover-help OK')

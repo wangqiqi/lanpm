@@ -27,7 +27,7 @@ const pairingUdpSrc = readFileSync(
 )
 const routeTableSrc = readFileSync(join(projectRoot, 'src/main/network/routeTable.ts'), 'utf8')
 const pairingTypesSrc = readFileSync(join(projectRoot, 'src/shared/discover/pairing.ts'), 'utf8')
-const pairingDoc = readFileSync(join(projectRoot, 'docs/配对码.md'), 'utf8')
+const pairingDoc = readFileSync(join(projectRoot, 'docs/02_技术实现建议.md'), 'utf8')
 
 assert.match(pairingServiceSrc, /listSubnetScanHosts/)
 assert.match(pairingServiceSrc, /subnetScanBatch/)

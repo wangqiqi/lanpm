@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
-const aiDoc = readFileSync(join(root, 'docs/AI接入.md'), 'utf8')
+const aiDoc = readFileSync(join(root, 'docs/02_技术实现建议.md'), 'utf8')
 const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
@@ -19,13 +19,13 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 
 assert.ok(pkg.scripts?.['verify:ai-orchestration-spike'], 'missing verify:ai-orchestration-spike script')
 
-assert.match(aiDoc, /### 6\.3 L3 编排调研结论/)
+assert.match(aiDoc, /### 15\.8 L3 编排调研结论/)
 assert.match(aiDoc, /SPRINT-AI-05/)
 assert.match(aiDoc, /verify:ai-orchestration-spike/)
 assert.match(aiDoc, /自建轻量状态机/)
 
 assert.match(roadmap, /verify:ai-pipeline|verify:ai-orchestration-spike/)
-assert.match(roadmap, /SPIKE-AI-05|L3 多步编排|L3a/)
+assert.match(roadmap, /高级 Agent 编排|L3a/)
 
 const deps = { ...pkg.dependencies, ...pkg.devDependencies }
 const forbidden = [/langgraph/i, /@langchain\//, /open-multi-agent/i]

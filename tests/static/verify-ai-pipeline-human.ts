@@ -9,7 +9,7 @@ const cockpit = readFileSync('src/renderer/src/views/CockpitView.tsx', 'utf8')
 const assistant = readFileSync('src/renderer/src/features/ai/AiAssistantShell.tsx', 'utf8')
 const preload = readFileSync('src/preload/index.ts', 'utf8')
 const types = readFileSync('src/shared/ai/pipelineTypes.ts', 'utf8')
-const docs = readFileSync('docs/AI接入.md', 'utf8')
+const docs = readFileSync('docs/02_技术实现建议.md', 'utf8')
 
 for (const [name, src, needle] of [
   ['runner resume', runner, 'resumeAiPipeline'],
@@ -24,7 +24,7 @@ for (const [name, src, needle] of [
   ['cockpit modal', cockpit, 'resumePipeline'],
   ['assistant remediate', assistant, 'taskRemediate'],
   ['preload resume', preload, 'AI_IPC.resumePipeline'],
-  ['docs section', docs, '### 6.5']
+  ['docs section', docs, '### 15.9 L3b 人审写库流水线']
 ] as const) {
   if (!src.includes(needle)) {
     throw new Error(`${name} must include ${needle}`)

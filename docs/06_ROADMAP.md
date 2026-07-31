@@ -2,7 +2,7 @@
 
 > **只保留未完成工作。** `docs/` 不存历史；已交付叙事见根目录 `CHANGELOG.md`。  
 > 手验步骤见 [05_测试与联调发布.md](./05_测试与联调发布.md)。版本以 `package.json` / `CHANGELOG` 为准。  
-> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准（当前：**SPRINT-DISCOVER-HELP** ✅ · 发现页组网帮助 · **1.47.0** 已交付）。
+> **进行中 Sprint** 以 `.cursorGrowth/plan.md` 为准。
 
 ---
 
@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：SPRINT-PAIR-04（macOS 路由 / `/24` 扫描）· SPRINT-DISCOVER-HELP（发现页组网帮助）· 见 `plan.md` 候选表。
+**候选下一 Sprint**：会议插件 Host 扩展 · 见 `plan.md` 候选表 · §3.5。
 
 ---
 
@@ -23,7 +23,7 @@
 | **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 | **不进核心**；见 **§3**；对齐飞鸽 §7 / §8.2 |
 | 思维导图 | 独立编辑器 | 可购插件候选 |
 | 表情、书签浏览器导入导出 | 聊天/书签体验糖 | 低优先级（原 B6 体验） |
-| **L3 多步编排** | 评估 + 拆解 + 汇总报告流水线 | L3a `healthCheck` 已交付 · `verify:ai-pipeline` · L3b 人审写库待立项 |
+| **高级 Agent 编排** | LangGraph / 多角色 DAG 等 | L3a/L3b 已交付（`verify:ai-pipeline*`）；**可选** 外框架后置 |
 | 移动端 Web | PWA 基础版本 | 后置 |
 
 ---
@@ -36,7 +36,6 @@
 | 完整插件市场 | 发布/安装/更新 / 签名目录 / **离线许可证** |
 | 原生移动 App | iOS + Android |
 | WebRTC DataChannel | 可选；默认仍 TCP+UDP（见 [01](./01_产品需求文档.md) §1.3.1） |
-| 群组发现增强 | **SPRINT-PAIR-01 进行中**：连接码 · 跨网段子网中继 · 入群治理；后续 SPRINT-PAIR-02 路由表单播 | 见 [配对码.md](./配对码.md) |
 | 匿名群可持久化历史 | 可选；现状退出即失、无文件 Tab |
 
 ---
