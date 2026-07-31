@@ -26,6 +26,7 @@ export type SyncMessageType =
   | 'member_event'
   | 'join_request'
   | 'join_request_decision'
+  | 'media_signal'
   | 'group_key_rotate'
   | 'chat_sync_request'
   | 'chat_sync_batch'

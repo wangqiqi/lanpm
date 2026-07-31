@@ -35,6 +35,7 @@ import {
   initJoinRequestService,
   shutdownJoinRequestService
 } from '../group/joinRequestService'
+import { initMediaSignalService, shutdownMediaSignalService } from '../media/mediaSignalService'
 import {
   handleReadReceiptSyncBatch,
   handleReadReceiptSyncRequest,
@@ -166,6 +167,7 @@ export function initChatService(db: Database): void {
   refreshGroupSubscriptions(db, transport)
   initReadReceiptService(db)
   initJoinRequestService(db)
+  initMediaSignalService(db)
   initGroupKeyService(db)
   ensureLocalRetentionMeta(db)
   initMessageRetentionScheduler(db)
@@ -186,6 +188,7 @@ export function shutdownChatService(): void {
   shutdownGroupKeyService()
   shutdownReadReceiptService()
   shutdownJoinRequestService()
+  shutdownMediaSignalService()
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
 }

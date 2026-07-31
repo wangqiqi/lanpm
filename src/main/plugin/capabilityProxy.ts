@@ -6,17 +6,23 @@ import { getTaskById } from '../storage/repositories/taskRepository'
 import { getGroupById } from '../group/groupService'
 import { listGroupFiles } from '../file/fileService'
 import { findPluginById } from './discover.ts'
+import {
+  getMediaRoomState,
+  pollMediaSignals,
+  sendMediaSignal
+} from '../media/mediaSignalService'
+import { listDesktopCaptureSources } from '../media/desktopCaptureService'
 
 export type CapabilityArgs = Record<string, unknown>
 
 /**
  * 能力白名单代理：插件不得直连 DB；未声明能力一律拒绝。
  */
-export function invokePluginCapability(
+export async function invokePluginCapability(
   pluginId: string,
   capability: PluginCapabilityId,
   args: CapabilityArgs = {}
-): unknown {
+): Promise<unknown> {
   const plugin = findPluginById(pluginId)
   if (!plugin) throw new Error(`plugin not found: ${pluginId}`)
   if (!plugin.enabled) throw new Error(`plugin disabled: ${pluginId}`)
@@ -47,32 +53,18 @@ export function invokePluginCapability(
       return listGroupFiles(db, groupId)
     }
     case 'media.signal.send': {
-      const groupId = String(args.groupId ?? '')
-      if (!groupId) throw new Error('groupId required')
-      return {
-        ok: true,
-        stub: true,
-        groupId,
-        envelopeId: String(args.envelopeId ?? `stub-${Date.now()}`)
-      }
+      return sendMediaSignal(db, args)
     }
     case 'media.signal.poll': {
-      const groupId = String(args.groupId ?? '')
-      if (!groupId) throw new Error('groupId required')
-      return { stub: true, groupId, messages: [] as unknown[] }
+      return pollMediaSignals(db, args)
     }
     case 'media.captureDesktop': {
-      return { stub: true, sources: [] as { id: string; name: string }[] }
+      return listDesktopCaptureSources()
     }
     case 'media.room.state': {
       const groupId = String(args.groupId ?? '')
       if (!groupId) throw new Error('groupId required')
-      return {
-        stub: true,
-        groupId,
-        phase: 'idle' as const,
-        participants: [] as string[]
-      }
+      return getMediaRoomState(db, groupId)
     }
     default: {
       const _exhaustive: never = capability

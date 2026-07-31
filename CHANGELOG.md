@@ -2,6 +2,18 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.68.0] - 2026-07-31
+
+### Added
+
+- **Lite mesh POC**：`media_signal` Sync 信令 · `mediaSignalService` 房间注册（≤4 人/群）· `desktopCapturer` Host 投屏代理
+- **MeetingStub mesh**：加入/离开房间 · 参与者列表 · 原生 `RTCPeerConnection` 1v1 信令交换 POC
+- **验收**：`verify:meeting-mesh-poc` · `verify:media-signal`
+
+### Changed
+
+- **媒体 capability**：`capabilityProxy` 接线真实 `media.*` 服务（移除 stub 返回值）
+
 ## [1.67.0] - 2026-07-31
 
 ### Added

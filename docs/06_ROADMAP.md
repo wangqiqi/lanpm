@@ -86,15 +86,15 @@
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
 | 1 | **SPIKE-会议插件**（SPIKE-374–376）：Lite mesh vs LiveKit 旁路 · `chat.toolbar.media` · Presence 侧车 | 立项前 | **SPIKE 已交付** · `npm run verify:meeting-spike` |
-| 2 | Host 扩展 + `lanpm.meeting` stub：`PluginGroupSlot` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | 下一 Sprint |
-| 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | 待 2 |
+| 2 | Host 扩展 + `lanpm.meeting` stub：`PluginGroupSlot` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | **已交付** · `verify:meeting-plugin` · v1.67.0 |
+| 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | **已交付** · `verify:meeting-mesh-poc` · v1.68.0 |
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | 待 3 |
 | 5 | 离线许可证（内网可购） | P1～P2 | 可与插件市场并行 |
 | 6 | 插件市场安装/更新 | P2 · M8 | 待 |
 
-验收锚点：`verify:meeting-spike`（SPIKE）· `verify:meeting-plugin`（实现 Sprint，待补）。
+验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc`。
 
-**下一实现 Sprint Goal（一句话）**：扩展 Host 媒体 Slot/capability + `plugins/lanpm.meeting` manifest/registry stub，并将聊天 `voice` 面板接到 `chat.toolbar.media`（Lite mesh 信令/投屏代理可 stub）。
+**下一实现 Sprint Goal（一句话）**：Pro LiveKit 旁路 + compose 模板（§3.5 序 4），或并行 `nav-preferences-mvp` / `multi-view-slot-wiring`（见 `plan.md` 候选）。
 
 ---
 
