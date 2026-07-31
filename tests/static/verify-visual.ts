@@ -96,23 +96,23 @@ const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
   },
   {
     file: 'ui/RegionButton.module.css',
-    pattern: /\.icon\s*\{[^}]*height:\s*32px/s,
-    label: 'RegionButton icon 32px'
+    pattern: /\.icon\s*\{[^}]*height:\s*var\(--lanpm-control-height-shell\)/s,
+    label: 'RegionButton icon shell height token'
   },
   {
     file: 'ui/RegionButton.module.css',
-    pattern: /\.text\s*\{[^}]*height:\s*32px/s,
-    label: 'RegionButton text 32px'
+    pattern: /\.text\s*\{[^}]*height:\s*var\(--lanpm-control-height-shell\)/s,
+    label: 'RegionButton text shell height token'
   },
   {
     file: 'ui/RegionButton.module.css',
-    pattern: /\.user\s*\{[^}]*height:\s*32px/s,
-    label: 'RegionButton user 32px'
+    pattern: /\.user\s*\{[^}]*height:\s*var\(--lanpm-control-height-shell\)/s,
+    label: 'RegionButton user shell height token'
   },
   {
     file: 'layout/TopBar.module.css',
-    pattern: /\.projectSelect\s*\{[^}]*height:\s*32px/s,
-    label: 'TopBar project select outer 32px'
+    pattern: /\.projectSelect\s*\{[^}]*height:\s*var\(--lanpm-control-height-shell\)/s,
+    label: 'TopBar project select outer shell height token'
   },
   {
     file: 'layout/TopBar.module.css',
@@ -131,8 +131,8 @@ const LAYOUT_SNIPPETS: { file: string; pattern: RegExp; label: string }[] = [
   },
   {
     file: 'layout/GlobalSearch.module.css',
-    pattern: /\.input\s*\{[^}]*height:\s*32px/s,
-    label: 'GlobalSearch input 32px'
+    pattern: /\.input\s*\{[^}]*height:\s*var\(--lanpm-control-height-shell\)/s,
+    label: 'GlobalSearch input shell height token'
   },
   {
     file: 'layout/BottomNav.module.css',
@@ -843,6 +843,15 @@ const REQUIRED_SPACING_TOKENS = [
 for (const token of REQUIRED_SPACING_TOKENS) {
   assert.ok(globalCss.includes(token), `global.css missing spacing token ${token} (SP-401)`)
 }
+assert.ok(
+  globalCss.includes('--lanpm-control-height-shell'),
+  'global.css missing --lanpm-control-height-shell (shell height SSOT)'
+)
+assert.match(
+  globalCss,
+  /--lanpm-control-height-shell:\s*32px/,
+  '--lanpm-control-height-shell must be 32px'
+)
 const spacingViewCss = [
   'views/CockpitView.module.css',
   'features/board/board.module.css',

@@ -10,8 +10,8 @@
 }
 
 .icon {
-  width: 32px;
-  height: 32px;
+  width: var(--lanpm-control-height-shell);
+  height: var(--lanpm-control-height-shell);
   padding: 0;
   border-radius: var(--lanpm-radius-md);
   box-sizing: border-box;
@@ -58,7 +58,7 @@
 }
 
 .text {
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   padding: 0 10px;
   box-sizing: border-box;
   border-radius: var(--lanpm-radius-md);
@@ -74,7 +74,7 @@
 }
 
 .user {
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   padding: 0 10px;
   box-sizing: border-box;
   border-radius: 980px;
@@ -84,9 +84,9 @@
   color: var(--lanpm-text);
 }
 
-/* 主 CTA：实色强调（对齐 Ant primary · 32px 壳层） */
+/* 主 CTA：实色强调（对齐 Ant primary · 壳层控件高） */
 .emphasis {
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   padding: 0 12px;
   box-sizing: border-box;
   border-radius: var(--lanpm-radius-md);

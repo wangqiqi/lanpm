@@ -244,10 +244,10 @@
   }
 }
 
-/* Logo：与 Select / Search / icon / user 统一 32px 控件高 */
+/* Logo：与 Select / Search / icon / user 统一壳层控件高 */
 .logo {
   gap: 8px;
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   padding: 0 10px;
   box-sizing: border-box;
   transition: transform var(--lanpm-motion-fast) var(--lanpm-ease-standard) !important;
@@ -274,7 +274,7 @@
 .projectSelect {
   min-width: 180px;
   max-width: min(280px, 36vw);
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
@@ -282,23 +282,23 @@
   line-height: 1;
 }
 
-/* 与 Logo / icon / user / Search 统一 32px · font-title · 600 */
+/* 与 Logo / icon / user / Search 统一壳层高 · font-title · 600 */
 .projectSelect :global(.ant-select-selector) {
   border-radius: var(--lanpm-radius-md) !important;
   background: var(--lanpm-fill-secondary) !important;
   border: none !important;
   box-shadow: none !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  max-height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
+  min-height: var(--lanpm-control-height-shell) !important;
+  max-height: var(--lanpm-control-height-shell) !important;
   padding-inline: 10px !important;
   align-items: center !important;
   box-sizing: border-box !important;
 }
 
 .projectSelect :global(.ant-select-selection-wrap) {
-  height: 32px !important;
-  min-height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
+  min-height: var(--lanpm-control-height-shell) !important;
   align-items: center !important;
 }
 
@@ -369,7 +369,7 @@
 .search:global(.ant-select-auto-complete),
 .search:global(.ant-select) {
   width: 220px;
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
@@ -380,16 +380,16 @@
 .searchPopoverField:global(.ant-select-auto-complete),
 .searchPopoverField:global(.ant-select) {
   width: 100%;
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   display: inline-flex;
   align-items: center;
 }
 
 .search :global(.ant-select-selector),
 .searchPopoverField :global(.ant-select-selector) {
-  height: 32px !important;
-  min-height: 32px !important;
-  max-height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
+  min-height: var(--lanpm-control-height-shell) !important;
+  max-height: var(--lanpm-control-height-shell) !important;
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -402,8 +402,8 @@
 
 .search :global(.ant-select-selection-wrap),
 .searchPopoverField :global(.ant-select-selection-wrap) {
-  height: 32px !important;
-  min-height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
+  min-height: var(--lanpm-control-height-shell) !important;
   align-items: center !important;
 }
 
@@ -412,7 +412,7 @@
   background: var(--lanpm-fill-secondary);
   border: none;
   box-shadow: none;
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
 }
 
 .localeSelect {

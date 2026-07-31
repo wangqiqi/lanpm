@@ -59,6 +59,9 @@ html {
   --lanpm-spacing-panel-y: var(--lanpm-space-4);
   --lanpm-spacing-tight: var(--lanpm-space-1);
 
+  /* TopBar / GlobalSearch / RegionButton — 壳层控件高（页内 Ant 仍 controlHeight 40） */
+  --lanpm-control-height-shell: 32px;
+
   /* 任务族色条（亮暗共用 · SSOT `lanpmDesignTokens.ts` LANPM_TASK_FAMILY） */
   --lanpm-task-family-0: #0066cc;
   --lanpm-task-family-1: #5856d6;

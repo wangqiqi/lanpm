@@ -2,6 +2,15 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.65.5] - 2026-07-31
+
+### Changed
+
+- **壳层控件高 SSOT**：新增 `--lanpm-control-height-shell`（32px）；`TopBar` · `GlobalSearch` · `RegionButton` 迁令牌
+- **GlobalSearch**：`optionMeta` 改 `--lanpm-font-caption`（替代 `11px` 字面量）
+- **文档**：`docs/04` §1.4/§1.5 补壳层高度令牌说明
+- **验收**：`verify:visual` 守卫对齐 shell height token
+
 ## [1.65.4] - 2026-07-31
 
 ### Changed

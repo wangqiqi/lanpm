@@ -1,7 +1,7 @@
 .root:global(.ant-select-auto-complete),
 .root:global(.ant-select) {
   width: 220px;
-  height: 32px;
+  height: var(--lanpm-control-height-shell);
   display: inline-flex;
   align-items: center;
   line-height: 1;
@@ -14,38 +14,38 @@
   background: var(--lanpm-fill-secondary) !important;
   border-radius: var(--lanpm-radius-md) !important;
   box-shadow: none !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  max-height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
+  min-height: var(--lanpm-control-height-shell) !important;
+  max-height: var(--lanpm-control-height-shell) !important;
   display: flex !important;
   align-items: center !important;
   box-sizing: border-box !important;
 }
 
 .root :global(.ant-select-selection-wrap) {
-  height: 32px !important;
-  min-height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
+  min-height: var(--lanpm-control-height-shell) !important;
   align-items: center !important;
 }
 
 .root :global(.ant-select-selection-search) {
   inset-inline-start: 0 !important;
   inset-inline-end: 0 !important;
-  height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
   display: flex !important;
   align-items: center !important;
 }
 
 .root :global(.ant-select-selection-search-input) {
-  height: 32px !important;
+  height: var(--lanpm-control-height-shell) !important;
   padding: 0 !important;
 }
 
 .input {
   width: 100%;
-  height: 32px;
-  min-height: 32px;
-  max-height: 32px;
+  height: var(--lanpm-control-height-shell);
+  min-height: var(--lanpm-control-height-shell);
+  max-height: var(--lanpm-control-height-shell);
   margin: 0;
   padding: 0 11px;
   box-sizing: border-box;
@@ -85,5 +85,5 @@
 }
 
 .optionMeta {
-  font-size: 11px;
+  font-size: var(--lanpm-font-caption);
 }
