@@ -2,6 +2,8 @@ import type { ChatMessagePage } from '../chat/pagination'
 import type { GroupMemberView } from '../chat/members'
 import type { ChatMessage } from '../chat/types'
 import type { ChecklistView } from '../task/checklist'
+import type { Task, TaskStatus } from '../task/types'
+import type { TaskPatchWhitelistField } from './taskPatchWhitelist'
 
 /** Extension API v0.2 — chat / board read + controlled write */
 
@@ -25,11 +27,32 @@ export type ChatSendTaskRefArgs = {
   taskId: string
 }
 
+/** Extension API v0.3 — task.patch payload */
+export type TaskPatchPayload = Partial<
+  Pick<Task, TaskPatchWhitelistField>
+>
+
+export type TaskPatchArgs = {
+  groupId: string
+  taskId: string
+  patch: TaskPatchPayload
+}
+
+export type BoardMoveTaskArgs = {
+  groupId: string
+  taskId: string
+  status: TaskStatus
+  sortOrder?: number
+  otherReason?: string
+}
+
 export type PluginCapabilityArgsMap = {
   'chat.listMessages': ChatListMessagesArgs
   'task.getChecklist': TaskGetChecklistArgs
   'member.list': MemberListArgs
   'chat.sendTaskRef': ChatSendTaskRefArgs
+  'task.patch': TaskPatchArgs
+  'board.moveTask': BoardMoveTaskArgs
 }
 
 export type PluginCapabilityResultMap = {
@@ -37,6 +60,16 @@ export type PluginCapabilityResultMap = {
   'task.getChecklist': ChecklistView
   'member.list': GroupMemberView[]
   'chat.sendTaskRef': ChatMessage
+  'task.patch': Task
+  'board.moveTask': Task
 }
 
-export type ExtensionApiV02CapabilityId = keyof PluginCapabilityArgsMap
+export type ExtensionApiV02CapabilityId = keyof Pick<
+  PluginCapabilityArgsMap,
+  'chat.listMessages' | 'task.getChecklist' | 'member.list' | 'chat.sendTaskRef'
+>
+
+export type ExtensionApiV03CapabilityId = keyof Pick<
+  PluginCapabilityArgsMap,
+  'task.patch' | 'board.moveTask'
+>

@@ -42,6 +42,8 @@ export type PluginCapabilityId =
   | 'task.getChecklist'
   | 'member.list'
   | 'chat.sendTaskRef'
+  | 'task.patch'
+  | 'board.moveTask'
   | 'license.feature'
 
 export type PluginSource = 'builtin' | 'sideload'
@@ -123,5 +125,7 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'task.getChecklist',
   'member.list',
   'chat.sendTaskRef',
+  'task.patch',
+  'board.moveTask',
   'license.feature'
 ] as const
