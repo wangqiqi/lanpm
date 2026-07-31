@@ -941,6 +941,7 @@ const enUS = {
   'profile.livekitSaved': 'Meeting bypass settings saved',
   'profile.livekitSaveFailed': 'Failed to save meeting bypass settings',
   'profile.navHint': 'Drag to reorder bottom tabs. Turn off a switch to hide a tab (Chat and at least one task entry stay visible).',
+  'profile.navPluginHint': 'Plugin contributed tabs (after core tabs). Drag to reorder or hide independently.',
   'profile.navToggleAria': 'Show or hide {view}',
   'profile.navLockedChat': 'Chat is the main axis and cannot be hidden.',
   'profile.navLockedTask': 'Keep at least one of Board or Tree visible.',

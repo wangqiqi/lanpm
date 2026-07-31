@@ -4,8 +4,12 @@ import { isViewAllowedForGroup } from './tabRules.ts'
 export interface NavPreferences {
   /** 用户隐藏的核心 Tab（仍受群类型与主轴约束） */
   hiddenViews: AppView[]
-  /** 可见 Tab 的显示顺序 */
+  /** 可见核心 Tab 的显示顺序 */
   order: AppView[]
+  /** 用户隐藏的插件贡献路由（Layer C `views[].route`） */
+  hiddenContributedRoutes: string[]
+  /** 贡献 Tab 在核心 Tab 之后的显示顺序 */
+  contributedOrder: string[]
 }
 
 export const ALL_APP_VIEWS: AppView[] = [
@@ -22,17 +26,28 @@ const TASK_ENTRY_VIEWS: AppView[] = ['board', 'tree']
 
 export const DEFAULT_NAV_PREFERENCES: NavPreferences = {
   hiddenViews: [],
-  order: [...ALL_APP_VIEWS]
+  order: [...ALL_APP_VIEWS],
+  hiddenContributedRoutes: [],
+  contributedOrder: []
 }
 
 function isAppView(value: unknown): value is AppView {
   return typeof value === 'string' && (ALL_APP_VIEWS as string[]).includes(value)
 }
 
+function isContributedRoute(value: unknown): value is string {
+  return typeof value === 'string' && /^[a-z][a-z0-9-]{0,63}$/.test(value.trim())
+}
+
 /** 校验并合并默认；损坏输入回退默认字段 */
 export function normalizeNavPreferences(raw: unknown): NavPreferences {
   if (!raw || typeof raw !== 'object') {
-    return { ...DEFAULT_NAV_PREFERENCES, order: [...DEFAULT_NAV_PREFERENCES.order] }
+    return {
+      ...DEFAULT_NAV_PREFERENCES,
+      order: [...DEFAULT_NAV_PREFERENCES.order],
+      hiddenContributedRoutes: [],
+      contributedOrder: []
+    }
   }
 
   const record = raw as Record<string, unknown>
@@ -48,7 +63,20 @@ export function normalizeNavPreferences(raw: unknown): NavPreferences {
     if (!order.includes(view)) order.push(view)
   }
 
-  return sanitizeNavPreferences({ hiddenViews, order })
+  const hiddenContributedRoutes = Array.isArray(record.hiddenContributedRoutes)
+    ? [...new Set(record.hiddenContributedRoutes.filter(isContributedRoute).map((r) => r.trim()))]
+    : []
+
+  const contributedOrder = Array.isArray(record.contributedOrder)
+    ? [...new Set(record.contributedOrder.filter(isContributedRoute).map((r) => r.trim()))]
+    : []
+
+  return sanitizeNavPreferences({
+    hiddenViews,
+    order,
+    hiddenContributedRoutes,
+    contributedOrder
+  })
 }
 
 /** 应用主轴硬约束（chat 不可藏 · board/tree 至少留一） */
@@ -67,9 +95,18 @@ export function sanitizeNavPreferences(prefs: NavPreferences): NavPreferences {
     if (!order.includes(view)) order.push(view)
   }
 
+  const hiddenContributedRoutes = [
+    ...new Set(prefs.hiddenContributedRoutes.filter(isContributedRoute).map((r) => r.trim()))
+  ]
+  const contributedOrder = [
+    ...new Set(prefs.contributedOrder.filter(isContributedRoute).map((r) => r.trim()))
+  ]
+
   return {
     hiddenViews: [...hidden],
-    order
+    order,
+    hiddenContributedRoutes,
+    contributedOrder
   }
 }
 
@@ -100,6 +137,37 @@ export function isViewVisibleForGroup(
   groupId?: string
 ): boolean {
   return resolveVisibleViews(groupType, prefs, groupId).includes(view)
+}
+
+/**
+ * 按偏好过滤/排序贡献 Tab（核心 Tab 之后的独立段）。
+ * `knownRoutes` 为当前已发现的贡献路由；未知 prefs 项保留在 store，渲染时跳过。
+ */
+export function resolveVisibleContributedRoutes(
+  prefs: NavPreferences,
+  knownRoutes: string[]
+): string[] {
+  const sanitized = sanitizeNavPreferences(prefs)
+  const hidden = new Set(sanitized.hiddenContributedRoutes)
+  const known = knownRoutes.filter((r) => isContributedRoute(r))
+  const visible = known.filter((route) => !hidden.has(route))
+
+  const orderIndex = new Map(sanitized.contributedOrder.map((route, index) => [route, index]))
+  visible.sort((a, b) => {
+    const ai = orderIndex.has(a) ? orderIndex.get(a)! : 1000 + known.indexOf(a)
+    const bi = orderIndex.has(b) ? orderIndex.get(b)! : 1000 + known.indexOf(b)
+    return ai - bi
+  })
+  return visible
+}
+
+export function isContributedRouteVisible(
+  prefs: NavPreferences,
+  route: string
+): boolean {
+  if (!isContributedRoute(route)) return false
+  const sanitized = sanitizeNavPreferences(prefs)
+  return !sanitized.hiddenContributedRoutes.includes(route)
 }
 
 /** Profile 设置页：该视图是否禁止关闭（主轴） */

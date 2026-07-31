@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.77.0] - 2026-07-31
+
+### Added
+
+- **插件 Tab 导航偏好**：`hiddenContributedRoutes` · `contributedOrder`（核心 Tab 之后段内排序/隐藏）
+- **Profile「导航与视图」**：列出已发现贡献视图，可拖拽与开关
+- **BottomNav / PluginViewGuard**：尊重插件 Tab 显隐；隐藏 deep-link 重定向
+
 ## [1.76.0] - 2026-07-31
 
 ### Added

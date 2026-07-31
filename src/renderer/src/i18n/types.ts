@@ -918,6 +918,7 @@ export type MessageKey =
   | 'profile.livekitSaved'
   | 'profile.livekitSaveFailed'
   | 'profile.navHint'
+  | 'profile.navPluginHint'
   | 'profile.navToggleAria'
   | 'profile.navLockedChat'
   | 'profile.navLockedTask'

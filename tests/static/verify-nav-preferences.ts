@@ -13,6 +13,9 @@ const shared = readFileSync(join(root, 'src/shared/navigation/navPreferences.ts'
 assert.match(shared, /NavPreferences/)
 assert.match(shared, /resolveVisibleViews/)
 assert.match(shared, /sanitizeNavPreferences/)
+assert.match(shared, /resolveVisibleContributedRoutes/)
+assert.match(shared, /hiddenContributedRoutes/)
+assert.match(shared, /contributedOrder/)
 
 const store = readFileSync(join(root, 'src/main/navigation/navPreferencesStore.ts'), 'utf8')
 assert.match(store, /nav-preferences\.json/)
@@ -22,15 +25,29 @@ assert.match(ipc, /NAV_IPC/)
 
 const bottomNav = readFileSync(join(root, 'src/renderer/src/layout/BottomNav.tsx'), 'utf8')
 assert.match(bottomNav, /resolveVisibleViews/)
+assert.match(bottomNav, /resolveVisibleContributedRoutes/)
 assert.match(bottomNav, /useNavPreferencesStore/)
 
 const guard = readFileSync(join(root, 'src/renderer/src/routes/GroupViewGuard.tsx'), 'utf8')
 assert.match(guard, /isViewVisibleForGroup/)
 assert.match(guard, /viewHiddenByPreference/)
 
+const pluginGuard = readFileSync(join(root, 'src/renderer/src/routes/PluginViewGuard.tsx'), 'utf8')
+assert.match(pluginGuard, /isContributedRouteVisible/)
+assert.match(pluginGuard, /viewHiddenByPreference/)
+
 const profile = readFileSync(join(root, 'src/renderer/src/features/profile/ProfileModal.tsx'), 'utf8')
 assert.match(profile, /NavPreferencesPanel/)
 assert.match(profile, /profile\.tabNav/)
+
+const panel = readFileSync(
+  join(root, 'src/renderer/src/features/profile/NavPreferencesPanel.tsx'),
+  'utf8'
+)
+assert.match(panel, /useContributedViews/)
+assert.match(panel, /hiddenContributedRoutes/)
+assert.match(panel, /contributedOrder/)
+assert.match(panel, /profile\.navPluginHint/)
 
 const preload = readFileSync(join(root, 'src/preload/index.ts'), 'utf8')
 assert.match(preload, /nav:getPreferences/)

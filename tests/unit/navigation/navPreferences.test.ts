@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_NAV_PREFERENCES,
+  isContributedRouteVisible,
   isViewHideLocked,
   isViewVisibleForGroup,
   normalizeNavPreferences,
+  resolveVisibleContributedRoutes,
   resolveVisibleViews,
   sanitizeNavPreferences
 } from '@shared/navigation/navPreferences'
@@ -11,6 +13,8 @@ import {
 describe('normalizeNavPreferences', () => {
   it('returns defaults for invalid input', () => {
     expect(normalizeNavPreferences(null).order).toEqual(DEFAULT_NAV_PREFERENCES.order)
+    expect(normalizeNavPreferences(null).hiddenContributedRoutes).toEqual([])
+    expect(normalizeNavPreferences(null).contributedOrder).toEqual([])
   })
 
   it('dedupes order and hiddenViews', () => {
@@ -22,11 +26,21 @@ describe('normalizeNavPreferences', () => {
     expect(prefs.order.slice(0, 3)).toEqual(['files', 'chat', 'board'])
     expect(prefs.order).toContain('tree')
   })
+
+  it('normalizes contributed route prefs', () => {
+    const prefs = normalizeNavPreferences({
+      hiddenContributedRoutes: ['mindmap', 'mindmap', 'BAD'],
+      contributedOrder: ['form', 'mindmap']
+    })
+    expect(prefs.hiddenContributedRoutes).toEqual(['mindmap'])
+    expect(prefs.contributedOrder).toEqual(['form', 'mindmap'])
+  })
 })
 
 describe('sanitizeNavPreferences', () => {
   it('keeps chat visible and restores a task entry when both hidden', () => {
     const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
       hiddenViews: ['chat', 'board', 'tree'],
       order: DEFAULT_NAV_PREFERENCES.order
     })
@@ -37,6 +51,7 @@ describe('sanitizeNavPreferences', () => {
 
   it('allows hiding board when tree remains', () => {
     const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
       hiddenViews: ['board'],
       order: DEFAULT_NAV_PREFERENCES.order
     })
@@ -47,6 +62,7 @@ describe('sanitizeNavPreferences', () => {
 describe('resolveVisibleViews', () => {
   it('filters hidden views for project groups', () => {
     const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
       hiddenViews: ['gantt', 'calendar'],
       order: DEFAULT_NAV_PREFERENCES.order
     })
@@ -70,6 +86,7 @@ describe('resolveVisibleViews', () => {
 describe('isViewHideLocked', () => {
   it('locks chat and last task entry', () => {
     const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
       hiddenViews: ['board'],
       order: DEFAULT_NAV_PREFERENCES.order
     })
@@ -82,9 +99,41 @@ describe('isViewHideLocked', () => {
 describe('isViewVisibleForGroup', () => {
   it('returns false for hidden project tab', () => {
     const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
       hiddenViews: ['whiteboard'],
       order: DEFAULT_NAV_PREFERENCES.order
     })
     expect(isViewVisibleForGroup('project', prefs, 'whiteboard')).toBe(false)
+  })
+})
+
+describe('resolveVisibleContributedRoutes', () => {
+  it('hides and orders known plugin routes', () => {
+    const prefs = normalizeNavPreferences({
+      hiddenContributedRoutes: ['mindmap'],
+      contributedOrder: ['form', 'mindmap', 'extra']
+    })
+    expect(resolveVisibleContributedRoutes(prefs, ['mindmap', 'form', 'extra'])).toEqual([
+      'form',
+      'extra'
+    ])
+  })
+
+  it('skips unknown routes while keeping prefs', () => {
+    const prefs = normalizeNavPreferences({
+      contributedOrder: ['gone', 'mindmap']
+    })
+    expect(resolveVisibleContributedRoutes(prefs, ['mindmap'])).toEqual(['mindmap'])
+    expect(prefs.contributedOrder).toContain('gone')
+  })
+})
+
+describe('isContributedRouteVisible', () => {
+  it('returns false when route is hidden', () => {
+    const prefs = normalizeNavPreferences({
+      hiddenContributedRoutes: ['mindmap']
+    })
+    expect(isContributedRouteVisible(prefs, 'mindmap')).toBe(false)
+    expect(isContributedRouteVisible(prefs, 'form')).toBe(true)
   })
 })

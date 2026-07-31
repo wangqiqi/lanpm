@@ -929,6 +929,7 @@ const zhCN = {
   'profile.livekitSaved': '会议旁路设置已保存',
   'profile.livekitSaveFailed': '会议旁路设置保存失败',
   'profile.navHint': '拖拽调整底部 Tab 顺序；关闭开关可隐藏 Tab（聊天与至少一种任务入口不可隐藏）。',
+  'profile.navPluginHint': '以下为插件贡献 Tab（排在核心 Tab 之后）；可单独拖拽排序与隐藏。',
   'profile.navToggleAria': '显示或隐藏 {view}',
   'profile.navLockedChat': '「聊天」为主轴，不可隐藏。',
   'profile.navLockedTask': '「看板」与「任务树」至少保留一个可见。',

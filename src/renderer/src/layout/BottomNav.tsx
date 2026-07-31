@@ -17,7 +17,10 @@ import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { NAV_DISABLED_HINT_KEYS, VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
-import { resolveVisibleViews } from '@shared/navigation/navPreferences'
+import {
+  resolveVisibleContributedRoutes,
+  resolveVisibleViews
+} from '@shared/navigation/navPreferences'
 import type { AppView } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
@@ -109,8 +112,14 @@ export default function BottomNav(): React.ReactElement {
 
   const visibleContributedTabs = useMemo(() => {
     if (!groupType) return []
-    return contributedViews.filter((view) => view.groupTypes.includes(groupType))
-  }, [contributedViews, groupType])
+    const forGroup = contributedViews.filter((view) => view.groupTypes.includes(groupType))
+    const knownRoutes = forGroup.map((view) => view.route)
+    const visibleRoutes = resolveVisibleContributedRoutes(navPreferences, knownRoutes)
+    const byRoute = new Map(forGroup.map((view) => [view.route, view]))
+    return visibleRoutes
+      .map((route) => byRoute.get(route))
+      .filter((view): view is (typeof forGroup)[number] => Boolean(view))
+  }, [contributedViews, groupType, navPreferences])
 
   if (!groupId || !groupType) return <></>
 

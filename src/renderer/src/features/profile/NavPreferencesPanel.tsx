@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { List, Switch, Typography } from 'antd'
 import { HolderOutlined } from '@ant-design/icons'
 import type { AppView } from '@shared/navigation/types'
@@ -11,11 +11,13 @@ import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
+import { useContributedViews } from '@renderer/plugin/useContributedViews'
+import type { MessageKey } from '@renderer/i18n/types'
 import styles from './NavPreferencesPanel.module.css'
 
 const { Text } = Typography
 
-function moveView(order: AppView[], from: number, to: number): AppView[] {
+function moveItem<T>(order: T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= order.length || to >= order.length) {
     return order
   }
@@ -25,14 +27,33 @@ function moveView(order: AppView[], from: number, to: number): AppView[] {
   return next
 }
 
-/** Profile「导航与视图」— 全局 Tab 排序与显隐 */
+/** Profile「导航与视图」— 核心 + 插件贡献 Tab 排序与显隐 */
 export default function NavPreferencesPanel(): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
   const preferences = useNavPreferencesStore((s) => s.preferences)
   const setPreferences = useNavPreferencesStore((s) => s.setPreferences)
+  const contributedViews = useContributedViews()
   const [busy, setBusy] = useState(false)
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragCoreIndex, setDragCoreIndex] = useState<number | null>(null)
+  const [dragPluginIndex, setDragPluginIndex] = useState<number | null>(null)
+
+  const pluginRoutes = useMemo(() => {
+    const known = contributedViews.map((v) => v.route)
+    const order = [...preferences.contributedOrder]
+    for (const route of known) {
+      if (!order.includes(route)) order.push(route)
+    }
+    return order.filter((route) => known.includes(route))
+  }, [contributedViews, preferences.contributedOrder])
+
+  const titleByRoute = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const view of contributedViews) {
+      map.set(view.route, t(view.titleKey as MessageKey))
+    }
+    return map
+  }, [contributedViews, t])
 
   const persist = useCallback(
     async (next: NavPreferences): Promise<void> => {
@@ -56,11 +77,25 @@ export default function NavPreferencesPanel(): React.ReactElement {
     void persist({ ...preferences, hiddenViews: [...hidden] })
   }
 
-  const onDrop = (toIndex: number): void => {
-    if (dragIndex === null || dragIndex === toIndex) return
-    const nextOrder = moveView(preferences.order, dragIndex, toIndex)
-    setDragIndex(null)
+  const togglePlugin = (route: string, visible: boolean): void => {
+    const hidden = new Set(preferences.hiddenContributedRoutes)
+    if (visible) hidden.delete(route)
+    else hidden.add(route)
+    void persist({ ...preferences, hiddenContributedRoutes: [...hidden] })
+  }
+
+  const onDropCore = (toIndex: number): void => {
+    if (dragCoreIndex === null || dragCoreIndex === toIndex) return
+    const nextOrder = moveItem(preferences.order, dragCoreIndex, toIndex)
+    setDragCoreIndex(null)
     void persist({ ...preferences, order: nextOrder })
+  }
+
+  const onDropPlugin = (toIndex: number): void => {
+    if (dragPluginIndex === null || dragPluginIndex === toIndex) return
+    const nextOrder = moveItem(pluginRoutes, dragPluginIndex, toIndex)
+    setDragPluginIndex(null)
+    void persist({ ...preferences, contributedOrder: nextOrder })
   }
 
   return (
@@ -76,10 +111,10 @@ export default function NavPreferencesPanel(): React.ReactElement {
             <List.Item
               className={styles.row}
               draggable={!busy}
-              onDragStart={() => setDragIndex(index)}
-              onDragEnd={() => setDragIndex(null)}
+              onDragStart={() => setDragCoreIndex(index)}
+              onDragEnd={() => setDragCoreIndex(null)}
               onDragOver={(event) => event.preventDefault()}
-              onDrop={() => onDrop(index)}
+              onDrop={() => onDropCore(index)}
             >
               <span className={styles.handle} aria-hidden>
                 <HolderOutlined />
@@ -95,6 +130,42 @@ export default function NavPreferencesPanel(): React.ReactElement {
           )
         }}
       />
+      {pluginRoutes.length > 0 ? (
+        <>
+          <Text type="secondary" className={styles.footnote}>
+            {t('profile.navPluginHint')}
+          </Text>
+          <List
+            className={styles.list}
+            dataSource={pluginRoutes}
+            renderItem={(route, index) => {
+              const visible = !preferences.hiddenContributedRoutes.includes(route)
+              const label = titleByRoute.get(route) ?? route
+              return (
+                <List.Item
+                  className={styles.row}
+                  draggable={!busy}
+                  onDragStart={() => setDragPluginIndex(index)}
+                  onDragEnd={() => setDragPluginIndex(null)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => onDropPlugin(index)}
+                >
+                  <span className={styles.handle} aria-hidden>
+                    <HolderOutlined />
+                  </span>
+                  <span className={styles.label}>{label}</span>
+                  <Switch
+                    checked={visible}
+                    disabled={busy}
+                    onChange={(checked) => togglePlugin(route, checked)}
+                    aria-label={t('profile.navToggleAria', { view: label })}
+                  />
+                </List.Item>
+              )
+            }}
+          />
+        </>
+      ) : null}
       {lockedHint(t)}
     </div>
   )
