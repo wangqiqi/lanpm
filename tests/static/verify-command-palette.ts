@@ -1,5 +1,5 @@
 /**
- * TASK-950 — Command palette POC guards.
+ * TASK-950 / TASK-975 — Command palette guards.
  * Run: npm run verify:command-palette
  */
 import assert from 'node:assert/strict'
@@ -13,6 +13,8 @@ const commands = readFileSync(join(root, 'src/shared/plugin/commands.ts'), 'utf8
 assert.match(commands, /PluginCommand/)
 assert.match(commands, /ListedCommand/)
 assert.match(commands, /InvokeCommandResult/)
+assert.match(commands, /CommandAction/)
+assert.match(commands, /resolveCommandAction/)
 
 const types = readFileSync(join(root, 'src/shared/plugin/types.ts'), 'utf8')
 assert.match(types, /commands\?:/)
@@ -24,6 +26,7 @@ const registry = readFileSync(join(root, 'src/main/plugin/commandRegistry.ts'), 
 assert.match(registry, /CORE_COMMANDS/)
 assert.match(registry, /listAllCommands/)
 assert.match(registry, /invokeListedCommand/)
+assert.doesNotMatch(registry, /stub/)
 
 const discover = readFileSync(join(root, 'src/main/plugin/discover.ts'), 'utf8')
 assert.match(discover, /export function listCommands/)
@@ -44,11 +47,23 @@ const api = readFileSync(join(root, 'src/shared/lanpm-api.ts'), 'utf8')
 assert.match(api, /listCommands/)
 assert.match(api, /invokeCommand/)
 
+const effects = readFileSync(join(root, 'src/renderer/src/plugin/commandEffects.ts'), 'utf8')
+assert.match(effects, /applyCommandAction/)
+assert.match(effects, /LANPM_OPEN_PROFILE_EVENT/)
+
+const handlerRegistry = readFileSync(
+  join(root, 'src/renderer/src/plugin/commandHandlerRegistry.ts'),
+  'utf8'
+)
+assert.match(handlerRegistry, /runPluginCommandHandler/)
+assert.match(handlerRegistry, /lanpm\.example:hello/)
+
 const palette = readFileSync(join(root, 'src/renderer/src/layout/CommandPalette.tsx'), 'utf8')
-assert.match(palette, /Ctrl\/Cmd\+K|isPaletteHotkey|metaKey/)
+assert.match(palette, /isPaletteHotkey|metaKey/)
 assert.match(palette, /listCommands/)
 assert.match(palette, /invokeCommand/)
-assert.match(palette, /LANPM_OPEN_PROFILE_EVENT/)
+assert.match(palette, /applyCommandAction/)
+assert.doesNotMatch(palette, /LANPM_OPEN_PROFILE_EVENT/)
 
 const layout = readFileSync(join(root, 'src/renderer/src/layout/MainLayout.tsx'), 'utf8')
 assert.match(layout, /CommandPalette/)
@@ -56,7 +71,8 @@ assert.match(layout, /CommandPalette/)
 const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub.ts'), 'utf8')
 assert.match(stub, /listCommands/)
 assert.match(stub, /invokeCommand/)
-assert.match(stub, /command\.example\.hello/)
+assert.match(stub, /resolveCommandAction/)
+assert.doesNotMatch(stub, /plugin stub|core stub/)
 
 const example = JSON.parse(
   readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
@@ -66,6 +82,7 @@ assert.ok(Array.isArray(example.commands) && example.commands.length > 0)
 const zh = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
 assert.match(zh, /command\.paletteTitle/)
 assert.match(zh, /command\.example\.hello/)
+assert.match(zh, /command\.example\.helloDone/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

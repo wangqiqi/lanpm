@@ -918,6 +918,7 @@ export type MessageKey =
   | 'command.core.openNavPreferences'
   | 'command.core.openPlugins'
   | 'command.example.hello'
+  | 'command.example.helloDone'
   | 'profile.livekitHint'
   | 'profile.livekitConfigured'
   | 'profile.livekitNotConfigured'

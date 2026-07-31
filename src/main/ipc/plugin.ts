@@ -2,7 +2,12 @@ import { ipcMain } from 'electron'
 import { PLUGIN_IPC } from '../../shared/plugin/channels'
 import type { PluginCapabilityId, PluginSlotId } from '../../shared/plugin/types'
 import { PLUGIN_CAPABILITY_IDS, PLUGIN_SLOT_IDS } from '../../shared/plugin/types'
-import { discoverPlugins, listContributedViews, listCommands, listSlotPlugins } from '../plugin/discover'
+import {
+  discoverPlugins,
+  listContributedViews,
+  listCommands,
+  listSlotPlugins
+} from '../plugin/discover'
 import { setPluginEnabled } from '../plugin/enabledStore'
 import { invokePluginCapability } from '../plugin/capabilityProxy'
 import { getPluginLicenseStatus, importPluginLicense } from '../plugin/licenseStore'
@@ -33,7 +38,7 @@ export function registerPluginIpc(): void {
     if (!known) {
       return { ok: false, commandId, message: 'unknown command' }
     }
-    return invokeListedCommand(commandId)
+    return invokeListedCommand(commandId, discoverPlugins())
   })
 
   ipcMain.handle(PLUGIN_IPC.importLicense, (_event, payload: string) => {

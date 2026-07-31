@@ -1940,13 +1940,12 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       listCommands: async () => listStubCommands(),
       invokeCommand: async (commandId) => {
-        const known = listStubCommands().some((c) => c.commandId === commandId)
-        if (!known) return { ok: false, commandId, message: 'unknown command' }
-        return {
-          ok: true,
-          commandId,
-          message: commandId.startsWith('core:') ? 'core stub' : 'plugin stub'
-        }
+        const listed = listStubCommands()
+        const pluginOnly = listed.filter((c) => c.source === 'plugin')
+        const { resolveCommandAction } = await import('@shared/plugin/commands')
+        const action = resolveCommandAction(commandId, pluginOnly)
+        if (!action) return { ok: false, commandId, message: 'unknown command' }
+        return { ok: true, commandId, action }
       },
       setEnabled: async (pluginId, enabled) => mutateStubPluginEnabled(pluginId, enabled),
       importLicense: async (payload) => {

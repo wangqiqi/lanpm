@@ -1,6 +1,7 @@
-/** Core + plugin command registry for command palette POC */
+/** Core + plugin command registry for command palette */
 
 import type { InvokeCommandResult, ListedCommand } from '../../shared/plugin/commands.ts'
+import { resolveCommandAction } from '../../shared/plugin/commands.ts'
 
 const CORE_COMMANDS: ListedCommand[] = [
   {
@@ -60,14 +61,18 @@ export function listAllCommands(
   return [...CORE_COMMANDS, ...listPluginCommandsFromDiscover(plugins)]
 }
 
-export function invokeListedCommand(commandId: string): InvokeCommandResult {
-  const all = [...CORE_COMMANDS]
-  const known = all.find((c) => c.commandId === commandId)
-  if (known) {
-    return { ok: true, commandId, message: 'core stub' }
+export function invokeListedCommand(
+  commandId: string,
+  plugins: Array<{
+    id: string
+    enabled: boolean
+    commands?: Array<{ id: string; titleKey: string }>
+  }>
+): InvokeCommandResult {
+  const pluginListed = listPluginCommandsFromDiscover(plugins)
+  const action = resolveCommandAction(commandId, pluginListed)
+  if (!action) {
+    return { ok: false, commandId, message: 'unknown command' }
   }
-  if (commandId.includes(':')) {
-    return { ok: true, commandId, message: 'plugin stub' }
-  }
-  return { ok: false, commandId, message: 'unknown command' }
+  return { ok: true, commandId, action }
 }

@@ -927,7 +927,8 @@ const zhCN = {
   'command.core.openProfile': '打开个人设置',
   'command.core.openNavPreferences': '打开导航与视图偏好',
   'command.core.openPlugins': '打开扩展管理',
-  'command.example.hello': '示例：打招呼（stub）',
+  'command.example.hello': '示例：打招呼',
+  'command.example.helloDone': '来自 lanpm.example 插件的问候！',
   'profile.livekitHint':
     '自托管 LiveKit SFU 的 WebSocket 地址与 API 密钥；Secret 仅保存在本机主进程。禁止默认连接 LiveKit Cloud。',
   'profile.livekitConfigured': '会议旁路已配置。',

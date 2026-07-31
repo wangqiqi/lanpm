@@ -6,12 +6,10 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/types'
 import { PLUGIN_ENABLED_CHANGED_EVENT } from '@renderer/plugin/pluginEvents'
+import { applyCommandAction } from '@renderer/plugin/commandEffects'
 import styles from './CommandPalette.module.css'
 
 const { Text } = Typography
-
-export const LANPM_OPEN_PROFILE_EVENT = 'lanpm:open-profile'
-export type OpenProfileDetail = { tab?: string }
 
 function isPaletteHotkey(event: KeyboardEvent): boolean {
   return (event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'k'
@@ -77,26 +75,12 @@ export default function CommandPalette(): React.ReactElement {
     if (busy) return
     setBusy(true)
     try {
-      if (cmd.commandId === 'core:open-profile') {
-        window.dispatchEvent(
-          new CustomEvent<OpenProfileDetail>(LANPM_OPEN_PROFILE_EVENT, { detail: {} })
-        )
-      } else if (cmd.commandId === 'core:open-nav-preferences') {
-        window.dispatchEvent(
-          new CustomEvent<OpenProfileDetail>(LANPM_OPEN_PROFILE_EVENT, {
-            detail: { tab: 'nav' }
-          })
-        )
-      } else if (cmd.commandId === 'core:open-plugins') {
-        window.dispatchEvent(
-          new CustomEvent<OpenProfileDetail>(LANPM_OPEN_PROFILE_EVENT, {
-            detail: { tab: 'plugins' }
-          })
-        )
-      }
       const result = await getLanpmApi().plugin.invokeCommand(cmd.commandId)
       if (result.ok) {
-        message.success(t('command.invokeOk', { name: t(cmd.titleKey as MessageKey) }))
+        const effectOk = await applyCommandAction(result, { message, t })
+        if (effectOk) {
+          message.success(t('command.invokeOk', { name: t(cmd.titleKey as MessageKey) }))
+        }
       } else {
         message.error(t('command.invokeFailed'))
       }

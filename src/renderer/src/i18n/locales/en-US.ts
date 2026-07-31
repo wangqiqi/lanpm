@@ -939,7 +939,8 @@ const enUS = {
   'command.core.openProfile': 'Open profile settings',
   'command.core.openNavPreferences': 'Open navigation preferences',
   'command.core.openPlugins': 'Open extensions',
-  'command.example.hello': 'Example: say hello (stub)',
+  'command.example.hello': 'Example: say hello',
+  'command.example.helloDone': 'Hello from lanpm.example plugin!',
   'profile.livekitHint':
     'Self-hosted LiveKit SFU URL and API keys. Secrets stay on this device (main process only). Do not use LiveKit Cloud by default.',
   'profile.livekitConfigured': 'LiveKit bypass is configured.',

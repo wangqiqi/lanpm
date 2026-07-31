@@ -42,7 +42,7 @@ import { PluginGlobalSlot } from '@renderer/plugin/PluginSlot'
 import {
   LANPM_OPEN_PROFILE_EVENT,
   type OpenProfileDetail
-} from '@renderer/layout/CommandPalette'
+} from '@renderer/plugin/commandEffects'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
 import { useNetworkStore } from '@renderer/stores/networkStore'
