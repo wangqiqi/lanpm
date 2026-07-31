@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.78.1-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.78.2-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -115,7 +115,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.78.1`** — 插件文档 SSOT 对齐；命令面板（Ctrl/Cmd+K）· 签名离线许可证 · 贡献 Tab 导航偏好。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.78.2`** — 全局插件 Slot（顶栏 · 底栏更多 · Profile Tab）；命令面板 · 离线许可证。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

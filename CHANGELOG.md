@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.2] - 2026-07-31
+
+### Added
+
+- **全局 Slot 接线**：`topbar.menu`（TopBar）· `group.tab.overflow`（BottomNav More）· `profile.tab`（Profile 动态 Tab）
+- **`PluginGlobalSlot`** · `globalSlotMap` SSOT · `verify:view-slot-hosts` 全局锚点守卫
+- **`lanpm.example`**：声明 `profile.tab` 样例 Tab
+
 ## [1.78.1] - 2026-07-31
 
 ### Changed
