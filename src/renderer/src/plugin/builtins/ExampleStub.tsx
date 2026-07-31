@@ -93,8 +93,20 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
   )
 }
 
+function ExampleProfileTab({ plugin }: Props): React.ReactElement {
+  const { t } = useI18n()
+  return (
+    <div className={styles.card} data-plugin-id={plugin.id}>
+      <Text type="secondary">{t('plugin.exampleProfileTab')}</Text>
+    </div>
+  )
+}
+
 /** 免费官方 stub — 证明 Host→Slot 端到端 + Extension API v0.2 demo */
 export default function ExampleStub(props: Props): React.ReactElement {
+  if (props.context?.view === 'profile') {
+    return <ExampleProfileTab {...props} />
+  }
   if (props.context?.view === 'chat' && !props.taskId) {
     return <ExampleComposerAction {...props} />
   }

@@ -9,7 +9,8 @@ import { fileURLToPath } from 'url'
 import type { AppView } from '../../src/shared/navigation/types.ts'
 import type { ViewPluginZone } from '../../src/shared/plugin/viewHost.ts'
 import { PLUGIN_SLOT_IDS } from '../../src/shared/plugin/types.ts'
-import { VIEW_SLOT_MAP } from '../../src/renderer/src/plugin/viewSlotMap.ts'
+import { VIEW_SLOT_MAP, GLOBAL_SLOT_HOST_FILES } from '../../src/renderer/src/plugin/viewSlotMap.ts'
+import { GLOBAL_PLUGIN_SLOT_IDS } from '../../src/shared/plugin/viewHost.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -91,12 +92,15 @@ const viewHost = readSrc('src/shared/plugin/viewHost.ts')
 assert.match(viewHost, /export type ViewPluginZone/)
 assert.match(viewHost, /export type ViewPluginContext/)
 assert.match(viewHost, /export type PluginSlotHostProps/)
+assert.match(viewHost, /export type GlobalPluginSlotId/)
+assert.match(viewHost, /export type PluginGlobalSlotProps/)
 
 const pluginSlot = readSrc('src/renderer/src/plugin/PluginSlot.tsx')
 assert.match(pluginSlot, /export function PluginSlotHost/)
 assert.match(pluginSlot, /export function PluginZoneHost/)
 assert.match(pluginSlot, /export function PluginGroupSlot/)
 assert.match(pluginSlot, /export function PluginTaskSlot/)
+assert.match(pluginSlot, /export function PluginGlobalSlot/)
 
 const allMappedSlots = new Set<string>()
 for (const view of CORE_VIEWS) {
@@ -118,6 +122,22 @@ for (const view of CORE_VIEWS) {
 }
 
 assert.ok(allMappedSlots.has('task.detail.section'), 'viewSlotMap must map task.detail.section')
+
+for (const slot of GLOBAL_PLUGIN_SLOT_IDS) {
+  const rel = GLOBAL_SLOT_HOST_FILES[slot]
+  assert.ok(rel, `GLOBAL_SLOT_HOST_FILES missing ${slot}`)
+  const src = readSrc(rel)
+  assert.match(
+    src,
+    new RegExp(`data-plugin-slot=["']${slot}["']|slot="${slot}"`),
+    `${rel} must wire global slot ${slot}`
+  )
+  assert.match(
+    src,
+    /PluginGlobalSlot|PluginSlotHost|PluginProfileTabBody|useProfileTabPlugins/,
+    `${rel} must use PluginGlobalSlot or profile tab host for ${slot}`
+  )
+}
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

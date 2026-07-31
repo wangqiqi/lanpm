@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button, Checkbox, Form, Input, Modal, Tabs, Typography } from 'antd'
 import DataStoragePanel from '@renderer/features/profile/DataStoragePanel'
 import NavPreferencesPanel from '@renderer/features/profile/NavPreferencesPanel'
 import LiveKitConfigPanel from '@renderer/features/profile/LiveKitConfigPanel'
 import PluginsPanel from '@renderer/features/profile/PluginsPanel'
+import { PluginProfileTabBody, useProfileTabPlugins } from '@renderer/plugin/PluginSlot'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNetworkStore } from '@renderer/stores/networkStore'
@@ -47,6 +49,12 @@ export default function ProfileModal({
   const [form] = Form.useForm<ProfileFormValues>()
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState(initialTab ?? 'profile')
+  const profileTabPlugins = useProfileTabPlugins()
+  const activeGroupId = useNavigationStore((s) => s.activeGroupId)
+  const profilePluginContext = useMemo(
+    () => ({ groupId: activeGroupId ?? undefined, view: 'profile' as const }),
+    [activeGroupId]
+  )
   const isProfileTab = activeTab === 'profile'
 
   useEffect(() => {
@@ -114,6 +122,7 @@ export default function ProfileModal({
       destroyOnHidden
       width={520}
     >
+      <div data-plugin-slot="profile.tab">
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
@@ -220,9 +229,17 @@ export default function ProfileModal({
             key: 'data',
             label: t('profile.tabData'),
             children: <DataStoragePanel />
-          }
+          },
+          ...profileTabPlugins.map((plugin) => ({
+            key: `plugin:${plugin.id}`,
+            label: plugin.name,
+            children: (
+              <PluginProfileTabBody plugin={plugin} context={profilePluginContext} />
+            )
+          }))
         ]}
       />
+      </div>
     </Modal>
   )
 }

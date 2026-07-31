@@ -38,6 +38,7 @@ import DiscoverModal from '@renderer/features/discover/DiscoverModal'
 import DiscoverCoachmark from '@renderer/features/discover/DiscoverCoachmark'
 import { isDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
+import { PluginGlobalSlot } from '@renderer/plugin/PluginSlot'
 import {
   LANPM_OPEN_PROFILE_EVENT,
   type OpenProfileDetail
@@ -219,6 +220,11 @@ export default function TopBar(): React.ReactElement {
   }
 
   const isCockpitRoute = location.pathname.startsWith('/cockpit')
+  const activePluginView = useMemo((): AppView => {
+    const raw = VIEW_PATH_RE.exec(location.pathname)?.[1]
+    const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files']
+    return views.includes(raw as AppView) ? (raw as AppView) : 'chat'
+  }, [location.pathname])
   const cockpitReturnTarget = cockpitReturnPath(activeGroupId, lastNonCockpitPath)
 
   const handleLogoClick = (): void => {
@@ -628,6 +634,12 @@ export default function TopBar(): React.ReactElement {
         </Popover>
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
+          <PluginGlobalSlot
+            slot="topbar.menu"
+            context={{ groupId: activeGroupId ?? '', view: activePluginView }}
+            className={styles.pluginMenuSlot}
+            inline
+          />
         <Dropdown menu={{ items: userMenu }} trigger={['click']}>
           <RegionButton variant="user" aria-label={t('topbar.userMenu')}>
             <UserAvatar

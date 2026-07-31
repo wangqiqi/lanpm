@@ -97,6 +97,7 @@ const enUS = {
   'nav.functionGuideBody':
     'Function groups support Chat and Files only. Board, task tree, and Gantt are available in project groups.',
   'nav.ariaLabel': 'Main view navigation',
+  'nav.tabOverflow': 'More',
   'nav.viewRedirected': 'This view is not available for this group; switched for you',
   'nav.viewHiddenByPreference': 'This view is hidden in Navigation & views; switched for you',
   'nav.groupsLoadFailed': 'Failed to load groups',
@@ -433,6 +434,7 @@ const enUS = {
   'plugin.pricingFree': 'Free',
   'plugin.pricingPaid': 'Paid',
   'plugin.exampleHint': 'Example plugin mounted · task {taskId}',
+  'plugin.exampleProfileTab': 'Example extension tab via profile.tab slot',
   'plugin.exampleProbeRead': 'Probe read APIs',
   'plugin.exampleSendTaskRef': 'Send first task ref',
   'plugin.exampleNoTasks': 'No tasks in this group',

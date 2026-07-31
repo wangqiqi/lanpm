@@ -6,6 +6,24 @@
   min-height: 0;
 }
 
+.globalSlot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+}
+
+.globalSlotInline {
+  flex-direction: row;
+}
+
+.overflowDropdownBody {
+  padding: 8px;
+  min-width: 200px;
+  max-width: min(360px, 90vw);
+}
+
 .slot {
   display: flex;
   flex-direction: column;

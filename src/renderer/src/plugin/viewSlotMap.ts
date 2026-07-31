@@ -1,6 +1,6 @@
 import type { AppView } from '@shared/navigation/types'
 import type { PluginSlotId } from '@shared/plugin/types'
-import type { ViewPluginZone } from '@shared/plugin/viewHost'
+import type { GlobalPluginSlotId, ViewPluginZone } from '@shared/plugin/viewHost'
 
 /** AppView → zone → slotIds（§3.5.3 SSOT） */
 export const VIEW_SLOT_MAP: Record<
@@ -56,4 +56,15 @@ export function getViewZoneSlots(
     return VIEW_SLOT_MAP[view as AppView]?.[zone] ?? []
   }
   return CONTRIBUTED_VIEW_SLOT_MAP[view]?.[zone] ?? []
+}
+
+/** 全局 Slot → 宿主文件（verify:view-slot-hosts） */
+export const GLOBAL_SLOT_HOST_FILES: Record<GlobalPluginSlotId, string> = {
+  'topbar.menu': 'src/renderer/src/layout/TopBar.tsx',
+  'group.tab.overflow': 'src/renderer/src/layout/BottomNav.tsx',
+  'profile.tab': 'src/renderer/src/features/profile/ProfileModal.tsx'
+}
+
+export function isGlobalPluginSlot(slot: PluginSlotId): slot is GlobalPluginSlotId {
+  return slot === 'topbar.menu' || slot === 'group.tab.overflow' || slot === 'profile.tab'
 }

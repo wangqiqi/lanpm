@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { Badge, Tooltip } from 'antd'
+import { Badge, Dropdown, Tooltip } from 'antd'
+import { EllipsisOutlined } from '@ant-design/icons'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   CommentOutlined,
@@ -26,6 +27,8 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
 import { groupViewPath, contributedViewPath, VIEW_TABS, isCoreAppView, parseGroupViewSegment } from '@renderer/routes/paths'
 import { useContributedViews } from '@renderer/plugin/useContributedViews'
+import { PluginSlotHost, useSlotPlugins } from '@renderer/plugin/PluginSlot'
+import pluginStyles from '@renderer/plugin/plugin.module.css'
 import type { MessageKey } from '@renderer/i18n/types'
 import { useBadgeStore } from '@renderer/stores/badgeStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -49,6 +52,49 @@ const CONTRIBUTED_ICONS: Record<string, React.ReactNode> = {
 function contributedTabIcon(icon?: string): React.ReactNode {
   if (!icon) return <NodeIndexOutlined />
   return CONTRIBUTED_ICONS[icon] ?? <NodeIndexOutlined />
+}
+
+function GroupTabOverflowSlot({
+  groupId,
+  view
+}: {
+  groupId: string
+  view: AppView | string
+}): React.ReactElement {
+  const { t } = useI18n()
+  const plugins = useSlotPlugins('group.tab.overflow')
+  const [open, setOpen] = useState(false)
+  const context = useMemo(() => ({ groupId, view }), [groupId, view])
+
+  return (
+    <span className={styles.tabSlot} data-plugin-slot="group.tab.overflow">
+      {plugins.length > 0 ? (
+        <Dropdown
+          open={open}
+          onOpenChange={setOpen}
+          trigger={['click']}
+          placement="topCenter"
+          dropdownRender={() => (
+            <div className={pluginStyles.overflowDropdownBody}>
+              <PluginSlotHost slot="group.tab.overflow" context={context} />
+            </div>
+          )}
+        >
+          <button
+            type="button"
+            className={styles.tab}
+            aria-label={t('nav.tabOverflow')}
+            aria-expanded={open}
+          >
+            <span className={styles.icon}>
+              <EllipsisOutlined />
+            </span>
+            <span className={styles.label}>{t('nav.tabOverflow')}</span>
+          </button>
+        </Dropdown>
+      ) : null}
+    </span>
+  )
 }
 
 export default function BottomNav(): React.ReactElement {
@@ -221,6 +267,10 @@ export default function BottomNav(): React.ReactElement {
           </span>
         )
       })}
+      <GroupTabOverflowSlot
+        groupId={gid}
+        view={activeView ?? activeContributedRoute ?? 'chat'}
+      />
     </nav>
   )
 }

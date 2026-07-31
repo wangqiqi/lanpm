@@ -32,6 +32,10 @@
   min-width: 0;
 }
 
+.pluginMenuSlot {
+  flex-wrap: nowrap;
+}
+
 .barDivider {
   flex-shrink: 0;
   align-self: center;

@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react'
 import { Typography } from 'antd'
 import type { AppView } from '@shared/navigation/types'
 import type { PluginSlotId, PluginView } from '@shared/plugin/types'
-import type { PluginSlotHostProps, PluginZoneHostProps } from '@shared/plugin/viewHost'
+import type {
+  PluginGlobalSlotProps,
+  PluginProfileTabProps,
+  PluginSlotHostProps,
+  PluginZoneHostProps,
+  ViewPluginContext
+} from '@shared/plugin/viewHost'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
 import PluginErrorBoundary from './PluginErrorBoundary'
@@ -46,22 +52,22 @@ function useSlotPlugins(slot: PluginSlotId): PluginView[] {
   return plugins
 }
 
-/** 单槽宿主：按 context 渲染已启用插件 */
-export function PluginSlotHost({
-  slot,
-  context,
-  showSectionLabel = false
-}: PluginSlotHostOptions): React.ReactElement | null {
+export { useSlotPlugins }
+
+function PluginInstanceList({
+  plugins,
+  context
+}: {
+  plugins: PluginView[]
+  context: ViewPluginContext
+}): React.ReactElement | null {
   const { t } = useI18n()
-  const plugins = useSlotPlugins(slot)
+  const taskId = context.selection?.taskId
 
   if (plugins.length === 0) return null
 
-  const taskId = context.selection?.taskId
-
   return (
-    <div className={styles.slot} data-plugin-slot={slot}>
-      {showSectionLabel ? <Text type="secondary">{t('plugin.slotSection')}</Text> : null}
+    <>
       {plugins.map((plugin) => {
         const Comp = resolvePluginComponent(plugin.id)
         if (!Comp) {
@@ -77,8 +83,74 @@ export function PluginSlotHost({
           </PluginErrorBoundary>
         )
       })}
+    </>
+  )
+}
+
+/** 单槽宿主：按 context 渲染已启用插件 */
+export function PluginSlotHost({
+  slot,
+  context,
+  showSectionLabel = false
+}: PluginSlotHostOptions): React.ReactElement | null {
+  const { t } = useI18n()
+  const plugins = useSlotPlugins(slot)
+
+  if (plugins.length === 0) return null
+
+  return (
+    <div className={styles.slot} data-plugin-slot={slot}>
+      {showSectionLabel ? <Text type="secondary">{t('plugin.slotSection')}</Text> : null}
+      <PluginInstanceList plugins={plugins} context={context} />
     </div>
   )
+}
+
+/** 全局 Slot 锚点：无插件时仍保留 data-plugin-slot */
+export function PluginGlobalSlot({
+  slot,
+  context,
+  className,
+  inline = false
+}: PluginGlobalSlotProps & { className?: string; inline?: boolean }): React.ReactElement {
+  const plugins = useSlotPlugins(slot)
+  return (
+    <div
+      className={`${styles.globalSlot} ${inline ? styles.globalSlotInline : ''} ${className ?? ''}`}
+      data-plugin-slot={slot}
+    >
+      <PluginInstanceList plugins={plugins} context={context} />
+    </div>
+  )
+}
+
+/** Profile 插件 Tab 内容 */
+export function PluginProfileTabBody({
+  plugin,
+  context
+}: PluginProfileTabProps): React.ReactElement | null {
+  const { t } = useI18n()
+  const Comp = resolvePluginComponent(plugin.id)
+  const viewContext: ViewPluginContext = {
+    groupId: context.groupId ?? '',
+    view: context.view ?? 'profile'
+  }
+  if (!Comp) {
+    return (
+      <div className={styles.card}>
+        <Text type="secondary">{t('plugin.unknownBuiltin', { id: plugin.id })}</Text>
+      </div>
+    )
+  }
+  return (
+    <PluginErrorBoundary pluginId={plugin.id}>
+      <Comp plugin={plugin} groupId={viewContext.groupId} context={viewContext} />
+    </PluginErrorBoundary>
+  )
+}
+
+export function useProfileTabPlugins(): PluginView[] {
+  return useSlotPlugins('profile.tab')
 }
 
 /** 视图 zone 容器：无插件时仍保留空锚点 */

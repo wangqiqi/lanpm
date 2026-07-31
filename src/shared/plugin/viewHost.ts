@@ -1,5 +1,17 @@
 import type { AppView } from '../navigation/types.ts'
-import type { PluginSlotId } from './types.ts'
+import type { PluginSlotId, PluginView } from './types.ts'
+
+/** 非 AppView zone 的全局 Slot（§3.1 · globalSlotMap SSOT） */
+export type GlobalPluginSlotId = Extract<
+  PluginSlotId,
+  'topbar.menu' | 'group.tab.overflow' | 'profile.tab'
+>
+
+export const GLOBAL_PLUGIN_SLOT_IDS: readonly GlobalPluginSlotId[] = [
+  'topbar.menu',
+  'group.tab.overflow',
+  'profile.tab'
+] as const
 
 /** 视图内插件挂载区域（§3.5.2） */
 export type ViewPluginZone =
@@ -31,4 +43,20 @@ export type PluginSlotHostProps = {
 export type PluginZoneHostProps = {
   zone: ViewPluginZone
   context: ViewPluginContext
+}
+
+/** Profile 插件 Tab：可选活动群上下文 */
+export type ProfilePluginContext = {
+  groupId?: string
+  view?: AppView | string
+}
+
+export type PluginGlobalSlotProps = {
+  slot: GlobalPluginSlotId
+  context: ViewPluginContext
+}
+
+export type PluginProfileTabProps = {
+  plugin: PluginView
+  context: ProfilePluginContext
 }
