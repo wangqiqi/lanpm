@@ -53,7 +53,7 @@ const bubble = readFileSync(
   'utf8'
 )
 assert.match(bubble, /createTaskFromMessage/)
-assert.match(bubble, /linkFileToTask/)
+assert.match(bubble, /linkMessageToTask/)
 
 const detail = readFileSync(
   join(projectRoot, 'src/renderer/src/features/tree/TaskDetailPanel.tsx'),

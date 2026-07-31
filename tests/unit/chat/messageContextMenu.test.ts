@@ -58,25 +58,21 @@ describe('messageContextMenu', () => {
     expect(ids.at(-1)).toBe('recall')
   })
 
-  it('code message has copy and copyCode plus reply/forward', () => {
+  it('code message has copy and copyCode plus quote/forward', () => {
     const message = base({ kind: 'code', language: 'ts', code: 'const x = 1' })
     const ids = buildMessageContextMenuActions({
       message,
       own: false,
-      taskCreateAllowed: true,
-      showMention: true
+      taskCreateAllowed: true
     }).map((a) => a.id)
     expect(ids).toEqual([
       'copy',
       'copyCode',
       'reply',
       'forward',
-      'pin',
       'createTask',
       'linkExistingTask',
-      'hide',
-      'enterMultiSelect',
-      'mention'
+      'enterMultiSelect'
     ])
   })
 
@@ -85,22 +81,18 @@ describe('messageContextMenu', () => {
     const ids = buildMessageContextMenuActions({
       message,
       own: false,
-      taskCreateAllowed: true,
-      showMention: true
+      taskCreateAllowed: true
     }).map((a) => a.id)
     expect(ids).toEqual([
       'copy',
       'openTask',
       'reply',
       'forward',
-      'pin',
-      'hide',
-      'enterMultiSelect',
-      'mention'
+      'enterMultiSelect'
     ])
   })
 
-  it('file message copy + open + link file', () => {
+  it('file message copy + open file only (no link file menu)', () => {
     const message = base({ kind: 'file', fileId: 'f1', fileName: 'x', size: 1 })
     const ids = buildMessageContextMenuActions({
       message,
@@ -109,7 +101,8 @@ describe('messageContextMenu', () => {
       taskCreateAllowed: true
     }).map((a) => a.id)
     expect(ids).toContain('openFile')
-    expect(ids).toContain('linkFile')
+    expect(ids).not.toContain('linkFile')
+    expect(ids).not.toContain('hide')
     expect(ids.at(-1)).toBe('recall')
   })
 })

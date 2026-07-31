@@ -54,21 +54,16 @@ interface MessageBubbleProps {
   /** Project group only — one-click create task from this message */
   taskCreateAllowed?: boolean
   onCreateTaskFromMessage?: (message: ChatMessage) => void
-  onLinkFileToTask?: (fileId: string, fileName: string) => void
   onLinkMessageToTask?: (message: ChatMessage) => void
   replyQuote?: ResolvedReplyQuote | null
   onJumpToReply?: (msgId: string) => void
-  isPinned?: boolean
   multiSelectMode?: boolean
   selected?: boolean
   onToggleSelect?: (msgId: string) => void
   jumpHighlighted?: boolean
   onReply?: (message: ChatMessage) => void
   onForward?: (message: ChatMessage) => void
-  onPin?: (msgId: string) => void
-  onUnpin?: (msgId: string) => void
   onEdit?: (message: ChatMessage) => void
-  onHide?: (msgId: string) => void
   onEnterMultiSelect?: (msgId: string) => void
 }
 
@@ -91,21 +86,16 @@ export default function MessageBubble({
   onRetrySend,
   taskCreateAllowed = false,
   onCreateTaskFromMessage,
-  onLinkFileToTask,
   onLinkMessageToTask,
   replyQuote = null,
   onJumpToReply,
-  isPinned = false,
   multiSelectMode = false,
   selected = false,
   onToggleSelect,
   jumpHighlighted = false,
   onReply,
   onForward,
-  onPin,
-  onUnpin,
   onEdit,
-  onHide,
   onEnterMultiSelect
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
@@ -181,8 +171,6 @@ export default function MessageBubble({
       own,
       currentUserId,
       taskCreateAllowed,
-      showMention: !own && Boolean(onMentionSender),
-      isPinned,
       multiSelectActive: multiSelectMode
     })
 
@@ -200,24 +188,14 @@ export default function MessageBubble({
           return t('chat.replyMessage')
         case 'forward':
           return t('chat.forwardMessage')
-        case 'pin':
-          return t('chat.pinMessage')
-        case 'unpin':
-          return t('chat.unpinMessage')
         case 'createTask':
           return t('chat.createTaskFromMessage')
         case 'linkExistingTask':
           return t('chat.linkMessageToTask')
-        case 'linkFile':
-          return t('chat.linkFileToTask')
         case 'edit':
           return t('chat.editMessage')
-        case 'hide':
-          return t('chat.hideMessage')
         case 'enterMultiSelect':
           return t('chat.enterMultiSelect')
-        case 'mention':
-          return t('chat.mentionMember', { name: senderName })
         case 'recall':
           return t('chat.recallMessage')
         default:
@@ -263,34 +241,17 @@ export default function MessageBubble({
         case 'forward':
           onForward?.(message)
           break
-        case 'pin':
-          onPin?.(message.msgId)
-          break
-        case 'unpin':
-          onUnpin?.(message.msgId)
-          break
         case 'createTask':
           onCreateTaskFromMessage?.(message)
           break
         case 'linkExistingTask':
           onLinkMessageToTask?.(message)
           break
-        case 'linkFile':
-          if (message.content.kind === 'file') {
-            onLinkFileToTask?.(message.content.fileId, message.content.fileName)
-          }
-          break
         case 'edit':
           onEdit?.(message)
           break
-        case 'hide':
-          onHide?.(message.msgId)
-          break
         case 'enterMultiSelect':
           onEnterMultiSelect?.(message.msgId)
-          break
-        case 'mention':
-          onMentionSender?.(senderName)
           break
         case 'recall':
           onRecall?.(message.msgId)
@@ -325,16 +286,11 @@ export default function MessageBubble({
     navigate,
     onCreateTaskFromMessage,
     onLinkMessageToTask,
-    onLinkFileToTask,
     onRecall,
     onReply,
     onForward,
-    onPin,
-    onUnpin,
     onEdit,
-    onHide,
     onEnterMultiSelect,
-    isPinned,
     multiSelectMode,
     pluginContextMenuItems
   ])

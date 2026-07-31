@@ -23,7 +23,6 @@ import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import type { Task } from '@shared/task/types'
 import { linkedFileIdsFromMessage, titleFromChatMessage } from '@shared/task/fromMessage'
-import { mergeLinkedFileId } from '@shared/task/linkFile'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -56,8 +55,6 @@ import { resolveReplyQuote } from '@shared/chat/replyQuote'
 import { buildQuoteKindLabels } from '@renderer/features/chat/quoteKindLabels'
 import {
   filterVisibleMessages,
-  hideMessageLocally,
-  hideMessagesLocally,
   listHiddenMessageIds
 } from '@shared/chat/hiddenMessages'
 import { extractMessageText } from '@shared/search/extractMessageText'
@@ -169,11 +166,10 @@ export default function ChatView(): React.ReactElement {
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
-  const [linkToTaskModal, setLinkToTaskModal] = useState<
-    | { kind: 'file'; fileId: string; fileName: string }
-    | { kind: 'message'; msgId: string; preview: string }
-    | null
-  >(null)
+  const [linkToTaskModal, setLinkToTaskModal] = useState<{
+    msgId: string
+    preview: string
+  } | null>(null)
   const [linkTaskId, setLinkTaskId] = useState<string | undefined>()
   const [linkSaving, setLinkSaving] = useState(false)
   const [replyToMsgId, setReplyToMsgId] = useState<string | null>(null)
@@ -636,19 +632,11 @@ export default function ChatView(): React.ReactElement {
     if (!task) return
     setLinkSaving(true)
     try {
-      if (linkToTaskModal.kind === 'file') {
-        await updateTask({
-          taskId: linkTaskId,
-          linkedFileIds: mergeLinkedFileId(task.linkedFileIds, linkToTaskModal.fileId)
-        })
-        message.success(t('chat.linkFileToTaskDone'))
-      } else {
-        await updateTask({
-          taskId: linkTaskId,
-          sourceMsgId: linkToTaskModal.msgId
-        })
-        message.success(t('chat.linkMessageToTaskDone'))
-      }
+      await updateTask({
+        taskId: linkTaskId,
+        sourceMsgId: linkToTaskModal.msgId
+      })
+      message.success(t('chat.linkMessageToTaskDone'))
       setLinkToTaskModal(null)
       setLinkTaskId(undefined)
     } catch (err) {
@@ -727,15 +715,6 @@ export default function ChatView(): React.ReactElement {
     [gid, togglePin, message, formatError]
   )
 
-  const handleHideMessage = useCallback(
-    (msgId: string) => {
-      hideMessageLocally(gid, msgId)
-      setHiddenRevision((n) => n + 1)
-      message.success(t('chat.hideMessageDone'))
-    },
-    [gid, message, t]
-  )
-
   const handleEditMessage = useCallback((msg: ChatMessage) => {
     if (msg.content.kind !== 'text') return
     setEditModal({ msgId: msg.msgId, text: msg.content.text })
@@ -812,14 +791,6 @@ export default function ChatView(): React.ReactElement {
     if (selectedMsgIds.length === 0) return
     setForwardModal({ batchMsgIds: selectedMsgIds })
   }, [selectedMsgIds])
-
-  const handleBatchHide = useCallback(() => {
-    hideMessagesLocally(gid, selectedMsgIds)
-    setHiddenRevision((n) => n + 1)
-    setMultiSelectMode(false)
-    setSelectedMsgIds([])
-    message.success(t('chat.hideMessageDone'))
-  }, [gid, selectedMsgIds, message, t])
 
   return (
     <div className={styles.chatLayout}>
@@ -1006,16 +977,12 @@ export default function ChatView(): React.ReactElement {
                         dmAllowed={dmAllowed && !inDm}
                         replyQuote={replyQuote}
                         onJumpToReply={jumpToMessage}
-                        isPinned={pinnedIds.includes(msg.msgId)}
                         multiSelectMode={multiSelectMode}
                         selected={selectedMsgIds.includes(msg.msgId)}
                         onToggleSelect={toggleSelectMessage}
                         onReply={handleReply}
                         onForward={handleForwardOne}
-                        onPin={(msgId) => void handlePinToggle(msgId)}
-                        onUnpin={(msgId) => void handlePinToggle(msgId)}
                         onEdit={handleEditMessage}
-                        onHide={handleHideMessage}
                         onEnterMultiSelect={handleEnterMultiSelect}
                         onMentionSender={insertMention}
                         onViewSender={viewSenderProfile}
@@ -1024,13 +991,9 @@ export default function ChatView(): React.ReactElement {
                         onRetrySend={(msgId) => void handleRetrySend(msgId)}
                         taskCreateAllowed={taskAllowed}
                         onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
-                        onLinkFileToTask={(fileId, fileName) => {
-                          setLinkToTaskModal({ kind: 'file', fileId, fileName })
-                          setLinkTaskId(undefined)
-                        }}
                         onLinkMessageToTask={(m) => {
                           const preview = titleFromChatMessage(m) ?? m.msgId
-                          setLinkToTaskModal({ kind: 'message', msgId: m.msgId, preview })
+                          setLinkToTaskModal({ msgId: m.msgId, preview })
                           setLinkTaskId(undefined)
                         }}
                       />
@@ -1059,7 +1022,6 @@ export default function ChatView(): React.ReactElement {
             maxCount={MAX_MULTI_SELECT}
             onCopy={handleBatchCopy}
             onForward={handleBatchForward}
-            onHide={handleBatchHide}
             onCancel={() => {
               setMultiSelectMode(false)
               setSelectedMsgIds([])
@@ -1255,11 +1217,7 @@ export default function ChatView(): React.ReactElement {
 
         <Modal
           open={linkToTaskModal != null}
-          title={
-            linkToTaskModal?.kind === 'message'
-              ? t('chat.linkMessageToTaskTitle')
-              : t('chat.linkFileToTaskTitle')
-          }
+          title={t('chat.linkMessageToTaskTitle')}
           okText={t('chat.linkFileToTaskConfirm')}
           cancelText={t('common.cancel')}
           confirmLoading={linkSaving}
@@ -1271,11 +1229,9 @@ export default function ChatView(): React.ReactElement {
           onOk={() => void handleConfirmLinkToTask()}
         >
           <Text type="secondary">
-            {linkToTaskModal?.kind === 'message'
+            {linkToTaskModal
               ? t('chat.linkMessageToTaskHint', { preview: linkToTaskModal.preview })
-              : linkToTaskModal?.kind === 'file'
-                ? t('chat.linkFileToTaskHint', { name: linkToTaskModal.fileName })
-                : null}
+              : null}
           </Text>
           <Select
             style={{ width: '100%', marginTop: 12 }}

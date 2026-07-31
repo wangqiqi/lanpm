@@ -10,15 +10,10 @@ export type MessageContextMenuActionId =
   | 'openFile'
   | 'reply'
   | 'forward'
-  | 'pin'
-  | 'unpin'
   | 'createTask'
   | 'linkExistingTask'
-  | 'linkFile'
   | 'edit'
-  | 'hide'
   | 'enterMultiSelect'
-  | 'mention'
   | 'recall'
 
 export interface MessageContextMenuAction {
@@ -73,9 +68,6 @@ export interface BuildMessageContextMenuInput {
   own: boolean
   currentUserId?: string
   taskCreateAllowed: boolean
-  /** Other-party bubble — show @mention in bubble menu */
-  showMention?: boolean
-  isPinned?: boolean
   multiSelectActive?: boolean
 }
 
@@ -85,14 +77,15 @@ function isInteractive(message: ChatMessage): boolean {
 
 /**
  * Flat core menu action ids in display order:
- * copy → nav → reply/forward/pin → task → edit/hide/multi → mention → recall (own only, bottom).
+ * copy → nav → quote/forward → task → edit/multi → recall (own only, bottom).
+ * @mention 仅在头像/昵称右键菜单（sender menu），避免与气泡菜单重复。
+ * 群置顶不在气泡上下文提供（顶栏区仍可查看/取消已有置顶）。
  * Plugin items append after core actions without dividers (host wiring).
  */
 export function buildMessageContextMenuActions(
   input: BuildMessageContextMenuInput
 ): MessageContextMenuAction[] {
-  const { message, own, currentUserId, taskCreateAllowed, showMention, isPinned, multiSelectActive } =
-    input
+  const { message, own, currentUserId, taskCreateAllowed, multiSelectActive } = input
   if (multiSelectActive) return []
   const actions: MessageContextMenuAction[] = []
 
@@ -116,17 +109,11 @@ export function buildMessageContextMenuActions(
   if (canForwardMessage(message)) {
     actions.push({ id: 'forward' })
   }
-  if (isInteractive(message)) {
-    actions.push({ id: isPinned ? 'unpin' : 'pin' })
-  }
 
   if (taskCreateAllowed && isTaskCreatable(message)) {
     actions.push({ id: 'createTask' })
     if (message.content.kind === 'text' || message.content.kind === 'code') {
       actions.push({ id: 'linkExistingTask' })
-    }
-    if (message.content.kind === 'file') {
-      actions.push({ id: 'linkFile' })
     }
   }
 
@@ -135,12 +122,7 @@ export function buildMessageContextMenuActions(
   }
 
   if (isInteractive(message)) {
-    actions.push({ id: 'hide' })
     actions.push({ id: 'enterMultiSelect' })
-  }
-
-  if (!own && showMention) {
-    actions.push({ id: 'mention' })
   }
 
   if (own && currentUserId && canRecallMessage(message, currentUserId)) {

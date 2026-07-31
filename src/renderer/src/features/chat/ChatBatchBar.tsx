@@ -7,7 +7,6 @@ interface ChatBatchBarProps {
   maxCount: number
   onCopy: () => void
   onForward: () => void
-  onHide: () => void
   onCancel: () => void
 }
 
@@ -16,7 +15,6 @@ export default function ChatBatchBar({
   maxCount,
   onCopy,
   onForward,
-  onHide,
   onCancel
 }: ChatBatchBarProps): React.ReactElement {
   const { t } = useI18n()
@@ -31,9 +29,6 @@ export default function ChatBatchBar({
         </Button>
         <Button size="small" onClick={onForward} disabled={selectedCount === 0}>
           {t('chat.batchForward')}
-        </Button>
-        <Button size="small" onClick={onHide} disabled={selectedCount === 0}>
-          {t('chat.batchHide')}
         </Button>
         <Button size="small" type="text" onClick={onCancel}>
           {t('chat.batchCancel')}
