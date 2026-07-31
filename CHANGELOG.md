@@ -2,12 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.65.3] - 2026-07-31
+
+### Changed
+
+- **MIT开源替代**：`MIT开源替代.md` 全文融入 `docs/01`–`06`；归档 `archive/20260731_103000_MIT开源替代_并入01-06正文.md`
+- **MIT开源替代**：`01` §14（产品原则）· `02` §16（决策树 · 矩阵 · LibreOffice）· `06` §5.1（替换债务队列）· `3rd/README.md`
+- **文档**：修复 `01` §14 重复节；`00` 阅读顺序改指 `02` §16
+
 ## [1.65.2] - 2026-07-31
 
 ### Changed
 
 - **飞鸽飞秋**：`飞鸽飞秋.md` 全文融入 `docs/01`–`06`；归档 `archive/20260731_102000_飞鸽飞秋_并入01-06正文.md`
-- **飞鸽飞秋**：`01` §13（品类定位 · 信创）· `06` §6（吸收 A1–A6 · 免费/收费 · verify 锚点）· `插件开发.md` 链更新；开源实现态仍以 `MIT开源替代.md` 为准
+- **飞鸽飞秋**：`01` §13（品类定位 · 信创）· `06` §6（吸收 A1–A6 · 免费/收费 · verify 锚点）· `插件开发.md` 链更新；开源实现态见 `02` §16
 - **验收脚本**：`verify-a1-nudge` · `verify-project-files` · `verify-transfer-a4` · `verify-discover-a5` · `verify-platform-matrix` · `verify-plugin-spike` · `verify-plugin-loader` · `verify-meeting-spike` · `verify-whiteboard-realtime` 改读 `06_ROADMAP` §6
 - **验收脚本**：`verify:whiteboard-realtime` 对齐 `SCHEMA_VERSION=16`
 
