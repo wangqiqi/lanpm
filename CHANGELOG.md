@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.6] - 2026-07-31
+
+### Added
+
+- **Extension API v0.3**：`task.patch`（字段白名单）· `board.moveTask`
+- **`taskPatchWhitelist`** SSOT · `verify:extension-api-v0.3` · 单元测试
+- **SDD**：`docs/specs/001-extension-api-v0.3/`
+
+### Changed
+
+- **`capabilityProxy`**：写能力经 `updateGroupTask` / `moveGroupTask`；`groupId` 校验
+- **`lanpm.example` v0.3.0**：声明 v0.3 capabilities · composer demo「+5% 进度」
+- **`docs/插件开发.md`**：§4.1 / §4.4 / §8.3 / §12 对齐 v1.78.6
+
 ## [1.78.5] - 2026-07-31
 
 ### Added
