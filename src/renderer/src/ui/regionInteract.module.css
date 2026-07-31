@@ -43,5 +43,5 @@
 
 .regionDisabled {
   cursor: not-allowed;
-  opacity: 0.4;
+  color: var(--lanpm-text-disabled);
 }

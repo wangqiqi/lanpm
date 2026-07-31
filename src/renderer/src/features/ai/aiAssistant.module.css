@@ -350,7 +350,8 @@
 }
 
 .promptRailItem:disabled {
-  opacity: 0.45;
+  color: var(--lanpm-text-disabled);
+  border-color: color-mix(in srgb, var(--lanpm-border) 65%, transparent);
   cursor: not-allowed;
 }
 
@@ -394,7 +395,8 @@
 }
 
 .promptChip:disabled {
-  opacity: 0.45;
+  color: var(--lanpm-text-disabled);
+  border-color: color-mix(in srgb, var(--lanpm-border) 65%, transparent);
   cursor: not-allowed;
 }
 
@@ -554,7 +556,8 @@
 }
 
 .sendIconBtn:disabled {
-  opacity: 0.45;
+  background: var(--lanpm-fill-secondary) !important;
+  color: var(--lanpm-text-disabled) !important;
   cursor: not-allowed;
   transform: none;
 }

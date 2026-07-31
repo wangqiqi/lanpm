@@ -983,6 +983,45 @@ assert.ok(
   'CockpitView must migrate all header/panel buttons to RegionButton (CB-403)'
 )
 
+// --- CO-401~403 contrast-opacity-pass ---
+const regionInteractCss = readFileSync(join(renderer, 'ui/regionInteract.module.css'), 'utf8')
+const aiAssistantCss = readFileSync(join(renderer, 'features/ai/aiAssistant.module.css'), 'utf8')
+
+assert.match(globalCss, /--lanpm-text-disabled:/, 'global.css must define --lanpm-text-disabled (CO-401)')
+assert.ok(
+  globalCss.includes("html[data-theme='light']") &&
+    /--lanpm-text-disabled:[^;]+;[\s\S]*html\[data-theme='dark'\][\s\S]*--lanpm-text-disabled:/.test(
+      globalCss
+    ),
+  'global.css must define --lanpm-text-disabled for light and dark (CO-401)'
+)
+assert.ok(
+  !/\.regionDisabled\s*\{[^}]*opacity:/s.test(regionInteractCss),
+  'regionDisabled must not use opacity (CO-402)'
+)
+assert.ok(
+  !/\.tab:disabled\s*\{[^}]*opacity:/s.test(viewSegmentCss),
+  'ViewSegment disabled tab must not use opacity (CO-402)'
+)
+assert.ok(
+  !/\.tabDisabled\s*\{[^}]*opacity:/s.test(bottomNavCss),
+  'BottomNav tabDisabled must not use opacity (CO-402)'
+)
+assert.ok(
+  !/\.cardRelationDimmed\s*\{[^}]*opacity:/s.test(boardCss),
+  'cardRelationDimmed must not use whole-card opacity (CO-403)'
+)
+assert.ok(
+  !/\.promptRailItem:disabled\s*\{[^}]*opacity:/s.test(aiAssistantCss) &&
+    !/\.promptChip:disabled\s*\{[^}]*opacity:/s.test(aiAssistantCss) &&
+    !/\.sendIconBtn:disabled\s*\{[^}]*opacity:/s.test(aiAssistantCss),
+  'aiAssistant disabled controls must not use opacity (CO-403)'
+)
+assert.ok(
+  !/\.loadOlder\s*\{[^}]*opacity:/s.test(chatCss),
+  'chat loadOlder must not stack opacity on secondary text (CO-403)'
+)
+
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')
 if (existsSync(outAssets)) {

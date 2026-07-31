@@ -66,8 +66,13 @@
 
 /* Inferred schedule (no persisted dates) — softer than dated events */
 .calendarHost :global(.fc .lanpm-cal-inferred) {
-  opacity: 0.72;
   border-style: dashed !important;
+  background: color-mix(
+    in srgb,
+    var(--lanpm-accent-fill) 55%,
+    var(--lanpm-surface-solid)
+  ) !important;
+  border-color: color-mix(in srgb, var(--lanpm-accent) 35%, var(--lanpm-border)) !important;
 }
 
 .calendarHost :global(.fc .fc-toolbar-title) {

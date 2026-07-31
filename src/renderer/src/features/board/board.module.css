@@ -102,12 +102,13 @@
 }
 
 .cardRelationDimmed {
-  opacity: 0.42;
+  background: color-mix(in srgb, var(--lanpm-surface-solid) 72%, var(--lanpm-fill-secondary));
+  border-color: color-mix(in srgb, var(--lanpm-border) 55%, transparent);
+  box-shadow: none;
 }
 
 .cardRelationFocus {
   box-shadow: 0 0 0 2px var(--lanpm-accent-ring);
-  opacity: 1;
 }
 
 .cardBlocked {
@@ -386,13 +387,12 @@
 }
 
 .legendDepDim {
-  background: var(--lanpm-text-tertiary);
-  opacity: 0.55;
+  background: var(--lanpm-text-disabled);
 }
 
 .legendHint {
   line-height: var(--lanpm-line-body);
-  opacity: 0.8;
+  color: var(--lanpm-text-disabled);
 }
 
 .legendDivider {

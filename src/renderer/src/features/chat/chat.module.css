@@ -845,9 +845,8 @@
 .loadOlder {
   align-self: center;
   font-size: var(--lanpm-font-body);
-  color: var(--lanpm-text-secondary);
+  color: var(--lanpm-text-disabled);
   padding: 8px 12px;
-  opacity: 0.85;
 }
 
 .messageRow {

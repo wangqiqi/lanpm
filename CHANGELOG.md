@@ -8,6 +8,21 @@
 
 - **`docs/插件开发.md`**：§3.5 Tab 视图宿主与 Zone 模型 · §3.6 Layer C `contributions.views` · §2.2 三层定制 · §12 ViewHost 标准化 Sprint 前置
 
+## [1.65.0] - 2026-07-31
+
+### Added
+
+- **`--lanpm-text-disabled`**：亮暗禁用前景色 SSOT
+- **`verify:visual` CO-401～403**：语义 disabled/dimmed 禁止整元素 opacity 守卫
+
+### Changed
+
+- **共享禁用**：`regionDisabled` · `ViewSegment` · `BottomNav.tabDisabled` 改令牌色
+- **看板**：`cardRelationDimmed` / 图例弱化改 `color-mix` + `--lanpm-text-disabled`
+- **树/日历/AI/聊天**：`discussionKind` · 推断日程 · disabled 控件 · `loadOlder` 去 opacity 叠加
+- **`docs/04`**：disabled 约定改 `--lanpm-text-disabled`
+- **`审查.md`**：§3.3 对账
+
 ## [1.64.0] - 2026-07-31
 
 ### Added
