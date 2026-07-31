@@ -156,6 +156,7 @@ export function useProfileTabPlugins(): PluginView[] {
 /** 视图 zone 容器：无插件时仍保留空锚点 */
 export function PluginZoneHost({ zone, context }: PluginZoneHostProps): React.ReactElement {
   const slots = getViewZoneSlots(context.view, zone)
+  const zoneContext: ViewPluginContext = { ...context, zone }
   return (
     <div
       className={styles.zoneHost}
@@ -163,7 +164,7 @@ export function PluginZoneHost({ zone, context }: PluginZoneHostProps): React.Re
       data-plugin-view={context.view}
     >
       {slots.map((slot) => (
-        <PluginSlotHost key={slot} slot={slot} context={context} />
+        <PluginSlotHost key={slot} slot={slot} context={zoneContext} />
       ))}
     </div>
   )

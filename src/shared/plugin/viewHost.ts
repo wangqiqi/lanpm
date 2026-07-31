@@ -27,6 +27,8 @@ export type ViewPluginContext = {
   groupId: string
   /** 核心 AppView 或 Layer C 贡献路由（如 `mindmap`） */
   view: AppView | string
+  /** `PluginZoneHost` 注入；插件据此区分同视图多 zone */
+  zone?: ViewPluginZone
   selection?: {
     taskId?: string
     fileId?: string
