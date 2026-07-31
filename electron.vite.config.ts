@@ -27,6 +27,24 @@ function formJsPluginAliases(): { find: string | RegExp; replacement: string }[]
   return aliases
 }
 
+/** 插件子包已安装时，让 renderer 动态 import 可解析 mind-elixir */
+function mindElixirPluginAliases(): { find: string | RegExp; replacement: string }[] {
+  const candidates = [
+    join(root, 'plugins/lanpm.mindmap/node_modules/mind-elixir/dist/MindElixir.js'),
+    join(root, 'plugins/lanpm.mindmap/node_modules/mind-elixir/dist/index.js')
+  ]
+  const css = join(root, 'plugins/lanpm.mindmap/node_modules/mind-elixir/dist/MindElixir.css')
+  const aliases: { find: string | RegExp; replacement: string }[] = []
+  const esm = candidates.find((p) => existsSync(p))
+  if (esm) {
+    aliases.push({ find: 'mind-elixir', replacement: esm })
+  }
+  if (existsSync(css)) {
+    aliases.push({ find: 'mind-elixir/dist/MindElixir.css', replacement: css })
+  }
+  return aliases
+}
+
 /** Linux inotify 上限偏低时 Vite 会 ENOSPC；轮询略慢但稳定 */
 function shouldUsePollingWatch(): boolean {
   if (process.env.LANPM_VITE_POLLING === '1') return true
@@ -171,6 +189,7 @@ export default defineConfig({
         { find: '@shared', replacement: resolve('src/shared') },
         { find: '@resources', replacement: resolve('resources') },
         ...formJsPluginAliases(),
+        ...mindElixirPluginAliases(),
         // Exact package id only; subpaths like dist/index.css stay on the package dir
         {
           find: /^gantt-task-react$/,

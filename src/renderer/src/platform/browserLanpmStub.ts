@@ -123,6 +123,28 @@ const STUB_PLUGINS: PluginView[] = [
     pricing: 'paid',
     enabled: true,
     dirName: 'lanpm.formjs'
+  },
+  {
+    id: 'lanpm.mindmap',
+    name: 'Mind Map',
+    version: '0.1.0',
+    slots: ['mindmap.toolbar'],
+    capabilities: ['task.list'],
+    pricing: 'paid',
+    enabled: true,
+    dirName: 'lanpm.mindmap',
+    contributions: {
+      views: [
+        {
+          id: 'mindmap',
+          route: 'mindmap',
+          titleKey: 'nav.mindmap',
+          icon: 'apartment',
+          groupTypes: ['project'],
+          pricing: 'paid'
+        }
+      ]
+    }
   }
 ]
 
@@ -1814,6 +1836,23 @@ export function createBrowserLanpmStub(): LanpmApi {
       listPlugins: async () => STUB_PLUGINS.slice(),
       listSlotPlugins: async (slotId) =>
         STUB_PLUGINS.filter((p) => p.enabled && p.slots.includes(slotId)),
+      listContributedViews: async () => {
+        const views: import('@shared/plugin/contributions').ContributedPluginView[] = []
+        for (const plugin of STUB_PLUGINS) {
+          if (!plugin.enabled) continue
+          for (const view of plugin.contributions?.views ?? []) {
+            views.push({
+              ...view,
+              pluginId: plugin.id,
+              dirName: plugin.dirName,
+              enabled: plugin.enabled,
+              groupTypes: view.groupTypes?.length ? view.groupTypes : ['project'],
+              pricing: view.pricing ?? plugin.pricing
+            })
+          }
+        }
+        return views.sort((a, b) => a.route.localeCompare(b.route))
+      },
       setEnabled: async (pluginId, enabled) => mutateStubPluginEnabled(pluginId, enabled),
       invokeCapability: async (pluginId, capability, args) => {
         const plugin = STUB_PLUGINS.find((p) => p.id === pluginId)

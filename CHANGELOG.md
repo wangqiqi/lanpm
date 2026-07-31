@@ -2,6 +2,17 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.74.0] - 2026-07-31
+
+### Added
+
+- **Layer C 宿主**：`contributions.views[]` manifest 校验 · 路由黑名单 · `listContributedViews` IPC
+- **动态路由**：`/g/:groupId/:contributedRoute` · `PluginViewGuard` · `PluginContributedView`
+- **底栏合并**：`BottomNav` 在核心 `VIEW_TABS` 后追加已启用插件 Tab
+- **思维导图插件**：`plugins/lanpm.mindmap` · `MindmapView` / `MindmapStub` · `mindElixirLoader` 动态加载
+- **Slot**：`mindmap.toolbar` · `CONTRIBUTED_VIEW_SLOT_MAP`
+- **验收**：`verify:contributions-views`
+
 ## [1.73.0] - 2026-07-31
 
 ### Added

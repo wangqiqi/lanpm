@@ -10,7 +10,8 @@ import {
   BarChartOutlined,
   CalendarOutlined,
   HighlightOutlined,
-  FolderOutlined
+  FolderOutlined,
+  NodeIndexOutlined
 } from '@ant-design/icons'
 import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -20,7 +21,9 @@ import { resolveVisibleViews } from '@shared/navigation/navPreferences'
 import type { AppView } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
-import { groupViewPath, VIEW_TABS } from '@renderer/routes/paths'
+import { groupViewPath, contributedViewPath, VIEW_TABS, isCoreAppView, parseGroupViewSegment } from '@renderer/routes/paths'
+import { useContributedViews } from '@renderer/plugin/useContributedViews'
+import type { MessageKey } from '@renderer/i18n/types'
 import { useBadgeStore } from '@renderer/stores/badgeStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import styles from './BottomNav.module.css'
@@ -35,6 +38,16 @@ const VIEW_ICONS: Record<AppView, React.ReactNode> = {
   files: <FolderOutlined />
 }
 
+const CONTRIBUTED_ICONS: Record<string, React.ReactNode> = {
+  apartment: <ApartmentOutlined />,
+  mindmap: <NodeIndexOutlined />
+}
+
+function contributedTabIcon(icon?: string): React.ReactNode {
+  if (!icon) return <NodeIndexOutlined />
+  return CONTRIBUTED_ICONS[icon] ?? <NodeIndexOutlined />
+}
+
 export default function BottomNav(): React.ReactElement {
   const navigate = useNavigate()
   const location = useLocation()
@@ -44,21 +57,17 @@ export default function BottomNav(): React.ReactElement {
   const getGroupType = useNavigationStore((s) => s.getGroupType)
 
   const activeView = useMemo((): AppView | null => {
-    const m = location.pathname.match(/\/g\/[^/]+\/(\w+)/)
-    const v = m?.[1]
-    if (
-      v === 'chat' ||
-      v === 'board' ||
-      v === 'tree' ||
-      v === 'gantt' ||
-      v === 'calendar' ||
-      v === 'whiteboard' ||
-      v === 'files'
-    ) {
-      return v
-    }
-    return null
+    const segment = parseGroupViewSegment(location.pathname)
+    return isCoreAppView(segment) ? segment : null
   }, [location.pathname])
+
+  const activeContributedRoute = useMemo((): string | null => {
+    const segment = parseGroupViewSegment(location.pathname)
+    if (!segment || isCoreAppView(segment)) return null
+    return segment
+  }, [location.pathname])
+
+  const contributedViews = useContributedViews()
 
   const gid = groupId ?? ''
   const badges = useBadgeStore((s) => s.badges)
@@ -97,6 +106,11 @@ export default function BottomNav(): React.ReactElement {
       (a, b) => (order.get(a.view) ?? 0) - (order.get(b.view) ?? 0)
     )
   }, [groupId, groupType, navPreferences])
+
+  const visibleContributedTabs = useMemo(() => {
+    if (!groupType) return []
+    return contributedViews.filter((view) => view.groupTypes.includes(groupType))
+  }, [contributedViews, groupType])
 
   if (!groupId || !groupType) return <></>
 
@@ -179,6 +193,23 @@ export default function BottomNav(): React.ReactElement {
           >
             {tabRegion}
           </Tooltip>
+        )
+      })}
+      {visibleContributedTabs.map((tab) => {
+        const active = activeContributedRoute === tab.route
+        const titleKey = tab.titleKey as MessageKey
+        return (
+          <span key={`${tab.pluginId}:${tab.route}`} className={styles.tabSlot}>
+            <button
+              type="button"
+              className={`${styles.tab} ${active ? styles.tabActive : ''}`}
+              aria-current={active ? 'page' : undefined}
+              onClick={() => navigate(contributedViewPath(groupId, tab.route))}
+            >
+              <span className={styles.icon}>{contributedTabIcon(tab.icon)}</span>
+              <span className={styles.label}>{t(titleKey)}</span>
+            </button>
+          </span>
         )
       })}
     </nav>

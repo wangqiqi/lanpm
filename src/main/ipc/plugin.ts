@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import { PLUGIN_IPC } from '../../shared/plugin/channels'
 import type { PluginCapabilityId, PluginSlotId } from '../../shared/plugin/types'
 import { PLUGIN_CAPABILITY_IDS, PLUGIN_SLOT_IDS } from '../../shared/plugin/types'
-import { discoverPlugins, listSlotPlugins } from '../plugin/discover'
+import { discoverPlugins, listContributedViews, listSlotPlugins } from '../plugin/discover'
 import { setPluginEnabled } from '../plugin/enabledStore'
 import { invokePluginCapability } from '../plugin/capabilityProxy'
 
@@ -18,6 +18,8 @@ export function registerPluginIpc(): void {
     }
     return listSlotPlugins(slotId as PluginSlotId)
   })
+
+  ipcMain.handle(PLUGIN_IPC.listContributedViews, () => listContributedViews())
 
   ipcMain.handle(PLUGIN_IPC.setEnabled, (_event, pluginId: string, enabled: boolean) => {
     if (typeof pluginId !== 'string' || !pluginId) throw new Error('pluginId required')

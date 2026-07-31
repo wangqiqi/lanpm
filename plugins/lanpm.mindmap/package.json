@@ -1,0 +1,9 @@
+{
+  "name": "lanpm-mindmap-plugin-deps",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Optional mind-elixir for lanpm.mindmap (not hoisted to root required deps)",
+  "dependencies": {
+    "mind-elixir": "^4.0.0"
+  }
+}

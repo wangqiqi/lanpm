@@ -38,6 +38,22 @@ export const VIEW_SLOT_MAP: Record<
   }
 }
 
-export function getViewZoneSlots(view: AppView, zone: ViewPluginZone): readonly PluginSlotId[] {
-  return VIEW_SLOT_MAP[view]?.[zone] ?? []
+/** Layer C 贡献视图 → zone → slotIds */
+export const CONTRIBUTED_VIEW_SLOT_MAP: Record<
+  string,
+  Partial<Record<ViewPluginZone, readonly PluginSlotId[]>>
+> = {
+  mindmap: {
+    toolbar: ['mindmap.toolbar']
+  }
+}
+
+export function getViewZoneSlots(
+  view: AppView | string,
+  zone: ViewPluginZone
+): readonly PluginSlotId[] {
+  if (view in VIEW_SLOT_MAP) {
+    return VIEW_SLOT_MAP[view as AppView]?.[zone] ?? []
+  }
+  return CONTRIBUTED_VIEW_SLOT_MAP[view]?.[zone] ?? []
 }

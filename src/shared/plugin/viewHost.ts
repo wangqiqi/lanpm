@@ -13,7 +13,8 @@ export type ViewPluginZone =
 /** 统一插件上下文；群级 Slot 可不传 selection */
 export type ViewPluginContext = {
   groupId: string
-  view: AppView
+  /** 核心 AppView 或 Layer C 贡献路由（如 `mindmap`） */
+  view: AppView | string
   selection?: {
     taskId?: string
     fileId?: string

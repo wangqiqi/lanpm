@@ -1,3 +1,5 @@
+import type { PluginContributionView } from './contributions.ts'
+
 /**
  * Plugin system SPIKE stubs（SPIKE-276–278）+ loader runtime views（TASK-289+）。
  * 禁止插件直连 ipcMain / SQLite。
@@ -22,6 +24,7 @@ export type PluginSlotId =
   | 'whiteboard.toolbar'
   | 'files.toolbar'
   | 'files.preview.action'
+  | 'mindmap.toolbar'
 
 /** Host 可代理给插件的只读能力（白名单；非完整 LanpmApi） */
 export type PluginCapabilityId =
@@ -50,6 +53,10 @@ export type PluginManifest = {
   capabilities: PluginCapabilityId[]
   /** 收费标记：与飞鸽 §7.0 对齐；Host 不据此收费，仅展示 */
   pricing: 'free' | 'paid'
+  /** Layer C：整页 Tab 贡献（§3.6） */
+  contributions?: {
+    views?: PluginContributionView[]
+  }
 }
 
 /** Renderer / IPC 可见视图 */
@@ -87,7 +94,8 @@ export const PLUGIN_SLOT_IDS: readonly PluginSlotId[] = [
   'calendar.event.action',
   'whiteboard.toolbar',
   'files.toolbar',
-  'files.preview.action'
+  'files.preview.action',
+  'mindmap.toolbar'
 ] as const
 
 export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [

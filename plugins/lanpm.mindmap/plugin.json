@@ -1,0 +1,20 @@
+{
+  "id": "lanpm.mindmap",
+  "name": "Mind Map",
+  "version": "0.1.0",
+  "slots": ["mindmap.toolbar"],
+  "capabilities": ["task.list"],
+  "pricing": "paid",
+  "contributions": {
+    "views": [
+      {
+        "id": "mindmap",
+        "route": "mindmap",
+        "titleKey": "nav.mindmap",
+        "icon": "apartment",
+        "groupTypes": ["project"],
+        "pricing": "paid"
+      }
+    ]
+  }
+}

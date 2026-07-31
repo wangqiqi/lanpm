@@ -1,7 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { PluginSlotId, PluginView } from '../../shared/plugin/types.ts'
-import { parsePluginManifest } from '../../shared/plugin/validateManifest.ts'
+import type { ContributedPluginView } from '../../shared/plugin/contributions.ts'
+import {
+  parsePluginManifest,
+  resolveContributionGroupTypes
+} from '../../shared/plugin/validateManifest.ts'
 import { isPluginEnabled, readEnabledMap } from './enabledStore.ts'
 import { resolvePluginsRoot } from './paths.ts'
 
@@ -38,4 +42,27 @@ export function listSlotPlugins(slotId: PluginSlotId): PluginView[] {
 
 export function findPluginById(pluginId: string): PluginView | null {
   return discoverPlugins().find((p) => p.id === pluginId) ?? null
+}
+
+export function listContributedViews(): ContributedPluginView[] {
+  const views: ContributedPluginView[] = []
+  for (const plugin of discoverPlugins()) {
+    if (!plugin.enabled) continue
+    for (const view of plugin.contributions?.views ?? []) {
+      views.push({
+        ...view,
+        pluginId: plugin.id,
+        dirName: plugin.dirName,
+        enabled: plugin.enabled,
+        groupTypes: resolveContributionGroupTypes(view),
+        pricing: view.pricing ?? plugin.pricing
+      })
+    }
+  }
+  views.sort((a, b) => a.route.localeCompare(b.route))
+  return views
+}
+
+export function findContributedViewByRoute(route: string): ContributedPluginView | null {
+  return listContributedViews().find((v) => v.route === route) ?? null
 }

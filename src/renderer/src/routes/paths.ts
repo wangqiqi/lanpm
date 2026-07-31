@@ -1,6 +1,21 @@
 import type { AppView } from '@shared/navigation/types'
+import type { MessageKey } from '@renderer/i18n/types'
 
 export const DEFAULT_GROUP_ID = 'demo-project'
+
+const CORE_APP_VIEWS = new Set<string>([
+  'chat',
+  'board',
+  'tree',
+  'gantt',
+  'calendar',
+  'whiteboard',
+  'files'
+])
+
+export function isCoreAppView(segment: string | null | undefined): segment is AppView {
+  return segment != null && CORE_APP_VIEWS.has(segment)
+}
 
 export function isDemoGroupId(groupId: string): boolean {
   return groupId.startsWith('demo-')
@@ -18,6 +33,15 @@ export function pickDefaultGroupId(
 
 export function groupViewPath(groupId: string, view: AppView): string {
   return `/g/${groupId}/${view}`
+}
+
+export function contributedViewPath(groupId: string, route: string): string {
+  return `/g/${groupId}/${route}`
+}
+
+export function parseGroupViewSegment(pathname: string): string | null {
+  const m = /\/g\/[^/]+\/(\w+)/.exec(pathname)
+  return m?.[1] ?? null
 }
 
 export function cockpitPath(): string {
@@ -50,6 +74,14 @@ export interface ViewTabDef {
     | 'nav.whiteboard'
     | 'nav.files'
   icon: 'chat' | 'board' | 'tree' | 'gantt' | 'calendar' | 'whiteboard' | 'files'
+}
+
+export interface ContributedTabDef {
+  route: string
+  titleKey: MessageKey
+  icon: string
+  pluginId: string
+  groupTypes: import('@shared/navigation/types').GroupType[]
 }
 
 export const VIEW_TABS: ViewTabDef[] = [

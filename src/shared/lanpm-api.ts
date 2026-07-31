@@ -352,6 +352,7 @@ export interface LanpmApi {
     listSlotPlugins: (
       slotId: import('./plugin/types').PluginSlotId
     ) => Promise<import('./plugin/types').PluginView[]>
+    listContributedViews: () => Promise<import('./plugin/contributions').ContributedPluginView[]>
     setEnabled: (
       pluginId: string,
       enabled: boolean

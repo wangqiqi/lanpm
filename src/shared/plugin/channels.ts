@@ -4,6 +4,7 @@
 export const PLUGIN_IPC = {
   listPlugins: 'plugin:listPlugins',
   listSlotPlugins: 'plugin:listSlotPlugins',
+  listContributedViews: 'plugin:listContributedViews',
   setEnabled: 'plugin:setEnabled',
   invokeCapability: 'plugin:invokeCapability'
 } as const
