@@ -368,4 +368,10 @@ export interface LanpmApi {
       prefs: import('./navigation/navPreferences').NavPreferences
     ) => Promise<import('./navigation/navPreferences').NavPreferences>
   }
+  meeting: {
+    getLiveKitConfig: () => Promise<import('./media/livekitConfig').LiveKitConfigPublic>
+    setLiveKitConfig: (
+      input: import('./media/livekitConfig').LiveKitConfig
+    ) => Promise<import('./media/livekitConfig').LiveKitConfigPublic>
+  }
 }

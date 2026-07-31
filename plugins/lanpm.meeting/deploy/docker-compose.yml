@@ -1,0 +1,14 @@
+# LiveKit 自托管旁路（Pro 档位）— 离线部署模板
+# 禁止默认连接 LiveKit Cloud / 公有 Jitsi
+
+services:
+  livekit:
+    image: livekit/livekit-server:v1.8
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    ports:
+      - '7880:7880'
+      - '7881:7881'
+      - '7882:7882/udp'
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro

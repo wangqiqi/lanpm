@@ -17,6 +17,7 @@ import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { registerWhiteboardIpc } from './ipc/whiteboard'
 import { registerPluginIpc } from './ipc/plugin'
 import { registerNavIpc } from './ipc/nav'
+import { registerMeetingIpc } from './ipc/meeting'
 import { registerNotificationIpc } from './ipc/notification'
 import { registerAiIpc } from './ipc/ai'
 import { initAiPatrolScheduler, shutdownAiPatrolScheduler } from './ai/aiPatrolScheduler'
@@ -123,6 +124,7 @@ function registerAllIpcHandlers(): void {
   registerWhiteboardIpc()
   registerPluginIpc()
   registerNavIpc()
+  registerMeetingIpc()
   registerNotificationIpc()
   registerAiIpc()
 }

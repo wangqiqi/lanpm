@@ -15,7 +15,8 @@ const mediaCaps = [
   'media.signal.send',
   'media.signal.poll',
   'media.captureDesktop',
-  'media.room.state'
+  'media.room.state',
+  'media.livekit.createToken'
 ] as const
 
 for (const cap of mediaCaps) {

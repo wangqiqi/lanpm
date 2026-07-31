@@ -1,8 +1,9 @@
-import { Button, List, Typography, message } from 'antd'
-import { AudioOutlined, DesktopOutlined, LoginOutlined, LogoutOutlined } from '@ant-design/icons'
+import { Button, Divider, List, Typography, message } from 'antd'
+import { AudioOutlined, DesktopOutlined, LoginOutlined, LogoutOutlined, VideoCameraOutlined } from '@ant-design/icons'
 import type { PluginView } from '@shared/plugin/types'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { useMeetingMesh } from './useMeetingMesh'
+import { useMeetingLiveKit } from './useMeetingLiveKit'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -12,13 +13,13 @@ interface Props {
   groupId: string
 }
 
-/** Lite mesh POC — SyncEnvelope 信令 + 原生 RTCPeerConnection 1v1 */
+/** Lite mesh POC + Pro LiveKit 旁路 */
 export default function MeetingStub({ plugin, groupId }: Props): React.ReactElement {
   const { t } = useI18n()
   const {
     roomState,
     joined,
-    busy,
+    busy: meshBusy,
     meshStatus,
     desktopSources,
     joinRoom,
@@ -26,7 +27,20 @@ export default function MeetingStub({ plugin, groupId }: Props): React.ReactElem
     loadDesktopSources
   } = useMeetingMesh(plugin, groupId)
 
+  const {
+    configured: liveKitConfigured,
+    proStatus,
+    proJoined,
+    busy: proBusy,
+    muted,
+    sdkMissing,
+    joinProRoom,
+    leaveProRoom,
+    toggleProMute
+  } = useMeetingLiveKit(plugin, groupId)
+
   const participants = roomState?.participants ?? []
+  const busy = meshBusy || proBusy
 
   const onJoin = async (): Promise<void> => {
     try {
@@ -55,6 +69,24 @@ export default function MeetingStub({ plugin, groupId }: Props): React.ReactElem
     }
   }
 
+  const onProJoin = async (): Promise<void> => {
+    try {
+      await joinProRoom()
+      message.success(t('plugin.meetingProJoinOk'))
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    }
+  }
+
+  const onProLeave = async (): Promise<void> => {
+    try {
+      await leaveProRoom()
+      message.info(t('plugin.meetingProLeaveOk'))
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    }
+  }
+
   return (
     <div className={styles.card} data-plugin-id={plugin.id}>
       <div className={styles.cardHeader}>
@@ -62,6 +94,10 @@ export default function MeetingStub({ plugin, groupId }: Props): React.ReactElem
         <span className={styles.badge}>{t('plugin.pricingPaid')}</span>
       </div>
       <Text type="secondary">{t('plugin.meetingStubHint')}</Text>
+
+      <Divider orientation="left" plain>
+        {t('plugin.meetingLiteSection')}
+      </Divider>
       {roomState ? (
         <Text type="secondary" className={styles.meetingState}>
           {t('plugin.meetingRoomState', {
@@ -100,6 +136,7 @@ export default function MeetingStub({ plugin, groupId }: Props): React.ReactElem
             type="primary"
             icon={<LoginOutlined />}
             loading={busy}
+            disabled={proJoined}
             onClick={() => void onJoin()}
           >
             {t('plugin.meetingJoin')}
@@ -125,6 +162,51 @@ export default function MeetingStub({ plugin, groupId }: Props): React.ReactElem
           onClick={() => void onDesktop()}
         >
           {t('plugin.meetingScreenStub')}
+        </Button>
+      </div>
+
+      <Divider orientation="left" plain>
+        {t('plugin.meetingProSection')}
+      </Divider>
+      {!liveKitConfigured ? (
+        <Text type="secondary">{t('plugin.meetingProConfigureHint')}</Text>
+      ) : sdkMissing ? (
+        <Text type="warning">{t('plugin.meetingProSdkMissing')}</Text>
+      ) : (
+        <Text type="secondary" className={styles.meetingState}>
+          {t('plugin.meetingProStatus', { status: proStatus })}
+        </Text>
+      )}
+      <div className={styles.meetingActions}>
+        {!proJoined ? (
+          <Button
+            size="small"
+            type="primary"
+            icon={<VideoCameraOutlined />}
+            loading={busy}
+            disabled={!liveKitConfigured || joined}
+            onClick={() => void onProJoin()}
+          >
+            {t('plugin.meetingProJoin')}
+          </Button>
+        ) : (
+          <Button
+            size="small"
+            danger
+            icon={<LogoutOutlined />}
+            loading={busy}
+            onClick={() => void onProLeave()}
+          >
+            {t('plugin.meetingProLeave')}
+          </Button>
+        )}
+        <Button
+          size="small"
+          icon={<AudioOutlined />}
+          disabled={!proJoined}
+          onClick={() => void toggleProMute()}
+        >
+          {muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}
         </Button>
       </div>
     </div>

@@ -44,6 +44,13 @@ import {
   normalizeNavPreferences,
   type NavPreferences
 } from '@shared/navigation/navPreferences'
+import {
+  isLiveKitConfigComplete,
+  liveKitRoomNameForGroup,
+  normalizeLiveKitConfig,
+  toLiveKitConfigPublic,
+  type LiveKitConfig
+} from '@shared/media/livekitConfig'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -55,6 +62,7 @@ const FILE_STORAGE_KEY = 'lanpm.dev.files'
 const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
 const NAV_PREFS_STORAGE_KEY = 'lanpm.dev.navPreferences'
+const LIVEKIT_CONFIG_STORAGE_KEY = 'lanpm.dev.livekitConfig'
 
 function readStubNavPreferences(): NavPreferences {
   try {
@@ -70,6 +78,22 @@ function writeStubNavPreferences(prefs: NavPreferences): NavPreferences {
   const normalized = normalizeNavPreferences(prefs)
   localStorage.setItem(NAV_PREFS_STORAGE_KEY, JSON.stringify(normalized))
   return normalized
+}
+
+function readStubLiveKitConfig(): LiveKitConfig {
+  try {
+    const raw = localStorage.getItem(LIVEKIT_CONFIG_STORAGE_KEY)
+    if (!raw) return normalizeLiveKitConfig({})
+    return normalizeLiveKitConfig(JSON.parse(raw) as unknown)
+  } catch {
+    return normalizeLiveKitConfig({})
+  }
+}
+
+function writeStubLiveKitConfig(input: LiveKitConfig): ReturnType<typeof toLiveKitConfigPublic> {
+  const normalized = normalizeLiveKitConfig(input)
+  localStorage.setItem(LIVEKIT_CONFIG_STORAGE_KEY, JSON.stringify(normalized))
+  return toLiveKitConfigPublic(normalized)
 }
 
 const STUB_PLUGINS: PluginView[] = [
@@ -1795,12 +1819,29 @@ export function createBrowserLanpmStub(): LanpmApi {
           const groupTasks = Object.values(readAllTasks()).flat()
           return groupTasks.find((t) => t.taskId === taskId) ?? null
         }
+        if (capability === 'media.livekit.createToken') {
+          const config = readStubLiveKitConfig()
+          const groupId = String(args?.groupId ?? '')
+          const identity = String(args?.identity ?? '')
+          if (!isLiveKitConfigComplete(config) || !groupId || !identity) {
+            throw new Error('LiveKit not configured')
+          }
+          return {
+            token: 'stub-livekit-token',
+            url: config.url,
+            roomName: liveKitRoomNameForGroup(groupId)
+          }
+        }
         throw new Error(`capability not granted: ${capability}`)
       }
     },
     nav: {
       getPreferences: async () => readStubNavPreferences(),
       setPreferences: async (prefs) => writeStubNavPreferences(prefs)
+    },
+    meeting: {
+      getLiveKitConfig: async () => toLiveKitConfigPublic(readStubLiveKitConfig()),
+      setLiveKitConfig: async (input) => writeStubLiveKitConfig(input)
     },
     data: {
       getStorageSettings: async () => ({

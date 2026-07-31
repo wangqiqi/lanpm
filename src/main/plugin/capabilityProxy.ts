@@ -12,6 +12,7 @@ import {
   sendMediaSignal
 } from '../media/mediaSignalService'
 import { listDesktopCaptureSources } from '../media/desktopCaptureService'
+import { createLiveKitTokenForGroup } from '../media/livekitTokenService'
 
 export type CapabilityArgs = Record<string, unknown>
 
@@ -65,6 +66,14 @@ export async function invokePluginCapability(
       const groupId = String(args.groupId ?? '')
       if (!groupId) throw new Error('groupId required')
       return getMediaRoomState(db, groupId)
+    }
+    case 'media.livekit.createToken': {
+      const groupId = String(args.groupId ?? '')
+      const identity = String(args.identity ?? '')
+      if (!groupId) throw new Error('groupId required')
+      if (!identity) throw new Error('identity required')
+      const roomName = args.roomName != null ? String(args.roomName) : undefined
+      return createLiveKitTokenForGroup({ groupId, identity, roomName })
     }
     default: {
       const _exhaustive: never = capability

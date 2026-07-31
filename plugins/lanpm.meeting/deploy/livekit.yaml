@@ -1,0 +1,9 @@
+# 开发用最小配置 — 生产请轮换 keys 并限制网络
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  use_external_ip: false
+keys:
+  ${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}

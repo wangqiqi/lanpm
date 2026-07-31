@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.71.0] - 2026-07-31
+
+### Added
+
+- **Pro LiveKit 旁路**：`plugins/lanpm.meeting/deploy` docker-compose · `meeting-livekit.json` 配置
+- **Host 代发 token**：`media.livekit.createToken` capability（JWT 仅 Main）
+- **MeetingStub Pro**：LiveKit SFU join/leave/mute POC；`livekit-client` 为插件子包可选依赖
+- **Profile「会议旁路」**：LiveKit URL / API Key / Secret 设置
+- **验收**：`verify:meeting-livekit-pro`
+
 ## [1.70.0] - 2026-07-31
 
 ### Added

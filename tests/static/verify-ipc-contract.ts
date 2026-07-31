@@ -19,6 +19,7 @@ import { WHITEBOARD_IPC } from '../../src/shared/whiteboard/channels.ts'
 import { DATA_IPC } from '../../src/shared/data/channels.ts'
 import { PLUGIN_IPC } from '../../src/shared/plugin/channels.ts'
 import { NAV_IPC } from '../../src/shared/navigation/channels.ts'
+import { MEETING_IPC } from '../../src/shared/media/channels.ts'
 import { NOTIFICATION_IPC } from '../../src/shared/notification/channels.ts'
 
 const IDENTITY_CHANNELS = {
@@ -46,6 +47,7 @@ const DECLARED = new Set<string>([
   ...Object.values(WHITEBOARD_IPC),
   ...Object.values(PLUGIN_IPC),
   ...Object.values(NAV_IPC),
+  ...Object.values(MEETING_IPC),
   ...Object.values(NOTIFICATION_IPC),
   ...Object.values(IDENTITY_CHANNELS)
 ])
@@ -79,6 +81,7 @@ function extractMainHandlers(): Set<string> {
     WHITEBOARD_IPC,
     PLUGIN_IPC,
     NAV_IPC,
+    MEETING_IPC,
     NOTIFICATION_IPC,
     IDENTITY_CHANNELS
   }

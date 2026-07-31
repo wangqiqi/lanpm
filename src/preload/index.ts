@@ -288,6 +288,10 @@ const api: LanpmApi = {
     getPreferences: () => ipcRenderer.invoke('nav:getPreferences'),
     setPreferences: (prefs) => ipcRenderer.invoke('nav:setPreferences', prefs)
   },
+  meeting: {
+    getLiveKitConfig: () => ipcRenderer.invoke('meeting:getLiveKitConfig'),
+    setLiveKitConfig: (input) => ipcRenderer.invoke('meeting:setLiveKitConfig', input)
+  },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),
     getStorageUsage: () => ipcRenderer.invoke('data:getStorageUsage'),

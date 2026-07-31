@@ -1,0 +1,9 @@
+{
+  "name": "lanpm-meeting-plugin-deps",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Optional LiveKit client for lanpm.meeting Pro tier (not hoisted to root required deps)",
+  "dependencies": {
+    "livekit-client": "^2.9.8"
+  }
+}

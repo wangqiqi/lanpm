@@ -33,6 +33,7 @@ export type PluginCapabilityId =
   | 'media.signal.poll'
   | 'media.captureDesktop'
   | 'media.room.state'
+  | 'media.livekit.createToken'
 
 export type PluginManifest = {
   /** 稳定 id，如 `lanpm.formjs` */
@@ -93,5 +94,6 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'media.signal.send',
   'media.signal.poll',
   'media.captureDesktop',
-  'media.room.state'
+  'media.room.state',
+  'media.livekit.createToken'
 ] as const
