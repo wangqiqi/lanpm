@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.5] - 2026-07-31
+
+### Added
+
+- **`ViewPluginContext.zone`**：`PluginZoneHost` 向插件注入当前 zone
+- **`verify:view-slot-hosts` 加固**：禁聊天 toolbar 双挂载 · zone 感知守卫 · 岛面横排布局
+
+### Changed
+
+- **`ExampleStub`**：仅在 `zone=composer` 渲染 composer 动作
+- **`MeetingToolbar`**：仅在 `zone=toolbar` 渲染
+- **`ChatView` / `ChatVoiceMediaPanel`**：文本/语音各一处 `toolbar` zone（去重 `PluginGroupSlot`）
+- **`chat.module.css`**：修复 `IslandPanel` 岛面侧栏与主区纵向错位
+- **`docs/插件开发.md`**：§3.5 zone 契约 · §8.3 / §12.3 对齐 v1.78.5
+
 ## [1.78.4] - 2026-07-31
 
 ### Added
