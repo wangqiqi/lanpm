@@ -149,7 +149,8 @@ const STUB_PLUGINS: PluginView[] = [
     dirName: 'lanpm.example',
     source: 'builtin',
     signatureValid: true,
-    licensed: null
+    licensed: null,
+    commands: [{ id: 'hello', titleKey: 'command.example.hello' }]
   },
   {
     id: 'lanpm.formjs',
@@ -192,6 +193,45 @@ const STUB_PLUGINS: PluginView[] = [
 ]
 
 refreshStubPluginLicenseFields()
+
+function listStubCommands(): import('@shared/plugin/commands').ListedCommand[] {
+  const listed: import('@shared/plugin/commands').ListedCommand[] = [
+    {
+      commandId: 'core:open-profile',
+      titleKey: 'command.core.openProfile',
+      source: 'core',
+      pluginId: null,
+      enabled: true
+    },
+    {
+      commandId: 'core:open-nav-preferences',
+      titleKey: 'command.core.openNavPreferences',
+      source: 'core',
+      pluginId: null,
+      enabled: true
+    },
+    {
+      commandId: 'core:open-plugins',
+      titleKey: 'command.core.openPlugins',
+      source: 'core',
+      pluginId: null,
+      enabled: true
+    }
+  ]
+  for (const plugin of STUB_PLUGINS) {
+    if (!plugin.enabled) continue
+    for (const cmd of plugin.commands ?? []) {
+      listed.push({
+        commandId: `${plugin.id}:${cmd.id}`,
+        titleKey: cmd.titleKey,
+        source: 'plugin',
+        pluginId: plugin.id,
+        enabled: true
+      })
+    }
+  }
+  return listed
+}
 
 function mutateStubPluginEnabled(pluginId: string, enabled: boolean): PluginView[] {
   const idx = STUB_PLUGINS.findIndex((p) => p.id === pluginId)
@@ -1897,6 +1937,16 @@ export function createBrowserLanpmStub(): LanpmApi {
           }
         }
         return views.sort((a, b) => a.route.localeCompare(b.route))
+      },
+      listCommands: async () => listStubCommands(),
+      invokeCommand: async (commandId) => {
+        const known = listStubCommands().some((c) => c.commandId === commandId)
+        if (!known) return { ok: false, commandId, message: 'unknown command' }
+        return {
+          ok: true,
+          commandId,
+          message: commandId.startsWith('core:') ? 'core stub' : 'plugin stub'
+        }
       },
       setEnabled: async (pluginId, enabled) => mutateStubPluginEnabled(pluginId, enabled),
       importLicense: async (payload) => {

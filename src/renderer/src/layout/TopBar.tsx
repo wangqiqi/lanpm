@@ -38,6 +38,10 @@ import DiscoverModal from '@renderer/features/discover/DiscoverModal'
 import DiscoverCoachmark from '@renderer/features/discover/DiscoverCoachmark'
 import { isDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
+import {
+  LANPM_OPEN_PROFILE_EVENT,
+  type OpenProfileDetail
+} from '@renderer/layout/CommandPalette'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { resolveGroupDisplayName } from '@renderer/i18n/groupLabels'
 import { useNetworkStore } from '@renderer/stores/networkStore'
@@ -79,6 +83,7 @@ export default function TopBar(): React.ReactElement {
   const [createOpen, setCreateOpen] = useState(false)
   const [discoverOpen, setDiscoverOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [profileTab, setProfileTab] = useState<string | undefined>(undefined)
   const user = useIdentityStore((s) => s.user)
   const localUserId = user?.userId
   const getDmSession = useDmStore((s) => s.getSession)
@@ -124,6 +129,16 @@ export default function TopBar(): React.ReactElement {
     setDiscoverOpen(true)
     ackDiscoverOpen()
   }, [discoverOpenPending, ackDiscoverOpen])
+
+  useEffect(() => {
+    const onOpenProfile = (ev: Event): void => {
+      const detail = (ev as CustomEvent<OpenProfileDetail>).detail
+      setProfileTab(detail?.tab)
+      setProfileOpen(true)
+    }
+    window.addEventListener(LANPM_OPEN_PROFILE_EVENT, onOpenProfile)
+    return () => window.removeEventListener(LANPM_OPEN_PROFILE_EVENT, onOpenProfile)
+  }, [])
 
   useEffect(() => {
     if (isDiscoverCoachmarkSeen()) return
@@ -644,7 +659,14 @@ export default function TopBar(): React.ReactElement {
           navigate(groupViewPath(nav.groupId, defaultViewForGroup(nav.type)))
         }}
       />
-      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
+      <ProfileModal
+        open={profileOpen}
+        initialTab={profileTab}
+        onClose={() => {
+          setProfileOpen(false)
+          setProfileTab(undefined)
+        }}
+      />
     </header>
   )
 }

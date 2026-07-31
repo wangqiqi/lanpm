@@ -2,10 +2,11 @@ import { ipcMain } from 'electron'
 import { PLUGIN_IPC } from '../../shared/plugin/channels'
 import type { PluginCapabilityId, PluginSlotId } from '../../shared/plugin/types'
 import { PLUGIN_CAPABILITY_IDS, PLUGIN_SLOT_IDS } from '../../shared/plugin/types'
-import { discoverPlugins, listContributedViews, listSlotPlugins } from '../plugin/discover'
+import { discoverPlugins, listContributedViews, listCommands, listSlotPlugins } from '../plugin/discover'
 import { setPluginEnabled } from '../plugin/enabledStore'
 import { invokePluginCapability } from '../plugin/capabilityProxy'
 import { getPluginLicenseStatus, importPluginLicense } from '../plugin/licenseStore'
+import { invokeListedCommand } from '../plugin/commandRegistry'
 
 const SLOT_SET = new Set<string>(PLUGIN_SLOT_IDS)
 const CAP_SET = new Set<string>(PLUGIN_CAPABILITY_IDS)
@@ -21,6 +22,19 @@ export function registerPluginIpc(): void {
   })
 
   ipcMain.handle(PLUGIN_IPC.listContributedViews, () => listContributedViews())
+
+  ipcMain.handle(PLUGIN_IPC.listCommands, () => listCommands())
+
+  ipcMain.handle(PLUGIN_IPC.invokeCommand, (_event, commandId: string) => {
+    if (typeof commandId !== 'string' || !commandId.trim()) {
+      throw new Error('commandId required')
+    }
+    const known = listCommands().some((c) => c.commandId === commandId)
+    if (!known) {
+      return { ok: false, commandId, message: 'unknown command' }
+    }
+    return invokeListedCommand(commandId)
+  })
 
   ipcMain.handle(PLUGIN_IPC.importLicense, (_event, payload: string) => {
     if (typeof payload !== 'string' || !payload.trim()) {

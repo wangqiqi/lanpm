@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import TopBar from '@renderer/layout/TopBar'
 import BottomNav from '@renderer/layout/BottomNav'
+import CommandPalette from '@renderer/layout/CommandPalette'
 import { useChatNotifications } from '@renderer/features/chat/useChatNotifications'
 import { useDueTaskNotifications } from '@renderer/features/task/useDueTaskNotifications'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -60,6 +61,7 @@ export default function MainLayout(): React.ReactElement {
         </div>
       ) : null}
       <AiAssistantShell />
+      <CommandPalette />
     </div>
   )
 }

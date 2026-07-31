@@ -1,4 +1,5 @@
 import type { PluginContributionView } from './contributions.ts'
+import type { PluginCommand } from './commands.ts'
 
 /**
  * Plugin system SPIKE stubs（SPIKE-276–278）+ loader runtime views（TASK-289+）。
@@ -60,6 +61,8 @@ export type PluginManifest = {
   contributions?: {
     views?: PluginContributionView[]
   }
+  /** 命令面板贡献（POC） */
+  commands?: PluginCommand[]
 }
 
 /** Renderer / IPC 可见视图 */

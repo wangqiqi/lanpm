@@ -2,6 +2,16 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.78.0] - 2026-07-31
+
+### Added
+
+- **命令面板 POC**：Ctrl/Cmd+K · 过滤列表 · Enter 调用 Host invoke stub
+- **Manifest `commands[]`**：`PluginCommand` · `parseCommands` · 空 slots 允许仅声明命令
+- **IPC**：`plugin:listCommands` · `plugin:invokeCommand`（core + 已启用插件）
+- **核心命令**：打开个人设置 / 导航偏好 / 扩展管理
+- **样例**：`lanpm.example` → `hello`；`verify:command-palette`
+
 ## [1.77.0] - 2026-07-31
 
 ### Added

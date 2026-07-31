@@ -18,6 +18,8 @@ import UserAvatar from '@renderer/ui/UserAvatar'
 interface ProfileModalProps {
   open: boolean
   onClose: () => void
+  /** Open on a specific tab when modal becomes visible */
+  initialTab?: string
 }
 
 interface ProfileFormValues {
@@ -25,7 +27,11 @@ interface ProfileFormValues {
   department?: string
 }
 
-export default function ProfileModal({ open, onClose }: ProfileModalProps): React.ReactElement {
+export default function ProfileModal({
+  open,
+  onClose,
+  initialTab
+}: ProfileModalProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const user = useIdentityStore((s) => s.user)
@@ -40,7 +46,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const [form] = Form.useForm<ProfileFormValues>()
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState(initialTab ?? 'profile')
   const isProfileTab = activeTab === 'profile'
 
   useEffect(() => {
@@ -48,9 +54,10 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps): Reac
       setActiveTab('profile')
       return
     }
+    if (initialTab) setActiveTab(initialTab)
     void refreshNetwork({ silent: true })
     hydrateNotificationPrefs()
-  }, [open, refreshNetwork, hydrateNotificationPrefs])
+  }, [open, initialTab, refreshNetwork, hydrateNotificationPrefs])
 
   useEffect(() => {
     if (!open || !user) return

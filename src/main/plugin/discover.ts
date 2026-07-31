@@ -2,10 +2,12 @@ import { existsSync, readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { PluginSlotId, PluginSource, PluginView } from '../../shared/plugin/types.ts'
 import type { ContributedPluginView } from '../../shared/plugin/contributions.ts'
+import type { ListedCommand } from '../../shared/plugin/commands.ts'
 import {
   parsePluginManifest,
   resolveContributionGroupTypes
 } from '../../shared/plugin/validateManifest.ts'
+import { listAllCommands } from './commandRegistry.ts'
 import { isPluginEnabled, readEnabledMap } from './enabledStore.ts'
 import { isPluginLicensed } from './licenseStore.ts'
 import { resolvePluginsRoot, resolveSideloadPluginsRoot } from './paths.ts'
@@ -89,3 +91,8 @@ export function listContributedViews(): ContributedPluginView[] {
 export function findContributedViewByRoute(route: string): ContributedPluginView | null {
   return listContributedViews().find((v) => v.route === route) ?? null
 }
+
+export function listCommands(): ListedCommand[] {
+  return listAllCommands(discoverPlugins())
+}
+

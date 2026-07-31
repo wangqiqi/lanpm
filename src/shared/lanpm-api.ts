@@ -353,6 +353,10 @@ export interface LanpmApi {
       slotId: import('./plugin/types').PluginSlotId
     ) => Promise<import('./plugin/types').PluginView[]>
     listContributedViews: () => Promise<import('./plugin/contributions').ContributedPluginView[]>
+    listCommands: () => Promise<import('./plugin/commands').ListedCommand[]>
+    invokeCommand: (
+      commandId: string
+    ) => Promise<import('./plugin/commands').InvokeCommandResult>
     importLicense: (payload: string) => Promise<import('./plugin/licenseTypes').PluginLicenseStatus>
     getLicenseStatus: (
       pluginId: string

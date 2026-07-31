@@ -4,6 +4,7 @@ import {
   isReservedContributionRoute,
   type PluginContributionView
 } from './contributions.ts'
+import type { PluginCommand } from './commands.ts'
 import {
   PLUGIN_CAPABILITY_IDS,
   PLUGIN_SLOT_IDS,
@@ -59,6 +60,25 @@ function parseContributionViews(raw: unknown): PluginContributionView[] | null {
   return views
 }
 
+function parseCommands(raw: unknown): PluginCommand[] | null {
+  if (raw === undefined) return []
+  if (!Array.isArray(raw)) return null
+  const commands: PluginCommand[] = []
+  const ids = new Set<string>()
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') return null
+    const o = item as Record<string, unknown>
+    if (typeof o.id !== 'string' || !o.id.trim()) return null
+    if (typeof o.titleKey !== 'string' || !o.titleKey.trim()) return null
+    const id = o.id.trim()
+    if (!/^[a-z][a-z0-9.-]{0,63}$/.test(id)) return null
+    if (ids.has(id)) return null
+    ids.add(id)
+    commands.push({ id, titleKey: o.titleKey.trim() })
+  }
+  return commands
+}
+
 /**
  * 校验 plugin.json；非法返回 null（发现阶段跳过）。
  */
@@ -74,13 +94,17 @@ export function parsePluginManifest(raw: unknown): PluginManifest | null {
 
   const contributionViews = parseContributionViews(o.contributions)
   if (contributionViews === null) return null
+  const commands = parseCommands(o.commands)
+  if (commands === null) return null
 
   const slots: PluginSlotId[] = []
   for (const s of o.slots) {
     if (typeof s !== 'string' || !SLOT_SET.has(s)) return null
     slots.push(s as PluginSlotId)
   }
-  if (slots.length === 0 && contributionViews.length === 0) return null
+  if (slots.length === 0 && contributionViews.length === 0 && commands.length === 0) {
+    return null
+  }
 
   const capabilities: PluginCapabilityId[] = []
   for (const c of o.capabilities) {
@@ -104,6 +128,9 @@ export function parsePluginManifest(raw: unknown): PluginManifest | null {
   }
   if (contributionViews.length > 0) {
     manifest.contributions = { views: contributionViews }
+  }
+  if (commands.length > 0) {
+    manifest.commands = commands
   }
   return manifest
 }

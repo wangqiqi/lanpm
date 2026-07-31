@@ -11,5 +11,11 @@
     "member.list",
     "chat.sendTaskRef"
   ],
-  "pricing": "free"
+  "pricing": "free",
+  "commands": [
+    {
+      "id": "hello",
+      "titleKey": "command.example.hello"
+    }
+  ]
 }

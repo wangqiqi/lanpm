@@ -1,0 +1,36 @@
+.modal :global(.ant-modal-body) {
+  padding-top: 8px;
+}
+
+.hint {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.list {
+  margin-top: 12px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.item {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px !important;
+  border-radius: var(--lanpm-radius-sm, 6px);
+}
+
+.itemActive {
+  background: var(--lanpm-bg-muted, rgba(0, 0, 0, 0.04));
+}
+
+.itemTitle {
+  font-weight: 500;
+}
+
+.itemMeta {
+  color: var(--lanpm-text-secondary, #888);
+  font-size: var(--lanpm-font-caption, 12px);
+}

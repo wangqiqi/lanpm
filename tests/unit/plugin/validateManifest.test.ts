@@ -57,6 +57,47 @@ describe('parsePluginManifest', () => {
       })
     ).toBeNull()
   })
+
+  it('accepts commands[] and allows empty slots when commands present', () => {
+    const m = parsePluginManifest({
+      id: 'lanpm.cmd-only',
+      name: 'Cmd',
+      version: '0.1.0',
+      slots: [],
+      capabilities: [],
+      pricing: 'free',
+      commands: [{ id: 'hello', titleKey: 'command.example.hello' }]
+    })
+    expect(m?.commands).toEqual([{ id: 'hello', titleKey: 'command.example.hello' }])
+  })
+
+  it('rejects duplicate or invalid command ids', () => {
+    expect(
+      parsePluginManifest({
+        id: 'x',
+        name: 'x',
+        version: '1',
+        slots: ['task.detail.section'],
+        capabilities: [],
+        pricing: 'free',
+        commands: [
+          { id: 'hello', titleKey: 'a' },
+          { id: 'hello', titleKey: 'b' }
+        ]
+      })
+    ).toBeNull()
+    expect(
+      parsePluginManifest({
+        id: 'x',
+        name: 'x',
+        version: '1',
+        slots: ['task.detail.section'],
+        capabilities: [],
+        pricing: 'free',
+        commands: [{ id: 'Bad_Id', titleKey: 'a' }]
+      })
+    ).toBeNull()
+  })
 })
 
 describe('pluginDeclaresCapability', () => {
