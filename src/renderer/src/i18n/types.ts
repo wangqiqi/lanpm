@@ -426,6 +426,8 @@ export type MessageKey =
   | 'plugin.exampleProfileTab'
   | 'plugin.exampleProbeRead'
   | 'plugin.exampleSendTaskRef'
+  | 'plugin.examplePatchTask'
+  | 'plugin.exampleTaskPatched'
   | 'plugin.exampleNoTasks'
   | 'plugin.exampleTaskRefSent'
   | 'plugin.exampleReadProbe'

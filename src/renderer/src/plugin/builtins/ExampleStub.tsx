@@ -58,6 +58,31 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
     }
   }, [groupId, plugin.id, t])
 
+  const onPatchFirstTask = useCallback(async () => {
+    setBusy(true)
+    try {
+      const tasks = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.list', {
+        groupId
+      })) as Task[]
+      const first = tasks.find((task) => !task.deletedAt)
+      if (!first) {
+        message.info(t('plugin.exampleNoTasks'))
+        return
+      }
+      const nextProgress = Math.min(100, (first.progressPercent ?? 0) + 5)
+      const updated = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.patch', {
+        groupId,
+        taskId: first.taskId,
+        patch: { progressPercent: nextProgress }
+      })) as Task
+      message.success(t('plugin.exampleTaskPatched', { percent: updated.progressPercent ?? 0 }))
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [groupId, plugin.id, t])
+
   const onProbeRead = useCallback(async () => {
     setBusy(true)
     try {
@@ -85,6 +110,9 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
     <div className={styles.composerAction} data-plugin-id={plugin.id}>
       <Button size="small" loading={busy} onClick={() => void onProbeRead()}>
         {t('plugin.exampleProbeRead')}
+      </Button>
+      <Button size="small" loading={busy} onClick={() => void onPatchFirstTask()}>
+        {t('plugin.examplePatchTask')}
       </Button>
       <Button size="small" type="primary" loading={busy} onClick={() => void onSendTaskRef()}>
         {t('plugin.exampleSendTaskRef')}

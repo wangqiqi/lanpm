@@ -437,6 +437,8 @@ const enUS = {
   'plugin.exampleProfileTab': 'Example extension tab via profile.tab slot',
   'plugin.exampleProbeRead': 'Probe read APIs',
   'plugin.exampleSendTaskRef': 'Send first task ref',
+  'plugin.examplePatchTask': 'Bump first task +5%',
+  'plugin.exampleTaskPatched': 'Task progress updated to {percent}%',
   'plugin.exampleNoTasks': 'No tasks in this group',
   'plugin.exampleTaskRefSent': 'Task ref sent: {title}',
   'plugin.exampleReadProbe': '{messages} recent messages · {members} members',

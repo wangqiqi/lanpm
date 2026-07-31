@@ -431,6 +431,8 @@ const zhCN = {
   'plugin.exampleProfileTab': '示例扩展 Tab · 由 profile.tab Slot 挂载',
   'plugin.exampleProbeRead': '探测读能力',
   'plugin.exampleSendTaskRef': '发送首条任务引用',
+  'plugin.examplePatchTask': '首条任务 +5% 进度',
+  'plugin.exampleTaskPatched': '任务进度已更新为 {percent}%',
   'plugin.exampleNoTasks': '当前群无可用任务',
   'plugin.exampleTaskRefSent': '已发送任务引用：{title}',
   'plugin.exampleReadProbe': '最近消息 {messages} 条 · 成员 {members} 人',
