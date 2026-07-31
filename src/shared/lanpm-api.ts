@@ -1,6 +1,7 @@
 import type { DiscoverSnapshot } from './discover/types'
 import type { ChatMessage } from './chat/types'
 import type { ChatMessagePage } from './chat/pagination'
+import type { SendChatOptions } from './chat/channels'
 import type { GroupMemberView } from './chat/members'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from './identity'
 import type {
@@ -59,12 +60,13 @@ export interface LanpmApi {
   chat: {
     listMessages: (groupId: string) => Promise<ChatMessagePage>
     loadOlderMessages: (groupId: string, beforeLamportTs: number) => Promise<ChatMessagePage>
-    sendText: (groupId: string, text: string) => Promise<ChatMessage>
+    sendText: (groupId: string, text: string, options?: SendChatOptions) => Promise<ChatMessage>
     sendCode: (
       groupId: string,
       code: string,
       languageHint?: string,
-      theme?: 'light' | 'dark'
+      theme?: 'light' | 'dark',
+      options?: SendChatOptions
     ) => Promise<ChatMessage>
     listMembers: (groupId: string) => Promise<GroupMemberView[]>
     markRead: (groupId: string, msgIds: string[]) => Promise<void>
@@ -78,6 +80,14 @@ export interface LanpmApi {
     sendTaskRef: (groupId: string, taskId: string) => Promise<ChatMessage>
     /** 手动重试发送失败的本机消息 */
     retryMessage: (msgId: string) => Promise<ChatMessage>
+    editMessage: (groupId: string, msgId: string, text: string) => Promise<ChatMessage>
+    listPinnedIds: (groupId: string) => Promise<string[]>
+    togglePin: (groupId: string, msgId: string) => Promise<string[]>
+    forwardMessage: (
+      sourceMsgId: string,
+      targetGroupId: string,
+      senderDisplayName?: string
+    ) => Promise<ChatMessage>
     onMessage: (handler: (message: ChatMessage) => void) => () => void
   }
   task: {

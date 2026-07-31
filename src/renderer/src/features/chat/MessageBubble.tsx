@@ -24,6 +24,8 @@ import { copyTextToClipboard } from '@renderer/features/chat/messageContextActio
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { usePluginMenus } from '@renderer/plugin/usePluginMenus'
+import MessageReplyStrip from '@renderer/features/chat/MessageReplyStrip'
+import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import styles from './chat.module.css'
 
 function formatFileSize(bytes: number): string {
@@ -54,6 +56,20 @@ interface MessageBubbleProps {
   onCreateTaskFromMessage?: (message: ChatMessage) => void
   onLinkFileToTask?: (fileId: string, fileName: string) => void
   onLinkMessageToTask?: (message: ChatMessage) => void
+  replyQuote?: ResolvedReplyQuote | null
+  onJumpToReply?: (msgId: string) => void
+  isPinned?: boolean
+  multiSelectMode?: boolean
+  selected?: boolean
+  onToggleSelect?: (msgId: string) => void
+  jumpHighlighted?: boolean
+  onReply?: (message: ChatMessage) => void
+  onForward?: (message: ChatMessage) => void
+  onPin?: (msgId: string) => void
+  onUnpin?: (msgId: string) => void
+  onEdit?: (message: ChatMessage) => void
+  onHide?: (msgId: string) => void
+  onEnterMultiSelect?: (msgId: string) => void
 }
 
 export default function MessageBubble({
@@ -76,7 +92,21 @@ export default function MessageBubble({
   taskCreateAllowed = false,
   onCreateTaskFromMessage,
   onLinkFileToTask,
-  onLinkMessageToTask
+  onLinkMessageToTask,
+  replyQuote = null,
+  onJumpToReply,
+  isPinned = false,
+  multiSelectMode = false,
+  selected = false,
+  onToggleSelect,
+  jumpHighlighted = false,
+  onReply,
+  onForward,
+  onPin,
+  onUnpin,
+  onEdit,
+  onHide,
+  onEnterMultiSelect
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const { message: appMessage } = useLanpmApp()
@@ -151,7 +181,9 @@ export default function MessageBubble({
       own,
       currentUserId,
       taskCreateAllowed,
-      showMention: !own && Boolean(onMentionSender)
+      showMention: !own && Boolean(onMentionSender),
+      isPinned,
+      multiSelectActive: multiSelectMode
     })
 
     const labelFor = (id: MessageContextMenuActionId): string => {
@@ -164,12 +196,26 @@ export default function MessageBubble({
           return t('chat.openTask')
         case 'openFile':
           return t('chat.openInFiles')
+        case 'reply':
+          return t('chat.replyMessage')
+        case 'forward':
+          return t('chat.forwardMessage')
+        case 'pin':
+          return t('chat.pinMessage')
+        case 'unpin':
+          return t('chat.unpinMessage')
         case 'createTask':
           return t('chat.createTaskFromMessage')
         case 'linkExistingTask':
           return t('chat.linkMessageToTask')
         case 'linkFile':
           return t('chat.linkFileToTask')
+        case 'edit':
+          return t('chat.editMessage')
+        case 'hide':
+          return t('chat.hideMessage')
+        case 'enterMultiSelect':
+          return t('chat.enterMultiSelect')
         case 'mention':
           return t('chat.mentionMember', { name: senderName })
         case 'recall':
@@ -211,6 +257,18 @@ export default function MessageBubble({
             })
           }
           break
+        case 'reply':
+          onReply?.(message)
+          break
+        case 'forward':
+          onForward?.(message)
+          break
+        case 'pin':
+          onPin?.(message.msgId)
+          break
+        case 'unpin':
+          onUnpin?.(message.msgId)
+          break
         case 'createTask':
           onCreateTaskFromMessage?.(message)
           break
@@ -221,6 +279,15 @@ export default function MessageBubble({
           if (message.content.kind === 'file') {
             onLinkFileToTask?.(message.content.fileId, message.content.fileName)
           }
+          break
+        case 'edit':
+          onEdit?.(message)
+          break
+        case 'hide':
+          onHide?.(message.msgId)
+          break
+        case 'enterMultiSelect':
+          onEnterMultiSelect?.(message.msgId)
           break
         case 'mention':
           onMentionSender?.(senderName)
@@ -260,13 +327,40 @@ export default function MessageBubble({
     onLinkMessageToTask,
     onLinkFileToTask,
     onRecall,
+    onReply,
+    onForward,
+    onPin,
+    onUnpin,
+    onEdit,
+    onHide,
+    onEnterMultiSelect,
+    isPinned,
+    multiSelectMode,
     pluginContextMenuItems
   ])
 
   const hasBubbleMenu = (bubbleMenu.items?.length ?? 0) > 0
 
+  const selectCheckbox =
+    multiSelectMode && onToggleSelect ? (
+      <input
+        type="checkbox"
+        className={styles.multiSelectCheckbox}
+        checked={selected}
+        aria-label={t('chat.selectMessage')}
+        onChange={() => onToggleSelect(message.msgId)}
+        onClick={(e) => e.stopPropagation()}
+      />
+    ) : null
+
   const bubbleBody = (
     <>
+      {replyQuote ? (
+        <MessageReplyStrip quote={replyQuote} onJump={onJumpToReply} />
+      ) : null}
+      {message.content.kind === 'text' && message.content.meta?.forwardedFrom ? (
+        <span className={styles.forwardedLabel}>{t('chat.forwardedMessage')}</span>
+      ) : null}
       {message.content.kind === 'text' && (
         <div>
           {message.content.meta?.source === 'ai-assistant' ? (
@@ -282,6 +376,9 @@ export default function MessageBubble({
             meta={message.content.meta}
             onTaskRefClick={groupId ? (taskId) => locateTask(taskId, 'board') : undefined}
           />
+          {message.content.meta?.editedAt ? (
+            <span className={styles.editedLabel}>{t('chat.editedLabel')}</span>
+          ) : null}
         </div>
       )}
 
@@ -347,7 +444,7 @@ export default function MessageBubble({
     </>
   )
 
-  const bubbleClass = `${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted ? styles.searchHighlight : ''}`
+  const bubbleClass = `${styles.bubble} ${isCode ? styles.codeBubble : own ? styles.bubbleOwn : styles.bubbleOther} ${highlighted || jumpHighlighted ? styles.searchHighlight : ''} ${jumpHighlighted ? styles.messageRowHighlight : ''}`
 
   if (isRecalled) {
     return (
@@ -371,7 +468,13 @@ export default function MessageBubble({
 
   if (own) {
     return (
-      <div className={styles.messageRowOwn} data-own="1" data-msg-id={message.msgId}>
+      <div
+        className={styles.messageRowOwn}
+        data-own="1"
+        data-msg-id={message.msgId}
+        onClick={multiSelectMode ? () => onToggleSelect?.(message.msgId) : undefined}
+      >
+        {selectCheckbox}
         <div className={styles.messageColOwn}>
           {hasBubbleMenu ? (
             <Dropdown menu={bubbleMenu} trigger={['contextMenu']}>
@@ -410,7 +513,9 @@ export default function MessageBubble({
       className={`${styles.messageRow} ${showSender ? styles.messageRowNewSender : styles.messageRowCompact}`}
       data-own="0"
       data-msg-id={message.msgId}
+      onClick={multiSelectMode ? () => onToggleSelect?.(message.msgId) : undefined}
     >
+      {selectCheckbox}
       <div className={styles.senderCol}>
         {showSender ? (
           <Dropdown menu={senderMenu} trigger={['contextMenu']}>

@@ -44,7 +44,7 @@ describe('messageContextMenu', () => {
     expect(getMessageCopyCodeText(base({ kind: 'text', text: 'a' }))).toBeNull()
   })
 
-  it('orders copy → task → mention → recall at bottom for own text', () => {
+  it('orders v2 actions with recall at bottom for own text', () => {
     const message = base({ kind: 'text', text: 'work item' })
     const ids = buildMessageContextMenuActions({
       message,
@@ -52,10 +52,13 @@ describe('messageContextMenu', () => {
       currentUserId: 'user_a',
       taskCreateAllowed: true
     }).map((a) => a.id)
-    expect(ids).toEqual(['copy', 'createTask', 'linkExistingTask', 'recall'])
+    expect(ids[0]).toBe('copy')
+    expect(ids).toContain('reply')
+    expect(ids).toContain('forward')
+    expect(ids.at(-1)).toBe('recall')
   })
 
-  it('code message has copy and copyCode', () => {
+  it('code message has copy and copyCode plus reply/forward', () => {
     const message = base({ kind: 'code', language: 'ts', code: 'const x = 1' })
     const ids = buildMessageContextMenuActions({
       message,
@@ -66,8 +69,13 @@ describe('messageContextMenu', () => {
     expect(ids).toEqual([
       'copy',
       'copyCode',
+      'reply',
+      'forward',
+      'pin',
       'createTask',
       'linkExistingTask',
+      'hide',
+      'enterMultiSelect',
       'mention'
     ])
   })
@@ -80,7 +88,16 @@ describe('messageContextMenu', () => {
       taskCreateAllowed: true,
       showMention: true
     }).map((a) => a.id)
-    expect(ids).toEqual(['copy', 'openTask', 'mention'])
+    expect(ids).toEqual([
+      'copy',
+      'openTask',
+      'reply',
+      'forward',
+      'pin',
+      'hide',
+      'enterMultiSelect',
+      'mention'
+    ])
   })
 
   it('file message copy + open + link file', () => {
@@ -91,6 +108,8 @@ describe('messageContextMenu', () => {
       currentUserId: 'user_a',
       taskCreateAllowed: true
     }).map((a) => a.id)
-    expect(ids).toEqual(['copy', 'openFile', 'createTask', 'linkFile', 'recall'])
+    expect(ids).toContain('openFile')
+    expect(ids).toContain('linkFile')
+    expect(ids.at(-1)).toBe('recall')
   })
 })

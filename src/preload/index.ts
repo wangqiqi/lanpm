@@ -40,9 +40,10 @@ const api: LanpmApi = {
     listMessages: (groupId) => ipcRenderer.invoke('chat:listMessages', groupId),
     loadOlderMessages: (groupId, beforeLamportTs) =>
       ipcRenderer.invoke('chat:loadOlderMessages', groupId, beforeLamportTs),
-    sendText: (groupId, text) => ipcRenderer.invoke('chat:sendText', groupId, text),
-    sendCode: (groupId, code, languageHint, theme) =>
-      ipcRenderer.invoke('chat:sendCode', groupId, code, languageHint, theme),
+    sendText: (groupId, text, options) =>
+      ipcRenderer.invoke('chat:sendText', groupId, text, options),
+    sendCode: (groupId, code, languageHint, theme, options) =>
+      ipcRenderer.invoke('chat:sendCode', groupId, code, languageHint, theme, options),
     listMembers: (groupId) => ipcRenderer.invoke('chat:listMembers', groupId),
     markRead: (groupId, msgIds) => ipcRenderer.invoke('chat:markRead', groupId, msgIds),
     pickAndSendFile: (groupId) => ipcRenderer.invoke('chat:pickAndSendFile', groupId),
@@ -54,6 +55,12 @@ const api: LanpmApi = {
     recallMessage: (groupId, msgId) => ipcRenderer.invoke('chat:recallMessage', groupId, msgId),
     sendTaskRef: (groupId, taskId) => ipcRenderer.invoke('chat:sendTaskRef', groupId, taskId),
     retryMessage: (msgId) => ipcRenderer.invoke('chat:retryMessage', msgId),
+    editMessage: (groupId, msgId, text) =>
+      ipcRenderer.invoke('chat:editMessage', groupId, msgId, text),
+    listPinnedIds: (groupId) => ipcRenderer.invoke('chat:listPinnedIds', groupId),
+    togglePin: (groupId, msgId) => ipcRenderer.invoke('chat:togglePin', groupId, msgId),
+    forwardMessage: (sourceMsgId, targetGroupId, senderDisplayName) =>
+      ipcRenderer.invoke('chat:forwardMessage', sourceMsgId, targetGroupId, senderDisplayName),
     onMessage: (handler: (message: ChatMessage) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, message: ChatMessage) => {
         handler(message)

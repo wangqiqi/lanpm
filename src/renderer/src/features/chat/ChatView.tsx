@@ -52,6 +52,23 @@ import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
+import { resolveReplyQuote } from '@shared/chat/replyQuote'
+import {
+  filterVisibleMessages,
+  hideMessageLocally,
+  hideMessagesLocally,
+  listHiddenMessageIds
+} from '@shared/chat/hiddenMessages'
+import { extractMessageText } from '@shared/search/extractMessageText'
+import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
+import ReplyQuoteBar from '@renderer/features/chat/ReplyQuoteBar'
+import ForwardMessageModal from '@renderer/features/chat/ForwardMessageModal'
+import EditMessageModal from '@renderer/features/chat/EditMessageModal'
+import ChatBatchBar from '@renderer/features/chat/ChatBatchBar'
+import PinnedMessagesBar from '@renderer/features/chat/PinnedMessagesBar'
+import { useChatPinStore } from '@renderer/stores/chatPinStore'
+import { useMessageJumpHighlight } from '@renderer/hooks/useMessageJumpHighlight'
+import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
 import styles from './chat.module.css'
 
 function ChatWorkspaceFrame({
@@ -91,6 +108,7 @@ const SIDEBAR_MIN = 160
 const SIDEBAR_MAX = 400
 const SIDEBAR_DEFAULT = 240
 const SIDEBAR_WIDTH_KEY = 'lanpm-chat-sidebar-width'
+const MAX_MULTI_SELECT = 50
 
 function formatTime(iso: string): string {
   try {
@@ -126,6 +144,8 @@ export default function ChatView(): React.ReactElement {
   const loadOlderMessages = useChatStore((s) => s.loadOlderMessages)
   const sendText = useChatStore((s) => s.sendText)
   const sendCode = useChatStore((s) => s.sendCode)
+  const editMessage = useChatStore((s) => s.editMessage)
+  const forwardMessage = useChatStore((s) => s.forwardMessage)
   const pickAndSendFile = useChatStore((s) => s.pickAndSendFile)
   const sendFile = useChatStore((s) => s.sendFile)
   const captureAndSendScreenshot = useChatStore((s) => s.captureAndSendScreenshot)
@@ -155,6 +175,17 @@ export default function ChatView(): React.ReactElement {
   >(null)
   const [linkTaskId, setLinkTaskId] = useState<string | undefined>()
   const [linkSaving, setLinkSaving] = useState(false)
+  const [replyToMsgId, setReplyToMsgId] = useState<string | null>(null)
+  const [forwardModal, setForwardModal] = useState<
+    { sourceMsgId: string } | { batchMsgIds: string[] } | null
+  >(null)
+  const [editModal, setEditModal] = useState<{ msgId: string; text: string } | null>(null)
+  const [multiSelectMode, setMultiSelectMode] = useState(false)
+  const [selectedMsgIds, setSelectedMsgIds] = useState<string[]>([])
+  const [hiddenRevision, setHiddenRevision] = useState(0)
+  const pinnedIds = useChatPinStore((s) => s.pinnedByGroup[gid] ?? [])
+  const loadPins = useChatPinStore((s) => s.loadPins)
+  const togglePin = useChatPinStore((s) => s.togglePin)
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
@@ -197,7 +228,40 @@ export default function ChatView(): React.ReactElement {
 
   const messagesReady = !loading || messages.length > 0
   const { isHighlighted: isMsgHighlighted } = useSearchHighlight('msg', messagesReady)
-  const dayGroups = useMemo(() => groupMessagesByDay(messages, locale), [messages, locale])
+  const { jumpToMessage, isJumpHighlighted } = useMessageJumpHighlight()
+
+  const hiddenIds = useMemo(() => {
+    void hiddenRevision
+    return listHiddenMessageIds(gid)
+  }, [gid, hiddenRevision])
+
+  const visibleMessages = useMemo(
+    () => filterVisibleMessages(gid, messages, hiddenIds),
+    [gid, messages, hiddenIds]
+  )
+
+  const messageById = useMemo(
+    () => new Map(messages.map((m) => [m.msgId, m])),
+    [messages]
+  )
+
+  const resolveSenderName = useCallback(
+    (userId: string) => {
+      const member = members.find((m) => m.userId === userId)
+      return resolveMemberDisplayName(member?.displayName ?? userId, t)
+    },
+    [members, t]
+  )
+
+  const pendingReplyQuote = useMemo(() => {
+    if (!replyToMsgId) return null
+    return resolveReplyQuote(replyToMsgId, (id) => messageById.get(id), resolveSenderName)
+  }, [replyToMsgId, messageById, resolveSenderName])
+
+  const dayGroups = useMemo(
+    () => groupMessagesByDay(visibleMessages, locale),
+    [visibleMessages, locale]
+  )
 
   const groupType = gid ? getGroupType(gid) : 'project'
   const originGroupId = inDm ? (dmSession?.originGroupId ?? lastOriginGroupId) : gid
@@ -315,12 +379,25 @@ export default function ChatView(): React.ReactElement {
     return unsub
   }, [projectGroupId, taskAllowed, loadTasks])
 
-  useMarkRead(gid, messages, currentUserId)
+  useMarkRead(gid, visibleMessages, currentUserId)
 
-  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined
+  useEffect(() => {
+    if (!gid) return
+    void loadPins(gid)
+  }, [gid, loadPins])
+
+  useEffect(() => {
+    setReplyToMsgId(null)
+    setMultiSelectMode(false)
+    setSelectedMsgIds([])
+    setForwardModal(null)
+    setEditModal(null)
+  }, [gid])
+
+  const lastMessage = visibleMessages.length > 0 ? visibleMessages[visibleMessages.length - 1] : undefined
   const { pendingNewCount, onMessagesScroll, jumpToLatest } = useNewMessageScroll({
     listRef,
-    messageCount: messages.length,
+    messageCount: visibleMessages.length,
     lastSenderUserId: lastMessage?.senderUserId,
     currentUserId,
     groupKey: gid
@@ -502,14 +579,16 @@ export default function ChatView(): React.ReactElement {
 
     pickedTaskRefIdRef.current = null
     const savedDraft = draft
+    const replyId = replyToMsgId ?? undefined
     try {
-      await sendText(gid, text)
+      await sendText(gid, text, replyId ? { replyToMsgId: replyId } : undefined)
       setDraft('')
+      setReplyToMsgId(null)
     } catch (err) {
       message.error(formatError(err, 'chat.sendFailed'))
       setDraft(savedDraft)
     }
-  }, [draft, gid, sendText, sendTaskRef, createFromChat, upsertMessage, taskAllowed, tasks, t, message, formatError])
+  }, [draft, gid, sendText, sendTaskRef, createFromChat, upsertMessage, taskAllowed, tasks, t, message, formatError, replyToMsgId])
 
   const handleCreateTask = useCallback(
     async (title: string) => {
@@ -580,6 +659,11 @@ export default function ChatView(): React.ReactElement {
   )
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (e.key === 'Escape' && replyToMsgId) {
+      e.preventDefault()
+      setReplyToMsgId(null)
+      return
+    }
     if (suggestMode === 'task' && handleTaskKeyDown(e)) return
     if (suggestMode === 'mention' && handleMentionKeyDown(e)) return
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -613,6 +697,121 @@ export default function ChatView(): React.ReactElement {
     },
     [retryMessage, message, t]
   )
+
+  const handleReply = useCallback((msg: ChatMessage) => {
+    setReplyToMsgId(msg.msgId)
+    requestAnimationFrame(() => draftInputRef.current?.focus())
+  }, [])
+
+  const handleForwardOne = useCallback((msg: ChatMessage) => {
+    setForwardModal({ sourceMsgId: msg.msgId })
+  }, [])
+
+  const handlePinToggle = useCallback(
+    async (msgId: string) => {
+      if (!gid) return
+      try {
+        await togglePin(gid, msgId)
+      } catch (err) {
+        message.error(formatError(err, 'chat.pinFailed'))
+      }
+    },
+    [gid, togglePin, message, formatError]
+  )
+
+  const handleHideMessage = useCallback(
+    (msgId: string) => {
+      hideMessageLocally(gid, msgId)
+      setHiddenRevision((n) => n + 1)
+      message.success(t('chat.hideMessageDone'))
+    },
+    [gid, message, t]
+  )
+
+  const handleEditMessage = useCallback((msg: ChatMessage) => {
+    if (msg.content.kind !== 'text') return
+    setEditModal({ msgId: msg.msgId, text: msg.content.text })
+  }, [])
+
+  const handleConfirmEdit = useCallback(
+    async (text: string) => {
+      if (!gid || !editModal) return
+      try {
+        await editMessage(gid, editModal.msgId, text)
+        setEditModal(null)
+        message.success(t('chat.editMessageDone'))
+      } catch (err) {
+        message.error(formatError(err, 'chat.editMessageFailed'))
+      }
+    },
+    [gid, editModal, editMessage, message, t, formatError]
+  )
+
+  const handleConfirmForward = useCallback(
+    async (targetGroupId: string) => {
+      if (!forwardModal) return
+      const senderName = useIdentityStore.getState().user?.displayName
+      try {
+        if ('batchMsgIds' in forwardModal) {
+          for (const msgId of forwardModal.batchMsgIds) {
+            await forwardMessage(msgId, targetGroupId, senderName)
+          }
+          message.success(t('chat.batchForwardDone'))
+          setMultiSelectMode(false)
+          setSelectedMsgIds([])
+        } else {
+          await forwardMessage(forwardModal.sourceMsgId, targetGroupId, senderName)
+          message.success(t('chat.forwardMessageDone'))
+        }
+        setForwardModal(null)
+      } catch (err) {
+        message.error(formatError(err, 'chat.forwardMessageFailed'))
+      }
+    },
+    [forwardModal, forwardMessage, message, t, formatError]
+  )
+
+  const toggleSelectMessage = useCallback((msgId: string) => {
+    setSelectedMsgIds((prev) => {
+      if (prev.includes(msgId)) return prev.filter((id) => id !== msgId)
+      if (prev.length >= MAX_MULTI_SELECT) {
+        message.warning(t('chat.batchSelectLimit', { max: MAX_MULTI_SELECT }))
+        return prev
+      }
+      return [...prev, msgId]
+    })
+  }, [message, t])
+
+  const handleEnterMultiSelect = useCallback((msgId: string) => {
+    setMultiSelectMode(true)
+    setSelectedMsgIds([msgId])
+  }, [])
+
+  const handleBatchCopy = useCallback(() => {
+    const texts = selectedMsgIds
+      .map((id) => messageById.get(id))
+      .filter((m): m is ChatMessage => Boolean(m))
+      .map((m) => extractMessageText(m.content))
+      .filter(Boolean)
+    if (texts.length === 0) return
+    void copyTextToClipboard(texts.join('\n\n')).then((ok) => {
+      if (ok) message.success(t('chat.copyMessageDone'))
+      else message.error(t('chat.copyMessageFailed'))
+    })
+  }, [selectedMsgIds, messageById, message, t])
+
+  const handleBatchForward = useCallback(() => {
+    if (selectedMsgIds.length === 0) return
+    setForwardModal({ batchMsgIds: selectedMsgIds })
+  }, [selectedMsgIds])
+
+  const handleBatchHide = useCallback(() => {
+    hideMessagesLocally(gid, selectedMsgIds)
+    setHiddenRevision((n) => n + 1)
+    setMultiSelectMode(false)
+    setSelectedMsgIds([])
+    message.success(t('chat.hideMessageDone'))
+  }, [gid, selectedMsgIds, message, t])
 
   return (
     <div className={styles.chatLayout}>
@@ -729,8 +928,20 @@ export default function ChatView(): React.ReactElement {
             <Text className={styles.chatContextMeta}>
               {t('chat.onlineStats', { online: onlineCount, total: members.length })}
             </Text>
+            {!multiSelectMode ? (
+              <Button size="small" type="text" onClick={() => setMultiSelectMode(true)}>
+                {t('chat.enterMultiSelect')}
+              </Button>
+            ) : null}
           </div>
         )}
+        <PinnedMessagesBar
+          pinnedIds={pinnedIds}
+          messages={messages}
+          members={members}
+          onJump={jumpToMessage}
+          onUnpin={(msgId) => void handlePinToggle(msgId)}
+        />
         <div className={styles.chatStreamColumn}>
         <div className={styles.messagesWrap}>
         <div className={styles.messages} ref={listRef} onScroll={handleMessagesScroll}>
@@ -741,7 +952,7 @@ export default function ChatView(): React.ReactElement {
               message={t('chat.loadFailed')}
               onRetry={() => void loadMessages(gid)}
             />
-          ) : messages.length === 0 ? (
+          ) : visibleMessages.length === 0 ? (
             <Text className={styles.empty} type="secondary">
               {t('chat.noMessages')}
             </Text>
@@ -762,6 +973,13 @@ export default function ChatView(): React.ReactElement {
                       prev.senderUserId !== msg.senderUserId ||
                       msg.createdAt.slice(0, 16) !== prev.createdAt.slice(0, 16)
                     const delivery = deliveryStatusMeta(msg.deliveryStatus, t)
+                    const replyQuote = msg.replyToMsgId
+                      ? resolveReplyQuote(
+                          msg.replyToMsgId,
+                          (id) => messageById.get(id),
+                          resolveSenderName
+                        )
+                      : null
                     return (
                       <MessageBubble
                         key={msg.msgId}
@@ -774,8 +992,22 @@ export default function ChatView(): React.ReactElement {
                         deliveryFailed={delivery.failed}
                         formatTime={formatTime}
                         highlighted={isMsgHighlighted(msg.msgId)}
+                        jumpHighlighted={isJumpHighlighted(msg.msgId)}
                         showSender={showSender}
                         dmAllowed={dmAllowed && !inDm}
+                        replyQuote={replyQuote}
+                        onJumpToReply={jumpToMessage}
+                        isPinned={pinnedIds.includes(msg.msgId)}
+                        multiSelectMode={multiSelectMode}
+                        selected={selectedMsgIds.includes(msg.msgId)}
+                        onToggleSelect={toggleSelectMessage}
+                        onReply={handleReply}
+                        onForward={handleForwardOne}
+                        onPin={(msgId) => void handlePinToggle(msgId)}
+                        onUnpin={(msgId) => void handlePinToggle(msgId)}
+                        onEdit={handleEditMessage}
+                        onHide={handleHideMessage}
+                        onEnterMultiSelect={handleEnterMultiSelect}
                         onMentionSender={insertMention}
                         onViewSender={viewSenderProfile}
                         onDmSender={startDmWithMember}
@@ -810,7 +1042,21 @@ export default function ChatView(): React.ReactElement {
           </button>
         )}
         </div>
+        </div>
 
+        {multiSelectMode ? (
+          <ChatBatchBar
+            selectedCount={selectedMsgIds.length}
+            maxCount={MAX_MULTI_SELECT}
+            onCopy={handleBatchCopy}
+            onForward={handleBatchForward}
+            onHide={handleBatchHide}
+            onCancel={() => {
+              setMultiSelectMode(false)
+              setSelectedMsgIds([])
+            }}
+          />
+        ) : (
         <div className={styles.composer} style={{ height: composerHeight }}>
           <div
             className={`${styles.resizeHandle} ${resizing ? styles.resizeHandleActive : ''}`}
@@ -908,6 +1154,9 @@ export default function ChatView(): React.ReactElement {
                 ]}
               />
             </div>
+            {pendingReplyQuote ? (
+              <ReplyQuoteBar quote={pendingReplyQuote} onDismiss={() => setReplyToMsgId(null)} />
+            ) : null}
             <div className={styles.composerBody}>
               <div className={styles.inputMain}>
                 {inputMode === 'text' ? (
@@ -956,9 +1205,23 @@ export default function ChatView(): React.ReactElement {
             </div>
           </div>
         </div>
-        </div>
+        )}
           </>
         )}
+
+        <ForwardMessageModal
+          open={forwardModal != null}
+          sourceGroupId={gid}
+          onCancel={() => setForwardModal(null)}
+          onConfirm={handleConfirmForward}
+        />
+
+        <EditMessageModal
+          open={editModal != null}
+          initialText={editModal?.text ?? ''}
+          onCancel={() => setEditModal(null)}
+          onConfirm={handleConfirmEdit}
+        />
 
         <CodeSendModal
           open={codeModalOpen}

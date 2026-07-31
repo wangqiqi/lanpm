@@ -65,6 +65,18 @@ import {
   updateDeliveryStatus
 } from '../storage/repositories/messageRepository'
 import { handleChatRecall, recallMessage } from './recallMessageService'
+import { handleChatEdit, editTextMessage } from './editMessageService'
+import {
+  handleChatPin,
+  listPinnedMessageIds,
+  togglePinnedMessage
+} from './pinMessageService'
+import {
+  buildForwardedTextContent,
+  canForwardMessage,
+  cloneContentForForward,
+  forwardedFromForMessage
+} from '../../shared/chat/forwardMessage'
 
 const subscribedGroups = new Map<string, () => void>()
 
@@ -105,6 +117,14 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'chat_recall') {
     handleChatRecall(db, envelope)
+    return
+  }
+  if (envelope.type === 'chat_edit') {
+    handleChatEdit(db, envelope)
+    return
+  }
+  if (envelope.type === 'chat_pin') {
+    handleChatPin(db, envelope)
     return
   }
   if (envelope.type === 'read_receipt_sync_request') {
@@ -221,12 +241,17 @@ export function listOlderGroupMessages(
   return listMessagesBeforePage(db, groupId, beforeLamportTs, CHAT_HISTORY_PAGE_SIZE)
 }
 
+export interface PublishChatMessageOptions {
+  replyToMsgId?: string
+}
+
 export async function publishChatMessage(
   db: Database,
   groupId: string,
   type: MessageType,
   content: MessageContent,
-  mentions?: string[]
+  mentions?: string[],
+  options?: PublishChatMessageOptions
 ): Promise<ChatMessage> {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user || !status.device) {
@@ -256,7 +281,8 @@ export async function publishChatMessage(
     lamportTs,
     createdAt: now,
     deliveryStatus: 'sending',
-    mentions: mentions?.length ? mentions : undefined
+    mentions: mentions?.length ? mentions : undefined,
+    replyToMsgId: options?.replyToMsgId
   }
 
   if (isAnonymousGroup(db, groupId)) {
@@ -335,7 +361,8 @@ export async function retryFailedMessage(db: Database, msgId: string): Promise<C
 export async function sendTextMessage(
   db: Database,
   groupId: string,
-  text: string
+  text: string,
+  options?: PublishChatMessageOptions
 ): Promise<ChatMessage> {
   const trimmed = text.trim()
   if (!trimmed) throwLanpm('stub.messageEmpty')
@@ -346,7 +373,8 @@ export async function sendTextMessage(
     groupId,
     'text',
     { kind: 'text', text: trimmed },
-    mentions
+    mentions,
+    options
   )
 }
 
@@ -369,7 +397,29 @@ export async function sendAiShareMessage(
   })
 }
 
-export { listGroupMembers, recallMessage }
+export { listGroupMembers, recallMessage, editTextMessage, listPinnedMessageIds, togglePinnedMessage }
+
+export async function forwardMessageToGroup(
+  db: Database,
+  source: ChatMessage,
+  targetGroupId: string,
+  senderDisplayName?: string
+): Promise<ChatMessage> {
+  if (!canForwardMessage(source)) throwLanpm('err.chatForwardNotAllowed')
+  const from = forwardedFromForMessage(source, senderDisplayName)
+  if (source.content.kind === 'text') {
+    const content = buildForwardedTextContent(source, from)
+    return publishChatMessage(db, targetGroupId, 'text', content)
+  }
+  const cloned = cloneContentForForward(source.content)
+  if (cloned.kind === 'text') {
+    return publishChatMessage(db, targetGroupId, 'text', {
+      ...cloned,
+      meta: { ...cloned.meta, forwardedFrom: from }
+    })
+  }
+  return publishChatMessage(db, targetGroupId, source.type, cloned)
+}
 
 export async function pickAndSendFileMessage(
   db: Database,
@@ -417,7 +467,8 @@ export async function sendCodeMessage(
   groupId: string,
   code: string,
   languageHint?: string,
-  theme?: 'light' | 'dark'
+  theme?: 'light' | 'dark',
+  options?: PublishChatMessageOptions
 ): Promise<ChatMessage> {
   if (isAnonymousGroup(db, groupId)) {
     throwLanpm('err.anonymousTextOnly')
@@ -425,12 +476,19 @@ export async function sendCodeMessage(
   const trimmed = code.trim()
   if (!trimmed) throwLanpm('stub.codeEmpty')
   const language = detectLanguage(trimmed, languageHint)
-  return publishChatMessage(db, groupId, 'code', {
-    kind: 'code',
-    language,
-    code: trimmed,
-    theme
-  })
+  return publishChatMessage(
+    db,
+    groupId,
+    'code',
+    {
+      kind: 'code',
+      language,
+      code: trimmed,
+      theme
+    },
+    undefined,
+    options
+  )
 }
 
 export async function sendTaskRefMessage(

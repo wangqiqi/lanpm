@@ -4,9 +4,18 @@ export type MessageType = 'text' | 'code' | 'file' | 'task_ref' | 'system'
 
 export type MessageDeliveryStatus = 'sending' | 'sent' | 'read' | 'failed'
 
+export interface ChatForwardedFrom {
+  groupId: string
+  senderUserId: string
+  senderDisplayName?: string
+  msgId: string
+}
+
 export interface ChatMessageMeta {
   source?: 'ai-assistant'
   aiThreadId?: string
+  forwardedFrom?: ChatForwardedFrom
+  editedAt?: string
 }
 
 export type MessageContent =

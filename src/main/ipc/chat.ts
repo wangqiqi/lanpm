@@ -10,12 +10,17 @@ import {
   sendFileMessage,
   sendTextMessage,
   sendTaskRefMessage,
-  retryFailedMessage
+  retryFailedMessage,
+  editTextMessage,
+  listPinnedMessageIds,
+  togglePinnedMessage,
+  forwardMessageToGroup
 } from '../chat/chatService'
 import { captureAndSendScreenshot } from '../screenshot/screenshotService'
 import { markMessagesRead } from '../chat/readReceiptService'
 import { getDatabase } from '../storage'
-import { CHAT_IPC } from '../../shared/chat/channels'
+import { getMessageById } from '../storage/repositories/messageRepository'
+import { CHAT_IPC, type SendChatOptions } from '../../shared/chat/channels'
 
 export function registerChatIpc(): void {
   ipcMain.handle(CHAT_IPC.listMessages, (_event, groupId: string) => {
@@ -38,12 +43,15 @@ export function registerChatIpc(): void {
     }
   )
 
-  ipcMain.handle(CHAT_IPC.sendText, (_event, groupId: string, text: string) => {
-    if (typeof groupId !== 'string' || !groupId) {
-      throw new Error('groupId required')
+  ipcMain.handle(
+    CHAT_IPC.sendText,
+    (_event, groupId: string, text: string, options?: SendChatOptions) => {
+      if (typeof groupId !== 'string' || !groupId) {
+        throw new Error('groupId required')
+      }
+      return sendTextMessage(getDatabase(), groupId, text, options)
     }
-    return sendTextMessage(getDatabase(), groupId, text)
-  })
+  )
 
   ipcMain.handle(CHAT_IPC.sendTaskRef, (_event, groupId: string, taskId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
@@ -60,11 +68,11 @@ export function registerChatIpc(): void {
 
   ipcMain.handle(
     CHAT_IPC.sendCode,
-    (_event, groupId: string, code: string, languageHint?: string, theme?: 'light' | 'dark') => {
+    (_event, groupId: string, code: string, languageHint?: string, theme?: 'light' | 'dark', options?: SendChatOptions) => {
       if (typeof groupId !== 'string' || !groupId) {
         throw new Error('groupId required')
       }
-      return sendCodeMessage(getDatabase(), groupId, code, languageHint, theme)
+      return sendCodeMessage(getDatabase(), groupId, code, languageHint, theme, options)
     }
   )
 
@@ -129,4 +137,38 @@ export function registerChatIpc(): void {
     }
     return retryFailedMessage(getDatabase(), msgId)
   })
+
+  ipcMain.handle(
+    CHAT_IPC.editMessage,
+    (_event, groupId: string, msgId: string, text: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof msgId !== 'string' || !msgId) throw new Error('msgId required')
+      return editTextMessage(getDatabase(), groupId, msgId, text)
+    }
+  )
+
+  ipcMain.handle(CHAT_IPC.listPinnedIds, (_event, groupId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    return listPinnedMessageIds(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(CHAT_IPC.togglePin, (_event, groupId: string, msgId: string) => {
+    if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    if (typeof msgId !== 'string' || !msgId) throw new Error('msgId required')
+    return togglePinnedMessage(getDatabase(), groupId, msgId)
+  })
+
+  ipcMain.handle(
+    CHAT_IPC.forwardMessage,
+    (_event, sourceMsgId: string, targetGroupId: string, senderDisplayName?: string) => {
+      if (typeof sourceMsgId !== 'string' || !sourceMsgId) throw new Error('sourceMsgId required')
+      if (typeof targetGroupId !== 'string' || !targetGroupId) {
+        throw new Error('targetGroupId required')
+      }
+      const db = getDatabase()
+      const source = getMessageById(db, sourceMsgId)
+      if (!source) throw new Error('message not found')
+      return forwardMessageToGroup(db, source, targetGroupId, senderDisplayName)
+    }
+  )
 }

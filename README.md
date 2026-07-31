@@ -115,7 +115,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.78.8`** — Plugin `menus[]` POC (`topbar.user` · `chat.message.context`); per-group nav v1.78.7. License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.78.9`** — Richer chat message context menu (copy · task links · @mention); plugin `menus[]` v1.78.8. License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

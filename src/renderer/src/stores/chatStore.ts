@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { ChatMessage } from '@shared/chat/types'
+import type { SendChatOptions } from '@shared/chat/channels'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
 interface ChatState {
@@ -11,14 +12,20 @@ interface ChatState {
   loadMessages: (groupId: string) => Promise<void>
   loadOlderMessages: (groupId: string) => Promise<void>
   clearLoadError: (groupId: string) => void
-  sendText: (groupId: string, text: string) => Promise<void>
-  sendCode: (groupId: string, code: string, languageHint?: string) => Promise<void>
+  sendText: (groupId: string, text: string, options?: SendChatOptions) => Promise<void>
+  sendCode: (groupId: string, code: string, languageHint?: string, options?: SendChatOptions) => Promise<void>
   pickAndSendFile: (groupId: string) => Promise<void>
   sendFile: (groupId: string, filePath: string) => Promise<void>
   sendExistingFile: (groupId: string, fileId: string) => Promise<void>
   captureAndSendScreenshot: (groupId: string) => Promise<void>
   recallMessage: (groupId: string, msgId: string) => Promise<void>
   retryMessage: (msgId: string) => Promise<ChatMessage>
+  editMessage: (groupId: string, msgId: string, text: string) => Promise<void>
+  forwardMessage: (
+    sourceMsgId: string,
+    targetGroupId: string,
+    senderDisplayName?: string
+  ) => Promise<ChatMessage>
   sendTaskRef: (groupId: string, taskId: string) => Promise<void>
   upsertMessage: (message: ChatMessage) => void
   /** DATA-CHATSTORE-EVICT — 本机清理后丢弃内存缓存 */
@@ -91,13 +98,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set((s) => ({ loadingOlder: { ...s.loadingOlder, [groupId]: false } }))
     }
   },
-  sendText: async (groupId, text) => {
-    const message = await getLanpmApi().chat.sendText(groupId, text)
+  sendText: async (groupId, text, options) => {
+    const message = await getLanpmApi().chat.sendText(groupId, text, options)
     get().upsertMessage(message)
   },
-  sendCode: async (groupId, code, languageHint) => {
+  sendCode: async (groupId, code, languageHint, options) => {
     const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-    const message = await getLanpmApi().chat.sendCode(groupId, code, languageHint, theme)
+    const message = await getLanpmApi().chat.sendCode(groupId, code, languageHint, theme, options)
     get().upsertMessage(message)
   },
   pickAndSendFile: async (groupId) => {
@@ -122,6 +129,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
   retryMessage: async (msgId) => {
     const message = await getLanpmApi().chat.retryMessage(msgId)
+    get().upsertMessage(message)
+    return message
+  },
+  editMessage: async (groupId, msgId, text) => {
+    const message = await getLanpmApi().chat.editMessage(groupId, msgId, text)
+    get().upsertMessage(message)
+  },
+  forwardMessage: async (sourceMsgId, targetGroupId, senderDisplayName) => {
+    const message = await getLanpmApi().chat.forwardMessage(
+      sourceMsgId,
+      targetGroupId,
+      senderDisplayName
+    )
     get().upsertMessage(message)
     return message
   },

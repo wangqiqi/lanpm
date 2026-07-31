@@ -1,14 +1,23 @@
 import type { ChatMessage } from './types'
 import { canRecallMessage } from './recall'
+import { canForwardMessage } from './forwardMessage'
+import { canEditMessage } from './messageEdit'
 
 export type MessageContextMenuActionId =
   | 'copy'
   | 'copyCode'
   | 'openTask'
   | 'openFile'
+  | 'reply'
+  | 'forward'
+  | 'pin'
+  | 'unpin'
   | 'createTask'
   | 'linkExistingTask'
   | 'linkFile'
+  | 'edit'
+  | 'hide'
+  | 'enterMultiSelect'
   | 'mention'
   | 'recall'
 
@@ -66,17 +75,25 @@ export interface BuildMessageContextMenuInput {
   taskCreateAllowed: boolean
   /** Other-party bubble — show @mention in bubble menu */
   showMention?: boolean
+  isPinned?: boolean
+  multiSelectActive?: boolean
+}
+
+function isInteractive(message: ChatMessage): boolean {
+  return message.content.kind !== 'recalled' && message.content.kind !== 'system'
 }
 
 /**
  * Flat core menu action ids in display order:
- * copy → task/nav → mention → recall (own only, bottom).
+ * copy → nav → reply/forward/pin → task → edit/hide/multi → mention → recall (own only, bottom).
  * Plugin items append after core actions without dividers (host wiring).
  */
 export function buildMessageContextMenuActions(
   input: BuildMessageContextMenuInput
 ): MessageContextMenuAction[] {
-  const { message, own, currentUserId, taskCreateAllowed, showMention } = input
+  const { message, own, currentUserId, taskCreateAllowed, showMention, isPinned, multiSelectActive } =
+    input
+  if (multiSelectActive) return []
   const actions: MessageContextMenuAction[] = []
 
   if (getMessageCopyPayload(message)) {
@@ -93,6 +110,16 @@ export function buildMessageContextMenuActions(
     actions.push({ id: 'openFile' })
   }
 
+  if (isInteractive(message)) {
+    actions.push({ id: 'reply' })
+  }
+  if (canForwardMessage(message)) {
+    actions.push({ id: 'forward' })
+  }
+  if (isInteractive(message)) {
+    actions.push({ id: isPinned ? 'unpin' : 'pin' })
+  }
+
   if (taskCreateAllowed && isTaskCreatable(message)) {
     actions.push({ id: 'createTask' })
     if (message.content.kind === 'text' || message.content.kind === 'code') {
@@ -101,6 +128,15 @@ export function buildMessageContextMenuActions(
     if (message.content.kind === 'file') {
       actions.push({ id: 'linkFile' })
     }
+  }
+
+  if (own && currentUserId && canEditMessage(message, currentUserId)) {
+    actions.push({ id: 'edit' })
+  }
+
+  if (isInteractive(message)) {
+    actions.push({ id: 'hide' })
+    actions.push({ id: 'enterMultiSelect' })
   }
 
   if (!own && showMention) {

@@ -1377,3 +1377,187 @@
   font-size: var(--lanpm-font-body);
   text-align: center;
 }
+
+.replyQuoteBar {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 0 12px 8px;
+  border-left: 3px solid var(--lanpm-accent);
+  background: var(--lanpm-fill-secondary);
+  border-radius: var(--lanpm-radius-sm);
+}
+
+.replyQuoteBarBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.replyQuoteBarLabel {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+}
+
+.replyQuoteBarSender {
+  font-weight: 600;
+  font-size: var(--lanpm-font-body);
+}
+
+.replyQuoteBarPreview {
+  font-size: var(--lanpm-font-body);
+  color: var(--lanpm-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.replyQuoteBarClose {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--lanpm-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.messageReplyStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 6px 8px;
+  border-left: 2px solid var(--lanpm-accent);
+  background: color-mix(in srgb, var(--lanpm-accent-fill) 25%, transparent);
+  border-radius: var(--lanpm-radius-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.messageReplyStripSender {
+  font-size: var(--lanpm-font-caption);
+  font-weight: 600;
+}
+
+.messageReplyStripPreview {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editedLabel {
+  margin-left: 6px;
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-tertiary);
+}
+
+.forwardedLabel {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+}
+
+.pinnedBar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--lanpm-border);
+  background: var(--lanpm-surface-solid);
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.pinnedItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pinnedItemBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: var(--lanpm-radius-sm);
+  background: var(--lanpm-fill-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.pinnedItemSender {
+  font-size: var(--lanpm-font-caption);
+  font-weight: 600;
+}
+
+.pinnedItemPreview {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pinnedItemUnpin {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--lanpm-radius-sm);
+  background: transparent;
+  color: var(--lanpm-text-secondary);
+  cursor: pointer;
+}
+
+.batchBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--lanpm-border);
+  background: var(--lanpm-surface-solid);
+}
+
+.batchBarCount {
+  font-size: var(--lanpm-font-body);
+  color: var(--lanpm-text-secondary);
+}
+
+.batchBarActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.multiSelectCheckbox {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 8px;
+  margin-right: 4px;
+}
+
+.messageRowHighlight {
+  animation: msgHighlightPulse 1.2s ease-out 2;
+}
+
+@keyframes msgHighlightPulse {
+  0%,
+  100% {
+    background: transparent;
+  }
+  50% {
+    background: color-mix(in srgb, var(--lanpm-accent-fill) 45%, transparent);
+  }
+}

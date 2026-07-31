@@ -14,5 +14,13 @@ export const CHAT_IPC = {
   captureAndSendScreenshot: 'chat:captureAndSendScreenshot',
   recallMessage: 'chat:recallMessage',
   sendTaskRef: 'chat:sendTaskRef',
-  retryMessage: 'chat:retryMessage'
+  retryMessage: 'chat:retryMessage',
+  editMessage: 'chat:editMessage',
+  listPinnedIds: 'chat:listPinnedIds',
+  togglePin: 'chat:togglePin',
+  forwardMessage: 'chat:forwardMessage'
 } as const
+
+export interface SendChatOptions {
+  replyToMsgId?: string
+}

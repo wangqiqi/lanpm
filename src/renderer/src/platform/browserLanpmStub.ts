@@ -2,6 +2,15 @@ import type { ChatMessage } from '@shared/chat/types'
 import { CHAT_HISTORY_PAGE_SIZE } from '@shared/chat/pagination'
 import type { GroupMemberView } from '@shared/chat/members'
 import { canRecallMessage, toRecalledMessage } from '@shared/chat/recall'
+import type { SendChatOptions } from '@shared/chat/channels'
+import { canEditMessage } from '@shared/chat/messageEdit'
+import {
+  canForwardMessage,
+  buildForwardedTextContent,
+  forwardedFromForMessage,
+  cloneContentForForward
+} from '@shared/chat/forwardMessage'
+import { togglePinId, mergePinPayload, type ChatPinPayload } from '@shared/chat/pin'
 import { parseMentions } from '@shared/chat/mentions'
 import { detectLanguage } from '@shared/chat/detectLanguage'
 import { isDmGroupId, parseDmGroupId } from '@shared/chat/dmSession'
@@ -58,6 +67,7 @@ import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
 const CHAT_STORAGE_KEY = 'lanpm.dev.chat'
+const PIN_STORAGE_KEY = 'lanpm.dev.chatPins'
 const TASK_STORAGE_KEY = 'lanpm.dev.tasks'
 const CHECKLIST_STORAGE_KEY = 'lanpm.dev.checklists'
 const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
@@ -583,6 +593,43 @@ function writeChatMessages(groupId: string, messages: ChatMessage[]): void {
   }
 }
 
+function readPinPayload(groupId: string): ChatPinPayload | null {
+  try {
+    const raw = localStorage.getItem(PIN_STORAGE_KEY)
+    if (!raw) return null
+    const all = JSON.parse(raw) as Record<string, ChatPinPayload>
+    return all[groupId] ?? null
+  } catch {
+    return null
+  }
+}
+
+function writePinPayload(payload: ChatPinPayload): void {
+  try {
+    const raw = localStorage.getItem(PIN_STORAGE_KEY)
+    const all = raw ? (JSON.parse(raw) as Record<string, ChatPinPayload>) : {}
+    all[payload.groupId] = payload
+    localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(all))
+  } catch {
+    /* ignore */
+  }
+}
+
+function findMessageById(msgId: string): { groupId: string; message: ChatMessage } | null {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+    if (!raw) return null
+    const all = JSON.parse(raw) as Record<string, ChatMessage[]>
+    for (const [groupId, list] of Object.entries(all)) {
+      const message = list.find((m) => m.msgId === msgId)
+      if (message) return { groupId, message }
+    }
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
 function readAllFiles(): Record<string, FileMeta[]> {
   try {
     const raw = localStorage.getItem(FILE_STORAGE_KEY)
@@ -869,7 +916,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         const messages = hasMore ? all.slice(-CHAT_HISTORY_PAGE_SIZE) : all
         return { messages, hasMore }
       },
-      sendText: async (groupId, text) => {
+      sendText: async (groupId, text, options?: SendChatOptions) => {
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
           throw stubError('stub.identityRequired')
@@ -890,7 +937,8 @@ export function createBrowserLanpmStub(): LanpmApi {
           lamportTs,
           createdAt: new Date().toISOString(),
           deliveryStatus: 'sent',
-          mentions: mentions.length ? mentions : undefined
+          mentions: mentions.length ? mentions : undefined,
+          replyToMsgId: options?.replyToMsgId
         }
         writeChatMessages(groupId, [...prev, msg])
         for (const fn of chatListeners) fn(msg)
@@ -922,7 +970,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         for (const fn of chatListeners) fn(msg)
         return msg
       },
-      sendCode: async (groupId, code, languageHint, theme) => {
+      sendCode: async (groupId, code, languageHint, theme, options?: SendChatOptions) => {
         const status = readStatus()
         if (!status.configured || !status.user || !status.device) {
           throw stubError('stub.identityRequired')
@@ -941,7 +989,8 @@ export function createBrowserLanpmStub(): LanpmApi {
           content: { kind: 'code', language, code: trimmed, theme },
           lamportTs,
           createdAt: new Date().toISOString(),
-          deliveryStatus: 'sent'
+          deliveryStatus: 'sent',
+          replyToMsgId: options?.replyToMsgId
         }
         writeChatMessages(groupId, [...prev, msg])
         for (const fn of chatListeners) fn(msg)
@@ -1005,6 +1054,84 @@ export function createBrowserLanpmStub(): LanpmApi {
           return sent
         }
         throw stubError('stub.messageNotFound')
+      },
+      editMessage: async (groupId, msgId, text) => {
+        const status = readStatus()
+        if (!status.configured || !status.user) throw stubError('stub.identityRequired')
+        const trimmed = text.trim()
+        if (!trimmed) throw stubError('stub.messageEmpty')
+        const prev = readChatMessages(groupId)
+        const existing = prev.find((m) => m.msgId === msgId)
+        if (!existing) throw stubError('stub.messageNotFound')
+        if (!canEditMessage(existing, status.user.userId)) throw stubError('err.chatEditNotAllowed')
+        const editedAt = new Date().toISOString()
+        const updated: ChatMessage = {
+          ...existing,
+          content: {
+            kind: 'text',
+            text: trimmed,
+            meta: { ...existing.content.kind === 'text' ? existing.content.meta : undefined, editedAt }
+          }
+        }
+        writeChatMessages(
+          groupId,
+          prev.map((m) => (m.msgId === msgId ? updated : m))
+        )
+        for (const fn of chatListeners) fn(updated)
+        return updated
+      },
+      listPinnedIds: async (groupId) => readPinPayload(groupId)?.msgIds ?? [],
+      togglePin: async (groupId, msgId) => {
+        const status = readStatus()
+        if (!status.configured || !status.user) throw stubError('stub.identityRequired')
+        const local = readPinPayload(groupId)
+        const msgIds = togglePinId(local?.msgIds ?? [], msgId)
+        const payload: ChatPinPayload = {
+          groupId,
+          msgIds,
+          updatedAt: new Date().toISOString(),
+          updatedBy: status.user.userId
+        }
+        writePinPayload(mergePinPayload(local, payload))
+        return msgIds
+      },
+      forwardMessage: async (sourceMsgId, targetGroupId, senderDisplayName) => {
+        const status = readStatus()
+        if (!status.configured || !status.user || !status.device) {
+          throw stubError('stub.identityRequired')
+        }
+        const found = findMessageById(sourceMsgId)
+        if (!found) throw stubError('stub.messageNotFound')
+        const { message: source } = found
+        if (!canForwardMessage(source)) throw stubError('err.chatForwardNotAllowed')
+        const from = forwardedFromForMessage(source, senderDisplayName)
+        const prev = readChatMessages(targetGroupId)
+        const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+        let content = source.content
+        if (source.content.kind === 'text') {
+          content = buildForwardedTextContent(source, from)
+        } else {
+          const cloned = cloneContentForForward(source.content)
+          if (cloned.kind === 'text') {
+            content = { ...cloned, meta: { ...cloned.meta, forwardedFrom: from } }
+          } else {
+            content = cloned
+          }
+        }
+        const msg: ChatMessage = {
+          msgId: `msg_${crypto.randomUUID()}`,
+          groupId: targetGroupId,
+          senderUserId: status.user.userId,
+          senderDeviceId: status.device.deviceId,
+          type: source.type,
+          content,
+          lamportTs,
+          createdAt: new Date().toISOString(),
+          deliveryStatus: 'sent'
+        }
+        writeChatMessages(targetGroupId, [...prev, msg])
+        for (const fn of chatListeners) fn(msg)
+        return msg
       },
       markRead: async (groupId, msgIds) => {
         const status = readStatus()

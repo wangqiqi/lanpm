@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.79.0] - 2026-07-31
+
+### Added
+
+- **聊天消息进阶交互**：引用回复（引用条 + 气泡展示 + 跳转高亮）· 转发 · 群置顶（`chat_pin` 同步）· 多选批量（复制/转发/本机隐藏）· 己方文本 15 分钟内编辑（`chat_edit`）
+- **共享模块**：`replyQuote` · `forwardMessage` · `messageEdit` · `pin` · `hiddenMessages`
+- **`verify:message-context-v2`** · 单测覆盖 reply/forward/pin/edit
+
+### Changed
+
+- **气泡右键菜单 v2**：扁平增 reply/forward/pin/edit/hide/多选；撤回仍置底
+- **`docs/01` §6.3** · **`docs/04`** · 同步协议 `chat_edit` / `chat_pin`
+
 ## [1.78.9] - 2026-07-31
 
 ### Added
