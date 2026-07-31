@@ -83,3 +83,28 @@
   line-height: 1.2;
   color: var(--lanpm-text);
 }
+
+/* 主 CTA：实色强调（对齐 Ant primary · 32px 壳层） */
+.emphasis {
+  height: 32px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border-radius: var(--lanpm-radius-md);
+  font-size: var(--lanpm-font-body);
+  font-weight: 500;
+  color: var(--lanpm-on-accent);
+  background: var(--lanpm-accent);
+}
+
+.emphasis:hover:not(:disabled):not(.regionDisabled) {
+  background: var(--lanpm-accent-hover);
+  color: var(--lanpm-on-accent);
+}
+
+.spinner {
+  font-size: var(--lanpm-font-caption);
+}
+
+.loading {
+  cursor: wait;
+}

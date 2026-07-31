@@ -1,17 +1,27 @@
+import { LoadingOutlined } from '@ant-design/icons'
 import region from './regionInteract.module.css'
 import styles from './RegionButton.module.css'
 
-type RegionButtonVariant = 'icon' | 'pill' | 'text' | 'toolbar' | 'caption' | 'user'
+type RegionButtonVariant =
+  | 'icon'
+  | 'pill'
+  | 'text'
+  | 'toolbar'
+  | 'caption'
+  | 'user'
+  | 'emphasis'
 
 export interface RegionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: RegionButtonVariant
   selected?: boolean
+  loading?: boolean
   children: React.ReactNode
 }
 
 export default function RegionButton({
   variant = 'pill',
   selected = false,
+  loading = false,
   className = '',
   disabled,
   children,
@@ -28,7 +38,11 @@ export default function RegionButton({
             ? styles.caption
             : variant === 'user'
               ? styles.user
-              : styles.pill
+              : variant === 'emphasis'
+                ? styles.emphasis
+                : styles.pill
+
+  const isDisabled = Boolean(disabled || loading)
 
   return (
     <button
@@ -38,14 +52,17 @@ export default function RegionButton({
         region.region,
         variantClass,
         selected ? region.regionSelected : '',
-        disabled ? region.regionDisabled : '',
+        isDisabled ? region.regionDisabled : '',
+        loading ? styles.loading : '',
         className
       ]
         .filter(Boolean)
         .join(' ')}
-      disabled={disabled}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
       {...rest}
     >
+      {loading ? <LoadingOutlined className={styles.spinner} spin aria-hidden /> : null}
       {children}
     </button>
   )

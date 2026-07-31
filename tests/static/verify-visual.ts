@@ -293,7 +293,7 @@ assert.ok(
 )
 assert.match(
   cockpitSrc,
-  /type="text"\s+icon=\{<RobotOutlined/,
+  /variant="text"[\s\S]*<RobotOutlined/,
   'Cockpit AI evaluate must be secondary text CTA (CK-408)'
 )
 assert.match(
@@ -962,6 +962,26 @@ assert.match(
 )
 assert.ok(!taskDetailSrc.includes('fontSize:'), 'TaskDetailPanel must not use inline fontSize (AP-403)')
 assert.match(verifyM7Src, /npm run knip/, 'verify:m7 must run knip dead-code scan (AP-403)')
+
+// --- CB-401~403 cockpit-button-unify ---
+const regionButtonSrc = readFileSync(join(renderer, 'ui/RegionButton.tsx'), 'utf8')
+const regionButtonCss = readFileSync(join(renderer, 'ui/RegionButton.module.css'), 'utf8')
+const aiConfigSrc = readFileSync(join(renderer, 'features/cockpit/AiConfigModal.tsx'), 'utf8')
+const cockpitAntImport = cockpitSrc.match(/import\s*\{([^}]+)\}\s*from\s*'antd'/)?.[1] ?? ''
+
+assert.ok(!/\bButton\b/.test(cockpitAntImport), 'CockpitView must not import Ant Button (CB-401)')
+assert.ok(!/<Button\b/.test(cockpitSrc), 'CockpitView must not render Ant Button (CB-401)')
+const aiConfigAntImport = aiConfigSrc.match(/import\s*\{([^}]+)\}\s*from\s*'antd'/)?.[1] ?? ''
+assert.ok(!/\bButton\b/.test(aiConfigAntImport), 'AiConfigModal must not import Ant Button (CB-401)')
+assert.ok(!/<Button\b/.test(aiConfigSrc), 'AiConfigModal must not render Ant Button (CB-401)')
+assert.match(regionButtonSrc, /loading\?:/, 'RegionButton must support loading prop (CB-402)')
+assert.match(regionButtonSrc, /'emphasis'/, 'RegionButton must define emphasis variant (CB-402)')
+assert.match(regionButtonCss, /\.emphasis\b/, 'RegionButton CSS must style emphasis variant (CB-402)')
+assert.match(cockpitSrc, /variant="emphasis"/, 'CockpitView must use RegionButton emphasis for primary CTAs (CB-403)')
+assert.ok(
+  (cockpitSrc.match(/<RegionButton/g) ?? []).length >= 16,
+  'CockpitView must migrate all header/panel buttons to RegionButton (CB-403)'
+)
 
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')

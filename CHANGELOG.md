@@ -8,6 +8,19 @@
 
 - **`docs/插件开发.md`**：§3.5 Tab 视图宿主与 Zone 模型 · §3.6 Layer C `contributions.views` · §2.2 三层定制 · §12 ViewHost 标准化 Sprint 前置
 
+## [1.64.0] - 2026-07-31
+
+### Added
+
+- **`RegionButton`**：`loading` prop · `emphasis` variant（主 CTA 实色 · 32px）
+- **`verify:visual` CB-401～403**：驾驶舱无 Ant `Button` · RegionButton 能力守卫
+
+### Changed
+
+- **`CockpitView`**：16 处 Ant `Button` → `RegionButton`（header / 岛面板 / link 动作）
+- **`AiConfigModal`**：探测连接按钮 → `RegionButton`
+- **`审查.md`**：P2-9b ✅
+
 ## [1.63.0] - 2026-07-31
 
 ### Added

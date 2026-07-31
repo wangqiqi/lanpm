@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Button, Alert, Progress, Space, Typography } from 'antd'
+import { Alert, Progress, Space, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   ArrowLeftOutlined,
@@ -293,28 +293,38 @@ export default function CockpitView(): React.ReactElement {
         title={t('cockpit.title')}
         actions={
           <Space wrap className={styles.headerActions}>
-            <Button type="text" icon={<ArrowLeftOutlined />} onClick={returnToActiveProject}>
+            <RegionButton variant="text" onClick={returnToActiveProject}>
+              <ArrowLeftOutlined />
               <span className={styles.backBtnLabel}>
                 {t('cockpit.backToProject', { name: activeProjectName })}
               </span>
-            </Button>
-            <Button type="primary" loading={reportLoading} onClick={() => void runReport('weekly')}>
+            </RegionButton>
+            <RegionButton
+              variant="emphasis"
+              loading={reportLoading}
+              onClick={() => void runReport('weekly')}
+            >
               {t('cockpit.weeklyReport')}
-            </Button>
-            <Button loading={reportLoading} onClick={() => void runReport('monthly')}>
+            </RegionButton>
+            <RegionButton
+              variant="pill"
+              loading={reportLoading}
+              onClick={() => void runReport('monthly')}
+            >
               {t('cockpit.monthlyReport')}
-            </Button>
-            <Button
-              type="text"
-              icon={<RobotOutlined />}
+            </RegionButton>
+            <RegionButton
+              variant="text"
               loading={reportLoading}
               onClick={() => void runReport('evaluate')}
             >
+              <RobotOutlined />
               {t('cockpit.aiEvaluate')}
-            </Button>
-            <Button type="text" icon={<KeyOutlined />} onClick={() => setAiConfigOpen(true)}>
+            </RegionButton>
+            <RegionButton variant="text" onClick={() => setAiConfigOpen(true)}>
+              <KeyOutlined />
               {t('cockpit.apiKey')}
-            </Button>
+            </RegionButton>
           </Space>
         }
       />
@@ -327,14 +337,14 @@ export default function CockpitView(): React.ReactElement {
           message={t('discover.cockpitNoGroupsTitle')}
           description={t('discover.cockpitNoGroupsHint')}
           action={
-            <Button
-              type="primary"
-              icon={<CompassOutlined />}
+            <RegionButton
+              variant="emphasis"
               onClick={() => useUiStore.getState().requestDiscoverOpen()}
               data-testid="cockpit-join-with-code"
             >
+              <CompassOutlined />
               {t('discover.cockpitJoinWithCode')}
-            </Button>
+            </RegionButton>
           }
         />
       ) : null}
@@ -359,13 +369,12 @@ export default function CockpitView(): React.ReactElement {
               })}
             </Text>
             {attentionProjects[0] ? (
-              <Button
-                size="small"
-                type="link"
+              <RegionButton
+                variant="caption"
                 onClick={() => navigate(groupViewPath(attentionProjects[0].groupId, 'board'))}
               >
                 {t('cockpit.attentionOpenBoard')}
-              </Button>
+              </RegionButton>
             ) : null}
           </>
         ) : (
@@ -511,22 +520,20 @@ export default function CockpitView(): React.ReactElement {
                   >
                     {kindLabel}
                   </span>
-                  <Button
-                    size="small"
-                    type="link"
+                  <RegionButton
+                    variant="caption"
                     className={styles.attentionTaskAction}
                     onClick={() => startTaskRemediate(item.groupId, item.taskId)}
                   >
                     {t('ai.pipeline.remediateRun')}
-                  </Button>
-                  <Button
-                    size="small"
-                    type="link"
+                  </RegionButton>
+                  <RegionButton
+                    variant="caption"
                     className={styles.attentionTaskAction}
                     onClick={() => navigate(groupViewPath(item.groupId, 'board'))}
                   >
                     {t('cockpit.attentionOpenBoard')}
-                  </Button>
+                  </RegionButton>
                 </li>
               )
             })}
@@ -619,20 +626,18 @@ export default function CockpitView(): React.ReactElement {
                     </Text>
                   </div>
                   <div className={styles.projectHealthActions}>
-                    <Button
-                      size="small"
-                      type="link"
+                    <RegionButton
+                      variant="caption"
                       onClick={() => navigate(groupViewPath(p.groupId, 'board'))}
                     >
                       {t('cockpit.openBoard')}
-                    </Button>
-                    <Button
-                      size="small"
-                      type="link"
+                    </RegionButton>
+                    <RegionButton
+                      variant="caption"
                       onClick={() => navigate(groupViewPath(p.groupId, 'chat'))}
                     >
                       {t('cockpit.enterProject')}
-                    </Button>
+                    </RegionButton>
                   </div>
                 </article>
               )
@@ -724,10 +729,8 @@ export default function CockpitView(): React.ReactElement {
         defaultCollapsed
         extra={
           patrolLatest ? (
-            <Button
-              type="link"
-              size="small"
-              icon={<RobotOutlined />}
+            <RegionButton
+              variant="caption"
               onClick={() => {
                 void (async () => {
                   try {
@@ -751,8 +754,9 @@ export default function CockpitView(): React.ReactElement {
                 })()
               }}
             >
+              <RobotOutlined />
               {t('cockpit.continueInAssistant')}
-            </Button>
+            </RegionButton>
           ) : null
         }
       >
@@ -776,9 +780,8 @@ export default function CockpitView(): React.ReactElement {
         defaultCollapsed
         extra={
           <Space size={4}>
-            <Button
-              type="link"
-              size="small"
+            <RegionButton
+              variant="caption"
               loading={pipelineLoading}
               disabled={!activeGroupId}
               onClick={() => {
@@ -804,12 +807,10 @@ export default function CockpitView(): React.ReactElement {
               }}
             >
               {pipelineLoading ? t('ai.pipeline.running') : t('ai.pipeline.run')}
-            </Button>
+            </RegionButton>
             {pipelineRun?.finalMarkdown ? (
-              <Button
-                type="link"
-                size="small"
-                icon={<RobotOutlined />}
+              <RegionButton
+                variant="caption"
                 onClick={() =>
                   openAssistant({
                     groupId: activeGroupId ?? null,
@@ -822,8 +823,9 @@ export default function CockpitView(): React.ReactElement {
                   })
                 }
               >
+                <RobotOutlined />
                 {t('cockpit.continueInAssistant')}
-              </Button>
+              </RegionButton>
             ) : null}
           </Space>
         }
@@ -862,10 +864,8 @@ export default function CockpitView(): React.ReactElement {
           data-testid="cockpit-report-panel"
           extra={
             <Space size={4}>
-              <Button
-                size="small"
-                type="link"
-                icon={<CopyOutlined />}
+              <RegionButton
+                variant="caption"
                 onClick={() => {
                   void navigator.clipboard.writeText(report.content).then(
                     () => message.success(t('cockpit.reportCopied')),
@@ -873,14 +873,14 @@ export default function CockpitView(): React.ReactElement {
                   )
                 }}
               >
+                <CopyOutlined />
                 {t('cockpit.reportCopy')}
-              </Button>
+              </RegionButton>
               <RegionButton variant="caption" onClick={() => setReportExpanded((v) => !v)}>
                 {reportExpanded ? t('cockpit.reportCollapse') : t('cockpit.reportExpand')}
               </RegionButton>
-              <Button
-                type="link"
-                icon={<RobotOutlined />}
+              <RegionButton
+                variant="caption"
                 onClick={() =>
                   openAssistant({
                     groupId: activeGroupId ?? null,
@@ -893,8 +893,9 @@ export default function CockpitView(): React.ReactElement {
                   })
                 }
               >
+                <RobotOutlined />
                 {t('cockpit.continueInAssistant')}
-              </Button>
+              </RegionButton>
             </Space>
           }
         >

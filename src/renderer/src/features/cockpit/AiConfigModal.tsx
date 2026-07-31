@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, Input, Modal, Select, Switch, Typography } from 'antd'
+import { Form, Input, Modal, Select, Switch, Typography } from 'antd'
+import RegionButton from '@renderer/ui/RegionButton'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AiConfigInput, AiConfigView, AiProvider } from '@shared/cockpit/types'
 import {
@@ -156,9 +157,9 @@ export default function AiConfigModal({
           <Input type="number" min={1} max={168} />
         </Form.Item>
         <Form.Item>
-          <Button loading={probing} onClick={() => void runProbe()}>
+          <RegionButton loading={probing} variant="pill" onClick={() => void runProbe()}>
             {t('ai.probeConnection')}
-          </Button>
+          </RegionButton>
         </Form.Item>
       </Form>
     </Modal>
