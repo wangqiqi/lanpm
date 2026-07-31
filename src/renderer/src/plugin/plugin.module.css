@@ -119,6 +119,30 @@
   margin-top: 8px;
 }
 
+.meetingToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.meetingToolbarCta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.meetingPopover {
+  max-width: min(360px, 90vw);
+}
+
+.meetingParticipants {
+  margin-top: 4px;
+  max-height: 160px;
+  overflow: auto;
+}
+
 .meetingState {
   display: block;
   margin-top: 6px;
