@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import { quotePreviewFromMessage } from '@shared/chat/replyQuote'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import type { GroupMemberView } from '@shared/chat/members'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { buildQuoteKindLabels } from '@renderer/features/chat/quoteKindLabels'
 import styles from './chat.module.css'
 
 interface PinnedMessagesBarProps {
@@ -21,6 +23,7 @@ export default function PinnedMessagesBar({
   onUnpin
 }: PinnedMessagesBarProps): React.ReactElement | null {
   const { t } = useI18n()
+  const kindLabels = useMemo(() => buildQuoteKindLabels(t), [t])
   if (pinnedIds.length === 0) return null
 
   const byId = new Map(messages.map((m) => [m.msgId, m]))
@@ -36,7 +39,7 @@ export default function PinnedMessagesBar({
         const preview = msg
           ? msg.content.kind === 'recalled'
             ? t('chat.replyQuoteRecalled')
-            : quotePreviewFromMessage(msg)
+            : quotePreviewFromMessage(msg, kindLabels) || t('chat.replyQuoteEmpty')
           : t('chat.replyQuoteMissing')
         return (
           <div key={msgId} className={styles.pinnedItem}>

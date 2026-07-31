@@ -10,6 +10,7 @@ export const PLUGIN_IPC = {
   invokeCommand: 'plugin:invokeCommand',
   setEnabled: 'plugin:setEnabled',
   invokeCapability: 'plugin:invokeCapability',
+  confirmCapability: 'plugin:confirmCapability',
   importLicense: 'plugin:importLicense',
   getLicenseStatus: 'plugin:getLicenseStatus'
 } as const

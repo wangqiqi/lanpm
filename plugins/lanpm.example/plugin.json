@@ -1,7 +1,7 @@
 {
   "id": "lanpm.example",
   "name": "Example Slot Stub",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "slots": ["task.detail.section", "chat.composer.action", "profile.tab"],
   "capabilities": [
     "task.get",
@@ -10,6 +10,7 @@
     "task.getChecklist",
     "member.list",
     "chat.sendTaskRef",
+    "task.create",
     "task.patch",
     "board.moveTask"
   ],

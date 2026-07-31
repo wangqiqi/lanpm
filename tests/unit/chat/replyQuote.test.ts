@@ -51,4 +51,20 @@ describe('replyQuote', () => {
     expect(preview.length).toBeLessThanOrEqual(120)
     expect(preview.endsWith('…')).toBe(true)
   })
+
+  it('uses kindLabels instead of raw message.type when preview empty', () => {
+    const preview = quotePreviewFromMessage(
+      base({ type: 'file', content: { kind: 'file', fileId: 'f1', fileName: '  ', size: 0 } }),
+      { file: '[文件]' }
+    )
+    expect(preview).toBe('[文件]')
+    expect(preview).not.toBe('file')
+  })
+
+  it('returns empty string when no text and no kindLabels', () => {
+    const preview = quotePreviewFromMessage(
+      base({ type: 'code', content: { kind: 'code', language: 'js', code: '' } })
+    )
+    expect(preview).toBe('')
+  })
 })

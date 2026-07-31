@@ -10,7 +10,7 @@ import {
   listSlotPlugins
 } from '../plugin/discover'
 import { setPluginEnabled } from '../plugin/enabledStore'
-import { invokePluginCapability } from '../plugin/capabilityProxy'
+import { confirmPluginCapability, invokePluginCapability } from '../plugin/capabilityProxy'
 import { getPluginLicenseStatus, importPluginLicense } from '../plugin/licenseStore'
 import { invokeListedCommand } from '../plugin/commandRegistry'
 
@@ -86,6 +86,15 @@ export function registerPluginIpc(): void {
         capability as PluginCapabilityId,
         args && typeof args === 'object' ? args : {}
       )
+    }
+  )
+
+  ipcMain.handle(
+    PLUGIN_IPC.confirmCapability,
+    (_event, pluginId: string, pendingId: string) => {
+      if (typeof pluginId !== 'string' || !pluginId) throw new Error('pluginId required')
+      if (typeof pendingId !== 'string' || !pendingId) throw new Error('pendingId required')
+      return confirmPluginCapability(pluginId, pendingId)
     }
   )
 }

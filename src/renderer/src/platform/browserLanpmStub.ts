@@ -50,6 +50,12 @@ import { buildWhiteboardScene, emptyWhiteboardSceneJson, normalizeSceneJson } fr
 import type { PluginView } from '@shared/plugin/types'
 import { getDisallowedTaskPatchFields } from '@shared/plugin/taskPatchWhitelist'
 import {
+  isHumanReviewCapability,
+  type CapabilityPendingConfirm,
+  type HumanReviewCapabilityId
+} from '@shared/plugin/capabilityConfirm'
+import { parseTaskCreateInput } from '@shared/plugin/taskCreateWhitelist'
+import {
   DEFAULT_NAV_PREFERENCES,
   normalizeNavPreferences,
   normalizeNavPreferencesDocument,
@@ -152,11 +158,94 @@ function refreshStubPluginLicenseFields(): void {
   }
 }
 
+type StubCapabilityPending = {
+  pluginId: string
+  capability: HumanReviewCapabilityId
+  args: Record<string, unknown>
+  userId: string
+}
+
+const stubCapabilityPendings = new Map<string, StubCapabilityPending>()
+
+function executeStubWriteCapability(
+  capability: HumanReviewCapabilityId,
+  args: Record<string, unknown>
+): Task {
+  if (capability === 'task.create') {
+    const parsed = parseTaskCreateInput(args)
+    if (!parsed.ok) throw new Error(parsed.message)
+    return stubCreateTask(parsed.value)
+  }
+  if (capability === 'task.patch') {
+    const groupId = String(args.groupId ?? '')
+    const taskId = String(args.taskId ?? '')
+    const patch = args.patch
+    if (!groupId) throw new Error('groupId required')
+    if (!taskId) throw new Error('taskId required')
+    if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+      throw new Error('patch required')
+    }
+    const disallowed = getDisallowedTaskPatchFields(patch as Record<string, unknown>)
+    if (disallowed.length > 0) {
+      throw new Error(`patch field not allowed: ${disallowed.join(', ')}`)
+    }
+    const all = readAllTasks()
+    const list = all[groupId] ?? []
+    if (!list.some((t) => t.taskId === taskId && !t.deletedAt)) {
+      throw stubError('stub.taskNotFound')
+    }
+    const patchBody = patch as {
+      title?: string
+      status?: TaskStatus
+      progressPercent?: number
+      priority?: Task['priority']
+      tags?: string[]
+    }
+    return stubUpdateTask({
+      taskId,
+      ...patchBody
+    })
+  }
+  if (capability === 'board.moveTask') {
+    const groupId = String(args.groupId ?? '')
+    const taskId = String(args.taskId ?? '')
+    const status = args.status as TaskStatus | undefined
+    if (!groupId) throw new Error('groupId required')
+    if (!taskId) throw new Error('taskId required')
+    if (!status) throw new Error('status required')
+    const all = readAllTasks()
+    const list = all[groupId] ?? []
+    if (!list.some((t) => t.taskId === taskId && !t.deletedAt)) {
+      throw stubError('stub.taskNotFound')
+    }
+    const existing = list.find((t) => t.taskId === taskId)!
+    const sortOrder =
+      args.sortOrder != null && Number.isFinite(Number(args.sortOrder))
+        ? Number(args.sortOrder)
+        : status !== existing.status
+          ? maxSortInColumn(list, status) + 1
+          : existing.sortOrder
+    return stubUpdateTask({
+      taskId,
+      status,
+      sortOrder,
+      otherReason:
+        status === 'other' && args.otherReason != null
+          ? String(args.otherReason)
+          : status === 'other'
+            ? existing.otherReason ?? null
+            : null
+    })
+  }
+  const _exhaustive: never = capability
+  throw new Error(`unknown write capability: ${_exhaustive}`)
+}
+
 const STUB_PLUGINS: PluginView[] = [
   {
     id: 'lanpm.example',
     name: 'Example Slot Stub',
-    version: '0.3.1',
+    version: '0.4.0',
     slots: ['task.detail.section', 'chat.composer.action'],
     capabilities: [
       'task.get',
@@ -165,6 +254,7 @@ const STUB_PLUGINS: PluginView[] = [
       'task.getChecklist',
       'member.list',
       'chat.sendTaskRef',
+      'task.create',
       'task.patch',
       'board.moveTask',
       'license.feature'
@@ -2260,66 +2350,49 @@ export function createBrowserLanpmStub(): LanpmApi {
           for (const fn of chatListeners) fn(msg)
           return msg
         }
-        if (capability === 'task.patch') {
-          const groupId = String(args?.groupId ?? '')
-          const taskId = String(args?.taskId ?? '')
-          const patch = args?.patch
-          if (!groupId) throw new Error('groupId required')
-          if (!taskId) throw new Error('taskId required')
-          if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
-            throw new Error('patch required')
+        if (isHumanReviewCapability(capability)) {
+          const status = readStatus()
+          if (!status.configured || !status.user) {
+            throw stubError('stub.identityRequired')
           }
-          const disallowed = getDisallowedTaskPatchFields(patch as Record<string, unknown>)
-          if (disallowed.length > 0) {
-            throw new Error(`patch field not allowed: ${disallowed.join(', ')}`)
+          if (capability === 'task.create') {
+            const parsed = parseTaskCreateInput(args ?? {})
+            if (!parsed.ok) throw new Error(parsed.message)
+          } else if (capability === 'task.patch') {
+            const groupId = String(args?.groupId ?? '')
+            const taskId = String(args?.taskId ?? '')
+            const patch = args?.patch
+            if (!groupId) throw new Error('groupId required')
+            if (!taskId) throw new Error('taskId required')
+            if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+              throw new Error('patch required')
+            }
+            const disallowed = getDisallowedTaskPatchFields(patch as Record<string, unknown>)
+            if (disallowed.length > 0) {
+              throw new Error(`patch field not allowed: ${disallowed.join(', ')}`)
+            }
+          } else if (capability === 'board.moveTask') {
+            const groupId = String(args?.groupId ?? '')
+            const taskId = String(args?.taskId ?? '')
+            const moveStatus = args?.status
+            if (!groupId) throw new Error('groupId required')
+            if (!taskId) throw new Error('taskId required')
+            if (!moveStatus) throw new Error('status required')
           }
-          const all = readAllTasks()
-          const list = all[groupId] ?? []
-          if (!list.some((t) => t.taskId === taskId && !t.deletedAt)) {
-            throw stubError('stub.taskNotFound')
-          }
-          const patchBody = patch as {
-            title?: string
-            status?: TaskStatus
-            progressPercent?: number
-            priority?: Task['priority']
-            tags?: string[]
-          }
-          return stubUpdateTask({
-            taskId,
-            ...patchBody
+          const pendingId = `pend_${crypto.randomUUID()}`
+          stubCapabilityPendings.set(pendingId, {
+            pluginId,
+            capability,
+            args: args ?? {},
+            userId: status.user.userId
           })
-        }
-        if (capability === 'board.moveTask') {
-          const groupId = String(args?.groupId ?? '')
-          const taskId = String(args?.taskId ?? '')
-          const status = args?.status as import('@shared/task/types').TaskStatus | undefined
-          if (!groupId) throw new Error('groupId required')
-          if (!taskId) throw new Error('taskId required')
-          if (!status) throw new Error('status required')
-          const all = readAllTasks()
-          const list = all[groupId] ?? []
-          if (!list.some((t) => t.taskId === taskId && !t.deletedAt)) {
-            throw stubError('stub.taskNotFound')
+          const pending: CapabilityPendingConfirm = {
+            status: 'pending_confirm',
+            pendingId,
+            capability,
+            pluginId
           }
-          const existing = list.find((t) => t.taskId === taskId)!
-          const sortOrder =
-            args?.sortOrder != null && Number.isFinite(Number(args.sortOrder))
-              ? Number(args.sortOrder)
-              : status !== existing.status
-                ? maxSortInColumn(list, status) + 1
-                : existing.sortOrder
-          return stubUpdateTask({
-            taskId,
-            status,
-            sortOrder,
-            otherReason:
-              status === 'other' && args?.otherReason != null
-                ? String(args.otherReason)
-                : status === 'other'
-                  ? existing.otherReason ?? null
-                  : null
-          })
+          return pending
         }
         if (capability === 'media.livekit.createToken') {
           const config = readStubLiveKitConfig()
@@ -2335,6 +2408,27 @@ export function createBrowserLanpmStub(): LanpmApi {
           }
         }
         throw new Error(`capability not granted: ${capability}`)
+      },
+      confirmCapability: async (pluginId, pendingId) => {
+        if (!pluginId) throw new Error('pluginId required')
+        if (!pendingId) throw new Error('pendingId required')
+        const pending = stubCapabilityPendings.get(pendingId)
+        if (!pending) throw new Error('pending not found')
+        stubCapabilityPendings.delete(pendingId)
+        if (pending.pluginId !== pluginId) throw new Error('pending plugin mismatch')
+        const plugin = STUB_PLUGINS.find((p) => p.id === pluginId)
+        if (!plugin?.enabled) throw new Error(`plugin disabled: ${pluginId}`)
+        if (!plugin.capabilities.includes(pending.capability)) {
+          throw new Error(`capability not granted: ${pending.capability}`)
+        }
+        const status = readStatus()
+        if (!status.configured || !status.user) {
+          throw stubError('stub.identityRequired')
+        }
+        if (pending.userId !== status.user.userId) {
+          throw new Error('pending session mismatch')
+        }
+        return executeStubWriteCapability(pending.capability, pending.args)
       }
     },
     nav: {

@@ -46,11 +46,21 @@ export type BoardMoveTaskArgs = {
   otherReason?: string
 }
 
+/** Extension API v0.4 — task.create (whitelist subset) */
+export type TaskCreateArgs = {
+  groupId: string
+  title: string
+  status?: TaskStatus
+  priority?: Task['priority']
+  tags?: string[]
+}
+
 export type PluginCapabilityArgsMap = {
   'chat.listMessages': ChatListMessagesArgs
   'task.getChecklist': TaskGetChecklistArgs
   'member.list': MemberListArgs
   'chat.sendTaskRef': ChatSendTaskRefArgs
+  'task.create': TaskCreateArgs
   'task.patch': TaskPatchArgs
   'board.moveTask': BoardMoveTaskArgs
 }
@@ -60,6 +70,7 @@ export type PluginCapabilityResultMap = {
   'task.getChecklist': ChecklistView
   'member.list': GroupMemberView[]
   'chat.sendTaskRef': ChatMessage
+  'task.create': Task
   'task.patch': Task
   'board.moveTask': Task
 }
@@ -72,4 +83,9 @@ export type ExtensionApiV02CapabilityId = keyof Pick<
 export type ExtensionApiV03CapabilityId = keyof Pick<
   PluginCapabilityArgsMap,
   'task.patch' | 'board.moveTask'
+>
+
+export type ExtensionApiV04CapabilityId = keyof Pick<
+  PluginCapabilityArgsMap,
+  'task.create' | 'task.patch' | 'board.moveTask'
 >

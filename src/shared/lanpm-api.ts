@@ -381,6 +381,7 @@ export interface LanpmApi {
       capability: import('./plugin/types').PluginCapabilityId,
       args?: Record<string, unknown>
     ) => Promise<unknown>
+    confirmCapability: (pluginId: string, pendingId: string) => Promise<unknown>
   }
   nav: {
     getDocument: () => Promise<import('./navigation/navPreferences').NavPreferencesDocument>

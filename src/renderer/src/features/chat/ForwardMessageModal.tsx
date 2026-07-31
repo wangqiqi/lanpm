@@ -49,6 +49,8 @@ export default function ForwardMessageModal({
         onCancel()
       }}
       onOk={() => void handleOk()}
+      okText={t('common.confirm')}
+      cancelText={t('common.cancel')}
       okButtonProps={{ disabled: !targetGroupId, loading: saving }}
       destroyOnClose
     >

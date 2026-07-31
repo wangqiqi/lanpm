@@ -295,7 +295,9 @@ const api: LanpmApi = {
     setEnabled: (pluginId, enabled) =>
       ipcRenderer.invoke('plugin:setEnabled', pluginId, enabled),
     invokeCapability: (pluginId, capability, args) =>
-      ipcRenderer.invoke('plugin:invokeCapability', pluginId, capability, args)
+      ipcRenderer.invoke('plugin:invokeCapability', pluginId, capability, args),
+    confirmCapability: (pluginId, pendingId) =>
+      ipcRenderer.invoke('plugin:confirmCapability', pluginId, pendingId)
   },
   nav: {
     getDocument: () => ipcRenderer.invoke('nav:getDocument'),

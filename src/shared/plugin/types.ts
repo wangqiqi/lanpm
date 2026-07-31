@@ -43,6 +43,7 @@ export type PluginCapabilityId =
   | 'task.getChecklist'
   | 'member.list'
   | 'chat.sendTaskRef'
+  | 'task.create'
   | 'task.patch'
   | 'board.moveTask'
   | 'license.feature'
@@ -128,6 +129,7 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'task.getChecklist',
   'member.list',
   'chat.sendTaskRef',
+  'task.create',
   'task.patch',
   'board.moveTask',
   'license.feature'

@@ -6,6 +6,7 @@ import type { Task } from '@shared/task/types'
 import type { ChatMessagePage } from '@shared/chat/pagination'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { invokeCapabilityWithHumanConfirm } from '@renderer/plugin/invokeCapabilityWithHumanConfirm'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -34,6 +35,16 @@ function ExampleTaskSection({ plugin, taskId }: Props): React.ReactElement {
 function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
   const { t } = useI18n()
   const [busy, setBusy] = useState(false)
+
+  const confirmCopy = useCallback(
+    (capability: string) => ({
+      title: t('plugin.confirmWriteTitle'),
+      content: t('plugin.confirmWriteBody', { capability }),
+      okText: t('plugin.confirmWriteOk'),
+      cancelText: t('plugin.confirmWriteCancel')
+    }),
+    [t]
+  )
 
   const onSendTaskRef = useCallback(async () => {
     setBusy(true)
@@ -70,18 +81,43 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
         return
       }
       const nextProgress = Math.min(100, (first.progressPercent ?? 0) + 5)
-      const updated = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.patch', {
-        groupId,
-        taskId: first.taskId,
-        patch: { progressPercent: nextProgress }
-      })) as Task
+      const updated = (await invokeCapabilityWithHumanConfirm(
+        plugin.id,
+        'task.patch',
+        {
+          groupId,
+          taskId: first.taskId,
+          patch: { progressPercent: nextProgress }
+        },
+        confirmCopy('task.patch')
+      )) as Task | null
+      if (!updated) return
       message.success(t('plugin.exampleTaskPatched', { percent: updated.progressPercent ?? 0 }))
     } catch (err: unknown) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
     } finally {
       setBusy(false)
     }
-  }, [groupId, plugin.id, t])
+  }, [confirmCopy, groupId, plugin.id, t])
+
+  const onCreateTask = useCallback(async () => {
+    setBusy(true)
+    try {
+      const title = t('plugin.exampleCreateTaskTitle')
+      const created = (await invokeCapabilityWithHumanConfirm(
+        plugin.id,
+        'task.create',
+        { groupId, title, priority: 'medium' },
+        confirmCopy('task.create')
+      )) as Task | null
+      if (!created) return
+      message.success(t('plugin.exampleTaskCreated', { title: created.title }))
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [confirmCopy, groupId, plugin.id, t])
 
   const onProbeRead = useCallback(async () => {
     setBusy(true)
@@ -111,6 +147,9 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
       <Button size="small" loading={busy} onClick={() => void onProbeRead()}>
         {t('plugin.exampleProbeRead')}
       </Button>
+      <Button size="small" loading={busy} onClick={() => void onCreateTask()}>
+        {t('plugin.exampleCreateTask')}
+      </Button>
       <Button size="small" loading={busy} onClick={() => void onPatchFirstTask()}>
         {t('plugin.examplePatchTask')}
       </Button>
@@ -130,7 +169,7 @@ function ExampleProfileTab({ plugin }: Props): React.ReactElement {
   )
 }
 
-/** 免费官方 stub — 证明 Host→Slot 端到端 + Extension API v0.2 demo */
+/** 免费官方 stub — Host→Slot + Extension API v0.4 人审演示 */
 export default function ExampleStub(props: Props): React.ReactElement | null {
   if (props.context?.view === 'profile') {
     return <ExampleProfileTab {...props} />

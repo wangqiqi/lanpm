@@ -2,6 +2,25 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.80.0] - 2026-07-31
+
+### Added
+
+- **Extension API v0.4 写操作人审**：`task.create` / `task.patch` / `board.moveTask` 经 `invokeCapability` 返回 `pending_confirm`，须 `confirmCapability` 才落库
+- **`task.create`**：白名单字段 `groupId` · `title` · `status?` · `priority?` · `tags?`
+- **Renderer**：`invokeCapabilityWithHumanConfirm`（Modal 确认）· `lanpm.example` 演示提议→确认
+- **`verify:extension-api-v0.4`** · 单测 `capabilityConfirm` / `taskCreateWhitelist`
+
+### Changed
+
+- **文档**：`docs/插件开发.md` §4 — Extension **v0.4 = 写人审**；license/侧载不再占用「v0.4」标签
+
+## [1.79.1] - 2026-07-31
+
+### Fixed
+
+- **消息引用预览 i18n**：空内容不再回落英文 `message.type`（`file`/`code` 等），改用 `chat.previewKind*`；通知撤回预览走 `chat.recalledPreview`
+
 ## [1.79.0] - 2026-07-31
 
 ### Added

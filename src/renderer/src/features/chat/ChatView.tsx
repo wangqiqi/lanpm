@@ -53,6 +53,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
 import { resolveReplyQuote } from '@shared/chat/replyQuote'
+import { buildQuoteKindLabels } from '@renderer/features/chat/quoteKindLabels'
 import {
   filterVisibleMessages,
   hideMessageLocally,
@@ -253,10 +254,17 @@ export default function ChatView(): React.ReactElement {
     [members, t]
   )
 
+  const quoteKindLabels = useMemo(() => buildQuoteKindLabels(t), [t])
+
   const pendingReplyQuote = useMemo(() => {
     if (!replyToMsgId) return null
-    return resolveReplyQuote(replyToMsgId, (id) => messageById.get(id), resolveSenderName)
-  }, [replyToMsgId, messageById, resolveSenderName])
+    return resolveReplyQuote(
+      replyToMsgId,
+      (id) => messageById.get(id),
+      resolveSenderName,
+      quoteKindLabels
+    )
+  }, [replyToMsgId, messageById, resolveSenderName, quoteKindLabels])
 
   const dayGroups = useMemo(
     () => groupMessagesByDay(visibleMessages, locale),
@@ -977,7 +985,8 @@ export default function ChatView(): React.ReactElement {
                       ? resolveReplyQuote(
                           msg.replyToMsgId,
                           (id) => messageById.get(id),
-                          resolveSenderName
+                          resolveSenderName,
+                          quoteKindLabels
                         )
                       : null
                     return (

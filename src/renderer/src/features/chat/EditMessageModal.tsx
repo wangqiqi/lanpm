@@ -40,6 +40,8 @@ export default function EditMessageModal({
       open={open}
       onCancel={onCancel}
       onOk={() => void handleOk()}
+      okText={t('common.confirm')}
+      cancelText={t('common.cancel')}
       okButtonProps={{ disabled: !text.trim(), loading: saving }}
       destroyOnClose
     >

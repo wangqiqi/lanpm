@@ -26,7 +26,7 @@ function shouldSuppressNotification(
 }
 
 function notificationBody(message: ChatMessage, t: ReturnType<typeof useI18n>['t']): string {
-  const preview = messagePreviewText(message)
+  const preview = messagePreviewText(message, t('chat.recalledPreview'))
   if (preview) return preview.slice(0, 200)
   if (message.content.kind === 'code') {
     return t('chat.notificationCodePreview', { language: message.content.language })
