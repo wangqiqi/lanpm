@@ -18,5 +18,5 @@
       "@resources/*": ["./resources/*"]
     }
   },
-  "include": ["src/renderer/src/**/*", "src/shared/**/*"]
+  "include": ["src/renderer/src/**/*", "src/shared/**/*", "plugins/lanpm.formjs/demo-schema.json"]
 }

@@ -1,0 +1,21 @@
+{
+  "type": "default",
+  "components": [
+    {
+      "key": "summary",
+      "labelKey": "plugin.formField.summary",
+      "type": "textfield",
+      "validate": { "required": true }
+    },
+    {
+      "key": "notes",
+      "labelKey": "plugin.formField.notes",
+      "type": "textarea"
+    },
+    {
+      "key": "accepted",
+      "labelKey": "plugin.formField.accepted",
+      "type": "checkbox"
+    }
+  ]
+}

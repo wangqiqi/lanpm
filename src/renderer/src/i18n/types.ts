@@ -427,6 +427,7 @@ export type MessageKey =
   | 'plugin.exampleTaskRefSent'
   | 'plugin.exampleReadProbe'
   | 'plugin.formHint'
+  | 'plugin.formJsInstallHint'
   | 'plugin.formLoading'
   | 'plugin.formSave'
   | 'plugin.formSavedLocal'

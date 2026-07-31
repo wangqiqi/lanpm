@@ -26,6 +26,7 @@ assert.ok(existsSync(join(root, 'src/main/plugin/discover.ts')))
 assert.ok(existsSync(join(root, 'src/main/plugin/capabilityProxy.ts')))
 assert.ok(existsSync(join(root, 'src/main/ipc/plugin.ts')))
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/PluginSlot.tsx')))
+assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/FormJsView.tsx')))
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/FormJsPoc.tsx')))
 
 const mainIndex = readFileSync(join(root, 'src/main/index.ts'), 'utf8')

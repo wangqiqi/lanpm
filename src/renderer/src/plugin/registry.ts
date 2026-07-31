@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import ExampleStub from './builtins/ExampleStub'
-import FormJsPoc from './builtins/FormJsPoc'
+import FormJsView from './builtins/FormJsView'
 import MeetingStub from './builtins/MeetingStub'
 
 export type PluginSlotComponentProps = {
@@ -15,7 +15,7 @@ export type PluginSlotComponentProps = {
 
 const REGISTRY: Record<string, ComponentType<PluginSlotComponentProps>> = {
   'lanpm.example': ExampleStub,
-  'lanpm.formjs': FormJsPoc,
+  'lanpm.formjs': FormJsView,
   'lanpm.meeting': MeetingStub
 }
 

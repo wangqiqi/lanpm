@@ -438,6 +438,8 @@ const enUS = {
   'plugin.exampleTaskRefSent': 'Task ref sent: {title}',
   'plugin.exampleReadProbe': '{messages} recent messages · {members} members',
   'plugin.formHint': 'form-js POC · task “{title}”',
+  'plugin.formJsInstallHint':
+    '@bpmn-io/form-js not found — run npm install --prefix plugins/lanpm.formjs from repo root, then restart',
   'plugin.formLoading': 'Loading task via Host…',
   'plugin.formSave': 'Save (local POC)',
   'plugin.formSavedLocal': 'Form values recorded locally (POC does not persist)',

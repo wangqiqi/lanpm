@@ -40,6 +40,17 @@
   gap: 6px;
 }
 
+.formJsHost {
+  margin-top: 8px;
+  min-height: 48px;
+}
+
+.formInstallHint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
 .crash {
   border: 1px dashed var(--lanpm-danger);
   border-radius: 8px;

@@ -4,7 +4,7 @@ import type { PluginView } from '@shared/plugin/types'
 import type { Task } from '@shared/task/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
-import { FORMJS_DEMO_SCHEMA } from './formJsDemoSchema'
+import { FORMJS_DEMO_SCHEMA } from './formJsSchema'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -14,13 +14,15 @@ interface Props {
   plugin: PluginView
   groupId: string
   taskId?: string
+  /** 真库未安装时由 FormJsView 传入 */
+  showInstallHint?: boolean
 }
 
 /**
  * form-js POC：form-js 风格 schema 的最小渲染器（不引入核心 @bpmn-io/form-js 依赖）。
  * 经 Host `task.get` 预填标题。
  */
-export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement {
+export default function FormJsPoc({ plugin, taskId, showInstallHint }: Props): React.ReactElement {
   const { t } = useI18n()
   const resolvedTaskId = taskId ?? ''
   const [taskTitle, setTaskTitle] = useState('')
@@ -74,6 +76,11 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
       <Text type="secondary">
         {loading ? t('plugin.formLoading') : t('plugin.formHint', { title: taskTitle || resolvedTaskId })}
       </Text>
+      {showInstallHint ? (
+        <Text type="secondary" className={styles.formInstallHint}>
+          {t('plugin.formJsInstallHint')}
+        </Text>
+      ) : null}
       {components.map((c) => {
         if (c.type === 'textarea') {
           return (

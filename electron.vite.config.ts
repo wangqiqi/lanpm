@@ -13,6 +13,20 @@ dns.setDefaultResultOrder('ipv4first')
 const root = dirname(fileURLToPath(import.meta.url))
 const isBrowserDev = process.env.LANPM_BROWSER_DEV === '1'
 
+/** 插件子包已安装时，让 renderer 动态 import 可解析 @bpmn-io/form-js */
+function formJsPluginAliases(): { find: string | RegExp; replacement: string }[] {
+  const esm = join(root, 'plugins/lanpm.formjs/node_modules/@bpmn-io/form-js/dist/index.es.js')
+  const css = join(root, 'plugins/lanpm.formjs/node_modules/@bpmn-io/form-js/dist/assets/form-js.css')
+  const aliases: { find: string | RegExp; replacement: string }[] = []
+  if (existsSync(esm)) {
+    aliases.push({ find: '@bpmn-io/form-js', replacement: esm })
+  }
+  if (existsSync(css)) {
+    aliases.push({ find: '@bpmn-io/form-js/dist/assets/form-js.css', replacement: css })
+  }
+  return aliases
+}
+
 /** Linux inotify 上限偏低时 Vite 会 ENOSPC；轮询略慢但稳定 */
 function shouldUsePollingWatch(): boolean {
   if (process.env.LANPM_VITE_POLLING === '1') return true
@@ -156,6 +170,7 @@ export default defineConfig({
         { find: '@renderer', replacement: resolve('src/renderer/src') },
         { find: '@shared', replacement: resolve('src/shared') },
         { find: '@resources', replacement: resolve('resources') },
+        ...formJsPluginAliases(),
         // Exact package id only; subpaths like dist/index.css stay on the package dir
         {
           find: /^gantt-task-react$/,

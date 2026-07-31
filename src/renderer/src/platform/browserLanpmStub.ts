@@ -116,7 +116,7 @@ const STUB_PLUGINS: PluginView[] = [
   },
   {
     id: 'lanpm.formjs',
-    name: 'Advanced Form (form-js POC)',
+    name: 'Advanced Form (form-js)',
     version: '0.1.0',
     slots: ['task.detail.section'],
     capabilities: ['task.get'],

@@ -2,6 +2,15 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.73.0] - 2026-07-31
+
+### Added
+
+- **form-js 真库**：`plugins/lanpm.formjs/package.json` · `formJsClientLoader` 动态加载
+- **FormJsView**：`@bpmn-io/form-js` 渲染；未安装子包时降级 `FormJsPoc` + 安装提示
+- **Schema SSOT**：`plugins/lanpm.formjs/demo-schema.json` · `labelKey` i18n 解析
+- **验收**：`verify:formjs-plugin`
+
 ## [1.72.0] - 2026-07-31
 
 ### Added

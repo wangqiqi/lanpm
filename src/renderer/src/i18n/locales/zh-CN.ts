@@ -432,6 +432,7 @@ const zhCN = {
   'plugin.exampleTaskRefSent': '已发送任务引用：{title}',
   'plugin.exampleReadProbe': '最近消息 {messages} 条 · 成员 {members} 人',
   'plugin.formHint': 'form-js POC · 任务「{title}」',
+  'plugin.formJsInstallHint': '未检测到 @bpmn-io/form-js：在仓库根执行 npm install --prefix plugins/lanpm.formjs 后重启',
   'plugin.formLoading': '正在经 Host 读取任务…',
   'plugin.formSave': '保存（本机 POC）',
   'plugin.formSavedLocal': '已记录本机表单值（POC 不写库）',
