@@ -91,6 +91,7 @@ assert.ok(existsSync(join(root, 'src/renderer/src/plugin/PluginSlot.tsx')), 'mis
 const viewHost = readSrc('src/shared/plugin/viewHost.ts')
 assert.match(viewHost, /export type ViewPluginZone/)
 assert.match(viewHost, /export type ViewPluginContext/)
+assert.match(viewHost, /zone\?:\s*ViewPluginZone/)
 assert.match(viewHost, /export type PluginSlotHostProps/)
 assert.match(viewHost, /export type GlobalPluginSlotId/)
 assert.match(viewHost, /export type PluginGlobalSlotProps/)
@@ -98,6 +99,7 @@ assert.match(viewHost, /export type PluginGlobalSlotProps/)
 const pluginSlot = readSrc('src/renderer/src/plugin/PluginSlot.tsx')
 assert.match(pluginSlot, /export function PluginSlotHost/)
 assert.match(pluginSlot, /export function PluginZoneHost/)
+assert.match(pluginSlot, /\{\s*\.\.\.context,\s*zone\s*\}/)
 assert.match(pluginSlot, /export function PluginGroupSlot/)
 assert.match(pluginSlot, /export function PluginTaskSlot/)
 assert.match(pluginSlot, /export function PluginGlobalSlot/)
@@ -143,5 +145,32 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
 }
 assert.ok(pkg.scripts?.['verify:view-slot-hosts'], 'missing verify:view-slot-hosts script')
+
+const chatView = readSrc('src/renderer/src/features/chat/ChatView.tsx')
+const voicePanel = readSrc('src/renderer/src/features/chat/ChatVoiceMediaPanel.tsx')
+const chatCss = readSrc('src/renderer/src/features/chat/chat.module.css')
+
+assert.match(
+  chatView,
+  /inputMode\s*===\s*['"]text['"][\s\S]*PluginZoneHost[\s\S]*zone="toolbar"/,
+  'ChatView must mount toolbar zone only in text input mode'
+)
+assert.match(voicePanel, /PluginZoneHost/, 'ChatVoiceMediaPanel must use PluginZoneHost')
+assert.match(voicePanel, /zone="toolbar"/, 'ChatVoiceMediaPanel must host toolbar zone')
+assert.ok(
+  !voicePanel.includes('PluginGroupSlot'),
+  'ChatVoiceMediaPanel must not use PluginGroupSlot (no dual toolbar mount)'
+)
+
+const exampleStub = readSrc('src/renderer/src/plugin/builtins/ExampleStub.tsx')
+const meetingToolbar = readSrc('src/renderer/src/plugin/builtins/MeetingToolbar.tsx')
+assert.match(exampleStub, /zone\s*!==\s*['"]composer['"]/)
+assert.match(meetingToolbar, /zone\s*!==\s*['"]toolbar['"]/)
+
+assert.match(
+  chatCss,
+  /\.chatIsland\s+\.chatWorkspace[\s\S]*flex-direction:\s*row/,
+  'chat island workspace must restore row layout (sidebar + main)'
+)
 
 console.log('verify:view-slot-hosts OK')
