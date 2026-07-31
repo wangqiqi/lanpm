@@ -901,6 +901,36 @@ assert.ok(
   'board.module.css must not retain legacy .columnHeader selectors (UC-404)'
 )
 
+// --- IS-401~404 island-surface-rollout sprint ---
+const ganttSrc = readFileSync(join(renderer, 'features/gantt/GanttView.tsx'), 'utf8')
+const filesSrc = readFileSync(join(renderer, 'features/files/FilesView.tsx'), 'utf8')
+for (const [label, src] of [
+  ['GanttView', ganttSrc],
+  ['FilesView', filesSrc],
+  ['ChatView', chatSrc]
+] as const) {
+  assert.match(src, /hideHeader/, `${label} must use IslandPanel hideHeader (IS-401)`)
+}
+assert.match(ganttSrc, /data-testid="gantt-island-surface"/, 'Gantt island surface testid (IS-402)')
+assert.match(filesSrc, /data-testid="files-island-surface"/, 'Files island surface testid (IS-402)')
+assert.match(chatSrc, /data-testid="chat-island-surface"/, 'Chat island surface testid (IS-402)')
+const filesCss = readFileSync(join(renderer, 'features/files/files.module.css'), 'utf8')
+const chartWrapBlock = ganttCss.match(/\.chartWrap\s*\{([^}]*)\}/)?.[1] ?? ''
+const filesBodyBlock = filesCss.match(/\.body\s*\{([^}]*)\}/)?.[1] ?? ''
+assert.ok(
+  !chartWrapBlock.includes('box-shadow'),
+  'gantt chartWrap must not define island box-shadow (IS-403)'
+)
+assert.ok(
+  !filesBodyBlock.includes('box-shadow'),
+  'files .body must not define island box-shadow (IS-403)'
+)
+assert.ok(
+  !chatCss.includes('.chatWorkspaceDesktop'),
+  'chat.module.css must not retain chatWorkspaceDesktop island chrome (IS-403)'
+)
+assert.match(docs04, /甘特、文件、聊天/, 'docs/04 §1.3.1 must list Gantt/Files/Chat island surfaces (IS-404)')
+
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')
 if (existsSync(outAssets)) {

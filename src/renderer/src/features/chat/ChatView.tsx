@@ -47,9 +47,35 @@ import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useNewMessageScroll } from '@renderer/features/chat/useNewMessageScroll'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
+
+function ChatWorkspaceFrame({
+  island,
+  ariaLabel,
+  children
+}: {
+  island: boolean
+  ariaLabel: string
+  children: React.ReactNode
+}): React.ReactElement {
+  if (island) {
+    return (
+      <IslandPanel
+        hideHeader
+        aria-label={ariaLabel}
+        className={styles.chatIsland}
+        bodyClassName={styles.chatWorkspace}
+        data-testid="chat-island-surface"
+      >
+        {children}
+      </IslandPanel>
+    )
+  }
+  return <div className={styles.chatWorkspace}>{children}</div>
+}
 
 const { Text } = Typography
 const { TextArea } = Input
@@ -596,7 +622,7 @@ export default function ChatView(): React.ReactElement {
       >
         <MenuOutlined />
       </button>
-      <div className={`${styles.chatWorkspace} ${!isNarrow ? styles.chatWorkspaceDesktop : ''}`}>
+      <ChatWorkspaceFrame island={!isNarrow} ariaLabel={t('nav.chat')}>
       <div
         className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''} ${!isNarrow && !sidebarOpen ? styles.sidebarCollapsed : ''}`}
         style={!isNarrow && sidebarOpen ? { width: sidebarWidth } : undefined}
@@ -981,7 +1007,7 @@ export default function ChatView(): React.ReactElement {
           onStartDm={startDmWithMember}
         />
       </div>
-      </div>
+      </ChatWorkspaceFrame>
     </div>
   )
 }

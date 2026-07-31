@@ -45,6 +45,7 @@ import ViewToolbar from '@renderer/ui/ViewToolbar'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import RegionButton from '@renderer/ui/RegionButton'
 import { ViewEmptyHint, ViewEmptyIcon, ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
@@ -1217,7 +1218,13 @@ export default function FilesView(): React.ReactElement {
         </div>
       )}
 
-      <div className={isNarrow ? `${styles.body} ${styles.bodyNarrow}` : styles.body}>
+      <IslandPanel
+        hideHeader
+        aria-label={t('nav.files')}
+        className={styles.filesIsland}
+        bodyClassName={isNarrow ? `${styles.body} ${styles.bodyNarrow}` : styles.body}
+        data-testid="files-island-surface"
+      >
         <div className={styles.listPane}>
           {loading && files.length === 0 ? (
             <ViewLoadingCenter />
@@ -1296,7 +1303,7 @@ export default function FilesView(): React.ReactElement {
             )}
           </aside>
         ) : null}
-      </div>
+      </IslandPanel>
 
       <Drawer
         title={selected?.name ?? t('files.previewDrawerTitle')}

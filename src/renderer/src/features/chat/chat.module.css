@@ -42,23 +42,23 @@
   width: 100%;
 }
 
-.chatWorkspaceDesktop {
-  border: 0.5px solid var(--lanpm-border);
-  border-radius: var(--lanpm-radius-lg);
-  overflow: hidden;
-  background: var(--lanpm-surface-elevated);
-  box-shadow: var(--lanpm-shadow-island);
+.chatIsland {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.chatWorkspaceDesktop .sidebar {
+.chatIsland .sidebar {
   border-right: 1px solid var(--lanpm-border);
 }
 
-.chatWorkspaceDesktop .sidebarCollapsed {
+.chatIsland .sidebarCollapsed {
   border-right-width: 0;
 }
 
-.chatWorkspaceDesktop .root {
+.chatIsland .root {
   background: transparent;
   box-shadow: none;
 }

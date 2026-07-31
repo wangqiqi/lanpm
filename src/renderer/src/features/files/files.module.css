@@ -102,6 +102,13 @@
   font-size: var(--lanpm-font-body-secondary);
 }
 
+.filesIsland {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .body {
   flex: 1;
   min-height: 0;
@@ -109,10 +116,6 @@
   grid-template-columns: minmax(0, 1fr) minmax(280px, 36%);
   gap: 0;
   overflow: hidden;
-  border-radius: var(--lanpm-radius-md);
-  background: var(--lanpm-surface-solid);
-  border: 0.5px solid var(--lanpm-separator);
-  box-shadow: var(--lanpm-shadow-surface);
 }
 
 .bodyNarrow {

@@ -33,6 +33,7 @@ import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import RegionButton from '@renderer/ui/RegionButton'
 import ViewSegment from '@renderer/ui/ViewSegment'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import IslandPanel from '@renderer/ui/IslandPanel'
 import { readCssVar } from '@renderer/ui/cssVar'
 import { LANPM_ACCENT, LANPM_ACCENT_FILL_RGBA } from '@shared/design/lanpmDesignTokens'
 import { useUiStore } from '@renderer/stores/uiStore'
@@ -366,12 +367,15 @@ export default function GanttView(): React.ReactElement {
       ) : ganttTasks.length === 0 ? (
         <ViewEmptyHint>{t('gantt.empty')}</ViewEmptyHint>
       ) : (
-        <div
-          className={`${styles.chartWrap} ${highlightId ? styles.chartHighlight : ''}`}
-          ref={chartRef}
-          data-lanpm-visual="gantt-chart"
+        <IslandPanel
+          hideHeader
+          aria-label={t('nav.gantt')}
+          className={`${styles.chartIsland} ${highlightId ? styles.chartHighlight : ''}`}
+          bodyClassName={styles.chartWrap}
+          data-testid="gantt-island-surface"
         >
-          <Gantt
+          <div ref={chartRef} className={styles.chartInner} data-lanpm-visual="gantt-chart">
+            <Gantt
             key={locale}
             tasks={ganttTasks}
             viewMode={viewMode}
@@ -452,7 +456,8 @@ export default function GanttView(): React.ReactElement {
               )
             }}
           />
-        </div>
+          </div>
+        </IslandPanel>
       )}
 
       <Modal

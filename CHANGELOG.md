@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.61.0] - 2026-07-31
+
+### Added
+
+- **`verify:visual` IS-401～404**：Gantt / Files / Chat `IslandPanel hideHeader` 守卫
+
+### Changed
+
+- **甘特图**：`chartWrap` 收敛至 `IslandPanel hideHeader`；`chartRef` 挂至内层 `chartInner`
+- **文件**：列表+预览 `.body` 网格收敛至 `IslandPanel hideHeader`
+- **聊天**：桌面工作区 `chatWorkspaceDesktop` 改 `IslandPanel hideHeader`（`ChatWorkspaceFrame`）；窄屏不变
+- **`docs/04` §1.3.1**：无标题岛面扩展至甘特 / 文件 / 聊天
+
 ## [1.60.0] - 2026-07-31
 
 ### Added
