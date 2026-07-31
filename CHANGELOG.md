@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.66.0] - 2026-07-31
+
+### Added
+
+- **ViewHost M1.5**：`ViewPluginContext` · `ViewPluginZone` · `PluginSlotHost` / `PluginGroupSlot` / `PluginTaskSlot` · `PluginZoneHost`
+- **viewSlotMap**：7 个 `AppView` → zone → `PluginSlotId[]` SSOT（`docs/插件开发.md` §3.5.3）
+- **插件槽扩展**：`chat.*` · `board.*` · `tree.toolbar` · `gantt.*` · `calendar.*` · `whiteboard.toolbar` · `files.toolbar` 入 `PLUGIN_SLOT_IDS`
+- **7 核心 Tab**：各视图预留 `toolbar` zone 空锚点（`data-plugin-zone`）
+- **验收**：`verify:view-slot-hosts`
+
+### Changed
+
+- **PluginSlot**：演进为 context 驱动；`taskId` 群级可选；`TaskDetailPanel` 保持兼容
+
 ## [1.65.6] - 2026-07-31
 
 ### Changed

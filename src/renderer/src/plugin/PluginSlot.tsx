@@ -1,23 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Typography } from 'antd'
+import type { AppView } from '@shared/navigation/types'
 import type { PluginSlotId, PluginView } from '@shared/plugin/types'
+import type { PluginSlotHostProps, PluginZoneHostProps } from '@shared/plugin/viewHost'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
 import PluginErrorBoundary from './PluginErrorBoundary'
 import { resolvePluginComponent } from './registry'
 import { PLUGIN_ENABLED_CHANGED_EVENT } from './pluginEvents'
+import { getViewZoneSlots } from './viewSlotMap'
 import styles from './plugin.module.css'
 
 const { Text } = Typography
 
-interface Props {
-  slotId: PluginSlotId
-  groupId: string
-  taskId: string
+export type PluginSlotHostOptions = PluginSlotHostProps & {
+  /** 任务详情区展示「扩展（插件）」标题 */
+  showSectionLabel?: boolean
 }
 
-export default function PluginSlot({ slotId, groupId, taskId }: Props): React.ReactElement | null {
-  const { t } = useI18n()
+function useSlotPlugins(slot: PluginSlotId): PluginView[] {
   const [plugins, setPlugins] = useState<PluginView[]>([])
   const [reloadToken, setReloadToken] = useState(0)
 
@@ -30,7 +31,7 @@ export default function PluginSlot({ slotId, groupId, taskId }: Props): React.Re
   useEffect(() => {
     let cancelled = false
     void getLanpmApi()
-      .plugin.listSlotPlugins(slotId)
+      .plugin.listSlotPlugins(slot)
       .then((list) => {
         if (!cancelled) setPlugins(list)
       })
@@ -40,13 +41,27 @@ export default function PluginSlot({ slotId, groupId, taskId }: Props): React.Re
     return () => {
       cancelled = true
     }
-  }, [slotId, groupId, taskId, reloadToken])
+  }, [slot, reloadToken])
+
+  return plugins
+}
+
+/** 单槽宿主：按 context 渲染已启用插件 */
+export function PluginSlotHost({
+  slot,
+  context,
+  showSectionLabel = false
+}: PluginSlotHostOptions): React.ReactElement | null {
+  const { t } = useI18n()
+  const plugins = useSlotPlugins(slot)
 
   if (plugins.length === 0) return null
 
+  const taskId = context.selection?.taskId
+
   return (
-    <div className={styles.slot} data-plugin-slot={slotId}>
-      <Text type="secondary">{t('plugin.slotSection')}</Text>
+    <div className={styles.slot} data-plugin-slot={slot}>
+      {showSectionLabel ? <Text type="secondary">{t('plugin.slotSection')}</Text> : null}
       {plugins.map((plugin) => {
         const Comp = resolvePluginComponent(plugin.id)
         if (!Comp) {
@@ -58,10 +73,85 @@ export default function PluginSlot({ slotId, groupId, taskId }: Props): React.Re
         }
         return (
           <PluginErrorBoundary key={plugin.id} pluginId={plugin.id}>
-            <Comp plugin={plugin} groupId={groupId} taskId={taskId} />
+            <Comp plugin={plugin} groupId={context.groupId} taskId={taskId} context={context} />
           </PluginErrorBoundary>
         )
       })}
     </div>
+  )
+}
+
+/** 视图 zone 容器：无插件时仍保留空锚点 */
+export function PluginZoneHost({ zone, context }: PluginZoneHostProps): React.ReactElement {
+  const slots = getViewZoneSlots(context.view, zone)
+  return (
+    <div
+      className={styles.zoneHost}
+      data-plugin-zone={zone}
+      data-plugin-view={context.view}
+    >
+      {slots.map((slot) => (
+        <PluginSlotHost key={slot} slot={slot} context={context} />
+      ))}
+    </div>
+  )
+}
+
+/** 群级 Slot：不传 taskId */
+export function PluginGroupSlot({
+  slot,
+  groupId,
+  view
+}: {
+  slot: PluginSlotId
+  groupId: string
+  view: AppView
+}): React.ReactElement | null {
+  return <PluginSlotHost slot={slot} context={{ groupId, view }} />
+}
+
+/** 任务级 Slot：薄封装 */
+export function PluginTaskSlot({
+  slot,
+  groupId,
+  taskId,
+  view,
+  showSectionLabel = false
+}: {
+  slot: PluginSlotId
+  groupId: string
+  taskId: string
+  view: AppView
+  showSectionLabel?: boolean
+}): React.ReactElement | null {
+  return (
+    <PluginSlotHost
+      slot={slot}
+      context={{ groupId, view, selection: { taskId } }}
+      showSectionLabel={showSectionLabel}
+    />
+  )
+}
+
+interface LegacyPluginSlotProps {
+  slotId: PluginSlotId
+  groupId: string
+  taskId: string
+}
+
+/** @deprecated 优先用 PluginTaskSlot / PluginZoneHost */
+export default function PluginSlot({
+  slotId,
+  groupId,
+  taskId
+}: LegacyPluginSlotProps): React.ReactElement | null {
+  return (
+    <PluginTaskSlot
+      slot={slotId}
+      groupId={groupId}
+      taskId={taskId}
+      view="tree"
+      showSectionLabel
+    />
   )
 }

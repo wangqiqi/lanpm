@@ -28,6 +28,7 @@ import {
 import { WHITEBOARD_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { readCssVar } from '@renderer/ui/cssVar'
 import styles from './whiteboard.module.css'
 
@@ -441,6 +442,7 @@ export default function WhiteboardView(): React.ReactElement {
 
   return (
     <div className={`${styles.root} ${whiteboardZen ? styles.rootZen : ''}`}>
+      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'whiteboard' }} />
       {loading || !initialData ? (
         <ViewLoadingCenter />
       ) : (

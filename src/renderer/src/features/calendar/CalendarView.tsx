@@ -20,6 +20,7 @@ import TaskEditModal from '@renderer/features/board/TaskEditModal'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import IslandPanel from '@renderer/ui/IslandPanel'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './calendar.module.css'
 
 function ymdFromFcStr(value: string | null | undefined): string | null {
@@ -149,6 +150,8 @@ export default function CalendarView(): React.ReactElement {
   return (
     <div className={styles.root}>
       {activeTasks.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
+
+      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'calendar' }} />
 
       <IslandPanel
         hideHeader

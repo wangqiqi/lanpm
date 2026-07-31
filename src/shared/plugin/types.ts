@@ -9,6 +9,18 @@ export type PluginSlotId =
   | 'topbar.menu'
   | 'profile.tab'
   | 'group.tab.overflow'
+  | 'chat.toolbar.media'
+  | 'chat.composer.action'
+  | 'chat.message.action'
+  | 'board.toolbar'
+  | 'board.card.footer'
+  | 'tree.toolbar'
+  | 'gantt.toolbar'
+  | 'gantt.bar.context'
+  | 'calendar.toolbar'
+  | 'calendar.event.action'
+  | 'whiteboard.toolbar'
+  | 'files.toolbar'
   | 'files.preview.action'
 
 /** Host 可代理给插件的只读能力（白名单；非完整 LanpmApi） */
@@ -54,6 +66,18 @@ export const PLUGIN_SLOT_IDS: readonly PluginSlotId[] = [
   'topbar.menu',
   'profile.tab',
   'group.tab.overflow',
+  'chat.toolbar.media',
+  'chat.composer.action',
+  'chat.message.action',
+  'board.toolbar',
+  'board.card.footer',
+  'tree.toolbar',
+  'gantt.toolbar',
+  'gantt.bar.context',
+  'calendar.toolbar',
+  'calendar.event.action',
+  'whiteboard.toolbar',
+  'files.toolbar',
   'files.preview.action'
 ] as const
 

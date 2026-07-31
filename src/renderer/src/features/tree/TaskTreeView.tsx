@@ -36,6 +36,7 @@ import {
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import TaskAwarenessBadges from '@renderer/features/task/TaskAwarenessBadges'
 import { useIdentityStore } from '@renderer/stores/identityStore'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import {
   publishLocalAwareness,
   useTaskAwarenessStore,
@@ -433,6 +434,8 @@ export default function TaskTreeView(): React.ReactElement {
           </>
         }
       />
+
+      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'tree' }} />
 
       {parentSelected && (
         <Alert type="info" showIcon message={t('tree.parentProgressHint')} className={styles.parentHint} />

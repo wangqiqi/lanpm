@@ -50,6 +50,7 @@ import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import IslandPanel from '@renderer/ui/IslandPanel'
 import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './chat.module.css'
 
 function ChatWorkspaceFrame({
@@ -805,6 +806,7 @@ export default function ChatView(): React.ReactElement {
           />
           <div className={styles.inputRow}>
             <div className={styles.composerIsland}>
+            <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>
                 <EmojiPicker onPick={insertEmoji} />

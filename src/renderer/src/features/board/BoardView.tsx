@@ -61,6 +61,7 @@ import {
 } from '@renderer/stores/taskAwarenessStore'
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import IslandPanel from '@renderer/ui/IslandPanel'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -651,6 +652,8 @@ export default function BoardView(): React.ReactElement {
           </ViewCrossLink>
         }
       />
+
+      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'board' }} />
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />

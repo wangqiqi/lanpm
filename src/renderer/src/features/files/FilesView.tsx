@@ -67,6 +67,7 @@ import {
 import { isTextPreviewFile } from '@shared/file/previewExtensions'
 import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
 import { runOnEnter } from '@renderer/lib/inputKeyboard'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './files.module.css'
 
 const { Text } = Typography
@@ -1054,6 +1055,8 @@ export default function FilesView(): React.ReactElement {
           </div>
         }
       />
+
+      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'files' }} />
 
       <div className={styles.searchRow}>
         <ViewSegment

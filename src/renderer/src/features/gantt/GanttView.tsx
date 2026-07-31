@@ -43,6 +43,7 @@ import { validateTaskDateRange } from '@shared/task/validation'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { scrollGanttChartToDateCentered, scrollGanttChartToTask } from './ganttScroll'
 import { evaluateTaskSchedule, scheduleHealthHintKey } from '@renderer/features/task/scheduleHealthUi'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
@@ -361,6 +362,8 @@ export default function GanttView(): React.ReactElement {
           </ViewToolbarGroup>
         }
       />
+
+      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'gantt' }} />
 
       {loading && tasks.length === 0 ? (
         <ViewLoadingCenter />

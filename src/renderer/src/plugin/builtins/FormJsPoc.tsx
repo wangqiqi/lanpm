@@ -13,7 +13,7 @@ const { TextArea } = Input
 interface Props {
   plugin: PluginView
   groupId: string
-  taskId: string
+  taskId?: string
 }
 
 /**
@@ -22,6 +22,7 @@ interface Props {
  */
 export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement {
   const { t } = useI18n()
+  const resolvedTaskId = taskId ?? ''
   const [taskTitle, setTaskTitle] = useState('')
   const [values, setValues] = useState<Record<string, string | boolean>>({})
   const [loading, setLoading] = useState(true)
@@ -36,7 +37,7 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
     let cancelled = false
     setLoading(true)
     void getLanpmApi()
-      .plugin.invokeCapability(plugin.id, 'task.get', { taskId })
+      .plugin.invokeCapability(plugin.id, 'task.get', { taskId: resolvedTaskId })
       .then((raw) => {
         if (cancelled) return
         const task = raw as Task | null
@@ -58,7 +59,7 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
     return () => {
       cancelled = true
     }
-  }, [plugin.id, taskId, t])
+  }, [plugin.id, resolvedTaskId, t])
 
   const setField = (key: string, value: string | boolean): void => {
     setValues((prev) => ({ ...prev, [key]: value }))
@@ -71,7 +72,7 @@ export default function FormJsPoc({ plugin, taskId }: Props): React.ReactElement
         <span className={styles.badge}>{t('plugin.pricingPaid')}</span>
       </div>
       <Text type="secondary">
-        {loading ? t('plugin.formLoading') : t('plugin.formHint', { title: taskTitle || taskId })}
+        {loading ? t('plugin.formLoading') : t('plugin.formHint', { title: taskTitle || resolvedTaskId })}
       </Text>
       {components.map((c) => {
         if (c.type === 'textarea') {

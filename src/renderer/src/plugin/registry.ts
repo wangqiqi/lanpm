@@ -1,12 +1,15 @@
 import type { ComponentType } from 'react'
 import type { PluginView } from '@shared/plugin/types'
+import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import ExampleStub from './builtins/ExampleStub'
 import FormJsPoc from './builtins/FormJsPoc'
 
 export type PluginSlotComponentProps = {
   plugin: PluginView
   groupId: string
-  taskId: string
+  /** 任务级 Slot 可选；群级 Slot 不传 */
+  taskId?: string
+  context?: ViewPluginContext
 }
 
 const REGISTRY: Record<string, ComponentType<PluginSlotComponentProps>> = {
