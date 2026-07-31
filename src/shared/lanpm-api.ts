@@ -405,5 +405,14 @@ export interface LanpmApi {
     setLiveKitConfig: (
       input: import('./media/livekitConfig').LiveKitConfig
     ) => Promise<import('./media/livekitConfig').LiveKitConfigPublic>
+    saveRecording: (payload: {
+      bytes: Uint8Array
+      suggestedName?: string
+    }) => Promise<{ saved: boolean; path?: string }>
+    listSchedules: (groupId?: string) => Promise<import('./media/meetingSchedule').MeetingSchedule[]>
+    createSchedule: (
+      input: import('./media/meetingSchedule').CreateMeetingScheduleInput
+    ) => Promise<import('./media/meetingSchedule').MeetingSchedule>
+    deleteSchedule: (payload: { id: string }) => Promise<{ ok: true }>
   }
 }

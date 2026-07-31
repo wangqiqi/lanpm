@@ -15,10 +15,9 @@ const toolbar = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/MeetingToolbar.tsx'),
   'utf8'
 )
-assert.match(toolbar, /meetingToolbar/)
-assert.match(toolbar, /Popover/)
-assert.match(toolbar, /isPluginLicenseActive/)
-assert.match(toolbar, /openProfileTab/)
+assert.match(toolbar, /MeetingSchedulePanel/)
+assert.match(toolbar, /useMeetingRecording/)
+assert.match(toolbar, /meeting-schedule-button/)
 
 const stub = readFileSync(join(root, 'src/renderer/src/plugin/builtins/MeetingStub.tsx'), 'utf8')
 assert.match(stub, /MeetingToolbar/)

@@ -22,6 +22,10 @@ import { registerNotificationIpc } from './ipc/notification'
 import { registerAiIpc } from './ipc/ai'
 import { initAiPatrolScheduler, shutdownAiPatrolScheduler } from './ai/aiPatrolScheduler'
 import {
+  initMeetingReminderService,
+  shutdownMeetingReminderService
+} from './media/meetingReminderService'
+import {
   initAiEndpointProbeScheduler,
   shutdownAiEndpointProbeScheduler
 } from './ai/aiEndpointProbeService'
@@ -224,6 +228,7 @@ app.whenReady().then(() => {
     initNetwork(getDatabase())
     initChatService(getDatabase())
     initAiPatrolScheduler(getDatabase())
+    initMeetingReminderService()
     initAiEndpointProbeScheduler(getDatabase())
     initScreenshotService()
     registerAllIpcHandlers()
@@ -258,6 +263,7 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   shutdownAiEndpointProbeScheduler()
+  shutdownMeetingReminderService()
   shutdownAiPatrolScheduler()
   shutdownScreenshotService()
   shutdownChatService()

@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.81.0] - 2026-07-31
+
+### Added
+
+- **会议本地录制 MVP**：入会后可 `MediaRecorder` 录制，`meeting.saveRecording` 经 `showSaveDialog` 保存本机 `.webm`
+- **群级会议日程 MVP**：`meetingSchedule` 本机 JSON 持久化 · `MeetingSchedulePanel` 预约/列表/删除
+- **桌面提醒**：开始前 5 分钟 + 开始时（主进程 `meetingReminderService`；浏览器桩 renderer 轮询）
+- **`verify:meeting-recording`** · **`verify:meeting-schedule`** · 单测 `meetingReminderLogic`
+- **Spec**：`docs/specs/003-meeting-ux-next/spec.md`
+
+### Changed
+
+- **`MeetingToolbar`**：录制钮/计时 · 日程 Popover · 详情内日程区
+- **`docs/插件开发.md` §12.4**：录制+日程 MVP 交付态
+
 ## [1.80.0] - 2026-07-31
 
 ### Added

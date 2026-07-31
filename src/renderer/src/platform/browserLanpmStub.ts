@@ -69,6 +69,14 @@ import {
   toLiveKitConfigPublic,
   type LiveKitConfig
 } from '@shared/media/livekitConfig'
+import {
+  createMeetingScheduleRecord,
+  filterUpcomingSchedules,
+  normalizeMeetingSchedule,
+  sortSchedulesByStart,
+  validateCreateMeetingScheduleInput,
+  type MeetingSchedule
+} from '@shared/media/meetingSchedule'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
 
 const STORAGE_KEY = 'lanpm.dev.identity'
@@ -82,6 +90,27 @@ const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
 const NAV_PREFS_STORAGE_KEY = 'lanpm.dev.navPreferences'
 const LIVEKIT_CONFIG_STORAGE_KEY = 'lanpm.dev.livekitConfig'
+const MEETING_SCHEDULES_STORAGE_KEY = 'lanpm.dev.meetingSchedules'
+
+function readStubMeetingSchedules(): MeetingSchedule[] {
+  try {
+    const raw = localStorage.getItem(MEETING_SCHEDULES_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .map((item) => normalizeMeetingSchedule(item))
+      .filter((item): item is MeetingSchedule => item !== null)
+  } catch {
+    return []
+  }
+}
+
+function writeStubMeetingSchedules(schedules: MeetingSchedule[]): MeetingSchedule[] {
+  const sorted = sortSchedulesByStart(schedules)
+  localStorage.setItem(MEETING_SCHEDULES_STORAGE_KEY, JSON.stringify(sorted))
+  return sorted
+}
 
 function readStubNavDocument(): NavPreferencesDocument {
   try {
@@ -2457,7 +2486,48 @@ export function createBrowserLanpmStub(): LanpmApi {
     },
     meeting: {
       getLiveKitConfig: async () => toLiveKitConfigPublic(readStubLiveKitConfig()),
-      setLiveKitConfig: async (input) => writeStubLiveKitConfig(input)
+      setLiveKitConfig: async (input) => writeStubLiveKitConfig(input),
+      saveRecording: async (payload) => {
+        const bytes = payload.bytes
+        if (!bytes?.length) throw new Error('Recording bytes required')
+        const name = payload.suggestedName?.trim() || `meeting-recording-${Date.now()}.webm`
+        const arrayBuffer = bytes.buffer.slice(
+          bytes.byteOffset,
+          bytes.byteOffset + bytes.byteLength
+        ) as ArrayBuffer
+        const blob = new Blob([arrayBuffer], { type: 'video/webm' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = name
+        a.click()
+        URL.revokeObjectURL(url)
+        return { saved: true, path: name }
+      },
+      listSchedules: async (groupId) => {
+        const all = readStubMeetingSchedules()
+        if (groupId?.trim()) {
+          return filterUpcomingSchedules(all.filter((s) => s.groupId === groupId.trim()))
+        }
+        return sortSchedulesByStart(all)
+      },
+      createSchedule: async (input) => {
+        const validated = validateCreateMeetingScheduleInput(input)
+        if (!validated) throw new Error('Invalid meeting schedule input')
+        const record = createMeetingScheduleRecord(validated)
+        const all = readStubMeetingSchedules()
+        all.push(record)
+        writeStubMeetingSchedules(all)
+        return record
+      },
+      deleteSchedule: async (payload) => {
+        const id = payload.id.trim()
+        const all = readStubMeetingSchedules()
+        const next = all.filter((s) => s.id !== id)
+        if (next.length === all.length) throw new Error('Schedule not found')
+        writeStubMeetingSchedules(next)
+        return { ok: true as const }
+      }
     },
     data: {
       getStorageSettings: async () => ({

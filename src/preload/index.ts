@@ -310,7 +310,11 @@ const api: LanpmApi = {
   },
   meeting: {
     getLiveKitConfig: () => ipcRenderer.invoke('meeting:getLiveKitConfig'),
-    setLiveKitConfig: (input) => ipcRenderer.invoke('meeting:setLiveKitConfig', input)
+    setLiveKitConfig: (input) => ipcRenderer.invoke('meeting:setLiveKitConfig', input),
+    saveRecording: (payload) => ipcRenderer.invoke('meeting:saveRecording', payload),
+    listSchedules: (groupId) => ipcRenderer.invoke('meeting:listSchedules', groupId),
+    createSchedule: (input) => ipcRenderer.invoke('meeting:createSchedule', input),
+    deleteSchedule: (payload) => ipcRenderer.invoke('meeting:deleteSchedule', payload)
   },
   data: {
     getStorageSettings: () => ipcRenderer.invoke('data:getStorageSettings'),

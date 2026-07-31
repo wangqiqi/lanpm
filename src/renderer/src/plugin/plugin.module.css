@@ -148,3 +148,17 @@
   margin-top: 6px;
   font-size: 12px;
 }
+
+.meetingSchedulePanel {
+  width: 280px;
+  max-width: min(90vw, 320px);
+}
+
+.meetingScheduleForm {
+  margin-top: 8px;
+}
+
+.meetingScheduleListTitle {
+  display: block;
+  margin: 12px 0 4px;
+}

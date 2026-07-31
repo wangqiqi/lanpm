@@ -13,11 +13,14 @@ import {
 import {
   AudioMutedOutlined,
   AudioOutlined,
+  CalendarOutlined,
   DesktopOutlined,
   InfoCircleOutlined,
   LoginOutlined,
   LogoutOutlined,
-  VideoCameraOutlined
+  VideoCameraOutlined,
+  PlayCircleOutlined,
+  StopOutlined
 } from '@ant-design/icons'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
@@ -26,6 +29,8 @@ import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
 import { useMeetingMesh } from './useMeetingMesh'
 import { useMeetingLiveKit } from './useMeetingLiveKit'
+import { useMeetingRecording } from './useMeetingRecording'
+import MeetingSchedulePanel from './MeetingSchedulePanel'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -67,6 +72,16 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
   const participants = roomState?.participants ?? []
   const busy = meshBusy || proBusy
   const controlsDisabled = !licenseActive
+  const inMeeting = joined || proJoined
+
+  const {
+    phase: recordingPhase,
+    elapsedLabel,
+    recording,
+    saving: recordingSaving,
+    startRecording,
+    stopAndSave
+  } = useMeetingRecording(inMeeting && licenseActive)
 
   const liteStatusLabel = useMemo(() => {
     if (!joined) return t('plugin.meetingStatusIdle')
@@ -124,6 +139,28 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     }
   }
 
+  const onStartRecord = async (): Promise<void> => {
+    try {
+      await startRecording()
+      message.success(t('plugin.meetingRecordStarted'))
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.meetingRecordFailed'))
+    }
+  }
+
+  const onStopRecord = async (): Promise<void> => {
+    try {
+      const result = await stopAndSave()
+      if (result.saved) {
+        message.success(t('plugin.meetingRecordSaved', { path: result.path ?? '' }))
+      } else {
+        message.info(t('plugin.meetingRecordCancelled'))
+      }
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.meetingRecordFailed'))
+    }
+  }
+
   const detailContent = (
     <div className={styles.meetingPopover}>
       <Text type="secondary">{t('plugin.meetingStubHint')}</Text>
@@ -172,6 +209,10 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
           {t('plugin.meetingOpenMeetingConfig')}
         </Button>
       ) : null}
+      <Divider orientation="left" plain>
+        {t('plugin.meetingScheduleSection')}
+      </Divider>
+      <MeetingSchedulePanel groupId={groupId} disabled={controlsDisabled} />
     </div>
   )
 
@@ -184,6 +225,11 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
         <Tag color={proJoined ? 'success' : liveKitConfigured ? 'default' : 'warning'}>
           {proJoined ? t('plugin.meetingStatusProLive') : proStatusLabel}
         </Tag>
+        {recording ? (
+          <Tag color="error" data-testid="meeting-recording-timer">
+            {t('plugin.meetingRecordTimer', { elapsed: elapsedLabel })}
+          </Tag>
+        ) : null}
 
         {!joined ? (
           <Tooltip title={t('plugin.meetingJoin')}>
@@ -257,6 +303,47 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
             onClick={() => void toggleProMute()}
           />
         </Tooltip>
+
+        {!recording ? (
+          <Tooltip title={t('plugin.meetingRecordStart')}>
+            <Button
+              size="small"
+              icon={<PlayCircleOutlined />}
+              loading={recordingSaving || recordingPhase === 'saving'}
+              disabled={controlsDisabled || !inMeeting}
+              aria-label={t('plugin.meetingRecordStart')}
+              data-testid="meeting-record-start"
+              onClick={() => void onStartRecord()}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip title={t('plugin.meetingRecordStop')}>
+            <Button
+              size="small"
+              danger
+              icon={<StopOutlined />}
+              loading={recordingSaving}
+              disabled={controlsDisabled}
+              aria-label={t('plugin.meetingRecordStop')}
+              data-testid="meeting-record-stop"
+              onClick={() => void onStopRecord()}
+            />
+          </Tooltip>
+        )}
+
+        <Popover
+          title={t('plugin.meetingScheduleTitlePopover')}
+          trigger="click"
+          content={<MeetingSchedulePanel groupId={groupId} disabled={controlsDisabled} />}
+        >
+          <Button
+            size="small"
+            icon={<CalendarOutlined />}
+            disabled={controlsDisabled}
+            aria-label={t('plugin.meetingScheduleTitlePopover')}
+            data-testid="meeting-schedule-button"
+          />
+        </Popover>
 
         <Popover
           title={t('plugin.meetingToolbarDetails')}
