@@ -8,7 +8,7 @@ import './styles/global.css'
 
 const rootEl = document.getElementById('root')
 if (!rootEl) {
-  throw new Error('#root 不存在')
+  throw new Error('#root element not found')
 }
 
 const tree = (

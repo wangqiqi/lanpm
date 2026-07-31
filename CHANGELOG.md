@@ -2,6 +2,14 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.65.6] - 2026-07-31
+
+### Changed
+
+- **开发桩 i18n**：`browserLanpmStub` 展示文案迁入 `stub.preview.*`（设备/用户/协作组/邀请/部门/示例任务）
+- **bootstrap**：`#root` 缺失错误改英文（i18n 未加载路径）
+- **i18n**：`types.ts` locale 键缩进统一
+
 ## [1.65.5] - 2026-07-31
 
 ### Changed

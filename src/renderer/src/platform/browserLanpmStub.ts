@@ -10,7 +10,6 @@ import { parseHostPort } from '@shared/network/manualPeer'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
 
-const BROWSER_PREVIEW_DEVICE = '开发预览'
 import type { LanpmApi } from '@shared/lanpm-api'
 import { DEFAULT_GROUP_AUTO_DISCOVER } from '@shared/group/types'
 import { randomAvatarDataUrl } from '@renderer/features/setup/avatar'
@@ -502,11 +501,11 @@ function ensureDevPreviewIdentity(): SetupStatus {
     configured: true,
     user: {
       userId: 'preview-user',
-      displayName: '预览用户',
-      baseName: '预览',
+      displayName: stubT('stub.preview.displayName'),
+      baseName: stubT('stub.preview.baseName'),
       suffix: '00',
-      department: '开发预览',
-      avatarUrl: randomAvatarDataUrl('预览')
+      department: stubT('stub.preview.department'),
+      avatarUrl: randomAvatarDataUrl(stubT('stub.preview.baseName'))
     },
     device: {
       deviceId: 'dev-preview',
@@ -519,7 +518,7 @@ function ensureDevPreviewIdentity(): SetupStatus {
 
 /** 浏览器直连 Vite 时的身份 API 桩（无 Electron preload） */
 function previewDeviceName(): string {
-  return resolveDeviceName('', BROWSER_PREVIEW_DEVICE)
+  return resolveDeviceName('', stubT('stub.preview.deviceName'))
 }
 
 function readReadReceipts(): Record<string, string[]> {
@@ -1208,7 +1207,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         group: {
           groupId,
           type: 'project' as const,
-          name: 'LanPM 协作组',
+          name: stubT('stub.preview.groupName'),
           createdBy: 'demo-alice',
           createdAt: new Date().toISOString(),
           autoDiscover: true
@@ -1220,7 +1219,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       startInvite: async (groupId) => ({
         inviteId: 'stub-invite',
         groupId,
-        groupName: 'LanPM 协作组',
+        groupName: stubT('stub.preview.groupName'),
         code: '123456',
         codeDisplay: '123 456',
         expiresAt: new Date(Date.now() + 300_000).toISOString()
@@ -1231,7 +1230,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         group: {
           groupId: `grp_invite_${code}`,
           type: 'project' as const,
-          name: '邀请入群',
+          name: stubT('stub.preview.inviteJoinGroupName'),
           createdBy: 'demo-alice',
           createdAt: new Date().toISOString(),
           autoDiscover: true
@@ -1265,7 +1264,7 @@ export function createBrowserLanpmStub(): LanpmApi {
             totalTasks: 4
           }
         ],
-        departments: [{ department: '研发部', completionPercent: 75, taskCount: 4, doneCount: 3 }],
+        departments: [{ department: stubT('stub.preview.departmentRnd'), completionPercent: 75, taskCount: 4, doneCount: 3 }],
         executiveSummary: {
           completedThisWeek: 1,
           inProgressCount: 2,
@@ -1284,8 +1283,8 @@ export function createBrowserLanpmStub(): LanpmApi {
             taskId: 'task-attention-1',
             groupId: 'demo-project',
             projectName: stubT('demo.groupProject'),
-            title: '示例延期任务',
-            assigneeName: '张三',
+            title: stubT('stub.preview.sampleOverdueTask'),
+            assigneeName: stubT('stub.preview.sampleAssignee'),
             kind: 'overdue' as const,
             endDate: '2026-07-01'
           }
@@ -1582,7 +1581,7 @@ export function createBrowserLanpmStub(): LanpmApi {
           groups: [
             {
               groupId: 'stub-remote-project',
-              name: 'LanPM 协作组',
+              name: stubT('stub.preview.groupName'),
               type: 'project' as const,
               ownerUserId: 'demo-alice',
               ownerDisplayName: 'Alice',
@@ -1615,7 +1614,7 @@ export function createBrowserLanpmStub(): LanpmApi {
           groups: [
             {
               groupId: 'stub-remote-project',
-              name: 'LanPM 协作组',
+              name: stubT('stub.preview.groupName'),
               type: 'project' as const,
               ownerUserId: 'demo-alice',
               ownerDisplayName: 'Alice',
@@ -1639,7 +1638,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         codeDisplay: '847 293',
         expiresAt: new Date(Date.now() + 300_000).toISOString(),
         groups: [
-          { groupId: 'stub-remote-project', name: 'LanPM 协作组', type: 'project' as const }
+          { groupId: 'stub-remote-project', name: stubT('stub.preview.groupName'), type: 'project' as const }
         ],
         localIp: '127.0.0.1',
         localIpTail: '1'
@@ -1666,7 +1665,7 @@ export function createBrowserLanpmStub(): LanpmApi {
           groups: [
             {
               groupId: 'stub-remote-project',
-              name: 'LanPM 协作组',
+              name: stubT('stub.preview.groupName'),
               type: 'project' as const,
               ownerUserId: 'demo-alice',
               ownerDisplayName: 'Alice',
