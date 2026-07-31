@@ -42,6 +42,11 @@
   width: 100%;
 }
 
+/* IslandPanel hideHeader 的 panelBodyFlush 为 column；此处须恢复侧栏+主区横排 */
+.chatIsland .chatWorkspace {
+  flex-direction: row;
+}
+
 .chatIsland {
   flex: 1;
   min-height: 0;

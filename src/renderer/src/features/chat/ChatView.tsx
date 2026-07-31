@@ -807,7 +807,9 @@ export default function ChatView(): React.ReactElement {
           />
           <div className={styles.inputRow}>
             <div className={styles.composerIsland}>
-            <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
+            {inputMode === 'text' ? (
+              <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
+            ) : null}
             <PluginZoneHost zone="composer" context={{ groupId: gid, view: 'chat' }} />
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>

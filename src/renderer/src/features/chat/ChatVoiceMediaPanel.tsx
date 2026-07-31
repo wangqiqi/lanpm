@@ -3,7 +3,7 @@ import { Button, Typography } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
-import { PluginGroupSlot } from '@renderer/plugin/PluginSlot'
+import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { resolvePluginComponent } from '@renderer/plugin/registry'
 import { PLUGIN_ENABLED_CHANGED_EVENT } from '@renderer/plugin/pluginEvents'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
@@ -15,7 +15,7 @@ interface Props {
   groupId: string
 }
 
-/** 聊天语音模式：接 `chat.toolbar.media` Slot；未启用时展示 CTA */
+/** 聊天语音模式：承载 `toolbar` zone；未启用时展示 CTA */
 export default function ChatVoiceMediaPanel({ groupId }: Props): React.ReactElement {
   const { t } = useI18n()
   const [slotPlugins, setSlotPlugins] = useState<PluginView[]>([])
@@ -65,7 +65,7 @@ export default function ChatVoiceMediaPanel({ groupId }: Props): React.ReactElem
 
   return (
     <div className={styles.voicePanel} data-testid="chat-voice-media-panel">
-      <PluginGroupSlot slot="chat.toolbar.media" groupId={groupId} view="chat" />
+      <PluginZoneHost zone="toolbar" context={{ groupId, view: 'chat' }} />
     </div>
   )
 }
