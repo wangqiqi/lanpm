@@ -931,6 +931,38 @@ assert.ok(
 )
 assert.match(docs04, /甘特、文件、聊天/, 'docs/04 §1.3.1 must list Gantt/Files/Chat island surfaces (IS-404)')
 
+// --- AP-401~403 audit-polish（审查.md 清尾） ---
+const discoverCoachmarkSrc = readFileSync(
+  join(renderer, 'features/discover/DiscoverCoachmark.tsx'),
+  'utf8'
+)
+const whiteboardCss = readFileSync(join(renderer, 'features/whiteboard/whiteboard.module.css'), 'utf8')
+const taskDetailSrc = readFileSync(join(renderer, 'features/tree/TaskDetailPanel.tsx'), 'utf8')
+const whiteboardTypesSrc = readFileSync(join(root, 'src/shared/whiteboard/types.ts'), 'utf8')
+const verifyM7Src = readFileSync(join(root, 'tests/runners/verify-m7.ts'), 'utf8')
+
+assert.match(
+  discoverCoachmarkSrc,
+  /readCssVar\('--lanpm-overlay'/,
+  'DiscoverCoachmark must use --lanpm-overlay token (AP-401)'
+)
+assert.match(
+  whiteboardCss,
+  /\.actionBtn[\s\S]*var\(--lanpm-shadow-island\)/,
+  'whiteboard.actionBtn must use --lanpm-shadow-island (AP-401)'
+)
+assert.ok(
+  !whiteboardCss.includes('rgba(0, 0, 0, 0.08)'),
+  'whiteboard.module.css must not hardcode island shadow rgba (AP-401)'
+)
+assert.match(
+  whiteboardTypesSrc,
+  /LANPM_SURFACE_SOLID_HEX/,
+  'whiteboard empty scene must use LANPM_SURFACE_SOLID_HEX (AP-402)'
+)
+assert.ok(!taskDetailSrc.includes('fontSize:'), 'TaskDetailPanel must not use inline fontSize (AP-403)')
+assert.match(verifyM7Src, /npm run knip/, 'verify:m7 must run knip dead-code scan (AP-403)')
+
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')
 if (existsSync(outAssets)) {

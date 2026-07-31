@@ -1,6 +1,7 @@
 import { useMemo, type RefObject } from 'react'
 import { Tour } from 'antd'
 import type { TourProps } from 'antd'
+import { readCssVar } from '@renderer/ui/cssVar'
 import { useI18n } from '@renderer/i18n/useI18n'
 
 interface DiscoverCoachmarkProps {
@@ -34,7 +35,7 @@ export default function DiscoverCoachmark({
       onClose={onClose}
       onFinish={onClose}
       steps={steps}
-      mask={{ color: 'rgba(0,0,0,0.45)' }}
+      mask={{ color: readCssVar('--lanpm-overlay', 'rgba(0, 0, 0, 0.35)') }}
       data-testid="discover-coachmark-tour"
     />
   )

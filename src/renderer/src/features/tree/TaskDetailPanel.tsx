@@ -560,7 +560,7 @@ export default function TaskDetailPanel({
           showSearch
           optionFilterProp="label"
         />
-        <Text type="secondary" style={{ fontSize: 11 }}>
+        <Text type="secondary" className={styles.detailMetaCaption}>
           {dictEmpty ? t('board.tagsEmptyDictHint') : t('board.tagsHint')}
         </Text>
         {tags.length > 0 ? (
@@ -684,7 +684,7 @@ export default function TaskDetailPanel({
         <div className={styles.checklistHeader}>
           <Text type="secondary">{t('tree.detailChecklist')}</Text>
           {checklistProgress.total > 0 ? (
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type="secondary" className={styles.detailMetaBody}>
               {t('tree.detailChecklistProgress', {
                 done: checklistProgress.done,
                 total: checklistProgress.total
@@ -735,7 +735,7 @@ export default function TaskDetailPanel({
                   </Button>
                 ) : null}
                 {item.linkedSubtaskId ? (
-                  <Text type="secondary" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>
+                  <Text type="secondary" className={styles.detailMetaCaptionNowrap}>
                     {t('tree.detailChecklistLinked')}
                   </Text>
                 ) : null}

@@ -32,6 +32,12 @@ export const LANPM_ACCENT_RING_RGBA = {
   dark: 'rgba(10, 132, 255, 0.4)'
 } as const
 
+/** 与 `--lanpm-surface-solid` 对齐（白板空场景种子；运行时可由 readCssVar 覆盖） */
+export const LANPM_SURFACE_SOLID_HEX = {
+  light: '#ffffff',
+  dark: '#1c1c1e'
+} as const
+
 /** 看板 / 树 / 甘特任务族色条（与 `global.module.css` `--lanpm-task-family-*` 同步） */
 export const LANPM_TASK_FAMILY = [
   LANPM_ACCENT.light,

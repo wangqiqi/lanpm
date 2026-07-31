@@ -7,6 +7,7 @@ import { projectRoot } from '../projectRoot.ts'
 
 const steps: { name: string; cmd: string; env?: Record<string, string> }[] = [
   { name: 'typecheck', cmd: 'npm run typecheck' },
+  { name: 'knip', cmd: 'npm run knip' },
   { name: 'test', cmd: 'npm run test' },
   { name: 'visual', cmd: 'npm run verify:visual' },
   { name: 'search', cmd: 'npm run verify:search' },

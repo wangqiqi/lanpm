@@ -162,6 +162,19 @@
   flex-shrink: 0;
 }
 
+.detailMetaCaption {
+  font-size: var(--lanpm-font-caption);
+}
+
+.detailMetaBody {
+  font-size: var(--lanpm-font-body);
+}
+
+.detailMetaCaptionNowrap {
+  font-size: var(--lanpm-font-caption);
+  white-space: nowrap;
+}
+
 .tagChipRow {
   display: flex;
   flex-wrap: wrap;

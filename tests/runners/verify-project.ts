@@ -45,6 +45,7 @@ assert.ok(
 const requiredScripts = [
   'lint',
   'typecheck',
+  'knip',
   'test',
   'build',
   'verify:m7',

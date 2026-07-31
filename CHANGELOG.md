@@ -2,6 +2,37 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.62.1] - 2026-07-31
+
+### Changed
+
+- **`docs/插件开发.md`**：§3.5 Tab 视图宿主与 Zone 模型 · §3.6 Layer C `contributions.views` · §2.2 三层定制 · §12 ViewHost 标准化 Sprint 前置
+
+## [1.63.0] - 2026-07-31
+
+### Added
+
+- **`LANPM_SURFACE_SOLID_HEX`**：白板空场景种子与 `--lanpm-surface-solid` 对齐
+- **`verify:visual` AP-401～403**：审查清尾守卫（overlay 令牌、白板阴影、TaskDetailPanel 字号、knip 进 m7）
+
+### Changed
+
+- **`verify:m7`**：串联 `npm run knip` 死代码扫描
+- **DiscoverCoachmark**：Tour 遮罩改 `readCssVar('--lanpm-overlay')`
+- **白板**：Excalidraw 浮钮阴影改 `--lanpm-shadow-island`
+- **TaskDetailPanel**：标签/清单 meta 字号改 CSS 令牌类
+- **`审查.md`**：§5/§7 与 v1.57～1.62 交付对账
+
+## [1.62.0] - 2026-07-31
+
+### Changed
+
+- **`docs/插件开发.md` 全面扩充**：§1.4 人·事主轴 · §2.2 双层定制（导航偏好 + 插件 Slot）· §3.2 按视图扩展地图 · §3.5 Tab 启停/排序 · §4.4 Extension API 路线 · §8 成熟度/市场 · §12 含导航偏好 MVP Sprint
+
+### Added
+
+- **`docs/插件开发.md`**：插件架构 SSOT — Slot/Capability 契约、`plugin.json` 规范、builtin registry 开发流程、用户消费路径、安全红线、生态阶段规划；`docs/00` 索引补链
+
 ## [1.61.0] - 2026-07-31
 
 ### Added

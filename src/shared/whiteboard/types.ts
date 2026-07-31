@@ -1,5 +1,7 @@
 /** Group-scoped Excalidraw scene (one board per group · TASK-226). */
 
+import { LANPM_SURFACE_SOLID_HEX } from '../design/lanpmDesignTokens.ts'
+
 export interface WhiteboardScene {
   groupId: string
   /** Serialized Excalidraw document JSON (`elements` + `appState` + optional `files`). */
@@ -31,7 +33,7 @@ export function emptyWhiteboardSceneJson(): string {
     version: 2,
     source: 'lanpm',
     elements: [],
-    appState: { viewBackgroundColor: '#ffffff' },
+    appState: { viewBackgroundColor: LANPM_SURFACE_SOLID_HEX.light },
     files: {}
   })
 }

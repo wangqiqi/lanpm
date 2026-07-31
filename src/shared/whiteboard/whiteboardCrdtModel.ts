@@ -3,6 +3,7 @@
  * Pure helpers — no Electron; avoids importing Binding package in main.
  */
 import * as Y from 'yjs'
+import { LANPM_SURFACE_SOLID_HEX } from '../design/lanpmDesignTokens.ts'
 import {
   emptyWhiteboardSceneJson,
   normalizeSceneJson
@@ -180,7 +181,7 @@ export function whiteboardDocToSceneJson(doc: Y.Doc): string {
       version: 2,
       source: 'lanpm',
       elements,
-      appState: { viewBackgroundColor: '#ffffff' },
+      appState: { viewBackgroundColor: LANPM_SURFACE_SOLID_HEX.light },
       files
     })
   )
