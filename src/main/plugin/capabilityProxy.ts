@@ -1,13 +1,16 @@
 import type { PluginCapabilityId } from '../../shared/plugin/types.ts'
 import type {
+  BoardMoveTaskArgs,
   ChatListMessagesArgs,
   ChatSendTaskRefArgs,
   MemberListArgs,
-  TaskGetChecklistArgs
+  TaskGetChecklistArgs,
+  TaskPatchArgs
 } from '../../shared/plugin/capabilityTypes.ts'
+import { getDisallowedTaskPatchFields } from '../../shared/plugin/taskPatchWhitelist.ts'
 import { pluginDeclaresCapability } from '../../shared/plugin/validateManifest.ts'
 import { getDatabase } from '../storage'
-import { listGroupTasks, listTaskChecklist } from '../task/taskService'
+import { listGroupTasks, listTaskChecklist, moveGroupTask, updateGroupTask } from '../task/taskService'
 import { getTaskById } from '../storage/repositories/taskRepository'
 import { getGroupById } from '../group/groupService'
 import { listGroupFiles } from '../file/fileService'
@@ -121,6 +124,32 @@ export async function invokePluginCapability(
       if (!groupId) throw new Error('groupId required')
       if (!taskId) throw new Error('taskId required')
       return sendTaskRefMessage(db, groupId, taskId)
+    }
+    case 'task.patch': {
+      const { groupId, taskId, patch } = args as TaskPatchArgs
+      if (!groupId) throw new Error('groupId required')
+      if (!taskId) throw new Error('taskId required')
+      if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+        throw new Error('patch required')
+      }
+      const disallowed = getDisallowedTaskPatchFields(patch as Record<string, unknown>)
+      if (disallowed.length > 0) {
+        throw new Error(`patch field not allowed: ${disallowed.join(', ')}`)
+      }
+      const existing = getTaskById(db, taskId)
+      if (!existing) throw new Error('task not found')
+      if (existing.groupId !== groupId) throw new Error('task not in group')
+      return updateGroupTask(db, { taskId, ...patch })
+    }
+    case 'board.moveTask': {
+      const { groupId, taskId, status, sortOrder, otherReason } = args as BoardMoveTaskArgs
+      if (!groupId) throw new Error('groupId required')
+      if (!taskId) throw new Error('taskId required')
+      if (!status) throw new Error('status required')
+      const existing = getTaskById(db, taskId)
+      if (!existing) throw new Error('task not found')
+      if (existing.groupId !== groupId) throw new Error('task not in group')
+      return moveGroupTask(db, { taskId, status, sortOrder, otherReason })
     }
     default: {
       const _exhaustive: never = capability
