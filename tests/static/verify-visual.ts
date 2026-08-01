@@ -1123,6 +1123,14 @@ assert.match(
   'ChatCollaborationDrawer must set dataset.visualCollabDrawer for capture (IA-408)'
 )
 
+// --- IA-409 bottom nav overflow slot (ia-regression TASK-1311) ---
+const bottomNavSrc = readFileSync(join(renderer, 'layout/BottomNav.tsx'), 'utf8')
+assert.match(
+  bottomNavSrc,
+  /if \(plugins\.length === 0\) return null/,
+  'BottomNav overflow slot must not render empty flex tabSlot (IA-409)'
+)
+
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')
 if (existsSync(outAssets)) {

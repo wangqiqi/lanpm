@@ -38,7 +38,7 @@ const VIEW_FILES: Record<(typeof CORE_VIEWS)[number], string> = {
 const ZONE_FILE_OVERRIDES: Partial<
   Record<AppView, Partial<Record<ViewPluginZone, string | readonly string[]>>>
 > = {
-  chat: { context: 'src/renderer/src/features/chat/MessageBubble.tsx' },
+  chat: { context: 'src/renderer/src/features/chat/ChatView.tsx' },
   board: {
     card: 'src/renderer/src/features/board/KanbanCard.tsx',
     detail: 'src/renderer/src/features/board/TaskEditModal.tsx'
