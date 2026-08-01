@@ -4,6 +4,7 @@ import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import ExampleStub from './builtins/ExampleStub'
 import MeetingStub from './builtins/MeetingStub'
 import OpsStub from './builtins/OpsStub'
+import MindmapSlot from './builtins/MindmapSlot'
 
 export type PluginSlotComponentProps = {
   plugin: PluginView
@@ -16,7 +17,8 @@ export type PluginSlotComponentProps = {
 const REGISTRY: Record<string, ComponentType<PluginSlotComponentProps>> = {
   'lanpm.example': ExampleStub,
   'lanpm.meeting': MeetingStub,
-  'lanpm.ops': OpsStub
+  'lanpm.ops': OpsStub,
+  'lanpm.mindmap': MindmapSlot
 }
 
 export function resolvePluginComponent(

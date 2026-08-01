@@ -14,7 +14,9 @@ import type { Task } from '@shared/task/types'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { patchGanttCalendarLabels } from './ganttCalendarLabels'
-import { exportGanttChart } from './ganttExport'
+import { exportGanttChart, captureGanttPngBlob } from './ganttExport'
+import ViewExportShareActions from '@renderer/components/view/ViewExportShareActions'
+import { sharePngToGroupChat } from '@renderer/lib/exportShare'
 import { computeGanttTimelineDates } from '@shared/task/ganttTimeline'
 import {
   GANTT_HANDLE_WIDTH,
@@ -74,6 +76,7 @@ export default function GanttView(): React.ReactElement {
   const [toId, setToId] = useState<string>()
   const [depType, setDepType] = useState<TaskDependencyType>('FS')
   const [exporting, setExporting] = useState(false)
+  const [sharing, setSharing] = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const [scheduleTask, setScheduleTask] = useState<Task | null>(null)
   const [scheduleStart, setScheduleStart] = useState('')
@@ -308,6 +311,27 @@ export default function GanttView(): React.ReactElement {
     }
   }
 
+  const shareChartPng = async (): Promise<void> => {
+    const el = chartRef.current
+    if (!el || !gid) return
+    setSharing(true)
+    try {
+      patchGanttCalendarLabels(el, timelineDates, viewMode, columnWidth, locale)
+      const stamp = new Date().toISOString().slice(0, 10)
+      const blob = await captureGanttPngBlob(el, {
+        taskCount: ganttTasks.length,
+        rowHeight: GANTT_ROW_HEIGHT,
+        headerHeight: GANTT_HEADER_HEIGHT
+      })
+      await sharePngToGroupChat(gid, blob, `gantt-${gid}-${stamp}.png`)
+      message.success(t('files.sharedToChat'))
+    } catch {
+      message.error(t('gantt.exportFailed'))
+    } finally {
+      setSharing(false)
+    }
+  }
+
   return (
     <div className={styles.root}>
       <ViewToolbar
@@ -359,6 +383,15 @@ export default function GanttView(): React.ReactElement {
             >
               {t('gantt.exportPdf')}
             </Button>
+            <ViewExportShareActions
+              onDownload={() => void exportChart('png')}
+              onShareToChat={() => void shareChartPng()}
+              downloading={exporting}
+              sharing={sharing}
+              downloadDisabled={ganttTasks.length === 0}
+              shareDisabled={ganttTasks.length === 0}
+              downloadLabel={t('gantt.exportPng')}
+            />
             <ViewToolbarHint>{t('gantt.toolbarHint')}</ViewToolbarHint>
           </ViewToolbarGroup>
         }

@@ -26,6 +26,15 @@ import { DEFAULT_GROUP_AUTO_DISCOVER } from '@shared/group/types'
 import { randomAvatarDataUrl } from '@renderer/features/setup/avatar'
 import { isMessageReadByOthers } from '@shared/chat/readReceipt'
 import type { FileMeta } from '@shared/file/types'
+import type {
+  CreateMindmapInput,
+  ExportMindmapPngInput,
+  MindmapDocument,
+  MindmapDocumentLoad,
+  RenameMindmapInput,
+  SaveMindmapInput
+} from '@shared/mindmap/types'
+import { emptyMindmapDataJson, mindmapFileName } from '@shared/mindmap/types'
 import type { CreateTaskInput, Task, TaskStatus, UpdateTaskInput } from '@shared/task/types'
 import { applyAggregatedProgress } from '@shared/task/progress'
 import {
@@ -95,6 +104,7 @@ const CHECKLIST_STORAGE_KEY = 'lanpm.dev.checklists'
 const READ_RECEIPT_KEY = 'lanpm.dev.readReceipts'
 const FILE_STORAGE_KEY = 'lanpm.dev.files'
 const WHITEBOARD_STORAGE_KEY = 'lanpm.dev.whiteboard'
+const MINDMAP_STORAGE_KEY = 'lanpm.dev.mindmap'
 const STUB_DISSOLVED_GROUPS_KEY = 'lanpm.dev.dissolvedGroups'
 const NAV_PREFS_STORAGE_KEY = 'lanpm.dev.navPreferences'
 const LIVEKIT_CONFIG_STORAGE_KEY = 'lanpm.dev.livekitConfig'
@@ -538,6 +548,31 @@ function writeStubWhiteboard(scene: WhiteboardScene): void {
   const all = readStubWhiteboards()
   all[scene.groupId] = scene
   localStorage.setItem(WHITEBOARD_STORAGE_KEY, JSON.stringify(all))
+}
+
+interface StubMindmapDoc extends MindmapDocument {
+  dataJson: string
+}
+
+function readStubMindmaps(): StubMindmapDoc[] {
+  try {
+    const raw = localStorage.getItem(MINDMAP_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as unknown
+    return Array.isArray(parsed) ? (parsed as StubMindmapDoc[]) : []
+  } catch {
+    return []
+  }
+}
+
+function writeStubMindmaps(docs: StubMindmapDoc[]): void {
+  localStorage.setItem(MINDMAP_STORAGE_KEY, JSON.stringify(docs))
+}
+
+function toMindmapMeta(doc: StubMindmapDoc): MindmapDocument {
+  const { dataJson: _omit, ...meta } = doc
+  void _omit
+  return meta
 }
 
 function assertStubTaskWritable(groupId: string): void {
@@ -2339,6 +2374,110 @@ export function createBrowserLanpmStub(): LanpmApi {
           seeds: []
         }
       })
+    },
+    mindmap: {
+      list: async (groupId) => {
+        return readStubMindmaps()
+          .filter((d) => d.groupId === groupId)
+          .map(({ docId, groupId: gid, title, updatedAt }) => ({
+            docId,
+            groupId: gid,
+            title,
+            updatedAt
+          }))
+      },
+      create: async (input: CreateMindmapInput) => {
+        const now = new Date().toISOString()
+        const docId = `stub-mindmap-${Date.now()}`
+        const fileId = `stub-mindmap-file-${Date.now()}`
+        const title = input.title?.trim() || '未命名脑图'
+        const dataJson = emptyMindmapDataJson(title)
+        const doc: StubMindmapDoc = {
+          docId,
+          groupId: input.groupId,
+          title,
+          fileId,
+          createdBy: 'stub-user',
+          createdAt: now,
+          updatedAt: now,
+          dataJson
+        }
+        const docs = readStubMindmaps()
+        docs.push(doc)
+        writeStubMindmaps(docs)
+        const groupFiles = readAllFiles()[input.groupId] ?? []
+        groupFiles.push({
+          fileId,
+          groupId: input.groupId,
+          name: mindmapFileName(title),
+          ext: 'json',
+          category: 'document',
+          size: dataJson.length,
+          mimeType: 'application/json',
+          uploadedBy: 'stub-user',
+          uploadedAt: now,
+          sha256: 'stub',
+          storagePath: '',
+          previewStatus: 'none',
+          isBookmark: false,
+          updatedAt: now
+        })
+        writeGroupFiles(input.groupId, groupFiles)
+        return toMindmapMeta(doc)
+      },
+      load: async (docId): Promise<MindmapDocumentLoad | null> => {
+        const doc = readStubMindmaps().find((d) => d.docId === docId)
+        return doc ?? null
+      },
+      save: async (input: SaveMindmapInput) => {
+        const docs = readStubMindmaps()
+        const idx = docs.findIndex((d) => d.docId === input.docId)
+        if (idx < 0) throw new Error('Mindmap not found')
+        const now = new Date().toISOString()
+        docs[idx] = { ...docs[idx], dataJson: input.dataJson, updatedAt: now }
+        writeStubMindmaps(docs)
+        return toMindmapMeta(docs[idx])
+      },
+      rename: async (input: RenameMindmapInput) => {
+        const docs = readStubMindmaps()
+        const idx = docs.findIndex((d) => d.docId === input.docId)
+        if (idx < 0) throw new Error('Mindmap not found')
+        const title = input.title.trim()
+        const now = new Date().toISOString()
+        docs[idx] = { ...docs[idx], title, updatedAt: now }
+        writeStubMindmaps(docs)
+        return toMindmapMeta(docs[idx])
+      },
+      delete: async (docId) => {
+        writeStubMindmaps(readStubMindmaps().filter((d) => d.docId !== docId))
+        return { ok: true as const }
+      },
+      exportPng: async (input: ExportMindmapPngInput) => {
+        if (!input.groupId || !input.pngBase64) throw new Error('exportPng input required')
+        const fileId = `file_mm_${Date.now()}`
+        const now = new Date().toISOString()
+        const name = input.fileName ?? `mindmap-${input.docId}.png`
+        const meta: FileMeta = {
+          fileId,
+          groupId: input.groupId,
+          name,
+          ext: 'png',
+          category: 'image',
+          size: Math.floor((input.pngBase64.length * 3) / 4),
+          mimeType: 'image/png',
+          uploadedBy: 'stub-user',
+          uploadedAt: now,
+          sha256: 'stub',
+          storagePath: '',
+          previewStatus: 'none',
+          isBookmark: false,
+          updatedAt: now
+        }
+        const groupFiles = readAllFiles()[input.groupId] ?? []
+        groupFiles.push(meta)
+        writeGroupFiles(input.groupId, groupFiles)
+        return meta
+      }
     },
     whiteboard: {
       getScene: async (groupId) => readStubWhiteboards()[groupId] ?? null,

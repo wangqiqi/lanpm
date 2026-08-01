@@ -257,6 +257,27 @@ async function captureElement(
   })
 }
 
+export async function captureGanttPngBlob(
+  container: HTMLElement,
+  opts: GanttExportOptions
+): Promise<Blob> {
+  const { target, layout, saved } = prepareGanttFullCapture(container, opts)
+  if (layout.gridHeight <= 0) {
+    throw new Error('err.ganttExportEmpty')
+  }
+  try {
+    const canvas = await captureElement(target, layout)
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error('err.ganttExportPngFailed'))),
+        'image/png'
+      )
+    })
+  } finally {
+    restoreGanttFullCapture(saved)
+  }
+}
+
 export async function exportGanttChart(
   container: HTMLElement,
   filename: string,

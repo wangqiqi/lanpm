@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Tooltip } from 'antd'
-import { CompressOutlined, DownloadOutlined, ExpandOutlined } from '@ant-design/icons'
+import { CompressOutlined, CommentOutlined, DownloadOutlined, ExpandOutlined } from '@ant-design/icons'
 import { Button as ExcalidrawButton, Excalidraw, exportToBlob } from '@excalidraw/excalidraw'
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types'
@@ -29,6 +29,7 @@ import { WHITEBOARD_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
+import { downloadBlob, sharePngToGroupChat } from '@renderer/lib/exportShare'
 import { readCssVar } from '@renderer/ui/cssVar'
 import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
 import styles from './whiteboard.module.css'
@@ -126,6 +127,7 @@ export default function WhiteboardView({ embedded = false }: WhiteboardViewProps
 
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [sharing, setSharing] = useState(false)
   const [linkedTaskId, setLinkedTaskId] = useState<string | undefined>()
   const [initialData, setInitialData] = useState<ScenePayload | null>(null)
   const [boardKey, setBoardKey] = useState(0)
@@ -411,6 +413,52 @@ export default function WhiteboardView({ embedded = false }: WhiteboardViewProps
     }
   }, [gid, message, formatError, t, flushSave])
 
+  const buildPngBlob = useCallback(async (): Promise<Blob> => {
+    await flushSave()
+    const api = apiRef.current
+    const latest = latestRef.current
+    const elements = api?.getSceneElements() ?? latest?.elements ?? []
+    const appState = api?.getAppState() ?? latest?.appState
+    const files = api?.getFiles() ?? latest?.files ?? {}
+    if (!appState) throw new Error('no scene')
+    return exportToBlob({
+      elements,
+      appState: { ...appState, exportBackground: true },
+      files,
+      mimeType: 'image/png'
+    })
+  }, [flushSave])
+
+  const downloadLocalPng = useCallback(async (): Promise<void> => {
+    if (!gid) return
+    setExporting(true)
+    try {
+      const blob = await buildPngBlob()
+      const stamp = new Date().toISOString().slice(0, 10)
+      downloadBlob(blob, `whiteboard-${gid.slice(0, 8)}-${stamp}.png`)
+      message.success(t('gantt.exportPngDone'))
+    } catch (err) {
+      message.error(formatError(err, 'whiteboard.exportFailed'))
+    } finally {
+      setExporting(false)
+    }
+  }, [gid, buildPngBlob, message, formatError, t])
+
+  const shareToChat = useCallback(async (): Promise<void> => {
+    if (!gid) return
+    setSharing(true)
+    try {
+      const blob = await buildPngBlob()
+      const stamp = new Date().toISOString().slice(0, 10)
+      await sharePngToGroupChat(gid, blob, `whiteboard-${stamp}.png`)
+      message.success(t('files.sharedToChat'))
+    } catch (err) {
+      message.error(formatError(err, 'whiteboard.exportFailed'))
+    } finally {
+      setSharing(false)
+    }
+  }, [gid, buildPngBlob, message, formatError, t])
+
   const uiOptions = useMemo(
     () => ({
       canvasActions: {
@@ -425,6 +473,8 @@ export default function WhiteboardView({ embedded = false }: WhiteboardViewProps
 
   const zenLabel = whiteboardZen ? t('whiteboard.exitZen') : t('whiteboard.zenMode')
   const exportLabel = t('whiteboard.exportPng')
+  const downloadLabel = t('viewExport.download')
+  const shareLabel = t('files.shareToChat')
   const linkedTaskLabel = linkedTaskId
     ? t('whiteboard.linkedHint', {
         taskId: linkedTaskId.length > 14 ? `${linkedTaskId.slice(0, 14)}…` : linkedTaskId
@@ -453,6 +503,32 @@ export default function WhiteboardView({ embedded = false }: WhiteboardViewProps
               <DownloadOutlined className={styles.actionIcon} />
             </ExcalidrawButton>
           </Tooltip>
+          <Tooltip title={downloadLabel}>
+            <ExcalidrawButton
+              className={styles.actionBtn}
+              onSelect={() => {
+                if (!exporting) void downloadLocalPng()
+              }}
+              title={downloadLabel}
+              aria-label={downloadLabel}
+              disabled={exporting}
+            >
+              <DownloadOutlined className={styles.actionIcon} />
+            </ExcalidrawButton>
+          </Tooltip>
+          <Tooltip title={shareLabel}>
+            <ExcalidrawButton
+              className={styles.actionBtn}
+              onSelect={() => {
+                if (!sharing) void shareToChat()
+              }}
+              title={shareLabel}
+              aria-label={shareLabel}
+              disabled={sharing}
+            >
+              <CommentOutlined className={styles.actionIcon} />
+            </ExcalidrawButton>
+          </Tooltip>
           <Tooltip title={zenLabel}>
             <ExcalidrawButton
               className={styles.actionBtn}
@@ -471,7 +547,7 @@ export default function WhiteboardView({ embedded = false }: WhiteboardViewProps
         </div>
       )
     },
-    [exportLabel, zenLabel, exporting, exportPng, whiteboardZen, setWhiteboardZen, t]
+    [exportLabel, downloadLabel, shareLabel, zenLabel, exporting, sharing, exportPng, downloadLocalPng, shareToChat, whiteboardZen, setWhiteboardZen, t]
   )
 
   if (!gid) return <ViewLoadingCenter />

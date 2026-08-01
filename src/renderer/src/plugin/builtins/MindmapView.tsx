@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Typography, message } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
 import type { Task } from '@shared/task/types'
-import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { emptyMindmapDataJson } from '@shared/mindmap/types'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { useMindmapDocumentStore } from '@renderer/stores/mindmapDocumentStore'
 import MindmapStub from './MindmapStub'
+import MindmapToolbar from './MindmapToolbar'
 import {
   loadMindElixirClient,
   loadMindElixirStyles,
@@ -23,7 +25,7 @@ interface Props {
   embedded?: boolean
 }
 
-function buildMindData(
+function buildMindDataFromTasks(
   sdk: MindElixirModule,
   groupId: string,
   tasks: Task[],
@@ -39,15 +41,32 @@ function buildMindData(
   return root
 }
 
+function parseMindmapData(dataJson: string, sdk: MindElixirModule, fallbackTopic: string): MindElixirData {
+  try {
+    return JSON.parse(dataJson) as MindElixirData
+  } catch {
+    return JSON.parse(emptyMindmapDataJson(fallbackTopic)) as MindElixirData
+  }
+}
+
 /** mind-elixir 真库渲染；未安装子包时降级 MindmapStub */
 export default function MindmapView({ plugin, groupId, embedded = false }: Props): React.ReactElement {
   const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const mindRef = useRef<MindElixirInstance | null>(null)
   const [sdk, setSdk] = useState<MindElixirModule | null | undefined>(undefined)
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [dataJson, setDataJson] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [ready, setReady] = useState(false)
+  const [reloadToken, setReloadToken] = useState(0)
+
+  const setDirty = useMindmapDocumentStore((s) => s.setDirty)
+  const registerSerializer = useMindmapDocumentStore((s) => s.registerSerializer)
+  const registerExportPng = useMindmapDocumentStore((s) => s.registerExportPng)
+  const refreshList = useMindmapDocumentStore((s) => s.refreshList)
+  const openDocument = useMindmapDocumentStore((s) => s.openDocument)
+  const createDocument = useMindmapDocumentStore((s) => s.createDocument)
+  const resetStore = useMindmapDocumentStore((s) => s.reset)
 
   useEffect(() => {
     let cancelled = false
@@ -60,28 +79,62 @@ export default function MindmapView({ plugin, groupId, embedded = false }: Props
   }, [])
 
   useEffect(() => {
+    const onReload = (): void => setReloadToken((n) => n + 1)
+    const onImport = (event: Event): void => {
+      const detail = (event as CustomEvent<{ tasks: Task[] }>).detail
+      if (!mindRef.current || !sdk || sdk === null) return
+      const data = buildMindDataFromTasks(sdk, groupId, detail.tasks ?? [], t('plugin.mindmapRoot'))
+      mindRef.current.refresh(data)
+      setDirty(true)
+    }
+    window.addEventListener('lanpm:mindmap-reload', onReload)
+    window.addEventListener('lanpm:mindmap-import-tasks', onImport)
+    return () => {
+      window.removeEventListener('lanpm:mindmap-reload', onReload)
+      window.removeEventListener('lanpm:mindmap-import-tasks', onImport)
+    }
+  }, [groupId, sdk, setDirty, t])
+
+  useEffect(() => {
     let cancelled = false
     setLoading(true)
-    void getLanpmApi()
-      .plugin.invokeCapability(plugin.id, 'task.list', { groupId })
-      .then((raw) => {
-        if (!cancelled) setTasks((raw as Task[]) ?? [])
-      })
-      .catch((err: unknown) => {
+    void (async () => {
+      try {
+        await refreshList(groupId)
+        let id = useMindmapDocumentStore.getState().docId
+        if (!id) {
+          const docs = useMindmapDocumentStore.getState().documents
+          if (docs.length > 0) {
+            id = docs[0]!.docId
+          } else {
+            await createDocument(groupId)
+            id = useMindmapDocumentStore.getState().docId
+          }
+        }
+        if (!id) throw new Error('mindmap doc missing')
+        const json = await openDocument(id)
+        if (!cancelled) setDataJson(json)
+      } catch (err) {
         if (!cancelled) {
           message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false)
-      })
+      }
+    })()
     return () => {
       cancelled = true
     }
-  }, [plugin.id, groupId, t])
+  }, [groupId, reloadToken, refreshList, openDocument, createDocument, t])
 
   useEffect(() => {
-    if (sdk === undefined || sdk === null || loading) return
+    return () => {
+      resetStore()
+    }
+  }, [groupId, resetStore])
+
+  useEffect(() => {
+    if (sdk === undefined || sdk === null || loading || !dataJson) return
     const container = containerRef.current
     if (!container) return
 
@@ -100,10 +153,33 @@ export default function MindmapView({ plugin, groupId, embedded = false }: Props
         nodeMenu: true,
         contextMenu: true,
         keypress: true
-      })
+      }) as MindElixirInstance & {
+        getDataString?: () => string
+        exportPng?: (a?: boolean, b?: string) => Promise<Blob | null>
+        bus?: { addListener: (event: string, cb: () => void) => void }
+      }
       mindRef.current = mind
-      const data = buildMindData(sdk, groupId, tasks, t('plugin.mindmapRoot'))
+      const data = parseMindmapData(dataJson, sdk, t('plugin.mindmapDefaultTitle'))
       mind.init(data)
+
+      registerSerializer(() => {
+        const inst = mindRef.current as MindElixirInstance & { getDataString?: () => string }
+        if (inst?.getDataString) return inst.getDataString()
+        return dataJson
+      })
+      registerExportPng(async () => {
+        const inst = mindRef.current as MindElixirInstance & {
+          exportPng?: (a?: boolean, b?: string) => Promise<Blob | null>
+        }
+        if (!inst?.exportPng) return null
+        return inst.exportPng(true)
+      })
+
+      const bus = (mind as { bus?: { addListener: (event: string, cb: () => void) => void } }).bus
+      if (bus?.addListener) {
+        bus.addListener('operation', () => setDirty(true))
+      }
+
       if (!cancelled) setReady(true)
     })().catch((err: unknown) => {
       if (!cancelled) {
@@ -113,10 +189,21 @@ export default function MindmapView({ plugin, groupId, embedded = false }: Props
 
     return () => {
       cancelled = true
+      registerSerializer(null)
+      registerExportPng(null)
       mindRef.current?.destroy?.()
       mindRef.current = null
     }
-  }, [sdk, loading, tasks, groupId, t])
+  }, [
+    sdk,
+    loading,
+    dataJson,
+    groupId,
+    t,
+    registerSerializer,
+    registerExportPng,
+    setDirty
+  ])
 
   if (sdk === undefined || loading) {
     return (
@@ -138,6 +225,7 @@ export default function MindmapView({ plugin, groupId, embedded = false }: Props
       data-mindmap-ready={ready ? '1' : '0'}
       data-embedded={embedded ? '1' : '0'}
     >
+      {embedded ? <MindmapToolbar plugin={plugin} groupId={groupId} /> : null}
       {!ready ? <Text type="secondary">{t('plugin.formLoading')}</Text> : null}
       <div ref={containerRef} className={styles.mindmapCanvas} data-mindmap-container />
     </div>
