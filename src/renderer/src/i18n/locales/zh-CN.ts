@@ -491,6 +491,8 @@ const zhCN = {
   'plugin.name.meeting': 'LanPM 会议',
   'plugin.meetingStubHint': 'Lite mesh POC：加入房间后经 Sync 信令交换；投屏列表由 Host desktopCapturer 代理',
   'plugin.opsComposerHint': '运维：/help · /logs · /status · /disk · /ps · /tail · /deploy · @机器',
+  'plugin.opsComposerMachines': '本群机器 {{online}}/{{total}} 在线 · /help 查看详情',
+  'plugin.opsComposerNoMachines': '本群暂无已注册机器',
   'plugin.opsFilesHint': '{{name}}：取日志与同步目录（启用插件后）',
   'plugin.opsAuditHint': '本机记录的运维斜杠命令审计（不含完整服务器路径）。',
   'plugin.opsAuditEmpty': '暂无命令记录',

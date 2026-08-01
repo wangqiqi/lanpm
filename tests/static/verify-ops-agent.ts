@@ -79,7 +79,11 @@ const messageBubble = readFileSync(join(root, 'src/renderer/src/features/chat/Me
 assert.match(messageBubble, /analyzeInAssistant/)
 assert.match(messageBubble, /openOpsFileInAssistant/)
 
-assert.ok(existsSync(join(root, 'src/shared/ops/logDesensitize.ts')))
+assert.ok(existsSync(join(root, 'src/main/ops/opsHelpText.ts')))
+
+const opsCommandService = readFileSync(join(root, 'src/main/ops/opsCommandService.ts'), 'utf8')
+assert.match(opsCommandService, /formatGroupOpsHelp/)
+assert.match(opsCommandService, /parsed\.command === 'help'/)
 
 const memberKind = readFileSync(join(root, 'src/shared/chat/memberKind.ts'), 'utf8')
 assert.match(memberKind, /deviceKind === 'machine'/)

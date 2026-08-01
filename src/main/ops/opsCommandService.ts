@@ -1,5 +1,8 @@
+import { randomUUID } from 'node:crypto'
 import type { Database } from 'better-sqlite3'
 import type { ParsedOpsCommand } from '../../shared/chat/opsCommand.ts'
+import { publishChatMessage } from '../chat/chatService.ts'
+import { formatGroupOpsHelp } from './opsHelpText.ts'
 import { listOpsMachines, sendOpsCommand } from './opsSyncService.ts'
 
 export async function sendOpsSlashCommand(
@@ -7,6 +10,16 @@ export async function sendOpsSlashCommand(
   groupId: string,
   parsed: ParsedOpsCommand
 ): Promise<{ requestId: string }> {
+  if (parsed.command === 'help') {
+    const text = formatGroupOpsHelp(listOpsMachines(groupId), parsed.targetDisplayName)
+    await publishChatMessage(db, groupId, 'text', {
+      kind: 'text',
+      text,
+      meta: { source: 'ops-agent' }
+    })
+    return { requestId: `help_local_${randomUUID()}` }
+  }
+
   const machines = listOpsMachines(groupId).filter((m) => m.online)
   if (machines.length === 0) {
     throw new Error('ops_no_machine')

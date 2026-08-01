@@ -1,5 +1,6 @@
 import type { GatewayPaths } from '../../shared/ops/paths.ts'
 import { formatStatus } from './statusSnapshot.ts'
+import { formatGroupOpsHelp } from './opsHelpText.ts'
 import {
   readGatewayFile,
   resolveOutboundLogRel,
@@ -23,16 +24,7 @@ export type OpsCommandExecution = {
 }
 
 function helpText(): string {
-  return [
-    'LanPM Ops commands:',
-    '/help — list commands',
-    '/logs [app|nginx] — fetch log file',
-    '/status — CPU / memory / disk summary',
-    '/disk — disk usage snapshot',
-    '/ps — process list snapshot (read-only)',
-    '/tail <path|key> — tail log lines (whitelist paths)',
-    '/deploy [name] — write package to inboundDir'
-  ].join('\n')
+  return formatGroupOpsHelp([])
 }
 
 export async function executeOpsCommand(

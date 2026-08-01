@@ -10,6 +10,7 @@
 - **ops-p2 · 斜杠命令扩展（TASK-1211）**：`/disk` `/ps` `/tail <path|key>` — `readOnlyCommands.ts` 路径白名单 · 单元测试 · composer 提示更新
 - **ops-p2 · 命令审计（TASK-1213）**：`ops-command-audit.json` 记录 who/when/cmd/结果摘要 · `ops:listAudit` IPC · Profile `lanpm.ops` Tab 只读表格
 - **ops-p2 · L3 分析入口（TASK-1214）**：日志/ops 文件与 `ops-agent` 文本消息 ·「在助手中分析」→ `AiAssistantShell` 注入脱敏 `seedMarkdown` · `shareToChat` 沿用现有顶栏助手
+- **ops-p2 · `/help` 动态化（TASK-1215）**：本群机器在线列表 · composer 显示在线数 · `/help` 本地回群（无需 Agent）
 
 ## [1.94.2] - 2026-08-01
 

@@ -485,6 +485,8 @@ export type MessageKey =
   | 'plugin.signatureInvalid'
   | 'plugin.meetingStubHint'
   | 'plugin.opsComposerHint'
+  | 'plugin.opsComposerMachines'
+  | 'plugin.opsComposerNoMachines'
   | 'plugin.opsFilesHint'
   | 'plugin.opsAuditHint'
   | 'plugin.opsAuditEmpty'
