@@ -110,7 +110,7 @@ export default function GlobalSearch({ className }: GlobalSearchProps): React.Re
     } finally {
       setLoading(false)
     }
-  }, [t, getGroupType])
+  }, [t, getGroupType, message])
 
   const debouncedSearch = useMemo(() => {
     let timer: ReturnType<typeof setTimeout> | null = null

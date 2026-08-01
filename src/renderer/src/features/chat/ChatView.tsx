@@ -708,7 +708,7 @@ export default function ChatView(): React.ReactElement {
       chatStoreActions.upsertMessage(chatMsg)
       message.success(t('chat.taskCreated'))
     },
-    [gid, taskAllowed, t]
+    [gid, taskAllowed, t, message]
   )
 
   const handleCreateTaskFromMessage = useCallback(
@@ -784,7 +784,7 @@ export default function ChatView(): React.ReactElement {
         message.error(formatError(err, 'chat.recallFailed'))
       }
     },
-    [gid, message, t]
+    [gid, message, formatError]
   )
 
   const handleRetrySend = useCallback(
@@ -798,7 +798,7 @@ export default function ChatView(): React.ReactElement {
         message.error(formatError(err, 'chat.retrySendFailed'))
       }
     },
-    [message, t]
+    [message, t, formatError]
   )
 
   const handleReply = useCallback((msg: ChatMessage) => {

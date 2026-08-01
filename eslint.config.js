@@ -23,6 +23,20 @@ export default tseslint.config(
     }
   },
   {
+    files: [
+      '**/*Context.tsx',
+      '**/ChatPluginMenusProvider.tsx',
+      '**/messageContentDefer.tsx',
+      '**/PluginSlot.tsx',
+      '**/TaskSuggest.tsx',
+      '**/SubtaskPreviewModal.tsx',
+      '.cursor/templates/scaffold/**/*.tsx'
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off'
+    }
+  },
+  {
     files: ['src/main/**/*.ts', 'src/preload/**/*.ts', 'electron.vite.config.ts'],
     languageOptions: {
       globals: globals.node

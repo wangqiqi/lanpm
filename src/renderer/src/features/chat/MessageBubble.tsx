@@ -131,10 +131,14 @@ function MessageBubble({
     sender?.displayName ?? message.senderUserId,
     t
   )
-  const senderMember: GroupMemberView = sender ?? {
-    userId: message.senderUserId,
-    displayName: senderName
-  }
+  const senderMember = useMemo<GroupMemberView>(
+    () =>
+      sender ?? {
+        userId: message.senderUserId,
+        displayName: senderName
+      },
+    [sender, message.senderUserId, senderName]
+  )
 
   const recallActorName = useMemo(() => {
     if (message.content.kind !== 'recalled') return ''
@@ -318,12 +322,9 @@ function MessageBubble({
     own,
     currentUserId,
     taskCreateAllowed,
-    onMentionSender,
-    senderName,
     t,
     appMessage,
     locateTask,
-    groupId,
     openFileInLibrary,
     onCreateTaskFromMessage,
     onLinkMessageToTask,

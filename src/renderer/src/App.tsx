@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Button, Spin, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -38,7 +38,7 @@ export default function App(): React.ReactElement {
   const loadGroupsRef = useRef(loadGroups)
   loadGroupsRef.current = loadGroups
 
-  const loadIdentity = (opts?: { resetHydrated?: boolean }): (() => void) => {
+  const loadIdentity = useCallback((opts?: { resetHydrated?: boolean }): (() => void) => {
     let cancelled = false
     setBootFailed(false)
     if (opts?.resetHydrated) setHydrated(false)
@@ -66,7 +66,7 @@ export default function App(): React.ReactElement {
     return () => {
       cancelled = true
     }
-  }
+  }, [locale, setBootFailed, setFromStatus, setHydrated])
 
   useEffect(() => {
     if (!configured) return
@@ -124,7 +124,9 @@ export default function App(): React.ReactElement {
     return unsub
   }, [locale])
 
-  useEffect(() => loadIdentity(), [])
+  useEffect(() => {
+    void loadIdentity()
+  }, [loadIdentity])
 
   const handleSetupComplete = (status: SetupStatus): void => {
     setFromStatus(status.configured, status.user, status.device)

@@ -116,10 +116,10 @@ export default function DiscoverModal({
     void refresh()
   }, [open, refresh])
 
-  const openGroup = (group: DiscoverGroupView): void => {
+  const openGroup = useCallback((group: DiscoverGroupView): void => {
     navigate(groupViewPath(group.groupId, defaultViewForGroup(group.type)))
     onClose()
-  }
+  }, [navigate, onClose])
 
   const handleJoinGroup = useCallback(
     async (group: DiscoverGroupView): Promise<boolean> => {
@@ -146,7 +146,7 @@ export default function DiscoverModal({
         setJoiningId(null)
       }
     },
-    [formatError, joinGroup, message, navigate, onClose, refresh, t]
+    [formatError, joinGroup, message, navigate, onClose, openGroup, refresh, t]
   )
 
   const tryAutoJoinAfterSnapshot = useCallback(

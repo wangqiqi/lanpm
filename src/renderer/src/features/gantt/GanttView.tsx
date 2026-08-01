@@ -220,7 +220,7 @@ export default function GanttView(): React.ReactElement {
         }, 200)
       }
     },
-    [tasks, updateSchedule, message, t]
+    [tasks, updateSchedule, message, formatError]
   )
 
   const addDependency = async (): Promise<void> => {

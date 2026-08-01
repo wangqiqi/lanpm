@@ -194,7 +194,7 @@ export default function TaskTreeView(): React.ReactElement {
         message.error(formatError(err, 'tree.updateFailed'))
       }
     },
-    [updateTask, t]
+    [updateTask, t, message, formatError]
   )
 
   const selectedTask = useMemo(
@@ -338,7 +338,7 @@ export default function TaskTreeView(): React.ReactElement {
         message.error(formatError(err, 'board.deleteFailed'))
       }
     },
-    [tasks, deleteTask, t, message]
+    [tasks, deleteTask, t, message, formatError]
   )
 
   const handleCreateRoot = async (): Promise<void> => {

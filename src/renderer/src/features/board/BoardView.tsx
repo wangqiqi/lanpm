@@ -433,7 +433,7 @@ export default function BoardView(): React.ReactElement {
         message.error(formatError(err, 'board.moveFailed'))
       }
     },
-    [tasksByColumn, moveTask, message, t]
+    [tasksByColumn, moveTask, message, formatError]
   )
 
   const handleDragEnd = (event: DragEndEvent): void => {
@@ -516,7 +516,7 @@ export default function BoardView(): React.ReactElement {
         message.error(formatError(err, 'board.deleteFailed'))
       }
     },
-    [tasks, deleteTask, t]
+    [tasks, deleteTask, t, message, formatError]
   )
 
   const handleCreate = async (): Promise<void> => {
@@ -585,7 +585,7 @@ export default function BoardView(): React.ReactElement {
         throw err
       }
     },
-    [updateTask, message, t]
+    [updateTask, message, t, formatError]
   )
 
   const editTaskLive = editTask

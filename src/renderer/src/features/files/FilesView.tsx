@@ -275,7 +275,7 @@ export default function FilesView(): React.ReactElement {
     }
     if (selected && filteredFiles.some((f) => f.fileId === selected.fileId)) return
     setSelected(filteredFiles[0]!)
-  }, [filteredFiles, selected?.fileId])
+  }, [filteredFiles, selected])
 
   useEffect(() => {
     if (!selected) return
@@ -506,7 +506,7 @@ export default function FilesView(): React.ReactElement {
         setDownloading(false)
       }
     },
-    [download, message, t]
+    [download, message, t, formatError]
   )
 
   const handleTableChange: TableProps<FileMeta>['onChange'] = (_pag, _filters, sorter) => {
