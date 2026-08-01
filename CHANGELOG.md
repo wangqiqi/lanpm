@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.101.4] - 2026-08-01
+
+### Fixed
+
+- **视觉截图**：mindmap 协作抽屉 `waitForCollabDrawer` 改用 `data-mindmap-ready` 与 mind-elixir 4.x `me-tpc`/`me-root` 选择器（`TASK-2108`）
+- **ESLint**：清零 `react-hooks/exhaustive-deps` 与 `react-refresh/only-export-components` 警告（`TASK-2109` · `TASK-2110`）
+- **白板 CSP**：`predev`/`prebuild` 复制 Excalidraw prod 资源至 `public/excalidraw/`，CSP 增加 `font-src 'self' data:`，消除 esm.sh 字体 blocked 告警（`TASK-2111`）
+
 ## [1.101.3] - 2026-08-01
 
 ### Fixed
