@@ -11,8 +11,16 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 assert.ok(existsSync(join(root, 'docs/screenshots/README.md')), 'docs/screenshots/README.md missing')
 assert.ok(
-  existsSync(join(root, 'docs/screenshots/baselines/dark/dark_chat.png')),
-  'dark baseline chat png missing'
+  existsSync(join(root, 'docs/screenshots/baselines/dark/dark_mindmap.png')),
+  'dark baseline mindmap png missing (TASK-1224 collaboration drawer)'
+)
+assert.ok(
+  existsSync(join(root, 'docs/screenshots/baselines/light/light_mindmap.png')),
+  'light baseline mindmap png missing (TASK-1224 collaboration drawer)'
+)
+assert.ok(
+  existsSync(join(root, 'docs/screenshots/baselines/light/light_files.png')),
+  'light baseline files png missing'
 )
 assert.ok(
   !existsSync(join(root, 'snapshot')),

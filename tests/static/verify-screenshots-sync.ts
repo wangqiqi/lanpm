@@ -21,4 +21,15 @@ assert.match(syncSrc, /light_calendar\.png/, 'sync map must include calendar')
 assert.match(syncSrc, /light_whiteboard\.png/, 'sync map must include whiteboard')
 assert.match(syncSrc, /light_cockpit\.png/, 'sync map must include cockpit')
 
+const captureSrc = readFileSync(join(root, 'scripts/screenshots-capture.mjs'), 'utf8')
+assert.match(captureSrc, /baselines\/light/, 'screenshots:capture must write light baselines')
+assert.match(captureSrc, /baselines\/dark/, 'screenshots:capture must write dark baselines')
+
+const docsScreenshots = readFileSync(join(root, 'docs/screenshots/README.md'), 'utf8')
+assert.match(
+  docsScreenshots,
+  /COLLAB_DRAWER|协作抽屉/,
+  'docs/screenshots must document collaboration drawer captures (TASK-1224)'
+)
+
 console.log('verify:screenshots-sync OK')
