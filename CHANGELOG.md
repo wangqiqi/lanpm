@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+## [1.102.1] - 2026-08-01
+
+### Added
+
+- **E2E 扩展**：`verify:e2e-views-expand` — gantt/calendar 深链岛屿 + 协作抽屉 files/whiteboard/mindmap + `mindmap-toolbar`（`SPIKE-2401` · `TASK-2403`–`TASK-2406`）
+- **协作入口 testid**：`collab-open-files` · `collab-open-whiteboard` · `collab-open-mindmap`（`TASK-2402`）
+
+### Fixed
+
+- **协作抽屉**：切换文件库/白板/脑图时 `drawerReady` 未恢复导致面板卡在 Spinner（`ChatCollaborationDrawer.tsx`）
+- **脑图 CSS**：补全 `.mindmapHost` 选择器（`plugin.module.css` 构建阻断）
+- **白板 E2E 锚点**：`whiteboard-island-surface` testid（`TASK-2402`）
+
+### Changed
+
+- **docs/05** §1.2.6c：E2E 覆盖矩阵（`TASK-2408`）
+- **`verify:ci-e2e-nightly`**：登记 expand spec 与 runner（`TASK-2406`）
+
 ## [1.102.0] - 2026-08-01
 
 ### Added
