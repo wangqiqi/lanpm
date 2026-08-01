@@ -136,6 +136,7 @@
     "verify:routes": "node --experimental-strip-types tests/static/verify-routes.ts",
     "verify:topbar": "node --experimental-strip-types tests/static/verify-topbar.ts",
     "verify:topbar-network-idle": "node --experimental-strip-types tests/static/verify-topbar-network-idle.ts",
+    "verify:highlight-worker-spike": "node --experimental-strip-types tests/static/verify-highlight-worker-spike.ts",
     "verify:profile-panel": "node --experimental-strip-types tests/static/verify-profile-panel.ts",
     "verify:discover": "node --experimental-strip-types tests/static/verify-discover.ts",
     "verify:discover-help": "node --experimental-strip-types tests/static/verify-discover-help.ts",

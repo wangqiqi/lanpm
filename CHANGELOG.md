@@ -2,6 +2,12 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [Unreleased]
+
+### Changed
+
+- **SPIKE highlight-worker**：调研结论 **Defer** — `docs/specs/015-highlight-worker-spike/spike.md` · `verify:highlight-worker-spike`
+
 ## [1.92.0] - 2026-08-01
 
 ### Added
