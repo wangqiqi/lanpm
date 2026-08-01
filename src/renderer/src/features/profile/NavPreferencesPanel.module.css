@@ -39,5 +39,5 @@
 
 .footnote {
   display: block;
-  font-size: 12px;
+  font-size: var(--lanpm-font-body-secondary);
 }

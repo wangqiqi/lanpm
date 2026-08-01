@@ -3,7 +3,7 @@ import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
 
 const { Text } = Typography
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { DownloadOutlined, FilePdfOutlined, PlusOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons'
+import { FilePdfOutlined, PlusOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -368,14 +368,6 @@ export default function GanttView(): React.ReactElement {
               {t('gantt.addDependency')}
             </Button>
             <Button
-              icon={<DownloadOutlined />}
-              loading={exporting}
-              disabled={ganttTasks.length === 0}
-              onClick={() => void exportChart('png')}
-            >
-              {t('gantt.exportPng')}
-            </Button>
-            <Button
               icon={<FilePdfOutlined />}
               loading={exporting}
               disabled={ganttTasks.length === 0}
@@ -390,7 +382,6 @@ export default function GanttView(): React.ReactElement {
               sharing={sharing}
               downloadDisabled={ganttTasks.length === 0}
               shareDisabled={ganttTasks.length === 0}
-              downloadLabel={t('gantt.exportPng')}
             />
             <ViewToolbarHint>{t('gantt.toolbarHint')}</ViewToolbarHint>
           </ViewToolbarGroup>

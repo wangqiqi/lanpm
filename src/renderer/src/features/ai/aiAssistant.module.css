@@ -250,7 +250,7 @@
   margin: 0;
   cursor: pointer;
   color: var(--lanpm-text-tertiary);
-  font-size: 12px;
+  font-size: var(--lanpm-font-body-secondary);
   line-height: 1;
   border-radius: var(--lanpm-radius-sm);
   transition: color var(--lanpm-motion-fast) var(--lanpm-ease-standard);

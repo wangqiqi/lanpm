@@ -104,7 +104,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
     if (panel === 'files') {
       return (
         <Suspense fallback={<PanelFallback />}>
-          <div className={styles.collaborationPanelBody}>
+          <div className={`${styles.collaborationPanelBody} ${drawerReady ? styles.collaborationPanelReady : ''}`}>
             <FilesView />
           </div>
         </Suspense>
@@ -115,7 +115,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
       return (
         <Suspense fallback={<PanelFallback />}>
           <div
-            className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall} ${styles.collaborationPanelCanvas}`}
+            className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall} ${styles.collaborationPanelCanvas} ${drawerReady ? styles.collaborationPanelReady : ''}`}
           >
             <WhiteboardView embedded />
           </div>
@@ -129,7 +129,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
     return (
       <Suspense fallback={<PanelFallback />}>
         <div
-          className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall} ${styles.collaborationPanelCanvas}`}
+          className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall} ${styles.collaborationPanelCanvas} ${drawerReady ? styles.collaborationPanelReady : ''}`}
         >
           <MindmapView plugin={mindmapPlugin} groupId={groupId} embedded />
         </div>
@@ -142,7 +142,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
       open={open}
       width={width}
       destroyOnClose={false}
-      className={styles.collaborationDrawer}
+      className={`${styles.collaborationDrawer} ${panel === 'whiteboard' ? styles.collaborationDrawerWhiteboard : ''}`}
       title={panel ? t(panelTitleKey(panel)) : ''}
       onClose={close}
       afterOpenChange={(visible) => {

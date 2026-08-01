@@ -1293,9 +1293,23 @@
   overflow: hidden;
 }
 
-/* 抽屉滑入用 transform，会破坏 Excalidraw 指针坐标 — 白板打开时禁用 */
-.collaborationDrawer:global(.ant-drawer-open) :global(.ant-drawer-content-wrapper) {
+/* 白板抽屉：滑入 transform 会破坏 Excalidraw 指针坐标 */
+.collaborationDrawerWhiteboard:global(.ant-drawer-open) :global(.ant-drawer-content-wrapper) {
   transform: none !important;
+}
+
+.collaborationPanelReady {
+  animation: collaborationPanelIn var(--lanpm-motion-normal) var(--lanpm-ease-emphasized);
+}
+
+@keyframes collaborationPanelIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .collaborationPanelBody {

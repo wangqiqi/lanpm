@@ -44,7 +44,7 @@
   flex-shrink: 0;
   font-size: var(--lanpm-font-body-secondary);
   color: var(--lanpm-text-secondary);
-  transition: transform 0.15s ease;
+  transition: transform var(--lanpm-motion-fast) var(--lanpm-ease-standard);
   transform: rotate(-90deg);
 }
 

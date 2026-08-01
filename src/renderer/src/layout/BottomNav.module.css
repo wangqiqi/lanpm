@@ -70,7 +70,7 @@
 }
 
 .tab:hover:not(:disabled) .label {
-  opacity: 1;
+  color: inherit;
 }
 
 /* 按压：微缩（所有可点 Tab） */
@@ -134,19 +134,18 @@
   align-items: center;
   gap: 3px;
   line-height: 1.15;
-  opacity: 0.92;
+  color: inherit;
   transition:
-    opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard),
     color var(--lanpm-motion-fast) var(--lanpm-ease-standard);
 }
 
 .tabActive .label {
-  opacity: 1;
+  color: inherit;
 }
 
 .tabLock {
   font-size: 9px;
-  opacity: 0.85;
+  color: var(--lanpm-text-tertiary);
 }
 
 @media (max-width: 720px) {

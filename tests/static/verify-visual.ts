@@ -18,6 +18,7 @@ const renderer = join(root, 'src/renderer/src')
 
 const REQUIRED_TOKENS = [
   '--lanpm-border',
+  '--lanpm-border-subtle',
   '--lanpm-bubble-bg',
   '--lanpm-code-bg',
   '--lanpm-accent-fill',
@@ -69,7 +70,6 @@ const FORBIDDEN_MODULE_HEX = [
 ] as const
 
 const FORBIDDEN_PHANTOM_TOKENS = [
-  '--lanpm-border-subtle',
   '--lanpm-surface-secondary',
   '--lanpm-text-primary'
 ] as const
@@ -179,6 +179,12 @@ for (const token of REQUIRED_FONT_TOKENS) {
   assert.ok(globalCss.includes(token), `global.css missing font token ${token}`)
 }
 
+assert.ok(globalCss.includes('--lanpm-motion-slow'), 'global.css must define --lanpm-motion-slow (SPRINT-25)')
+assert.ok(
+  globalCss.includes('@media (prefers-reduced-motion: reduce)'),
+  'global.css must define prefers-reduced-motion fallback (SPRINT-25)'
+)
+
 for (const token of REQUIRED_TOKENS) {
   assert.ok(globalCss.includes(token), `global.css missing ${token} in both themes`)
   const lightIdx = globalCss.indexOf("html[data-theme='light']")
@@ -245,6 +251,7 @@ for (const [key, px] of [
 
 const themeProviderSrc = readFileSync(join(renderer, 'app/ThemeProvider.tsx'), 'utf8')
 assert.match(themeProviderSrc, /lanpmDesignTokens/, 'ThemeProvider must import lanpmDesignTokens SSOT')
+assert.match(themeProviderSrc, /motionDurationMid/, 'ThemeProvider must align Ant motion tokens (SPRINT-25)')
 assert.ok(!themeProviderSrc.includes('#0071e3'), 'ThemeProvider must not use legacy #0071e3 accent')
 
 const htmlRootEnd = globalCss.indexOf("html[data-theme='light']")
@@ -1126,6 +1133,16 @@ assert.match(
   collaborationDrawerSrc,
   /visualCollabDrawer/,
   'ChatCollaborationDrawer must set dataset.visualCollabDrawer for capture (IA-408)'
+)
+assert.match(
+  chatCss,
+  /collaborationDrawerWhiteboard/,
+  'chat.module.css must scope whiteboard transform:none to collaborationDrawerWhiteboard (SPRINT-25)'
+)
+assert.match(
+  chatCss,
+  /collaborationPanelReady/,
+  'chat.module.css must fade-in collaboration panel content (SPRINT-25)'
 )
 
 // --- IA-409 bottom nav overflow slot (ia-regression TASK-1311) ---

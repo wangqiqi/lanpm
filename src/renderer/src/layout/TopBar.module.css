@@ -143,7 +143,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.15;
-  opacity: 0.92;
 }
 
 .barActionDanger {
@@ -157,11 +156,11 @@
 
 /* 发现 / 建群 / 解散：次要操作，hover 弱于群切换与搜索 */
 .barActionSecondary {
-  opacity: 0.9;
+  color: var(--lanpm-text-secondary);
 }
 
 .barActionSecondary:hover {
-  color: var(--lanpm-text-secondary);
+  color: var(--lanpm-text);
   background: var(--lanpm-hover-bg);
 }
 
@@ -170,7 +169,7 @@
 }
 
 .barActionSecondary.barActionDanger {
-  opacity: 0.88;
+  color: var(--lanpm-danger);
 }
 
 .barActionSecondary.barActionDanger:hover {

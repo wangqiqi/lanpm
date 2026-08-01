@@ -190,9 +190,10 @@
 }
 
 .submitBtn:disabled {
-  color: var(--lanpm-on-accent) !important;
-  background: var(--lanpm-accent) !important;
-  opacity: 0.55 !important;
+  color: var(--lanpm-text-disabled) !important;
+  background: var(--lanpm-fill-secondary) !important;
+  border-color: transparent !important;
+  cursor: not-allowed;
 }
 
 .form :global(.ant-btn-primary.submitBtn),
