@@ -7,6 +7,7 @@
 ### Added
 
 - **视觉截图发版策略（TASK-1221）**：`verify:visual-screenshots` 不进 CI / `verify:release-gate`；打 tag 前本地必跑（`docs/05` §1.3.1 · Linux `xvfb-run`）；新增 `verify:release-screenshots-policy` 静态守卫
+- **协作面板截图（TASK-1223）**：`visualCapture` 在聊天页打开协作抽屉截取 files / whiteboard / mindmap（`COLLAB_DRAWER_SLUGS` · IA-408）；`data-visual-collab` · `dataset.visualCollabDrawer` 供无头等待
 
 ## [1.96.1] - 2026-08-01
 

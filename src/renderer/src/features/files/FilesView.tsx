@@ -1026,7 +1026,7 @@ export default function FilesView(): React.ReactElement {
   )
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} data-visual-surface="files">
       <ViewToolbar
         start={
           <ViewSegment

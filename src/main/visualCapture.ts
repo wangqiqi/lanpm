@@ -18,11 +18,12 @@ const APP_PAGES = [
   { slug: 'tree', hash: `/g/${GROUP_ID}/tree` },
   { slug: 'gantt', hash: `/g/${GROUP_ID}/gantt` },
   { slug: 'calendar', hash: `/g/${GROUP_ID}/calendar` },
-  { slug: 'whiteboard', hash: `/g/${GROUP_ID}/whiteboard` },
-  { slug: 'files', hash: `/g/${GROUP_ID}/files` },
-  { slug: 'mindmap', hash: `/g/${GROUP_ID}/mindmap` },
   { slug: 'cockpit', hash: '/cockpit' }
 ] as const
+
+/** v1.96+ IA：文件/白板/脑图在聊天协作抽屉内截取（非底栏 Tab 深链） */
+const COLLAB_DRAWER_SLUGS = ['files', 'whiteboard', 'mindmap'] as const
+type CollabDrawerSlug = (typeof COLLAB_DRAWER_SLUGS)[number]
 
 const THEMES = ['light', 'dark'] as const
 
@@ -268,61 +269,80 @@ function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
   console.info('[lanpm:visual-capture] seeded', rows.length, 'tasks for gantt/board')
 }
 
-async function ensureMindmapRoute(win: BrowserWindow): Promise<void> {
-  const hash = `#/g/${GROUP_ID}/mindmap`
-  const deadline = Date.now() + 45_000
-  while (Date.now() < deadline) {
-    await win.webContents.executeJavaScript(`
-      (function() {
-        const next = ${JSON.stringify(hash)}
-        if (window.location.hash !== next) window.location.hash = next
-      })()
-    `)
-    await wait(1_200)
-    const ready = await win.webContents.executeJavaScript(`
-      (function() {
-        if (!window.location.hash.includes('/mindmap')) return false
-        return !!document.querySelector('[data-contributed-view="mindmap"]')
-      })()
-    `)
-    if (ready) return
-  }
-  throw new Error('mindmap route not ready')
+async function openCollabDrawer(win: BrowserWindow, panel: CollabDrawerSlug): Promise<void> {
+  await win.webContents.executeJavaScript(`
+    (function() {
+      const api = window.__lanpmVisualCapture
+      if (!api) throw new Error('__lanpmVisualCapture missing — open chat view first')
+      api.openCollaborationPanel(${JSON.stringify(panel)})
+    })()
+  `)
+  await wait(400)
 }
 
-async function waitForMindmapChrome(win: BrowserWindow, marker?: string): Promise<void> {
-  await ensureMindmapRoute(win)
+async function closeCollabDrawer(win: BrowserWindow): Promise<void> {
   await win.webContents.executeJavaScript(`
-    new Promise((resolve, reject) => {
-      const marker = ${JSON.stringify(marker ?? '')}
-      const deadline = Date.now() + 35_000
-      const tick = () => {
-        const engine = document.querySelector('[data-mindmap-engine]')
-        const pluginHost = document.querySelector('[data-plugin-id="lanpm.mindmap"]')
-        if (engine) {
+    (function() {
+      window.__lanpmVisualCapture?.closeCollaborationPanel()
+    })()
+  `)
+  await wait(500)
+}
+
+async function waitForCollabDrawer(win: BrowserWindow, panel: CollabDrawerSlug): Promise<void> {
+  const deadline = Date.now() + 50_000
+  while (Date.now() < deadline) {
+    const ready = await win.webContents.executeJavaScript(`
+      (function() {
+        const openPanel = document.documentElement.dataset.visualCollabDrawer
+        if (openPanel !== ${JSON.stringify(panel)}) return false
+        const drawer = document.querySelector('.ant-drawer-open')
+        if (!drawer) return false
+        const panel = ${JSON.stringify(panel)}
+        if (panel === 'files') {
+          return !!drawer.querySelector('[data-visual-surface="files"]')
+        }
+        if (panel === 'whiteboard') {
+          return !!drawer.querySelector('.excalidraw')
+        }
+        if (panel === 'mindmap') {
+          const engine = drawer.querySelector('[data-mindmap-engine]')
+          if (!engine) return false
           const kind = engine.getAttribute('data-mindmap-engine')
           if (kind === 'mind-elixir') {
-            const topics = document.querySelectorAll('.me-tpc, .map-container .me-node')
-            if (topics.length > 0) return resolve(true)
+            return drawer.querySelectorAll('.me-tpc, .map-container .me-node').length > 0
           }
           if (kind === 'stub') {
             const list = engine.querySelector('ul')
-            if (list && list.children.length > 0) return resolve(true)
+            return !!(list && list.children.length > 0)
           }
+          return true
         }
-        if (pluginHost && (document.body?.innerText ?? '').includes('项目任务')) {
-          return resolve(true)
-        }
-        if (marker && (document.body?.innerText ?? '').includes(marker)) return resolve(true)
-        if (Date.now() > deadline) {
-          const hint = (document.body?.innerText ?? '').slice(0, 160)
-          return reject(new Error('mindmap not ready: ' + hint))
-        }
-        setTimeout(tick, 250)
-      }
-      tick()
-    })
-  `)
+        return false
+      })()
+    `)
+    if (ready) {
+      await wait(panel === 'whiteboard' ? 2_000 : 800)
+      return
+    }
+    await wait(300)
+  }
+  throw new Error(`collab drawer not ready: ${panel}`)
+}
+
+async function captureCollabDrawerPages(
+  win: BrowserWindow,
+  outDir: string,
+  theme: (typeof THEMES)[number]
+): Promise<void> {
+  await navigateHash(win, `/g/${GROUP_ID}/chat`)
+  await waitForHealthyUi(win)
+  for (const slug of COLLAB_DRAWER_SLUGS) {
+    await openCollabDrawer(win, slug)
+    await waitForCollabDrawer(win, slug)
+    await capture(win, outDir, `${theme}_${slug}.png`, theme)
+    await closeCollabDrawer(win)
+  }
 }
 
 async function flushPaint(win: BrowserWindow): Promise<void> {
@@ -341,13 +361,10 @@ async function capture(
   opts?: {
     waitForText?: string
     waitForGanttBars?: boolean
-    waitForMindmap?: boolean
-    mindmapMarker?: string
   }
 ): Promise<number | undefined> {
   await waitForHealthyUi(win)
   if (opts?.waitForText) await waitForSeededTaskChrome(win, opts.waitForText)
-  if (opts?.waitForMindmap) await waitForMindmapChrome(win, opts.mindmapMarker)
   let ganttBars: number | undefined
   if (opts?.waitForGanttBars) {
     await expandGanttViewport(win)
@@ -406,22 +423,16 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     await loadUrl(win, themedPageUrl(theme, first.hash))
     await applyTheme(win, theme)
     await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
+    await captureCollabDrawerPages(win, outDir, theme)
     for (const page of rest) {
-      if (page.slug === 'mindmap') {
-        await ensureMindmapRoute(win)
-      } else {
-        await navigateHash(win, page.hash)
-      }
+      await navigateHash(win, page.hash)
       await applyTheme(win, theme)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
       const waitForGanttBars = page.slug === 'gantt'
-      const waitForMindmap = page.slug === 'mindmap'
       const bars = await capture(win, outDir, `${theme}_${page.slug}.png`, theme, {
         waitForText,
-        waitForGanttBars,
-        waitForMindmap,
-        mindmapMarker: waitForMindmap ? taskMarker : undefined
+        waitForGanttBars
       })
       if (bars !== undefined) ganttMeta[theme] = bars
     }

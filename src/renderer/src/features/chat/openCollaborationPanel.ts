@@ -23,3 +23,19 @@ export function openWhiteboardCollaborationPanel(linkTaskId?: string): void {
 export function openMindmapCollaborationPanel(): void {
   openCollaborationPanel('mindmap')
 }
+
+declare global {
+  interface Window {
+    __lanpmVisualCapture?: {
+      openCollaborationPanel: typeof openCollaborationPanel
+      closeCollaborationPanel: () => void
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__lanpmVisualCapture = {
+    openCollaborationPanel,
+    closeCollaborationPanel: () => useChatCollaborationStore.getState().close()
+  }
+}

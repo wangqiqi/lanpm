@@ -1101,6 +1101,28 @@ assert.match(
   'MessageBubble must open files via collaboration drawer with fileId (IA-406)'
 )
 
+const visualCaptureSrc = readFileSync(join(root, 'src/main/visualCapture.ts'), 'utf8')
+assert.match(
+  visualCaptureSrc,
+  /COLLAB_DRAWER_SLUGS/,
+  'visualCapture must capture files/whiteboard/mindmap via chat drawer (IA-408 TASK-1223)'
+)
+assert.match(
+  visualCaptureSrc,
+  /captureCollabDrawerPages/,
+  'visualCapture must implement chat+drawer screenshot flow (IA-408)'
+)
+assert.match(
+  chatSrc,
+  /data-visual-collab/,
+  'ChatView collaboration buttons must expose data-visual-collab (IA-408)'
+)
+assert.match(
+  collaborationDrawerSrc,
+  /visualCollabDrawer/,
+  'ChatCollaborationDrawer must set dataset.visualCollabDrawer for capture (IA-408)'
+)
+
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
 const outAssets = join(root, 'out/renderer/assets')
 if (existsSync(outAssets)) {

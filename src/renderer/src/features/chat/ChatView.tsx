@@ -64,6 +64,7 @@ import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
 import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
 import type { ChatCollaborationPanel } from '@renderer/stores/chatCollaborationStore'
+import '@renderer/features/chat/openCollaborationPanel'
 import { useContributedViews } from '@renderer/plugin/useContributedViews'
 import { usePluginView } from '@renderer/plugin/usePluginView'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
@@ -1274,6 +1275,7 @@ export default function ChatView(): React.ReactElement {
                     <div className={styles.toolbarCollaborationGroup}>
                       {filesLibraryAllowed && (
                         <ComposerIconButton
+                          data-visual-collab="files"
                           icon={<FolderOpenOutlined />}
                           label={t('nav.files')}
                           onClick={() => openCollaborationPanel('files')}
@@ -1281,6 +1283,7 @@ export default function ChatView(): React.ReactElement {
                       )}
                       {whiteboardAllowed && (
                         <ComposerIconButton
+                          data-visual-collab="whiteboard"
                           icon={<LayoutOutlined />}
                           label={t('nav.whiteboard')}
                           onClick={() => openCollaborationPanel('whiteboard')}
@@ -1288,6 +1291,7 @@ export default function ChatView(): React.ReactElement {
                       )}
                       {mindmapAllowed && (
                         <ComposerIconButton
+                          data-visual-collab="mindmap"
                           icon={<ApartmentOutlined />}
                           label={t('nav.mindmap')}
                           onClick={() => openCollaborationPanel('mindmap')}
