@@ -1,0 +1,11 @@
+{
+  "name": "lanpm-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SPIKE-OPS-001 — minimal HTTP file gateway for ops collaboration",
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts",
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  }
+}

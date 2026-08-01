@@ -112,10 +112,25 @@
 
 ---
 
-## 5. 候选队列（建议序）
+## 5. 运维协作与远程网关（ops-gateway）
+
+> 真源：[功能扩展](./功能扩展.md) · 金句「聊着聊着就把事干了」。
+
+| 序 | 项 | 阶段 | 状态 |
+|----|-----|------|------|
+| 1 | **SPIKE-OPS-001**：`tools/lanpm-gateway/` 目录列表 + 单文件收发 | SPIKE | **已交付** · `npm run verify:ops-gateway-spike` |
+| 2 | Phase 1 MVP：`lanpm-agent` + 入站/出站 + L1 斜杠命令 | P1 | 待立项 · 依赖 SPIKE Go |
+| 3 | Gateway HTTP + Web Terminal | P2～P3 | 后置 |
+
+验收锚点：`verify:ops-gateway-spike`（SPIKE）· `verify:ops-agent`（MVP · 待建）。
+
+---
+
+## 6. 候选队列（建议序）
 
 | 候选 | 说明 | 备注 |
 |------|------|------|
+| **ops-mvp-p1** | `lanpm-agent` · 入站/出站 · `/logs` 等 | **§5** · SPIKE 已交付 |
 | **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
 | 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | 侧载+许可 ✅；**商店 UI 暂不做**（等盈利） |
 | 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |
@@ -123,7 +138,7 @@
 | 真机手验补测 | §4 延期项 | 有设备再开 |
 | WebRTC DataChannel | 可选 | 非默认路径 |
 
-### 5.1 开源替换债务（OSS-first）
+### 6.1 开源替换债务（OSS-first）
 
 > 选型纪律见 [01](./01_产品需求文档.md) §14 · [02](./02_技术实现建议.md) §16；立项走 `/plan`。
 

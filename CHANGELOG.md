@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [1.93.2] - 2026-08-01
+
+### Added
+
+- **SPIKE-OPS-001 · `tools/lanpm-gateway/`**：最小 HTTP 网关（目录列表 + 单文件 upload/download）· localhost bind · path 白名单
+- **`verify:ops-gateway-spike`** — 静态守卫 + `tools/lanpm-gateway` smoke 测试
+- **`docs/功能扩展.md`** — 运维协作讨论稿入库；SPIKE 状态已交付
+- **`docs/06_ROADMAP.md`** §5 运维协作与远程网关
+
 ## [1.93.1] - 2026-08-01
 
 ### Changed
