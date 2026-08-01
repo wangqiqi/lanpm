@@ -8,6 +8,10 @@ import {
   type ChatVirtualRow
 } from '@renderer/features/chat/chatVirtualRows'
 import type { ChatDayGroup } from '@renderer/features/chat/chatDateGroups'
+import {
+  MessageContentDeferProvider,
+  shouldDeferHeavyContentForRow
+} from '@renderer/features/chat/messageContentDefer'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
@@ -37,6 +41,9 @@ export default function ChatVirtualMessageList({
     getItemKey: (index) => virtualRowKey(rows[index]!, index)
   })
 
+  const scrollOffset = virtualizer.scrollOffset
+  const viewportHeight = virtualizer.scrollElement?.clientHeight ?? 0
+
   return (
     <div
       className={styles.messageList}
@@ -44,6 +51,12 @@ export default function ChatVirtualMessageList({
     >
       {virtualizer.getVirtualItems().map((virtualRow) => {
         const row = rows[virtualRow.index] as ChatVirtualRow
+        const deferHeavyContent = shouldDeferHeavyContentForRow(
+          virtualRow.start,
+          virtualRow.size ?? estimateVirtualRowSize(row),
+          scrollOffset ?? 0,
+          viewportHeight
+        )
         return (
           <div
             key={virtualRow.key}
@@ -66,7 +79,9 @@ export default function ChatVirtualMessageList({
                 <div className={styles.dayLabel}>{row.label}</div>
               </div>
             ) : (
-              renderMessage(row.message, row.showSender)
+              <MessageContentDeferProvider deferHeavyContent={deferHeavyContent}>
+                {renderMessage(row.message, row.showSender)}
+              </MessageContentDeferProvider>
             )}
           </div>
         )

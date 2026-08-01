@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.86.0] - 2026-08-01
+
+### Added
+
+- **聊天性能 viewport（chat-perf-viewport）**：严格视口 `deferHeavyContent` — 离屏不进 `MarkdownView` / `highlightCode`
+- **`MessageContentDeferProvider`** · `shouldDeferHeavyContentForRow`（虚拟行 + scroll 判定）
+- **`isImageFileName`** · Markdown `<img loading="lazy">` · `UserAvatar` `deferImage`
+- **`verify:chat-perf-viewport`** · Spec `docs/specs/008-chat-perf-viewport/spec.md`
+
+### Changed
+
+- **`ChatVirtualMessageList`**：消息行包裹 defer Provider（overscan DOM 保留、重内容 defer）
+- **`ChatMessageText`** / **`CodeBlock`** / **`MarkdownView`**：defer 态纯文本 / 行数占位
+- **`docs/优化.md` §11**：补 v1.85.0 · §5.12 / §5.18 标 ✅ v1.86.0
+
 ## [1.85.0] - 2026-08-01
 
 ### Added

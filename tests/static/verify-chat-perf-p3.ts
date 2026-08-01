@@ -78,9 +78,7 @@ assert.match(scroll, /rememberScrollMemory/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
-  version?: string
 }
 assert.ok(pkg.scripts?.['verify:chat-perf-p3'], 'missing verify:chat-perf-p3 script')
-assert.equal(pkg.version, '1.85.0', 'package.json version should be 1.85.0')
 
 console.log('verify:chat-perf-p3 OK')

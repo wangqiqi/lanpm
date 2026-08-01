@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.85.0",
+  "version": "1.86.0",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -119,6 +119,7 @@
     "verify:chat-perf": "node --experimental-strip-types tests/static/verify-chat-perf.ts",
     "verify:chat-perf-follow": "node --experimental-strip-types tests/static/verify-chat-perf-follow.ts",
     "verify:chat-perf-p3": "node --experimental-strip-types tests/static/verify-chat-perf-p3.ts",
+    "verify:chat-perf-viewport": "node --experimental-strip-types tests/static/verify-chat-perf-viewport.ts",
     "verify:view-slot-hosts": "node --experimental-strip-types tests/static/verify-view-slot-hosts.ts",
     "verify:sync-outbox": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-sync-outbox.ts",
     "verify:bundle": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-bundle.ts",

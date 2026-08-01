@@ -21,7 +21,9 @@ import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
 import { useChatMessageActions } from '@renderer/features/chat/ChatMessageActionsContext'
+import { useDeferHeavyContent } from '@renderer/features/chat/messageContentDefer'
 import { useChatPluginMenuItems } from '@renderer/features/chat/ChatPluginMenusProvider'
+import { isImageFileName } from '@shared/chat/imageFile'
 import MessageReplyStrip from '@renderer/features/chat/MessageReplyStrip'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import styles from './chat.module.css'
@@ -106,6 +108,7 @@ function MessageBubble({
   const currentUserId = useIdentityStore((s) => s.user?.userId)
   const { groupId, navigate, locateTask } = useChatMessageActions()
   const gid = groupId
+  const deferHeavyContent = useDeferHeavyContent()
   const isRecalled = message.content.kind === 'recalled'
   const isCode = message.content.kind === 'code'
   const isSystem =
@@ -332,6 +335,7 @@ function MessageBubble({
             own={own}
             meta={message.content.meta}
             msgId={message.msgId}
+            deferHeavyContent={deferHeavyContent}
             onTaskRefClick={gid ? (taskId) => locateTask(taskId, 'board') : undefined}
           />
           {message.content.meta?.editedAt ? (
@@ -345,6 +349,7 @@ function MessageBubble({
           language={message.content.language}
           code={message.content.code}
           theme={message.content.theme ?? theme}
+          deferHeavyContent={deferHeavyContent}
         />
       )}
 
@@ -353,6 +358,8 @@ function MessageBubble({
           type="button"
           className={styles.bubbleAttachCard}
           aria-label={t('chat.openInFiles')}
+          data-image-attach={isImageFileName(message.content.fileName) ? '1' : undefined}
+          data-defer-media={deferHeavyContent ? '1' : undefined}
           onClick={() => {
             if (message.content.kind !== 'file') return
             navigate(groupViewPath(groupId, 'files'), {
@@ -483,6 +490,7 @@ function MessageBubble({
                 displayName={senderName}
                 userId={senderMember.userId}
                 avatarUrl={senderMember.avatarUrl}
+                deferImage={deferHeavyContent}
               />
             </button>
           </Dropdown>

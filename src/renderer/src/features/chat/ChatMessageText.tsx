@@ -15,7 +15,16 @@ interface ChatMessageTextProps {
   own?: boolean
   meta?: { source?: string }
   msgId?: string
+  deferHeavyContent?: boolean
   onTaskRefClick?: (taskId: string) => void
+}
+
+function renderPlainTextSegment(value: string, key: string): React.ReactElement {
+  return (
+    <span key={key} className={styles.deferredPlainText}>
+      {value}
+    </span>
+  )
 }
 
 function renderTaskRefSegment(
@@ -24,7 +33,8 @@ function renderTaskRefSegment(
   own: boolean | undefined,
   onTaskRefClick: ((taskId: string) => void) | undefined,
   t: (key: 'chat.viewTask') => string,
-  msgId?: string
+  msgId: string | undefined,
+  deferHeavyContent: boolean
 ): React.ReactElement {
   if (tSeg.kind === 'taskRef') {
     if (tSeg.taskId && onTaskRefClick) {
@@ -52,13 +62,19 @@ function renderTaskRefSegment(
     )
   }
 
-  if (shouldRenderChatMarkdown(tSeg.value)) {
+  if (!deferHeavyContent && shouldRenderChatMarkdown(tSeg.value)) {
     return (
-      <MarkdownView key={key} content={tSeg.value} variant="inline" cacheKey={msgId} />
+      <MarkdownView
+        key={key}
+        content={tSeg.value}
+        variant="inline"
+        cacheKey={msgId}
+        deferHeavyContent={false}
+      />
     )
   }
 
-  return <span key={key}>{tSeg.value}</span>
+  return renderPlainTextSegment(tSeg.value, key)
 }
 
 function renderTextWithTaskRefs(
@@ -67,11 +83,12 @@ function renderTextWithTaskRefs(
   own: boolean | undefined,
   onTaskRefClick: ((taskId: string) => void) | undefined,
   t: (key: 'chat.viewTask') => string,
-  msgId?: string
+  msgId: string | undefined,
+  deferHeavyContent: boolean
 ): React.ReactNode {
   const taskSegments = splitTaskRefSegments(text, tasks)
   return taskSegments.map((tSeg, j) =>
-    renderTaskRefSegment(tSeg, `t-${j}`, own, onTaskRefClick, t, msgId)
+    renderTaskRefSegment(tSeg, `t-${j}`, own, onTaskRefClick, t, msgId, deferHeavyContent)
   )
 }
 
@@ -82,11 +99,12 @@ function ChatMessageTextInner({
   own,
   meta,
   msgId,
+  deferHeavyContent = false,
   onTaskRefClick
 }: ChatMessageTextProps): React.ReactElement {
   const { t } = useI18n()
 
-  if (shouldRenderChatMarkdown(text, meta)) {
+  if (!deferHeavyContent && shouldRenderChatMarkdown(text, meta)) {
     const mentionSegments = splitMentionSegments(text, members)
     const hasMentionOrTask =
       mentionSegments.some((s) => s.kind === 'mention') ||
@@ -112,7 +130,15 @@ function ChatMessageTextInner({
           }
           return (
             <span key={`${i}-txt`}>
-              {renderTextWithTaskRefs(seg.value, tasks, own, onTaskRefClick, t, msgId)}
+              {renderTextWithTaskRefs(
+                seg.value,
+                tasks,
+                own,
+                onTaskRefClick,
+                t,
+                msgId,
+                deferHeavyContent
+              )}
             </span>
           )
         })}
@@ -137,7 +163,15 @@ function ChatMessageTextInner({
         }
         return (
           <span key={`${i}-txt`}>
-            {renderTextWithTaskRefs(seg.value, tasks, own, onTaskRefClick, t, msgId)}
+            {renderTextWithTaskRefs(
+              seg.value,
+              tasks,
+              own,
+              onTaskRefClick,
+              t,
+              msgId,
+              deferHeavyContent
+            )}
           </span>
         )
       })}

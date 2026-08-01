@@ -17,17 +17,22 @@ interface MarkdownViewProps {
   className?: string
   /** 消息 id，用于解析缓存键 */
   cacheKey?: string
+  deferHeavyContent?: boolean
 }
 
 export default function MarkdownView({
   content,
   variant = 'block',
   className,
-  cacheKey
+  cacheKey,
+  deferHeavyContent = false
 }: MarkdownViewProps): React.ReactElement {
   const theme = useUiStore((s) => s.theme)
 
   const body = useMemo(() => {
+    if (deferHeavyContent) {
+      return <span className={styles.deferredMarkdown}>{content}</span>
+    }
     const key = buildMarkdownCacheKey(cacheKey, content, variant, theme)
     const cached = getCachedMarkdownBody(key)
     if (cached) return cached
@@ -49,12 +54,31 @@ export default function MarkdownView({
             const text = String(children).replace(/\n$/, '')
             const match = /language-([\w-]+)/.exec(codeClass ?? '')
             if (match) {
-              return <CodeBlock language={match[1] ?? 'text'} code={text} theme={theme} />
+              return (
+                <CodeBlock
+                  language={match[1] ?? 'text'}
+                  code={text}
+                  theme={theme}
+                  deferHeavyContent={false}
+                />
+              )
             }
             return (
               <code className={styles.inlineCode} {...rest}>
                 {children}
               </code>
+            )
+          },
+          img({ src, alt }) {
+            if (!src) return null
+            return (
+              <img
+                src={src}
+                alt={alt ?? ''}
+                loading="lazy"
+                decoding="async"
+                className={styles.markdownImage}
+              />
             )
           },
           a({ href, children }) {
@@ -76,7 +100,7 @@ export default function MarkdownView({
     )
     setCachedMarkdownBody(key, el)
     return el
-  }, [content, theme, variant, cacheKey])
+  }, [content, theme, variant, cacheKey, deferHeavyContent])
 
   return <div className={`${styles.markdownRoot} ${className ?? ''}`.trim()}>{body}</div>
 }

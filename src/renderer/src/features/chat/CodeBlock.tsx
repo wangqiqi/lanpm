@@ -14,13 +14,15 @@ interface CodeBlockProps {
   language: string
   code: string
   theme: ThemeMode
+  deferHeavyContent?: boolean
 }
 
 const HLJS_THEME_ID = 'lanpm-hljs-theme'
 const COLLAPSE_LINE_THRESHOLD = 12
 
-function useHighlightTheme(theme: ThemeMode): void {
+function useHighlightTheme(theme: ThemeMode, enabled: boolean): void {
   useEffect(() => {
+    if (!enabled) return
     let link = document.getElementById(HLJS_THEME_ID) as HTMLLinkElement | null
     if (!link) {
       link = document.createElement('link')
@@ -29,17 +31,22 @@ function useHighlightTheme(theme: ThemeMode): void {
       document.head.appendChild(link)
     }
     link.href = theme === 'dark' ? githubDarkCssUrl : githubCssUrl
-  }, [theme])
+  }, [theme, enabled])
 }
 
-function CodeBlockInner({ language, code, theme }: CodeBlockProps): React.ReactElement {
+function CodeBlockInner({
+  language,
+  code,
+  theme,
+  deferHeavyContent = false
+}: CodeBlockProps): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
-  useHighlightTheme(theme)
   const lineCount = code.split('\n').length
   const collapsible = lineCount > COLLAPSE_LINE_THRESHOLD
   const [expanded, setExpanded] = useState(false)
-  const shouldHighlight = !collapsible || expanded
+  const shouldHighlight = !deferHeavyContent && (!collapsible || expanded)
+  useHighlightTheme(theme, shouldHighlight)
   const html = useMemo(
     () => (shouldHighlight ? highlightCode(code, language) : ''),
     [code, language, shouldHighlight]
@@ -64,20 +71,21 @@ function CodeBlockInner({ language, code, theme }: CodeBlockProps): React.ReactE
           <CopyOutlined />
           {t('chat.copyCode')}
         </RegionButton>
-        {collapsible && (
+        {collapsible && !deferHeavyContent ? (
           <RegionButton variant="caption" onClick={() => setExpanded((v) => !v)}>
             {expanded ? t('chat.codeCollapse') : t('chat.codeExpand')}
           </RegionButton>
-        )}
+        ) : null}
       </div>
       <pre
         className={`hljs ${styles.codeBlock} ${expanded ? styles.codeBlockExpanded : ''}`}
         data-theme={theme}
+        data-deferred={deferHeavyContent ? '1' : undefined}
       >
         {shouldHighlight ? (
           <code dangerouslySetInnerHTML={{ __html: html }} />
         ) : (
-          <code>{code}</code>
+          <code>{deferHeavyContent && collapsible ? `… (${lineCount})` : code}</code>
         )}
       </pre>
     </div>
