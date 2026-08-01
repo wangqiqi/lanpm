@@ -69,9 +69,20 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
     }
   }, [panel])
 
+  /** files 立即可挂载；白板/脑图需等抽屉尺寸稳定（首开与面板切换均须 re-ready） */
   useEffect(() => {
+    if (!open) {
+      setDrawerReady(false)
+      return
+    }
+    if (panel === 'files') {
+      setDrawerReady(true)
+      return
+    }
     setDrawerReady(false)
-  }, [panel])
+    const id = window.setTimeout(() => setDrawerReady(true), 320)
+    return () => clearTimeout(id)
+  }, [panel, open])
 
   const mindmapLicensed = useMemo(
     () => (mindmapPlugin ? isPluginLicenseActive(mindmapPlugin) : false),
@@ -135,7 +146,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
       title={panel ? t(panelTitleKey(panel)) : ''}
       onClose={close}
       afterOpenChange={(visible) => {
-        setDrawerReady(visible)
+        if (!visible) setDrawerReady(false)
       }}
       styles={{
         wrapper: panel === 'whiteboard' ? { transform: 'none' } : undefined

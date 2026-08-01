@@ -1277,6 +1277,7 @@ export default function ChatView(): React.ReactElement {
                       {filesLibraryAllowed && (
                         <ComposerIconButton
                           data-visual-collab="files"
+                          data-testid="collab-open-files"
                           icon={<FolderOpenOutlined />}
                           label={t('nav.files')}
                           onClick={() => openCollaborationPanel('files')}
@@ -1285,6 +1286,7 @@ export default function ChatView(): React.ReactElement {
                       {whiteboardAllowed && (
                         <ComposerIconButton
                           data-visual-collab="whiteboard"
+                          data-testid="collab-open-whiteboard"
                           icon={<LayoutOutlined />}
                           label={t('nav.whiteboard')}
                           onClick={() => openCollaborationPanel('whiteboard')}
@@ -1293,6 +1295,7 @@ export default function ChatView(): React.ReactElement {
                       {mindmapAllowed && (
                         <ComposerIconButton
                           data-visual-collab="mindmap"
+                          data-testid="collab-open-mindmap"
                           icon={<ApartmentOutlined />}
                           label={t('nav.mindmap')}
                           onClick={() => openCollaborationPanel('mindmap')}

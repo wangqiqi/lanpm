@@ -557,6 +557,7 @@ export default function WhiteboardView({ embedded = false }: WhiteboardViewProps
       className={`${styles.root} ${whiteboardZen ? styles.rootZen : ''} ${
         embedded ? styles.rootEmbedded : ''
       }`}
+      data-testid="whiteboard-island-surface"
     >
       <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'whiteboard' }} />
       {loading || !initialData ? (
