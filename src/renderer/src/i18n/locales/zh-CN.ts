@@ -490,7 +490,7 @@ const zhCN = {
   'plugin.signatureInvalid': '签名无效',
   'plugin.name.meeting': 'LanPM 会议',
   'plugin.meetingStubHint': 'Lite mesh POC：加入房间后经 Sync 信令交换；投屏列表由 Host desktopCapturer 代理',
-  'plugin.opsComposerHint': '运维：/help · /logs · /status · /deploy · @机器',
+  'plugin.opsComposerHint': '运维：/help · /logs · /status · /disk · /ps · /tail · /deploy · @机器',
   'plugin.opsFilesHint': '{{name}}：取日志与同步目录（启用插件后）',
   'plugin.meetingRoomState': '房间：{phase} · {count}/{max} 人',
   'plugin.meetingVoiceStub': '语音',

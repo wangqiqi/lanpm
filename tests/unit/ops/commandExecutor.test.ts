@@ -44,4 +44,22 @@ describe('executeOpsCommand', () => {
     const r = await executeOpsCommand(paths, { command: 'deploy', args: ['pkg.tar.gz'] })
     assert.equal(r.ok, true)
   })
+
+  it('runs disk', async () => {
+    const r = await executeOpsCommand(paths, { command: 'disk' })
+    assert.equal(r.ok, true)
+    assert.match(r.text ?? '', /disk\(/)
+  })
+
+  it('runs tail for outbound key', async () => {
+    const r = await executeOpsCommand(paths, { command: 'tail', args: ['app'] })
+    assert.equal(r.ok, true)
+    assert.match(r.text ?? '', /line1/)
+  })
+
+  it('rejects tail outside whitelist', async () => {
+    const r = await executeOpsCommand(paths, { command: 'tail', args: ['../../../etc/passwd'] })
+    assert.equal(r.ok, false)
+    assert.equal(r.error, 'PATH_FORBIDDEN')
+  })
 })

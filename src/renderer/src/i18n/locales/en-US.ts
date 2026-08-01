@@ -497,7 +497,7 @@ const enUS = {
   'plugin.signatureInvalid': 'Invalid signature',
   'plugin.name.meeting': 'LanPM Meeting',
   'plugin.meetingStubHint': 'Lite mesh POC: join a room and exchange signals over Sync; screen sources via Host desktopCapturer',
-  'plugin.opsComposerHint': 'Ops: /help · /logs · /status · /deploy · @machine',
+  'plugin.opsComposerHint': 'Ops: /help · /logs · /status · /disk · /ps · /tail · /deploy · @machine',
   'plugin.opsFilesHint': '{{name}}: fetch logs & sync dirs (when plugin enabled)',
   'plugin.meetingRoomState': 'Room: {phase} · {count}/{max}',
   'plugin.meetingVoiceStub': 'Voice',

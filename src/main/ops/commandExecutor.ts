@@ -7,6 +7,12 @@ import {
 } from '../gateway/fileStore.ts'
 import { PathForbiddenError } from '../gateway/pathGuard.ts'
 import type { OpsCommandName, OpsCommandPayload } from '../../shared/ops/types.ts'
+import {
+  formatDiskSnapshot,
+  formatPsSnapshot,
+  resolveTailRel,
+  tailGatewayText
+} from './readOnlyCommands.ts'
 
 export type OpsCommandExecution = {
   ok: boolean
@@ -22,6 +28,9 @@ function helpText(): string {
     '/help — list commands',
     '/logs [app|nginx] — fetch log file',
     '/status — CPU / memory / disk summary',
+    '/disk — disk usage snapshot',
+    '/ps — process list snapshot (read-only)',
+    '/tail <path|key> — tail log lines (whitelist paths)',
     '/deploy [name] — write package to inboundDir'
   ].join('\n')
 }
@@ -39,6 +48,15 @@ export async function executeOpsCommand(
         return { ok: true, text: helpText() }
       case 'status':
         return { ok: true, text: formatStatus(paths.root) }
+      case 'disk':
+        return { ok: true, text: formatDiskSnapshot(paths) }
+      case 'ps':
+        return { ok: true, text: await formatPsSnapshot() }
+      case 'tail': {
+        const rel = resolveTailRel(paths, args[0] ?? '')
+        const text = await tailGatewayText(paths, rel)
+        return { ok: true, text }
+      }
       case 'logs': {
         const key = args[0] ?? 'app'
         const rel = resolveOutboundLogRel(paths, key)

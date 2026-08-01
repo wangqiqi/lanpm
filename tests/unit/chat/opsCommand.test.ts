@@ -11,6 +11,10 @@ describe('parseOpsCommand', () => {
     assert.deepEqual(parseOpsCommand('/logs app'), { command: 'logs', args: ['app'] })
   })
 
+  it('parses slash tail with path', () => {
+    assert.deepEqual(parseOpsCommand('/tail app'), { command: 'tail', args: ['app'] })
+  })
+
   it('parses @machine prefix', () => {
     assert.deepEqual(parseOpsCommand('@prod-web-01 /status'), {
       command: 'status',

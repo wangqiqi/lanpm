@@ -1,6 +1,6 @@
 export type OpsDeviceKind = 'human' | 'machine'
 
-export const OPS_COMMAND_NAMES = ['help', 'logs', 'status', 'deploy'] as const
+export const OPS_COMMAND_NAMES = ['help', 'logs', 'status', 'deploy', 'disk', 'ps', 'tail'] as const
 export type OpsCommandName = (typeof OPS_COMMAND_NAMES)[number]
 
 export type OpsCommandPayload = {

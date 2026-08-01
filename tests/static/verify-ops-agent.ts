@@ -30,6 +30,10 @@ assert.match(statusSnapshot, /disk: unavailable/)
 
 const commandExecutor = readFileSync(join(root, 'src/main/ops/commandExecutor.ts'), 'utf8')
 assert.match(commandExecutor, /formatStatus\(paths\.root\)/)
+assert.match(commandExecutor, /case 'disk'/)
+assert.match(commandExecutor, /case 'tail'/)
+
+assert.ok(existsSync(join(root, 'src/main/ops/readOnlyCommands.ts')))
 
 assert.ok(existsSync(join(root, 'src/main/ops/opsSyncService.ts')))
 assert.ok(existsSync(join(root, 'src/main/gateway/fileStore.ts')))
