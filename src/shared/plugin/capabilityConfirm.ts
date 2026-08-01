@@ -4,7 +4,9 @@ import type { PluginCapabilityId } from './types.ts'
 export const HUMAN_REVIEW_CAPABILITY_IDS = [
   'task.create',
   'task.patch',
-  'board.moveTask'
+  'board.moveTask',
+  'chat.sendText',
+  'file.upload'
 ] as const satisfies readonly PluginCapabilityId[]
 
 export type HumanReviewCapabilityId = (typeof HUMAN_REVIEW_CAPABILITY_IDS)[number]

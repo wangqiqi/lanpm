@@ -3,6 +3,8 @@ import type {
   BoardMoveTaskArgs,
   ChatListMessagesArgs,
   ChatSendTaskRefArgs,
+  ChatSendTextArgs,
+  FileUploadArgs,
   MemberListArgs,
   TaskCreateArgs,
   TaskGetChecklistArgs,
@@ -15,6 +17,11 @@ import {
 } from '../../shared/plugin/capabilityConfirm.ts'
 import { getDisallowedTaskPatchFields } from '../../shared/plugin/taskPatchWhitelist.ts'
 import { parseTaskCreateInput } from '../../shared/plugin/taskCreateWhitelist.ts'
+import { parseChatSendTextInput } from '../../shared/plugin/chatSendTextWhitelist.ts'
+import {
+  FILE_UPLOAD_MAX_BYTES,
+  parseFileUploadInput
+} from '../../shared/plugin/fileUploadWhitelist.ts'
 import { pluginDeclaresCapability } from '../../shared/plugin/validateManifest.ts'
 import { getDatabase } from '../storage'
 import {
@@ -26,7 +33,7 @@ import {
 } from '../task/taskService'
 import { getTaskById } from '../storage/repositories/taskRepository'
 import { getGroupById } from '../group/groupService'
-import { listGroupFiles } from '../file/fileService'
+import { listGroupFiles, uploadFileFromPath } from '../file/fileService'
 import { findPluginById } from './discover.ts'
 import {
   assertPaidPluginLicensed,
@@ -35,7 +42,8 @@ import {
 import {
   listGroupMessages,
   listOlderGroupMessages,
-  sendTaskRefMessage
+  sendTaskRefMessage,
+  sendTextMessage
 } from '../chat/chatService'
 import { listGroupMembers } from '../chat/memberService'
 import {
@@ -48,6 +56,7 @@ import { createLiveKitTokenForGroup } from '../media/livekitTokenService'
 import { getSetupStatus } from '../identity/setup'
 import { createCapabilityPending, takeCapabilityPending } from './capabilityPendingStore.ts'
 import type { Database } from 'better-sqlite3'
+import { existsSync, statSync } from 'node:fs'
 
 export type CapabilityArgs = Record<string, unknown>
 
@@ -108,6 +117,27 @@ function executeWriteCapability(
       if (existing.groupId !== groupId) throw new Error('task not in group')
       return moveGroupTask(db, { taskId, status, sortOrder, otherReason })
     }
+    case 'chat.sendText': {
+      const parsed = parseChatSendTextInput(args)
+      if (!parsed.ok) throw new Error(parsed.message)
+      const { groupId, text, replyToMsgId } = parsed.value
+      return sendTextMessage(
+        db,
+        groupId,
+        text,
+        replyToMsgId ? { replyToMsgId } : undefined
+      )
+    }
+    case 'file.upload': {
+      const parsed = parseFileUploadInput(args)
+      if (!parsed.ok) throw new Error(parsed.message)
+      const { groupId, sourcePath } = parsed.value
+      if (!existsSync(sourcePath)) throw new Error('source file not found')
+      const stat = statSync(sourcePath)
+      if (!stat.isFile()) throw new Error('source path is not a file')
+      if (stat.size > FILE_UPLOAD_MAX_BYTES) throw new Error('file too large')
+      return uploadFileFromPath(db, groupId, sourcePath)
+    }
     default: {
       const _exhaustive: never = capability
       throw new Error(`unknown write capability: ${_exhaustive}`)
@@ -146,6 +176,17 @@ export async function invokePluginCapability(
       if (!groupId) throw new Error('groupId required')
       if (!taskId) throw new Error('taskId required')
       if (!status) throw new Error('status required')
+    } else if (capability === 'chat.sendText') {
+      const parsed = parseChatSendTextInput(args as ChatSendTextArgs)
+      if (!parsed.ok) throw new Error(parsed.message)
+    } else if (capability === 'file.upload') {
+      const parsed = parseFileUploadInput(args as FileUploadArgs)
+      if (!parsed.ok) throw new Error(parsed.message)
+      const { sourcePath } = parsed.value
+      if (!existsSync(sourcePath)) throw new Error('source file not found')
+      const stat = statSync(sourcePath)
+      if (!stat.isFile()) throw new Error('source path is not a file')
+      if (stat.size > FILE_UPLOAD_MAX_BYTES) throw new Error('file too large')
     }
     const db = getDatabase()
     const userId = requireCurrentUserId(db)

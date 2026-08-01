@@ -55,6 +55,8 @@ import {
   type HumanReviewCapabilityId
 } from '@shared/plugin/capabilityConfirm'
 import { parseTaskCreateInput } from '@shared/plugin/taskCreateWhitelist'
+import { parseChatSendTextInput } from '@shared/plugin/chatSendTextWhitelist'
+import { parseFileUploadInput } from '@shared/plugin/fileUploadWhitelist'
 import {
   DEFAULT_NAV_PREFERENCES,
   normalizeNavPreferences,
@@ -199,7 +201,7 @@ const stubCapabilityPendings = new Map<string, StubCapabilityPending>()
 function executeStubWriteCapability(
   capability: HumanReviewCapabilityId,
   args: Record<string, unknown>
-): Task {
+): Task | ChatMessage | FileMeta {
   if (capability === 'task.create') {
     const parsed = parseTaskCreateInput(args)
     if (!parsed.ok) throw new Error(parsed.message)
@@ -266,6 +268,65 @@ function executeStubWriteCapability(
             : null
     })
   }
+  if (capability === 'chat.sendText') {
+    const parsed = parseChatSendTextInput(args)
+    if (!parsed.ok) throw new Error(parsed.message)
+    const { groupId, text, replyToMsgId } = parsed.value
+    const status = readStatus()
+    if (!status.configured || !status.user || !status.device) {
+      throw stubError('stub.identityRequired')
+    }
+    const prev = readChatMessages(groupId)
+    const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+    const members = listStubMembers(groupId)
+    const mentions = parseMentions(text, members)
+    const msg: ChatMessage = {
+      msgId: `msg_${crypto.randomUUID()}`,
+      groupId,
+      senderUserId: status.user.userId,
+      senderDeviceId: status.device.deviceId,
+      type: 'text',
+      content: { kind: 'text', text },
+      lamportTs,
+      createdAt: new Date().toISOString(),
+      deliveryStatus: 'sent',
+      ...(mentions.length > 0 ? { mentions } : {}),
+      ...(replyToMsgId ? { replyToMsgId } : {})
+    }
+    writeChatMessages(groupId, [...prev, msg])
+    for (const fn of chatListeners) fn(msg)
+    return msg
+  }
+  if (capability === 'file.upload') {
+    const parsed = parseFileUploadInput(args)
+    if (!parsed.ok) throw new Error(parsed.message)
+    const { groupId, sourcePath } = parsed.value
+    const status = readStatus()
+    if (!status.configured || !status.user) {
+      throw stubError('stub.identityRequired')
+    }
+    const name = sourcePath.split(/[/\\]/).pop() ?? 'upload.bin'
+    const ext = name.includes('.') ? name.split('.').pop() ?? 'bin' : 'bin'
+    const now = new Date().toISOString()
+    const meta: FileMeta = {
+      fileId: `stub_file_${crypto.randomUUID()}`,
+      groupId,
+      name,
+      ext,
+      category: 'other',
+      size: 0,
+      uploadedBy: status.user.userId,
+      uploadedAt: now,
+      sha256: '',
+      storagePath: sourcePath,
+      previewStatus: 'none',
+      isBookmark: false,
+      updatedAt: now
+    }
+    const files = readAllFiles()[groupId] ?? []
+    writeGroupFiles(groupId, [...files, meta])
+    return meta
+  }
   const _exhaustive: never = capability
   throw new Error(`unknown write capability: ${_exhaustive}`)
 }
@@ -274,7 +335,7 @@ const STUB_PLUGINS: PluginView[] = [
   {
     id: 'lanpm.example',
     name: 'Example Slot Stub',
-    version: '0.4.0',
+    version: '0.5.0',
     slots: ['task.detail.section', 'chat.composer.action'],
     capabilities: [
       'task.get',
@@ -283,6 +344,8 @@ const STUB_PLUGINS: PluginView[] = [
       'task.getChecklist',
       'member.list',
       'chat.sendTaskRef',
+      'chat.sendText',
+      'file.upload',
       'task.create',
       'task.patch',
       'board.moveTask',
@@ -2407,6 +2470,12 @@ export function createBrowserLanpmStub(): LanpmApi {
             if (!groupId) throw new Error('groupId required')
             if (!taskId) throw new Error('taskId required')
             if (!moveStatus) throw new Error('status required')
+          } else if (capability === 'chat.sendText') {
+            const parsed = parseChatSendTextInput(args ?? {})
+            if (!parsed.ok) throw new Error(parsed.message)
+          } else if (capability === 'file.upload') {
+            const parsed = parseFileUploadInput(args ?? {})
+            if (!parsed.ok) throw new Error(parsed.message)
           }
           const pendingId = `pend_${crypto.randomUUID()}`
           stubCapabilityPendings.set(pendingId, {

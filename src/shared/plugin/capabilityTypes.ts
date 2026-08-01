@@ -1,3 +1,4 @@
+import type { FileMeta } from '../file/types'
 import type { ChatMessagePage } from '../chat/pagination'
 import type { GroupMemberView } from '../chat/members'
 import type { ChatMessage } from '../chat/types'
@@ -25,6 +26,19 @@ export type MemberListArgs = {
 export type ChatSendTaskRefArgs = {
   groupId: string
   taskId: string
+}
+
+/** Extension API v0.5 — chat.sendText */
+export type ChatSendTextArgs = {
+  groupId: string
+  text: string
+  replyToMsgId?: string
+}
+
+/** Extension API v0.5 — file.upload */
+export type FileUploadArgs = {
+  groupId: string
+  sourcePath: string
 }
 
 /** Extension API v0.3 — task.patch payload */
@@ -60,6 +74,8 @@ export type PluginCapabilityArgsMap = {
   'task.getChecklist': TaskGetChecklistArgs
   'member.list': MemberListArgs
   'chat.sendTaskRef': ChatSendTaskRefArgs
+  'chat.sendText': ChatSendTextArgs
+  'file.upload': FileUploadArgs
   'task.create': TaskCreateArgs
   'task.patch': TaskPatchArgs
   'board.moveTask': BoardMoveTaskArgs
@@ -70,6 +86,8 @@ export type PluginCapabilityResultMap = {
   'task.getChecklist': ChecklistView
   'member.list': GroupMemberView[]
   'chat.sendTaskRef': ChatMessage
+  'chat.sendText': ChatMessage
+  'file.upload': FileMeta
   'task.create': Task
   'task.patch': Task
   'board.moveTask': Task
@@ -88,4 +106,9 @@ export type ExtensionApiV03CapabilityId = keyof Pick<
 export type ExtensionApiV04CapabilityId = keyof Pick<
   PluginCapabilityArgsMap,
   'task.create' | 'task.patch' | 'board.moveTask'
+>
+
+export type ExtensionApiV05CapabilityId = keyof Pick<
+  PluginCapabilityArgsMap,
+  'chat.sendText' | 'file.upload'
 >

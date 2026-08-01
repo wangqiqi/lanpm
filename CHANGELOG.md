@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.82.0] - 2026-08-01
+
+### Added
+
+- **Extension API v0.5**：`chat.sendText` · `file.upload` 经 Host 人审（`pending_confirm` + `confirmCapability`）
+- **`chat.sendText`** 白名单：`groupId` · `text` · `replyToMsgId?`
+- **`file.upload`** 白名单：`groupId` · `sourcePath`（存在 · 为文件 · 200MiB 上限）
+- **`lanpm.example` v0.5.0**：Composer 演示发送文本 + 上传文件
+- **`verify:extension-api-v0.5`** · Spec `docs/specs/004-extension-api-v0.5/spec.md`
+
+### Changed
+
+- **`docs/插件开发.md` §4**：v0.5 路线 · `chat.sendText` / `file.upload` 交付态
+
 ## [1.81.0] - 2026-07-31
 
 ### Added

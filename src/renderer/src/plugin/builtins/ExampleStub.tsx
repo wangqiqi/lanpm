@@ -4,6 +4,8 @@ import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { Task } from '@shared/task/types'
 import type { ChatMessagePage } from '@shared/chat/pagination'
+import type { ChatMessage } from '@shared/chat/types'
+import type { FileMeta } from '@shared/file/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { invokeCapabilityWithHumanConfirm } from '@renderer/plugin/invokeCapabilityWithHumanConfirm'
@@ -119,6 +121,45 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
     }
   }, [confirmCopy, groupId, plugin.id, t])
 
+  const onSendText = useCallback(async () => {
+    setBusy(true)
+    try {
+      const text = t('plugin.exampleSendTextBody')
+      const sent = (await invokeCapabilityWithHumanConfirm(
+        plugin.id,
+        'chat.sendText',
+        { groupId, text },
+        confirmCopy('chat.sendText')
+      )) as ChatMessage | null
+      if (!sent) return
+      message.success(t('plugin.exampleTextSent'))
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [confirmCopy, groupId, plugin.id, t])
+
+  const onUploadFile = useCallback(async () => {
+    const sourcePath = window.prompt(t('plugin.exampleUploadPrompt'))
+    if (!sourcePath?.trim()) return
+    setBusy(true)
+    try {
+      const meta = (await invokeCapabilityWithHumanConfirm(
+        plugin.id,
+        'file.upload',
+        { groupId, sourcePath: sourcePath.trim() },
+        confirmCopy('file.upload')
+      )) as FileMeta | null
+      if (!meta) return
+      message.success(t('plugin.exampleFileUploaded', { name: meta.name }))
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [confirmCopy, groupId, plugin.id, t])
+
   const onProbeRead = useCallback(async () => {
     setBusy(true)
     try {
@@ -156,6 +197,12 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
       <Button size="small" type="primary" loading={busy} onClick={() => void onSendTaskRef()}>
         {t('plugin.exampleSendTaskRef')}
       </Button>
+      <Button size="small" loading={busy} onClick={() => void onSendText()}>
+        {t('plugin.exampleSendText')}
+      </Button>
+      <Button size="small" loading={busy} onClick={() => void onUploadFile()}>
+        {t('plugin.exampleUploadFile')}
+      </Button>
     </div>
   )
 }
@@ -169,7 +216,7 @@ function ExampleProfileTab({ plugin }: Props): React.ReactElement {
   )
 }
 
-/** 免费官方 stub — Host→Slot + Extension API v0.4 人审演示 */
+/** 免费官方 stub — Host→Slot + Extension API v0.5 人审演示 */
 export default function ExampleStub(props: Props): React.ReactElement | null {
   if (props.context?.view === 'profile') {
     return <ExampleProfileTab {...props} />
