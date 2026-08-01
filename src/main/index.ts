@@ -15,6 +15,7 @@ import { registerPairingIpc } from './ipc/pairing'
 import { registerDataIpc } from './ipc/data'
 import { registerNetworkIpc, registerBadgeIpc } from './ipc/network'
 import { registerWhiteboardIpc } from './ipc/whiteboard'
+import { registerMindmapIpc } from './ipc/mindmap'
 import { registerPluginIpc } from './ipc/plugin'
 import { registerNavIpc } from './ipc/nav'
 import { registerMeetingIpc } from './ipc/meeting'
@@ -129,6 +130,7 @@ function registerAllIpcHandlers(): void {
   registerPairingIpc()
   registerDataIpc()
   registerWhiteboardIpc()
+  registerMindmapIpc()
   registerPluginIpc()
   registerNavIpc()
   registerMeetingIpc()

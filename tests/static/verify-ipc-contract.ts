@@ -16,6 +16,7 @@ import { NETWORK_IPC } from '../../src/shared/network/status.ts'
 import { BADGE_IPC } from '../../src/shared/badge/types.ts'
 import { DISCOVER_IPC, PAIRING_IPC } from '../../src/shared/discover/channels.ts'
 import { WHITEBOARD_IPC } from '../../src/shared/whiteboard/channels.ts'
+import { MINDMAP_IPC } from '../../src/shared/mindmap/channels.ts'
 import { DATA_IPC } from '../../src/shared/data/channels.ts'
 import { PLUGIN_IPC } from '../../src/shared/plugin/channels.ts'
 import { NAV_IPC } from '../../src/shared/navigation/channels.ts'
@@ -45,6 +46,7 @@ const DECLARED = new Set<string>([
   ...Object.values(PAIRING_IPC),
   ...Object.values(DATA_IPC),
   ...Object.values(WHITEBOARD_IPC),
+  ...Object.values(MINDMAP_IPC),
   ...Object.values(PLUGIN_IPC),
   ...Object.values(NAV_IPC),
   ...Object.values(MEETING_IPC),
@@ -79,6 +81,7 @@ function extractMainHandlers(): Set<string> {
     PAIRING_IPC,
     DATA_IPC,
     WHITEBOARD_IPC,
+    MINDMAP_IPC,
     PLUGIN_IPC,
     NAV_IPC,
     MEETING_IPC,

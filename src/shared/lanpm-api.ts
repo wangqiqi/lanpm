@@ -399,6 +399,23 @@ export interface LanpmApi {
       handler: (payload: { groupId: string; updateBase64: string }) => void
     ) => () => void
   }
+  mindmap: {
+    list: (groupId: string) => Promise<import('./mindmap/types').MindmapDocumentSummary[]>
+    create: (
+      input: import('./mindmap/types').CreateMindmapInput
+    ) => Promise<import('./mindmap/types').MindmapDocument>
+    load: (docId: string) => Promise<import('./mindmap/types').MindmapDocumentLoad | null>
+    save: (
+      input: import('./mindmap/types').SaveMindmapInput
+    ) => Promise<import('./mindmap/types').MindmapDocument>
+    rename: (
+      input: import('./mindmap/types').RenameMindmapInput
+    ) => Promise<import('./mindmap/types').MindmapDocument>
+    delete: (docId: string) => Promise<{ ok: true }>
+    exportPng: (
+      input: import('./mindmap/types').ExportMindmapPngInput
+    ) => Promise<import('./file/types').FileMeta>
+  }
   plugin: {
     listPlugins: () => Promise<import('./plugin/types').PluginView[]>
     listSlotPlugins: (

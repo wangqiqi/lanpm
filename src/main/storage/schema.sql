@@ -251,6 +251,18 @@ CREATE TABLE task_checklist_items (
 CREATE INDEX idx_checklist_items_task ON task_checklist_items(task_id);
 CREATE INDEX idx_checklist_items_checklist ON task_checklist_items(checklist_id);
 
+-- 群思维导图文档索引（SPRINT-23 · TASK-2301）
+CREATE TABLE mindmap_documents (
+  doc_id TEXT PRIMARY KEY,
+  group_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  file_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  created_by TEXT NOT NULL
+);
+CREATE INDEX idx_mindmap_documents_group ON mindmap_documents(group_id, updated_at);
+
 -- AI 助手会话（本机个人 · 不同步 P2P）
 CREATE TABLE ai_threads (
   thread_id TEXT PRIMARY KEY,

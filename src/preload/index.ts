@@ -323,6 +323,15 @@ const api: LanpmApi = {
       return () => ipcRenderer.removeListener('whiteboard:remoteAwareness', listener)
     }
   },
+  mindmap: {
+    list: (groupId) => ipcRenderer.invoke('mindmap:list', groupId),
+    create: (input) => ipcRenderer.invoke('mindmap:create', input),
+    load: (docId) => ipcRenderer.invoke('mindmap:load', docId),
+    save: (input) => ipcRenderer.invoke('mindmap:save', input),
+    rename: (input) => ipcRenderer.invoke('mindmap:rename', input),
+    delete: (docId) => ipcRenderer.invoke('mindmap:delete', docId),
+    exportPng: (input) => ipcRenderer.invoke('mindmap:exportPng', input)
+  },
   plugin: {
     listPlugins: () => ipcRenderer.invoke('plugin:listPlugins'),
     listSlotPlugins: (slotId) => ipcRenderer.invoke('plugin:listSlotPlugins', slotId),

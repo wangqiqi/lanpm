@@ -145,6 +145,36 @@ export function getFileById(db: Database, fileId: string): FileMeta | null {
   return row ? rowToMeta(row) : null
 }
 
+export function updateFileContent(
+  db: Database,
+  fileId: string,
+  patch: { name?: string; size: number; sha256: string; updatedAt: string }
+): FileMeta | null {
+  const existing = getFileById(db, fileId)
+  if (!existing) return null
+  if (patch.name !== undefined) {
+    db.prepare(
+      `UPDATE files SET name = ?, size = ?, sha256 = ?, updated_at = ? WHERE file_id = ?`
+    ).run(patch.name, patch.size, patch.sha256, patch.updatedAt, fileId)
+  } else {
+    db.prepare(`UPDATE files SET size = ?, sha256 = ?, updated_at = ? WHERE file_id = ?`).run(
+      patch.size,
+      patch.sha256,
+      patch.updatedAt,
+      fileId
+    )
+  }
+  return getFileById(db, fileId)
+}
+
+export function updateFileName(db: Database, fileId: string, name: string, updatedAt: string): void {
+  db.prepare(`UPDATE files SET name = ?, updated_at = ? WHERE file_id = ?`).run(name, updatedAt, fileId)
+}
+
+export function deleteFileById(db: Database, fileId: string): void {
+  db.prepare(`DELETE FROM files WHERE file_id = ?`).run(fileId)
+}
+
 /** B-02 — 远端 file_meta 登记（待 pull） */
 export function upsertRemoteFileMeta(db: Database, meta: FileMeta): boolean {
   const existing = getFileById(db, meta.fileId)

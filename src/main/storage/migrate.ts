@@ -348,6 +348,26 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `CREATE INDEX idx_group_join_requests_applicant ON group_join_requests(applicant_user_id, group_id, status)`
       )
     }
+  },
+  {
+    fromVersion: 16,
+    description: 'mindmap_documents for group mind maps (SPRINT-23 TASK-2301)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE mindmap_documents (
+          doc_id TEXT PRIMARY KEY,
+          group_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          file_id TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          created_by TEXT NOT NULL
+        )
+      `)
+      db.exec(
+        `CREATE INDEX idx_mindmap_documents_group ON mindmap_documents(group_id, updated_at)`
+      )
+    }
   }
 ]
 

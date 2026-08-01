@@ -40,10 +40,11 @@ export const EXPECTED_TABLES = [
   'whiteboard_crdt_docs',
   'task_checklists',
   'task_checklist_items',
+  'mindmap_documents',
   'ai_threads',
   'ai_messages',
   'ai_patrol_runs',
   'ai_pipeline_runs'
 ] as const
 
-export const SCHEMA_VERSION = 16
+export const SCHEMA_VERSION = 17
