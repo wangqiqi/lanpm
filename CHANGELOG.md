@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [1.103.0] - 2026-08-01
+
+### Added
+
+- **设计令牌**：`--lanpm-border-subtle` · `--lanpm-motion-slow` · `--lanpm-ease-emphasized`（亮暗成对）
+- **动效**：协作抽屉内容 `collaborationPanelReady` 淡入；全局 `prefers-reduced-motion` 降级
+- **Ant 动效对齐**：`ThemeProvider` `motionDurationFast/Mid/Slow`（`TASK-2508`）
+
+### Changed
+
+- **壳层**：底栏 Tab / 顶栏次要操作去掉 `opacity` 弱化，改用语义色（`TASK-2502`）
+- **甘特工具栏**：去除重复「导出 PNG」，保留 PDF + `ViewExportShareActions`（`TASK-2505`）
+- **协作抽屉**：白板 `transform:none` 仅作用于 `collaborationDrawerWhiteboard`（`TASK-2504`）
+- **对比度**：暗色 `--lanpm-text-tertiary` 提亮；Setup 禁用按钮改 fill-secondary（`TASK-2507`）
+- **字号**：plugin / taskAwareness / NavPreferences / aiAssistant 离散 px → token（`TASK-2501`）
+- **docs/04** §1.6 动效表；截图基线刷新（`TASK-2509` · `TASK-2510`）
+
 ## [1.102.1] - 2026-08-01
 
 ### Added
