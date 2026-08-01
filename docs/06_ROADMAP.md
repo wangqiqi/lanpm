@@ -68,7 +68,7 @@
 
 | 已有 | 会议插件还需（SPIKE-374–376 已拍板） |
 |------|--------------------------------------|
-| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **深化** 会议 UX · 媒体 capability 产品化 · LiveKit 旁路运维体验；Slot `chat.toolbar.media` / `PluginGroupSlot` **已有** |
+| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **深化** 会议 UX · 媒体 capability 产品化 · LiveKit 旁路运维体验；Slot `chat.toolbar.media` / `PluginZoneHost` **已有** |
 | 安全红线：禁插件直连 DB / `ipcMain` | 维持；媒体经 Host 代理；**builtin registry** 注册 `lanpm.meeting`；LiveKit SDK **不进**核心 `dependencies` |
 
 ### 3.4 架构注意（无中心 vs SFU）
@@ -85,7 +85,7 @@
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
 | 1 | **SPIKE-会议插件**（SPIKE-374–376）：Lite mesh vs LiveKit 旁路 · `chat.toolbar.media` · Presence 侧车 | SPIKE | **已交付** · `npm run verify:meeting-spike` |
-| 2 | Host 扩展 + `lanpm.meeting` stub：`PluginGroupSlot` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | **已交付** · `verify:meeting-plugin` · v1.67.0 |
+| 2 | Host 扩展 + `lanpm.meeting` stub：`PluginZoneHost` · `MeetingToolbar` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | **已交付** · `verify:meeting-plugin` · v1.67.0 |
 | 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | **已交付** · `verify:meeting-mesh-poc` · v1.68.0 |
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | **已交付** · `verify:meeting-livekit-pro` · v1.71.0 |
 | 5 | 离线许可证（内网可购） | P1～P2 | **已交付** · `verify:plugin-market-spike` · `verify:offline-license-cli` · v1.75–1.76 |
@@ -109,7 +109,10 @@
 |---|-----|---------------|----------|------|
 | 1 | 发版门禁 | `npm run verify:release-gate` | — | ✅ |
 | 2 | 视觉 PNG 冒烟 | `verify:visual-screenshots`（[05 §1.3.1](./05_测试与联调发布.md#131-视觉截图策略task-1221) 本地必跑） | `npm run build && npm run verify:visual-screenshots`（Linux：`xvfb-run -a`） | ✅ |
-| 3 | 聊天协作抽屉 | `verify:visual` IA-401～408 · `verify:visual-screenshots` 抽屉态 | **项目群**聊天 → Composer 三按钮（文件库 / 白板 / 脑图）→ 抽屉打开 →「全屏编辑」深链；职能群仅文件库；DM 无按钮 | 建议 |
+| 3 | 聊天协作抽屉 | `verify:visual` IA-401～409 · `verify:visual-screenshots` 抽屉态 | **项目群**聊天 → Composer 三按钮（文件库 / 白板 / 脑图）→ 抽屉打开 →「全屏编辑」深链；职能群仅文件库；DM 无按钮 | 建议 |
+| 3b | 底栏 Tab 布局 | `verify:nav-preferences` · `verify:visual` IA-409 | **项目群**底栏：默认隐藏 files/白板/脑图后 Tab **等宽撑满**、无右侧空槽；Profile → 导航 可恢复隐藏 Tab | 建议 |
+| 3c | 会议工具条 | `verify:meeting-plugin` | 聊天输入区上方会议按钮（Lite 加入 / Pro）可点、Popover 详情无报错 | 建议 |
+| 3d | Profile 插件 | `verify:plugin-ui-surfaces` | Profile → 插件：启停 `lanpm.meeting` · 导航偏好保存 | 建议 |
 | 4 | 看板 / 任务树 | `verify:m3` | [05 §4](./05_测试与联调发布.md#4-看板与任务树m3) 表 6 步 | 延期 |
 | 5 | 双实例 Stub | `verify:dual-stub` | [05 §3](./05_测试与联调发布.md#3-双实例-stub-联调) | 延期 |
 | 6 | 真网双机 | `verify:m6` loopback | [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6) | 延期 |

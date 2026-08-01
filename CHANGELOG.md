@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **底栏 Tab 撑满（TASK-1311）**：`group.tab.overflow` 无插件时不渲染空 `.tabSlot`，隐藏 files/whiteboard/mindmap 后剩余 Tab 等宽撑满（IA-409）
+
+### Changed
+
+- **会议静态守卫（TASK-1312）**：`verify:meeting-*` 对齐 `MeetingToolbar` / `PluginZoneHost` 接线
+- **视图 Slot 守卫（TASK-1313）**：`verify:view-slot-hosts` chat `context` zone 落点改 `ChatView`；`verify:visual` 增补 IA-409
+- **文档同步（TASK-1314）**：`docs/06` · `docs/07` 会议 Slot 表述与 `PluginZoneHost` 一致
+
 ## [1.96.2] - 2026-08-01
 
 ### Added
