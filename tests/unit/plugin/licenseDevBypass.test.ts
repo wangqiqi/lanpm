@@ -31,7 +31,14 @@ describe('shouldBypassPaidPluginLicense', () => {
     delete process.env.LANPM_NETWORK
     delete process.env.LANPM_VISUAL_CAPTURE_DIR
     delete process.env.LANPM_E2E
+    delete process.env.LANPM_BROWSER_DEV
     process.env.NODE_ENV = 'production'
     expect(shouldBypassPaidPluginLicense()).toBe(false)
+  })
+
+  it('bypasses when LANPM_E2E=1', () => {
+    process.env.NODE_ENV = 'production'
+    process.env.LANPM_E2E = '1'
+    expect(shouldBypassPaidPluginLicense()).toBe(true)
   })
 })

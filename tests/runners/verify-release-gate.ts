@@ -15,6 +15,7 @@ function run(cmd: string): void {
 }
 
 const steps = [
+  'npm run verify:pack-license',
   'npm run verify:docs-code -- --strict',
   'npm run verify:visual',
   'npm run verify:profile-panel',

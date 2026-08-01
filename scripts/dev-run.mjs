@@ -28,7 +28,7 @@ const web = process.argv.includes('--web')
 const env = { ...process.env }
 delete env.ELECTRON_RUN_AS_NODE
 if (web) env.LANPM_BROWSER_DEV = '1'
-// 开发/测试：付费插件免许可证（打包产物 isPackaged 时仍走正式闸）
+// 开发：显式注入 LANPM_LICENSE_SKIP_VERIFY=1；构建/未打包 dist 不自动绕过
 if (env.LANPM_LICENSE_SKIP_VERIFY !== '0') {
   env.LANPM_LICENSE_SKIP_VERIFY = '1'
 }

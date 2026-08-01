@@ -47,3 +47,5 @@ resources/icon.ico
 resources/logo-*.png
 src/renderer/public/favicon.svg
 src/renderer/public/favicon.png
+
+test-results/

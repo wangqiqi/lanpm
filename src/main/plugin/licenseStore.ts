@@ -50,23 +50,15 @@ function grantIsActive(grant: PluginLicenseGrant, now = Date.now()): boolean {
   return grant.features.includes('license.feature') || grant.features.length > 0
 }
 
-function isDevUnpackagedApp(): boolean {
-  try {
-    return !app.isPackaged
-  } catch {
-    return false
-  }
-}
-
 export function isPluginLicensed(pluginId: string, now = Date.now()): boolean {
-  if (shouldBypassPaidPluginLicense() || isDevUnpackagedApp()) return true
+  if (shouldBypassPaidPluginLicense()) return true
   const grant = readLicenseStore().grants.find((g) => g.pluginId === pluginId)
   if (!grant) return false
   return grantIsActive(grant, now)
 }
 
 export function getPluginLicenseStatus(pluginId: string, now = Date.now()): PluginLicenseStatus {
-  if (shouldBypassPaidPluginLicense() || isDevUnpackagedApp()) {
+  if (shouldBypassPaidPluginLicense()) {
     return { pluginId, licensed: true, features: ['license.feature'] }
   }
   const grant = readLicenseStore().grants.find((g) => g.pluginId === pluginId)
@@ -105,7 +97,7 @@ export function assertPaidPluginLicensed(
   pricing: 'free' | 'paid'
 ): void {
   if (pricing !== 'paid') return
-  if (shouldBypassPaidPluginLicense() || isDevUnpackagedApp()) return
+  if (shouldBypassPaidPluginLicense()) return
   if (!isPluginLicensed(pluginId)) {
     throw new Error(`license required for paid plugin: ${pluginId}`)
   }

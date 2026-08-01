@@ -4,11 +4,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **付费插件许可证 · 构建/打包闸**：移除 `licenseStore` 中 `!app.isPackaged` 隐式绕过；`npm run build` / `dist/*-unpacked` / 正式安装包均须正式离线授权，仅 `LANPM_LICENSE_SKIP_VERIFY=1` 等显式开发/测试开关可跳过；新增 `verify:pack-license` 并入 `prebuild`
+
 ## [1.95.1] - 2026-08-01
 
 ### Fixed
 
-- **付费插件开发闸**：`licenseDevBypass` — `npm run dev` / 未打包构建 / stub·E2E·截图测试自动跳过许可证校验；打包产物仍须正式离线授权
+- **付费插件开发闸**：`licenseDevBypass` — `npm run dev`（`LANPM_LICENSE_SKIP_VERIFY=1`）与 stub·E2E·截图测试可跳过许可证；**构建/未打包 dist/正式安装包**须正式授权（见 `[Unreleased]` 构建闸加固）
 - **思维导图**：`ensure-plugin-deps` 自动安装 `plugins/lanpm.mindmap` 的 mind-elixir；修复开发期 `task.list` 被 license 拦截导致页面无法打开
 - **视觉规范**：补 `--lanpm-fill-tertiary` token；`chat.module.css` 机器标签字号改用 `--lanpm-font-tab`（`verify:visual`）
 
