@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [1.102.0] - 2026-08-01
+
+### Added
+
+- **思维导图文档**：每群多张独立导图（新建/打开/保存/重命名/删除）；`mindmap_documents` 表 + 群文件 JSON 持久化（`SPIKE-2301` · `TASK-2301`）
+- **MindmapToolbar**：`mindmap.toolbar` Slot 接线；可选「从任务导入」；下载 JSON/PNG；发到群聊（`TASK-2302` · `TASK-2303` · `TASK-2304` · `TASK-2305`）
+- **ViewExportShareActions**：白板/甘特/脑图统一导出·下载·分享入口（`TASK-2306` · `TASK-2307` · `TASK-2308`）
+- **`verify:mindmap`**：静态门禁（schema · IPC · MindmapView/Toolbar）（`TASK-2309`）
+
+### Changed
+
+- **MindmapView**：默认空白文档，不再自动绑定 `task.list`（`TASK-2302`）
+- **白板**：Excalidraw 顶栏补本地下载 PNG + 发到群聊（`TASK-2306`）
+- **甘特**：工具栏补发到群聊（PNG）（`TASK-2307`）
+- **浏览器 stub**：`browserLanpmStub` 补 `mindmap.*` API（`TASK-2301`）
+- **docs/04** · **docs/07**：脑图文档模型与三视图导出矩阵（`TASK-2310`）
+
 ## [1.101.4] - 2026-08-01
 
 ### Fixed
