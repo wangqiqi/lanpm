@@ -39,6 +39,7 @@ import { isLocalRemovedPath, isRemotePendingPath } from '@shared/file/sync'
 import { useFileStore } from '@renderer/stores/fileStore'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { TransferActiveRow } from './TransferActiveRow'
+import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import ViewToolbar from '@renderer/ui/ViewToolbar'
@@ -164,6 +165,8 @@ export default function FilesView(): React.ReactElement {
   const [previewError, setPreviewError] = useState(false)
   const [previewLoading, setPreviewLoading] = useState(false)
   const consumedSelectFileIdRef = useRef<string | null>(null)
+  const pendingSelectFileId = useChatCollaborationStore((s) => s.pendingSelectFileId)
+  const clearPendingSelectFileId = useChatCollaborationStore((s) => s.clearPendingSelectFileId)
   const previewRequestRef = useRef(0)
   const [bookmarkOpen, setBookmarkOpen] = useState(false)
   const [bookmarkUrl, setBookmarkUrl] = useState('')
@@ -239,8 +242,12 @@ export default function FilesView(): React.ReactElement {
   }, [selected])
 
   useEffect(() => {
+    if (pendingSelectFileId) consumedSelectFileIdRef.current = null
+  }, [pendingSelectFileId])
+
+  useEffect(() => {
     const state = location.state as { selectFileId?: string } | null
-    const targetId = state?.selectFileId
+    const targetId = pendingSelectFileId ?? state?.selectFileId
     if (!targetId || !gid) return
     if (consumedSelectFileIdRef.current === targetId) return
     const match = files.find((f) => f.fileId === targetId)
@@ -248,8 +255,18 @@ export default function FilesView(): React.ReactElement {
     consumedSelectFileIdRef.current = targetId
     setSelected(match)
     if (isNarrow) setPreviewDrawerOpen(true)
-    navigate(location.pathname, { replace: true, state: {} })
-  }, [location.pathname, location.state, navigate, files, gid, isNarrow])
+    if (pendingSelectFileId) clearPendingSelectFileId()
+    if (state?.selectFileId) navigate(location.pathname, { replace: true, state: {} })
+  }, [
+    location.pathname,
+    location.state,
+    navigate,
+    files,
+    gid,
+    isNarrow,
+    pendingSelectFileId,
+    clearPendingSelectFileId
+  ])
 
   useEffect(() => {
     if (filteredFiles.length === 0) {

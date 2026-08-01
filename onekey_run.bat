@@ -8,6 +8,8 @@ set "RUN_DIR=%ROOT%\.lanpm"
 set "PID_FILE=%RUN_DIR%\dev.pid"
 set "LOG_FILE=%RUN_DIR%\dev.log"
 set "MODE_FILE=%RUN_DIR%\dev.mode"
+set "URL_FILE=%RUN_DIR%\dev.url"
+set "PORT_FILE=%RUN_DIR%\dev.port"
 set "VER="
 for /f "delims=" %%v in ('node -p "require('./package.json').version" 2^>nul') do set "VER=%%v"
 if "%~1"=="" goto :menu
@@ -114,6 +116,20 @@ exit /b 0
 if not exist "%LOG_FILE%" exit /b 0
 node "%ROOT%\scripts\onekey-preflight.mjs" --diagnose-log "%LOG_FILE%" 2>nul
 exit /b 0
+:clear_dev_url
+node "%ROOT%\scripts\onekey-dev-url.mjs" clear >nul 2>&1
+if exist "%URL_FILE%" del "%URL_FILE%" 2>nul
+if exist "%PORT_FILE%" del "%PORT_FILE%" 2>nul
+exit /b 0
+:show_dev_url
+set "DEV_URL="
+for /f "delims=" %%u in ('node "%ROOT%\scripts\onekey-dev-url.mjs" read 2^>nul') do set "DEV_URL=%%u"
+if defined DEV_URL echo   LanPM  -^>  !DEV_URL!
+exit /b 0
+:wait_dev_url
+for /f "delims=" %%u in ('node "%ROOT%\scripts\onekey-dev-url.mjs" wait --timeout=45 2^>nul') do set "DEV_URL=%%u"
+if defined DEV_URL call :print "[lanpm] renderer: !DEV_URL!"
+exit /b 0
 :start_dev
 set "DEV_MODE=%~1"
 call :ensure_run_dir
@@ -125,6 +141,7 @@ if not errorlevel 1 (
   exit /b 1
 )
 if /i "%DEV_MODE%"=="web" (set "NPM_SCRIPT=dev:web") else (set "NPM_SCRIPT=dev")
+call :clear_dev_url
 type nul >"%LOG_FILE%"
 >"%MODE_FILE%" echo(%DEV_MODE%)
 echo [lanpm] starting dev mode: %DEV_MODE% ...
@@ -151,6 +168,7 @@ exit /b 1
 :start_dev_pid_ok
 >"%PID_FILE%" echo(!VITE_PID!)
 call :print "[lanpm] started pid=!VITE_PID! mode=!NPM_SCRIPT!"
+call :wait_dev_url
 call :print "[lanpm] logs: onekey_run.bat logs"
 exit /b 0
 :cmd_start
@@ -171,7 +189,7 @@ if exist "%PID_FILE%" (
   ) else (
     call :print "[lanpm] invalid pid file; cleaning stray processes"
   )
-  del "%PID_FILE%" "%MODE_FILE%" 2>nul
+  del "%PID_FILE%" "%MODE_FILE%" "%URL_FILE%" "%PORT_FILE%" 2>nul
 ) else (
   call :print "[lanpm] no pid file; cleaning stray processes"
 )
@@ -180,6 +198,7 @@ if !VITE_COUNT! gtr 0 (
   echo [lanpm] cleaning electron-vite processes ...
   call :stop_vite_all
 )
+call :clear_dev_url
 echo [lanpm] stopped
 exit /b 0
 :cmd_restart
@@ -201,11 +220,13 @@ if not errorlevel 1 (
   set "SMODE=electron"
   if exist "%MODE_FILE%" set /p "SMODE=" <"%MODE_FILE%"
   echo [lanpm] dev: running pid=!SPID! mode=!SMODE!
+  call :show_dev_url
 ) else (
   echo [lanpm] dev: not running
 )
 echo.
-echo [lanpm] Vite ports 5173/5174:
+echo [lanpm] Vite ports:
+call :show_dev_url
 call :show_vite_ports
 echo.
 if exist "%LOG_FILE%" (
@@ -221,9 +242,11 @@ if not errorlevel 1 (
   set "SMODE=electron"
   if exist "%MODE_FILE%" set /p "SMODE=" <"%MODE_FILE%"
   echo [lanpm] dev: running  pid=!SPID!  mode=!SMODE!
+  call :show_dev_url
 ) else (
   echo [lanpm] dev: not running - 选项 1 或 2 可启动
 )
+call :show_dev_url
 call :show_vite_ports
 exit /b 0
 :log_tail

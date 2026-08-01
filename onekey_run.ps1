@@ -17,6 +17,9 @@ $RunDir = Join-Path $Root '.lanpm'
 $PidFile = Join-Path $RunDir 'dev.pid'
 $LogFile = Join-Path $RunDir 'dev.log'
 $ModeFile = Join-Path $RunDir 'dev.mode'
+$UrlFile = Join-Path $RunDir 'dev.url'
+$PortFile = Join-Path $RunDir 'dev.port'
+$DevUrlScript = Join-Path $Root 'scripts/onekey-dev-url.mjs'
 
 function Ensure-RunDir {
   New-Item -ItemType Directory -Force -Path $RunDir | Out-Null
@@ -80,22 +83,56 @@ function Get-PortSummary([int]$Port) {
   return $line
 }
 
+function Clear-DevUrl {
+  & node $DevUrlScript clear 2>$null | Out-Null
+  Remove-Item $UrlFile, $PortFile -ErrorAction SilentlyContinue
+}
+
+function Read-DevUrl {
+  if (Test-Path $UrlFile) {
+    return (Get-Content $UrlFile -Raw).Trim()
+  }
+  $url = (& node $DevUrlScript read 2>$null)
+  if ($url) { return $url.Trim() }
+  return $null
+}
+
+function Wait-DevUrl {
+  $url = (& node $DevUrlScript wait --timeout=45 2>$null)
+  if ($url) { return $url.Trim() }
+  return $null
+}
+
+function Show-DevUrl {
+  $url = Read-DevUrl
+  if ($url) { Write-Host "  LanPM  ->  $url" }
+}
+
 function Show-VitePorts([switch]$Brief) {
-  $lanpm = @(Get-LanpmViteProcesses).Count -gt 0
+  $lanpmUrl = Read-DevUrl
+  $lanpmPort = $null
+  if ($lanpmUrl -match ':(\d+)$') { $lanpmPort = $Matches[1] }
+  if ($lanpmUrl -and (Test-DevRunning)) {
+    Write-Host "  LanPM  ->  $lanpmUrl"
+    if ($Brief -and $lanpmPort -and $lanpmPort -ne '5173') {
+      Write-Host '  (avoided :5173; another Vite process is using it)'
+    }
+  }
+
   $found = $false
-  foreach ($port in 5173, 5174) {
+  foreach ($port in 5173, 5174, 5175) {
+    if ($lanpmPort -and "$port" -eq $lanpmPort) { continue }
     $who = Get-PortSummary $port
     if (-not $who) { continue }
     $found = $true
-    if ($lanpm -and $who -match '^(node|electron)') {
-      Write-Host "  :$port  LanPM - $who"
-    } elseif ($Brief) {
-      Write-Host "  :$port  in use - $who"
+    if ($Brief) {
+      Write-Host "  :$port  other use - $who (start/web will auto-avoid)"
     } else {
-      Write-Host "  :$port  listening - $who"
+      Write-Host "  :$port  other use - $who"
+      Write-Host '    no conflict with LanPM (strictPort: false)'
     }
   }
-  if (-not $found) { Write-Host '  5173/5174 not listening' }
+  if (-not $found -and -not $lanpmUrl) { Write-Host '  5173-5175 not listening' }
 }
 
 function Invoke-Preflight([switch]$Quiet) {
@@ -129,6 +166,7 @@ function Start-Dev([string]$Mode) {
   }
 
   $npmScript = if ($Mode -eq 'web') { 'dev:web' } else { 'dev' }
+  Clear-DevUrl
   '' | Set-Content -Path $LogFile -Encoding utf8
   Set-Content -Path $ModeFile -Value $Mode -Encoding utf8 -NoNewline
 
@@ -156,13 +194,24 @@ function Start-Dev([string]$Mode) {
   }
 
   if ((Test-PidAlive $devPid) -or (Test-DevRunning)) {
+    $devUrl = Wait-DevUrl
     Write-Host "[lanpm] started pid=$devPid ($npmScript)" -ForegroundColor Green
+    if ($devUrl) {
+      if ($Mode -eq 'web') {
+        Write-Host "[lanpm] browser preview: $devUrl" -ForegroundColor Green
+      } else {
+        Write-Host "[lanpm] renderer: $devUrl" -ForegroundColor Cyan
+      }
+    } else {
+      Write-Host '[lanpm] could not parse Vite URL from log; try status or logs' -ForegroundColor Yellow
+    }
     Write-Host '[lanpm] logs: .\onekey_run.ps1 logs' -ForegroundColor Cyan
   } else {
     Write-Host '[lanpm] start failed; see log:' -ForegroundColor Red
     if (Test-Path $LogFile) { Get-Content $LogFile -Tail 30 }
     Invoke-DiagnoseLog
     Remove-Item $PidFile, $ModeFile -ErrorAction SilentlyContinue
+    Clear-DevUrl
     exit 1
   }
 }
@@ -173,7 +222,7 @@ function Stop-Dev {
     $devPid = [int](Get-Content $PidFile -Raw).Trim()
     Write-Host "[lanpm] stopping pid=$devPid ..." -ForegroundColor Cyan
     Stop-DevTree $devPid
-    Remove-Item $PidFile, $ModeFile -ErrorAction SilentlyContinue
+    Remove-Item $PidFile, $ModeFile, $UrlFile, $PortFile -ErrorAction SilentlyContinue
   } else {
     Write-Host '[lanpm] no pid file; cleaning stray processes' -ForegroundColor Yellow
   }
@@ -181,6 +230,7 @@ function Stop-Dev {
     Write-Host '[lanpm] cleaning electron-vite processes ...' -ForegroundColor Yellow
     Stop-LanpmVite
   }
+  Clear-DevUrl
   Write-Host '[lanpm] stopped' -ForegroundColor Green
 }
 
@@ -194,11 +244,19 @@ function Show-Status {
     $devPid = if (Test-Path $PidFile) { (Get-Content $PidFile -Raw).Trim() } else { '?' }
     $mode = if (Test-Path $ModeFile) { (Get-Content $ModeFile -Raw).Trim() } else { 'electron' }
     Write-Host "[lanpm] dev: running (pid=$devPid, mode=$mode)" -ForegroundColor Green
+    $hintUrl = Read-DevUrl
+    if ($hintUrl) {
+      if ($mode -eq 'web') {
+        Write-Host "[lanpm] browser preview: $hintUrl" -ForegroundColor Green
+      } else {
+        Write-Host "[lanpm] renderer: $hintUrl" -ForegroundColor Cyan
+      }
+    }
   } else {
     Write-Host '[lanpm] dev: not running' -ForegroundColor Yellow
   }
   Write-Host ''
-  Write-Host '[lanpm] Vite ports (5173/5174):' -ForegroundColor Cyan
+  Write-Host '[lanpm] Vite ports:' -ForegroundColor Cyan
   Show-VitePorts
   Write-Host ''
   if (Test-Path $LogFile) {

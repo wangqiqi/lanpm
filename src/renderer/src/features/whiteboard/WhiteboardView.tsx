@@ -30,6 +30,7 @@ import { ViewLoadingCenter } from '@renderer/ui/ViewState'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { readCssVar } from '@renderer/ui/cssVar'
+import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
 import styles from './whiteboard.module.css'
 
 type ScenePayload = {
@@ -104,13 +105,21 @@ function base64ToBytes(b64: string): Uint8Array {
   return out
 }
 
-export default function WhiteboardView(): React.ReactElement {
+interface WhiteboardViewProps {
+  /** 聊天协作抽屉等嵌套宿主：避免 transform/尺寸未稳定导致指针偏移 */
+  embedded?: boolean
+}
+
+export default function WhiteboardView({ embedded = false }: WhiteboardViewProps): React.ReactElement {
   const { locale, t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const gid = groupId ?? ''
   const linkTaskFromUrl = searchParams.get('linkTask')?.trim() || undefined
+  const pendingLinkTaskId = useChatCollaborationStore((s) => s.pendingLinkTaskId)
+  const clearPendingLinkTaskId = useChatCollaborationStore((s) => s.clearPendingLinkTaskId)
+  const linkTaskId = linkTaskFromUrl ?? (embedded ? pendingLinkTaskId ?? undefined : undefined)
   const theme = useUiStore((s) => s.theme)
   const whiteboardZen = useUiStore((s) => s.whiteboardZen)
   const setWhiteboardZen = useUiStore((s) => s.setWhiteboardZen)
@@ -123,6 +132,7 @@ export default function WhiteboardView(): React.ReactElement {
   const [collabReady, setCollabReady] = useState(false)
 
   const apiRef = useRef<ExcalidrawImperativeAPI | null>(null)
+  const canvasHostRef = useRef<HTMLDivElement | null>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latestRef = useRef<{
     elements: readonly ExcalidrawElement[]
@@ -138,9 +148,31 @@ export default function WhiteboardView(): React.ReactElement {
 
   const langCode = locale.startsWith('zh') ? 'zh-CN' : 'en'
 
+  const refreshCanvas = useCallback((): void => {
+    apiRef.current?.refresh()
+  }, [])
+
   useEffect(() => {
     linkedTaskIdRef.current = linkedTaskId
   }, [linkedTaskId])
+
+  useEffect(() => {
+    if (!embedded || loading || !initialData) return
+    const host = canvasHostRef.current
+    if (!host) return
+    const ro = new ResizeObserver(() => {
+      refreshCanvas()
+    })
+    ro.observe(host)
+    const raf = requestAnimationFrame(() => {
+      refreshCanvas()
+      requestAnimationFrame(refreshCanvas)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+    }
+  }, [embedded, loading, initialData, boardKey, refreshCanvas])
 
   const flushSave = useCallback(async (): Promise<void> => {
     if (!gid) return
@@ -181,7 +213,7 @@ export default function WhiteboardView(): React.ReactElement {
     try {
       const api = getLanpmApi()
       const scene = await api.whiteboard.getScene(gid)
-      const nextLinked = linkTaskFromUrl ?? scene?.linkedTaskId
+      const nextLinked = linkTaskId ?? scene?.linkedTaskId
       setLinkedTaskId(nextLinked)
 
       const docState = await api.whiteboard.getDocState(gid)
@@ -244,14 +276,15 @@ export default function WhiteboardView(): React.ReactElement {
       }
 
       setBoardKey((k) => k + 1)
-      if (linkTaskFromUrl) {
+      if (linkTaskId) {
         const sceneJson = scene?.sceneJson ?? emptyWhiteboardSceneJson()
         await api.whiteboard.saveScene({
           groupId: gid,
           sceneJson,
-          linkedTaskId: linkTaskFromUrl
+          linkedTaskId: linkTaskId
         })
-        setSearchParams({}, { replace: true })
+        if (linkTaskFromUrl) setSearchParams({}, { replace: true })
+        if (embedded && pendingLinkTaskId) clearPendingLinkTaskId()
       }
     } catch (err) {
       message.error(formatError(err, 'whiteboard.saveFailed'))
@@ -260,7 +293,7 @@ export default function WhiteboardView(): React.ReactElement {
     } finally {
       setLoading(false)
     }
-  }, [gid, linkTaskFromUrl, message, formatError, setSearchParams, teardownCollab])
+  }, [gid, linkTaskId, linkTaskFromUrl, embedded, pendingLinkTaskId, clearPendingLinkTaskId, message, formatError, setSearchParams, teardownCollab])
 
   useEffect(() => {
     void loadScene()
@@ -327,6 +360,9 @@ export default function WhiteboardView(): React.ReactElement {
   const bindExcalidraw = useCallback(
     (api: ExcalidrawImperativeAPI): void => {
       apiRef.current = api
+      if (embedded) {
+        requestAnimationFrame(() => api.refresh())
+      }
       if (!collabReady || !docRef.current || !awarenessRef.current) return
       if (bindingRef.current) return
       const yElements = docRef.current.getArray<Y.Map<unknown>>(WHITEBOARD_CRDT_ELEMENTS_KEY)
@@ -338,7 +374,7 @@ export default function WhiteboardView(): React.ReactElement {
         awarenessRef.current
       )
     },
-    [collabReady]
+    [collabReady, embedded]
   )
 
   const exportPng = useCallback(async (): Promise<void> => {
@@ -441,12 +477,22 @@ export default function WhiteboardView(): React.ReactElement {
   if (!gid) return <ViewLoadingCenter />
 
   return (
-    <div className={`${styles.root} ${whiteboardZen ? styles.rootZen : ''}`}>
+    <div
+      className={`${styles.root} ${whiteboardZen ? styles.rootZen : ''} ${
+        embedded ? styles.rootEmbedded : ''
+      }`}
+    >
       <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'whiteboard' }} />
       {loading || !initialData ? (
         <ViewLoadingCenter />
       ) : (
-        <div className={styles.canvasHost} data-theme={theme} data-zen={whiteboardZen ? '1' : '0'}>
+        <div
+          ref={canvasHostRef}
+          className={styles.canvasHost}
+          data-theme={theme}
+          data-zen={whiteboardZen ? '1' : '0'}
+          data-embedded={embedded ? '1' : '0'}
+        >
           {linkedTaskLabel ? (
             <span className={styles.linkedBadge} title={linkedTaskLabel}>
               {linkedTaskLabel}

@@ -2,10 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { MessageInstance } from 'antd/es/message/interface'
 import { Navigate, useParams } from 'react-router-dom'
 import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
-import {
-  firstVisibleViewForGroup,
-  isViewVisibleForGroup
-} from '@shared/navigation/navPreferences'
+import { firstVisibleViewForGroup } from '@shared/navigation/navPreferences'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -30,25 +27,19 @@ export default function GroupViewGuard({
   const warnedRef = useRef<string | null>(null)
 
   const type = groupId ? getGroupType(groupId) : 'project'
-  const ruleAllowed = groupId ? isViewAllowedForGroup(type, view, groupId) : false
-  const prefAllowed = groupId
-    ? isViewVisibleForGroup(type, navPreferences, view, groupId)
-    : false
-  const allowed = ruleAllowed && prefAllowed
+  /** 群类型 tabRules；hiddenViews 仅影响底栏，不阻断深链 / 全屏路由（SPRINT-15 IA） */
+  const allowed = groupId ? isViewAllowedForGroup(type, view, groupId) : false
   const redirectView = groupId
     ? firstVisibleViewForGroup(type, navPreferences, groupId)
     : defaultViewForGroup(type)
-  const hiddenByPreference = ruleAllowed && !prefAllowed
 
   useEffect(() => {
     if (!groupId || allowed) return
     const key = `${groupId}:${view}`
     if (warnedRef.current === key) return
     warnedRef.current = key
-    messageRef.current.warning(
-      t(hiddenByPreference ? 'nav.viewHiddenByPreference' : 'nav.viewRedirected')
-    )
-  }, [groupId, allowed, view, t, hiddenByPreference])
+    messageRef.current.warning(t('nav.viewRedirected'))
+  }, [groupId, allowed, view, t])
 
   if (!groupId) {
     return <Navigate to="/" replace />

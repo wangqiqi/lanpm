@@ -14,8 +14,8 @@ import {
   type MessageContextMenuActionId
 } from '@shared/chat/messageContextMenu'
 import { openOpsFileInAssistant, openOpsTextInAssistant } from '@renderer/features/chat/analyzeInAssistant'
+import { openFilesCollaborationPanel } from '@renderer/features/chat/openCollaborationPanel'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import { groupViewPath } from '@renderer/routes/paths'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
@@ -110,7 +110,11 @@ function MessageBubble({
   const { message: appMessage } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
-  const { groupId, navigate, locateTask } = useChatMessageActions()
+  const { groupId, locateTask } = useChatMessageActions()
+
+  const openFileInLibrary = useCallback((fileId: string): void => {
+    openFilesCollaborationPanel(fileId)
+  }, [])
   const gid = groupId
   const deferHeavyContent = useDeferHeavyContent()
   const isRecalled = message.content.kind === 'recalled'
@@ -264,10 +268,8 @@ function MessageBubble({
           }
           break
         case 'openFile':
-          if (message.content.kind === 'file' && groupId) {
-            navigate(groupViewPath(groupId, 'files'), {
-              state: { selectFileId: message.content.fileId }
-            })
+          if (message.content.kind === 'file') {
+            openFileInLibrary(message.content.fileId)
           }
           break
         case 'analyzeInAssistant':
@@ -321,7 +323,7 @@ function MessageBubble({
     appMessage,
     locateTask,
     groupId,
-    navigate,
+    openFileInLibrary,
     onCreateTaskFromMessage,
     onLinkMessageToTask,
     onRecall,
@@ -403,9 +405,7 @@ function MessageBubble({
           data-defer-media={deferHeavyContent ? '1' : undefined}
           onClick={() => {
             if (message.content.kind !== 'file') return
-            navigate(groupViewPath(groupId, 'files'), {
-              state: { selectFileId: message.content.fileId }
-            })
+            openFileInLibrary(message.content.fileId)
           }}
         >
           <div className={styles.attachIcon}>

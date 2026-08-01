@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo } from 'react'
+import { Suspense, lazy, useMemo, useState } from 'react'
 import { Button, Drawer, Spin } from 'antd'
 import { ExpandOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -54,6 +54,9 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
 
   const open = panel != null
   const width = panel ? PANEL_WIDTH[panel] : 720
+  /** Excalidraw 须在抽屉动画结束且尺寸稳定后再挂载，否则指针与笔迹错位 */
+  const [drawerReady, setDrawerReady] = useState(false)
+  const showTallPanel = open && drawerReady && (panel === 'whiteboard' || panel === 'mindmap')
 
   const mindmapLicensed = useMemo(
     () => (mindmapPlugin ? isPluginLicenseActive(mindmapPlugin) : false),
@@ -82,10 +85,13 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
       )
     }
     if (panel === 'whiteboard') {
+      if (!showTallPanel) return <PanelFallback />
       return (
         <Suspense fallback={<PanelFallback />}>
-          <div className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall}`}>
-            <WhiteboardView />
+          <div
+            className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall} ${styles.collaborationPanelCanvas}`}
+          >
+            <WhiteboardView embedded />
           </div>
         </Suspense>
       )
@@ -93,6 +99,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
     if (!mindmapPlugin) {
       return <PanelFallback />
     }
+    if (!showTallPanel) return <PanelFallback />
     return (
       <Suspense fallback={<PanelFallback />}>
         <div className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall}`}>
@@ -110,6 +117,12 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
       className={styles.collaborationDrawer}
       title={panel ? t(panelTitleKey(panel)) : ''}
       onClose={close}
+      afterOpenChange={(visible) => {
+        setDrawerReady(visible)
+      }}
+      styles={{
+        wrapper: panel === 'whiteboard' ? { transform: 'none' } : undefined
+      }}
       extra={
         panel ? (
           <Button

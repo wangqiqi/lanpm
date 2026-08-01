@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [1.96.1] - 2026-08-01
+
+### Fixed
+
+- **聊天协作 IA follow-up（SPRINT-15）**：白板在抽屉内笔迹与指针错位（`embedded` + 动画结束后再挂载 Excalidraw）；聊天附件 / 任务附件点击文件无反应（改走 `openCollaborationPanel` + `pendingSelectFileId`）；任务「打开白板」改走协作抽屉并传递 `linkTaskId`
+- **路由守卫**：`GroupViewGuard` / `PluginViewGuard` 不再因 `hiddenViews` / `hiddenContributedRoutes` 阻断深链与「全屏编辑」逃逸路由
+
+### Added
+
+- **`openCollaborationPanel.ts`**：统一从任意视图打开文件库 / 白板 / 脑图抽屉
+- **`chatCollaborationStore`**：`pendingLinkTaskId`；`chatCollaborationStore` 单测
+- **静态门禁**：`verify:visual` IA-405～407 · `verify:nav-preferences` / `verify:nav-per-group` 守卫语义更新
+
+### Changed
+
+- **onekey 开发启动**：`onekey_run.sh` / `onekey_run.bat` / `onekey_run.ps1` 启动后从 `dev.log` 解析实际 Vite URL（端口避让后可能非 5173），写入 `.lanpm/dev.url`；`status` 显示 LanPM 当前地址，其他占用端口标注「自动避让」；新增 `scripts/onekey-dev-url.mjs`（`wait` / `read` / `clear`）
+
 ## [1.96.0] - 2026-08-01
 
 ### Added

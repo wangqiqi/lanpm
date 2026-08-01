@@ -12,7 +12,10 @@ import { memberSelectFilterOption } from '@shared/chat/matchMemberSearch'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
-import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
+import {
+  openFilesCollaborationPanel,
+  openWhiteboardCollaborationPanel
+} from '@renderer/features/chat/openCollaborationPanel'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import type { TranslateParams } from '@renderer/i18n/messages'
@@ -55,7 +58,6 @@ import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescrip
 import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
-import { whiteboardPathForTask } from '@renderer/features/whiteboard/whiteboardLink'
 import { buildAssigneeNudgeDraft } from '@shared/task/dueNudge'
 import styles from './tree.module.css'
 
@@ -869,7 +871,7 @@ export default function TaskDetailPanel({
             type="link"
             size="small"
             onClick={() => {
-              useChatCollaborationStore.getState().open('files')
+              openFilesCollaborationPanel()
               onClose()
             }}
           >
@@ -886,7 +888,7 @@ export default function TaskDetailPanel({
                   type="button"
                   className={styles.discussionItem}
                   onClick={() => {
-                    useChatCollaborationStore.getState().open('files')
+                    openFilesCollaborationPanel(fileId)
                     onClose()
                   }}
                 >
@@ -943,7 +945,7 @@ export default function TaskDetailPanel({
         <Button onClick={() => void handleDiscussInChat()}>{t('board.discussInChat')}</Button>
         <Button
           onClick={() => {
-            navigate(whiteboardPathForTask(groupId, task.taskId))
+            openWhiteboardCollaborationPanel(task.taskId)
             onClose()
           }}
         >

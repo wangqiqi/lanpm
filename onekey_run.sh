@@ -10,6 +10,9 @@ RUN_DIR="$ROOT/.lanpm"
 PID_FILE="$RUN_DIR/dev.pid"
 LOG_FILE="$RUN_DIR/dev.log"
 MODE_FILE="$RUN_DIR/dev.mode"
+URL_FILE="$RUN_DIR/dev.url"
+PORT_FILE="$RUN_DIR/dev.port"
+DEV_URL_SCRIPT="$ROOT/scripts/onekey-dev-url.mjs"
 
 VERSION='?'
 
@@ -165,6 +168,41 @@ lanpm_vite_running() {
   [[ -n "$(lanpm_vite_procs)" ]]
 }
 
+clear_dev_url() {
+  node "$DEV_URL_SCRIPT" clear 2>/dev/null || rm -f "$URL_FILE" "$PORT_FILE"
+}
+
+read_dev_url() {
+  if [[ -f "$URL_FILE" ]]; then
+    tr -d '[:space:]' <"$URL_FILE"
+    return 0
+  fi
+  local url
+  url="$(node "$DEV_URL_SCRIPT" read 2>/dev/null || true)"
+  [[ -n "$url" ]] || return 1
+  echo "$url"
+}
+
+wait_for_dev_url() {
+  local url
+  url="$(node "$DEV_URL_SCRIPT" wait --timeout=45 2>/dev/null || true)"
+  [[ -n "$url" ]] || return 1
+  echo "$url"
+}
+
+print_dev_url_hint() {
+  local mode="${1:-electron}"
+  local url
+  url="$(read_dev_url 2>/dev/null || true)"
+  [[ -n "$url" ]] || return 0
+  if [[ "$mode" == "web" ]]; then
+    ok "浏览器预览: $url"
+    info "5173 被占用时会自动避让到其他端口，请用上方地址"
+  else
+    info "Renderer: $url（Electron 窗口自动连接；web 模式请用 start:web）"
+  fi
+}
+
 port_listener_summary() {
   local port="$1"
   if ! command -v lsof >/dev/null 2>&1; then
@@ -176,32 +214,43 @@ port_listener_summary() {
 
 vite_ports_status() {
   local brief="${1:-}"
+  local lanpm_url lanpm_port
+  lanpm_url="$(read_dev_url 2>/dev/null || true)"
+  if [[ -n "$lanpm_url" ]]; then
+    lanpm_port="${lanpm_url##*:}"
+    if lanpm_vite_running || is_running 2>/dev/null; then
+      echo "  LanPM  →  $lanpm_url"
+      if [[ "$brief" == "brief" && "$lanpm_port" != "5173" ]]; then
+        echo "  （已避让 :5173，当前占用其他 Vite 进程）"
+      fi
+    fi
+  fi
+
   if ! command -v lsof >/dev/null 2>&1; then
-    echo "  (未安装 lsof，跳过端口检测)"
+    [[ -z "$lanpm_url" ]] && echo "  (未安装 lsof，跳过端口检测)"
     return 0
   fi
-  local ports="5173 5174"
+  local ports="5173 5174 5175"
   local found=0
   local lanpm_proc="no"
   lanpm_vite_running && lanpm_proc="yes"
 
   for port in $ports; do
+    [[ -n "$lanpm_port" && "$port" == "$lanpm_port" ]] && continue
     local who
     who="$(port_listener_summary "$port")"
     [[ -n "$who" ]] || continue
     found=1
-    if [[ "$lanpm_proc" == "yes" && "$who" =~ ^(node|electron) ]]; then
-      echo "  :$port  LanPM · $who"
-    elif [[ "$brief" == "brief" ]]; then
-      echo "  :$port  其他占用 · $who（非本脚本 dev，start 可能换端口）"
+    if [[ "$brief" == "brief" ]]; then
+      echo "  :$port  其他占用 · $who（start/web 将自动避让）"
     else
-      echo "  :$port  监听 · $who"
-      if [[ "$lanpm_proc" != "yes" ]]; then
-        echo "    提示: 若为 Cursor/其他 Vite，与 LanPM 无冲突时可忽略"
-      fi
+      echo "  :$port  其他占用 · $who"
+      echo "    与 LanPM 无冲突（strictPort: false 已自动避让）"
     fi
   done
-  [[ $found -eq 0 ]] && echo "  5173/5174 无监听"
+  if [[ $found -eq 0 && -z "$lanpm_url" ]]; then
+    echo "  5173–5175 无监听"
+  fi
 }
 
 menu_status_brief() {
@@ -211,6 +260,7 @@ menu_status_brief() {
     mode="electron"
     [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
     ok "dev: 运行中  pid=$p  mode=$mode"
+    print_dev_url_hint "$mode"
   else
     warn "dev: 未运行（由本脚本 start/web 启动）"
   fi
@@ -229,11 +279,12 @@ cmd_status() {
     mode="electron"
     [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
     ok "开发服务: 运行中 (pid=$p, mode=$mode)"
+    print_dev_url_hint "$mode"
   else
     warn "开发服务: 未运行"
   fi
   echo ""
-  info "Vite 端口（5173/5174）:"
+  info "Vite 端口:"
   vite_ports_status
   if ! is_running && lanpm_vite_running; then
     warn "检测到 electron-vite 在运行但未登记 pid，可执行 stop 清理"
@@ -292,6 +343,7 @@ start_dev() {
   fi
 
   : >"$LOG_FILE"
+  clear_dev_url
   echo "$mode" >"$MODE_FILE"
 
   info "启动开发模式: $mode …"
@@ -323,13 +375,25 @@ start_dev() {
   fi
 
   if pid_alive "$pid" || lanpm_vite_running; then
+    local dev_url
+    dev_url="$(wait_for_dev_url 2>/dev/null || true)"
     ok "已启动 pid=$pid ($npm_script)"
+    if [[ -n "$dev_url" ]]; then
+      if [[ "$mode" == "web" ]]; then
+        ok "浏览器预览: $dev_url"
+      else
+        info "Renderer: $dev_url"
+      fi
+    else
+      warn "未能从日志解析 Vite 地址，请稍后用 status 或 logs 查看"
+    fi
     info "查看日志: ./onekey_run.sh logs"
   else
     err "启动失败，请查看日志:"
     tail -n 30 "$LOG_FILE" 2>/dev/null || true
     diagnose_start_failure
     rm -f "$PID_FILE" "$MODE_FILE"
+    clear_dev_url
     return 1
   fi
 }
@@ -349,12 +413,14 @@ cmd_stop() {
     info "停止 pid=$p …"
     kill_tree "$p"
     rm -f "$PID_FILE" "$MODE_FILE"
+    clear_dev_url
   else
     warn "无 pid 文件，尝试清理残留进程"
   fi
   if lanpm_vite_running; then
     cleanup_stray
   fi
+  clear_dev_url
   ok "已停止"
 }
 
@@ -458,7 +524,7 @@ cmd_clean() {
   find "$ROOT" -name '*.tsbuildinfo' -delete 2>/dev/null || true
   # .lanpm：临时库、Stub 总线、视觉截图、双实例手验目录；保留目录骨架
   if [[ -d "$RUN_DIR" ]]; then
-    rm -f "$PID_FILE" "$MODE_FILE"
+    rm -f "$PID_FILE" "$MODE_FILE" "$URL_FILE" "$PORT_FILE"
     : >"$LOG_FILE" 2>/dev/null || rm -f "$LOG_FILE"
     rm -rf "$RUN_DIR/tmp" "$RUN_DIR/stub-bus" "$RUN_DIR/visual-screenshots" \
       "$RUN_DIR/dev-a" "$RUN_DIR/dev-b"

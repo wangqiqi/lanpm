@@ -11,6 +11,11 @@
   padding: 0;
 }
 
+.rootEmbedded {
+  height: 100%;
+  padding: 0;
+}
+
 /* 挂在 Excalidraw top-right：与「素材库」同排，继承 Island 变量 */
 .floatingActions {
   display: flex;
@@ -49,6 +54,13 @@
   border: none;
   border-radius: 0;
   min-height: 0;
+}
+
+.canvasHost[data-embedded='1'] {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
 }
 
 .canvasHost :global(.excalidraw) {

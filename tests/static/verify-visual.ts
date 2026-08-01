@@ -949,6 +949,7 @@ const discoverCoachmarkSrc = readFileSync(
 )
 const whiteboardCss = readFileSync(join(renderer, 'features/whiteboard/whiteboard.module.css'), 'utf8')
 const taskDetailSrc = readFileSync(join(renderer, 'features/tree/TaskDetailPanel.tsx'), 'utf8')
+const messageBubbleSrc = readFileSync(join(renderer, 'features/chat/MessageBubble.tsx'), 'utf8')
 const whiteboardTypesSrc = readFileSync(join(root, 'src/shared/whiteboard/types.ts'), 'utf8')
 const verifyM7Src = readFileSync(join(root, 'tests/runners/verify-m7.ts'), 'utf8')
 
@@ -1075,8 +1076,29 @@ assert.match(
 )
 assert.match(
   taskDetailSrc,
-  /useChatCollaborationStore/,
-  'TaskDetailPanel must open files panel via collaboration store (IA-403)'
+  /openFilesCollaborationPanel/,
+  'TaskDetailPanel must open files panel via collaboration helper (IA-403)'
+)
+assert.match(
+  taskDetailSrc,
+  /openWhiteboardCollaborationPanel/,
+  'TaskDetailPanel must open whiteboard via collaboration drawer (IA-407)'
+)
+assert.match(
+  collaborationDrawerSrc,
+  /WhiteboardView embedded/,
+  'whiteboard in drawer must use embedded mode (IA-405)'
+)
+assert.match(
+  chatCss,
+  /collaborationPanelCanvas/,
+  'chat.module.css must define collaborationPanelCanvas overflow (IA-405)'
+)
+
+assert.match(
+  messageBubbleSrc,
+  /openFilesCollaborationPanel\(fileId\)/,
+  'MessageBubble must open files via collaboration drawer with fileId (IA-406)'
 )
 
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---

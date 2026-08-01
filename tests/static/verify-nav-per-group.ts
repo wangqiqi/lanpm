@@ -44,11 +44,11 @@ assert.match(bottomNav, /resolveVisibleViews/)
 
 const guard = readFileSync(join(root, 'src/renderer/src/routes/GroupViewGuard.tsx'), 'utf8')
 assert.match(guard, /useNavPreferencesStore/)
-assert.match(guard, /isViewVisibleForGroup/)
+assert.match(guard, /isViewAllowedForGroup/)
 
 const pluginGuard = readFileSync(join(root, 'src/renderer/src/routes/PluginViewGuard.tsx'), 'utf8')
 assert.match(pluginGuard, /useNavPreferencesStore/)
-assert.match(pluginGuard, /isContributedRouteVisible/)
+assert.match(pluginGuard, /contribution\.groupTypes\.includes/)
 
 const panel = readFileSync(
   join(root, 'src/renderer/src/features/profile/NavPreferencesPanel.tsx'),

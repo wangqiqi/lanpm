@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Checkbox, Input, InputNumber, Modal, Select } from 'antd'
-import { useNavigate } from 'react-router-dom'
 import { KANBAN_COLUMN_ORDER } from '@shared/task/kanban'
 import type { Task, TaskPriority, TaskStatus } from '@shared/task/types'
 import type { TaskDetailSaveInput } from '@renderer/features/tree/TaskDetailPanel'
@@ -26,7 +25,7 @@ import { useDescriptionCaretBroadcast } from '@renderer/features/task/useDescrip
 import { useGroupTagStore } from '@renderer/stores/groupTagStore'
 import { useTaskAwarenessStore } from '@renderer/stores/taskAwarenessStore'
 import awarenessStyles from '@renderer/features/task/taskAwareness.module.css'
-import { whiteboardPathForTask } from '@renderer/features/whiteboard/whiteboardLink'
+import { openWhiteboardCollaborationPanel } from '@renderer/features/chat/openCollaborationPanel'
 import { PluginTaskSlot } from '@renderer/plugin/PluginSlot'
 
 const { TextArea } = Input
@@ -61,7 +60,6 @@ export default function TaskEditModal({
 }: TaskEditModalProps): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
-  const navigate = useNavigate()
   const members = useChatMembersStore((s) => s.membersByGroup[groupId] ?? [])
   const tagMetaRows = useGroupTagStore((s) => s.byGroup[groupId] ?? [])
   const tagOptions = useMemo(
@@ -207,7 +205,7 @@ export default function TaskEditModal({
           {task ? (
             <Button
               onClick={() => {
-                navigate(whiteboardPathForTask(groupId, task.taskId))
+                openWhiteboardCollaborationPanel(task.taskId)
                 onCancel()
               }}
             >

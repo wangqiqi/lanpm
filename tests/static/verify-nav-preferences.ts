@@ -39,12 +39,20 @@ assert.match(bottomNav, /resolveVisibleContributedRoutes/)
 assert.match(bottomNav, /useNavPreferencesStore/)
 
 const guard = readFileSync(join(root, 'src/renderer/src/routes/GroupViewGuard.tsx'), 'utf8')
-assert.match(guard, /isViewVisibleForGroup/)
-assert.match(guard, /viewHiddenByPreference/)
+assert.match(guard, /isViewAllowedForGroup/)
+assert.match(
+  guard,
+  /hiddenViews 仅影响底栏/,
+  'GroupViewGuard must not block routes hidden only in BottomNav (SPRINT-15 IA)'
+)
 
 const pluginGuard = readFileSync(join(root, 'src/renderer/src/routes/PluginViewGuard.tsx'), 'utf8')
-assert.match(pluginGuard, /isContributedRouteVisible/)
-assert.match(pluginGuard, /viewHiddenByPreference/)
+assert.match(pluginGuard, /contribution\.groupTypes\.includes/)
+assert.match(
+  pluginGuard,
+  /hiddenContributedRoutes 仅影响底栏/,
+  'PluginViewGuard must not block contributed routes hidden only in BottomNav (SPRINT-15 IA)'
+)
 
 const profile = readFileSync(join(root, 'src/renderer/src/features/profile/ProfileModal.tsx'), 'utf8')
 assert.match(profile, /NavPreferencesPanel/)
