@@ -14,6 +14,7 @@
 - **ops-p2 · `/status` GPU（TASK-1212）**：Agent `nvidia-smi` 探测首卡利用率/显存 · 无 GPU 则省略该行
 - **ops-p2 · 任务挂包（TASK-1216）**：群聊发文件时 composer 含 `#任务` 则自动写入 `Task.linkedFileIds` · 任务详情附件区可见 · 不改动 `/task` 斜杠
 - **ops-p2 · Ops 设置 UI（TASK-1217）**：Profile `lanpm.ops` Tab — 许可/启停态 · Agent 配对说明 · 本群机器只读列表 · 命令审计
+- **ops-p2 · 验收与文档（TASK-1218）**：`npm run verify:ops-p2` · `07` §38 · `06` §5 更新
 
 ## [1.94.2] - 2026-08-01
 

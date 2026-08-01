@@ -95,6 +95,7 @@
     "verify:meeting-spike": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-meeting-spike.ts",
     "verify:ops-gateway-spike": "node --experimental-strip-types tests/static/verify-ops-gateway-spike.ts",
     "verify:ops-agent": "node --experimental-strip-types tests/static/verify-ops-agent.ts",
+    "verify:ops-p2": "node --experimental-strip-types tests/static/verify-ops-p2.ts",
     "verify:meeting-plugin": "node --experimental-strip-types tests/static/verify-meeting-plugin.ts",
     "verify:meeting-mesh-poc": "node --experimental-strip-types tests/static/verify-meeting-mesh-poc.ts",
     "verify:meeting-livekit-pro": "node --experimental-strip-types tests/static/verify-meeting-livekit-pro.ts",
