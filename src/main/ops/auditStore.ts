@@ -1,12 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { app } from 'electron'
-import type { OpsAuditEntry } from '../../shared/ops/auditTypes.ts'
+import type { OpsAuditEntry, OpsWatchAuditEntry } from '../../shared/ops/auditTypes.ts'
 
 const MAX_ENTRIES = 500
+const MAX_WATCH_ENTRIES = 200
 
 type StoreFile = {
   entries: OpsAuditEntry[]
+  watchEntries?: OpsWatchAuditEntry[]
 }
 
 function storePath(): string {
@@ -53,5 +55,29 @@ export function completeOpsAuditEntry(
 export function listOpsAuditEntries(groupId?: string, limit = 50): OpsAuditEntry[] {
   const entries = readStore().entries
   const filtered = groupId ? entries.filter((e) => e.groupId === groupId) : entries
+  return filtered.slice(0, limit)
+}
+
+export function appendOpsWatchAudit(input: {
+  groupId: string
+  machineDisplayName: string
+  filePath: string
+}): void {
+  const store = readStore()
+  const watchEntries = Array.isArray(store.watchEntries) ? store.watchEntries : []
+  watchEntries.unshift({
+    id: `watch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    groupId: input.groupId,
+    machineDisplayName: input.machineDisplayName,
+    filePath: input.filePath,
+    pushedAt: new Date().toISOString()
+  })
+  store.watchEntries = watchEntries.slice(0, MAX_WATCH_ENTRIES)
+  writeStore(store)
+}
+
+export function listOpsWatchAuditEntries(groupId?: string, limit = 50): OpsWatchAuditEntry[] {
+  const watchEntries = readStore().watchEntries ?? []
+  const filtered = groupId ? watchEntries.filter((e) => e.groupId === groupId) : watchEntries
   return filtered.slice(0, limit)
 }

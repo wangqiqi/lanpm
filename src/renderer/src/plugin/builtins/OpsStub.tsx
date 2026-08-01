@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { OpsMachineRecord } from '@shared/ops/types'
+import { listOpsCommandSuggestions } from '@shared/chat/opsCommand'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import OpsProfilePanel from '@renderer/features/ops/OpsProfilePanel'
@@ -34,6 +35,7 @@ function OpsComposerHint({ groupId }: { groupId: string }): React.ReactElement {
   }, [groupId])
 
   const online = machines.filter((m) => m.online).length
+  const commandLine = listOpsCommandSuggestions().join(' · ')
   const machineLine =
     machines.length > 0
       ? t('plugin.opsComposerMachines', { online: String(online), total: String(machines.length) })
@@ -42,6 +44,8 @@ function OpsComposerHint({ groupId }: { groupId: string }): React.ReactElement {
   return (
     <Typography.Text type="secondary" className="text-xs">
       {t('plugin.opsComposerHint')}
+      <br />
+      <span>{commandLine}</span>
       <br />
       {machineLine}
     </Typography.Text>

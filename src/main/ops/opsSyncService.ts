@@ -20,7 +20,8 @@ import { OPS_SYSTEM_EVENTS } from '../../shared/ops/types.ts'
 import { executeOpsCommand } from './commandExecutor.ts'
 import {
   appendOpsAuditEntry,
-  completeOpsAuditEntry
+  completeOpsAuditEntry,
+  listOpsAuditEntries
 } from './auditStore.ts'
 import { summarizeOpsCommandLine, summarizeOpsResult } from '../../shared/ops/auditTypes.ts'
 import {
@@ -38,8 +39,11 @@ import { sendFileMessage } from '../chat/chatService.ts'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { writeFileSync, unlinkSync } from 'node:fs'
+import { refreshOutboundWatchers, shutdownOutboundWatchers } from './outboundWatchService.ts'
+import { appendTaskOpsNote } from './opsTaskLinkService.ts'
 
 const subscribedGroups = new Map<string, () => void>()
+const pendingTaskLinks = new Map<string, string>()
 
 async function publishOpsEnvelope(
   db: Database,
@@ -122,6 +126,18 @@ async function handleOpsCommandResult(db: Database, envelope: SyncEnvelope): Pro
       resultSummary: summarizeOpsResult(payload),
       completedAt: new Date().toISOString()
     })
+    const linkTaskId = pendingTaskLinks.get(payload.requestId)
+    if (linkTaskId) {
+      const auditEntry = listOpsAuditEntries(envelope.groupId, 200).find(
+        (e) => e.requestId === payload.requestId
+      )
+      appendTaskOpsNote(
+        db,
+        linkTaskId,
+        `${auditEntry?.commandLine ?? 'ops'} failed: ${payload.error ?? 'unknown'}`
+      )
+      pendingTaskLinks.delete(payload.requestId)
+    }
     await publishOpsSystem(db, envelope.groupId, OPS_SYSTEM_EVENTS.commandResult, {
       error: payload.error ?? 'ops_failed',
       requestId: payload.requestId
@@ -134,6 +150,16 @@ async function handleOpsCommandResult(db: Database, envelope: SyncEnvelope): Pro
     resultSummary: summarizeOpsResult(payload),
     completedAt: new Date().toISOString()
   })
+
+  const linkTaskId = pendingTaskLinks.get(payload.requestId)
+  pendingTaskLinks.delete(payload.requestId)
+  const auditEntry = listOpsAuditEntries(envelope.groupId, 200).find(
+    (e) => e.requestId === payload.requestId
+  )
+  const commandLine = auditEntry?.commandLine ?? 'ops command'
+  if (linkTaskId) {
+    appendTaskOpsNote(db, linkTaskId, `${commandLine} → ${summarizeOpsResult(payload)}`)
+  }
 
   if (payload.dataBase64 && payload.fileName) {
     const tmp = join(tmpdir(), `lanpm-ops-${randomUUID()}-${payload.fileName}`)
@@ -213,21 +239,26 @@ export function initOpsSyncService(db: Database): void {
   for (const group of listUserGroups(db)) {
     ensureSubscribed(db, group.groupId)
   }
+  refreshOutboundWatchers(db)
 }
 
 export function shutdownOpsSyncService(): void {
   for (const unsub of subscribedGroups.values()) unsub()
   subscribedGroups.clear()
+  shutdownOutboundWatchers()
+  pendingTaskLinks.clear()
 }
 
 export async function sendOpsCommand(
   db: Database,
   groupId: string,
-  payload: Omit<OpsCommandPayload, 'requestId' | 'groupId'>
+  payload: Omit<OpsCommandPayload, 'requestId' | 'groupId'> & { linkTaskId?: string }
 ): Promise<{ requestId: string }> {
   const requestId = `ops_${randomUUID()}`
-  const full: OpsCommandPayload = { ...payload, requestId, groupId }
+  const { linkTaskId, ...commandPayload } = payload
+  const full: OpsCommandPayload = { ...commandPayload, requestId, groupId }
   const status = getSetupStatus(db)
+  if (linkTaskId) pendingTaskLinks.set(requestId, linkTaskId)
   appendOpsAuditEntry({
     requestId,
     groupId,
@@ -237,7 +268,8 @@ export async function sendOpsCommand(
     command: payload.command,
     commandLine: summarizeOpsCommandLine(payload.command, payload.args),
     issuedAt: new Date().toISOString(),
-    status: 'pending'
+    status: 'pending',
+    linkTaskId
   })
   await publishOpsEnvelope(db, groupId, 'ops_command', full)
   return { requestId }
@@ -286,6 +318,7 @@ export async function registerLocalOpsAgent(
     })
     ensureSubscribed(db, groupId)
   }
+  refreshOutboundWatchers(db)
   return record
 }
 

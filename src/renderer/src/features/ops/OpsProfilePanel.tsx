@@ -6,6 +6,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import OpsAuditPanel from './OpsAuditPanel'
 import OpsGatewayPanel from './OpsGatewayPanel'
+import OpsAssistantPanel from './OpsAssistantPanel'
 
 const { Text, Paragraph, Title } = Typography
 
@@ -116,6 +117,10 @@ export default function OpsProfilePanel({ plugin, groupId }: Props): React.React
           ]}
         />
       )}
+
+      <Divider />
+
+      <OpsAssistantPanel groupId={groupId} pluginEnabled={plugin.enabled} />
 
       <Divider />
 

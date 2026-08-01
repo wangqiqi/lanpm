@@ -37,6 +37,7 @@ import { showOpenDialog } from '../systemDialog'
 import { readFileSync, existsSync } from 'node:fs'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
 import { initOpsSyncService, shutdownOpsSyncService, listOpsMachines, publishOpsInbound } from '../ops/opsSyncService'
+import { scheduleOpsBotReply } from '../ops/opsBotService.ts'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import {
   initJoinRequestService,
@@ -258,6 +259,7 @@ export function listDmPreviews(db: Database): DmMessagePreview[] {
 
 export interface PublishChatMessageOptions {
   replyToMsgId?: string
+  senderOverride?: { userId: string; deviceId: string }
 }
 
 export async function publishChatMessage(
@@ -286,11 +288,13 @@ export async function publishChatMessage(
     ? listAnonymousMessages(groupId).length + 1
     : getMaxLamportTs(db, groupId) + 1
   const now = new Date().toISOString()
+  const senderUserId = options?.senderOverride?.userId ?? status.user.userId
+  const senderDeviceId = options?.senderOverride?.deviceId ?? status.device.deviceId
   const msg: ChatMessage = {
     msgId: `msg_${randomUUID()}`,
     groupId,
-    senderUserId: status.user.userId,
-    senderDeviceId: status.device.deviceId,
+    senderUserId,
+    senderDeviceId,
     type,
     content,
     lamportTs,
@@ -383,7 +387,7 @@ export async function sendTextMessage(
   if (!trimmed) throwLanpm('stub.messageEmpty')
   const members = await listGroupMembers(db, groupId)
   const mentions = parseMentions(trimmed, members)
-  return publishChatMessage(
+  const msg = await publishChatMessage(
     db,
     groupId,
     'text',
@@ -391,6 +395,10 @@ export async function sendTextMessage(
     mentions,
     options
   )
+  if (mentions.length > 0) {
+    scheduleOpsBotReply(db, groupId, trimmed, mentions)
+  }
+  return msg
 }
 
 /** Extension API v0.6 — markdown body as text message (renderer renders markdown). */

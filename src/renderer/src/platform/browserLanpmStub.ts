@@ -2205,6 +2205,16 @@ export function createBrowserLanpmStub(): LanpmApi {
       sendSlash: async () => ({ requestId: 'stub-ops' }),
       listMachines: async () => [],
       listAudit: async () => [],
+      getGroupSettings: async (groupId) => ({
+        groupId,
+        assistantEnabled: false,
+        watchEnabled: false
+      }),
+      updateGroupSettings: async (groupId, patch) => ({
+        groupId,
+        assistantEnabled: patch.assistantEnabled ?? false,
+        watchEnabled: patch.watchEnabled ?? false
+      }),
       getGatewayStatus: async () => ({
         running: false,
         host: '127.0.0.1',

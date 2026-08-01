@@ -4,6 +4,32 @@
 
 ## [Unreleased]
 
+## [1.101.0] - 2026-08-01
+
+### Added
+
+- **Ops Phase 2 剩余（ops-p2-remaining）**：群级 **Ops 助手 Bot**（`deviceKind: bot` · `@Ops` L2 短答 ≤500 字 · `meta.source: ops-bot`）；**出站 watch**（`chokidar` · 30s/文件节流 · 默认关）；**任务挂包深化**（`/deploy` 与命令结果写入任务 description）；Profile `OpsAssistantPanel`；`verify:ops-p2-remaining`（TASK-1801～1810）
+
+### Changed
+
+- **`docs/07_插件与扩展.md`** §8.2 / §38 Phase 2 剩余 ✅ · **`docs/06_ROADMAP.md`** §5 行 4
+
+## [1.100.1] - 2026-08-01
+
+### Fixed
+
+- **思维导图（开发态）**：`mindElixirLoader` 改用 Vite 可解析的 `import('mind-elixir')`；抽屉内嵌布局占满高度；`postinstall` 自动安装 `plugins/lanpm.mindmap` 可选依赖
+
+### Changed
+
+- **日历**：推断排期提示条（`calendar.inferredHint`）
+- **数据存储**：Profile 面板分区标题与备份说明文案
+- **会议工具栏**：Popover 详情区 Lite/Pro 状态与参会者列表 i18n
+
+### Removed
+
+- **lanpm.formjs（Advanced Form / form-js）**：移除可购表单 POC 插件及 `@bpmn-io/form-js` 子包、`FormJsView`/`FormJsPoc` 内置 UI、`verify:formjs-plugin`；任务详情默认不再出现干扰性扩展表单
+
 ## [1.100.0] - 2026-08-01
 
 ### Added

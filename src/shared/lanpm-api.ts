@@ -335,12 +335,21 @@ export interface LanpmApi {
     setSeeds: (seeds: string[]) => Promise<DiscoverSnapshot>
   }
   ops: {
-    sendSlash: (groupId: string, text: string) => Promise<{ requestId: string }>
+    sendSlash: (
+      groupId: string,
+      text: string,
+      options?: { linkTaskId?: string }
+    ) => Promise<{ requestId: string }>
     listMachines: (groupId: string) => Promise<import('./ops/types').OpsMachineRecord[]>
     listAudit: (
       groupId?: string,
       limit?: number
     ) => Promise<import('./ops/auditTypes').OpsAuditEntry[]>
+    getGroupSettings: (groupId: string) => Promise<import('./ops/groupSettings').OpsGroupSettings>
+    updateGroupSettings: (
+      groupId: string,
+      patch: import('./ops/groupSettings').OpsGroupSettingsPatch
+    ) => Promise<import('./ops/groupSettings').OpsGroupSettings>
     getGatewayStatus: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
     startGateway: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
     stopGateway: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>

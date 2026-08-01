@@ -14,6 +14,15 @@ export type OpsAuditEntry = {
   status: OpsAuditStatus
   resultSummary?: string
   completedAt?: string
+  linkTaskId?: string
+}
+
+export type OpsWatchAuditEntry = {
+  id: string
+  groupId: string
+  machineDisplayName: string
+  filePath: string
+  pushedAt: string
 }
 
 export function summarizeOpsCommandLine(command: OpsCommandName, args?: string[]): string {

@@ -273,9 +273,13 @@ const api: LanpmApi = {
     setSeeds: (seeds) => ipcRenderer.invoke('discover:setSeeds', seeds)
   },
   ops: {
-    sendSlash: (groupId, text) => ipcRenderer.invoke(OPS_IPC.sendSlash, groupId, text),
+    sendSlash: (groupId, text, options) =>
+      ipcRenderer.invoke(OPS_IPC.sendSlash, groupId, text, options),
     listMachines: (groupId) => ipcRenderer.invoke(OPS_IPC.listMachines, groupId),
     listAudit: (groupId, limit) => ipcRenderer.invoke(OPS_IPC.listAudit, groupId, limit),
+    getGroupSettings: (groupId) => ipcRenderer.invoke(OPS_IPC.getGroupSettings, groupId),
+    updateGroupSettings: (groupId, patch) =>
+      ipcRenderer.invoke(OPS_IPC.updateGroupSettings, groupId, patch),
     getGatewayStatus: () => ipcRenderer.invoke(OPS_IPC.getGatewayStatus),
     startGateway: () => ipcRenderer.invoke(OPS_IPC.startGateway),
     stopGateway: () => ipcRenderer.invoke(OPS_IPC.stopGateway),

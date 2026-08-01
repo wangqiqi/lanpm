@@ -637,12 +637,16 @@ export default function ChatView(): React.ReactElement {
     const opsCmd = parseOpsCommand(text)
     if (opsCmd) {
       setDraft('')
+      const linkTaskId = taskAllowed
+        ? resolveComposerTaskLink(text, tasks, pickedTaskRefIdRef.current)
+        : undefined
       try {
-        await getLanpmApi().ops.sendSlash(gid, text)
+        await getLanpmApi().ops.sendSlash(gid, text, linkTaskId ? { linkTaskId } : undefined)
         message.success(t('chat.opsCommandSent'))
       } catch (err) {
         message.error(formatError(err, 'chat.opsCommandFailed'))
       }
+      pickedTaskRefIdRef.current = null
       return
     }
 
@@ -1297,6 +1301,7 @@ export default function ChatView(): React.ReactElement {
                     </div>
                   </>
                 )}
+                <div className={styles.toolbarGroupDivider} aria-hidden />
                 <div className={styles.toolbarMeetingGroup} data-visual-meeting="toolbar">
                   <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
                 </div>

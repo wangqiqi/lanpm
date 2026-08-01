@@ -41,3 +41,22 @@ export function isOpsCommandDraft(text: string): boolean {
   }
   return /^@\S+\s+\//.test(t)
 }
+
+/** Composer `/` 草稿命令补全提示 */
+export function suggestOpsSlashCompletion(draft: string): string | null {
+  const trimmed = draft.trimStart()
+  if (!trimmed.startsWith('/')) return null
+  const parts = trimmed.split(/\s+/)
+  if (parts.length > 1) return null
+  const partial = (parts[0] ?? '').slice(1).toLowerCase()
+  if (!partial) return null
+  const matches = OPS_COMMAND_NAMES.filter((n) => n.startsWith(partial))
+  if (matches.length === 1 && matches[0] !== partial) return `/${matches[0]}`
+  return null
+}
+
+export function listOpsCommandSuggestions(partialCommand?: string): string[] {
+  const p = (partialCommand ?? '').toLowerCase()
+  if (!p) return [...OPS_COMMAND_NAMES].map((n) => `/${n}`)
+  return OPS_COMMAND_NAMES.filter((n) => n.startsWith(p)).map((n) => `/${n}`)
+}

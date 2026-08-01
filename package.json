@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.100.0",
+  "version": "1.101.0",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -97,6 +97,7 @@
     "verify:ops-agent": "node --experimental-strip-types tests/static/verify-ops-agent.ts",
     "verify:ops-p2": "node --experimental-strip-types tests/static/verify-ops-p2.ts",
     "verify:ops-p3": "node --experimental-strip-types tests/static/verify-ops-p3.ts",
+    "verify:ops-p2-remaining": "node --experimental-strip-types tests/static/verify-ops-p2-remaining.ts",
     "verify:meeting-plugin": "node --experimental-strip-types tests/static/verify-meeting-plugin.ts",
     "verify:meeting-mesh-poc": "node --experimental-strip-types tests/static/verify-meeting-mesh-poc.ts",
     "verify:meeting-livekit-pro": "node --experimental-strip-types tests/static/verify-meeting-livekit-pro.ts",
@@ -111,7 +112,6 @@
     "verify:extension-api-v0.4": "node --experimental-strip-types tests/static/verify-extension-api-v0.4.ts",
     "verify:extension-api-v0.5": "node --experimental-strip-types tests/static/verify-extension-api-v0.5.ts",
     "verify:extension-api-v0.6": "node --experimental-strip-types tests/static/verify-extension-api-v0.6.ts",
-    "verify:formjs-plugin": "node --experimental-strip-types tests/static/verify-formjs-plugin.ts",
     "verify:contributions-views": "node --experimental-strip-types tests/static/verify-contributions-views.ts",
     "verify:plugin-market-spike": "node --experimental-strip-types tests/static/verify-plugin-market-spike.ts",
     "verify:offline-license-cli": "node --experimental-strip-types tests/static/verify-offline-license-cli.ts",
@@ -219,6 +219,7 @@
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.9",
     "better-sqlite3": "^12.10.0",
+    "chokidar": "^3.6.0",
     "electron-screenshots": "^0.6.1",
     "node-pty": "^1.1.0",
     "react": "^18.3.1",

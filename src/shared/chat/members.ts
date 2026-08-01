@@ -10,7 +10,7 @@ export type GroupMemberView = {
   mentionKeys?: string[]
   /** 按 userId 聚合的在线态（M2-05） */
   presence?: UserPresence
-  /** 运维机器成员 */
-  deviceKind?: 'human' | 'machine'
+  /** 运维机器 / 助手 Bot 成员 */
+  deviceKind?: 'human' | 'machine' | 'bot'
   deviceId?: string
 }

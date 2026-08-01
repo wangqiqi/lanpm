@@ -9,6 +9,12 @@ import { getAggregatedUserPresence } from '../presence/presenceRegistry'
 import { getNetworkTransport } from '../network'
 import { getGroupById, listGroupMembers as listDbGroupMembers, resolveGroupType } from '../group/groupService'
 import { listOpsMachines, machineUserId } from '../ops/opsSyncService.ts'
+import {
+  OPS_BOT_DISPLAY_NAME,
+  OPS_BOT_MENTION_KEYS,
+  OPS_BOT_USER_ID
+} from '../../shared/ops/bot.ts'
+import { getOpsGroupSettings } from '../ops/opsGroupSettingsStore.ts'
 import { getUserById } from '../storage/repositories/userRepository'
 
 /** 非匿名群占位成员，便于 @提及联调 */
@@ -25,7 +31,7 @@ function resolvePresence(userId: string, localUserId?: string): UserPresence {
 
 function withPresence(members: GroupMemberView[], localUserId?: string): GroupMemberView[] {
   return members.map((m) => {
-    if (m.deviceKind === 'machine') {
+    if (m.deviceKind === 'machine' || m.deviceKind === 'bot') {
       return { ...m, presence: m.presence ?? 'offline' }
     }
     return {
@@ -136,8 +142,23 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
     })
   }
 
+  const opsSettings = getOpsGroupSettings(groupId)
+  if (opsSettings.assistantEnabled) {
+    members.set(OPS_BOT_USER_ID, {
+      userId: OPS_BOT_USER_ID,
+      displayName: OPS_BOT_DISPLAY_NAME,
+      mentionKeys: [...OPS_BOT_MENTION_KEYS],
+      deviceKind: 'bot',
+      presence: 'online'
+    })
+  }
+
   return withPresence([...members.values()], localUserId).sort((a, b) => {
-    const rank = (m: GroupMemberView): number => (m.deviceKind === 'machine' ? 1 : 0)
+    const rank = (m: GroupMemberView): number => {
+      if (m.deviceKind === 'bot') return 2
+      if (m.deviceKind === 'machine') return 1
+      return 0
+    }
     const dr = rank(a) - rank(b)
     if (dr !== 0) return dr
     return a.displayName.localeCompare(b.displayName)
@@ -145,6 +166,7 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
 }
 
 export function getMemberDisplayName(db: Database, groupId: string, userId: string): string {
+  if (userId === OPS_BOT_USER_ID) return OPS_BOT_DISPLAY_NAME
   if (isDmGroupId(groupId)) {
     const user = getUserById(db, userId)
     return user?.displayName ?? userId

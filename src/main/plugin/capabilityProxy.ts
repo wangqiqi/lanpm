@@ -332,7 +332,9 @@ export async function invokePluginCapability(
       if (!text.trim()) throw new Error('text required')
       const parsed = parseOpsCommand(text)
       if (!parsed) throw new Error('ops_invalid_command')
-      return sendOpsSlashCommand(db, groupId, parsed)
+      return sendOpsSlashCommand(db, groupId, parsed, text, {
+        linkTaskId: typeof args.linkTaskId === 'string' ? args.linkTaskId : undefined
+      })
     }
     default: {
       const _exhaustive: never = capability
