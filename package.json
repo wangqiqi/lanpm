@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.102.0",
+  "version": "1.102.1",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -158,6 +158,7 @@
     "verify:e2e-discover": "node --experimental-strip-types tests/runners/verify-e2e-discover.ts",
     "verify:e2e-pairing": "node --experimental-strip-types tests/runners/verify-e2e-pairing.ts",
     "verify:e2e-views": "node --experimental-strip-types tests/runners/verify-e2e-views.ts",
+    "verify:e2e-views-expand": "node --experimental-strip-types tests/runners/verify-e2e-views-expand.ts",
     "verify:ci-e2e-nightly": "node --experimental-strip-types tests/static/verify-ci-e2e-nightly.ts",
     "verify:verify-debt": "node --experimental-strip-types tests/runners/verify-verify-debt.ts",
     "verify:verify-debt-static": "node --experimental-strip-types tests/static/verify-verify-debt.ts",

@@ -11,9 +11,11 @@ import {
   dismissAllModals,
   openDemoProjectView,
   clickBottomNavTab,
+  openCollaborationDrawer,
+  waitForCollabPanelReady,
   DEMO_PROJECT_GROUP_ID
 } from './setup.ts'
-import type { E2eTabView } from './setup.ts'
+import type { E2eTabView, CollabPanel } from './setup.ts'
 import { closeElectronApp, launchLanpmElectron, prepareLanpmPage } from './lanpmElectron.ts'
 
 export type ElectronFixtures = {
@@ -72,6 +74,8 @@ export {
   dismissAllModals,
   openDemoProjectView,
   clickBottomNavTab,
+  openCollaborationDrawer,
+  waitForCollabPanelReady,
   DEMO_PROJECT_GROUP_ID
 }
-export type { E2eTabView }
+export type { E2eTabView, CollabPanel }

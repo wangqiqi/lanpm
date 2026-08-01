@@ -72,7 +72,9 @@ async function resetDiscoverPairingPanel(page: Page): Promise<void> {
 
 export const DEMO_PROJECT_GROUP_ID = 'demo-project'
 
-export type E2eTabView = 'chat' | 'board' | 'tree'
+export type E2eTabView = 'chat' | 'board' | 'tree' | 'gantt' | 'calendar'
+
+export type CollabPanel = 'files' | 'whiteboard' | 'mindmap'
 
 /** 直达示例项目群某底栏 Tab（依赖 E2E 启动时 `ensureSeedGroups` 注入 demo-project）。 */
 export async function openDemoProjectView(page: Page, view: E2eTabView): Promise<void> {
@@ -80,6 +82,16 @@ export async function openDemoProjectView(page: Page, view: E2eTabView): Promise
   await page.evaluate((h) => {
     window.location.hash = h
   }, hash)
+
+  if (view === 'gantt') {
+    await expect(page.getByTestId('gantt-island-surface')).toBeVisible({ timeout: 60_000 })
+    return
+  }
+  if (view === 'calendar') {
+    await expect(page.getByTestId('calendar-island-surface')).toBeVisible({ timeout: 60_000 })
+    return
+  }
+
   await expect(page.getByTestId(`nav-tab-${view}`)).toHaveAttribute('aria-current', 'page', {
     timeout: 60_000
   })
@@ -105,4 +117,36 @@ export async function openDiscoverModal(page: Page): Promise<void> {
   await discover.click()
   await expect(dialog).toBeVisible()
   await resetDiscoverPairingPanel(page)
+}
+
+/** 聊天协作抽屉：深链到 chat 后调用 visualCapture 同款 API（SPIKE-2401）。 */
+export async function openCollaborationDrawer(page: Page, panel: CollabPanel): Promise<void> {
+  await openDemoProjectView(page, 'chat')
+  await page.evaluate((p) => {
+    window.__lanpmVisualCapture?.openCollaborationPanel(p)
+  }, panel)
+  await expect(page.locator('.ant-drawer-open')).toBeVisible({ timeout: 60_000 })
+  await page.waitForFunction(
+    (p) => document.documentElement.dataset.visualCollabDrawer === p,
+    panel,
+    { timeout: 60_000 }
+  )
+}
+
+export async function waitForCollabPanelReady(page: Page, panel: CollabPanel): Promise<void> {
+  const drawer = page.locator('.ant-drawer-open')
+  if (panel === 'files') {
+    await expect(drawer.locator('[data-visual-surface="files"]')).toBeVisible({
+      timeout: 60_000
+    })
+    return
+  }
+  if (panel === 'whiteboard') {
+    await expect(drawer.locator('.excalidraw')).toBeVisible({ timeout: 90_000 })
+    await expect(drawer.getByTestId('whiteboard-island-surface')).toBeVisible({
+      timeout: 90_000
+    })
+    return
+  }
+  await expect(drawer.getByTestId('mindmap-toolbar')).toBeVisible({ timeout: 120_000 })
 }
