@@ -4,6 +4,7 @@ import { app } from 'electron'
 import type { PluginLicenseGrant, PluginLicenseStatus, PluginLicenseStore } from '../../shared/plugin/licenseTypes.ts'
 import { PLUGIN_LICENSES_FILE } from '../../shared/plugin/sideloadFormat.ts'
 import { isSignedPluginLicense } from '../../shared/plugin/licenseCanonical.ts'
+import { shouldBypassPaidPluginLicense } from '../../shared/plugin/licenseDevBypass.ts'
 import { extractGrantsFromSignedLicense } from './licenseVerify.ts'
 
 function licensesPath(): string {
@@ -49,13 +50,25 @@ function grantIsActive(grant: PluginLicenseGrant, now = Date.now()): boolean {
   return grant.features.includes('license.feature') || grant.features.length > 0
 }
 
+function isDevUnpackagedApp(): boolean {
+  try {
+    return !app.isPackaged
+  } catch {
+    return false
+  }
+}
+
 export function isPluginLicensed(pluginId: string, now = Date.now()): boolean {
+  if (shouldBypassPaidPluginLicense() || isDevUnpackagedApp()) return true
   const grant = readLicenseStore().grants.find((g) => g.pluginId === pluginId)
   if (!grant) return false
   return grantIsActive(grant, now)
 }
 
 export function getPluginLicenseStatus(pluginId: string, now = Date.now()): PluginLicenseStatus {
+  if (shouldBypassPaidPluginLicense() || isDevUnpackagedApp()) {
+    return { pluginId, licensed: true, features: ['license.feature'] }
+  }
   const grant = readLicenseStore().grants.find((g) => g.pluginId === pluginId)
   if (!grant) {
     return { pluginId, licensed: false, features: [] }
@@ -92,6 +105,7 @@ export function assertPaidPluginLicensed(
   pricing: 'free' | 'paid'
 ): void {
   if (pricing !== 'paid') return
+  if (shouldBypassPaidPluginLicense() || isDevUnpackagedApp()) return
   if (!isPluginLicensed(pluginId)) {
     throw new Error(`license required for paid plugin: ${pluginId}`)
   }

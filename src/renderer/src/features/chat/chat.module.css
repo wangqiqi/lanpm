@@ -601,7 +601,7 @@
   margin-right: 4px;
   padding: 0 4px;
   border-radius: 3px;
-  font-size: 10px;
+  font-size: var(--lanpm-font-tab);
   font-weight: 500;
   line-height: 16px;
   vertical-align: middle;

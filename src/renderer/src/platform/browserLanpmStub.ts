@@ -50,6 +50,7 @@ import { isGroupTagColor, normalizeGroupTagKey } from '@shared/task/groupTagMeta
 import type { SaveWhiteboardSceneInput, WhiteboardScene } from '@shared/whiteboard/types'
 import { buildWhiteboardScene, emptyWhiteboardSceneJson, normalizeSceneJson } from '@shared/whiteboard/types'
 import type { PluginView } from '@shared/plugin/types'
+import { shouldBypassPaidPluginLicense } from '@shared/plugin/licenseDevBypass'
 import { getDisallowedTaskPatchFields } from '@shared/plugin/taskPatchWhitelist'
 import {
   isHumanReviewCapability,
@@ -175,6 +176,7 @@ function writeStubPluginLicenses(map: Record<string, { features: string[]; expir
 }
 
 function isStubPluginLicensed(pluginId: string): boolean {
+  if (shouldBypassPaidPluginLicense()) return true
   const grant = readStubPluginLicenses()[pluginId]
   if (!grant) return false
   if (grant.expiresAt != null && grant.expiresAt <= Date.now()) return false

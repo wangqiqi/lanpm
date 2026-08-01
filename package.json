@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.95.0",
+  "version": "1.95.1",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -11,10 +11,10 @@
     "lanpm": "scripts/lanpm.mjs"
   },
   "scripts": {
-    "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs",
+    "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs",
     "dev": "node scripts/dev-run.mjs",
     "dev:web": "node scripts/dev-run.mjs --web",
-    "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs",
+    "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs",
     "build": "electron-vite build",
     "prepreview": "node scripts/ensure-native-deps.mjs",
     "preview": "electron-vite preview",

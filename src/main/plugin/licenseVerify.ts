@@ -6,12 +6,11 @@ import {
 } from '../../shared/plugin/sideloadFormat.ts'
 import { canonicalizeLicensePayload, isSignedPluginLicense } from '../../shared/plugin/licenseCanonical.ts'
 import { LICENSE_ISSUER_PUBLIC_KEY_PEM } from './licenseKeys.ts'
+import { shouldBypassPaidPluginLicense } from '../../shared/plugin/licenseDevBypass.ts'
 import { getLocalMachineId } from './machineId.ts'
 
 export function shouldSkipLicenseVerify(): boolean {
-  if (process.env.LANPM_LICENSE_SKIP_VERIFY === '1') return true
-  if (process.env.NODE_ENV === 'test') return true
-  return false
+  return shouldBypassPaidPluginLicense()
 }
 
 function parseSignedLicense(raw: unknown): SignedPluginLicense | null {
