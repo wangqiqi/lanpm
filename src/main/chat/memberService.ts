@@ -24,10 +24,15 @@ function resolvePresence(userId: string, localUserId?: string): UserPresence {
 }
 
 function withPresence(members: GroupMemberView[], localUserId?: string): GroupMemberView[] {
-  return members.map((m) => ({
-    ...m,
-    presence: resolvePresence(m.userId, localUserId)
-  }))
+  return members.map((m) => {
+    if (m.deviceKind === 'machine') {
+      return { ...m, presence: m.presence ?? 'offline' }
+    }
+    return {
+      ...m,
+      presence: resolvePresence(m.userId, localUserId)
+    }
+  })
 }
 
 /** 本地 users 表已知头像；peer 尚未同步时可为 undefined（UI 确定性兜底） */
@@ -131,9 +136,12 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
     })
   }
 
-  return withPresence([...members.values()], localUserId).sort((a, b) =>
-    a.displayName.localeCompare(b.displayName)
-  )
+  return withPresence([...members.values()], localUserId).sort((a, b) => {
+    const rank = (m: GroupMemberView): number => (m.deviceKind === 'machine' ? 1 : 0)
+    const dr = rank(a) - rank(b)
+    if (dr !== 0) return dr
+    return a.displayName.localeCompare(b.displayName)
+  })
 }
 
 export function getMemberDisplayName(db: Database, groupId: string, userId: string): string {

@@ -57,6 +57,18 @@ for (const cap of opsCaps) {
 const chatView = readFileSync(join(root, 'src/renderer/src/features/chat/ChatView.tsx'), 'utf8')
 assert.match(chatView, /parseOpsCommand/)
 
+const memberList = readFileSync(join(root, 'src/renderer/src/features/chat/MemberList.tsx'), 'utf8')
+assert.match(memberList, /isMachineMember/)
+assert.match(memberList, /MachineMemberAvatar/)
+assert.match(memberList, /memberRowMachineOffline/)
+
+const memberKind = readFileSync(join(root, 'src/shared/chat/memberKind.ts'), 'utf8')
+assert.match(memberKind, /deviceKind === 'machine'/)
+
+const memberService = readFileSync(join(root, 'src/main/chat/memberService.ts'), 'utf8')
+assert.match(memberService, /deviceKind: 'machine'/)
+assert.match(memberService, /m\.deviceKind === 'machine'/)
+
 assert.match(networkTypes, /ops_command/)
 assert.match(networkTypes, /ops_inbound/)
 assert.match(roadmap, /verify:ops-agent/)

@@ -4,6 +4,7 @@ import UserAvatar from '@renderer/ui/UserAvatar'
 import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
+import { isMachineMember } from '@shared/chat/memberKind'
 import type { Task } from '@shared/task/types'
 import {
   buildMessageContextMenuActions,
@@ -153,7 +154,7 @@ function MessageBubble({
         onClick: () => onViewSender?.(senderMember)
       }
     ]
-    if (dmAllowed && onDmSender) {
+    if (dmAllowed && onDmSender && senderMember && !isMachineMember(senderMember)) {
       items.push({
         key: 'dm',
         label: t('chat.startDm'),

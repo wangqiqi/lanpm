@@ -1,10 +1,12 @@
 import { Modal, Typography } from 'antd'
 import type { GroupMemberView } from '@shared/chat/members'
+import { isMachineMember } from '@shared/chat/memberKind'
 import { presenceEmoji } from '@shared/presence'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { presenceMessageKey } from '@renderer/i18n/presence'
 import RegionButton from '@renderer/ui/RegionButton'
 import UserAvatar from '@renderer/ui/UserAvatar'
+import MachineMemberAvatar from '@renderer/features/chat/MachineMemberAvatar'
 
 const { Text } = Typography
 
@@ -29,10 +31,12 @@ export default function MemberProfileModal({
 }: MemberProfileModalProps): React.ReactElement {
   const { t } = useI18n()
   const presence = member?.presence ?? 'offline'
+  const isMachine = member != null && isMachineMember(member)
+  const online = presence === 'online'
 
   return (
     <Modal
-      title={t('chat.memberProfileTitle')}
+      title={isMachine ? t('chat.memberMachineProfileTitle') : t('chat.memberProfileTitle')}
       open={open && member != null}
       onCancel={onClose}
       footer={null}
@@ -41,14 +45,21 @@ export default function MemberProfileModal({
       {member ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <UserAvatar
-              size={48}
-              displayName={member.displayName}
-              userId={member.userId}
-              avatarUrl={member.avatarUrl}
-            />
+            {isMachine ? (
+              <MachineMemberAvatar size={48} online={online} />
+            ) : (
+              <UserAvatar
+                size={48}
+                displayName={member.displayName}
+                userId={member.userId}
+                avatarUrl={member.avatarUrl}
+              />
+            )}
             <div>
               <Text strong style={{ fontSize: 16 }}>
+                {isMachine ? (
+                  <span style={{ marginRight: 6 }}>{t('chat.memberMachine')}</span>
+                ) : null}
                 {member.displayName}
                 {isSelf ? t('common.me') : ''}
               </Text>
@@ -60,10 +71,12 @@ export default function MemberProfileModal({
             </div>
           </div>
           <div>
-            <Text type="secondary">{t('chat.memberUserId')}</Text>
+            <Text type="secondary">
+              {isMachine ? t('chat.memberDeviceId') : t('chat.memberUserId')}
+            </Text>
             <div>
-              <Text code copyable={{ text: member.userId }}>
-                {member.userId}
+              <Text code copyable={{ text: isMachine ? member.deviceId ?? member.userId : member.userId }}>
+                {isMachine ? member.deviceId ?? member.userId : member.userId}
               </Text>
             </div>
           </div>
@@ -79,7 +92,7 @@ export default function MemberProfileModal({
                 {t('chat.mentionMember', { name: member.displayName })}
               </RegionButton>
             ) : null}
-            {!isSelf && dmAllowed && onStartDm ? (
+            {!isSelf && dmAllowed && onStartDm && !isMachine ? (
               <RegionButton
                 variant="toolbar"
                 onClick={() => {

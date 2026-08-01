@@ -3,6 +3,7 @@ import { Input, List, Typography } from 'antd'
 import { MessageOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { GroupMemberView } from '@shared/chat/members'
+import { isMachineMember } from '@shared/chat/memberKind'
 import { matchesMemberSearch } from '@shared/chat/matchMemberSearch'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
@@ -16,6 +17,7 @@ import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { presenceMessageKey } from '@renderer/i18n/presence'
 import UserAvatar from '@renderer/ui/UserAvatar'
+import MachineMemberAvatar from '@renderer/features/chat/MachineMemberAvatar'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -108,32 +110,51 @@ export default function MemberList({
         }}
         renderItem={(member) => {
           const isSelf = member.userId === currentUserId
+          const isMachine = isMachineMember(member)
           const presence = member.presence ?? 'offline'
           const displayLabel = resolveMemberDisplayName(member.displayName, t)
+          const online = presence === 'online'
+          const rowClass = [
+            styles.memberRow,
+            isMachine && !online ? styles.memberRowMachineOffline : ''
+          ]
+            .filter(Boolean)
+            .join(' ')
           return (
             <List.Item className={styles.memberItem}>
-              <div className={styles.memberRow}>
+              <div className={rowClass}>
                 <button
                   type="button"
                   className={styles.memberBtn}
                   onClick={() => onInsertMention(member.displayName)}
-                  title={`@${displayLabel} · ${t(presenceMessageKey(presence))}`}
+                  title={
+                    isMachine
+                      ? `@${displayLabel} · ${t('chat.memberMachine')} · ${t(presenceMessageKey(presence))}`
+                      : `@${displayLabel} · ${t(presenceMessageKey(presence))}`
+                  }
                 >
                   <span className={styles.memberAvatarWrap} aria-hidden>
-                    <UserAvatar
-                      size={24}
-                      displayName={displayLabel}
-                      userId={member.userId}
-                      avatarUrl={member.avatarUrl}
-                    />
+                    {isMachine ? (
+                      <MachineMemberAvatar size={24} online={online} />
+                    ) : (
+                      <UserAvatar
+                        size={24}
+                        displayName={displayLabel}
+                        userId={member.userId}
+                        avatarUrl={member.avatarUrl}
+                      />
+                    )}
                     <span className={styles.memberPresenceBadge}>{presenceEmoji(presence)}</span>
                   </span>
                   <span className={styles.memberName}>
+                    {isMachine ? (
+                      <span className={styles.memberMachineBadge}>{t('chat.memberMachine')}</span>
+                    ) : null}
                     {displayLabel}
                     {isSelf ? t('common.me') : ''}
                   </span>
                 </button>
-                {!isSelf && !isDm && dmAllowed && (
+                {!isSelf && !isDm && dmAllowed && !isMachine && (
                   <button
                     type="button"
                     className={styles.dmBtn}

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **ops-p2 · 机器成员 UX（TASK-1210）**：成员列表/资料/提及 — `deviceKind: machine` 云服务器图标 · 「机器」标签 · 离线灰显 · 隐藏对机器的私聊入口；`memberService` 保留机器 presence 且人类排序优先；i18n `chat.memberMachine*`
+
 ## [1.94.2] - 2026-08-01
 
 ### Changed

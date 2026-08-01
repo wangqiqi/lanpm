@@ -561,6 +561,43 @@
   background: var(--lanpm-fill-secondary);
 }
 
+.memberRowMachineOffline {
+  opacity: 0.62;
+}
+
+.memberMachineIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--lanpm-radius-sm);
+  background: var(--lanpm-fill-secondary);
+  color: var(--lanpm-accent);
+  flex-shrink: 0;
+}
+
+.memberMachineIconOffline {
+  color: var(--lanpm-text-tertiary);
+  background: var(--lanpm-fill-tertiary);
+}
+
+.memberMachineBadge {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 16px;
+  vertical-align: middle;
+  color: var(--lanpm-accent);
+  background: color-mix(in srgb, var(--lanpm-accent) 12%, transparent);
+}
+
+.mentionMachineTag {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-tertiary);
+}
+
 .dmBtn {
   flex-shrink: 0;
   border: none;

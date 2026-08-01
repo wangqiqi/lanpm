@@ -1,4 +1,5 @@
 import type { GroupMemberView } from '@shared/chat/members'
+import { isMachineMember } from '@shared/chat/memberKind'
 import styles from './chat.module.css'
 
 interface MentionSuggestProps {
@@ -29,6 +30,9 @@ export default function MentionSuggest({
           }}
         >
           @{member.displayName}
+          {isMachineMember(member) ? (
+            <span className={styles.mentionMachineTag}> 🖥</span>
+          ) : null}
         </button>
       ))}
     </div>
