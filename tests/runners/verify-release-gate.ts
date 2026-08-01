@@ -18,6 +18,7 @@ const steps = [
   'npm run verify:pack-license',
   'npm run verify:docs-code -- --strict',
   'npm run verify:visual',
+  'npm run verify:release-screenshots-policy',
   'npm run verify:profile-panel',
   'npm run verify:discover',
   'npm run verify:pairing-code',
@@ -33,3 +34,9 @@ for (const cmd of steps) {
 }
 
 console.log('\nverify:release-gate: all passed')
+console.log(
+  'NOTE (TASK-1221): before tagging, run locally:\n' +
+    '  npm run build && npm run verify:visual-screenshots\n' +
+    '  Linux: npm run build && xvfb-run -a npm run verify:visual-screenshots\n' +
+    '  See docs/05 §1.3.1'
+)

@@ -176,6 +176,7 @@
     "verify:screenshots-sync": "node --experimental-strip-types tests/static/verify-screenshots-sync.ts",
     "verify:project": "node --experimental-strip-types tests/runners/verify-project.ts",
     "verify:release-gate": "node --experimental-strip-types tests/runners/verify-release-gate.ts",
+    "verify:release-screenshots-policy": "node --experimental-strip-types tests/static/verify-release-screenshots-policy.ts",
     "verify:m7-acceptance": "node --experimental-strip-types tests/static/verify-m7-acceptance.ts",
     "verify:m7-stability": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-m7-stability.ts",
     "verify:m7-perf": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-m7-perf.ts",

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **视觉截图发版策略（TASK-1221）**：`verify:visual-screenshots` 不进 CI / `verify:release-gate`；打 tag 前本地必跑（`docs/05` §1.3.1 · Linux `xvfb-run`）；新增 `verify:release-screenshots-policy` 静态守卫
+
 ## [1.96.1] - 2026-08-01
 
 ### Fixed
