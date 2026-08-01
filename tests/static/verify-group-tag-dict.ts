@@ -17,7 +17,7 @@ import { TASK_IPC, GROUP_TAG_META_PUSH_CHANNEL } from '../../src/shared/task/cha
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
-assert.equal(SCHEMA_VERSION, 6)
+assert.ok(SCHEMA_VERSION >= 6, `SCHEMA_VERSION must be >= 6, got ${SCHEMA_VERSION}`)
 assert.ok(EXPECTED_TABLES.includes('group_tag_meta'))
 
 assert.equal(normalizeGroupTagKey('  API '), 'api')
@@ -116,4 +116,4 @@ assert.doesNotMatch(detailPanel, /mode="tags"/)
 const zh = readFileSync(join(projectRoot, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
 assert.match(zh, /board\.tagsEmptyDictHint/)
 
-console.log('verify:group-tag-dict OK (protocol · schema v6 · sync · UI · force-dict)')
+console.log(`verify:group-tag-dict OK (protocol · schema v${SCHEMA_VERSION} · sync · UI · force-dict)`)

@@ -28,7 +28,7 @@ import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
 
 const root = projectRoot
 
-assert.equal(SCHEMA_VERSION, 11)
+assert.ok(SCHEMA_VERSION >= 11, `SCHEMA_VERSION must be >= 11, got ${SCHEMA_VERSION}`)
 assert.ok(EXPECTED_TABLES.includes('sync_outbox'))
 
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
@@ -55,7 +55,7 @@ try {
   const db = new Database(join(dir, 'lanpm.db'))
   db.pragma('foreign_keys = ON')
   applyMigrations(db)
-  assert.equal(db.pragma('user_version', { simple: true }), 11)
+  assert.equal(db.pragma('user_version', { simple: true }), SCHEMA_VERSION)
 
   const t0 = Date.parse('2026-07-11T12:00:00.000Z')
   const first = enqueueSyncOutbox(db, {

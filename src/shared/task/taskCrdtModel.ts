@@ -3,9 +3,9 @@
  * Pure helpers — no SQLite / Electron.
  */
 import * as Y from 'yjs'
-import type { Task } from './types'
-import { normalizeTaskTags } from './tags'
-import { normalizeLinkedFileIds } from './linkedFiles'
+import type { Task } from './types.ts'
+import { normalizeTaskTags } from './tags.ts'
+import { normalizeLinkedFileIds } from './linkedFiles.ts'
 
 export const TASK_CRDT_TASKS_KEY = 'tasks'
 

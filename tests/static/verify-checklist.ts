@@ -8,6 +8,7 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 import { checklistProgressOf } from '../../src/shared/task/checklist.ts'
 import { TASK_IPC } from '../../src/shared/task/channels.ts'
+import { EXPECTED_TABLES, SCHEMA_VERSION } from '../../src/main/storage/schema.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -20,10 +21,9 @@ assert.equal(
   'task:createSubtaskFromChecklistItem'
 )
 
-const schemaTs = readFileSync(join(root, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*11/)
-assert.match(schemaTs, /task_checklists/)
-assert.match(schemaTs, /task_checklist_items/)
+assert.ok(SCHEMA_VERSION >= 9, `SCHEMA_VERSION must be >= 9, got ${SCHEMA_VERSION}`)
+assert.ok(EXPECTED_TABLES.includes('task_checklists'))
+assert.ok(EXPECTED_TABLES.includes('task_checklist_items'))
 
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
 assert.match(schemaSql, /CREATE TABLE task_checklists/)
@@ -61,4 +61,4 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 assert.ok(pkg.scripts?.['verify:checklist'], 'missing verify:checklist script')
 
-console.log('verify:checklist OK (schema v9 · IPC · UI · progress · subtask)')
+console.log(`verify:checklist OK (schema v${SCHEMA_VERSION} · IPC · UI · progress · subtask)`)

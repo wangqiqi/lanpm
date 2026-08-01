@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [1.101.3] - 2026-08-01
+
+### Fixed
+
+- **verify-debt（SPIKE-1310）**：`verify:checklist` · `message-task` · `group-tag-dict` · `sync-outbox` 去 SCHEMA_VERSION 硬编码，改 `EXPECTED_TABLES` / 下限断言
+- **task-crdt 集成**：`taskCrdtModel.ts` ESM import（`./tags.ts` · `./linkedFiles.ts`）；`verify:task-crdt*` 三脚本恢复绿
+
+### Added
+
+- **`verify:verify-debt`**：聚合 7 脚本 · `verify:verify-debt-static` 静态门禁
+- **docs/05** §1.2.6b
+
 ## [1.101.2] - 2026-08-01
 
 ### Added

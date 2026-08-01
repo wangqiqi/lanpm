@@ -8,14 +8,15 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 import { collectTaskDiscussions } from '../../src/shared/task/discussions.ts'
 import { TASK_IPC } from '../../src/shared/task/channels.ts'
+import { EXPECTED_TABLES, SCHEMA_VERSION } from '../../src/main/storage/schema.ts'
 import type { ChatMessage } from '../../src/shared/chat/types.ts'
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 assert.ok(TASK_IPC.listDiscussions === 'task:listDiscussions')
 
-const schemaTs = readFileSync(join(projectRoot, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*11/)
+assert.ok(SCHEMA_VERSION >= 8, `SCHEMA_VERSION must be >= 8, got ${SCHEMA_VERSION}`)
+assert.ok(EXPECTED_TABLES.includes('tasks'))
 
 const schemaSql = readFileSync(join(projectRoot, 'src/main/storage/schema.sql'), 'utf8')
 assert.match(schemaSql, /source_msg_id/)
@@ -87,4 +88,4 @@ assert.ok(pkg.scripts?.['verify:message-task'], 'package.json missing verify:mes
 const docs01 = readFileSync(join(projectRoot, 'docs/01_产品需求文档.md'), 'utf8')
 assert.match(docs01, /消息↔任务|建任务/)
 
-console.log('verify:message-task OK (schema v8 · IPC · UI hooks · discussions)')
+console.log(`verify:message-task OK (schema v${SCHEMA_VERSION} · IPC · UI hooks · discussions)`)
