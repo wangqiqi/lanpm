@@ -60,16 +60,17 @@ function GroupTabOverflowSlot({
 }: {
   groupId: string
   view: AppView | string
-}): React.ReactElement {
+}): React.ReactElement | null {
   const { t } = useI18n()
   const plugins = useSlotPlugins('group.tab.overflow')
   const [open, setOpen] = useState(false)
   const context = useMemo(() => ({ groupId, view }), [groupId, view])
 
+  if (plugins.length === 0) return null
+
   return (
     <span className={styles.tabSlot} data-plugin-slot="group.tab.overflow">
-      {plugins.length > 0 ? (
-        <Dropdown
+      <Dropdown
           open={open}
           onOpenChange={setOpen}
           trigger={['click']}
@@ -92,7 +93,6 @@ function GroupTabOverflowSlot({
             <span className={styles.label}>{t('nav.tabOverflow')}</span>
           </button>
         </Dropdown>
-      ) : null}
     </span>
   )
 }

@@ -37,6 +37,11 @@ const bottomNav = readFileSync(join(root, 'src/renderer/src/layout/BottomNav.tsx
 assert.match(bottomNav, /resolveVisibleViews/)
 assert.match(bottomNav, /resolveVisibleContributedRoutes/)
 assert.match(bottomNav, /useNavPreferencesStore/)
+assert.match(
+  bottomNav,
+  /if \(plugins\.length === 0\) return null/,
+  'GroupTabOverflowSlot must not render empty tabSlot when overflow has no plugins (IA-409)'
+)
 
 const guard = readFileSync(join(root, 'src/renderer/src/routes/GroupViewGuard.tsx'), 'utf8')
 assert.match(guard, /isViewAllowedForGroup/)
