@@ -9,7 +9,6 @@ import { fileURLToPath } from 'url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
-assert.ok(existsSync(join(root, 'docs/specs/014-topbar-network-idle/spec.md')))
 assert.ok(existsSync(join(root, 'src/renderer/src/layout/useNetworkIdlePoll.ts')))
 
 const hook = readFileSync(join(root, 'src/renderer/src/layout/useNetworkIdlePoll.ts'), 'utf8')

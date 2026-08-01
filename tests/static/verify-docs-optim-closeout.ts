@@ -1,5 +1,5 @@
 /**
- * TASK-1128 — Docs optim closeout guards.
+ * TASK-1128 — Chat-perf docs closeout guards.
  * Run: npm run verify:docs-optim-closeout
  */
 import assert from 'node:assert/strict'
@@ -9,25 +9,22 @@ import { fileURLToPath } from 'url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
-assert.ok(
-  existsSync(join(root, 'docs/specs/010-docs-optim-closeout/spec.md')),
-  'missing spec'
-)
+assert.ok(existsSync(join(root, 'docs/decisions/chat-perf.md')), 'missing docs/decisions/chat-perf.md')
+assert.ok(!existsSync(join(root, 'docs/优化.md')), 'docs/优化.md must not remain in docs/')
 
-const optim = readFileSync(join(root, 'docs/优化.md'), 'utf8')
-assert.match(optim, /最后对齐.*v1\.83\.0–v1\.87\.0/)
-assert.match(optim, /\| 状态 \|/)
-assert.match(optim, /历史评审快照/)
-assert.match(optim, /chat-perf-store-hooks/)
-assert.match(optim, /verify:docs-optim-closeout/)
-assert.match(optim, /v1\.88\.0.*docs-optim-closeout/)
+const decision = readFileSync(join(root, 'docs/decisions/chat-perf.md'), 'utf8')
+assert.match(decision, /v1\.93/)
+assert.match(decision, /verify:chat-perf/)
 
 const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
-assert.match(roadmap, /v1\.83–v1\.87 已交付/)
 assert.ok(!roadmap.includes('Sprint 候选 `chat-perf`'), 'ROADMAP must not list stale chat-perf sprint')
+assert.ok(!roadmap.includes('[优化.md]'), 'ROADMAP must not link docs/优化.md')
+assert.ok(!roadmap.includes('.cursorGrowth/archive'), 'ROADMAP must not link archive paths')
 
 const nav = readFileSync(join(root, 'docs/00_文档导航.md'), 'utf8')
-assert.match(nav, /backlog SSOT/)
+assert.ok(!nav.includes('[优化.md]'), 'nav must not list docs/优化.md')
+assert.match(nav, /decisions\//)
+assert.ok(!nav.includes('[.cursorGrowth/archive'), 'nav must not link archive paths')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

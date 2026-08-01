@@ -8,43 +8,17 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
+const decisionPath = join(root, 'docs/decisions/chat-perf.md')
 
-const requiredFiles = [
-  'docs/specs/009-chat-perf-observe/spec.md',
-  'docs/templates/chat-perf-regression.md',
-  'docs/chat-perf-baseline.md'
-]
+assert.ok(existsSync(decisionPath), 'missing docs/decisions/chat-perf.md')
+assert.ok(!existsSync(join(root, 'docs/优化.md')), 'docs/优化.md must not remain in docs/')
 
-for (const f of requiredFiles) {
-  assert.ok(existsSync(join(root, f)), `missing ${f}`)
-}
-
-const spec = readFileSync(join(root, 'docs/specs/009-chat-perf-observe/spec.md'), 'utf8')
-assert.match(spec, /## Budget/)
-assert.match(spec, /§10\.4/)
-assert.match(spec, /verify:chat-perf-observe/)
-assert.match(spec, /chat-perf-observe/)
-assert.match(spec, /800ms/)
-assert.match(spec, /500ms/)
-
-const regression = readFileSync(
-  join(root, 'docs/templates/chat-perf-regression.md'),
-  'utf8'
-)
-assert.match(regression, /packaged/i)
-assert.match(regression, /500/)
-assert.match(regression, /Performance/)
-assert.match(regression, /Memory/)
-assert.match(regression, /chat-perf-baseline/)
-
-const baseline = readFileSync(join(root, 'docs/chat-perf-baseline.md'), 'utf8')
-assert.match(baseline, /v1\.86/)
-assert.match(baseline, /历史记录/)
-assert.match(baseline, /009-chat-perf-observe/)
-
-const optim = readFileSync(join(root, 'docs/优化.md'), 'utf8')
-assert.match(optim, /verify:chat-perf-observe/)
-assert.match(optim, /009-chat-perf-observe/)
+const decision = readFileSync(decisionPath, 'utf8')
+assert.match(decision, /v1\.83\.0.*v1\.93\.0/)
+assert.match(decision, /800ms/)
+assert.match(decision, /500ms/)
+assert.match(decision, /verify:chat-perf-observe/)
+assert.match(decision, /Worker/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

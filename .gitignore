@@ -35,7 +35,7 @@ build/
 out/
 *.tsbuildinfo
 
-# Super Cursor 项目特化（plan / learn / archive）— 本地 only
+# Super Cursor 项目特化（plan / learn / archive）— 本地 only，不纳入 Git
 .cursorGrowth/
 
 # 勿在仓库根重建 archive/（SSOT：.cursorGrowth/archive，见 workflow.json archive_dir）

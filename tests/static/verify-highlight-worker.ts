@@ -10,16 +10,15 @@ import { fileURLToPath } from 'url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 for (const f of [
-  'docs/specs/016-highlight-worker/spec.md',
   'src/renderer/src/features/chat/highlight.worker.ts',
-  'src/renderer/src/features/chat/highlightCore.ts'
+  'src/renderer/src/features/chat/highlightCore.ts',
+  'docs/decisions/chat-perf.md'
 ]) {
   assert.ok(existsSync(join(root, f)), `missing ${f}`)
 }
 
-const spec = readFileSync(join(root, 'docs/specs/016-highlight-worker/spec.md'), 'utf8')
-assert.match(spec, /highlight\.worker\.ts/)
-assert.match(spec, /highlightCodeAsync/)
+const decision = readFileSync(join(root, 'docs/decisions/chat-perf.md'), 'utf8')
+assert.match(decision, /Worker/)
 
 const worker = readFileSync(
   join(root, 'src/renderer/src/features/chat/highlight.worker.ts'),

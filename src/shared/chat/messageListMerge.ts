@@ -1,6 +1,6 @@
 import type { ChatMessage } from './types'
 
-/** Renderer 侧每群内存软上限（`docs/优化.md` §6 序 7） */
+/** Renderer 侧每群内存软上限（chat-perf v1.84 · 见 docs/decisions/chat-perf.md） */
 export const CHAT_MEMORY_WINDOW = 2000
 
 export function compareChatMessages(a: ChatMessage, b: ChatMessage): number {

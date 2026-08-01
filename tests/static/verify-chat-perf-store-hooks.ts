@@ -9,7 +9,6 @@ import { fileURLToPath } from 'url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
-assert.ok(existsSync(join(root, 'docs/specs/012-chat-perf-store-hooks/spec.md')))
 assert.ok(existsSync(join(root, 'src/renderer/src/features/chat/chatStoreActions.ts')))
 
 const actions = readFileSync(

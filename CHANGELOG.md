@@ -2,20 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [Unreleased]
+
 ## [1.93.0] - 2026-08-01
 
 ### Added
 
 - **Worker 代码高亮（highlight-worker）**：`highlight.worker.ts` · `highlightCodeAsync` · `CodeBlock` async UI
-- **`docs/specs/016-highlight-worker/spec.md`**
 - **`verify:highlight-worker`** — 静态守卫 + `tests/unit/chat/highlightSetup.test.ts`
+- **`docs/decisions/chat-perf.md`** — chat-perf 主序列（v1.83–v1.93）决策摘要
 
 ### Changed
 
 - **`highlightSetup` / `highlightCore`**：同步 `highlightCode` 保留；LRU/50k 上限迁入 `highlightCore`
 - **`CodeBlock`**：`useEffect` + `AbortController` 异步高亮；加载态 `codeBlockHighlightLoading`
-- **`docs/优化.md`** · **`06_ROADMAP.md`** — Worker 高亮标 ✅ v1.93.0
-- **`verify:chat-perf-follow`** · **`verify:chat-perf-p3`** — 对齐 dm-preview / highlight-worker 落点
+- **`06_ROADMAP.md`** — 聊天性能主序列标 ✅；指针改 `docs/decisions/chat-perf.md`
+- **`verify:chat-perf*`** · **`verify:docs-optim-closeout`** — 守卫代码落点 + `docs/decisions/`；`docs/` 不再保留 `优化.md`
+- **chat-perf 文档分层**：全文迁入本地 `.cursorGrowth/archive/chat-perf/`（不进 Git）；`docs/00_文档导航.md` · `README.md` 同步
 
 ## [1.92.1] - 2026-08-01
 

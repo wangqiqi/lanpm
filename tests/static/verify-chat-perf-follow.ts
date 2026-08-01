@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 for (const f of [
-  'docs/specs/006-chat-perf-follow/spec.md',
   'src/shared/chat/messageListMerge.ts',
   'tests/unit/chat/messageListMerge.test.ts'
 ]) {

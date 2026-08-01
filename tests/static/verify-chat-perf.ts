@@ -14,8 +14,7 @@ for (const f of [
   'src/renderer/src/plugin/pluginSlotCache.ts',
   'src/renderer/src/features/chat/ChatPluginMenusProvider.tsx',
   'src/renderer/src/features/chat/chatVirtualRows.ts',
-  'src/renderer/src/features/chat/ChatVirtualMessageList.tsx',
-  'docs/specs/005-chat-perf/spec.md'
+  'src/renderer/src/features/chat/ChatVirtualMessageList.tsx'
 ]) {
   assert.ok(existsSync(join(root, f)), `missing ${f}`)
 }
