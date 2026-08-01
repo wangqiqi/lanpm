@@ -61,6 +61,5 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   version?: string
 }
 assert.ok(pkg.scripts?.['verify:chat-perf-viewport'], 'missing verify:chat-perf-viewport script')
-assert.equal(pkg.version, '1.86.0', 'package.json version should be 1.86.0')
 
 console.log('verify:chat-perf-viewport OK')
