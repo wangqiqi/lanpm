@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.92.0] - 2026-08-01
+
+### Added
+
+- **顶栏网络空闲门控（topbar-network-idle）**：`useNetworkIdlePoll` — Page Visibility 跳过 hidden tick · visible 补刷
+- **`docs/specs/014-topbar-network-idle/spec.md`**
+- **`verify:topbar-network-idle`** — 静态守卫 TopBar 无裸 8s interval
+
+### Changed
+
+- **`TopBar`**：网络状态轮询改 `useNetworkIdlePoll`（对齐 `MemberList` presence 模式）
+- **`docs/优化.md`** §1 / §5 P3 顶栏轮询标 ✅ v1.92.0
+
 ## [1.91.0] - 2026-08-01
 
 ### Added

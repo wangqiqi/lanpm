@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Dropdown,
   Popover,
@@ -58,6 +58,7 @@ import { matchesGroupSearch } from '@shared/group/matchGroupSearch'
 import { sortGroupsForSwitcher } from '@shared/group/sortGroups'
 import logoUrl from '@resources/logo.svg'
 import styles from './TopBar.module.css'
+import { useNetworkIdlePoll } from '@renderer/layout/useNetworkIdlePoll'
 
 const { Text } = Typography
 
@@ -158,11 +159,17 @@ export default function TopBar(): React.ReactElement {
     ackDiscoverCoachmark()
   }
 
-  useEffect(() => {
+  const refreshNetworkOnMount = useCallback(() => {
     void refreshNetwork()
-    const timer = setInterval(() => void refreshNetwork({ silent: true }), 8000)
-    return () => clearInterval(timer)
   }, [refreshNetwork])
+  const refreshNetworkSilent = useCallback(() => {
+    void refreshNetwork({ silent: true })
+  }, [refreshNetwork])
+
+  useNetworkIdlePoll({
+    onMount: refreshNetworkOnMount,
+    onTick: refreshNetworkSilent
+  })
 
   useEffect(() => {
     refreshGroupActivity()

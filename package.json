@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.91.0",
+  "version": "1.92.0",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -135,6 +135,7 @@
     "verify:m0": "npm run verify:storage && npm run verify:suffix && npm run verify:network-stub && npm run verify:peer-registry",
     "verify:routes": "node --experimental-strip-types tests/static/verify-routes.ts",
     "verify:topbar": "node --experimental-strip-types tests/static/verify-topbar.ts",
+    "verify:topbar-network-idle": "node --experimental-strip-types tests/static/verify-topbar-network-idle.ts",
     "verify:profile-panel": "node --experimental-strip-types tests/static/verify-profile-panel.ts",
     "verify:discover": "node --experimental-strip-types tests/static/verify-discover.ts",
     "verify:discover-help": "node --experimental-strip-types tests/static/verify-discover-help.ts",
