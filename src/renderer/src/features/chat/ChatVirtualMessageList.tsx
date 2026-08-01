@@ -38,7 +38,7 @@ export default function ChatVirtualMessageList({
     getScrollElement: () => listRef.current,
     estimateSize: (index) => estimateVirtualRowSize(rows[index]!),
     overscan: 8,
-    getItemKey: (index) => virtualRowKey(rows[index]!, index)
+    getItemKey: (index) => virtualRowKey(rows[index]!)
   })
 
   const scrollOffset = virtualizer.scrollOffset

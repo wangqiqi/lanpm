@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/useMeetingRecording.ts')))
-assert.ok(existsSync(join(root, 'docs/specs/003-meeting-ux-next/spec.md')))
 
 const hook = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/useMeetingRecording.ts'),

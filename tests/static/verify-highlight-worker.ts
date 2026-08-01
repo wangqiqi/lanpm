@@ -11,14 +11,16 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 for (const f of [
   'src/renderer/src/features/chat/highlight.worker.ts',
-  'src/renderer/src/features/chat/highlightCore.ts',
-  'docs/decisions/chat-perf.md'
+  'src/renderer/src/features/chat/highlightCore.ts'
 ]) {
   assert.ok(existsSync(join(root, f)), `missing ${f}`)
 }
 
-const decision = readFileSync(join(root, 'docs/decisions/chat-perf.md'), 'utf8')
-assert.match(decision, /Worker/)
+const decisionPath = join(root, '.cursorGrowth/decisions/chat-perf.md')
+if (existsSync(decisionPath)) {
+  const decision = readFileSync(decisionPath, 'utf8')
+  assert.match(decision, /Worker/)
+}
 
 const worker = readFileSync(
   join(root, 'src/renderer/src/features/chat/highlight.worker.ts'),

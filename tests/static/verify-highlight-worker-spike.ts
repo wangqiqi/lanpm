@@ -11,9 +11,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const spikePath = join(root, '.cursorGrowth/archive/chat-perf/specs/015-highlight-worker-spike/spike.md')
 
 // spike 全文在本地 archive；CI 只验决策摘要与代码落点
-assert.ok(existsSync(join(root, 'docs/decisions/chat-perf.md')))
-const decision = readFileSync(join(root, 'docs/decisions/chat-perf.md'), 'utf8')
-assert.match(decision, /Worker/)
+const decisionPath = join(root, '.cursorGrowth/decisions/chat-perf.md')
+if (existsSync(decisionPath)) {
+  const decision = readFileSync(decisionPath, 'utf8')
+  assert.match(decision, /Worker/)
+}
 
 if (existsSync(spikePath)) {
   const spike = readFileSync(spikePath, 'utf8')

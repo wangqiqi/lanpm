@@ -3,13 +3,11 @@
  * Run: npm run verify:meeting-productization
  */
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
-
-assert.ok(existsSync(join(root, 'docs/specs/011-meeting-productization/spec.md')))
 
 const copy = readFileSync(join(root, 'src/shared/media/meetingReminderCopy.ts'), 'utf8')
 assert.match(copy, /meetingReminderTitle/)

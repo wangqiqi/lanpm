@@ -27,7 +27,7 @@ export function buildChatVirtualRows(
   return rows
 }
 
-export function virtualRowKey(row: ChatVirtualRow, index: number): string {
+export function virtualRowKey(row: ChatVirtualRow): string {
   if (row.kind === 'loadOlder') return 'load-older'
   if (row.kind === 'day') return `day:${row.dayKey}`
   return `msg:${row.message.msgId}`

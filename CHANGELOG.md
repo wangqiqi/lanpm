@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [1.93.1] - 2026-08-01
+
+### Changed
+
+- **`docs/specs/`** · **`docs/decisions/`** → `.cursorGrowth/specs/` · `.cursorGrowth/decisions/`（本地，不进 Git）
+- **`workflow.json`** `sdd.specs_dir` → `.cursorGrowth/specs`
+- **`verify:*`** — 入库守卫只验代码；Growth 文档存在时可选本地校验
+- **lint** — 移除未使用 import/变量（会议排期 · chat 虚拟列表 · PluginSlot）
+
 ## [1.93.0] - 2026-08-01
 
 ### Added

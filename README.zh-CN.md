@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.93.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.93.1-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -115,7 +115,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.93.0`** — Worker 异步代码高亮；聊天性能主序列闭合（v1.83–v1.93）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.93.1`** — SDD spec/决策迁入 `.cursorGrowth/`；chat-perf 守卫更新。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

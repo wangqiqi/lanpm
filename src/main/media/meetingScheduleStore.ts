@@ -7,7 +7,6 @@ import {
   normalizeMeetingSchedule,
   sortSchedulesByStart,
   validateCreateMeetingScheduleInput,
-  type CreateMeetingScheduleInput,
   type MeetingSchedule
 } from '../../shared/media/meetingSchedule.ts'
 

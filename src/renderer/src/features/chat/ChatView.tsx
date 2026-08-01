@@ -199,7 +199,7 @@ export default function ChatView(): React.ReactElement {
     x: number
     y: number
   } | null>(null)
-  const [hiddenRevision, setHiddenRevision] = useState(0)
+  const hiddenIds = useMemo(() => listHiddenMessageIds(gid), [gid])
   const pinnedIds = useChatPinStore((s) => s.pinnedByGroup[gid] ?? [])
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
@@ -244,11 +244,6 @@ export default function ChatView(): React.ReactElement {
   const messagesReady = !loading || messages.length > 0
   const { isHighlighted: isMsgHighlighted } = useSearchHighlight('msg', messagesReady)
   const { jumpToMessage, isJumpHighlighted } = useMessageJumpHighlight()
-
-  const hiddenIds = useMemo(() => {
-    void hiddenRevision
-    return listHiddenMessageIds(gid)
-  }, [gid, hiddenRevision])
 
   const visibleMessages = useMemo(
     () => filterVisibleMessages(gid, messages, hiddenIds),

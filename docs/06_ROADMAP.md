@@ -215,5 +215,5 @@
 | 依赖 / 开源选型 | [02](./02_技术实现建议.md) §16 · [01](./01_产品需求文档.md) §14 |
 | 开源替换债务 | 本节 **§5.1** |
 | 插件架构 | [插件开发.md](./插件开发.md) |
-| 聊天性能（已交付 v1.83–v1.93） | [decisions/chat-perf.md](./decisions/chat-perf.md) |
+| 聊天性能（已交付 v1.83–v1.93） | `CHANGELOG` `[1.83.0]`–`[1.93.0]` · 本地 `.cursorGrowth/decisions/chat-perf.md` |
 | Sprint 执行 | `.cursorGrowth/plan.md`（本地） |

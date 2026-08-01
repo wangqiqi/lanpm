@@ -9,7 +9,6 @@ import type {
   PluginZoneHostProps,
   ViewPluginContext
 } from '@shared/plugin/viewHost'
-import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
 import PluginErrorBoundary from './PluginErrorBoundary'
 import { resolvePluginComponent } from './registry'

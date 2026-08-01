@@ -53,10 +53,6 @@ assert.ok(
   existsSync(join(root, 'src/main/plugin/capabilityPendingStore.ts')),
   'missing capabilityPendingStore.ts'
 )
-assert.ok(
-  existsSync(join(root, 'docs/specs/002-extension-api-v0.4/spec.md')),
-  'missing v0.4 spec'
-)
 
 const channels = readFileSync(join(root, 'src/shared/plugin/channels.ts'), 'utf8')
 assert.match(channels, /confirmCapability/)

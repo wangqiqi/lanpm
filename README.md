@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.93.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.93.1-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -95,7 +95,7 @@ First launch runs a short setup wizard, then opens the demo group at `#/g/demo-p
 ```bash
 npm run lint && npm run typecheck && npm run test
 npm run verify:p0          # guards (IPC, i18n, docs, screenshots layout)
-npm run verify:chat-perf-observe  # chat perf decision doc + static guards (see docs/decisions/chat-perf.md)
+npm run verify:chat-perf-observe  # chat perf code guards (+ local .cursorGrowth/decisions if present)
 npm run verify:m7          # full RC regression before release
 npm run build
 ```
@@ -104,7 +104,7 @@ npm run build
 |-------|------|
 | README images | `npm run screenshots:capture` → `npm run screenshots:sync-readme` ([docs/screenshots](./docs/screenshots/README.md)) |
 | Acceptance | **Electron** (`npm run dev`) is source of truth — not browser stub (`npm run dev:web`) |
-| Chat perf QA | Budget → `docs/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
+| Chat perf QA | Budget in local `.cursorGrowth/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
 
 Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — details in [`.cursor/`](./.cursor/).
@@ -117,7 +117,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.93.0`** — Worker async code highlight; chat-perf series closed (v1.83–v1.93). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.93.1`** — SDD specs/decisions in `.cursorGrowth/`; chat-perf guards updated. License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 
