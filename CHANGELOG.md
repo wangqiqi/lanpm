@@ -4,7 +4,18 @@
 
 ## [Unreleased]
 
-## [1.99.0] - 2026-08-01
+## [1.100.0] - 2026-08-01
+
+### Added
+
+- **Ops Phase 3（ops-p3）**：主进程嵌入 Gateway HTTP（`127.0.0.1` · Bearer token · `pathGuard`）；Profile 启停与 token 轮换；Web 文件浏览 `/`；可选 Web Terminal `/terminal`（`node-pty` + xterm.js，默认关）；Gateway 审计日志（TASK-1701～1710）
+- **门禁**：`verify:ops-p3`；`verify:ops-gateway-spike` 改查 `src/main/gateway/`
+
+### Changed
+
+- **`docs/07_插件与扩展.md`** §38 Phase 3 ✅ · **`docs/06_ROADMAP.md`** §5 行 5
+- **`tools/lanpm-gateway`**：re-export 主进程 `httpServer` 实现
+
 
 ### Added
 

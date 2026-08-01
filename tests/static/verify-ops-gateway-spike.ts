@@ -19,15 +19,16 @@ const featureDoc = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8'
 assert.ok(pkg.scripts?.['verify:ops-gateway-spike'], 'missing verify:ops-gateway-spike script')
 assert.ok(existsSync(join(toolRoot, 'package.json')), 'tools/lanpm-gateway/package.json')
 assert.ok(existsSync(join(toolRoot, 'src/server.ts')), 'tools/lanpm-gateway/src/server.ts')
+assert.ok(existsSync(join(root, 'src/main/gateway/httpServer.ts')), 'src/main/gateway/httpServer.ts')
 assert.ok(existsSync(join(toolRoot, 'src/pathGuard.ts')), 'tools/lanpm-gateway/src/pathGuard.ts')
 assert.ok(existsSync(join(toolRoot, 'README.md')), 'tools/lanpm-gateway/README.md')
 
-const serverSrc = readFileSync(join(toolRoot, 'src/server.ts'), 'utf8')
+const serverSrc = readFileSync(join(root, 'src/main/gateway/httpServer.ts'), 'utf8')
 assert.match(serverSrc, /\/api\/v1\/list/)
 assert.match(serverSrc, /\/api\/v1\/files/)
 assert.match(serverSrc, /PATH_FORBIDDEN/)
 
-const configSrc = readFileSync(join(toolRoot, 'src/config.ts'), 'utf8')
+const configSrc = readFileSync(join(root, 'src/main/gateway/config.ts'), 'utf8')
 assert.match(configSrc, /127\.0\.0\.1/)
 
 assert.match(roadmap, /verify:ops-gateway-spike/)

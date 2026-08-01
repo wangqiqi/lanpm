@@ -19,6 +19,7 @@ import { registerPluginIpc } from './ipc/plugin'
 import { registerNavIpc } from './ipc/nav'
 import { registerMeetingIpc } from './ipc/meeting'
 import { registerOpsIpc } from './ipc/ops'
+import { shutdownGateway } from './ops/gatewayService'
 import { registerNotificationIpc } from './ipc/notification'
 import { registerLocaleIpc } from './ipc/locale'
 import { registerAiIpc } from './ipc/ai'
@@ -272,5 +273,6 @@ app.on('will-quit', () => {
   shutdownScreenshotService()
   shutdownChatService()
   shutdownNetwork()
+  void shutdownGateway()
   closeDatabase()
 })

@@ -275,7 +275,12 @@ const api: LanpmApi = {
   ops: {
     sendSlash: (groupId, text) => ipcRenderer.invoke(OPS_IPC.sendSlash, groupId, text),
     listMachines: (groupId) => ipcRenderer.invoke(OPS_IPC.listMachines, groupId),
-    listAudit: (groupId, limit) => ipcRenderer.invoke(OPS_IPC.listAudit, groupId, limit)
+    listAudit: (groupId, limit) => ipcRenderer.invoke(OPS_IPC.listAudit, groupId, limit),
+    getGatewayStatus: () => ipcRenderer.invoke(OPS_IPC.getGatewayStatus),
+    startGateway: () => ipcRenderer.invoke(OPS_IPC.startGateway),
+    stopGateway: () => ipcRenderer.invoke(OPS_IPC.stopGateway),
+    updateGatewayConfig: (patch) => ipcRenderer.invoke(OPS_IPC.updateGatewayConfig, patch),
+    rotateGatewayToken: () => ipcRenderer.invoke(OPS_IPC.rotateGatewayToken)
   },
   pairing: {
     start: () => ipcRenderer.invoke('pairing:start'),

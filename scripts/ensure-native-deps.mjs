@@ -18,7 +18,7 @@ const verbose = process.env.LANPM_NATIVE_VERBOSE === '1' || force
 const electronBin = resolveElectronBin()
 
 /** Packages passed to `@electron/rebuild -w` (comma-separated). */
-const REBUILD_MODULES = ['better-sqlite3', 'node-screenshots']
+const REBUILD_MODULES = ['better-sqlite3', 'node-screenshots', 'node-pty']
 
 const sqliteNative = join(
   root,

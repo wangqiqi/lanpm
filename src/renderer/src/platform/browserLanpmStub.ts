@@ -403,19 +403,6 @@ const STUB_PLUGINS: PluginView[] = [
     ]
   },
   {
-    id: 'lanpm.formjs',
-    name: 'Advanced Form (form-js)',
-    version: '0.1.0',
-    slots: ['task.detail.section'],
-    capabilities: ['task.get', 'license.feature'],
-    pricing: 'paid',
-    enabled: true,
-    dirName: 'lanpm.formjs',
-    source: 'builtin',
-    signatureValid: true,
-    licensed: false
-  },
-  {
     id: 'lanpm.mindmap',
     name: 'Mind Map',
     version: '0.1.0',
@@ -2217,7 +2204,52 @@ export function createBrowserLanpmStub(): LanpmApi {
     ops: {
       sendSlash: async () => ({ requestId: 'stub-ops' }),
       listMachines: async () => [],
-      listAudit: async () => []
+      listAudit: async () => [],
+      getGatewayStatus: async () => ({
+        running: false,
+        host: '127.0.0.1',
+        port: 8787,
+        url: null,
+        token: 'stub-token',
+        root: './data',
+        terminalEnabled: false
+      }),
+      startGateway: async () => ({
+        running: false,
+        host: '127.0.0.1',
+        port: 8787,
+        url: null,
+        token: 'stub-token',
+        root: './data',
+        terminalEnabled: false
+      }),
+      stopGateway: async () => ({
+        running: false,
+        host: '127.0.0.1',
+        port: 8787,
+        url: null,
+        token: 'stub-token',
+        root: './data',
+        terminalEnabled: false
+      }),
+      updateGatewayConfig: async () => ({
+        running: false,
+        host: '127.0.0.1',
+        port: 8787,
+        url: null,
+        token: 'stub-token',
+        root: './data',
+        terminalEnabled: false
+      }),
+      rotateGatewayToken: async () => ({
+        running: false,
+        host: '127.0.0.1',
+        port: 8787,
+        url: null,
+        token: 'stub-rotated',
+        root: './data',
+        terminalEnabled: false
+      })
     },
     pairing: {
       start: async () => ({

@@ -145,9 +145,9 @@
 | 2 | Phase 1：`lanpm-agent` + 入站/出站 + L1 斜杠命令 + `lanpm.ops` + `/status` 磁盘 | P1 | **已交付** · `verify:ops-agent` · v1.94.0–v1.94.1 |
 | 3 | Phase 2（ops-p2）：机器 UX · `/disk` `/ps` `/tail` · GPU `/status` · 命令审计 · L3 分析 · 动态 `/help` · 任务挂包 · Profile 设置 | P2 | **已交付** · `verify:ops-p2` · v1.95.0 |
 | 4 | Phase 2（剩余）：Ops 助手 Bot · 出站 watch · 任务挂包深化 | P2 | 后置 |
-| 5 | Gateway HTTP + Web Terminal | P2～P3 | 后置 |
+| 5 | Gateway HTTP + Web Terminal | P2～P3 | **已交付** · `verify:ops-p3` · v1.100.0 |
 
-验收锚点（已交付）：`verify:ops-gateway-spike` · `verify:ops-agent` · `verify:ops-p2`。
+验收锚点（已交付）：`verify:ops-gateway-spike` · `verify:ops-agent` · `verify:ops-p2` · `verify:ops-p3`。
 
 ---
 

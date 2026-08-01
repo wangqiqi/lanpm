@@ -341,6 +341,13 @@ export interface LanpmApi {
       groupId?: string,
       limit?: number
     ) => Promise<import('./ops/auditTypes').OpsAuditEntry[]>
+    getGatewayStatus: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
+    startGateway: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
+    stopGateway: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
+    updateGatewayConfig: (
+      patch: import('./ops/gatewayTypes').OpsGatewayConfigPatch
+    ) => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
+    rotateGatewayToken: () => Promise<import('./ops/gatewayTypes').OpsGatewayStatus>
   }
   pairing: {
     start: () => Promise<import('./discover/pairing').PairingSessionView>

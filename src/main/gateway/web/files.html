@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LanPM Gateway — Files</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 1rem; max-width: 960px; }
+    h1 { font-size: 1.25rem; }
+    .row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+    input, button { padding: 0.35rem 0.6rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.4rem; border-bottom: 1px solid #ccc; }
+    a { cursor: pointer; color: #1677ff; }
+    .err { color: #cf1322; }
+    .muted { opacity: 0.7; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>LanPM Gateway — File browser</h1>
+  <p class="muted">Localhost only · paths constrained by inbound/outbound whitelist</p>
+  <div class="row">
+    <label>Token <input id="token" type="password" size="32" placeholder="Bearer token" /></label>
+    <button id="saveToken" type="button">Save token</button>
+    <span id="cwd" class="muted"></span>
+    <a id="terminalLink" href="/terminal">Terminal →</a>
+  </div>
+  <div class="row">
+    <input id="uploadPath" type="text" placeholder="relative path e.g. inbound/file.txt" size="40" />
+    <input id="uploadFile" type="file" />
+    <button id="uploadBtn" type="button">Upload</button>
+  </div>
+  <p id="error" class="err" hidden></p>
+  <table>
+    <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Actions</th></tr></thead>
+    <tbody id="list"></tbody>
+  </table>
+  <script>
+    const tokenKey = 'lanpm-gateway-token'
+    const tokenEl = document.getElementById('token')
+    const saved = localStorage.getItem(tokenKey)
+    if (saved) tokenEl.value = saved
+    document.getElementById('saveToken').onclick = () => {
+      localStorage.setItem(tokenKey, tokenEl.value.trim())
+      load()
+    }
+
+    let currentDir = ''
+    function authHeaders() {
+      const t = tokenEl.value.trim() || localStorage.getItem(tokenKey) || ''
+      return t ? { Authorization: 'Bearer ' + t } : {}
+    }
+    function showError(msg) {
+      const el = document.getElementById('error')
+      el.hidden = !msg
+      el.textContent = msg || ''
+    }
+    async function api(path, opts = {}) {
+      const res = await fetch(path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || res.statusText)
+      }
+      return res
+    }
+    async function load() {
+      showError('')
+      document.getElementById('cwd').textContent = currentDir ? '/' + currentDir : '/'
+      const res = await api('/api/v1/list?dir=' + encodeURIComponent(currentDir))
+      const data = await res.json()
+      const tbody = document.getElementById('list')
+      tbody.innerHTML = ''
+      if (currentDir) {
+        const tr = document.createElement('tr')
+        tr.innerHTML = '<td colspan="4"><a data-up>..</a></td>'
+        tr.querySelector('[data-up]').onclick = () => {
+          const parts = currentDir.split('/').filter(Boolean)
+          parts.pop()
+          currentDir = parts.join('/')
+          load()
+        }
+        tbody.appendChild(tr)
+      }
+      for (const e of data.entries || []) {
+        const tr = document.createElement('tr')
+        const rel = currentDir ? currentDir + '/' + e.name : e.name
+        tr.innerHTML = '<td></td><td></td><td></td><td></td>'
+        const nameCell = tr.children[0]
+        if (e.type === 'dir') {
+          const a = document.createElement('a')
+          a.textContent = e.name + '/'
+          a.onclick = () => { currentDir = rel; load() }
+          nameCell.appendChild(a)
+        } else {
+          nameCell.textContent = e.name
+        }
+        tr.children[1].textContent = e.type
+        tr.children[2].textContent = e.size != null ? String(e.size) : '—'
+        if (e.type === 'file') {
+          const dl = document.createElement('a')
+          dl.textContent = 'Download'
+          dl.onclick = async () => {
+            const r = await api('/api/v1/files/' + encodeURIComponent(rel))
+            const blob = await r.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = e.name
+            a.click()
+            URL.revokeObjectURL(url)
+          }
+          tr.children[3].appendChild(dl)
+        }
+        tbody.appendChild(tr)
+      }
+    }
+    document.getElementById('uploadBtn').onclick = async () => {
+      const path = document.getElementById('uploadPath').value.trim()
+      const file = document.getElementById('uploadFile').files[0]
+      if (!path || !file) { showError('Pick file and path'); return }
+      showError('')
+      const buf = await file.arrayBuffer()
+      await api('/api/v1/files/' + encodeURIComponent(path), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: buf
+      })
+      load()
+    }
+    load().catch((e) => showError(e.message))
+  </script>
+</body>
+</html>

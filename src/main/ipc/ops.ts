@@ -5,6 +5,14 @@ import { sendOpsSlashCommand } from '../ops/opsCommandService.ts'
 import { listOpsMachines } from '../ops/opsSyncService.ts'
 import { listOpsAuditEntries } from '../ops/auditStore.ts'
 import { parseOpsCommand } from '../../shared/chat/opsCommand.ts'
+import type { OpsGatewayConfigPatch } from '../../shared/ops/gatewayTypes.ts'
+import {
+  getGatewayStatus,
+  patchGatewayConfig,
+  rotateGatewayToken,
+  startGateway,
+  stopGateway
+} from '../ops/gatewayService.ts'
 
 export function registerOpsIpc(): void {
   ipcMain.handle(
@@ -31,4 +39,17 @@ export function registerOpsIpc(): void {
       return listOpsAuditEntries(groupId || undefined, safeLimit)
     }
   )
+
+  ipcMain.handle(OPS_IPC.getGatewayStatus, () => getGatewayStatus())
+
+  ipcMain.handle(OPS_IPC.startGateway, () => startGateway())
+
+  ipcMain.handle(OPS_IPC.stopGateway, () => stopGateway())
+
+  ipcMain.handle(OPS_IPC.updateGatewayConfig, (_event, patch: OpsGatewayConfigPatch) => {
+    if (!patch || typeof patch !== 'object') throw new Error('patch required')
+    return patchGatewayConfig(patch)
+  })
+
+  ipcMain.handle(OPS_IPC.rotateGatewayToken, () => rotateGatewayToken())
 }

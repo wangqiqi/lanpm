@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LanPM Gateway — Terminal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css" />
+  <style>
+    body { margin: 0; background: #1e1e1e; color: #eee; font-family: system-ui, sans-serif; }
+    #bar { padding: 0.5rem 1rem; background: #2d2d2d; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    #bar input { min-width: 200px; }
+    #terminal { height: calc(100vh - 48px); padding: 4px; }
+    a { color: #69b1ff; }
+    .err { color: #ff7875; }
+  </style>
+</head>
+<body>
+  <div id="bar">
+    <a href="/">← Files</a>
+    <label>Token <input id="token" type="password" placeholder="Bearer token" /></label>
+    <button id="connect" type="button">Connect</button>
+    <span id="status" class="err"></span>
+  </div>
+  <div id="terminal"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+  <script>
+    const tokenKey = 'lanpm-gateway-token'
+    const tokenEl = document.getElementById('token')
+    const saved = localStorage.getItem(tokenKey)
+    if (saved) tokenEl.value = saved
+
+    let term, fitAddon, socket
+    function setStatus(msg) { document.getElementById('status').textContent = msg || '' }
+
+    document.getElementById('connect').onclick = () => {
+      const token = tokenEl.value.trim()
+      if (token) localStorage.setItem(tokenKey, token)
+      if (socket) { socket.close(); socket = null }
+      setStatus('Connecting…')
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const q = token ? '?token=' + encodeURIComponent(token) : ''
+      const url = proto + '//' + location.host + '/api/v1/terminal' + q
+      socket = new WebSocket(url)
+      if (!term) {
+        term = new Terminal({ cursorBlink: true, fontSize: 14 })
+        fitAddon = new FitAddon.FitAddon()
+        term.loadAddon(fitAddon)
+        term.open(document.getElementById('terminal'))
+        fitAddon.fit()
+        term.onData((data) => {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'input', data }))
+          }
+        })
+        window.addEventListener('resize', () => {
+          fitAddon.fit()
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }))
+          }
+        })
+      }
+      socket.onopen = () => {
+        setStatus('Connected')
+        fitAddon.fit()
+        socket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }))
+      }
+      socket.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data)
+          if (msg.type === 'output') term.write(msg.data)
+        } catch { term.write(ev.data) }
+      }
+      socket.onerror = () => setStatus('WebSocket error')
+      socket.onclose = () => setStatus('Disconnected')
+    }
+  </script>
+</body>
+</html>
