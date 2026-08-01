@@ -11,10 +11,10 @@
     "lanpm": "scripts/lanpm.mjs"
   },
   "scripts": {
-    "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs",
+    "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs",
     "dev": "node scripts/dev-run.mjs",
     "dev:web": "node scripts/dev-run.mjs --web",
-    "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && npm run verify:pack-license",
+    "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && npm run verify:pack-license",
     "build": "electron-vite build",
     "prepreview": "node scripts/ensure-native-deps.mjs",
     "preview": "electron-vite preview",

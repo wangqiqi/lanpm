@@ -47,5 +47,6 @@ resources/icon.ico
 resources/logo-*.png
 src/renderer/public/favicon.svg
 src/renderer/public/favicon.png
+src/renderer/public/excalidraw/
 
 test-results/

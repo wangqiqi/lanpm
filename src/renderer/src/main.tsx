@@ -3,6 +3,15 @@ import { installDevPreviewClientGuards } from '@renderer/platform/devPreviewClie
 import { bootstrapDocumentTheme } from '@renderer/theme/initialTheme'
 import './styles/global.css'
 
+declare global {
+  interface Window {
+    EXCALIDRAW_ASSET_PATH?: string
+  }
+}
+
+/** Local prod assets — avoids esm.sh font fallback under strict CSP */
+window.EXCALIDRAW_ASSET_PATH = `${import.meta.env.BASE_URL}excalidraw/`
+
 bootstrapDocumentTheme()
 
 function showFatalError(err: unknown): void {
