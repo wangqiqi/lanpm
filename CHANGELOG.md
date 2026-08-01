@@ -13,6 +13,7 @@
 - **核心视图 E2E 范围（SPIKE-1226）**：暂缓 chat/board Tab 冒烟与任务 CRUD E2E；决策记入 `docs/05` §1.2.6 补充 · `archive/20260801_162500_SPIKE-1226_核心视图E2E范围.md`
 - **非聊天视图 perf 冒烟（TASK-1227）**：`verify:core-views-perf` — GroupView lazy 重视图 · board/tree/gantt memo · 白板防抖与协作抽屉延迟挂载；`docs/06` §4 引用
 - **真机手验清单（DOC-1228）**：`docs/06` §4.1 发版前手勾表与 `docs/05` §8.1 对齐（含聊天协作抽屉 #3 · 视觉 PNG #2）
+- **i18n 英文布局（TASK-1229）**：`verify:i18n-en` 扩展 cockpit/chat 内联标签长度 · 视图 i18n · CSS 折行/省略守卫
 
 ## [1.96.1] - 2026-08-01
 
