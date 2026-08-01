@@ -99,7 +99,25 @@
 
 ## 4. 手验待补（延期 · 非阻断）
 
-> 发版自动化：`npm run verify:release-gate`。真机项曾在正式发布时显式接受风险；有设备再补。
+> 发版自动化：`npm run verify:release-gate`（见 [05](./05_测试与联调发布.md) §1.3 · §8.1）。
+
+### 4.1 发版前手勾表（与 05 §8.1 对齐）
+
+维护者打 tag 前按序勾选；**阻断**项未绿不得发版。
+
+| # | 项 | 自动化 / 守卫 | 手验步骤 | 阻断 |
+|---|-----|---------------|----------|------|
+| 1 | 发版门禁 | `npm run verify:release-gate` | — | ✅ |
+| 2 | 视觉 PNG 冒烟 | `verify:visual-screenshots`（[05 §1.3.1](./05_测试与联调发布.md#131-视觉截图策略task-1221) 本地必跑） | `npm run build && npm run verify:visual-screenshots`（Linux：`xvfb-run -a`） | ✅ |
+| 3 | 聊天协作抽屉 | `verify:visual` IA-401～408 · `verify:visual-screenshots` 抽屉态 | **项目群**聊天 → Composer 三按钮（文件库 / 白板 / 脑图）→ 抽屉打开 →「全屏编辑」深链；职能群仅文件库；DM 无按钮 | 建议 |
+| 4 | 看板 / 任务树 | `verify:m3` | [05 §4](./05_测试与联调发布.md#4-看板与任务树m3) 表 6 步 | 延期 |
+| 5 | 双实例 Stub | `verify:dual-stub` | [05 §3](./05_测试与联调发布.md#3-双实例-stub-联调) | 延期 |
+| 6 | 真网双机 | `verify:m6` loopback | [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6) | 延期 |
+| 7 | 三平台真机 UI | CI `verify.yml` × `verify:m7` | Win / mac / Linux 七页肉眼 | 延期 |
+| 8 | 性能抽样 | `verify:m7-perf` · `verify:core-views-perf` | [05 §5](./05_测试与联调发布.md#5-性能测量m7) 冷启动 · 内存 · Tab P95 | 延期 |
+| 9 | 英文折行 | `verify:i18n-en` | cockpit / chat 关键页长文案肉眼 | 延期 |
+
+### 4.2 延期汇总（有设备再补）
 
 | 项 | 现状 |
 |----|------|
