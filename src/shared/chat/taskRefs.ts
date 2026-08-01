@@ -132,6 +132,24 @@ export function splitTaskRefSegments(text: string, tasks: Task[]): TaskRefSegmen
   return segments.length ? segments : [{ kind: 'text', value: text }]
 }
 
+/**
+ * Resolve task id from composer `#` ref when attaching/sending a file (optional link).
+ * Uses picked suggest id first, then title token at end of draft.
+ */
+export function resolveComposerTaskLink(
+  draft: string,
+  tasks: Task[],
+  pickedTaskId?: string | null
+): string | undefined {
+  const query = extractTaskRefQuery(draft)
+  if (query === null) return undefined
+  if (pickedTaskId) {
+    const picked = activeTasks(tasks).find((t) => t.taskId === pickedTaskId)
+    if (picked) return picked.taskId
+  }
+  return resolveTaskByTitleToken(query, tasks)?.taskId
+}
+
 /** @ 与 # 同时存在时，取更靠近输入末尾的触发器 */
 export function activeComposerSuggest(
   draft: string,

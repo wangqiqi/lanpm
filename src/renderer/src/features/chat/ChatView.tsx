@@ -32,7 +32,7 @@ import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
 import { deliveryStatusMeta, groupMessagesByDay } from '@renderer/features/chat/chatDateGroups'
 import { useMentionSuggest } from '@renderer/features/chat/mentionKeyboard'
-import { activeComposerSuggest, resolveStandaloneTaskRefForSend } from '@shared/chat/taskRefs'
+import { activeComposerSuggest, resolveComposerTaskLink, resolveStandaloneTaskRefForSend } from '@shared/chat/taskRefs'
 import { useTaskSuggest } from '@renderer/features/chat/taskKeyboard'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import CodeSendModal from '@renderer/features/chat/CodeSendModal'
@@ -396,6 +396,11 @@ export default function ChatView(): React.ReactElement {
   const dismissTaskRef = useCallback(() => {
     setDraft((prev) => prev.replace(/(?:^|\s)#([^#\n]*)$/, '').trimEnd())
   }, [])
+
+  const resolveFileLinkTaskId = useCallback((): string | undefined => {
+    if (!taskAllowed) return undefined
+    return resolveComposerTaskLink(draft, tasks, pickedTaskRefIdRef.current)
+  }, [draft, tasks, taskAllowed])
 
   const suggestMode = useMemo(
     () => activeComposerSuggest(draft, taskAllowed),
@@ -1021,9 +1026,9 @@ export default function ChatView(): React.ReactElement {
             message.warning(t('chat.fileNoPath'))
             return
           }
-          void chatStoreActions.sendFile(gid, path).catch((err: unknown) =>
-            message.error(formatError(err, 'chat.fileSendFailed'))
-          )
+          void chatStoreActions
+            .sendFile(gid, path, { linkTaskId: resolveFileLinkTaskId() })
+            .catch((err: unknown) => message.error(formatError(err, 'chat.fileSendFailed')))
         }}
       >
         {fileDragOver && fileAllowed && (
@@ -1211,9 +1216,11 @@ export default function ChatView(): React.ReactElement {
                           icon={<PaperClipOutlined />}
                           label={t('chat.fileBtn')}
                           onClick={() =>
-                            void chatStoreActions.pickAndSendFile(gid).catch((err: unknown) =>
-                              message.error(formatError(err, 'chat.fileSendFailed'))
-                            )
+                            void chatStoreActions
+                              .pickAndSendFile(gid, { linkTaskId: resolveFileLinkTaskId() })
+                              .catch((err: unknown) =>
+                                message.error(formatError(err, 'chat.fileSendFailed'))
+                              )
                           }
                         />
                       )}

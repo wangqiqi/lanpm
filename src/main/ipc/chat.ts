@@ -21,7 +21,7 @@ import { captureAndSendScreenshot } from '../screenshot/screenshotService'
 import { markMessagesRead } from '../chat/readReceiptService'
 import { getDatabase } from '../storage'
 import { getMessageById } from '../storage/repositories/messageRepository'
-import { CHAT_IPC, type SendChatOptions } from '../../shared/chat/channels'
+import { CHAT_IPC, type SendChatOptions, type SendFileOptions } from '../../shared/chat/channels'
 
 export function registerChatIpc(): void {
   ipcMain.handle(CHAT_IPC.listMessages, (_event, groupId: string) => {
@@ -79,33 +79,42 @@ export function registerChatIpc(): void {
     }
   )
 
-  ipcMain.handle(CHAT_IPC.pickAndSendFile, (event, groupId: string) => {
-    if (typeof groupId !== 'string' || !groupId) {
-      throw new Error('groupId required')
+  ipcMain.handle(
+    CHAT_IPC.pickAndSendFile,
+    (event, groupId: string, options?: SendFileOptions) => {
+      if (typeof groupId !== 'string' || !groupId) {
+        throw new Error('groupId required')
+      }
+      const parent = BrowserWindow.fromWebContents(event.sender)
+      return pickAndSendFileMessage(getDatabase(), groupId, parent, options)
     }
-    const parent = BrowserWindow.fromWebContents(event.sender)
-    return pickAndSendFileMessage(getDatabase(), groupId, parent)
-  })
+  )
 
-  ipcMain.handle(CHAT_IPC.sendFile, (_event, groupId: string, filePath: string) => {
-    if (typeof groupId !== 'string' || !groupId) {
-      throw new Error('groupId required')
+  ipcMain.handle(
+    CHAT_IPC.sendFile,
+    (_event, groupId: string, filePath: string, options?: SendFileOptions) => {
+      if (typeof groupId !== 'string' || !groupId) {
+        throw new Error('groupId required')
+      }
+      if (typeof filePath !== 'string' || !filePath) {
+        throw new Error('filePath required')
+      }
+      return sendFileMessage(getDatabase(), groupId, filePath, options)
     }
-    if (typeof filePath !== 'string' || !filePath) {
-      throw new Error('filePath required')
-    }
-    return sendFileMessage(getDatabase(), groupId, filePath)
-  })
+  )
 
-  ipcMain.handle(CHAT_IPC.sendExistingFile, (_event, groupId: string, fileId: string) => {
-    if (typeof groupId !== 'string' || !groupId) {
-      throw new Error('groupId required')
+  ipcMain.handle(
+    CHAT_IPC.sendExistingFile,
+    (_event, groupId: string, fileId: string, options?: SendFileOptions) => {
+      if (typeof groupId !== 'string' || !groupId) {
+        throw new Error('groupId required')
+      }
+      if (typeof fileId !== 'string' || !fileId) {
+        throw new Error('fileId required')
+      }
+      return sendExistingFileMessage(getDatabase(), groupId, fileId, options)
     }
-    if (typeof fileId !== 'string' || !fileId) {
-      throw new Error('fileId required')
-    }
-    return sendExistingFileMessage(getDatabase(), groupId, fileId)
-  })
+  )
 
   ipcMain.handle(CHAT_IPC.captureAndSendScreenshot, (_event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) {

@@ -68,10 +68,12 @@ const api: LanpmApi = {
       ipcRenderer.invoke('chat:sendCode', groupId, code, languageHint, theme, options),
     listMembers: (groupId) => ipcRenderer.invoke('chat:listMembers', groupId),
     markRead: (groupId, msgIds) => ipcRenderer.invoke('chat:markRead', groupId, msgIds),
-    pickAndSendFile: (groupId) => ipcRenderer.invoke('chat:pickAndSendFile', groupId),
-    sendFile: (groupId, filePath) => ipcRenderer.invoke('chat:sendFile', groupId, filePath),
-    sendExistingFile: (groupId, fileId) =>
-      ipcRenderer.invoke('chat:sendExistingFile', groupId, fileId),
+    pickAndSendFile: (groupId, options) =>
+      ipcRenderer.invoke('chat:pickAndSendFile', groupId, options),
+    sendFile: (groupId, filePath, options) =>
+      ipcRenderer.invoke('chat:sendFile', groupId, filePath, options),
+    sendExistingFile: (groupId, fileId, options) =>
+      ipcRenderer.invoke('chat:sendExistingFile', groupId, fileId, options),
     captureAndSendScreenshot: (groupId) =>
       ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
     recallMessage: (groupId, msgId) => ipcRenderer.invoke('chat:recallMessage', groupId, msgId),

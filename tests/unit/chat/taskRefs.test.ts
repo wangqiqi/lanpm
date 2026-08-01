@@ -5,7 +5,9 @@ import {
   extractTaskRefQuery,
   filterTasksByQuery,
   parseStandaloneTaskRef,
+  resolveComposerTaskLink,
   resolveStandaloneTaskRefForSend,
+  resolveComposerTaskLink,
   splitTaskRefSegments,
   taskMatchesQuery
 } from '@shared/chat/taskRefs'
@@ -66,6 +68,12 @@ describe('taskRefs', () => {
     expect(
       resolveStandaloneTaskRefForSend('#部署文档', tasks, 'task_b')?.taskId
     ).toBe('task_b')
+  })
+
+  it('resolves composer task link for file attach', () => {
+    expect(resolveComposerTaskLink('attach #Fix Login UI', tasks, 'task_a')).toBe('task_a')
+    expect(resolveComposerTaskLink('attach #Fix Login UI', tasks, null)).toBe('task_a')
+    expect(resolveComposerTaskLink('no ref here', tasks, 'task_a')).toBeUndefined()
   })
 
   it('splits inline task refs for rendering', () => {

@@ -12,6 +12,7 @@
 - **ops-p2 · L3 分析入口（TASK-1214）**：日志/ops 文件与 `ops-agent` 文本消息 ·「在助手中分析」→ `AiAssistantShell` 注入脱敏 `seedMarkdown` · `shareToChat` 沿用现有顶栏助手
 - **ops-p2 · `/help` 动态化（TASK-1215）**：本群机器在线列表 · composer 显示在线数 · `/help` 本地回群（无需 Agent）
 - **ops-p2 · `/status` GPU（TASK-1212）**：Agent `nvidia-smi` 探测首卡利用率/显存 · 无 GPU 则省略该行
+- **ops-p2 · 任务挂包（TASK-1216）**：群聊发文件时 composer 含 `#任务` 则自动写入 `Task.linkedFileIds` · 任务详情附件区可见 · 不改动 `/task` 斜杠
 
 ## [1.94.2] - 2026-08-01
 

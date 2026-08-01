@@ -28,6 +28,9 @@ import {
 import { uploadFileFromPath } from '../file/fileService'
 import { getFileById } from '../storage/repositories/fileRepository'
 import { getTaskById } from '../storage/repositories/taskRepository'
+import { mergeLinkedFileId } from '../../shared/task/linkFile.ts'
+import { updateGroupTask } from '../task/taskService.ts'
+import type { SendFileOptions } from '../../shared/chat/channels'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { showOpenDialog } from '../systemDialog'
 import { readFileSync, existsSync } from 'node:fs'
@@ -432,32 +435,50 @@ export async function forwardMessageToGroup(
   return publishChatMessage(db, targetGroupId, source.type, cloned)
 }
 
+function maybeLinkFileToTask(
+  db: Database,
+  groupId: string,
+  fileId: string,
+  linkTaskId?: string
+): void {
+  if (!linkTaskId) return
+  const task = getTaskById(db, linkTaskId)
+  if (!task || task.deletedAt || task.groupId !== groupId) return
+  updateGroupTask(db, {
+    taskId: linkTaskId,
+    linkedFileIds: mergeLinkedFileId(task.linkedFileIds, fileId)
+  })
+}
+
 export async function pickAndSendFileMessage(
   db: Database,
   groupId: string,
-  parent?: BrowserWindow | null
+  parent?: BrowserWindow | null,
+  options?: SendFileOptions
 ): Promise<ChatMessage | null> {
   const result = await showOpenDialog(parent, { properties: ['openFile'] })
   if (result.canceled || !result.filePaths[0]) return null
-  return sendFileMessage(db, groupId, result.filePaths[0])
+  return sendFileMessage(db, groupId, result.filePaths[0], options)
 }
 
 export async function sendFileMessage(
   db: Database,
   groupId: string,
-  sourcePath: string
+  sourcePath: string,
+  options?: SendFileOptions
 ): Promise<ChatMessage> {
   if (isAnonymousGroup(db, groupId)) {
     throwLanpm('err.anonymousNoFile')
   }
   const meta = await uploadFileFromPath(db, groupId, sourcePath)
-  return sendExistingFileMessage(db, groupId, meta.fileId)
+  return sendExistingFileMessage(db, groupId, meta.fileId, options)
 }
 
 export async function sendExistingFileMessage(
   db: Database,
   groupId: string,
-  fileId: string
+  fileId: string,
+  options?: SendFileOptions
 ): Promise<ChatMessage> {
   if (isAnonymousGroup(db, groupId)) {
     throwLanpm('err.anonymousNoFile')
@@ -486,6 +507,8 @@ export async function sendExistingFileMessage(
       )
     }
   }
+
+  maybeLinkFileToTask(db, groupId, fileId, options?.linkTaskId)
 
   return msg
 }

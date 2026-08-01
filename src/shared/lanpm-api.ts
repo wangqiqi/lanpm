@@ -2,7 +2,7 @@ import type { DiscoverSnapshot } from './discover/types'
 import type { DmMessagePreview } from './chat/dmPreview'
 import type { ChatMessage } from './chat/types'
 import type { ChatMessagePage } from './chat/pagination'
-import type { SendChatOptions } from './chat/channels'
+import type { SendChatOptions, SendFileOptions } from './chat/channels'
 import type { GroupMemberView } from './chat/members'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from './identity'
 import type {
@@ -82,10 +82,10 @@ export interface LanpmApi {
     ) => Promise<ChatMessage>
     listMembers: (groupId: string) => Promise<GroupMemberView[]>
     markRead: (groupId: string, msgIds: string[]) => Promise<void>
-    pickAndSendFile: (groupId: string) => Promise<ChatMessage | null>
-    sendFile: (groupId: string, filePath: string) => Promise<ChatMessage>
+    pickAndSendFile: (groupId: string, options?: SendFileOptions) => Promise<ChatMessage | null>
+    sendFile: (groupId: string, filePath: string, options?: SendFileOptions) => Promise<ChatMessage>
     /** 引用已上传文件发送群聊消息（文件视图「发送到群聊」） */
-    sendExistingFile: (groupId: string, fileId: string) => Promise<ChatMessage>
+    sendExistingFile: (groupId: string, fileId: string, options?: SendFileOptions) => Promise<ChatMessage>
     /** 区域截图 + 标注，确认后作为图片文件发送到群聊（仅 Electron） */
     captureAndSendScreenshot: (groupId: string) => Promise<ChatMessage | null>
     recallMessage: (groupId: string, msgId: string) => Promise<ChatMessage>

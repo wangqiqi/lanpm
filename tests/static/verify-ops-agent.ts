@@ -68,8 +68,14 @@ for (const cap of opsCaps) {
   assert.match(proxy, new RegExp(`case '${cap.replace('.', '\\.')}':`))
 }
 
+const chatService = readFileSync(join(root, 'src/main/chat/chatService.ts'), 'utf8')
+assert.match(chatService, /maybeLinkFileToTask/)
+assert.match(chatService, /linkTaskId/)
+
 const chatView = readFileSync(join(root, 'src/renderer/src/features/chat/ChatView.tsx'), 'utf8')
 assert.match(chatView, /parseOpsCommand/)
+assert.match(chatView, /resolveFileLinkTaskId/)
+assert.match(chatView, /resolveComposerTaskLink/)
 
 const memberList = readFileSync(join(root, 'src/renderer/src/features/chat/MemberList.tsx'), 'utf8')
 assert.match(memberList, /isMachineMember/)

@@ -25,3 +25,8 @@ export const CHAT_IPC = {
 export interface SendChatOptions {
   replyToMsgId?: string
 }
+
+/** Optional task link when sending a file to group chat (ops inbound + task detail). */
+export interface SendFileOptions {
+  linkTaskId?: string
+}

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { ChatMessage } from '@shared/chat/types'
-import type { SendChatOptions } from '@shared/chat/channels'
+import type { SendChatOptions, SendFileOptions } from '@shared/chat/channels'
 import {
   downgradeToLastMessage,
   mergeChatMessage,
@@ -20,9 +20,9 @@ interface ChatState {
   clearLoadError: (groupId: string) => void
   sendText: (groupId: string, text: string, options?: SendChatOptions) => Promise<void>
   sendCode: (groupId: string, code: string, languageHint?: string, options?: SendChatOptions) => Promise<void>
-  pickAndSendFile: (groupId: string) => Promise<void>
-  sendFile: (groupId: string, filePath: string) => Promise<void>
-  sendExistingFile: (groupId: string, fileId: string) => Promise<void>
+  pickAndSendFile: (groupId: string, options?: SendFileOptions) => Promise<void>
+  sendFile: (groupId: string, filePath: string, options?: SendFileOptions) => Promise<void>
+  sendExistingFile: (groupId: string, fileId: string, options?: SendFileOptions) => Promise<void>
   captureAndSendScreenshot: (groupId: string) => Promise<void>
   recallMessage: (groupId: string, msgId: string) => Promise<void>
   retryMessage: (msgId: string) => Promise<ChatMessage>
@@ -93,16 +93,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const message = await getLanpmApi().chat.sendCode(groupId, code, languageHint, theme, options)
     get().upsertMessage(message)
   },
-  pickAndSendFile: async (groupId) => {
-    const message = await getLanpmApi().chat.pickAndSendFile(groupId)
+  pickAndSendFile: async (groupId, options) => {
+    const message = await getLanpmApi().chat.pickAndSendFile(groupId, options)
     if (message) get().upsertMessage(message)
   },
-  sendFile: async (groupId, filePath) => {
-    const message = await getLanpmApi().chat.sendFile(groupId, filePath)
+  sendFile: async (groupId, filePath, options) => {
+    const message = await getLanpmApi().chat.sendFile(groupId, filePath, options)
     get().upsertMessage(message)
   },
-  sendExistingFile: async (groupId, fileId) => {
-    const message = await getLanpmApi().chat.sendExistingFile(groupId, fileId)
+  sendExistingFile: async (groupId, fileId, options) => {
+    const message = await getLanpmApi().chat.sendExistingFile(groupId, fileId, options)
     get().upsertMessage(message)
   },
   captureAndSendScreenshot: async (groupId) => {
