@@ -1,5 +1,5 @@
-import os from 'node:os'
 import type { GatewayPaths } from '../../shared/ops/paths.ts'
+import { formatStatus } from './statusSnapshot.ts'
 import {
   readGatewayFile,
   resolveOutboundLogRel,
@@ -26,20 +26,6 @@ function helpText(): string {
   ].join('\n')
 }
 
-function formatStatus(): string {
-  const total = os.totalmem()
-  const free = os.freemem()
-  const usedPct = total > 0 ? Math.round(((total - free) / total) * 100) : 0
-  const load = os.loadavg().map((n) => n.toFixed(2)).join(', ')
-  return [
-    `host: ${os.hostname()}`,
-    `cpus: ${os.cpus().length}`,
-    `load: ${load}`,
-    `mem_used_pct: ${usedPct}`,
-    `platform: ${os.platform()} ${os.arch()}`
-  ].join('\n')
-}
-
 export async function executeOpsCommand(
   paths: GatewayPaths,
   payload: Pick<OpsCommandPayload, 'command' | 'args' | 'fileName' | 'dataBase64'>
@@ -52,7 +38,7 @@ export async function executeOpsCommand(
       case 'help':
         return { ok: true, text: helpText() }
       case 'status':
-        return { ok: true, text: formatStatus() }
+        return { ok: true, text: formatStatus(paths.root) }
       case 'logs': {
         const key = args[0] ?? 'app'
         const rel = resolveOutboundLogRel(paths, key)

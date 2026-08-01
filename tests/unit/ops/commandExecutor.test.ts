@@ -33,6 +33,13 @@ describe('executeOpsCommand', () => {
     assert.match(r.text ?? '', /\/logs/)
   })
 
+  it('runs status with disk path from agent root', async () => {
+    const r = await executeOpsCommand(paths, { command: 'status' })
+    assert.equal(r.ok, true)
+    assert.match(r.text ?? '', /mem: \d+%/)
+    assert.match(r.text ?? '', /disk\(/)
+  })
+
   it('runs deploy', async () => {
     const r = await executeOpsCommand(paths, { command: 'deploy', args: ['pkg.tar.gz'] })
     assert.equal(r.ok, true)

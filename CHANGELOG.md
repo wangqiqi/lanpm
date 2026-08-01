@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.94.1] - 2026-08-01
+
+### Changed
+
+- **ops-status-patch · `/status`**：`statusSnapshot.ts` — uptime · 内存绝对值（used/total）· Agent `root` 磁盘 `statfs`（不可用时 `disk: unavailable`）
+- **`verify:ops-agent`** — 守卫 `statusSnapshot` 落点 · `formatStatus(paths.root)`
+- **`docs/功能扩展.md`** — `/status` 字段说明；GPU defer → Phase 2
+
 ## [1.94.0] - 2026-08-01
 
 ### Added

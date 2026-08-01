@@ -21,6 +21,16 @@ const networkTypes = readFileSync(join(root, 'src/shared/network/types.ts'), 'ut
 assert.ok(pkg.scripts?.['verify:ops-agent'], 'missing verify:ops-agent script')
 assert.ok(existsSync(join(root, 'plugins/lanpm.ops/plugin.json')))
 assert.ok(existsSync(join(root, 'tools/lanpm-agent/package.json')))
+assert.ok(existsSync(join(root, 'src/main/ops/statusSnapshot.ts')))
+assert.ok(existsSync(join(root, 'src/main/ops/commandExecutor.ts')))
+
+const statusSnapshot = readFileSync(join(root, 'src/main/ops/statusSnapshot.ts'), 'utf8')
+assert.match(statusSnapshot, /readDiskUsageSync/)
+assert.match(statusSnapshot, /disk: unavailable/)
+
+const commandExecutor = readFileSync(join(root, 'src/main/ops/commandExecutor.ts'), 'utf8')
+assert.match(commandExecutor, /formatStatus\(paths\.root\)/)
+
 assert.ok(existsSync(join(root, 'src/main/ops/opsSyncService.ts')))
 assert.ok(existsSync(join(root, 'src/main/gateway/fileStore.ts')))
 assert.ok(existsSync(join(root, 'src/shared/chat/opsCommand.ts')))
