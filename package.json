@@ -121,6 +121,7 @@
     "verify:chat-perf-p3": "node --experimental-strip-types tests/static/verify-chat-perf-p3.ts",
     "verify:chat-perf-viewport": "node --experimental-strip-types tests/static/verify-chat-perf-viewport.ts",
     "verify:chat-perf-observe": "node --experimental-strip-types tests/static/verify-chat-perf-observe.ts",
+    "verify:docs-optim-closeout": "node --experimental-strip-types tests/static/verify-docs-optim-closeout.ts",
     "verify:view-slot-hosts": "node --experimental-strip-types tests/static/verify-view-slot-hosts.ts",
     "verify:sync-outbox": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-sync-outbox.ts",
     "verify:bundle": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-bundle.ts",
