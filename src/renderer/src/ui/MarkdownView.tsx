@@ -3,6 +3,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import { useUiStore } from '@renderer/stores/uiStore'
+import {
+  buildMarkdownCacheKey,
+  getCachedMarkdownBody,
+  setCachedMarkdownBody
+} from '@renderer/features/chat/chatMarkdownCache'
 import styles from './markdownContent.module.css'
 
 interface MarkdownViewProps {
@@ -10,17 +15,23 @@ interface MarkdownViewProps {
   /** 行内片段（气泡内混排）vs 块级（整段 MD） */
   variant?: 'inline' | 'block'
   className?: string
+  /** 消息 id，用于解析缓存键 */
+  cacheKey?: string
 }
 
 export default function MarkdownView({
   content,
   variant = 'block',
-  className
+  className,
+  cacheKey
 }: MarkdownViewProps): React.ReactElement {
   const theme = useUiStore((s) => s.theme)
 
-  const body = useMemo(
-    () => (
+  const body = useMemo(() => {
+    const key = buildMarkdownCacheKey(cacheKey, content, variant, theme)
+    const cached = getCachedMarkdownBody(key)
+    if (cached) return cached
+    const el = (
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -62,9 +73,10 @@ export default function MarkdownView({
       >
         {content}
       </ReactMarkdown>
-    ),
-    [content, theme, variant]
-  )
+    )
+    setCachedMarkdownBody(key, el)
+    return el
+  }, [content, theme, variant, cacheKey])
 
   return <div className={`${styles.markdownRoot} ${className ?? ''}`.trim()}>{body}</div>
 }

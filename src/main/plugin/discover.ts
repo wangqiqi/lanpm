@@ -3,7 +3,7 @@ import { join } from 'path'
 import type { PluginSlotId, PluginSource, PluginView } from '../../shared/plugin/types.ts'
 import type { ContributedPluginView } from '../../shared/plugin/contributions.ts'
 import type { ListedCommand } from '../../shared/plugin/commands.ts'
-import type { ListedMenuItem } from '../../shared/plugin/menus.ts'
+import type { ListedMenuItem, PluginMenuLocation } from '../../shared/plugin/menus.ts'
 import {
   parsePluginManifest,
   resolveContributionGroupTypes
@@ -98,7 +98,7 @@ export function listCommands(): ListedCommand[] {
   return listAllCommands(discoverPlugins())
 }
 
-export function listMenus(): ListedMenuItem[] {
-  return listAllMenus(discoverPlugins())
+export function listMenus(location?: PluginMenuLocation): ListedMenuItem[] {
+  return listAllMenus(discoverPlugins(), location)
 }
 

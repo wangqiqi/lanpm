@@ -2,7 +2,6 @@ import { memo, useMemo } from 'react'
 import { Dropdown, Tag, type MenuProps } from 'antd'
 import UserAvatar from '@renderer/ui/UserAvatar'
 import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
-import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
 import type { Task } from '@shared/task/types'
@@ -21,7 +20,7 @@ import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
-import { useLocateTask } from '@renderer/features/task/useLocateTask'
+import { useChatMessageActions } from '@renderer/features/chat/ChatMessageActionsContext'
 import { useChatPluginMenuItems } from '@renderer/features/chat/ChatPluginMenusProvider'
 import MessageReplyStrip from '@renderer/features/chat/MessageReplyStrip'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
@@ -36,7 +35,8 @@ function formatFileSize(bytes: number): string {
 interface MessageBubbleProps {
   message: ChatMessage
   own: boolean
-  members: GroupMemberView[]
+  memberById: ReadonlyMap<string, GroupMemberView>
+  mentionMembers?: GroupMemberView[]
   tasks?: Task[]
   deliveryLabel: string
   deliveryAriaLabel: string
@@ -70,7 +70,8 @@ interface MessageBubbleProps {
 function MessageBubble({
   message,
   own,
-  members,
+  memberById,
+  mentionMembers = [],
   tasks = [],
   deliveryLabel,
   deliveryAriaLabel,
@@ -103,18 +104,16 @@ function MessageBubble({
   const { message: appMessage } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
   const currentUserId = useIdentityStore((s) => s.user?.userId)
-  const navigate = useNavigate()
-  const { groupId } = useParams<{ groupId: string }>()
-  const gid = groupId ?? ''
-  const locateTask = useLocateTask(gid)
+  const { groupId, navigate, locateTask } = useChatMessageActions()
+  const gid = groupId
   const isRecalled = message.content.kind === 'recalled'
   const isCode = message.content.kind === 'code'
   const isSystem =
     !isRecalled && (message.type === 'system' || message.content.kind === 'system')
 
   const sender = useMemo(
-    () => members.find((m) => m.userId === message.senderUserId),
-    [members, message.senderUserId]
+    () => memberById.get(message.senderUserId),
+    [memberById, message.senderUserId]
   )
   const senderName = resolveMemberDisplayName(
     sender?.displayName ?? message.senderUserId,
@@ -129,11 +128,11 @@ function MessageBubble({
     if (message.content.kind !== 'recalled') return ''
     const { recalledBy } = message.content
     if (recalledBy === currentUserId) return t('chat.recalledYou')
-    const actor = members.find((m) => m.userId === recalledBy)
+    const actor = memberById.get(recalledBy)
     return actor
       ? resolveMemberDisplayName(actor.displayName, t)
       : recalledBy
-  }, [message.content, members, currentUserId, t])
+  }, [message.content, memberById, currentUserId, t])
 
   const pluginContextMenuItems = useChatPluginMenuItems('chat.message.context')
 
@@ -328,11 +327,12 @@ function MessageBubble({
           ) : null}
           <ChatMessageText
             text={message.content.text}
-            members={members}
+            members={mentionMembers}
             tasks={tasks}
             own={own}
             meta={message.content.meta}
-            onTaskRefClick={groupId ? (taskId) => locateTask(taskId, 'board') : undefined}
+            msgId={message.msgId}
+            onTaskRefClick={gid ? (taskId) => locateTask(taskId, 'board') : undefined}
           />
           {message.content.meta?.editedAt ? (
             <span className={styles.editedLabel}>{t('chat.editedLabel')}</span>
@@ -524,7 +524,8 @@ function messageBubblePropsAreEqual(
   return (
     prev.message === next.message &&
     prev.own === next.own &&
-    prev.members === next.members &&
+    prev.memberById === next.memberById &&
+    prev.mentionMembers === next.mentionMembers &&
     prev.tasks === next.tasks &&
     prev.deliveryLabel === next.deliveryLabel &&
     prev.deliveryAriaLabel === next.deliveryAriaLabel &&

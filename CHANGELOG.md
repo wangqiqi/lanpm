@@ -2,6 +2,22 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.85.0] - 2026-08-01
+
+### Added
+
+- **聊天性能 P3（chat-perf-p3）**：`listMenus(location?)` IPC 按锚点过滤 · `pluginMenusCache` 按 location 缓存
+- **`ChatMessageActionsContext`**：Router 导航/任务定位上提，气泡无 `useNavigate`/`useParams`/`useLocateTask`
+- **高亮 LRU** · **Markdown `msgId+textHash` 缓存** · **`BoundedSet`/`LruMap`** 工具
+- **`verify:chat-perf-p3`** · Spec `docs/specs/007-chat-perf-p3/spec.md`
+
+### Changed
+
+- **`MessageBubble`**：`memberById` + 含 `@`/`#` 才传 mention/task 子集；`replyQuotesByMsgId` 预计算
+- **`highlightSetup`**：禁 `highlightAuto` → `plaintext`；50k 字符上限；≈200 条 LRU
+- **`useChatNotifications`**：`notifiedIds` 上限 10k；**`useNewMessageScroll`** 滚动记忆最多 20 群
+- **`docs/优化.md` §6**：序 10 标 **✅ v1.85.0**
+
 ## [1.84.0] - 2026-08-01
 
 ### Added

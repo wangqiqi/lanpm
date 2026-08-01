@@ -54,4 +54,37 @@ describe('menuRegistry', () => {
     ])
     expect(listAllMenus(plugins)).toEqual(listed)
   })
+
+  it('filters menus by location when provided', () => {
+    const plugins = [
+      {
+        id: 'lanpm.example',
+        enabled: true,
+        commands: [
+          { id: 'hello', titleKey: 'command.example.hello' },
+          { id: 'ctx', titleKey: 'command.example.ctx' }
+        ],
+        menus: [
+          {
+            location: 'topbar.user' as const,
+            items: [{ command: 'hello' }]
+          },
+          {
+            location: 'chat.message.context' as const,
+            items: [{ command: 'ctx' }]
+          }
+        ]
+      }
+    ]
+    expect(listAllMenus(plugins, 'chat.message.context')).toEqual([
+      {
+        location: 'chat.message.context',
+        commandId: 'lanpm.example:ctx',
+        titleKey: 'command.example.ctx',
+        source: 'plugin',
+        pluginId: 'lanpm.example',
+        enabled: true
+      }
+    ])
+  })
 })

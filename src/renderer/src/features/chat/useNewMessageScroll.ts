@@ -12,6 +12,18 @@ import {
 
 /** 单会话内按群记忆滚动位置（不跨重启） */
 const scrollMemoryByGroup = new Map<string, ChatScrollMemory>()
+const SCROLL_MEMORY_MAX_GROUPS = 20
+
+function rememberScrollMemory(groupKey: string, memory: ChatScrollMemory): void {
+  if (scrollMemoryByGroup.has(groupKey)) {
+    scrollMemoryByGroup.delete(groupKey)
+  }
+  scrollMemoryByGroup.set(groupKey, memory)
+  while (scrollMemoryByGroup.size > SCROLL_MEMORY_MAX_GROUPS) {
+    const oldest = scrollMemoryByGroup.keys().next().value
+    if (oldest !== undefined) scrollMemoryByGroup.delete(oldest)
+  }
+}
 
 interface UseNewMessageScrollOptions {
   listRef: React.RefObject<HTMLDivElement | null>
@@ -120,7 +132,7 @@ export function useNewMessageScroll({
     const pinned = isPinnedToBottom(el)
     pinnedRef.current = pinned
     if (pinned) setPendingNewCount(0)
-    scrollMemoryByGroup.set(groupKey, captureScrollMemory(el))
+    rememberScrollMemory(groupKey, captureScrollMemory(el))
   }, [listRef, groupKey])
 
   const jumpToLatest = useCallback(() => {
@@ -129,7 +141,7 @@ export function useNewMessageScroll({
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     pinnedRef.current = true
     setPendingNewCount(0)
-    scrollMemoryByGroup.set(groupKey, { pinned: true })
+    rememberScrollMemory(groupKey, { pinned: true })
   }, [listRef, groupKey])
 
   return { pendingNewCount, onMessagesScroll, jumpToLatest }

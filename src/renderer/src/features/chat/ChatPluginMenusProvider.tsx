@@ -12,6 +12,8 @@ type ChatPluginMenusContextValue = {
   itemsForLocation: (location: PluginMenuLocation) => MenuProps['items']
 }
 
+const CHAT_MENU_LOCATIONS: PluginMenuLocation[] = ['chat.message.context']
+
 const ChatPluginMenusContext = createContext<ChatPluginMenusContextValue | null>(null)
 
 export function ChatPluginMenusProvider({
@@ -21,17 +23,9 @@ export function ChatPluginMenusProvider({
 }): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
-  const [listed, setListed] = useState<Awaited<ReturnType<typeof fetchPluginMenusCached>>>([])
-
-  useEffect(() => {
-    let cancelled = false
-    void fetchPluginMenusCached().then((menus) => {
-      if (!cancelled) setListed(menus)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const [itemsByLocation, setItemsByLocation] = useState<
+    Map<PluginMenuLocation, MenuProps['items']>
+  >(() => new Map())
 
   const runMenuCommand = useCallback(
     async (commandId: string): Promise<void> => {
@@ -45,23 +39,34 @@ export function ChatPluginMenusProvider({
     [message, t]
   )
 
-  const itemsByLocation = useMemo(() => {
-    const map = new Map<PluginMenuLocation, MenuProps['items']>()
-    for (const item of listed) {
-      const prev = map.get(item.location) ?? []
-      map.set(item.location, [
-        ...prev,
-        {
-          key: `plugin-menu:${item.commandId}`,
-          label: t(item.titleKey as MessageKey),
-          onClick: () => {
-            void runMenuCommand(item.commandId)
-          }
-        }
-      ])
+  useEffect(() => {
+    let cancelled = false
+    void Promise.all(
+      CHAT_MENU_LOCATIONS.map(async (location) => {
+        const listed = await fetchPluginMenusCached(location)
+        return { location, listed }
+      })
+    ).then((results) => {
+      if (cancelled) return
+      const map = new Map<PluginMenuLocation, MenuProps['items']>()
+      for (const { location, listed } of results) {
+        map.set(
+          location,
+          listed.map((item) => ({
+            key: `plugin-menu:${item.commandId}`,
+            label: t(item.titleKey as MessageKey),
+            onClick: () => {
+              void runMenuCommand(item.commandId)
+            }
+          }))
+        )
+      }
+      setItemsByLocation(map)
+    })
+    return () => {
+      cancelled = true
     }
-    return map
-  }, [listed, runMenuCommand, t])
+  }, [runMenuCommand, t])
 
   const value = useMemo<ChatPluginMenusContextValue>(
     () => ({

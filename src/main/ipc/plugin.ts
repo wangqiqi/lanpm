@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { PLUGIN_IPC } from '../../shared/plugin/channels'
+import { isPluginMenuLocation } from '../../shared/plugin/menus.ts'
 import type { PluginCapabilityId, PluginSlotId } from '../../shared/plugin/types'
 import { PLUGIN_CAPABILITY_IDS, PLUGIN_SLOT_IDS } from '../../shared/plugin/types'
 import {
@@ -31,7 +32,13 @@ export function registerPluginIpc(): void {
 
   ipcMain.handle(PLUGIN_IPC.listCommands, () => listCommands())
 
-  ipcMain.handle(PLUGIN_IPC.listMenus, () => listMenus())
+  ipcMain.handle(PLUGIN_IPC.listMenus, (_event, location?: string) => {
+    if (location === undefined) return listMenus()
+    if (typeof location !== 'string' || !isPluginMenuLocation(location)) {
+      throw new Error('invalid menu location')
+    }
+    return listMenus(location)
+  })
 
   ipcMain.handle(PLUGIN_IPC.invokeCommand, (_event, commandId: string) => {
     if (typeof commandId !== 'string' || !commandId.trim()) {

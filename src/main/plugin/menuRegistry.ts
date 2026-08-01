@@ -42,6 +42,11 @@ export function listPluginMenusFromDiscover(plugins: DiscoverPlugin[]): ListedMe
   return listed
 }
 
-export function listAllMenus(plugins: DiscoverPlugin[]): ListedMenuItem[] {
-  return listPluginMenusFromDiscover(plugins)
+export function listAllMenus(
+  plugins: DiscoverPlugin[],
+  location?: PluginMenuLocation
+): ListedMenuItem[] {
+  const all = listPluginMenusFromDiscover(plugins)
+  if (!location) return all
+  return all.filter((item) => item.location === location)
 }

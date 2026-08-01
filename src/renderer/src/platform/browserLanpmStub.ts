@@ -2292,7 +2292,11 @@ export function createBrowserLanpmStub(): LanpmApi {
         return views.sort((a, b) => a.route.localeCompare(b.route))
       },
       listCommands: async () => listStubCommands(),
-      listMenus: async () => listStubMenus(),
+      listMenus: async (location?: import('@shared/plugin/menus').PluginMenuLocation) => {
+        const all = listStubMenus()
+        if (!location) return all
+        return all.filter((item) => item.location === location)
+      },
       invokeCommand: async (commandId) => {
         const listed = listStubCommands()
         const pluginOnly = listed.filter((c) => c.source === 'plugin')

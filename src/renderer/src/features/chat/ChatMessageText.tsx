@@ -14,6 +14,7 @@ interface ChatMessageTextProps {
   tasks?: Task[]
   own?: boolean
   meta?: { source?: string }
+  msgId?: string
   onTaskRefClick?: (taskId: string) => void
 }
 
@@ -22,7 +23,8 @@ function renderTaskRefSegment(
   key: string,
   own: boolean | undefined,
   onTaskRefClick: ((taskId: string) => void) | undefined,
-  t: (key: 'chat.viewTask') => string
+  t: (key: 'chat.viewTask') => string,
+  msgId?: string
 ): React.ReactElement {
   if (tSeg.kind === 'taskRef') {
     if (tSeg.taskId && onTaskRefClick) {
@@ -51,7 +53,9 @@ function renderTaskRefSegment(
   }
 
   if (shouldRenderChatMarkdown(tSeg.value)) {
-    return <MarkdownView key={key} content={tSeg.value} variant="inline" />
+    return (
+      <MarkdownView key={key} content={tSeg.value} variant="inline" cacheKey={msgId} />
+    )
   }
 
   return <span key={key}>{tSeg.value}</span>
@@ -62,11 +66,12 @@ function renderTextWithTaskRefs(
   tasks: Task[],
   own: boolean | undefined,
   onTaskRefClick: ((taskId: string) => void) | undefined,
-  t: (key: 'chat.viewTask') => string
+  t: (key: 'chat.viewTask') => string,
+  msgId?: string
 ): React.ReactNode {
   const taskSegments = splitTaskRefSegments(text, tasks)
   return taskSegments.map((tSeg, j) =>
-    renderTaskRefSegment(tSeg, `t-${j}`, own, onTaskRefClick, t)
+    renderTaskRefSegment(tSeg, `t-${j}`, own, onTaskRefClick, t, msgId)
   )
 }
 
@@ -76,6 +81,7 @@ function ChatMessageTextInner({
   tasks = [],
   own,
   meta,
+  msgId,
   onTaskRefClick
 }: ChatMessageTextProps): React.ReactElement {
   const { t } = useI18n()
@@ -87,7 +93,7 @@ function ChatMessageTextInner({
       tasks.length > 0
 
     if (!hasMentionOrTask) {
-      return <MarkdownView content={text} variant="block" />
+      return <MarkdownView content={text} variant="block" cacheKey={msgId} />
     }
 
     return (
@@ -106,7 +112,7 @@ function ChatMessageTextInner({
           }
           return (
             <span key={`${i}-txt`}>
-              {renderTextWithTaskRefs(seg.value, tasks, own, onTaskRefClick, t)}
+              {renderTextWithTaskRefs(seg.value, tasks, own, onTaskRefClick, t, msgId)}
             </span>
           )
         })}
@@ -131,7 +137,7 @@ function ChatMessageTextInner({
         }
         return (
           <span key={`${i}-txt`}>
-            {renderTextWithTaskRefs(seg.value, tasks, own, onTaskRefClick, t)}
+            {renderTextWithTaskRefs(seg.value, tasks, own, onTaskRefClick, t, msgId)}
           </span>
         )
       })}

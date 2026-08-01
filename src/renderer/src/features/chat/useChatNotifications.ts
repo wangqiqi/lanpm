@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat/types'
 import { messagePreviewText } from '@shared/chat/messagePreview'
+import { BoundedSet } from '@shared/util/bounded'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { showDesktopNotification } from '@renderer/platform/desktopNotification'
 import { useIdentityStore } from '@renderer/stores/identityStore'
@@ -9,7 +10,8 @@ import { useNotificationPrefsStore } from '@renderer/stores/notificationPrefsSto
 import { useI18n } from '@renderer/i18n/useI18n'
 import { groupViewPath } from '@renderer/routes/paths'
 
-const notifiedIds = new Set<string>()
+const NOTIFIED_IDS_MAX = 10_000
+const notifiedIds = new BoundedSet<string>(NOTIFIED_IDS_MAX)
 
 function shouldSuppressNotification(
   message: ChatMessage,

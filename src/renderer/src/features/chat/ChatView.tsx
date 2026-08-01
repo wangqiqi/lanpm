@@ -42,6 +42,8 @@ import TaskSuggest, { taskStatusMessageKey } from '@renderer/features/chat/TaskS
 import MessageBubble from '@renderer/features/chat/MessageBubble'
 import ChatVirtualMessageList from '@renderer/features/chat/ChatVirtualMessageList'
 import { ChatPluginMenusProvider } from '@renderer/features/chat/ChatPluginMenusProvider'
+import { ChatMessageActionsProvider } from '@renderer/features/chat/ChatMessageActionsContext'
+import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
@@ -55,6 +57,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
 import { resolveReplyQuote } from '@shared/chat/replyQuote'
+import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import { buildQuoteKindLabels } from '@renderer/features/chat/quoteKindLabels'
 import {
   filterVisibleMessages,
@@ -110,6 +113,8 @@ const SIDEBAR_MAX = 400
 const SIDEBAR_DEFAULT = 240
 const SIDEBAR_WIDTH_KEY = 'lanpm-chat-sidebar-width'
 const MAX_MULTI_SELECT = 50
+const EMPTY_MEMBERS: GroupMemberView[] = []
+const EMPTY_TASKS: Task[] = []
 
 function formatTime(iso: string): string {
   try {
@@ -127,6 +132,11 @@ export default function ChatView(): React.ReactElement {
   const location = useLocation()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
+  const locateTask = useLocateTask(gid)
+  const messageActionsValue = useMemo(
+    () => ({ groupId: gid, navigate, locateTask }),
+    [gid, navigate, locateTask]
+  )
   const inDm = isDmGroupId(gid)
   const lastOriginGroupId = useDmStore((s) => s.lastOriginGroupId)
   const dmSession = useDmStore((s) => (inDm ? s.getSession(gid) : undefined))
@@ -177,6 +187,10 @@ export default function ChatView(): React.ReactElement {
   const pickedTaskRefIdRef = useRef<string | null>(null)
   const [draft, setDraft] = useState('')
   const members = useChatMembersStore((s) => s.membersByGroup[gid] ?? [])
+  const memberById = useMemo(
+    () => new Map(members.map((m) => [m.userId, m] as const)),
+    [members]
+  )
   const loadMembers = useChatMembersStore((s) => s.loadMembers)
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
@@ -271,6 +285,21 @@ export default function ChatView(): React.ReactElement {
   )
 
   const quoteKindLabels = useMemo(() => buildQuoteKindLabels(t), [t])
+
+  const replyQuotesByMsgId = useMemo(() => {
+    const map = new Map<string, ResolvedReplyQuote>()
+    for (const msg of visibleMessages) {
+      if (!msg.replyToMsgId) continue
+      const quote = resolveReplyQuote(
+        msg.replyToMsgId,
+        (id) => messageById.get(id),
+        resolveSenderName,
+        quoteKindLabels
+      )
+      if (quote) map.set(msg.msgId, quote)
+    }
+    return map
+  }, [visibleMessages, messageById, resolveSenderName, quoteKindLabels])
 
   const pendingReplyQuote = useMemo(() => {
     if (!replyToMsgId) return null
@@ -840,21 +869,18 @@ export default function ChatView(): React.ReactElement {
   const renderMessage = useCallback(
     (msg: ChatMessage, showSender: boolean) => {
       const delivery = deliveryStatusMeta(msg.deliveryStatus, t)
-      const replyQuote = msg.replyToMsgId
-        ? resolveReplyQuote(
-            msg.replyToMsgId,
-            (id) => messageById.get(id),
-            resolveSenderName,
-            quoteKindLabels
-          )
-        : null
+      const textForRefs = extractMessageText(msg.content)
+      const mentionMembers = textForRefs.includes('@') ? members : EMPTY_MEMBERS
+      const bubbleTasks =
+        taskAllowed && textForRefs.includes('#') ? tasks : EMPTY_TASKS
       return (
         <MessageBubble
           key={msg.msgId}
           message={msg}
           own={msg.senderUserId === currentUserId}
-          members={members}
-          tasks={taskAllowed ? tasks : []}
+          memberById={memberById}
+          mentionMembers={mentionMembers}
+          tasks={bubbleTasks}
           deliveryLabel={delivery.text}
           deliveryAriaLabel={delivery.ariaLabel}
           deliveryFailed={delivery.failed}
@@ -863,7 +889,7 @@ export default function ChatView(): React.ReactElement {
           jumpHighlighted={isJumpHighlighted(msg.msgId)}
           showSender={showSender}
           dmAllowed={dmAllowed && !inDm}
-          replyQuote={replyQuote}
+          replyQuote={replyQuotesByMsgId.get(msg.msgId) ?? null}
           onJumpToReply={jumpToMessage}
           multiSelectMode={multiSelectMode}
           selected={selectedMsgIds.has(msg.msgId)}
@@ -890,11 +916,10 @@ export default function ChatView(): React.ReactElement {
     },
     [
       t,
-      messageById,
-      resolveSenderName,
-      quoteKindLabels,
-      currentUserId,
+      memberById,
       members,
+      replyQuotesByMsgId,
+      currentUserId,
       taskAllowed,
       tasks,
       isMsgHighlighted,
@@ -921,6 +946,7 @@ export default function ChatView(): React.ReactElement {
 
   return (
     <ChatPluginMenusProvider>
+    <ChatMessageActionsProvider value={messageActionsValue}>
     <div className={styles.chatLayout}>
       {sidebarOpen && (
         <button
@@ -1358,6 +1384,7 @@ export default function ChatView(): React.ReactElement {
       </div>
       </ChatWorkspaceFrame>
     </div>
+    </ChatMessageActionsProvider>
     </ChatPluginMenusProvider>
   )
 }

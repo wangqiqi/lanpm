@@ -13,8 +13,13 @@ import sql from 'highlight.js/lib/languages/sql'
 import typescript from 'highlight.js/lib/languages/typescript'
 import xml from 'highlight.js/lib/languages/xml'
 import { toHighlightLanguage } from '@shared/chat/detectLanguage'
+import { LruMap } from '@shared/util/bounded'
+
+export const HIGHLIGHT_MAX_CHARS = 50_000
+export const HIGHLIGHT_CACHE_MAX = 200
 
 let registered = false
+const highlightCache = new LruMap<string, string>(HIGHLIGHT_CACHE_MAX)
 
 function ensureRegistered(): void {
   if (registered) return
@@ -34,11 +39,29 @@ function ensureRegistered(): void {
   registered = true
 }
 
+function hashCode(text: string): string {
+  let h = 0
+  for (let i = 0; i < text.length; i++) {
+    h = (Math.imul(31, h) + text.charCodeAt(i)) | 0
+  }
+  return `${h}:${text.length}`
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 export function highlightCode(code: string, language: string): string {
   ensureRegistered()
-  const lang = toHighlightLanguage(language)
-  if (hljs.getLanguage(lang)) {
-    return hljs.highlight(code, { language: lang }).value
+  if (code.length > HIGHLIGHT_MAX_CHARS) {
+    return `${escapeHtml(code.slice(0, HIGHLIGHT_MAX_CHARS))}…`
   }
-  return hljs.highlightAuto(code).value
+  const lang = toHighlightLanguage(language)
+  const effectiveLang = hljs.getLanguage(lang) ? lang : 'plaintext'
+  const key = `${effectiveLang}:${hashCode(code)}`
+  const cached = highlightCache.get(key)
+  if (cached !== undefined) return cached
+  const value = hljs.highlight(code, { language: effectiveLang }).value
+  highlightCache.set(key, value)
+  return value
 }

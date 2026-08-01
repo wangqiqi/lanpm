@@ -15,8 +15,8 @@ export function usePluginMenus(location: PluginMenuLocation): MenuProps['items']
   const [listed, setListed] = useState<ListedMenuItem[]>([])
 
   const loadMenus = useCallback(async (): Promise<void> => {
-    const all = await fetchPluginMenusCached()
-    setListed(all.filter((item) => item.location === location))
+    const listed = await fetchPluginMenusCached(location)
+    setListed(listed)
   }, [location])
 
   useEffect(() => {
