@@ -104,6 +104,7 @@ npm run build
 |-------|------|
 | README images | `npm run screenshots:capture` → `npm run screenshots:sync-readme` ([docs/screenshots](./docs/screenshots/README.md)) |
 | Acceptance | **Electron** (`npm run dev`) is source of truth — not browser stub (`npm run dev:web`) |
+| Chat perf QA | Packaged build regression → `docs/templates/chat-perf-regression.md` · budget → `docs/specs/009-chat-perf-observe/spec.md` |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
 
 Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — details in [`.cursor/`](./.cursor/).
