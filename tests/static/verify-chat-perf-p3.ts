@@ -52,10 +52,13 @@ assert.match(chatView, /ChatMessageActionsProvider/)
 assert.match(chatView, /replyQuotesByMsgId/)
 assert.match(chatView, /memberById/)
 
-const highlight = readFileSync(join(root, 'src/renderer/src/features/chat/highlightSetup.ts'), 'utf8')
+const highlight = readFileSync(join(root, 'src/renderer/src/features/chat/highlightCore.ts'), 'utf8')
 assert.ok(!highlight.includes('highlightAuto'), 'must not use highlightAuto')
 assert.match(highlight, /HIGHLIGHT_MAX_CHARS/)
 assert.match(highlight, /LruMap/)
+
+const highlightSetup = readFileSync(join(root, 'src/renderer/src/features/chat/highlightSetup.ts'), 'utf8')
+assert.match(highlightSetup, /highlightCodeAsync/)
 
 const markdown = readFileSync(join(root, 'src/renderer/src/ui/MarkdownView.tsx'), 'utf8')
 assert.match(markdown, /cacheKey/)

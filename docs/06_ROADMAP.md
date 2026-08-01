@@ -22,7 +22,7 @@
 |------|------|------|
 | **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 · **体验产品化** | Host/stub/mesh/LiveKit 路径已交付；见 **§3** · **§6.4** |
 | 表情、书签浏览器导入导出 | 聊天/书签体验糖 | 低优先级（原 B6 体验） |
-| **聊天性能（剩余）** | Worker 高亮（[SPIKE 015 暂缓](./specs/015-highlight-worker-spike/spike.md)） | 主序列 **v1.83–v1.92 已交付**；详见 [优化.md](./优化.md) |
+| **聊天性能** | Worker 高亮（[016](./specs/016-highlight-worker/spec.md)） | 主序列 **v1.83–v1.93 已交付**；详见 [优化.md](./优化.md) |
 | **高级 Agent 编排** | LangGraph / 多角色 DAG 等 | L3a/L3b 已交付（`verify:ai-pipeline*`）；**可选** 外框架后置 |
 | 移动端 Web | PWA 基础版本 | 后置 |
 

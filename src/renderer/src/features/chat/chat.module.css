@@ -1053,6 +1053,10 @@
   max-height: none;
 }
 
+.codeBlockHighlightLoading code {
+  opacity: 0.72;
+}
+
 .codeDetectHint {
   margin-left: 12px;
   font-size: var(--lanpm-font-body-secondary);

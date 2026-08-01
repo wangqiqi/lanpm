@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Tag } from 'antd'
 import RegionButton from '@renderer/ui/RegionButton'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
@@ -6,7 +6,7 @@ import { CopyOutlined } from '@ant-design/icons'
 import githubCssUrl from 'highlight.js/styles/github.css?url'
 import githubDarkCssUrl from 'highlight.js/styles/github-dark.css?url'
 import type { ThemeMode } from '@renderer/stores/uiStore'
-import { highlightCode } from '@renderer/features/chat/highlightSetup'
+import { highlightCode, highlightCodeAsync } from '@renderer/features/chat/highlightSetup'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
@@ -46,11 +46,40 @@ function CodeBlockInner({
   const collapsible = lineCount > COLLAPSE_LINE_THRESHOLD
   const [expanded, setExpanded] = useState(false)
   const shouldHighlight = !deferHeavyContent && (!collapsible || expanded)
+  const [html, setHtml] = useState('')
+  const [highlightLoading, setHighlightLoading] = useState(false)
   useHighlightTheme(theme, shouldHighlight)
-  const html = useMemo(
-    () => (shouldHighlight ? highlightCode(code, language) : ''),
-    [code, language, shouldHighlight]
-  )
+
+  useEffect(() => {
+    if (!shouldHighlight) {
+      setHtml('')
+      setHighlightLoading(false)
+      return
+    }
+    const controller = new AbortController()
+    let cancelled = false
+    setHighlightLoading(true)
+    void highlightCodeAsync(code, language, controller.signal)
+      .then((result) => {
+        if (cancelled) return
+        setHtml(result)
+        setHighlightLoading(false)
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        try {
+          setHtml(highlightCode(code, language))
+        } catch {
+          setHtml('')
+        }
+        setHighlightLoading(false)
+      })
+    return () => {
+      cancelled = true
+      controller.abort()
+    }
+  }, [code, language, shouldHighlight])
 
   const copyCode = async (): Promise<void> => {
     try {
@@ -78,12 +107,19 @@ function CodeBlockInner({
         ) : null}
       </div>
       <pre
-        className={`hljs ${styles.codeBlock} ${expanded ? styles.codeBlockExpanded : ''}`}
+        className={`hljs ${styles.codeBlock} ${expanded ? styles.codeBlockExpanded : ''} ${
+          highlightLoading ? styles.codeBlockHighlightLoading : ''
+        }`}
         data-theme={theme}
         data-deferred={deferHeavyContent ? '1' : undefined}
+        data-highlight-loading={highlightLoading ? '1' : undefined}
       >
         {shouldHighlight ? (
-          <code dangerouslySetInnerHTML={{ __html: html }} />
+          html ? (
+            <code dangerouslySetInnerHTML={{ __html: html }} />
+          ) : (
+            <code>{code}</code>
+          )
         ) : (
           <code>{deferHeavyContent && collapsible ? `… (${lineCount})` : code}</code>
         )}

@@ -38,10 +38,12 @@ assert.ok(!markRead.includes('}, [groupId, localUserId, messages'), 'must not de
 const dmBar = readFileSync(join(root, 'src/renderer/src/features/chat/DmSessionBar.tsx'), 'utf8')
 assert.ok(!dmBar.includes('messagesByGroup = useChatStore'), 'must not subscribe whole messagesByGroup')
 assert.match(dmBar, /DmSessionRow/)
-assert.match(dmBar, /messagesByGroup\[session\.groupId\]/)
+assert.match(dmBar, /useDmPreviewStore/)
+assert.match(dmBar, /useDmPreviews/)
 
 const codeBlock = readFileSync(join(root, 'src/renderer/src/features/chat/CodeBlock.tsx'), 'utf8')
 assert.match(codeBlock, /shouldHighlight/)
+assert.match(codeBlock, /highlightCodeAsync/)
 assert.match(codeBlock, /memo\(/)
 
 const chatText = readFileSync(join(root, 'src/renderer/src/features/chat/ChatMessageText.tsx'), 'utf8')

@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.93.0] - 2026-08-01
+
+### Added
+
+- **Worker 代码高亮（highlight-worker）**：`highlight.worker.ts` · `highlightCodeAsync` · `CodeBlock` async UI
+- **`docs/specs/016-highlight-worker/spec.md`**
+- **`verify:highlight-worker`** — 静态守卫 + `tests/unit/chat/highlightSetup.test.ts`
+
+### Changed
+
+- **`highlightSetup` / `highlightCore`**：同步 `highlightCode` 保留；LRU/50k 上限迁入 `highlightCore`
+- **`CodeBlock`**：`useEffect` + `AbortController` 异步高亮；加载态 `codeBlockHighlightLoading`
+- **`docs/优化.md`** · **`06_ROADMAP.md`** — Worker 高亮标 ✅ v1.93.0
+- **`verify:chat-perf-follow`** · **`verify:chat-perf-p3`** — 对齐 dm-preview / highlight-worker 落点
+
 ## [1.92.1] - 2026-08-01
 
 ### Changed
