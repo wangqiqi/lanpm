@@ -11,6 +11,7 @@
 - **截图基线同步（TASK-1224）**：`docs/screenshots/baselines` 更新为协作抽屉态（含 `light_mindmap` / `dark_mindmap`）；`assets/` README 门面图同步；`verify:screenshots-layout` / `verify:screenshots-sync` 守卫扩展
 - **插件面视觉守卫（TASK-1225）**：`verify:plugin-ui-surfaces` — Profile `profile.tab` · `PluginsPanel` · 任务详情 `task.detail.section`（树/看板）· formjs `data-formjs-engine` / `formJsHost`；并入 `verify:release-gate`
 - **核心视图 E2E 范围（SPIKE-1226）**：暂缓 chat/board Tab 冒烟与任务 CRUD E2E；决策记入 `docs/05` §1.2.6 补充 · `archive/20260801_162500_SPIKE-1226_核心视图E2E范围.md`
+- **非聊天视图 perf 冒烟（TASK-1227）**：`verify:core-views-perf` — GroupView lazy 重视图 · board/tree/gantt memo · 白板防抖与协作抽屉延迟挂载；`docs/06` §4 引用
 
 ## [1.96.1] - 2026-08-01
 

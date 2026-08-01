@@ -105,7 +105,7 @@
 |----|------|
 | Win/mac/Linux **真机 UI** 七页肉眼 | 自动化 CI 三 OS × `verify:m7` 已闭合；真机延期 |
 | **真网**双机（发现 → 加群/私聊/已读） | `verify:dual-stub` 已闭合；真网延期 |
-| 冷启动 / 空闲·聊天内存 / Tab P95 手测 | `verify:m7-perf` 部分自动化；生产包真机延期 |
+| 冷启动 / 空闲·聊天内存 / Tab P95 手测 | `verify:m7-perf` 部分自动化；`verify:core-views-perf` 静态守卫 board/gantt/tree/whiteboard；生产包真机延期 |
 | 英文长文案折行肉眼 | `verify:i18n-en` 无 CJK；全页折行延期 |
 
 方法见 [05](./05_测试与联调发布.md) §2 / §5 / §6。
