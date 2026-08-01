@@ -50,7 +50,10 @@ const topBar = readFileSync(join(root, 'src/renderer/src/layout/TopBar.tsx'), 'u
 assert.match(topBar, /usePluginMenus\('topbar\.user'\)/)
 
 const bubble = readFileSync(join(root, 'src/renderer/src/features/chat/MessageBubble.tsx'), 'utf8')
-assert.match(bubble, /usePluginMenus\('chat\.message\.context'\)/)
+assert.match(
+  bubble,
+  /useChatPluginMenuItems\('chat\.message\.context'\)|usePluginMenus\('chat\.message\.context'\)/
+)
 
 const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub.ts'), 'utf8')
 assert.match(stub, /listMenus/)

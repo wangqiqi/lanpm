@@ -7,6 +7,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/types'
 import { PLUGIN_ENABLED_CHANGED_EVENT } from '@renderer/plugin/pluginEvents'
 import { applyCommandAction } from '@renderer/plugin/commandEffects'
+import { fetchPluginMenusCached } from '@renderer/plugin/pluginMenusCache'
 
 export function usePluginMenus(location: PluginMenuLocation): MenuProps['items'] {
   const { t } = useI18n()
@@ -14,12 +15,8 @@ export function usePluginMenus(location: PluginMenuLocation): MenuProps['items']
   const [listed, setListed] = useState<ListedMenuItem[]>([])
 
   const loadMenus = useCallback(async (): Promise<void> => {
-    try {
-      const all = await getLanpmApi().plugin.listMenus()
-      setListed(all.filter((item) => item.location === location))
-    } catch {
-      setListed([])
-    }
+    const all = await fetchPluginMenusCached()
+    setListed(all.filter((item) => item.location === location))
   }, [location])
 
   useEffect(() => {

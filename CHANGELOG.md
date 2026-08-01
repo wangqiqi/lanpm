@@ -2,6 +2,21 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.83.0] - 2026-08-01
+
+### Added
+
+- **聊天性能 Sprint（chat-perf）**：会话级 `ChatPluginMenusProvider` + `pluginMenusCache` / `pluginSlotCache`（插件 IPC 与消息条数 N 解耦）
+- **虚拟消息列表**：`ChatVirtualMessageList`（`@tanstack/react-virtual`）· 按日分组行模型 `chatVirtualRows`
+- **单例右键菜单**：`ChatView` 级 ContextMenu + 按需 `PluginZoneHost`（`chat.message.action`）
+- **`verify:chat-perf`** · Spec `docs/specs/005-chat-perf/spec.md`
+
+### Changed
+
+- **`MessageBubble`**：`memo` + `useChatPluginMenuItems`；移除 per-bubble `PluginZoneHost` / `Dropdown` contextMenu
+- **`ChatView`**：`selectedMsgIds` → `Set`；`PinnedMessagesBar` 接收 `messageById` Map
+- **`docs/优化.md` §6**：序 1–4、8 标 **✅ v1.83.0**
+
 ## [1.82.0] - 2026-08-01
 
 ### Added

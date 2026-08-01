@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Dropdown, Tag, type MenuProps } from 'antd'
 import UserAvatar from '@renderer/ui/UserAvatar'
 import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
@@ -22,8 +22,7 @@ import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
-import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
-import { usePluginMenus } from '@renderer/plugin/usePluginMenus'
+import { useChatPluginMenuItems } from '@renderer/features/chat/ChatPluginMenusProvider'
 import MessageReplyStrip from '@renderer/features/chat/MessageReplyStrip'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import styles from './chat.module.css'
@@ -65,9 +64,10 @@ interface MessageBubbleProps {
   onForward?: (message: ChatMessage) => void
   onEdit?: (message: ChatMessage) => void
   onEnterMultiSelect?: (msgId: string) => void
+  onBubbleContextMenu?: (msgId: string, menu: MenuProps, event: React.MouseEvent) => void
 }
 
-export default function MessageBubble({
+function MessageBubble({
   message,
   own,
   members,
@@ -96,7 +96,8 @@ export default function MessageBubble({
   onReply,
   onForward,
   onEdit,
-  onEnterMultiSelect
+  onEnterMultiSelect,
+  onBubbleContextMenu
 }: MessageBubbleProps): React.ReactElement {
   const { t } = useI18n()
   const { message: appMessage } = useLanpmApp()
@@ -106,11 +107,6 @@ export default function MessageBubble({
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
   const locateTask = useLocateTask(gid)
-  const messageContext = {
-    groupId: gid,
-    view: 'chat' as const,
-    selection: { messageId: message.msgId }
-  }
   const isRecalled = message.content.kind === 'recalled'
   const isCode = message.content.kind === 'code'
   const isSystem =
@@ -139,7 +135,7 @@ export default function MessageBubble({
       : recalledBy
   }, [message.content, members, currentUserId, t])
 
-  const pluginContextMenuItems = usePluginMenus('chat.message.context')
+  const pluginContextMenuItems = useChatPluginMenuItems('chat.message.context')
 
   const senderMenu: MenuProps = useMemo(() => {
     if (own) return { items: [] }
@@ -297,6 +293,12 @@ export default function MessageBubble({
 
   const hasBubbleMenu = (bubbleMenu.items?.length ?? 0) > 0
 
+  const handleBubbleContextMenu = (event: React.MouseEvent): void => {
+    if (!hasBubbleMenu || !onBubbleContextMenu) return
+    event.preventDefault()
+    onBubbleContextMenu(message.msgId, bubbleMenu, event)
+  }
+
   const selectCheckbox =
     multiSelectMode && onToggleSelect ? (
       <input
@@ -432,13 +434,9 @@ export default function MessageBubble({
       >
         {selectCheckbox}
         <div className={styles.messageColOwn}>
-          {hasBubbleMenu ? (
-            <Dropdown menu={bubbleMenu} trigger={['contextMenu']}>
-              <div className={bubbleClass}>{bubbleBody}</div>
-            </Dropdown>
-          ) : (
-            <div className={bubbleClass}>{bubbleBody}</div>
-          )}
+          <div className={bubbleClass} onContextMenu={handleBubbleContextMenu}>
+            {bubbleBody}
+          </div>
           <div className={styles.status}>
             {formatTime(message.createdAt)}{' '}
             <span
@@ -458,7 +456,6 @@ export default function MessageBubble({
               </button>
             ) : null}
           </div>
-          <PluginZoneHost zone="context" context={messageContext} />
         </div>
       </div>
     )
@@ -509,14 +506,53 @@ export default function MessageBubble({
           </Dropdown>
         ) : null}
         {hasBubbleMenu ? (
-          <Dropdown menu={bubbleMenu} trigger={['contextMenu']}>
-            <div className={bubbleClass}>{bubbleBody}</div>
-          </Dropdown>
+          <div className={bubbleClass} onContextMenu={handleBubbleContextMenu}>
+            {bubbleBody}
+          </div>
         ) : (
           <div className={bubbleClass}>{bubbleBody}</div>
         )}
-        <PluginZoneHost zone="context" context={messageContext} />
       </div>
     </div>
   )
 }
+
+function messageBubblePropsAreEqual(
+  prev: MessageBubbleProps,
+  next: MessageBubbleProps
+): boolean {
+  return (
+    prev.message === next.message &&
+    prev.own === next.own &&
+    prev.members === next.members &&
+    prev.tasks === next.tasks &&
+    prev.deliveryLabel === next.deliveryLabel &&
+    prev.deliveryAriaLabel === next.deliveryAriaLabel &&
+    prev.deliveryFailed === next.deliveryFailed &&
+    prev.highlighted === next.highlighted &&
+    prev.jumpHighlighted === next.jumpHighlighted &&
+    prev.showSender === next.showSender &&
+    prev.dmAllowed === next.dmAllowed &&
+    prev.taskCreateAllowed === next.taskCreateAllowed &&
+    prev.replyQuote === next.replyQuote &&
+    prev.multiSelectMode === next.multiSelectMode &&
+    prev.selected === next.selected &&
+    prev.formatTime === next.formatTime &&
+    prev.onMentionSender === next.onMentionSender &&
+    prev.onViewSender === next.onViewSender &&
+    prev.onDmSender === next.onDmSender &&
+    prev.onRecall === next.onRecall &&
+    prev.onRetrySend === next.onRetrySend &&
+    prev.onCreateTaskFromMessage === next.onCreateTaskFromMessage &&
+    prev.onLinkMessageToTask === next.onLinkMessageToTask &&
+    prev.onJumpToReply === next.onJumpToReply &&
+    prev.onToggleSelect === next.onToggleSelect &&
+    prev.onReply === next.onReply &&
+    prev.onForward === next.onForward &&
+    prev.onEdit === next.onEdit &&
+    prev.onEnterMultiSelect === next.onEnterMultiSelect &&
+    prev.onBubbleContextMenu === next.onBubbleContextMenu
+  )
+}
+
+export default memo(MessageBubble, messageBubblePropsAreEqual)

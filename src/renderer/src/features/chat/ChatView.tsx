@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
-import { Button, Input, Modal, Segmented, Select, Typography } from 'antd'
+import { Button, Dropdown, Input, Modal, Segmented, Select, Typography } from 'antd'
+import type { MenuProps } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
   AudioOutlined,
@@ -39,6 +40,8 @@ import MemberList from '@renderer/features/chat/MemberList'
 import MentionSuggest from '@renderer/features/chat/MentionSuggest'
 import TaskSuggest, { taskStatusMessageKey } from '@renderer/features/chat/TaskSuggest'
 import MessageBubble from '@renderer/features/chat/MessageBubble'
+import ChatVirtualMessageList from '@renderer/features/chat/ChatVirtualMessageList'
+import { ChatPluginMenusProvider } from '@renderer/features/chat/ChatPluginMenusProvider'
 import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
@@ -178,7 +181,13 @@ export default function ChatView(): React.ReactElement {
   >(null)
   const [editModal, setEditModal] = useState<{ msgId: string; text: string } | null>(null)
   const [multiSelectMode, setMultiSelectMode] = useState(false)
-  const [selectedMsgIds, setSelectedMsgIds] = useState<string[]>([])
+  const [selectedMsgIds, setSelectedMsgIds] = useState<Set<string>>(() => new Set())
+  const [bubbleMenuState, setBubbleMenuState] = useState<{
+    msgId: string
+    menu: MenuProps
+    x: number
+    y: number
+  } | null>(null)
   const [hiddenRevision, setHiddenRevision] = useState(0)
   const pinnedIds = useChatPinStore((s) => s.pinnedByGroup[gid] ?? [])
   const loadPins = useChatPinStore((s) => s.loadPins)
@@ -266,6 +275,26 @@ export default function ChatView(): React.ReactElement {
     () => groupMessagesByDay(visibleMessages, locale),
     [visibleMessages, locale]
   )
+
+  const handleBubbleContextMenu = useCallback(
+    (msgId: string, menu: MenuProps, event: React.MouseEvent) => {
+      setBubbleMenuState({ msgId, menu, x: event.clientX, y: event.clientY })
+    },
+    []
+  )
+
+  useEffect(() => {
+    if (!bubbleMenuState) return
+    const close = (): void => setBubbleMenuState(null)
+    window.addEventListener('click', close)
+    window.addEventListener('contextmenu', close)
+    window.addEventListener('scroll', close, true)
+    return () => {
+      window.removeEventListener('click', close)
+      window.removeEventListener('contextmenu', close)
+      window.removeEventListener('scroll', close, true)
+    }
+  }, [bubbleMenuState])
 
   const groupType = gid ? getGroupType(gid) : 'project'
   const originGroupId = inDm ? (dmSession?.originGroupId ?? lastOriginGroupId) : gid
@@ -393,7 +422,7 @@ export default function ChatView(): React.ReactElement {
   useEffect(() => {
     setReplyToMsgId(null)
     setMultiSelectMode(false)
-    setSelectedMsgIds([])
+    setSelectedMsgIds(new Set())
     setForwardModal(null)
     setEditModal(null)
   }, [gid])
@@ -745,7 +774,7 @@ export default function ChatView(): React.ReactElement {
           }
           message.success(t('chat.batchForwardDone'))
           setMultiSelectMode(false)
-          setSelectedMsgIds([])
+          setSelectedMsgIds(new Set())
         } else {
           await forwardMessage(forwardModal.sourceMsgId, targetGroupId, senderName)
           message.success(t('chat.forwardMessageDone'))
@@ -760,22 +789,27 @@ export default function ChatView(): React.ReactElement {
 
   const toggleSelectMessage = useCallback((msgId: string) => {
     setSelectedMsgIds((prev) => {
-      if (prev.includes(msgId)) return prev.filter((id) => id !== msgId)
-      if (prev.length >= MAX_MULTI_SELECT) {
+      const next = new Set(prev)
+      if (next.has(msgId)) {
+        next.delete(msgId)
+        return next
+      }
+      if (next.size >= MAX_MULTI_SELECT) {
         message.warning(t('chat.batchSelectLimit', { max: MAX_MULTI_SELECT }))
         return prev
       }
-      return [...prev, msgId]
+      next.add(msgId)
+      return next
     })
   }, [message, t])
 
   const handleEnterMultiSelect = useCallback((msgId: string) => {
     setMultiSelectMode(true)
-    setSelectedMsgIds([msgId])
+    setSelectedMsgIds(new Set([msgId]))
   }, [])
 
   const handleBatchCopy = useCallback(() => {
-    const texts = selectedMsgIds
+    const texts = Array.from(selectedMsgIds)
       .map((id) => messageById.get(id))
       .filter((m): m is ChatMessage => Boolean(m))
       .map((m) => extractMessageText(m.content))
@@ -788,11 +822,94 @@ export default function ChatView(): React.ReactElement {
   }, [selectedMsgIds, messageById, message, t])
 
   const handleBatchForward = useCallback(() => {
-    if (selectedMsgIds.length === 0) return
-    setForwardModal({ batchMsgIds: selectedMsgIds })
+    if (selectedMsgIds.size === 0) return
+    setForwardModal({ batchMsgIds: Array.from(selectedMsgIds) })
   }, [selectedMsgIds])
 
+  const renderMessage = useCallback(
+    (msg: ChatMessage, showSender: boolean) => {
+      const delivery = deliveryStatusMeta(msg.deliveryStatus, t)
+      const replyQuote = msg.replyToMsgId
+        ? resolveReplyQuote(
+            msg.replyToMsgId,
+            (id) => messageById.get(id),
+            resolveSenderName,
+            quoteKindLabels
+          )
+        : null
+      return (
+        <MessageBubble
+          key={msg.msgId}
+          message={msg}
+          own={msg.senderUserId === currentUserId}
+          members={members}
+          tasks={taskAllowed ? tasks : []}
+          deliveryLabel={delivery.text}
+          deliveryAriaLabel={delivery.ariaLabel}
+          deliveryFailed={delivery.failed}
+          formatTime={formatTime}
+          highlighted={isMsgHighlighted(msg.msgId)}
+          jumpHighlighted={isJumpHighlighted(msg.msgId)}
+          showSender={showSender}
+          dmAllowed={dmAllowed && !inDm}
+          replyQuote={replyQuote}
+          onJumpToReply={jumpToMessage}
+          multiSelectMode={multiSelectMode}
+          selected={selectedMsgIds.has(msg.msgId)}
+          onToggleSelect={toggleSelectMessage}
+          onReply={handleReply}
+          onForward={handleForwardOne}
+          onEdit={handleEditMessage}
+          onEnterMultiSelect={handleEnterMultiSelect}
+          onMentionSender={insertMention}
+          onViewSender={viewSenderProfile}
+          onDmSender={startDmWithMember}
+          onRecall={(msgId) => void handleRecall(msgId)}
+          onRetrySend={(msgId) => void handleRetrySend(msgId)}
+          taskCreateAllowed={taskAllowed}
+          onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
+          onLinkMessageToTask={(m) => {
+            const preview = titleFromChatMessage(m) ?? m.msgId
+            setLinkToTaskModal({ msgId: m.msgId, preview })
+            setLinkTaskId(undefined)
+          }}
+          onBubbleContextMenu={handleBubbleContextMenu}
+        />
+      )
+    },
+    [
+      t,
+      messageById,
+      resolveSenderName,
+      quoteKindLabels,
+      currentUserId,
+      members,
+      taskAllowed,
+      tasks,
+      isMsgHighlighted,
+      isJumpHighlighted,
+      dmAllowed,
+      inDm,
+      jumpToMessage,
+      multiSelectMode,
+      selectedMsgIds,
+      toggleSelectMessage,
+      handleReply,
+      handleForwardOne,
+      handleEditMessage,
+      handleEnterMultiSelect,
+      insertMention,
+      viewSenderProfile,
+      startDmWithMember,
+      handleRecall,
+      handleRetrySend,
+      handleCreateTaskFromMessage,
+      handleBubbleContextMenu
+    ]
+  )
+
   return (
+    <ChatPluginMenusProvider>
     <div className={styles.chatLayout}>
       {sidebarOpen && (
         <button
@@ -916,7 +1033,7 @@ export default function ChatView(): React.ReactElement {
         )}
         <PinnedMessagesBar
           pinnedIds={pinnedIds}
-          messages={messages}
+          messageById={messageById}
           members={members}
           onJump={jumpToMessage}
           onUnpin={(msgId) => void handlePinToggle(msgId)}
@@ -936,74 +1053,47 @@ export default function ChatView(): React.ReactElement {
               {t('chat.noMessages')}
             </Text>
           ) : (
-            <div className={styles.messageList}>
-              {(hasMore || loadingOlder) && (
-                <div className={styles.loadOlder}>
-                  {loadingOlder ? t('chat.loadingOlder') : t('chat.loadOlderHint')}
-                </div>
-              )}
-              {dayGroups.map((group) => (
-                <div key={group.dayKey} className={styles.dayGroup}>
-                  <div className={styles.dayLabel}>{group.label}</div>
-                  {group.messages.map((msg, msgIndex) => {
-                    const prev = msgIndex > 0 ? group.messages[msgIndex - 1] : null
-                    const showSender =
-                      !prev ||
-                      prev.senderUserId !== msg.senderUserId ||
-                      msg.createdAt.slice(0, 16) !== prev.createdAt.slice(0, 16)
-                    const delivery = deliveryStatusMeta(msg.deliveryStatus, t)
-                    const replyQuote = msg.replyToMsgId
-                      ? resolveReplyQuote(
-                          msg.replyToMsgId,
-                          (id) => messageById.get(id),
-                          resolveSenderName,
-                          quoteKindLabels
-                        )
-                      : null
-                    return (
-                      <MessageBubble
-                        key={msg.msgId}
-                        message={msg}
-                        own={msg.senderUserId === currentUserId}
-                        members={members}
-                        tasks={taskAllowed ? tasks : []}
-                        deliveryLabel={delivery.text}
-                        deliveryAriaLabel={delivery.ariaLabel}
-                        deliveryFailed={delivery.failed}
-                        formatTime={formatTime}
-                        highlighted={isMsgHighlighted(msg.msgId)}
-                        jumpHighlighted={isJumpHighlighted(msg.msgId)}
-                        showSender={showSender}
-                        dmAllowed={dmAllowed && !inDm}
-                        replyQuote={replyQuote}
-                        onJumpToReply={jumpToMessage}
-                        multiSelectMode={multiSelectMode}
-                        selected={selectedMsgIds.includes(msg.msgId)}
-                        onToggleSelect={toggleSelectMessage}
-                        onReply={handleReply}
-                        onForward={handleForwardOne}
-                        onEdit={handleEditMessage}
-                        onEnterMultiSelect={handleEnterMultiSelect}
-                        onMentionSender={insertMention}
-                        onViewSender={viewSenderProfile}
-                        onDmSender={startDmWithMember}
-                        onRecall={(msgId) => void handleRecall(msgId)}
-                        onRetrySend={(msgId) => void handleRetrySend(msgId)}
-                        taskCreateAllowed={taskAllowed}
-                        onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
-                        onLinkMessageToTask={(m) => {
-                          const preview = titleFromChatMessage(m) ?? m.msgId
-                          setLinkToTaskModal({ msgId: m.msgId, preview })
-                          setLinkTaskId(undefined)
-                        }}
-                      />
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
+            <ChatVirtualMessageList
+              listRef={listRef}
+              dayGroups={dayGroups}
+              showLoadOlder={hasMore || loadingOlder}
+              loadingOlder={loadingOlder}
+              renderMessage={renderMessage}
+            />
           )}
         </div>
+        {bubbleMenuState ? (
+          <>
+            <Dropdown
+              menu={bubbleMenuState.menu}
+              open
+              trigger={[]}
+              onOpenChange={(open) => {
+                if (!open) setBubbleMenuState(null)
+              }}
+            >
+              <span
+                style={{
+                  position: 'fixed',
+                  left: bubbleMenuState.x,
+                  top: bubbleMenuState.y,
+                  width: 0,
+                  height: 0
+                }}
+              />
+            </Dropdown>
+            <div style={{ display: 'none' }} aria-hidden>
+              <PluginZoneHost
+                zone="context"
+                context={{
+                  groupId: gid,
+                  view: 'chat',
+                  selection: { messageId: bubbleMenuState.msgId }
+                }}
+              />
+            </div>
+          </>
+        ) : null}
         {pendingNewCount > 0 && (
           <button
             type="button"
@@ -1018,13 +1108,13 @@ export default function ChatView(): React.ReactElement {
 
         {multiSelectMode ? (
           <ChatBatchBar
-            selectedCount={selectedMsgIds.length}
+            selectedCount={selectedMsgIds.size}
             maxCount={MAX_MULTI_SELECT}
             onCopy={handleBatchCopy}
             onForward={handleBatchForward}
             onCancel={() => {
               setMultiSelectMode(false)
-              setSelectedMsgIds([])
+              setSelectedMsgIds(new Set())
             }}
           />
         ) : (
@@ -1256,5 +1346,6 @@ export default function ChatView(): React.ReactElement {
       </div>
       </ChatWorkspaceFrame>
     </div>
+    </ChatPluginMenusProvider>
   )
 }

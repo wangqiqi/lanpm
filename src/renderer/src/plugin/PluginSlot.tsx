@@ -14,6 +14,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import PluginErrorBoundary from './PluginErrorBoundary'
 import { resolvePluginComponent } from './registry'
 import { PLUGIN_ENABLED_CHANGED_EVENT } from './pluginEvents'
+import { fetchSlotPluginsCached } from './pluginSlotCache'
 import { getViewZoneSlots } from './viewSlotMap'
 import styles from './plugin.module.css'
 
@@ -36,14 +37,9 @@ function useSlotPlugins(slot: PluginSlotId): PluginView[] {
 
   useEffect(() => {
     let cancelled = false
-    void getLanpmApi()
-      .plugin.listSlotPlugins(slot)
-      .then((list) => {
-        if (!cancelled) setPlugins(list)
-      })
-      .catch(() => {
-        if (!cancelled) setPlugins([])
-      })
+    void fetchSlotPluginsCached(slot).then((list) => {
+      if (!cancelled) setPlugins(list)
+    })
     return () => {
       cancelled = true
     }

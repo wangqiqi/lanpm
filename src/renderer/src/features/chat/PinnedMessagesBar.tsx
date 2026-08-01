@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import { quotePreviewFromMessage } from '@shared/chat/replyQuote'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
@@ -9,15 +9,15 @@ import styles from './chat.module.css'
 
 interface PinnedMessagesBarProps {
   pinnedIds: string[]
-  messages: ChatMessage[]
+  messageById: Map<string, ChatMessage>
   members: GroupMemberView[]
   onJump: (msgId: string) => void
   onUnpin: (msgId: string) => void
 }
 
-export default function PinnedMessagesBar({
+function PinnedMessagesBarInner({
   pinnedIds,
-  messages,
+  messageById,
   members,
   onJump,
   onUnpin
@@ -26,12 +26,10 @@ export default function PinnedMessagesBar({
   const kindLabels = useMemo(() => buildQuoteKindLabels(t), [t])
   if (pinnedIds.length === 0) return null
 
-  const byId = new Map(messages.map((m) => [m.msgId, m]))
-
   return (
     <div className={styles.pinnedBar} role="region" aria-label={t('chat.pinnedMessages')}>
       {pinnedIds.map((msgId) => {
-        const msg = byId.get(msgId)
+        const msg = messageById.get(msgId)
         const sender = msg ? members.find((m) => m.userId === msg.senderUserId) : undefined
         const senderName = msg
           ? resolveMemberDisplayName(sender?.displayName ?? msg.senderUserId, t)
@@ -61,3 +59,5 @@ export default function PinnedMessagesBar({
     </div>
   )
 }
+
+export default memo(PinnedMessagesBarInner)
