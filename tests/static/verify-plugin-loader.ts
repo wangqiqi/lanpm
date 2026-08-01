@@ -1,5 +1,5 @@
 /**
- * TASK-294 — Plugin loader + form-js POC.
+ * TASK-294 — Plugin loader guards.
  * Run: npm run verify:plugin-loader
  */
 import assert from 'node:assert/strict'
@@ -18,16 +18,15 @@ assert.equal(PLUGIN_IPC.listPlugins, 'plugin:listPlugins')
 const example = JSON.parse(
   readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
 )
-const formjs = JSON.parse(readFileSync(join(root, 'plugins/lanpm.formjs/plugin.json'), 'utf8'))
+const meeting = JSON.parse(readFileSync(join(root, 'plugins/lanpm.meeting/plugin.json'), 'utf8'))
 assert.equal(parsePluginManifest(example)?.id, 'lanpm.example')
-assert.equal(parsePluginManifest(formjs)?.pricing, 'paid')
+assert.equal(parsePluginManifest(meeting)?.pricing, 'paid')
 
 assert.ok(existsSync(join(root, 'src/main/plugin/discover.ts')))
 assert.ok(existsSync(join(root, 'src/main/plugin/capabilityProxy.ts')))
 assert.ok(existsSync(join(root, 'src/main/ipc/plugin.ts')))
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/PluginSlot.tsx')))
-assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/FormJsView.tsx')))
-assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/FormJsPoc.tsx')))
+assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/ExampleStub.tsx')))
 
 const mainIndex = readFileSync(join(root, 'src/main/index.ts'), 'utf8')
 assert.match(mainIndex, /registerPluginIpc/)
@@ -54,7 +53,6 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
   scripts?: Record<string, string>
 }
-assert.ok(!pkg.dependencies?.['@bpmn-io/form-js'], 'form-js must not be in core dependencies')
 assert.ok(pkg.scripts?.['verify:plugin-loader'], 'missing verify:plugin-loader')
 
 const builder = readFileSync(join(root, 'electron-builder.yml'), 'utf8')

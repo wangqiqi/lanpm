@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { CalendarOutlined } from '@ant-design/icons'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -18,6 +19,7 @@ import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import TaskEditModal from '@renderer/features/board/TaskEditModal'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
+import { Typography } from 'antd'
 import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import IslandPanel from '@renderer/ui/IslandPanel'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
@@ -52,6 +54,9 @@ export default function CalendarView(): React.ReactElement {
 
   const events = useMemo(() => tasksToCalendarEvents(tasks), [tasks])
   const activeTasks = useMemo(() => tasks.filter((t) => !t.deletedAt), [tasks])
+  const isEmpty = activeTasks.length === 0
+  const allInferred =
+    events.length > 0 && events.every((ev) => ev.extendedProps.inferredSchedule)
   const editTaskLive = useMemo(
     () => (editTask ? (tasks.find((x) => x.taskId === editTask.taskId) ?? editTask) : null),
     [editTask, tasks]
@@ -149,9 +154,10 @@ export default function CalendarView(): React.ReactElement {
 
   return (
     <div className={styles.root}>
-      {activeTasks.length === 0 ? <ViewEmptyHint>{t('calendar.empty')}</ViewEmptyHint> : null}
-
-      <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'calendar' }} />
+      <div className={styles.topBar}>
+        <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'calendar' }} />
+        <ViewHelpButton content={t('calendar.toolbarHint')} />
+      </div>
       <PluginZoneHost
         zone="context"
         context={{
@@ -161,39 +167,43 @@ export default function CalendarView(): React.ReactElement {
         }}
       />
 
-      <IslandPanel
-        hideHeader
-        aria-label={t('nav.calendar')}
-        className={styles.calendarIsland}
-        bodyClassName={styles.calendarHost}
-        data-testid="calendar-island-surface"
-        data-empty={activeTasks.length === 0 ? '1' : '0'}
-      >
-        <ViewHelpButton
-          className={styles.helpBtn}
-          content={t('calendar.toolbarHint')}
-        />
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek'
-          }}
-          locale={locale === 'zh-CN' ? zhCnLocale : undefined}
-          height="100%"
-          events={events}
-          editable
-          eventStartEditable
-          eventDurationEditable
-          eventClick={handleEventClick}
-          eventDrop={(arg) => void applyCalendarSchedule(arg)}
-          eventResize={(arg) => void applyCalendarSchedule(arg)}
-          dayMaxEvents={3}
-          moreLinkClick="popover"
-        />
-      </IslandPanel>
+      {isEmpty ? (
+        <ViewEmptyHint icon={<CalendarOutlined />}>{t('calendar.empty')}</ViewEmptyHint>
+      ) : (
+        <IslandPanel
+          hideHeader
+          aria-label={t('nav.calendar')}
+          className={styles.calendarIsland}
+          bodyClassName={styles.calendarHost}
+          data-testid="calendar-island-surface"
+        >
+          {allInferred ? (
+            <Typography.Text type="secondary" className={styles.inferredBanner}>
+              {t('calendar.inferredHint')}
+            </Typography.Text>
+          ) : null}
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek'
+            }}
+            locale={locale === 'zh-CN' ? zhCnLocale : undefined}
+            height="100%"
+            events={events}
+            editable
+            eventStartEditable
+            eventDurationEditable
+            eventClick={handleEventClick}
+            eventDrop={(arg) => void applyCalendarSchedule(arg)}
+            eventResize={(arg) => void applyCalendarSchedule(arg)}
+            dayMaxEvents={3}
+            moreLinkClick="popover"
+          />
+        </IslandPanel>
+      )}
 
       <TaskEditModal
         open={!!editTask}

@@ -1,5 +1,5 @@
 /**
- * TASK-1225 — Plugin UI surface guards (Profile tab · task.detail.section · formjs).
+ * TASK-1225 — Plugin UI surface guards (Profile tab · task.detail.section).
  * Run: npm run verify:plugin-ui-surfaces
  */
 import assert from 'node:assert/strict'
@@ -68,27 +68,24 @@ for (const locale of ['zh-CN.ts', 'en-US.ts'] as const) {
   assert.match(src, /['"]plugin\.slotSection['"]:/, `${locale} must define plugin.slotSection`)
 }
 
-// --- formjs task.detail.section visual surface ---
-const formjsManifest = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.formjs/plugin.json'), 'utf8')
+// --- example task.detail.section visual surface ---
+const exampleManifest = JSON.parse(
+  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
 ) as { slots?: string[] }
 assert.ok(
-  formjsManifest.slots?.includes('task.detail.section'),
-  'lanpm.formjs must declare task.detail.section'
+  exampleManifest.slots?.includes('task.detail.section'),
+  'lanpm.example must declare task.detail.section'
 )
 
-const formJsView = readSrc('src/renderer/src/plugin/builtins/FormJsView.tsx')
-assert.match(formJsView, /data-formjs-engine=["']bpmn["']/, 'FormJsView must expose data-formjs-engine marker')
-assert.match(formJsView, /data-formjs-container/, 'FormJsView must expose form container hook')
-assert.match(formJsView, /styles\.formJsHost/, 'FormJsView must use formJsHost layout class')
-assert.match(formJsView, /styles\.card/, 'FormJsView must use plugin card chrome')
+const exampleStub = readSrc('src/renderer/src/plugin/builtins/ExampleStub.tsx')
+assert.match(exampleStub, /data-plugin-id=\{plugin\.id\}/, 'ExampleStub must stamp data-plugin-id')
+assert.match(exampleStub, /styles\.card/, 'ExampleStub must use plugin card chrome')
 
 const pluginCss = readSrc('src/renderer/src/plugin/plugin.module.css')
-assert.match(pluginCss, /\.formJsHost\b/, 'plugin.module.css must define formJsHost')
 assert.match(pluginCss, /var\(--lanpm-border\)/, 'plugin card chrome must use design tokens')
 assert.doesNotMatch(pluginCss, /#[0-9a-fA-F]{3,8}/, 'plugin.module.css must not hardcode hex colors')
 
 const registry = readSrc('src/renderer/src/plugin/registry.ts')
-assert.match(registry, /lanpm\.formjs.*FormJsView/, 'registry must map lanpm.formjs to FormJsView')
+assert.match(registry, /lanpm\.example.*ExampleStub/, 'registry must map lanpm.example to ExampleStub')
 
 console.log('verify:plugin-ui-surfaces OK')

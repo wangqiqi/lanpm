@@ -1,0 +1,79 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 520px;
+}
+
+.card {
+  border: 1px solid var(--lanpm-border);
+  border-radius: var(--lanpm-radius-sm, 8px);
+  padding: 12px 14px;
+  background: var(--lanpm-surface-elevated, transparent);
+}
+
+.cardTitle {
+  display: block;
+  font-size: var(--lanpm-font-body);
+  line-height: 1.4;
+}
+
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--lanpm-font-caption);
+  line-height: 1.45;
+}
+
+.retentionRow {
+  margin-top: 10px;
+}
+
+.retentionField {
+  margin-bottom: 0;
+}
+
+.usageRow {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--lanpm-border);
+}
+
+.footnote {
+  display: block;
+  margin-top: 10px;
+  font-size: var(--lanpm-font-caption);
+  line-height: 1.45;
+}
+
+.subsection {
+  margin-top: 12px;
+}
+
+.subsection:first-of-type {
+  margin-top: 10px;
+}
+
+.subsectionTitle {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--lanpm-font-caption);
+}
+
+.fieldStack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.controlRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.fullWidth {
+  width: 100%;
+  max-width: 280px;
+}

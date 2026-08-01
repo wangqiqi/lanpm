@@ -1,4 +1,7 @@
-/** Dynamic loader — optional import('mind-elixir') at runtime; not bundled by Vite */
+/**
+ * Optional mind-elixir — Vite alias (electron.vite.config) when plugin subpackage is installed.
+ * Plain dynamic import so dev/build resolve plugins/lanpm.mindmap/node_modules/mind-elixir.
+ */
 
 export type MindElixirData = {
   nodeData: { id: string; topic: string; children?: MindElixirData['nodeData'][] }
@@ -36,10 +39,10 @@ let cssLoaded = false
 export async function loadMindElixirClient(): Promise<MindElixirModule | null> {
   if (cached !== undefined) return cached
   try {
-    const load = new Function("return import('mind-elixir')") as () => Promise<MindElixirModule>
-    cached = await load()
+    cached = (await import('mind-elixir')) as MindElixirModule
     return cached
-  } catch {
+  } catch (err) {
+    console.warn('[lanpm] mind-elixir load failed', err)
     cached = null
     return null
   }
@@ -47,19 +50,6 @@ export async function loadMindElixirClient(): Promise<MindElixirModule | null> {
 
 export async function loadMindElixirStyles(): Promise<void> {
   if (cssLoaded) return
-  try {
-    const load = new Function(
-      "return import('mind-elixir/dist/MindElixir.css')"
-    ) as () => Promise<unknown>
-    await load()
-    cssLoaded = true
-  } catch {
-    const id = 'lanpm-mind-elixir-fallback-style'
-    if (document.getElementById(id)) return
-    const style = document.createElement('style')
-    style.id = id
-    style.textContent =
-      '.map-container{min-height:320px;border:1px dashed var(--ant-color-border,#d9d9d9);border-radius:8px}'
-    document.head.appendChild(style)
-  }
+  // mind-elixir 4.x 在 MindElixir.js 内已注入样式；此处仅保留占位供未来换肤
+  cssLoaded = true
 }

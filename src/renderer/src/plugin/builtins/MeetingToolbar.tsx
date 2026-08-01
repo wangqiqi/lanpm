@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
   Button,
-  Divider,
   List,
   Modal,
   Popover,
@@ -36,6 +35,36 @@ import MeetingLiveKitVideoGrid from './MeetingLiveKitVideoGrid'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
+
+type MeshStatus = 'idle' | 'connecting' | 'connected' | 'failed'
+type ProStatus = 'idle' | 'connecting' | 'connected' | 'failed' | 'unavailable'
+
+function meshStatusKey(status: MeshStatus): `plugin.meetingMesh${'Idle' | 'Connecting' | 'Connected' | 'Failed'}` {
+  const map = {
+    idle: 'plugin.meetingMeshIdle',
+    connecting: 'plugin.meetingMeshConnecting',
+    connected: 'plugin.meetingMeshConnected',
+    failed: 'plugin.meetingMeshFailed'
+  } as const
+  return map[status]
+}
+
+function proStatusKey(
+  status: ProStatus
+): `plugin.meetingPro${'Idle' | 'Connecting' | 'Connected' | 'Unavailable' | 'Failed'}` {
+  const map = {
+    idle: 'plugin.meetingProIdle',
+    connecting: 'plugin.meetingProConnecting',
+    connected: 'plugin.meetingProConnected',
+    unavailable: 'plugin.meetingProUnavailable',
+    failed: 'plugin.meetingProFailed'
+  } as const
+  return map[status]
+}
+
+function roomPhaseKey(phase?: string): 'plugin.meetingRoomPhaseIdle' | 'plugin.meetingRoomPhaseActive' {
+  return phase === 'active' ? 'plugin.meetingRoomPhaseActive' : 'plugin.meetingRoomPhaseIdle'
+}
 
 interface Props {
   plugin: PluginView
@@ -96,14 +125,22 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
 
   const liteStatusLabel = useMemo(() => {
     if (!joined) return t('plugin.meetingStatusIdle')
-    return t('plugin.meetingMeshStatus', { status: meshStatus })
-  }, [joined, meshStatus, t])
+    return t('plugin.meetingLiteJoined')
+  }, [joined, t])
+
+  const meshStatusLabel = useMemo(() => t(meshStatusKey(meshStatus)), [meshStatus, t])
 
   const proStatusLabel = useMemo(() => {
     if (!liveKitConfigured) return t('plugin.meetingProNotConfigured')
     if (sdkMissing) return t('plugin.meetingProSdkMissing')
-    return t('plugin.meetingProStatus', { status: proStatus })
-  }, [liveKitConfigured, proStatus, sdkMissing, t])
+    if (proJoined) return t('plugin.meetingStatusProLive')
+    return t('plugin.meetingProStatus', { status: t(proStatusKey(proStatus)) })
+  }, [liveKitConfigured, proStatus, proJoined, sdkMissing, t])
+
+  const roomPhaseLabel = useMemo(
+    () => t(roomPhaseKey(roomState?.phase)),
+    [roomState?.phase, t]
+  )
 
   const onJoin = async (): Promise<void> => {
     try {
@@ -210,89 +247,85 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     </div>
   )
 
+  const configLink = !licenseActive ? (
+    <div className={styles.meetingToolbarCta}>
+      <Text type="secondary">{t('plugin.meetingLicenseCta')}</Text>
+      <Button type="link" size="small" onClick={() => openProfileTab('plugins')}>
+        {t('plugin.meetingOpenPlugins')}
+      </Button>
+    </div>
+  ) : !liveKitConfigured ? (
+    <div className={styles.meetingToolbarCta}>
+      <Button type="link" size="small" onClick={() => openProfileTab('meeting')}>
+        {t('plugin.meetingOpenMeetingConfig')}
+      </Button>
+    </div>
+  ) : null
+
   const detailContent = (
-    <div className={styles.meetingPopover}>
+    <div className={styles.meetingPopover} data-testid="meeting-detail-panel">
       {statusHeader}
-      <Text type="secondary">{t('plugin.meetingStubHint')}</Text>
-      {!licenseActive ? (
-        <div className={styles.meetingToolbarCta}>
-          <Text type="secondary">{t('plugin.meetingLicenseCta')}</Text>
-          <Button type="link" size="small" onClick={() => openProfileTab('plugins')}>
-            {t('plugin.meetingOpenPlugins')}
-          </Button>
-        </div>
-      ) : !liveKitConfigured ? (
-        <div className={styles.meetingToolbarCta}>
-          <Button type="link" size="small" onClick={() => openProfileTab('meeting')}>
-            {t('plugin.meetingOpenMeetingConfig')}
-          </Button>
-        </div>
-      ) : null}
-      <Divider orientation="left" plain>
-        {t('plugin.meetingLiteSection')}
-      </Divider>
-      {roomState ? (
-        <Text type="secondary" className={styles.meetingState}>
-          {t('plugin.meetingRoomState', {
-            phase: roomState.phase ?? 'idle',
-            count: participants.length,
-            max: roomState.maxParticipants ?? 4
+      {configLink}
+      <div className={styles.meetingDetailSection}>
+        <Text strong className={styles.meetingDetailTitle}>
+          {t('plugin.meetingLiteSection')}
+        </Text>
+        <Text type="secondary" className={styles.meetingDetailHint}>
+          {t('plugin.meetingLiteHint')}
+        </Text>
+        {roomState ? (
+          <Text className={styles.meetingDetailMeta}>
+            {t('plugin.meetingRoomState', {
+              phase: roomPhaseLabel,
+              count: participants.length,
+              max: roomState.maxParticipants ?? 4
+            })}
+          </Text>
+        ) : null}
+        {joined && meshStatus !== 'idle' ? (
+          <Text type="secondary" className={styles.meetingDetailMeta}>
+            {t('plugin.meetingMeshStatus', { status: meshStatusLabel })}
+          </Text>
+        ) : null}
+        {participants.length > 0 ? (
+          <>
+            <Text type="secondary" className={styles.meetingDetailSubhead}>
+              {t('plugin.meetingParticipantsTitle')}
+            </Text>
+            <List
+              size="small"
+              className={styles.meetingParticipants}
+              dataSource={participants}
+              renderItem={(p) => (
+                <List.Item>
+                  <Text>{p.displayName}</Text>
+                </List.Item>
+              )}
+            />
+          </>
+        ) : null}
+      </div>
+      <div className={styles.meetingDetailSection}>
+        <Text strong className={styles.meetingDetailTitle}>
+          {t('plugin.meetingProSection')}
+        </Text>
+        <Text type="secondary" className={styles.meetingDetailHint}>
+          {t('plugin.meetingProHint')}
+        </Text>
+        <MeetingLiveKitVideoGrid
+          participants={proParticipants}
+          joined={proJoined}
+          participantsLabel={t('plugin.meetingProParticipants', {
+            count: proParticipants.length
           })}
-        </Text>
-      ) : null}
-      {joined ? (
-        <Text type="secondary" className={styles.meetingState}>
-          {liteStatusLabel}
-        </Text>
-      ) : null}
-      {participants.length > 0 ? (
-        <List
-          size="small"
-          className={styles.meetingParticipants}
-          dataSource={participants}
-          renderItem={(p) => (
-            <List.Item>
-              <Text>{p.displayName}</Text>
-            </List.Item>
-          )}
         />
-      ) : null}
-      {desktopSources.length > 0 ? (
-        <Text type="secondary" className={styles.meetingState}>
-          {t('plugin.meetingDesktopCount', { count: desktopSources.length })}
-        </Text>
-      ) : null}
-      <Divider orientation="left" plain>
-        {t('plugin.meetingProSection')}
-      </Divider>
-      <MeetingLiveKitVideoGrid
-        participants={proParticipants}
-        joined={proJoined}
-        participantsLabel={t('plugin.meetingProParticipants', {
-          count: proParticipants.length
-        })}
-      />
-      <Text type="secondary" className={styles.meetingState}>
-        {proStatusLabel}
-      </Text>
-      {!liveKitConfigured ? (
-        <Button type="link" size="small" onClick={() => openProfileTab('meeting')}>
-          {t('plugin.meetingOpenMeetingConfig')}
-        </Button>
-      ) : null}
-      <Divider orientation="left" plain>
-        {t('plugin.meetingScheduleSection')}
-      </Divider>
-      <MeetingSchedulePanel
-        groupId={groupId}
-        disabled={controlsDisabled}
-        onJoinMeeting={onScheduleJoin}
-        joinMeetingDisabled={controlsDisabled || joined || proJoined}
-      />
-      <Divider orientation="left" plain>
-        {t('plugin.meetingRecordSection')}
-      </Divider>
-      <Text type="secondary" className={styles.meetingState}>
+        {!proJoined ? (
+          <Text type="secondary" className={styles.meetingDetailMeta}>
+            {proStatusLabel}
+          </Text>
+        ) : null}
+      </div>
+      <Text type="secondary" className={styles.meetingDetailFootnote}>
         {t('plugin.meetingRecordLocalHint')}
       </Text>
     </div>
@@ -474,11 +507,13 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
       </Modal>
       <div className={styles.meetingToolbar} data-plugin-id={plugin.id} data-testid="meeting-toolbar">
         <Popover content={menuContent} trigger="click" placement="topLeft">
-          <ComposerIconButton
-            icon={<VideoCameraOutlined />}
-            label={t('plugin.meetingToolbarMenu')}
-            data-testid="meeting-toolbar-menu"
-          />
+          <span className={styles.meetingToolbarTrigger}>
+            <ComposerIconButton
+              icon={<VideoCameraOutlined />}
+              label={t('plugin.meetingToolbarMenu')}
+              data-testid="meeting-toolbar-menu"
+            />
+          </span>
         </Popover>
       </div>
     </>

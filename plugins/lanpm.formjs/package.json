@@ -1,9 +1,0 @@
-{
-  "name": "lanpm-formjs-plugin-deps",
-  "private": true,
-  "version": "0.2.0",
-  "description": "Optional @bpmn-io/form-js for lanpm.formjs (not hoisted to root required deps)",
-  "dependencies": {
-    "@bpmn-io/form-js": "^1.24.1"
-  }
-}

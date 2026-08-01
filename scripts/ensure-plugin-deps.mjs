@@ -1,17 +1,16 @@
 /**
- * Ensures optional plugin subpackage deps (mind-elixir, form-js) are installed.
+ * Ensures optional plugin subpackage deps (mind-elixir) are installed.
  * No-op when already present.
  */
 import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 const PLUGIN_PACKAGES = [
-  { dir: 'plugins/lanpm.mindmap', marker: 'node_modules/mind-elixir' },
-  { dir: 'plugins/lanpm.formjs', marker: 'node_modules/@bpmn-io/form-js' }
+  { dir: 'plugins/lanpm.mindmap', marker: 'node_modules/mind-elixir' }
 ]
 
 for (const { dir, marker } of PLUGIN_PACKAGES) {

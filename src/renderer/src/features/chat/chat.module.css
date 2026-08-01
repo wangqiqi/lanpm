@@ -1242,12 +1242,18 @@
 }
 
 .toolbarRefGroup,
-.toolbarAttachGroup {
-  display: flex;
+.toolbarAttachGroup,
+.toolbarCollaborationGroup,
+.toolbarMeetingGroup {
+  display: inline-flex;
   align-items: center;
   gap: 1px;
+  height: 36px;
   padding: 2px;
+  box-sizing: border-box;
   border-radius: calc(var(--lanpm-radius-md) - 1px);
+  flex-shrink: 0;
+  line-height: 0;
 }
 
 .toolbarRefGroup {
@@ -1261,30 +1267,20 @@
 }
 
 .toolbarCollaborationGroup {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  padding: 2px;
-  border-radius: calc(var(--lanpm-radius-md) - 1px);
   background: var(--lanpm-fill-tertiary);
   border: 0.5px solid var(--lanpm-border);
 }
 
 .toolbarMeetingGroup {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  padding: 2px;
-  border-radius: calc(var(--lanpm-radius-md) - 1px);
   background: var(--lanpm-fill-tertiary);
   border: 0.5px solid var(--lanpm-border);
   min-width: 0;
-  flex-shrink: 1;
 }
 
 .toolbarMeetingGroup :global([data-plugin-zone='toolbar']) {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  height: 100%;
   min-width: 0;
 }
 

@@ -14,12 +14,11 @@ function localizedPluginName(
   pluginId: string,
   fallback: string,
   t: (
-    key: 'plugin.name.example' | 'plugin.name.formjs' | 'plugin.name.meeting' | 'plugin.name.mindmap',
+    key: 'plugin.name.example' | 'plugin.name.meeting' | 'plugin.name.mindmap',
     params?: never
   ) => string
 ): string {
   if (pluginId === 'lanpm.example') return t('plugin.name.example')
-  if (pluginId === 'lanpm.formjs') return t('plugin.name.formjs')
   if (pluginId === 'lanpm.meeting') return t('plugin.name.meeting')
   if (pluginId === 'lanpm.mindmap') return t('plugin.name.mindmap')
   return fallback
@@ -163,7 +162,7 @@ export default function PluginsPanel(): React.ReactElement {
           rows={6}
           value={importText}
           onChange={(e) => setImportText(e.target.value)}
-          placeholder='{"pluginId":"lanpm.formjs","features":["license.feature"]}'
+          placeholder='{"pluginId":"lanpm.meeting","features":["license.feature"]}'
         />
       </Modal>
     </div>

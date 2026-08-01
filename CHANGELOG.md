@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+## [1.101.1] - 2026-08-01
+
+### Changed
+
+- **日历**：推断排期提示条与样式（`calendar.inferredHint`）
+- **聊天**：协作抽屉 · Emoji 选择器样式微调
+- **Profile**：数据存储面板分区与备份说明 · `DataStoragePanel.module.css`
+- **会议工具栏**：Popover Lite/Pro 状态与参会者列表 i18n
+- **思维导图**：`mindElixirLoader` 开发态加载优化
+
+### Removed
+
+- **lanpm.formjs**：正式移除插件目录 · `FormJsView`/`FormJsPoc` · `verify:formjs-plugin`；`docs/07` · license 示例同步
+
+### Fixed
+
+- **发版门禁**：`README` / `README.zh-CN` 版本徽章与 `package.json` 对齐 · `verify:release-gate` 绿（TASK-1901～1910）
+
 ## [1.101.0] - 2026-08-01
 
 ### Added

@@ -1,8 +1,0 @@
-{
-  "id": "lanpm.formjs",
-  "name": "Advanced Form (form-js)",
-  "version": "0.2.0",
-  "slots": ["task.detail.section"],
-  "capabilities": ["task.get"],
-  "pricing": "paid"
-}

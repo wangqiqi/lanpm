@@ -113,8 +113,10 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
     if (!showTallPanel) return <PanelFallback />
     return (
       <Suspense fallback={<PanelFallback />}>
-        <div className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall}`}>
-          <MindmapView plugin={mindmapPlugin} groupId={groupId} />
+        <div
+          className={`${styles.collaborationPanelBody} ${styles.collaborationPanelTall} ${styles.collaborationPanelCanvas}`}
+        >
+          <MindmapView plugin={mindmapPlugin} groupId={groupId} embedded />
         </div>
       </Suspense>
     )

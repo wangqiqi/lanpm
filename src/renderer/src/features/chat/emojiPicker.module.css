@@ -4,6 +4,12 @@
   overflow-y: auto;
 }
 
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
 .group + .group {
   margin-top: 8px;
 }

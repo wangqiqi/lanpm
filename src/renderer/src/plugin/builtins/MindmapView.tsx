@@ -19,6 +19,8 @@ const { Text } = Typography
 interface Props {
   plugin: PluginView
   groupId: string
+  /** 聊天协作抽屉内嵌：占满面板高度 */
+  embedded?: boolean
 }
 
 function buildMindData(
@@ -38,7 +40,7 @@ function buildMindData(
 }
 
 /** mind-elixir 真库渲染；未安装子包时降级 MindmapStub */
-export default function MindmapView({ plugin, groupId }: Props): React.ReactElement {
+export default function MindmapView({ plugin, groupId, embedded = false }: Props): React.ReactElement {
   const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const mindRef = useRef<MindElixirInstance | null>(null)
@@ -129,7 +131,12 @@ export default function MindmapView({ plugin, groupId }: Props): React.ReactElem
   }
 
   return (
-    <div className={styles.mindmapHost} data-plugin-id={plugin.id} data-mindmap-engine="mind-elixir">
+    <div
+      className={`${styles.mindmapHost}${embedded ? ` ${styles.mindmapHostEmbedded}` : ''}`}
+      data-plugin-id={plugin.id}
+      data-mindmap-engine="mind-elixir"
+      data-embedded={embedded ? '1' : '0'}
+    >
       {!ready ? <Text type="secondary">{t('plugin.formLoading')}</Text> : null}
       <div ref={containerRef} className={styles.mindmapCanvas} data-mindmap-container />
     </div>

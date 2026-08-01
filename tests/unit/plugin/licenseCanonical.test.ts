@@ -17,7 +17,7 @@ describe('licenseCanonical', () => {
       term: 'trial',
       grants: [
         {
-          pluginId: 'lanpm.formjs',
+          pluginId: 'lanpm.meeting',
           features: ['license.feature'],
           issuedAt: 1_700_000_000_000,
           expiresAt: 1_707_776_000_000
@@ -28,7 +28,7 @@ describe('licenseCanonical', () => {
     const a = canonicalizeLicensePayload(license)
     const b = canonicalizeLicensePayload(license)
     expect(a).toBe(b)
-    expect(a).toContain('"pluginId":"lanpm.formjs"')
+    expect(a).toContain('"pluginId":"lanpm.meeting"')
   })
 
   it('roundtrips Ed25519 sign/verify with issuer keys', () => {

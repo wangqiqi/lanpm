@@ -50,7 +50,9 @@ export default function EmojiPicker({ onPick }: EmojiPickerProps): React.ReactEl
       placement="topLeft"
       destroyOnHidden
     >
-      <ComposerIconButton icon={<SmileOutlined />} label={t('chat.emojiBtn')} />
+      <span className={styles.trigger}>
+        <ComposerIconButton icon={<SmileOutlined />} label={t('chat.emojiBtn')} />
+      </span>
     </Popover>
   )
 }

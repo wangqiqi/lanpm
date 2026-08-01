@@ -56,8 +56,8 @@ const loader = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/mindElixirLoader.ts'),
   'utf8'
 )
-assert.match(loader, /mind-elixir/)
-assert.match(loader, /new Function/)
+assert.match(loader, /import\('mind-elixir'\)/)
+assert.doesNotMatch(loader, /new Function/, 'loader must use Vite-resolvable import, not Function constructor')
 
 const view = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/MindmapView.tsx'),

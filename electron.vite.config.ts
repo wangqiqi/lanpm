@@ -13,20 +13,6 @@ dns.setDefaultResultOrder('ipv4first')
 const root = dirname(fileURLToPath(import.meta.url))
 const isBrowserDev = process.env.LANPM_BROWSER_DEV === '1'
 
-/** 插件子包已安装时，让 renderer 动态 import 可解析 @bpmn-io/form-js */
-function formJsPluginAliases(): { find: string | RegExp; replacement: string }[] {
-  const esm = join(root, 'plugins/lanpm.formjs/node_modules/@bpmn-io/form-js/dist/index.es.js')
-  const css = join(root, 'plugins/lanpm.formjs/node_modules/@bpmn-io/form-js/dist/assets/form-js.css')
-  const aliases: { find: string | RegExp; replacement: string }[] = []
-  if (existsSync(esm)) {
-    aliases.push({ find: '@bpmn-io/form-js', replacement: esm })
-  }
-  if (existsSync(css)) {
-    aliases.push({ find: '@bpmn-io/form-js/dist/assets/form-js.css', replacement: css })
-  }
-  return aliases
-}
-
 /** 插件子包已安装时，让 renderer 动态 import 可解析 mind-elixir */
 function mindElixirPluginAliases(): { find: string | RegExp; replacement: string }[] {
   const candidates = [
@@ -36,11 +22,12 @@ function mindElixirPluginAliases(): { find: string | RegExp; replacement: string
   const css = join(root, 'plugins/lanpm.mindmap/node_modules/mind-elixir/dist/MindElixir.css')
   const aliases: { find: string | RegExp; replacement: string }[] = []
   const esm = candidates.find((p) => existsSync(p))
-  if (esm) {
-    aliases.push({ find: 'mind-elixir', replacement: esm })
-  }
+  // CSS 须在 mind-elixir 包名 alias 之前，避免解析成 MindElixir.js/dist/...
   if (existsSync(css)) {
     aliases.push({ find: 'mind-elixir/dist/MindElixir.css', replacement: css })
+  }
+  if (esm) {
+    aliases.push({ find: /^mind-elixir$/, replacement: esm })
   }
   return aliases
 }
@@ -188,7 +175,6 @@ export default defineConfig({
         { find: '@renderer', replacement: resolve('src/renderer/src') },
         { find: '@shared', replacement: resolve('src/shared') },
         { find: '@resources', replacement: resolve('resources') },
-        ...formJsPluginAliases(),
         ...mindElixirPluginAliases(),
         // Exact package id only; subpaths like dist/index.css stay on the package dir
         {

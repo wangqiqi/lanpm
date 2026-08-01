@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
-  Alert,
   Button,
   Checkbox,
-  Divider,
   Form,
   Input,
   InputNumber,
@@ -25,6 +23,9 @@ import {
 import { useI18n } from '@renderer/i18n/useI18n'
 import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import type { DataCleanupOptions } from '@shared/data/types'
+import styles from './DataStoragePanel.module.css'
+
+const { Text } = Typography
 
 export default function DataStoragePanel(): React.ReactElement {
   const { t, formatError } = useI18n()
@@ -247,52 +248,64 @@ export default function DataStoragePanel(): React.ReactElement {
   }
 
   return (
-    <div>
-      <Typography.Paragraph type="secondary">{t('data.intro')}</Typography.Paragraph>
-
-      <Alert
-        type="info"
-        showIcon
-        message={t('data.syncWindowTitle')}
-        description={t('data.syncWindowDesc', { days: settings?.syncWindowDays ?? 7 })}
-        style={{ marginBottom: 16 }}
-      />
-
-      <Form layout="vertical" requiredMark={false}>
-        <Form.Item label={t('data.retentionLabel')}>
-          <Space wrap>
-            <InputNumber
-              min={LOCAL_RETENTION_DAYS_MIN}
-              max={LOCAL_RETENTION_DAYS_MAX}
-              value={retention}
-              onChange={(v) => setRetention(v ?? 90)}
-              onPressEnter={runOnEnter(() => void saveRetention())}
-            />
-            <Button type="primary" loading={loading} onClick={() => void saveRetention()}>
-              {t('common.save')}
-            </Button>
-          </Space>
-        </Form.Item>
-        <Form.Item label={t('data.usageLabel')}>
-          <Typography.Text>
+    <div className={styles.panel} data-testid="data-storage-panel">
+      <section className={styles.card}>
+        <Text strong className={styles.cardTitle}>
+          {t('data.sectionRetention')}
+        </Text>
+        <Text type="secondary" className={styles.hint}>
+          {t('data.intro')}
+        </Text>
+        <Form layout="vertical" requiredMark={false} className={styles.retentionRow}>
+          <Form.Item label={t('data.retentionLabel')} className={styles.retentionField}>
+            <Space wrap>
+              <InputNumber
+                min={LOCAL_RETENTION_DAYS_MIN}
+                max={LOCAL_RETENTION_DAYS_MAX}
+                value={retention}
+                onChange={(v) => setRetention(v ?? 90)}
+                onPressEnter={runOnEnter(() => void saveRetention())}
+              />
+              <Button type="primary" loading={loading} onClick={() => void saveRetention()}>
+                {t('common.save')}
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+        <div className={styles.usageRow}>
+          <Text type="secondary">{t('data.usageLabel')}</Text>
+          <br />
+          <Text>
             {t('data.usageStats', {
               messages: usage?.messageCount ?? 0,
               files: usage?.fileCount ?? 0
             })}
-          </Typography.Text>
-        </Form.Item>
-      </Form>
+          </Text>
+        </div>
+        <Text type="secondary" className={styles.footnote}>
+          {t('data.syncWindowDesc', { days: settings?.syncWindowDays ?? 7 })}
+        </Text>
+      </section>
 
-      <Divider />
-
-      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+      <section className={styles.card}>
+        <Text strong className={styles.cardTitle}>
+          {t('data.sectionMaintenance')}
+        </Text>
+        <Text type="secondary" className={styles.hint}>
+          {t('data.cleanupHint')}
+        </Text>
         <Button onClick={() => setCleanOpen(true)}>{t('data.cleanupOpen')}</Button>
 
-        <div>
-          <Typography.Text strong>{t('data.clearGroupTitle')}</Typography.Text>
-          <Space wrap style={{ marginTop: 8, width: '100%' }}>
+        <div className={styles.subsection}>
+          <Text strong className={styles.subsectionTitle}>
+            {t('data.clearGroupTitle')}
+          </Text>
+          <Text type="secondary" className={styles.hint}>
+            {t('data.clearGroupHint')}
+          </Text>
+          <div className={styles.controlRow}>
             <Select
-              style={{ minWidth: 200 }}
+              className={styles.fullWidth}
               placeholder={t('data.clearGroupPick')}
               value={clearGroupId}
               onChange={setClearGroupId}
@@ -309,24 +322,35 @@ export default function DataStoragePanel(): React.ReactElement {
             <Button danger disabled={!clearGroupId} onClick={onClearGroup}>
               {t('data.clearGroupRun')}
             </Button>
-          </Space>
+          </div>
         </div>
+      </section>
 
-        <div>
-          <Typography.Text strong>{t('data.bundleTitle')}</Typography.Text>
-          <Space wrap style={{ marginTop: 8, width: '100%' }} direction="vertical">
+      <section className={styles.card}>
+        <Text strong className={styles.cardTitle}>
+          {t('data.sectionBackup')}
+        </Text>
+        <Text type="secondary" className={styles.hint}>
+          {t('data.bundleHint')}
+        </Text>
+
+        <div className={styles.subsection}>
+          <Text strong className={styles.subsectionTitle}>
+            {t('data.bundleExportSection')}
+          </Text>
+          <div className={styles.fieldStack}>
             <Select
-              style={{ minWidth: 200 }}
+              className={styles.fullWidth}
               placeholder={t('data.clearGroupPick')}
               value={bundleGroupId}
               onChange={setBundleGroupId}
               options={groups.map((g) => ({ value: g.groupId, label: g.name }))}
             />
             <Input.Password
+              className={styles.fullWidth}
               placeholder={t('data.bundlePassword')}
               value={bundlePassword}
               onChange={(e) => setBundlePassword(e.target.value)}
-              style={{ maxWidth: 280 }}
             />
             <Checkbox
               checked={bundleIncludeFiles}
@@ -334,45 +358,48 @@ export default function DataStoragePanel(): React.ReactElement {
             >
               {t('data.bundleIncludeFiles')}
             </Checkbox>
-            <Space wrap>
-              <Button
-                disabled={!bundleGroupId || bundlePassword.length < 4}
-                onClick={() => {
-                  if (!bundleGroupId) return
-                  void getLanpmApi()
-                    .data.exportGroupBundle(bundleGroupId, bundlePassword, bundleIncludeFiles)
-                    .then((result) => {
-                      if (!result) return
-                      message.success(t('data.bundleExportDone', { path: result.path }))
-                      if (result.messagesTruncated) {
-                        message.warning(
-                          t('data.bundleExportTruncated', {
-                            exported: result.messagesExported,
-                            total: result.messagesTotalInGroup,
-                            limit: result.messageExportLimit
-                          })
-                        )
-                      }
-                    })
-                    .catch((err) =>
-                      message.error(formatError(err, 'data.saveFailed'))
-                    )
-                }}
-              >
-                {t('data.bundleExport')}
-              </Button>
-            </Space>
-            <Divider style={{ margin: '8px 0' }} />
+            <Button
+              disabled={!bundleGroupId || bundlePassword.length < 4}
+              onClick={() => {
+                if (!bundleGroupId) return
+                void getLanpmApi()
+                  .data.exportGroupBundle(bundleGroupId, bundlePassword, bundleIncludeFiles)
+                  .then((result) => {
+                    if (!result) return
+                    message.success(t('data.bundleExportDone', { path: result.path }))
+                    if (result.messagesTruncated) {
+                      message.warning(
+                        t('data.bundleExportTruncated', {
+                          exported: result.messagesExported,
+                          total: result.messagesTotalInGroup,
+                          limit: result.messageExportLimit
+                        })
+                      )
+                    }
+                  })
+                  .catch((err) => message.error(formatError(err, 'data.saveFailed')))
+              }}
+            >
+              {t('data.bundleExport')}
+            </Button>
+          </div>
+        </div>
+
+        <div className={styles.subsection}>
+          <Text strong className={styles.subsectionTitle}>
+            {t('data.bundleImportSection')}
+          </Text>
+          <div className={styles.fieldStack}>
             <Input.Password
+              className={styles.fullWidth}
               placeholder={t('data.bundleImportPassword')}
               value={importPassword}
               onChange={(e) => setImportPassword(e.target.value)}
-              style={{ maxWidth: 280 }}
             />
             <Select
+              className={styles.fullWidth}
               value={importMode}
               onChange={setImportMode}
-              style={{ minWidth: 200 }}
               options={[
                 { value: 'skip', label: t('data.bundleConflictSkip') },
                 { value: 'new_id', label: t('data.bundleConflictNewId') },
@@ -386,9 +413,9 @@ export default function DataStoragePanel(): React.ReactElement {
             >
               {t('data.bundleImport')}
             </Button>
-          </Space>
+          </div>
         </div>
-      </Space>
+      </section>
 
       <Modal
         title={t('data.cleanupOpen')}
@@ -398,7 +425,9 @@ export default function DataStoragePanel(): React.ReactElement {
         okText={t('data.cleanupRun')}
         cancelText={t('common.cancel')}
       >
-        <Typography.Paragraph type="secondary">{t('data.cleanupHint')}</Typography.Paragraph>
+        <Typography.Paragraph type="secondary" className={styles.hint}>
+          {t('data.cleanupHint')}
+        </Typography.Paragraph>
         <Checkbox
           checked={cleanOpts.chat}
           onChange={(e) => setCleanOpts((o) => ({ ...o, chat: e.target.checked }))}

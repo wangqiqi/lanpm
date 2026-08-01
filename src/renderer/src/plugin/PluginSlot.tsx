@@ -86,12 +86,17 @@ function PluginInstanceList({
 export function PluginSlotHost({
   slot,
   context,
-  showSectionLabel = false
-}: PluginSlotHostOptions): React.ReactElement | null {
+  showSectionLabel = false,
+  inline = false
+}: PluginSlotHostOptions & { inline?: boolean }): React.ReactElement | null {
   const { t } = useI18n()
   const plugins = useSlotPlugins(slot)
 
   if (plugins.length === 0) return null
+
+  if (inline) {
+    return <PluginInstanceList plugins={plugins} context={context} />
+  }
 
   return (
     <div className={styles.slot} data-plugin-slot={slot}>
@@ -159,7 +164,7 @@ export function PluginZoneHost({ zone, context }: PluginZoneHostProps): React.Re
       data-plugin-view={context.view}
     >
       {slots.map((slot) => (
-        <PluginSlotHost key={slot} slot={slot} context={zoneContext} />
+        <PluginSlotHost key={slot} slot={slot} context={zoneContext} inline />
       ))}
     </div>
   )

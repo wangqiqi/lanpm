@@ -10,12 +10,12 @@
 
 # 内网签发：试用 90 天（默认 term=trial）
 ./lanpm-license issue --request machine-request.json \
-  --plugin lanpm.formjs --plugin lanpm.meeting \
+  --plugin lanpm.meeting \
   --term trial --key /secure/issuer-private.pem -o license.json
 
 # 内网签发：永久授权
 ./lanpm-license issue --request machine-request.json \
-  --plugin lanpm.formjs --term perpetual --key /secure/issuer-private.pem -o license.json
+  --plugin lanpm.meeting --term perpetual --key /secure/issuer-private.pem -o license.json
 
 # 验签调试
 ./lanpm-license verify license.json
