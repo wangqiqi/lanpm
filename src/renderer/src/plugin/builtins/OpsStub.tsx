@@ -5,7 +5,7 @@ import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { OpsMachineRecord } from '@shared/ops/types'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import OpsAuditPanel from '@renderer/features/ops/OpsAuditPanel'
+import OpsProfilePanel from '@renderer/features/ops/OpsProfilePanel'
 
 interface Props {
   plugin: PluginView
@@ -53,7 +53,7 @@ export default function OpsStub({ plugin, groupId, context }: Props): React.Reac
   const { t } = useI18n()
 
   if (context?.view === 'profile') {
-    return <OpsAuditPanel groupId={groupId || undefined} />
+    return <OpsProfilePanel plugin={plugin} groupId={groupId || undefined} />
   }
 
   if (context?.zone === 'composer') {

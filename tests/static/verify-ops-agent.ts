@@ -68,6 +68,18 @@ for (const cap of opsCaps) {
   assert.match(proxy, new RegExp(`case '${cap.replace('.', '\\.')}':`))
 }
 
+assert.ok(existsSync(join(root, 'src/renderer/src/features/ops/OpsProfilePanel.tsx')))
+
+const opsProfile = readFileSync(
+  join(root, 'src/renderer/src/features/ops/OpsProfilePanel.tsx'),
+  'utf8'
+)
+assert.match(opsProfile, /OpsProfilePanel/)
+assert.match(opsProfile, /pairing-code/)
+
+const opsStub = readFileSync(join(root, 'src/renderer/src/plugin/builtins/OpsStub.tsx'), 'utf8')
+assert.match(opsStub, /OpsProfilePanel/)
+
 const chatService = readFileSync(join(root, 'src/main/chat/chatService.ts'), 'utf8')
 assert.match(chatService, /maybeLinkFileToTask/)
 assert.match(chatService, /linkTaskId/)
