@@ -1,13 +1,13 @@
 export type AiMessageRole = 'user' | 'assistant' | 'system'
 
 /** 助手打开入口（隐式上下文） */
-export type AiEntrySource = 'topbar' | 'cockpit' | 'task-detail' | 'global'
+export type AiEntrySource = 'topbar' | 'cockpit' | 'task-detail' | 'chat-ops' | 'global'
 
 export interface AiThreadContext {
   /** Cockpit report seed or task review seed */
   seedMarkdown?: string
   taskId?: string
-  reportKind?: 'weekly' | 'monthly' | 'evaluate' | 'patrol' | 'healthCheck' | 'taskRemediate'
+  reportKind?: 'weekly' | 'monthly' | 'evaluate' | 'patrol' | 'healthCheck' | 'taskRemediate' | 'opsLog' | 'opsStatus'
 }
 
 export interface AiThread {

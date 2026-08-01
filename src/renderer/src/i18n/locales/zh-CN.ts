@@ -870,6 +870,8 @@ const zhCN = {
   'chat.fileDropHint': '松开以发送文件',
   'chat.fileNoPath': '浏览器预览不支持拖拽发送文件，请使用 Electron 客户端',
   'chat.openInFiles': '在文件中查看',
+  'chat.analyzeInAssistant': '在助手中分析',
+  'chat.opsAnalyzeNoText': '无法读取该文件文本，或 AI 助手未启用',
   'chat.screenshotBtn': '截图',
   'chat.screenshotFailed': '截图发送失败',
   'stub.screenshotElectronOnly': '浏览器预览不支持截图，请使用 Electron 客户端',

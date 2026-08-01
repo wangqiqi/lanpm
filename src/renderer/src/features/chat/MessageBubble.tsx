@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useCallback } from 'react'
 import { Dropdown, Tag, type MenuProps } from 'antd'
 import UserAvatar from '@renderer/ui/UserAvatar'
 import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
@@ -8,10 +8,13 @@ import { isMachineMember } from '@shared/chat/memberKind'
 import type { Task } from '@shared/task/types'
 import {
   buildMessageContextMenuActions,
+  canAnalyzeInAssistant,
   getMessageCopyCodeText,
   getMessageCopyPayload,
   type MessageContextMenuActionId
 } from '@shared/chat/messageContextMenu'
+import { openOpsFileInAssistant, openOpsTextInAssistant } from '@renderer/features/chat/analyzeInAssistant'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useUiStore } from '@renderer/stores/uiStore'
@@ -140,6 +143,37 @@ function MessageBubble({
 
   const pluginContextMenuItems = useChatPluginMenuItems('chat.message.context')
 
+  const runAnalyzeInAssistant = useCallback((): void => {
+    if (!groupId) return
+    void (async () => {
+      if (message.content.kind === 'file') {
+        const result = await openOpsFileInAssistant(
+          groupId,
+          message.content.fileId,
+          message.content.fileName
+        )
+        if (!result.ok) {
+          if (result.reason === 'gate') appMessage.warning(t('ai.gateDisabled'))
+          else appMessage.warning(t('chat.opsAnalyzeNoText'))
+        }
+        return
+      }
+      if (message.content.kind === 'text') {
+        const gate = await getLanpmApi().ai?.getGateStatus()
+        if (!gate?.enabled) {
+          appMessage.warning(t('ai.gateDisabled'))
+          return
+        }
+        const label =
+          message.content.meta?.source === 'ops-agent' ? 'ops-command' : 'chat-text'
+        const result = openOpsTextInAssistant(groupId, message.content.text, label)
+        if (!result.ok) appMessage.warning(t('chat.opsAnalyzeNoText'))
+      }
+    })()
+  }, [groupId, message, appMessage, t])
+
+  const showAnalyzeAction = canAnalyzeInAssistant(message)
+
   const senderMenu: MenuProps = useMemo(() => {
     if (own) return { items: [] }
     const items: MenuProps['items'] = [
@@ -183,6 +217,8 @@ function MessageBubble({
           return t('chat.openTask')
         case 'openFile':
           return t('chat.openInFiles')
+        case 'analyzeInAssistant':
+          return t('chat.analyzeInAssistant')
         case 'reply':
           return t('chat.replyMessage')
         case 'forward':
@@ -233,6 +269,9 @@ function MessageBubble({
               state: { selectFileId: message.content.fileId }
             })
           }
+          break
+        case 'analyzeInAssistant':
+          runAnalyzeInAssistant()
           break
         case 'reply':
           onReply?.(message)
@@ -291,7 +330,8 @@ function MessageBubble({
     onEdit,
     onEnterMultiSelect,
     multiSelectMode,
-    pluginContextMenuItems
+    pluginContextMenuItems,
+    runAnalyzeInAssistant
   ])
 
   const hasBubbleMenu = (bubbleMenu.items?.length ?? 0) > 0
@@ -376,6 +416,18 @@ function MessageBubble({
             <span className={styles.attachMeta}>
               {formatFileSize(message.content.size)} • {t('chat.openInFiles')}
             </span>
+            {showAnalyzeAction ? (
+              <button
+                type="button"
+                className={styles.attachAnalyzeBtn}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  runAnalyzeInAssistant()
+                }}
+              >
+                {t('chat.analyzeInAssistant')}
+              </button>
+            ) : null}
           </div>
         </button>
       )}

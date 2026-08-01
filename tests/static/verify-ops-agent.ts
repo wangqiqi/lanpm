@@ -75,6 +75,12 @@ assert.match(memberList, /isMachineMember/)
 assert.match(memberList, /MachineMemberAvatar/)
 assert.match(memberList, /memberRowMachineOffline/)
 
+const messageBubble = readFileSync(join(root, 'src/renderer/src/features/chat/MessageBubble.tsx'), 'utf8')
+assert.match(messageBubble, /analyzeInAssistant/)
+assert.match(messageBubble, /openOpsFileInAssistant/)
+
+assert.ok(existsSync(join(root, 'src/shared/ops/logDesensitize.ts')))
+
 const memberKind = readFileSync(join(root, 'src/shared/chat/memberKind.ts'), 'utf8')
 assert.match(memberKind, /deviceKind === 'machine'/)
 

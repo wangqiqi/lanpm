@@ -2,12 +2,14 @@ import type { ChatMessage } from './types'
 import { canRecallMessage } from './recall'
 import { canForwardMessage } from './forwardMessage'
 import { canEditMessage } from './messageEdit'
+import { isTextPreviewFile } from '../file/previewExtensions.ts'
 
 export type MessageContextMenuActionId =
   | 'copy'
   | 'copyCode'
   | 'openTask'
   | 'openFile'
+  | 'analyzeInAssistant'
   | 'reply'
   | 'forward'
   | 'createTask'
@@ -32,6 +34,23 @@ const NON_TASK_KINDS = new Set<ChatMessage['content']['kind']>([
   'system',
   'task_ref'
 ])
+
+function fileExtFromName(name: string): string {
+  const idx = name.lastIndexOf('.')
+  if (idx <= 0 || idx === name.length - 1) return ''
+  return name.slice(idx + 1)
+}
+
+export function canAnalyzeInAssistant(message: ChatMessage): boolean {
+  const { content } = message
+  if (content.kind === 'file') {
+    return isTextPreviewFile(content.fileName, fileExtFromName(content.fileName))
+  }
+  if (content.kind === 'text' && content.meta?.source === 'ops-agent') {
+    return Boolean(content.text.trim())
+  }
+  return false
+}
 
 function isTaskCreatable(message: ChatMessage): boolean {
   return !NON_TASK_KINDS.has(message.content.kind)
@@ -101,6 +120,9 @@ export function buildMessageContextMenuActions(
   }
   if (message.content.kind === 'file') {
     actions.push({ id: 'openFile' })
+  }
+  if (canAnalyzeInAssistant(message)) {
+    actions.push({ id: 'analyzeInAssistant' })
   }
 
   if (isInteractive(message)) {

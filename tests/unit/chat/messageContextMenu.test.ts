@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { ChatMessage } from '@shared/chat/types'
 import {
   buildMessageContextMenuActions,
+  canAnalyzeInAssistant,
   getMessageCopyCodeText,
   getMessageCopyPayload
 } from '@shared/chat/messageContextMenu'
@@ -104,5 +105,25 @@ describe('messageContextMenu', () => {
     expect(ids).not.toContain('linkFile')
     expect(ids).not.toContain('hide')
     expect(ids.at(-1)).toBe('recall')
+  })
+
+  it('log file adds analyzeInAssistant', () => {
+    const message = base({ kind: 'file', fileId: 'f1', fileName: 'app.log', size: 1 })
+    expect(canAnalyzeInAssistant(message)).toBe(true)
+    const ids = buildMessageContextMenuActions({
+      message,
+      own: false,
+      taskCreateAllowed: false
+    }).map((a) => a.id)
+    expect(ids).toContain('analyzeInAssistant')
+  })
+
+  it('ops-agent text adds analyzeInAssistant', () => {
+    const message = base({
+      kind: 'text',
+      text: 'host: prod\nmem: 50%',
+      meta: { source: 'ops-agent' }
+    })
+    expect(canAnalyzeInAssistant(message)).toBe(true)
   })
 })

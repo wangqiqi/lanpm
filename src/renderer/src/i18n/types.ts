@@ -863,6 +863,8 @@ export type MessageKey =
   | 'chat.fileDropHint'
   | 'chat.fileNoPath'
   | 'chat.openInFiles'
+  | 'chat.analyzeInAssistant'
+  | 'chat.opsAnalyzeNoText'
   | 'chat.screenshotBtn'
   | 'chat.screenshotFailed'
   | 'stub.screenshotElectronOnly'

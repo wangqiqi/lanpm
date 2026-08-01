@@ -877,6 +877,8 @@ const enUS = {
   'chat.fileDropHint': 'Drop to send file',
   'chat.fileNoPath': 'Drag-and-drop files requires the Electron app',
   'chat.openInFiles': 'View in Files',
+  'chat.analyzeInAssistant': 'Analyze in assistant',
+  'chat.opsAnalyzeNoText': 'Cannot read file text, or AI assistant is disabled',
   'chat.screenshotBtn': 'Screenshot',
   'chat.screenshotFailed': 'Failed to send screenshot',
   'stub.screenshotElectronOnly': 'Screenshots require the Electron app',
