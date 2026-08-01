@@ -84,7 +84,7 @@
 
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
-| 1 | **SPIKE-会议插件**（SPIKE-374–376）：Lite mesh vs LiveKit 旁路 · `chat.toolbar.media` · Presence 侧车 | 立项前 | **SPIKE 已交付** · `npm run verify:meeting-spike` |
+| 1 | **SPIKE-会议插件**（SPIKE-374–376）：Lite mesh vs LiveKit 旁路 · `chat.toolbar.media` · Presence 侧车 | SPIKE | **已交付** · `npm run verify:meeting-spike` |
 | 2 | Host 扩展 + `lanpm.meeting` stub：`PluginGroupSlot` · 媒体 capability · 聊天 `voiceComingSoon` → Slot/升级 CTA | P1 | **已交付** · `verify:meeting-plugin` · v1.67.0 |
 | 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | **已交付** · `verify:meeting-mesh-poc` · v1.68.0 |
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | **已交付** · `verify:meeting-livekit-pro` · v1.71.0 |
@@ -112,17 +112,19 @@
 
 ---
 
-## 5. 运维协作与远程网关（ops-gateway）
+## 5. 运维协作与远程网关（ops）
 
-> 真源：[07_插件与扩展](./07_插件与扩展.md) §27 起 · 金句「聊着聊着就把事干了」。
+> 真源：[07_插件与扩展](./07_插件与扩展.md) §27 起 · 金句「聊着聊着就把事干了」。  
+> **Phase 1 已闭合**（v1.94.0–v1.94.1）；本节仅列 **未完成** Phase 2+。
 
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
-| 1 | **SPIKE-OPS-001**：`tools/lanpm-gateway/` 目录列表 + 单文件收发 | SPIKE | **已交付** · `npm run verify:ops-gateway-spike` |
-| 2 | Phase 1 MVP：`lanpm-agent` + 入站/出站 + L1 斜杠命令 | P1 | **已交付** · `npm run verify:ops-agent` · v1.94.0 |
-| 3 | Gateway HTTP + Web Terminal | P2～P3 | 后置 |
+| 1 | **SPIKE-OPS-001**：`tools/lanpm-gateway/` 目录列表 + 单文件收发 | SPIKE | **已交付** · `verify:ops-gateway-spike` · v1.93.2 |
+| 2 | Phase 1：`lanpm-agent` + 入站/出站 + L1 斜杠命令 + `lanpm.ops` + `/status` 磁盘 | P1 | **已交付** · `verify:ops-agent` · v1.94.0–v1.94.1 |
+| 3 | Phase 2：Ops 助手 · 出站 watch · L3 分析入口 · 任务挂包深化 | P2 | 进行中 / 后置 |
+| 4 | Gateway HTTP + Web Terminal | P2～P3 | 后置 |
 
-验收锚点：`verify:ops-gateway-spike`（SPIKE）· `verify:ops-agent`（MVP · v1.94.0）。
+验收锚点（已交付）：`verify:ops-gateway-spike` · `verify:ops-agent`。
 
 ---
 
@@ -130,7 +132,7 @@
 
 | 候选 | 说明 | 备注 |
 |------|------|------|
-| **ops-mvp-p1** | `lanpm-agent` · 入站/出站 · `/logs` 等 | **§5** · **已交付** v1.94.0 |
+| **Ops Phase 2** | Ops 助手 · Gateway HTTP · 出站 watch · L3 分析 | **§5** · 进行中 |
 | **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
 | 插件离线分发 SPIKE | 侧载/签名 / **离线许可证** | ✅ 已交付；**应用商店不做**（离线分发终态） |
 | 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |

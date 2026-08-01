@@ -1,5 +1,8 @@
 import os from 'node:os'
 import { statfsSync } from 'node:fs'
+import { formatGpuLine, readGpuSnapshot, type GpuSnapshot } from './gpuSnapshot.ts'
+
+export type { GpuSnapshot } from './gpuSnapshot.ts'
 
 export type DiskUsage = {
   usedBytes: number
@@ -18,6 +21,7 @@ export type StatusSnapshotInputs = {
   uptimeSeconds?: number
   diskPath?: string
   readDisk?: (path: string) => DiskUsage | null
+  gpu?: GpuSnapshot | 'unavailable' | null
 }
 
 export function formatBytes(bytes: number): string {
@@ -86,9 +90,21 @@ export function buildStatusLines(inputs: StatusSnapshotInputs = {}): string[] {
     lines.push('disk: unavailable')
   }
 
+  if (inputs.gpu === 'unavailable') {
+    lines.push('gpu: unavailable')
+  } else if (inputs.gpu) {
+    lines.push(formatGpuLine(inputs.gpu))
+  }
+
   return lines
 }
 
-export function formatStatus(diskPath = '/'): string {
-  return buildStatusLines({ diskPath }).join('\n')
+export async function formatStatus(diskPath = '/'): Promise<string> {
+  const gpu = await readGpuSnapshot()
+  return buildStatusLines({ diskPath, gpu: gpu ?? undefined }).join('\n')
+}
+
+/** Sync formatter for tests and callers that inject GPU. */
+export function formatStatusSync(diskPath = '/', inputs: Omit<StatusSnapshotInputs, 'diskPath'> = {}): string {
+  return buildStatusLines({ ...inputs, diskPath }).join('\n')
 }

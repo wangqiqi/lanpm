@@ -54,4 +54,26 @@ describe('statusSnapshot', () => {
     })
     assert.ok(lines.some((line) => line === 'disk: unavailable'))
   })
+
+  it('buildStatusLines includes gpu when provided', () => {
+    const lines = buildStatusLines({
+      gpu: {
+        name: 'NVIDIA T4',
+        utilizationPct: 12,
+        memoryUsedMb: 512,
+        memoryTotalMb: 16384
+      }
+    })
+    assert.match(lines.join('\n'), /gpu: 12% \(NVIDIA T4/)
+  })
+
+  it('buildStatusLines omits gpu when absent', () => {
+    const lines = buildStatusLines({ hostname: 'edge' })
+    assert.ok(!lines.some((line) => line.startsWith('gpu:')))
+  })
+
+  it('buildStatusLines can show gpu unavailable', () => {
+    const lines = buildStatusLines({ gpu: 'unavailable' })
+    assert.ok(lines.some((line) => line === 'gpu: unavailable'))
+  })
 })

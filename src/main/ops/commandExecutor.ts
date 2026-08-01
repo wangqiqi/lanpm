@@ -39,7 +39,7 @@ export async function executeOpsCommand(
       case 'help':
         return { ok: true, text: helpText() }
       case 'status':
-        return { ok: true, text: formatStatus(paths.root) }
+        return { ok: true, text: await formatStatus(paths.root) }
       case 'disk':
         return { ok: true, text: formatDiskSnapshot(paths) }
       case 'ps':

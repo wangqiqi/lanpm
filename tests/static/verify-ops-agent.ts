@@ -27,9 +27,10 @@ assert.ok(existsSync(join(root, 'src/main/ops/commandExecutor.ts')))
 const statusSnapshot = readFileSync(join(root, 'src/main/ops/statusSnapshot.ts'), 'utf8')
 assert.match(statusSnapshot, /readDiskUsageSync/)
 assert.match(statusSnapshot, /disk: unavailable/)
+assert.ok(existsSync(join(root, 'src/main/ops/gpuSnapshot.ts')))
 
 const commandExecutor = readFileSync(join(root, 'src/main/ops/commandExecutor.ts'), 'utf8')
-assert.match(commandExecutor, /formatStatus\(paths\.root\)/)
+assert.match(commandExecutor, /await formatStatus\(paths\.root\)/)
 assert.match(commandExecutor, /case 'disk'/)
 assert.match(commandExecutor, /case 'tail'/)
 
