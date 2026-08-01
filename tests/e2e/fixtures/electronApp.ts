@@ -4,7 +4,16 @@
 import { test as base, expect, type Page } from '@playwright/test'
 import type { ElectronApplication } from 'playwright'
 import { mkLanpmTemp, rmLanpmTemp } from '../../lanpmTemp.ts'
-import { completeSetupWizard, openDiscoverModal, discoverDialog, dismissAllModals } from './setup.ts'
+import {
+  completeSetupWizard,
+  openDiscoverModal,
+  discoverDialog,
+  dismissAllModals,
+  openDemoProjectView,
+  clickBottomNavTab,
+  DEMO_PROJECT_GROUP_ID
+} from './setup.ts'
+import type { E2eTabView } from './setup.ts'
 import { closeElectronApp, launchLanpmElectron, prepareLanpmPage } from './lanpmElectron.ts'
 
 export type ElectronFixtures = {
@@ -56,4 +65,13 @@ export const test = base.extend<ElectronFixtures>({
 })
 
 export { expect }
-export { completeSetupWizard, openDiscoverModal, discoverDialog, dismissAllModals }
+export {
+  completeSetupWizard,
+  openDiscoverModal,
+  discoverDialog,
+  dismissAllModals,
+  openDemoProjectView,
+  clickBottomNavTab,
+  DEMO_PROJECT_GROUP_ID
+}
+export type { E2eTabView }

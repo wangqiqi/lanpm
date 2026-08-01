@@ -1,0 +1,43 @@
+# 可选 nightly：Playwright Electron E2E（发现弹窗 + 底栏 Tab 挂载冒烟）。
+# 默认 PR / verify.yml 不跑；手动 workflow_dispatch 或 schedule。
+name: e2e-nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *' # 02:00 UTC+8
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-nightly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright-e2e:
+    name: e2e discover + views
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Linux dependencies
+        run: bash .github/scripts/install-linux-deps.sh verify
+
+      - name: Install xvfb
+        run: sudo apt-get install -y xvfb
+
+      - name: Install
+        run: npm ci
+
+      - name: verify:e2e-discover
+        run: xvfb-run -a npm run verify:e2e-discover
+
+      - name: verify:e2e-views
+        run: xvfb-run -a npm run verify:e2e-views

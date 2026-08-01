@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [1.101.2] - 2026-08-01
+
+### Added
+
+- **ci-e2e-nightly**：底栏 **chat / board / tree** 挂载冒烟 E2E（`verify:e2e-views` · `views-tab-smoke.spec.ts`）；`BottomNav` `nav-tab-*` testid；`openDemoProjectView` fixture helper
+- **GitHub `e2e-nightly` workflow**：ubuntu + `xvfb-run` · `verify:e2e-discover` + `verify:e2e-views`（可选 schedule / 手动触发；不进 PR 矩阵）
+- **`verify:ci-e2e-nightly`**：静态门禁（脚本 · spec · workflow · docs 对齐）
+
+### Changed
+
+- **docs/05** §1.2.6a：SPIKE-1226 决策落地；标注非 `verify:release-gate`
+
 ## [1.101.1] - 2026-08-01
 
 ### Changed

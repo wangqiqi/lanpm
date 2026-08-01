@@ -70,6 +70,28 @@ async function resetDiscoverPairingPanel(page: Page): Promise<void> {
   }
 }
 
+export const DEMO_PROJECT_GROUP_ID = 'demo-project'
+
+export type E2eTabView = 'chat' | 'board' | 'tree'
+
+/** 直达示例项目群某底栏 Tab（依赖 E2E 启动时 `ensureSeedGroups` 注入 demo-project）。 */
+export async function openDemoProjectView(page: Page, view: E2eTabView): Promise<void> {
+  const hash = `#/g/${DEMO_PROJECT_GROUP_ID}/${view}`
+  await page.evaluate((h) => {
+    window.location.hash = h
+  }, hash)
+  await expect(page.getByTestId(`nav-tab-${view}`)).toHaveAttribute('aria-current', 'page', {
+    timeout: 60_000
+  })
+}
+
+export async function clickBottomNavTab(page: Page, view: E2eTabView): Promise<void> {
+  await page.getByTestId(`nav-tab-${view}`).click()
+  await expect(page.getByTestId(`nav-tab-${view}`)).toHaveAttribute('aria-current', 'page', {
+    timeout: 30_000
+  })
+}
+
 export async function openDiscoverModal(page: Page): Promise<void> {
   const dialog = discoverDialog(page)
   if (await dialog.isVisible().catch(() => false)) {

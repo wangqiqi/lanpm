@@ -208,6 +208,7 @@ export default function BottomNav(): React.ReactElement {
           >
             <button
               type="button"
+              data-testid={`nav-tab-${tab.view}`}
               className={`${styles.tab} ${active ? styles.tabActive : ''} ${!allowed ? styles.tabDisabled : ''}`}
               disabled={!allowed}
               aria-disabled={!allowed}
