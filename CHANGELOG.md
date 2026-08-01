@@ -4,13 +4,15 @@
 
 ## [Unreleased]
 
+## [1.96.2] - 2026-08-01
+
 ### Added
 
 - **视觉截图发版策略（TASK-1221）**：`verify:visual-screenshots` 不进 CI / `verify:release-gate`；打 tag 前本地必跑（`docs/05` §1.3.1 · Linux `xvfb-run`）；新增 `verify:release-screenshots-policy` 静态守卫
 - **协作面板截图（TASK-1223）**：`visualCapture` 在聊天页打开协作抽屉截取 files / whiteboard / mindmap（`COLLAB_DRAWER_SLUGS` · IA-408）；`data-visual-collab` · `dataset.visualCollabDrawer` 供无头等待
 - **截图基线同步（TASK-1224）**：`docs/screenshots/baselines` 更新为协作抽屉态（含 `light_mindmap` / `dark_mindmap`）；`assets/` README 门面图同步；`verify:screenshots-layout` / `verify:screenshots-sync` 守卫扩展
 - **插件面视觉守卫（TASK-1225）**：`verify:plugin-ui-surfaces` — Profile `profile.tab` · `PluginsPanel` · 任务详情 `task.detail.section`（树/看板）· formjs `data-formjs-engine` / `formJsHost`；并入 `verify:release-gate`
-- **核心视图 E2E 范围（SPIKE-1226）**：暂缓 chat/board Tab 冒烟与任务 CRUD E2E；决策记入 `docs/05` §1.2.6 补充 · `archive/20260801_162500_SPIKE-1226_核心视图E2E范围.md`
+- **核心视图 E2E 范围（SPIKE-1226）**：暂缓 chat/board Tab 冒烟与任务 CRUD E2E；决策记入 `docs/05` §1.2.6 补充
 - **非聊天视图 perf 冒烟（TASK-1227）**：`verify:core-views-perf` — GroupView lazy 重视图 · board/tree/gantt memo · 白板防抖与协作抽屉延迟挂载；`docs/06` §4 引用
 - **真机手验清单（DOC-1228）**：`docs/06` §4.1 发版前手勾表与 `docs/05` §8.1 对齐（含聊天协作抽屉 #3 · 视觉 PNG #2）
 - **i18n 英文布局（TASK-1229）**：`verify:i18n-en` 扩展 cockpit/chat 内联标签长度 · 视图 i18n · CSS 折行/省略守卫
