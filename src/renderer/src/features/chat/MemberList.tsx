@@ -10,6 +10,7 @@ import { presenceEmoji } from '@shared/presence'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { chatStoreActions } from '@renderer/features/chat/chatStoreActions'
 import { groupViewPath } from '@renderer/routes/paths'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -40,12 +41,15 @@ export default function MemberList({
   const { t } = useI18n()
   const [search, setSearch] = useState('')
   const currentUserId = useIdentityStore((s) => s.user?.userId)
-  const openSession = useDmStore((s) => s.openSession)
-  const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const navGroups = useNavigationStore((s) => s.groups)
   const navigate = useNavigate()
   const isDm = isDmGroupId(groupId)
   const originGroupId = isDm ? useDmStore.getState().lastOriginGroupId : groupId
-  const dmAllowed = groupAllowsDirectMessage(getGroupType(originGroupId))
+  const originGroupType = useMemo(() => {
+    if (!originGroupId || isDmGroupId(originGroupId)) return 'anonymous' as const
+    return navGroups.find((x) => x.groupId === originGroupId)?.type ?? 'project'
+  }, [originGroupId, navGroups])
+  const dmAllowed = groupAllowsDirectMessage(originGroupType)
 
   const filteredMembers = useMemo(
     () => members.filter((m) => matchesMemberSearch(m, search)),
@@ -69,12 +73,12 @@ export default function MemberList({
 
   const startDm = (member: GroupMemberView): void => {
     if (!currentUserId || member.userId === currentUserId || !dmAllowed) return
-    const dmGroupId = openSession(
+    const dmGroupId = chatStoreActions.openDmSession(
       member.userId,
       member.displayName,
       currentUserId,
       originGroupId,
-      getGroupType(originGroupId)
+      chatStoreActions.getGroupType(originGroupId)
     )
     if (!dmGroupId) return
     navigate(groupViewPath(dmGroupId, 'chat'))

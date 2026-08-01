@@ -47,6 +47,7 @@ import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
 import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
+import { chatStoreActions } from '@renderer/features/chat/chatStoreActions'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useNewMessageScroll } from '@renderer/features/chat/useNewMessageScroll'
 import { useSearchHighlight } from '@renderer/hooks/useSearchHighlight'
@@ -147,40 +148,23 @@ export default function ChatView(): React.ReactElement {
     setDmPickerOpen(false)
   }, [gid])
 
-  const downgradeInactiveGroups = useChatStore((s) => s.downgradeInactiveGroups)
   const prevGidRef = useRef(gid)
   useEffect(() => {
     const prev = prevGidRef.current
     if (prev && prev !== gid) {
-      downgradeInactiveGroups(gid)
+      chatStoreActions.downgradeInactiveGroups(gid)
     }
     prevGidRef.current = gid
-  }, [gid, downgradeInactiveGroups])
+  }, [gid])
 
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
   const hasMore = useChatStore((s) => s.hasMoreByGroup[gid] ?? false)
   const loading = useChatStore((s) => s.loading[gid])
   const loadingOlder = useChatStore((s) => s.loadingOlder[gid])
   const loadError = useChatStore((s) => s.loadError[gid])
-  const loadMessages = useChatStore((s) => s.loadMessages)
-  const loadOlderMessages = useChatStore((s) => s.loadOlderMessages)
-  const sendText = useChatStore((s) => s.sendText)
-  const sendCode = useChatStore((s) => s.sendCode)
-  const editMessage = useChatStore((s) => s.editMessage)
-  const forwardMessage = useChatStore((s) => s.forwardMessage)
-  const pickAndSendFile = useChatStore((s) => s.pickAndSendFile)
-  const sendFile = useChatStore((s) => s.sendFile)
-  const captureAndSendScreenshot = useChatStore((s) => s.captureAndSendScreenshot)
-  const upsertMessage = useChatStore((s) => s.upsertMessage)
-  const recallMessage = useChatStore((s) => s.recallMessage)
-  const retryMessage = useChatStore((s) => s.retryMessage)
-  const createFromChat = useTaskStore((s) => s.createFromChat)
-  const updateTask = useTaskStore((s) => s.updateTask)
-  const sendTaskRef = useChatStore((s) => s.sendTaskRef)
-  const loadTasks = useTaskStore((s) => s.loadTasks)
   const tasks = useTaskStore((s) => s.tasksByGroup[projectGroupId] ?? [])
   const currentUserId = useIdentityStore((s) => s.user?.userId)
-  const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const navGroups = useNavigationStore((s) => s.groups)
   const listRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const draftInputRef = useRef<HTMLTextAreaElement>(null)
@@ -191,7 +175,9 @@ export default function ChatView(): React.ReactElement {
     () => new Map(members.map((m) => [m.userId, m] as const)),
     [members]
   )
-  const loadMembers = useChatMembersStore((s) => s.loadMembers)
+  const refreshMembers = useCallback(() => {
+    void chatStoreActions.loadMembers(gid)
+  }, [gid])
   const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [linkToTaskModal, setLinkToTaskModal] = useState<{
@@ -215,8 +201,6 @@ export default function ChatView(): React.ReactElement {
   } | null>(null)
   const [hiddenRevision, setHiddenRevision] = useState(0)
   const pinnedIds = useChatPinStore((s) => s.pinnedByGroup[gid] ?? [])
-  const loadPins = useChatPinStore((s) => s.loadPins)
-  const togglePin = useChatPinStore((s) => s.togglePin)
   const [composerHeight, setComposerHeight] = useState(COMPOSER_DEFAULT)
   const [maxComposerHeight, setMaxComposerHeight] = useState(COMPOSER_MAX)
   const [resizing, setResizing] = useState(false)
@@ -336,9 +320,17 @@ export default function ChatView(): React.ReactElement {
     }
   }, [bubbleMenuState])
 
-  const groupType = gid ? getGroupType(gid) : 'project'
+  const groupType = useMemo(() => {
+    if (!gid) return 'project' as const
+    if (isDmGroupId(gid)) return 'anonymous' as const
+    return navGroups.find((x) => x.groupId === gid)?.type ?? 'project'
+  }, [gid, navGroups])
   const originGroupId = inDm ? (dmSession?.originGroupId ?? lastOriginGroupId) : gid
-  const dmAllowed = groupAllowsDirectMessage(getGroupType(originGroupId))
+  const originGroupType = useMemo(() => {
+    if (!originGroupId || isDmGroupId(originGroupId)) return 'anonymous' as const
+    return navGroups.find((x) => x.groupId === originGroupId)?.type ?? 'project'
+  }, [originGroupId, navGroups])
+  const dmAllowed = groupAllowsDirectMessage(originGroupType)
   const isMemoryOnlyAnonymous = Boolean(gid && !inDm && groupType === 'anonymous')
   const taskAllowed = Boolean(gid && !inDm && groupType === 'project')
   const codeAllowed = Boolean(gid && !isMemoryOnlyAnonymous)
@@ -353,22 +345,20 @@ export default function ChatView(): React.ReactElement {
     })
   }, [])
 
-  const openSession = useDmStore((s) => s.openSession)
-
   const startDmWithMember = useCallback(
     (member: GroupMemberView) => {
       if (!currentUserId || member.userId === currentUserId || !dmAllowed || inDm) return
-      const dmGroupId = openSession(
+      const dmGroupId = chatStoreActions.openDmSession(
         member.userId,
         member.displayName,
         currentUserId,
         originGroupId,
-        getGroupType(originGroupId)
+        chatStoreActions.getGroupType(originGroupId)
       )
       if (!dmGroupId) return
       navigate(groupViewPath(dmGroupId, 'chat'))
     },
-    [currentUserId, dmAllowed, inDm, openSession, originGroupId, getGroupType, navigate]
+    [currentUserId, dmAllowed, inDm, originGroupId, navigate]
   )
 
   const viewSenderProfile = useCallback((member: GroupMemberView) => {
@@ -445,19 +435,19 @@ export default function ChatView(): React.ReactElement {
 
   useEffect(() => {
     if (!projectGroupId || !taskAllowed) return
-    void loadTasks(projectGroupId)
+    void chatStoreActions.loadTasks(projectGroupId)
     const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
-      if (changedGroupId === projectGroupId) void loadTasks(projectGroupId)
+      if (changedGroupId === projectGroupId) void chatStoreActions.loadTasks(projectGroupId)
     })
     return unsub
-  }, [projectGroupId, taskAllowed, loadTasks])
+  }, [projectGroupId, taskAllowed])
 
   useMarkRead(gid, visibleMessages, currentUserId)
 
   useEffect(() => {
     if (!gid) return
-    void loadPins(gid)
-  }, [gid, loadPins])
+    void chatStoreActions.loadPins(gid)
+  }, [gid])
 
   useEffect(() => {
     setReplyToMsgId(null)
@@ -483,14 +473,14 @@ export default function ChatView(): React.ReactElement {
     if (el.scrollTop > 48) return
     const prevHeight = el.scrollHeight
     const prevTop = el.scrollTop
-    void loadOlderMessages(gid).then(() => {
+    void chatStoreActions.loadOlderMessages(gid).then(() => {
       requestAnimationFrame(() => {
         const node = listRef.current
         if (!node) return
         node.scrollTop = node.scrollHeight - prevHeight + prevTop
       })
     })
-  }, [onMessagesScroll, gid, hasMore, loadingOlder, loadOlderMessages])
+  }, [onMessagesScroll, gid, hasMore, loadingOlder])
 
   const onlineCount = useMemo(
     () => members.filter((m) => m.presence === 'online').length,
@@ -502,13 +492,13 @@ export default function ChatView(): React.ReactElement {
 
   useEffect(() => {
     if (!gid) return
-    void loadMessages(gid)
-    void loadMembers(gid)
+    void chatStoreActions.loadMessages(gid)
+    void chatStoreActions.loadMembers(gid)
     const unsub = getLanpmApi().chat.onMessage((msg) => {
-      if (msg.groupId === gid) upsertMessage(msg)
+      if (msg.groupId === gid) chatStoreActions.upsertMessage(msg)
     })
     return unsub
-  }, [gid, loadMessages, loadMembers, upsertMessage])
+  }, [gid])
 
   useEffect(() => {
     const state = location.state as { composeDraft?: string } | null
@@ -626,8 +616,8 @@ export default function ChatView(): React.ReactElement {
       }
       setDraft('')
       try {
-        const { message: chatMsg } = await createFromChat(gid, taskCmd.title)
-        upsertMessage(chatMsg)
+        const { message: chatMsg } = await chatStoreActions.createFromChat(gid, taskCmd.title)
+        chatStoreActions.upsertMessage(chatMsg)
         message.success(t('chat.taskCreated'))
       } catch (err) {
         message.error(formatError(err, 'chat.taskCreateFailed'))
@@ -642,7 +632,7 @@ export default function ChatView(): React.ReactElement {
       setDraft('')
       pickedTaskRefIdRef.current = null
       try {
-        await sendTaskRef(gid, taskRef.taskId)
+        await chatStoreActions.sendTaskRef(gid, taskRef.taskId)
       } catch (err) {
         message.error(formatError(err, 'chat.taskRefFailed'))
         setDraft(text)
@@ -654,23 +644,23 @@ export default function ChatView(): React.ReactElement {
     const savedDraft = draft
     const replyId = replyToMsgId ?? undefined
     try {
-      await sendText(gid, text, replyId ? { replyToMsgId: replyId } : undefined)
+      await chatStoreActions.sendText(gid, text, replyId ? { replyToMsgId: replyId } : undefined)
       setDraft('')
       setReplyToMsgId(null)
     } catch (err) {
       message.error(formatError(err, 'chat.sendFailed'))
       setDraft(savedDraft)
     }
-  }, [draft, gid, sendText, sendTaskRef, createFromChat, upsertMessage, taskAllowed, tasks, t, message, formatError, replyToMsgId])
+  }, [draft, gid, taskAllowed, tasks, t, message, formatError, replyToMsgId])
 
   const handleCreateTask = useCallback(
     async (title: string) => {
       if (!gid || !taskAllowed) return
-      const { message: chatMsg } = await createFromChat(gid, title)
-      upsertMessage(chatMsg)
+      const { message: chatMsg } = await chatStoreActions.createFromChat(gid, title)
+      chatStoreActions.upsertMessage(chatMsg)
       message.success(t('chat.taskCreated'))
     },
-    [gid, taskAllowed, createFromChat, upsertMessage, t]
+    [gid, taskAllowed, t]
   )
 
   const handleCreateTaskFromMessage = useCallback(
@@ -682,17 +672,17 @@ export default function ChatView(): React.ReactElement {
         return
       }
       try {
-        const { message: chatMsg } = await createFromChat(gid, title, {
+        const { message: chatMsg } = await chatStoreActions.createFromChat(gid, title, {
           sourceMsgId: msg.msgId,
           linkedFileIds: linkedFileIdsFromMessage(msg)
         })
-        upsertMessage(chatMsg)
+        chatStoreActions.upsertMessage(chatMsg)
         message.success(t('chat.taskCreated'))
       } catch (err) {
         message.error(formatError(err, 'chat.taskCreateFailed'))
       }
     },
-    [gid, taskAllowed, createFromChat, upsertMessage, t, message, formatError]
+    [gid, taskAllowed, t, message, formatError]
   )
 
   const handleConfirmLinkToTask = useCallback(async () => {
@@ -701,7 +691,7 @@ export default function ChatView(): React.ReactElement {
     if (!task) return
     setLinkSaving(true)
     try {
-      await updateTask({
+      await chatStoreActions.updateTask({
         taskId: linkTaskId,
         sourceMsgId: linkToTaskModal.msgId
       })
@@ -713,14 +703,14 @@ export default function ChatView(): React.ReactElement {
     } finally {
       setLinkSaving(false)
     }
-  }, [gid, linkToTaskModal, linkTaskId, tasks, updateTask, message, t, formatError])
+  }, [gid, linkToTaskModal, linkTaskId, tasks, message, t, formatError])
 
   const handleSendCode = useCallback(
     async (code: string, languageHint: string) => {
       if (!gid) return
-      await sendCode(gid, code, languageHint)
+      await chatStoreActions.sendCode(gid, code, languageHint)
     },
-    [gid, sendCode]
+    [gid]
   )
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
@@ -741,18 +731,18 @@ export default function ChatView(): React.ReactElement {
     async (msgId: string) => {
       if (!gid) return
       try {
-        await recallMessage(gid, msgId)
+        await chatStoreActions.recallMessage(gid, msgId)
       } catch (err) {
         message.error(formatError(err, 'chat.recallFailed'))
       }
     },
-    [gid, recallMessage, message, t]
+    [gid, message, t]
   )
 
   const handleRetrySend = useCallback(
     async (msgId: string) => {
       try {
-        const result = await retryMessage(msgId)
+        const result = await chatStoreActions.retryMessage(msgId)
         if (result.deliveryStatus === 'failed') {
           message.error(t('chat.retrySendFailed'))
         }
@@ -760,7 +750,7 @@ export default function ChatView(): React.ReactElement {
         message.error(formatError(err, 'chat.retrySendFailed'))
       }
     },
-    [retryMessage, message, t]
+    [message, t]
   )
 
   const handleReply = useCallback((msg: ChatMessage) => {
@@ -776,12 +766,12 @@ export default function ChatView(): React.ReactElement {
     async (msgId: string) => {
       if (!gid) return
       try {
-        await togglePin(gid, msgId)
+        await chatStoreActions.togglePin(gid, msgId)
       } catch (err) {
         message.error(formatError(err, 'chat.pinFailed'))
       }
     },
-    [gid, togglePin, message, formatError]
+    [gid, message, formatError]
   )
 
   const handleEditMessage = useCallback((msg: ChatMessage) => {
@@ -793,14 +783,14 @@ export default function ChatView(): React.ReactElement {
     async (text: string) => {
       if (!gid || !editModal) return
       try {
-        await editMessage(gid, editModal.msgId, text)
+        await chatStoreActions.editMessage(gid, editModal.msgId, text)
         setEditModal(null)
         message.success(t('chat.editMessageDone'))
       } catch (err) {
         message.error(formatError(err, 'chat.editMessageFailed'))
       }
     },
-    [gid, editModal, editMessage, message, t, formatError]
+    [gid, editModal, message, t, formatError]
   )
 
   const handleConfirmForward = useCallback(
@@ -810,13 +800,13 @@ export default function ChatView(): React.ReactElement {
       try {
         if ('batchMsgIds' in forwardModal) {
           for (const msgId of forwardModal.batchMsgIds) {
-            await forwardMessage(msgId, targetGroupId, senderName)
+            await chatStoreActions.forwardMessage(msgId, targetGroupId, senderName)
           }
           message.success(t('chat.batchForwardDone'))
           setMultiSelectMode(false)
           setSelectedMsgIds(new Set())
         } else {
-          await forwardMessage(forwardModal.sourceMsgId, targetGroupId, senderName)
+          await chatStoreActions.forwardMessage(forwardModal.sourceMsgId, targetGroupId, senderName)
           message.success(t('chat.forwardMessageDone'))
         }
         setForwardModal(null)
@@ -824,7 +814,7 @@ export default function ChatView(): React.ReactElement {
         message.error(formatError(err, 'chat.forwardMessageFailed'))
       }
     },
-    [forwardModal, forwardMessage, message, t, formatError]
+    [forwardModal, message, t, formatError]
   )
 
   const toggleSelectMessage = useCallback((msgId: string) => {
@@ -986,7 +976,7 @@ export default function ChatView(): React.ReactElement {
           groupId={gid}
           members={members}
           presencePolling={sidebarOpen}
-          onRefresh={() => void loadMembers(gid)}
+          onRefresh={refreshMembers}
           onInsertMention={(name) => {
             insertMention(name)
             if (isNarrow) setSidebarOpen(false)
@@ -1023,7 +1013,7 @@ export default function ChatView(): React.ReactElement {
             message.warning(t('chat.fileNoPath'))
             return
           }
-          void sendFile(gid, path).catch((err: unknown) =>
+          void chatStoreActions.sendFile(gid, path).catch((err: unknown) =>
             message.error(formatError(err, 'chat.fileSendFailed'))
           )
         }}
@@ -1084,7 +1074,7 @@ export default function ChatView(): React.ReactElement {
           ) : loadError && messages.length === 0 ? (
             <ViewErrorCenter
               message={t('chat.loadFailed')}
-              onRetry={() => void loadMessages(gid)}
+              onRetry={() => void chatStoreActions.loadMessages(gid)}
             />
           ) : visibleMessages.length === 0 ? (
             <Text className={styles.empty} type="secondary">
@@ -1213,7 +1203,7 @@ export default function ChatView(): React.ReactElement {
                           icon={<PaperClipOutlined />}
                           label={t('chat.fileBtn')}
                           onClick={() =>
-                            void pickAndSendFile(gid).catch((err: unknown) =>
+                            void chatStoreActions.pickAndSendFile(gid).catch((err: unknown) =>
                               message.error(formatError(err, 'chat.fileSendFailed'))
                             )
                           }
@@ -1224,7 +1214,7 @@ export default function ChatView(): React.ReactElement {
                           icon={<CameraOutlined />}
                           label={t('chat.screenshotBtn')}
                           onClick={() =>
-                            void captureAndSendScreenshot(gid).catch((err: unknown) =>
+                            void chatStoreActions.captureAndSendScreenshot(gid).catch((err: unknown) =>
                               message.error(formatError(err, 'chat.screenshotFailed'))
                             )
                           }

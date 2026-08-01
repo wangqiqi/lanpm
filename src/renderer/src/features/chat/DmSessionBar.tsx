@@ -6,6 +6,7 @@ import { isDmGroupId } from '@shared/chat/dmSession'
 import type { ChatMessage } from '@shared/chat/types'
 import { lastChatMessage, messagePreviewText } from '@shared/chat/messagePreview'
 import { useDmStore, type DmSession } from '@renderer/stores/dmStore'
+import { chatStoreActions } from '@renderer/features/chat/chatStoreActions'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
@@ -89,18 +90,14 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
   const lastOriginGroupId = useDmStore((s) => s.lastOriginGroupId)
   const localUserId = useIdentityStore((s) => s.user?.userId)
   const groups = useNavigationStore((s) => s.groups)
-  const getGroupType = useNavigationStore((s) => s.getGroupType)
-  const loadMessages = useChatStore((s) => s.loadMessages)
-  const pruneDisallowedOrigins = useDmStore((s) => s.pruneDisallowedOrigins)
-  const syncWithDatabase = useDmStore((s) => s.syncWithDatabase)
 
   useEffect(() => {
-    pruneDisallowedOrigins(getGroupType)
-  }, [pruneDisallowedOrigins, getGroupType])
+    chatStoreActions.pruneDmDisallowedOrigins()
+  }, [groups])
 
   useEffect(() => {
-    if (localUserId) void syncWithDatabase(localUserId)
-  }, [localUserId, syncWithDatabase])
+    if (localUserId) void chatStoreActions.syncDmWithDatabase(localUserId)
+  }, [localUserId])
 
   const inDm = isDmGroupId(activeGroupId)
   const contextProjectId = inDm
@@ -111,20 +108,20 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
     const project: DmSession[] = []
     const other: DmSession[] = []
     for (const s of sessions) {
-      if (!groupAllowsDirectMessage(getGroupType(s.originGroupId))) continue
+      if (!groupAllowsDirectMessage(chatStoreActions.getGroupType(s.originGroupId))) continue
       if (s.originGroupId === contextProjectId) project.push(s)
       else other.push(s)
     }
     return { projectDms: project, otherDms: other }
-  }, [sessions, contextProjectId, getGroupType])
+  }, [sessions, contextProjectId])
 
   useEffect(() => {
     if (!isDmGroupId(activeGroupId)) return
     const existing = useChatStore.getState().messagesByGroup[activeGroupId]
     if (!existing || existing.length === 0) {
-      void loadMessages(activeGroupId)
+      void chatStoreActions.loadMessages(activeGroupId)
     }
-  }, [activeGroupId, loadMessages])
+  }, [activeGroupId])
 
   const openDm = (groupId: string): void => {
     navigate(groupViewPath(groupId, 'chat'))

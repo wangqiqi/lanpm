@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.90.0] - 2026-08-01
+
+### Added
+
+- **聊天性能 store-hooks（chat-perf-store-hooks）**：`chatStoreActions` · `ChatView` 动作订阅改 `getState()` · 邻域组件收敛
+- **`docs/specs/012-chat-perf-store-hooks/spec.md`**
+- **`verify:chat-perf-store-hooks`** — 静态守卫禁止动作 selector
+
+### Changed
+
+- **`ChatView`**：`useChatStore` 仅保留按 `gid` 的数据切片；`groupType` 经 `navGroups` 派生
+- **`DmSessionBar`** · **`MemberList`**：DM/成员动作经 `chatStoreActions`
+- **`docs/优化.md`** §5.19 Zustand 选型标 ✅ v1.90.0
+
 ## [1.89.0] - 2026-08-01
 
 ### Added
