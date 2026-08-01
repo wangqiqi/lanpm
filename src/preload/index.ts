@@ -3,6 +3,7 @@ import type { DmMessagePreview } from '../shared/chat/dmPreview'
 import type { ChatMessage } from '../shared/chat/types'
 import type { ProfileUpdateInput, SetupInput } from '../shared/identity'
 import type { LanpmApi } from '../shared/lanpm-api'
+import { OPS_IPC } from '../shared/ops/channels'
 import { CHAT_IPC, CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { GROUP_TAG_META_PUSH_CHANNEL, TASK_AWARENESS_PUSH_CHANNEL, TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
@@ -266,6 +267,10 @@ const api: LanpmApi = {
   discover: {
     snapshot: () => ipcRenderer.invoke('discover:snapshot'),
     setSeeds: (seeds) => ipcRenderer.invoke('discover:setSeeds', seeds)
+  },
+  ops: {
+    sendSlash: (groupId, text) => ipcRenderer.invoke(OPS_IPC.sendSlash, groupId, text),
+    listMachines: (groupId) => ipcRenderer.invoke(OPS_IPC.listMachines, groupId)
   },
   pairing: {
     start: () => ipcRenderer.invoke('pairing:start'),

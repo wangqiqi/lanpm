@@ -30,7 +30,9 @@ import { getFileById } from '../storage/repositories/fileRepository'
 import { getTaskById } from '../storage/repositories/taskRepository'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { showOpenDialog } from '../systemDialog'
+import { readFileSync, existsSync } from 'node:fs'
 import { initFileSyncService, shutdownFileSyncService } from '../file/fileSyncService'
+import { initOpsSyncService, shutdownOpsSyncService, listOpsMachines, publishOpsInbound } from '../ops/opsSyncService'
 import { initReadReceiptService, shutdownReadReceiptService } from './readReceiptService'
 import {
   initJoinRequestService,
@@ -196,6 +198,7 @@ export function initChatService(db: Database): void {
   initTaskSyncService(db)
   initWhiteboardSyncService(db)
   initFileSyncService(db)
+  initOpsSyncService(db)
   void requestOfflineSync(db).catch(catchSyncFailure('chat.requestOfflineSync', { notify: false }))
   void requestReadReceiptOfflineSync(db).catch(
     catchSyncFailure('chat.requestReadReceiptOfflineSync', { notify: false })
@@ -207,6 +210,7 @@ export function shutdownChatService(): void {
   shutdownTaskSyncService()
   shutdownWhiteboardSyncService()
   shutdownFileSyncService()
+  shutdownOpsSyncService()
   shutdownGroupKeyService()
   shutdownReadReceiptService()
   shutdownJoinRequestService()
@@ -461,12 +465,29 @@ export async function sendExistingFileMessage(
   const meta = getFileById(db, fileId)
   if (!meta) throwLanpm('err.fileNotFound')
   if (meta.groupId !== groupId) throwLanpm('err.fileWrongGroup')
-  return publishChatMessage(db, groupId, 'file', {
+  const msg = await publishChatMessage(db, groupId, 'file', {
     kind: 'file',
     fileId: meta.fileId,
     fileName: meta.name,
     size: meta.size
   })
+
+  const machines = listOpsMachines(groupId).filter((m) => m.online)
+  if (machines.length > 0 && existsSync(meta.storagePath)) {
+    const dataBase64 = readFileSync(meta.storagePath).toString('base64')
+    for (const machine of machines) {
+      await publishOpsInbound(
+        db,
+        groupId,
+        machine.deviceId,
+        meta.name,
+        dataBase64,
+        `${machine.inboundDir}/${meta.name}`
+      )
+    }
+  }
+
+  return msg
 }
 
 export async function sendCodeMessage(

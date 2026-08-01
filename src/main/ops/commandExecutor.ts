@@ -1,0 +1,81 @@
+import os from 'node:os'
+import type { GatewayPaths } from '../../shared/ops/paths.ts'
+import {
+  readGatewayFile,
+  resolveOutboundLogRel,
+  writeGatewayFile
+} from '../gateway/fileStore.ts'
+import { PathForbiddenError } from '../gateway/pathGuard.ts'
+import type { OpsCommandName, OpsCommandPayload } from '../../shared/ops/types.ts'
+
+export type OpsCommandExecution = {
+  ok: boolean
+  text?: string
+  fileName?: string
+  dataBase64?: string
+  error?: string
+}
+
+function helpText(): string {
+  return [
+    'LanPM Ops commands:',
+    '/help — list commands',
+    '/logs [app|nginx] — fetch log file',
+    '/status — CPU / memory / disk summary',
+    '/deploy [name] — write package to inboundDir'
+  ].join('\n')
+}
+
+function formatStatus(): string {
+  const total = os.totalmem()
+  const free = os.freemem()
+  const usedPct = total > 0 ? Math.round(((total - free) / total) * 100) : 0
+  const load = os.loadavg().map((n) => n.toFixed(2)).join(', ')
+  return [
+    `host: ${os.hostname()}`,
+    `cpus: ${os.cpus().length}`,
+    `load: ${load}`,
+    `mem_used_pct: ${usedPct}`,
+    `platform: ${os.platform()} ${os.arch()}`
+  ].join('\n')
+}
+
+export async function executeOpsCommand(
+  paths: GatewayPaths,
+  payload: Pick<OpsCommandPayload, 'command' | 'args' | 'fileName' | 'dataBase64'>
+): Promise<OpsCommandExecution> {
+  const command = payload.command as OpsCommandName
+  const args = payload.args ?? []
+
+  try {
+    switch (command) {
+      case 'help':
+        return { ok: true, text: helpText() }
+      case 'status':
+        return { ok: true, text: formatStatus() }
+      case 'logs': {
+        const key = args[0] ?? 'app'
+        const rel = resolveOutboundLogRel(paths, key)
+        const data = await readGatewayFile(paths, rel)
+        return { ok: true, fileName: `${key}.log`, dataBase64: data.toString('base64') }
+      }
+      case 'deploy': {
+        const name = args[0] ?? payload.fileName ?? 'deploy.bin'
+        const rel = `${paths.inboundDir.replace(/\/$/, '')}/${name}`
+        const data = payload.dataBase64
+          ? Buffer.from(payload.dataBase64, 'base64')
+          : Buffer.from(`deploy placeholder ${new Date().toISOString()}`)
+        await writeGatewayFile(paths, rel, data)
+        return { ok: true, text: `deployed to ${rel} (${data.length} bytes)` }
+      }
+      default:
+        return { ok: false, error: 'UNKNOWN_COMMAND' }
+    }
+  } catch (err) {
+    if (err instanceof PathForbiddenError) {
+      return { ok: false, error: 'PATH_FORBIDDEN' }
+    }
+    const message = err instanceof Error ? err.message : 'EXEC_FAILED'
+    return { ok: false, error: message }
+  }
+}

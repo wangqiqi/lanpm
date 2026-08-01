@@ -49,6 +49,8 @@ export type PluginCapabilityId =
   | 'task.patch'
   | 'board.moveTask'
   | 'license.feature'
+  | 'ops.machine.list'
+  | 'ops.command.send'
 
 export type PluginSource = 'builtin' | 'sideload'
 
@@ -136,5 +138,7 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'task.create',
   'task.patch',
   'board.moveTask',
-  'license.feature'
+  'license.feature',
+  'ops.machine.list',
+  'ops.command.send'
 ] as const

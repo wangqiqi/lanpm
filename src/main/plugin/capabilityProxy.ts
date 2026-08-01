@@ -1,3 +1,4 @@
+import { existsSync, statSync } from 'node:fs'
 import type { PluginCapabilityId } from '../../shared/plugin/types.ts'
 import type {
   BoardMoveTaskArgs,
@@ -56,7 +57,9 @@ import { createLiveKitTokenForGroup } from '../media/livekitTokenService'
 import { getSetupStatus } from '../identity/setup'
 import { createCapabilityPending, takeCapabilityPending } from './capabilityPendingStore.ts'
 import type { Database } from 'better-sqlite3'
-import { existsSync, statSync } from 'node:fs'
+import { listOpsMachines } from '../ops/opsSyncService.ts'
+import { sendOpsSlashCommand } from '../ops/opsCommandService.ts'
+import { parseOpsCommand } from '../../shared/chat/opsCommand.ts'
 
 export type CapabilityArgs = Record<string, unknown>
 
@@ -276,6 +279,20 @@ export async function invokePluginCapability(
       if (!groupId) throw new Error('groupId required')
       if (!taskId) throw new Error('taskId required')
       return sendTaskRefMessage(db, groupId, taskId)
+    }
+    case 'ops.machine.list': {
+      const groupId = String(args.groupId ?? '')
+      if (!groupId) throw new Error('groupId required')
+      return listOpsMachines(groupId)
+    }
+    case 'ops.command.send': {
+      const groupId = String(args.groupId ?? '')
+      const text = String(args.text ?? '')
+      if (!groupId) throw new Error('groupId required')
+      if (!text.trim()) throw new Error('text required')
+      const parsed = parseOpsCommand(text)
+      if (!parsed) throw new Error('ops_invalid_command')
+      return sendOpsSlashCommand(db, groupId, parsed)
     }
     default: {
       const _exhaustive: never = capability

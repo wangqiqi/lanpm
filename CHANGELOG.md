@@ -4,6 +4,25 @@
 
 ## [Unreleased]
 
+## [1.94.0] - 2026-08-01
+
+### Added
+
+- **ops-mvp-p1 · Phase 1 Full MVP**：`lanpm agent start` / `tools/lanpm-agent/` headless Agent · 机器成员 `deviceKind: machine`
+- **P2P 运维协议**：`ops_command` · `ops_command_result` · `ops_inbound`（`src/shared/ops/` · `src/shared/network/types.ts`）
+- **L1 斜杠命令**：`/help` `/logs` `/status` `/deploy` — 聊天 composer 解析 + `@机器` 路由（`src/shared/chat/opsCommand.ts`）
+- **入站/出站**：聊天文件 → Agent `inboundDir`；命令结果 → 群文本/文件消息
+- **`plugins/lanpm.ops`**：manifest · `OpsStub` · capabilities `ops.machine.list` / `ops.command.send`（默认关 · `pricing: paid`）
+- **`src/main/gateway/`**：自 SPIKE 抽取 `pathGuard` + `fileStore` 供 Agent 复用
+- **Host capability / IPC**：`registerOpsIpc` · 机器上下线系统消息 · i18n `chat.ops*` / `plugin.ops*`
+- **`verify:ops-agent`** — 静态守卫 + 单元测试（`opsCommand` · `pathGuard` · `commandExecutor`）
+
+### Changed
+
+- **`docs/03`** §6.5.8 — `ops_*` payload 草案 · `GroupMember.deviceKind`
+- **`docs/06_ROADMAP.md`** §5 Phase 1 标已交付
+- **`docs/功能扩展.md`** · **`docs/插件开发.md`** — Ops MVP 与 `lanpm.ops` 清单同步
+
 ## [1.93.2] - 2026-08-01
 
 ### Added

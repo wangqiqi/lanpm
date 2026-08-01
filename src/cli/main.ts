@@ -1,5 +1,6 @@
 import { app } from 'electron'
 import { runPairingCli } from './pairingCli.ts'
+import { runAgentCli } from './agentCli.ts'
 import { initNetwork, shutdownNetwork } from '../main/network/index.ts'
 import { closeDatabase, initDatabase } from '../main/storage/index.ts'
 import { ensureProfileUserDataPath } from '../main/storage/profilePaths.ts'
@@ -12,8 +13,13 @@ async function main(): Promise<void> {
   ensureProfileUserDataPath()
   const db = initDatabase()
   initNetwork(db)
+  const argv = process.argv.slice(2)
   try {
-    await runPairingCli(process.argv.slice(2), db)
+    if (argv[0] === 'agent') {
+      await runAgentCli(argv.slice(1), db)
+    } else {
+      await runPairingCli(argv, db)
+    }
   } finally {
     shutdownNetwork()
     closeDatabase()

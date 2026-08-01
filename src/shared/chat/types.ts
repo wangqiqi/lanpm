@@ -12,8 +12,9 @@ export interface ChatForwardedFrom {
 }
 
 export interface ChatMessageMeta {
-  source?: 'ai-assistant'
+  source?: 'ai-assistant' | 'ops-agent'
   aiThreadId?: string
+  requestId?: string
   forwardedFrom?: ChatForwardedFrom
   editedAt?: string
 }

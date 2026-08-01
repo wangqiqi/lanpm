@@ -34,6 +34,12 @@ export type SyncMessageType =
   | 'chat_sync_batch'
   | 'read_receipt_sync_request'
   | 'read_receipt_sync_batch'
+  | 'ops_command'
+  | 'ops_command_result'
+  | 'ops_inbound'
+  | 'ops_command'
+  | 'ops_command_result'
+  | 'ops_inbound'
 
 /** docs/04 §6.1 */
 export interface SyncEnvelope {

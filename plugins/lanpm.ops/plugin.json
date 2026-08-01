@@ -1,0 +1,8 @@
+{
+  "id": "lanpm.ops",
+  "name": "LanPM Ops",
+  "version": "0.1.0",
+  "slots": ["files.toolbar", "chat.composer.action"],
+  "capabilities": ["ops.machine.list", "ops.command.send"],
+  "pricing": "paid"
+}

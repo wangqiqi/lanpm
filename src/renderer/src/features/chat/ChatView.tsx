@@ -22,6 +22,7 @@ import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
+import { parseOpsCommand } from '@shared/chat/opsCommand'
 import type { Task } from '@shared/task/types'
 import { linkedFileIdsFromMessage, titleFromChatMessage } from '@shared/task/fromMessage'
 import { useChatStore } from '@renderer/stores/chatStore'
@@ -596,6 +597,18 @@ export default function ChatView(): React.ReactElement {
   const handleSend = useCallback(async () => {
     const text = draft.trim()
     if (!text || !gid) return
+
+    const opsCmd = parseOpsCommand(text)
+    if (opsCmd) {
+      setDraft('')
+      try {
+        await getLanpmApi().ops.sendSlash(gid, text)
+        message.success(t('chat.opsCommandSent'))
+      } catch (err) {
+        message.error(formatError(err, 'chat.opsCommandFailed'))
+      }
+      return
+    }
 
     const taskCmd = parseTaskCommand(text)
     if (taskCmd) {

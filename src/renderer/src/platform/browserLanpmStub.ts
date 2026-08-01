@@ -2174,6 +2174,10 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
       }
     },
+    ops: {
+      sendSlash: async () => ({ requestId: 'stub-ops' }),
+      listMachines: async () => []
+    },
     pairing: {
       start: async () => ({
         pairingId: 'stub-pairing',

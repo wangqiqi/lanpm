@@ -119,10 +119,10 @@
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
 | 1 | **SPIKE-OPS-001**：`tools/lanpm-gateway/` 目录列表 + 单文件收发 | SPIKE | **已交付** · `npm run verify:ops-gateway-spike` |
-| 2 | Phase 1 MVP：`lanpm-agent` + 入站/出站 + L1 斜杠命令 | P1 | 待立项 · 依赖 SPIKE Go |
+| 2 | Phase 1 MVP：`lanpm-agent` + 入站/出站 + L1 斜杠命令 | P1 | **已交付** · `npm run verify:ops-agent` · v1.94.0 |
 | 3 | Gateway HTTP + Web Terminal | P2～P3 | 后置 |
 
-验收锚点：`verify:ops-gateway-spike`（SPIKE）· `verify:ops-agent`（MVP · 待建）。
+验收锚点：`verify:ops-gateway-spike`（SPIKE）· `verify:ops-agent`（MVP · v1.94.0）。
 
 ---
 
@@ -130,7 +130,7 @@
 
 | 候选 | 说明 | 备注 |
 |------|------|------|
-| **ops-mvp-p1** | `lanpm-agent` · 入站/出站 · `/logs` 等 | **§5** · SPIKE 已交付 |
+| **ops-mvp-p1** | `lanpm-agent` · 入站/出站 · `/logs` 等 | **§5** · **已交付** v1.94.0 |
 | **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
 | 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | 侧载+许可 ✅；**商店 UI 暂不做**（等盈利） |
 | 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |

@@ -8,6 +8,7 @@ import { getSetupStatus } from '../identity/setup'
 import { getAggregatedUserPresence } from '../presence/presenceRegistry'
 import { getNetworkTransport } from '../network'
 import { getGroupById, listGroupMembers as listDbGroupMembers, resolveGroupType } from '../group/groupService'
+import { listOpsMachines, machineUserId } from '../ops/opsSyncService.ts'
 import { getUserById } from '../storage/repositories/userRepository'
 
 /** 非匿名群占位成员，便于 @提及联调 */
@@ -116,6 +117,18 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
   const members = await collectPeerMembers(db)
   for (const stub of STUB_MEMBERS) {
     if (!members.has(stub.userId)) members.set(stub.userId, stub)
+  }
+
+  for (const machine of listOpsMachines(groupId)) {
+    const userId = machineUserId(machine.deviceId)
+    members.set(userId, {
+      userId,
+      displayName: machine.displayName,
+      mentionKeys: [machine.displayName, machine.deviceId],
+      deviceKind: 'machine',
+      deviceId: machine.deviceId,
+      presence: machine.online ? 'online' : 'offline'
+    })
   }
 
   return withPresence([...members.values()], localUserId).sort((a, b) =>

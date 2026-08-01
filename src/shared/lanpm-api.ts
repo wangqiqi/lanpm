@@ -328,6 +328,10 @@ export interface LanpmApi {
     snapshot: () => Promise<DiscoverSnapshot>
     setSeeds: (seeds: string[]) => Promise<DiscoverSnapshot>
   }
+  ops: {
+    sendSlash: (groupId: string, text: string) => Promise<{ requestId: string }>
+    listMachines: (groupId: string) => Promise<import('./ops/types').OpsMachineRecord[]>
+  }
   pairing: {
     start: () => Promise<import('./discover/pairing').PairingSessionView>
     cancel: () => Promise<{ ok: true }>
