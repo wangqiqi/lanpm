@@ -9,6 +9,7 @@
 - **视觉截图发版策略（TASK-1221）**：`verify:visual-screenshots` 不进 CI / `verify:release-gate`；打 tag 前本地必跑（`docs/05` §1.3.1 · Linux `xvfb-run`）；新增 `verify:release-screenshots-policy` 静态守卫
 - **协作面板截图（TASK-1223）**：`visualCapture` 在聊天页打开协作抽屉截取 files / whiteboard / mindmap（`COLLAB_DRAWER_SLUGS` · IA-408）；`data-visual-collab` · `dataset.visualCollabDrawer` 供无头等待
 - **截图基线同步（TASK-1224）**：`docs/screenshots/baselines` 更新为协作抽屉态（含 `light_mindmap` / `dark_mindmap`）；`assets/` README 门面图同步；`verify:screenshots-layout` / `verify:screenshots-sync` 守卫扩展
+- **插件面视觉守卫（TASK-1225）**：`verify:plugin-ui-surfaces` — Profile `profile.tab` · `PluginsPanel` · 任务详情 `task.detail.section`（树/看板）· formjs `data-formjs-engine` / `formJsHost`；并入 `verify:release-gate`
 
 ## [1.96.1] - 2026-08-01
 

@@ -20,6 +20,7 @@ const steps = [
   'npm run verify:visual',
   'npm run verify:release-screenshots-policy',
   'npm run verify:profile-panel',
+  'npm run verify:plugin-ui-surfaces',
   'npm run verify:discover',
   'npm run verify:pairing-code',
   'npm run verify:project',

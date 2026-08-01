@@ -115,6 +115,7 @@
     "verify:media-signal": "node --experimental-strip-types tests/integration/verify-media-signal.ts",
     "verify:plugin-loader": "node --experimental-strip-types tests/static/verify-plugin-loader.ts",
     "verify:plugin-enable-ui": "node --experimental-strip-types tests/static/verify-plugin-enable-ui.ts",
+    "verify:plugin-ui-surfaces": "node --experimental-strip-types tests/static/verify-plugin-ui-surfaces.ts",
     "verify:nav-preferences": "node --experimental-strip-types tests/static/verify-nav-preferences.ts",
     "verify:nav-per-group": "node --experimental-strip-types tests/static/verify-nav-per-group.ts",
     "verify:command-palette": "node --experimental-strip-types tests/static/verify-command-palette.ts",
