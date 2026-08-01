@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { markDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
 import { readInitialTheme, type ThemeMode } from '@renderer/theme/initialTheme'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import type { AppLocale } from '@shared/locale/types'
 
 export type { ThemeMode }
 
@@ -22,7 +24,7 @@ function readTagColorOverrides(): Record<string, Record<string, string>> {
 
 interface UiState {
   theme: ThemeMode
-  locale: 'zh-CN' | 'en-US'
+  locale: AppLocale
   boardShowAllFsLines: boolean
   /** groupId → (tagKey → css color) */
   tagColorOverridesByGroup: Record<string, Record<string, string>>
@@ -34,7 +36,7 @@ interface UiState {
   discoverCoachmarkPending: boolean
   setTheme: (theme: ThemeMode) => void
   toggleTheme: () => void
-  setLocale: (locale: 'zh-CN' | 'en-US') => void
+  setLocale: (locale: AppLocale) => void
   setBoardShowAllFsLines: (on: boolean) => void
   setTagColorOverride: (groupId: string, tagKey: string, color: string | null) => void
   setWhiteboardZen: (on: boolean) => void
@@ -46,7 +48,7 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set, get) => ({
   theme: readInitialTheme(),
-  locale: (localStorage.getItem('locale') as 'zh-CN' | 'en-US') || 'zh-CN',
+  locale: (localStorage.getItem('locale') as AppLocale) || 'zh-CN',
   boardShowAllFsLines: readBoardShowAllFsLines(),
   tagColorOverridesByGroup: readTagColorOverrides(),
   whiteboardZen: false,
@@ -63,6 +65,11 @@ export const useUiStore = create<UiState>((set, get) => ({
   setLocale: (locale) => {
     localStorage.setItem('locale', locale)
     set({ locale })
+    try {
+      void getLanpmApi().locale.set(locale)
+    } catch {
+      /* browser stub */
+    }
   },
   setBoardShowAllFsLines: (on) => {
     localStorage.setItem('board.showAllFsLines', on ? 'true' : 'false')

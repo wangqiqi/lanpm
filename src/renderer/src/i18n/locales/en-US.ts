@@ -544,6 +544,8 @@ const enUS = {
   'plugin.meetingScheduleStartsAt': 'Start time',
   'plugin.meetingScheduleStartsAtRequired': 'Pick a start time',
   'plugin.meetingScheduleDuration': 'Duration',
+  'plugin.meetingScheduleDurationOption': '{minutes} min',
+  'plugin.meetingScheduleJoin': 'Join meeting',
   'plugin.meetingScheduleCreate': 'Add schedule',
   'plugin.meetingScheduleCreated': 'Meeting scheduled',
   'plugin.meetingScheduleDeleted': 'Schedule removed',

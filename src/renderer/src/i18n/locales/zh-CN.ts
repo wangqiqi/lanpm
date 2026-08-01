@@ -537,6 +537,8 @@ const zhCN = {
   'plugin.meetingScheduleStartsAt': '开始时间',
   'plugin.meetingScheduleStartsAtRequired': '请选择开始时间',
   'plugin.meetingScheduleDuration': '时长',
+  'plugin.meetingScheduleDurationOption': '{minutes} 分钟',
+  'plugin.meetingScheduleJoin': '加入会议',
   'plugin.meetingScheduleCreate': '添加预约',
   'plugin.meetingScheduleCreated': '已添加会议预约',
   'plugin.meetingScheduleDeleted': '已删除预约',

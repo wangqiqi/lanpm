@@ -35,6 +35,11 @@ import type {
   DataStorageSettingsView
 } from './data/types'
 import type { UserNotice } from './sync/userNotice'
+import type { AppLocale } from './locale/types'
+import type {
+  DesktopNotificationOptions,
+  NotificationNavigatePayload
+} from './notification/channels'
 
 export interface LanpmApi {
   platform: NodeJS.Platform | 'browser'
@@ -49,7 +54,12 @@ export interface LanpmApi {
   onUserNotice: (handler: (notice: UserNotice) => void) => () => void
   /** 主进程桌面通知（Windows 品牌 icon / 标题） */
   notification: {
-    show: (title: string, body: string) => Promise<void>
+    show: (title: string, body: string, options?: DesktopNotificationOptions) => Promise<void>
+    onNavigate: (handler: (payload: NotificationNavigatePayload) => void) => () => void
+  }
+  locale: {
+    get: () => Promise<AppLocale>
+    set: (locale: AppLocale) => Promise<AppLocale>
   }
   identity: {
     getSetupStatus: () => Promise<SetupStatus>

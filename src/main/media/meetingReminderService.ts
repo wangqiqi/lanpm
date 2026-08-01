@@ -1,32 +1,30 @@
 import { showDesktopNotification } from '../desktopNotification.ts'
+import { readAppLocale } from '../locale/localeStore.ts'
 import { listAllMeetingSchedulesForReminders } from './meetingScheduleStore.ts'
 import { scanMeetingReminders } from '../../shared/media/meetingReminderLogic.ts'
+import {
+  formatMeetingReminderWhen,
+  meetingReminderBody,
+  meetingReminderTitle
+} from '../../shared/media/meetingReminderCopy.ts'
 
 const SCAN_INTERVAL_MS = 30_000
 
 let timer: ReturnType<typeof setInterval> | null = null
 const notifiedKeys = new Set<string>()
 
-function formatReminderBody(title: string, startsAt: string): string {
-  const when = new Date(startsAt)
-  const time = Number.isNaN(when.getTime())
-    ? startsAt
-    : when.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
-  return `${title} · ${time}`
-}
-
 function runScan(): void {
   const now = Date.now()
+  const locale = readAppLocale()
   const schedules = listAllMeetingSchedulesForReminders()
   const hits = scanMeetingReminders(schedules, now, notifiedKeys)
 
   for (const hit of hits) {
     notifiedKeys.add(hit.dedupeKey)
-    const title =
-      hit.kind === '5min'
-        ? `会议将在 5 分钟后开始`
-        : `会议现在开始`
-    showDesktopNotification(title, formatReminderBody(hit.schedule.title, hit.schedule.startsAt))
+    const title = meetingReminderTitle(hit.kind, locale)
+    const whenLabel = formatMeetingReminderWhen(hit.schedule.startsAt, locale)
+    const body = meetingReminderBody(hit.schedule.title, whenLabel, locale)
+    showDesktopNotification(title, body, { groupId: hit.schedule.groupId })
   }
 }
 

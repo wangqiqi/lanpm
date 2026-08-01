@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.89.0] - 2026-08-01
+
+### Added
+
+- **会议体验产品化（meeting-productization）**：主进程提醒 i18n · `userData/locale.json` 同步 · 通知点击深链到群 · 日程「加入会议」CTA · 面板时长/时间 i18n
+- **`docs/specs/011-meeting-productization/spec.md`**
+- **`verify:meeting-productization`** — 静态守卫 locale · 深链 · join CTA
+
+### Changed
+
+- **`meetingReminderService`**：使用 `meetingReminderCopy` + `readAppLocale`，通知携带 `groupId`
+- **`MeetingSchedulePanel`**：时长 Select i18n · 列表 join 按钮 · `formatScheduleWhen` 尊重 locale
+- **`docs/插件开发.md`** §8.3 会议产品化标 ✅ v1.89.0
+
 ## [1.88.0] - 2026-08-01
 
 ### Added

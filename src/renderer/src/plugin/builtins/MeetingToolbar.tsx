@@ -212,7 +212,12 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
       <Divider orientation="left" plain>
         {t('plugin.meetingScheduleSection')}
       </Divider>
-      <MeetingSchedulePanel groupId={groupId} disabled={controlsDisabled} />
+      <MeetingSchedulePanel
+        groupId={groupId}
+        disabled={controlsDisabled}
+        onJoinMeeting={onJoin}
+        joinMeetingDisabled={controlsDisabled || joined || proJoined}
+      />
     </div>
   )
 
@@ -334,7 +339,14 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
         <Popover
           title={t('plugin.meetingScheduleTitlePopover')}
           trigger="click"
-          content={<MeetingSchedulePanel groupId={groupId} disabled={controlsDisabled} />}
+          content={
+            <MeetingSchedulePanel
+              groupId={groupId}
+              disabled={controlsDisabled}
+              onJoinMeeting={onJoin}
+              joinMeetingDisabled={controlsDisabled || joined || proJoined}
+            />
+          }
         >
           <Button
             size="small"

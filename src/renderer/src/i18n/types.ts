@@ -531,6 +531,8 @@ export type MessageKey =
   | 'plugin.meetingScheduleStartsAt'
   | 'plugin.meetingScheduleStartsAtRequired'
   | 'plugin.meetingScheduleDuration'
+  | 'plugin.meetingScheduleDurationOption'
+  | 'plugin.meetingScheduleJoin'
   | 'plugin.meetingScheduleCreate'
   | 'plugin.meetingScheduleCreated'
   | 'plugin.meetingScheduleDeleted'

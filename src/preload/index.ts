@@ -8,6 +8,13 @@ import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
 import { GROUP_PUSH_CHANNEL, GROUP_JOIN_REQUEST_PUSH_CHANNEL } from '../shared/group/channels'
 import { USER_NOTICE_CHANNEL } from '../shared/sync/userNotice'
 import type { UserNotice } from '../shared/sync/userNotice'
+import { LOCALE_IPC } from '../shared/locale/channels'
+import {
+  NOTIFICATION_IPC,
+  NOTIFICATION_NAVIGATE_CHANNEL,
+  type DesktopNotificationOptions,
+  type NotificationNavigatePayload
+} from '../shared/notification/channels'
 import { AI_IPC, AI_STREAM_CHUNK_CHANNEL, AI_STREAM_DONE_CHANNEL, AI_STREAM_ERROR_CHANNEL } from '../shared/ai/channels'
 
 const api: LanpmApi = {
@@ -27,7 +34,19 @@ const api: LanpmApi = {
     return () => ipcRenderer.removeListener(USER_NOTICE_CHANNEL, listener)
   },
   notification: {
-    show: (title: string, body: string) => ipcRenderer.invoke('notification:show', title, body)
+    show: (title: string, body: string, options?: DesktopNotificationOptions) =>
+      ipcRenderer.invoke(NOTIFICATION_IPC.show, title, body, options),
+    onNavigate: (handler: (payload: NotificationNavigatePayload) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, payload: NotificationNavigatePayload) => {
+        handler(payload)
+      }
+      ipcRenderer.on(NOTIFICATION_NAVIGATE_CHANNEL, listener)
+      return () => ipcRenderer.removeListener(NOTIFICATION_NAVIGATE_CHANNEL, listener)
+    }
+  },
+  locale: {
+    get: () => ipcRenderer.invoke(LOCALE_IPC.get) as Promise<'zh-CN' | 'en-US'>,
+    set: (locale: 'zh-CN' | 'en-US') => ipcRenderer.invoke(LOCALE_IPC.set, locale)
   },
   identity: {
     getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, DatePicker, Form, Input, List, Select, Space, Typography, message } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, LoginOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import type { MeetingSchedule } from '@shared/media/meetingSchedule'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { useUiStore } from '@renderer/stores/uiStore'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -12,6 +13,8 @@ const { Text } = Typography
 interface Props {
   groupId: string
   disabled?: boolean
+  onJoinMeeting?: () => Promise<void>
+  joinMeetingDisabled?: boolean
 }
 
 interface FormValues {
@@ -20,19 +23,12 @@ interface FormValues {
   durationMinutes: number
 }
 
-const DURATION_OPTIONS = [
-  { value: 15, label: '15 min' },
-  { value: 30, label: '30 min' },
-  { value: 45, label: '45 min' },
-  { value: 60, label: '60 min' },
-  { value: 90, label: '90 min' },
-  { value: 120, label: '120 min' }
-]
+const DURATION_MINUTES = [15, 30, 45, 60, 90, 120] as const
 
-function formatScheduleWhen(startsAt: string): string {
+function formatScheduleWhen(startsAt: string, locale: string): string {
   const d = new Date(startsAt)
   if (Number.isNaN(d.getTime())) return startsAt
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(locale, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -41,11 +37,27 @@ function formatScheduleWhen(startsAt: string): string {
 }
 
 /** 群级会议日程：预约表单 + 近期列表 */
-export default function MeetingSchedulePanel({ groupId, disabled }: Props): React.ReactElement {
+export default function MeetingSchedulePanel({
+  groupId,
+  disabled,
+  onJoinMeeting,
+  joinMeetingDisabled
+}: Props): React.ReactElement {
   const { t } = useI18n()
+  const locale = useUiStore((s) => s.locale)
   const [form] = Form.useForm<FormValues>()
   const [schedules, setSchedules] = useState<MeetingSchedule[]>([])
   const [loading, setLoading] = useState(false)
+  const [joiningId, setJoiningId] = useState<string | null>(null)
+
+  const durationOptions = useMemo(
+    () =>
+      DURATION_MINUTES.map((minutes) => ({
+        value: minutes,
+        label: t('plugin.meetingScheduleDurationOption', { minutes })
+      })),
+    [t]
+  )
 
   const refresh = useCallback(async () => {
     const list = await getLanpmApi().meeting.listSchedules(groupId)
@@ -86,6 +98,19 @@ export default function MeetingSchedulePanel({ groupId, disabled }: Props): Reac
     }
   }
 
+  const onJoin = async (id: string): Promise<void> => {
+    if (!onJoinMeeting) return
+    setJoiningId(id)
+    try {
+      await onJoinMeeting()
+      message.success(t('plugin.meetingJoinOk'))
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setJoiningId(null)
+    }
+  }
+
   return (
     <div className={styles.meetingSchedulePanel} data-testid="meeting-schedule-panel">
       <Text type="secondary">{t('plugin.meetingScheduleHint')}</Text>
@@ -117,7 +142,7 @@ export default function MeetingSchedulePanel({ groupId, disabled }: Props): Reac
           />
         </Form.Item>
         <Form.Item name="durationMinutes" label={t('plugin.meetingScheduleDuration')}>
-          <Select disabled={disabled} options={DURATION_OPTIONS} />
+          <Select disabled={disabled} options={durationOptions} />
         </Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} disabled={disabled} block>
           {t('plugin.meetingScheduleCreate')}
@@ -135,6 +160,23 @@ export default function MeetingSchedulePanel({ groupId, disabled }: Props): Reac
             renderItem={(item) => (
               <List.Item
                 actions={[
+                  ...(onJoinMeeting
+                    ? [
+                        <Button
+                          key="join"
+                          type="link"
+                          size="small"
+                          icon={<LoginOutlined />}
+                          loading={joiningId === item.id}
+                          disabled={disabled || joinMeetingDisabled}
+                          aria-label={t('plugin.meetingScheduleJoin')}
+                          data-testid="meeting-schedule-join"
+                          onClick={() => void onJoin(item.id)}
+                        >
+                          {t('plugin.meetingScheduleJoin')}
+                        </Button>
+                      ]
+                    : []),
                   <Button
                     key="delete"
                     type="text"
@@ -150,7 +192,7 @@ export default function MeetingSchedulePanel({ groupId, disabled }: Props): Reac
                 <List.Item.Meta
                   title={item.title}
                   description={t('plugin.meetingScheduleListMeta', {
-                    when: formatScheduleWhen(item.startsAt),
+                    when: formatScheduleWhen(item.startsAt, locale),
                     minutes: item.durationMinutes
                   })}
                 />

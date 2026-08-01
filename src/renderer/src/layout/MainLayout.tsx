@@ -6,6 +6,7 @@ import CommandPalette from '@renderer/layout/CommandPalette'
 import { useChatNotifications } from '@renderer/features/chat/useChatNotifications'
 import { useDueTaskNotifications } from '@renderer/features/task/useDueTaskNotifications'
 import { useMeetingScheduleReminders } from '@renderer/features/meeting/useMeetingScheduleReminders'
+import { useNotificationNavigation } from '@renderer/features/meeting/useNotificationNavigation'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import AiAssistantShell from '@renderer/features/ai/AiAssistantShell'
@@ -21,6 +22,7 @@ export default function MainLayout(): React.ReactElement {
   useChatNotifications()
   useDueTaskNotifications()
   useMeetingScheduleReminders()
+  useNotificationNavigation()
 
   useEffect(() => {
     if (!/\/whiteboard$/.test(location.pathname) && whiteboardZen) {

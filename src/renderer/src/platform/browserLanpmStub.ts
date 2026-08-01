@@ -1010,6 +1010,15 @@ export function createBrowserLanpmStub(): LanpmApi {
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
           new Notification(title, { body })
         }
+      },
+      onNavigate: () => () => undefined
+    },
+    locale: {
+      get: async () =>
+        (localStorage.getItem('locale') as 'zh-CN' | 'en-US') || 'zh-CN',
+      set: async (locale) => {
+        localStorage.setItem('locale', locale)
+        return locale
       }
     },
     identity: {

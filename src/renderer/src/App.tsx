@@ -103,6 +103,16 @@ export default function App(): React.ReactElement {
   }, [configured])
 
   useEffect(() => {
+    if (!configured) return
+    try {
+      const locale = useUiStore.getState().locale
+      void getLanpmApi().locale.set(locale)
+    } catch {
+      /* browser stub */
+    }
+  }, [configured])
+
+  useEffect(() => {
     const unsub = getLanpmApi().onUserNotice((notice) => {
       const text = translate(locale, notice.messageKey as MessageKey, notice.params)
       if (notice.level === 'error') {

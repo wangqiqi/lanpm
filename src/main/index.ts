@@ -19,6 +19,7 @@ import { registerPluginIpc } from './ipc/plugin'
 import { registerNavIpc } from './ipc/nav'
 import { registerMeetingIpc } from './ipc/meeting'
 import { registerNotificationIpc } from './ipc/notification'
+import { registerLocaleIpc } from './ipc/locale'
 import { registerAiIpc } from './ipc/ai'
 import { initAiPatrolScheduler, shutdownAiPatrolScheduler } from './ai/aiPatrolScheduler'
 import {
@@ -130,6 +131,7 @@ function registerAllIpcHandlers(): void {
   registerNavIpc()
   registerMeetingIpc()
   registerNotificationIpc()
+  registerLocaleIpc()
   registerAiIpc()
 }
 
