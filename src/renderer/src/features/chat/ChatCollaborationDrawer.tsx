@@ -69,6 +69,10 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
     }
   }, [panel])
 
+  useEffect(() => {
+    setDrawerReady(false)
+  }, [panel])
+
   const mindmapLicensed = useMemo(
     () => (mindmapPlugin ? isPluginLicenseActive(mindmapPlugin) : false),
     [mindmapPlugin]

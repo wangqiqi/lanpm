@@ -46,7 +46,12 @@ export default function MindmapStub({
   }, [plugin.id, groupId, t])
 
   return (
-    <div className={styles.card} data-plugin-id={plugin.id} data-mindmap-engine="stub">
+    <div
+      className={styles.card}
+      data-plugin-id={plugin.id}
+      data-mindmap-engine="stub"
+      data-mindmap-ready={loading ? '0' : '1'}
+    >
       <div className={styles.cardHeader}>
         <Text strong>{plugin.name}</Text>
         <span className={styles.badge}>{t('plugin.pricingPaid')}</span>

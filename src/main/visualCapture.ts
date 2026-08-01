@@ -308,15 +308,17 @@ async function waitForCollabDrawer(win: BrowserWindow, panel: CollabDrawerSlug):
         if (panel === 'mindmap') {
           const engine = drawer.querySelector('[data-mindmap-engine]')
           if (!engine) return false
+          if (engine.getAttribute('data-mindmap-ready') === '1') return true
           const kind = engine.getAttribute('data-mindmap-engine')
           if (kind === 'mind-elixir') {
-            return drawer.querySelectorAll('.me-tpc, .map-container .me-node').length > 0
+            // mind-elixir 4.x uses custom elements (me-tpc), not .me-tpc classes
+            return drawer.querySelectorAll('me-tpc, me-root').length > 0
           }
           if (kind === 'stub') {
             const list = engine.querySelector('ul')
             return !!(list && list.children.length > 0)
           }
-          return true
+          return false
         }
         return false
       })()

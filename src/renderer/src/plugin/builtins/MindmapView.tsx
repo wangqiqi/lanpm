@@ -135,6 +135,7 @@ export default function MindmapView({ plugin, groupId, embedded = false }: Props
       className={`${styles.mindmapHost}${embedded ? ` ${styles.mindmapHostEmbedded}` : ''}`}
       data-plugin-id={plugin.id}
       data-mindmap-engine="mind-elixir"
+      data-mindmap-ready={ready ? '1' : '0'}
       data-embedded={embedded ? '1' : '0'}
     >
       {!ready ? <Text type="secondary">{t('plugin.formLoading')}</Text> : null}
