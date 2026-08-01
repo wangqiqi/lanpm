@@ -270,7 +270,8 @@ const api: LanpmApi = {
   },
   ops: {
     sendSlash: (groupId, text) => ipcRenderer.invoke(OPS_IPC.sendSlash, groupId, text),
-    listMachines: (groupId) => ipcRenderer.invoke(OPS_IPC.listMachines, groupId)
+    listMachines: (groupId) => ipcRenderer.invoke(OPS_IPC.listMachines, groupId),
+    listAudit: (groupId, limit) => ipcRenderer.invoke(OPS_IPC.listAudit, groupId, limit)
   },
   pairing: {
     start: () => ipcRenderer.invoke('pairing:start'),

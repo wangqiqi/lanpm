@@ -331,6 +331,10 @@ export interface LanpmApi {
   ops: {
     sendSlash: (groupId: string, text: string) => Promise<{ requestId: string }>
     listMachines: (groupId: string) => Promise<import('./ops/types').OpsMachineRecord[]>
+    listAudit: (
+      groupId?: string,
+      limit?: number
+    ) => Promise<import('./ops/auditTypes').OpsAuditEntry[]>
   }
   pairing: {
     start: () => Promise<import('./discover/pairing').PairingSessionView>

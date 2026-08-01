@@ -19,6 +19,11 @@ import type {
 import { OPS_SYSTEM_EVENTS } from '../../shared/ops/types.ts'
 import { executeOpsCommand } from './commandExecutor.ts'
 import {
+  appendOpsAuditEntry,
+  completeOpsAuditEntry
+} from './auditStore.ts'
+import { summarizeOpsCommandLine, summarizeOpsResult } from '../../shared/ops/auditTypes.ts'
+import {
   gatewayPathsFromMachine,
   getOpsMachine,
   listOpsMachines,
@@ -112,12 +117,23 @@ async function handleOpsCommandResult(db: Database, envelope: SyncEnvelope): Pro
 
   const payload = envelope.payload
   if (!payload.ok) {
+    completeOpsAuditEntry(payload.requestId, {
+      status: 'failed',
+      resultSummary: summarizeOpsResult(payload),
+      completedAt: new Date().toISOString()
+    })
     await publishOpsSystem(db, envelope.groupId, OPS_SYSTEM_EVENTS.commandResult, {
       error: payload.error ?? 'ops_failed',
       requestId: payload.requestId
     })
     return
   }
+
+  completeOpsAuditEntry(payload.requestId, {
+    status: 'ok',
+    resultSummary: summarizeOpsResult(payload),
+    completedAt: new Date().toISOString()
+  })
 
   if (payload.dataBase64 && payload.fileName) {
     const tmp = join(tmpdir(), `lanpm-ops-${randomUUID()}-${payload.fileName}`)
@@ -211,6 +227,18 @@ export async function sendOpsCommand(
 ): Promise<{ requestId: string }> {
   const requestId = `ops_${randomUUID()}`
   const full: OpsCommandPayload = { ...payload, requestId, groupId }
+  const status = getSetupStatus(db)
+  appendOpsAuditEntry({
+    requestId,
+    groupId,
+    actorUserId: status.user?.userId ?? 'unknown',
+    actorName: status.user?.displayName ?? status.user?.userId ?? 'unknown',
+    targetDeviceId: payload.targetDeviceId,
+    command: payload.command,
+    commandLine: summarizeOpsCommandLine(payload.command, payload.args),
+    issuedAt: new Date().toISOString(),
+    status: 'pending'
+  })
   await publishOpsEnvelope(db, groupId, 'ops_command', full)
   return { requestId }
 }

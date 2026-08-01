@@ -34,6 +34,15 @@ assert.match(commandExecutor, /case 'disk'/)
 assert.match(commandExecutor, /case 'tail'/)
 
 assert.ok(existsSync(join(root, 'src/main/ops/readOnlyCommands.ts')))
+assert.ok(existsSync(join(root, 'src/main/ops/auditStore.ts')))
+assert.ok(existsSync(join(root, 'src/shared/ops/auditTypes.ts')))
+
+const opsIpc = readFileSync(join(root, 'src/main/ipc/ops.ts'), 'utf8')
+assert.match(opsIpc, /listAudit/)
+
+const opsSync = readFileSync(join(root, 'src/main/ops/opsSyncService.ts'), 'utf8')
+assert.match(opsSync, /appendOpsAuditEntry/)
+assert.match(opsSync, /completeOpsAuditEntry/)
 
 assert.ok(existsSync(join(root, 'src/main/ops/opsSyncService.ts')))
 assert.ok(existsSync(join(root, 'src/main/gateway/fileStore.ts')))

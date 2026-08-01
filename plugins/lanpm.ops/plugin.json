@@ -2,7 +2,7 @@
   "id": "lanpm.ops",
   "name": "LanPM Ops",
   "version": "0.1.0",
-  "slots": ["files.toolbar", "chat.composer.action"],
+  "slots": ["files.toolbar", "chat.composer.action", "profile.tab"],
   "capabilities": ["ops.machine.list", "ops.command.send"],
   "pricing": "paid"
 }
