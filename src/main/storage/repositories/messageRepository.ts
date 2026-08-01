@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import type { DmMessagePreview } from '../../../shared/chat/dmPreview'
 import type { ChatMessage, MessageContent, MessageDeliveryStatus } from '../../../shared/chat/types'
 import { CHAT_HISTORY_PAGE_SIZE, type ChatMessagePage } from '../../../shared/chat/pagination.ts'
 
@@ -226,6 +227,32 @@ export function listDistinctDmGroupIds(db: Database): string[] {
     )
     .all() as { groupId: string }[]
   return rows.map((r) => r.groupId)
+}
+
+/** Latest message per DM group — one row per `dm:%` group (window fn). */
+export function listDmMessagePreviews(db: Database): DmMessagePreview[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM (
+         SELECT *,
+           ROW_NUMBER() OVER (
+             PARTITION BY group_id
+             ORDER BY lamport_ts DESC, created_at DESC, rowid DESC
+           ) AS rn
+         FROM messages
+         WHERE group_id LIKE 'dm:%'
+       )
+       WHERE rn = 1`
+    )
+    .all() as (MessageRow & { rn: number })[]
+  return rows.map((row) => {
+    const message = rowToMessage(row)
+    return {
+      groupId: message.groupId,
+      lastAt: message.createdAt,
+      lastMessage: message
+    }
+  })
 }
 
 export function updateMessage(db: Database, message: ChatMessage): void {

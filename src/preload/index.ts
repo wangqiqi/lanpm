@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { DmMessagePreview } from '../shared/chat/dmPreview'
 import type { ChatMessage } from '../shared/chat/types'
 import type { ProfileUpdateInput, SetupInput } from '../shared/identity'
 import type { LanpmApi } from '../shared/lanpm-api'
-import { CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
+import { CHAT_IPC, CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
 import { GROUP_TAG_META_PUSH_CHANNEL, TASK_AWARENESS_PUSH_CHANNEL, TASK_PUSH_CHANNEL } from '../shared/task/channels'
 import { FILE_TRANSFER_PUSH_CHANNEL } from '../shared/file/channels'
 import { GROUP_PUSH_CHANNEL, GROUP_JOIN_REQUEST_PUSH_CHANNEL } from '../shared/group/channels'
@@ -57,6 +58,7 @@ const api: LanpmApi = {
   },
   chat: {
     listMessages: (groupId) => ipcRenderer.invoke('chat:listMessages', groupId),
+    listDmPreviews: () => ipcRenderer.invoke(CHAT_IPC.listDmPreviews) as Promise<DmMessagePreview[]>,
     loadOlderMessages: (groupId, beforeLamportTs) =>
       ipcRenderer.invoke('chat:loadOlderMessages', groupId, beforeLamportTs),
     sendText: (groupId, text, options) =>

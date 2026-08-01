@@ -3,6 +3,7 @@ import {
   listGroupMembers,
   listGroupMessages,
   listOlderGroupMessages,
+  listDmPreviews,
   sendCodeMessage,
   pickAndSendFileMessage,
   recallMessage,
@@ -29,6 +30,8 @@ export function registerChatIpc(): void {
     }
     return listGroupMessages(getDatabase(), groupId)
   })
+
+  ipcMain.handle(CHAT_IPC.listDmPreviews, () => listDmPreviews(getDatabase()))
 
   ipcMain.handle(
     CHAT_IPC.loadOlderMessages,

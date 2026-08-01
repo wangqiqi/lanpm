@@ -14,6 +14,8 @@ import { togglePinId, mergePinPayload, type ChatPinPayload } from '@shared/chat/
 import { parseMentions } from '@shared/chat/mentions'
 import { detectLanguage } from '@shared/chat/detectLanguage'
 import { isDmGroupId, parseDmGroupId } from '@shared/chat/dmSession'
+import { dmPreviewFromMessage } from '@shared/chat/dmPreview'
+import { lastChatMessage } from '@shared/chat/messagePreview'
 import type { UserPresence } from '@shared/network/types'
 import { parseHostPort } from '@shared/network/manualPeer'
 import type { ProfileUpdateInput, SetupInput, SetupStatus } from '@shared/identity'
@@ -775,6 +777,24 @@ function writeChatMessages(groupId: string, messages: ChatMessage[]): void {
   }
 }
 
+function listStubDmPreviews() {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+    if (!raw) return []
+    const store = JSON.parse(raw) as Record<string, ChatMessage[]>
+    const out = []
+    for (const [groupId, messages] of Object.entries(store)) {
+      if (!isDmGroupId(groupId)) continue
+      const last = lastChatMessage(messages)
+      if (!last) continue
+      out.push(dmPreviewFromMessage(last))
+    }
+    return out
+  } catch {
+    return []
+  }
+}
+
 function readPinPayload(groupId: string): ChatPinPayload | null {
   try {
     const raw = localStorage.getItem(PIN_STORAGE_KEY)
@@ -1097,6 +1117,7 @@ export function createBrowserLanpmStub(): LanpmApi {
         const messages = hasMore ? all.slice(-CHAT_HISTORY_PAGE_SIZE) : all
         return { messages, hasMore }
       },
+      listDmPreviews: async () => listStubDmPreviews(),
       loadOlderMessages: async (groupId, beforeLamportTs) => {
         const status = readStatus()
         const localUserId = status.configured && status.user ? status.user.userId : undefined

@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import type { BrowserWindow } from 'electron'
+import type { DmMessagePreview } from '../../shared/chat/dmPreview'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
 import type { ChatMessagePage } from '../../shared/chat/pagination'
 import { CHAT_HISTORY_PAGE_SIZE } from '../../shared/chat/pagination'
@@ -59,6 +60,7 @@ import {
   getMaxLamportTs,
   getMessageById,
   insertMessage,
+  listDmMessagePreviews,
   listMessagesBeforePage,
   listRecentMessagesPage,
   messageExists,
@@ -239,6 +241,11 @@ export function listOlderGroupMessages(
     return { messages: [], hasMore: false }
   }
   return listMessagesBeforePage(db, groupId, beforeLamportTs, CHAT_HISTORY_PAGE_SIZE)
+}
+
+/** DM session list — latest message per `dm:%` group without loading full histories. */
+export function listDmPreviews(db: Database): DmMessagePreview[] {
+  return listDmMessagePreviews(db)
 }
 
 export interface PublishChatMessageOptions {

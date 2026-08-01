@@ -3,11 +3,12 @@ import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { useNavigate } from 'react-router-dom'
 import { Typography } from 'antd'
 import { isDmGroupId } from '@shared/chat/dmSession'
-import type { ChatMessage } from '@shared/chat/types'
-import { lastChatMessage, messagePreviewText } from '@shared/chat/messagePreview'
+import { messagePreviewText } from '@shared/chat/messagePreview'
 import { useDmStore, type DmSession } from '@renderer/stores/dmStore'
 import { chatStoreActions } from '@renderer/features/chat/chatStoreActions'
 import { useChatStore } from '@renderer/stores/chatStore'
+import { useDmPreviewStore } from '@renderer/features/chat/dmPreviewStore'
+import { useDmPreviews } from '@renderer/features/chat/useDmPreviews'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import type { MessageKey } from '@renderer/i18n/messages'
@@ -20,8 +21,6 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
 const { Text } = Typography
-
-const EMPTY_MESSAGES: ChatMessage[] = []
 
 export type ChatDmPanelLayout = 'main'
 
@@ -60,10 +59,10 @@ const DmSessionRow = memo(function DmSessionRow({
   onOpen
 }: DmSessionRowProps): React.ReactElement {
   const { t } = useI18n()
-  const thread = useChatStore((s) => s.messagesByGroup[session.groupId] ?? EMPTY_MESSAGES)
-  const last = lastChatMessage(thread)
+  const entry = useDmPreviewStore((s) => s.byGroup[session.groupId])
+  const last = entry?.lastMessage ?? null
   const preview = last ? messagePreviewText(last, t('chat.recalledPreview')) : ''
-  const timeLabel = last ? formatSessionTime(last.createdAt, locale, sessionTimeLabels) : ''
+  const timeLabel = entry?.lastAt ? formatSessionTime(entry.lastAt, locale, sessionTimeLabels) : ''
 
   return (
     <button
@@ -90,6 +89,8 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
   const lastOriginGroupId = useDmStore((s) => s.lastOriginGroupId)
   const localUserId = useIdentityStore((s) => s.user?.userId)
   const groups = useNavigationStore((s) => s.groups)
+
+  useDmPreviews()
 
   useEffect(() => {
     chatStoreActions.pruneDmDisallowedOrigins()

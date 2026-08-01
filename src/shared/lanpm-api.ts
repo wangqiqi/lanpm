@@ -1,4 +1,5 @@
 import type { DiscoverSnapshot } from './discover/types'
+import type { DmMessagePreview } from './chat/dmPreview'
 import type { ChatMessage } from './chat/types'
 import type { ChatMessagePage } from './chat/pagination'
 import type { SendChatOptions } from './chat/channels'
@@ -69,6 +70,7 @@ export interface LanpmApi {
   }
   chat: {
     listMessages: (groupId: string) => Promise<ChatMessagePage>
+    listDmPreviews: () => Promise<DmMessagePreview[]>
     loadOlderMessages: (groupId: string, beforeLamportTs: number) => Promise<ChatMessagePage>
     sendText: (groupId: string, text: string, options?: SendChatOptions) => Promise<ChatMessage>
     sendCode: (

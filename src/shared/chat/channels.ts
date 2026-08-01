@@ -18,7 +18,8 @@ export const CHAT_IPC = {
   editMessage: 'chat:editMessage',
   listPinnedIds: 'chat:listPinnedIds',
   togglePin: 'chat:togglePin',
-  forwardMessage: 'chat:forwardMessage'
+  forwardMessage: 'chat:forwardMessage',
+  listDmPreviews: 'chat:listDmPreviews'
 } as const
 
 export interface SendChatOptions {

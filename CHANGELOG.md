@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.91.0] - 2026-08-01
+
+### Added
+
+- **DM 会话预览 IPC（dm-preview-ipc）**：`CHAT_IPC.listDmPreviews` · `dmPreviewStore` · `useDmPreviews` 增量 patch
+- **`docs/specs/013-dm-preview-ipc/spec.md`**
+- **`verify:dm-preview-ipc`** — 静态守卫 IPC 与 `DmSessionRow` 无 `messagesByGroup` 订阅
+
+### Changed
+
+- **`DmSessionBar`**：预览改读 `dmPreviewStore`，不再按行订阅 `messagesByGroup`
+- **`messageRepository.listDmMessagePreviews`** — SQLite 窗口函数按 DM 群取末条消息
+- **`docs/优化.md`** §5.15 Store 写入减负标 ✅ v1.91.0
+
 ## [1.90.0] - 2026-08-01
 
 ### Added
