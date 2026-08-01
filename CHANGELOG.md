@@ -4,9 +4,13 @@
 
 ## [Unreleased]
 
+## [1.95.2] - 2026-08-01
+
 ### Fixed
 
-- **付费插件许可证 · 构建/打包闸**：移除 `licenseStore` 中 `!app.isPackaged` 隐式绕过；`npm run build` / `dist/*-unpacked` / 正式安装包均须正式离线授权，仅 `LANPM_LICENSE_SKIP_VERIFY=1` 等显式开发/测试开关可跳过；新增 `verify:pack-license` 并入 `prebuild`
+- **付费插件许可证 · 构建/打包闸（TASK-1220）**：移除 `licenseStore` 中 `!app.isPackaged` 隐式绕过；`npm run build` / `dist/*-unpacked` / 正式安装包均须正式离线授权，仅 `LANPM_LICENSE_SKIP_VERIFY=1` 等显式开发/测试开关可跳过；新增 `verify:pack-license` 并入 `prebuild` 与 `verify:release-gate`
+- **覆盖率门禁**：补 `ops/validate` · `whiteboardCrdtModel` · `bounded` 单测，恢复 `verify:coverage` ≥85%
+- **发现中继集成测试**：`verify:discover-relay` 避免多节点同 `groupId` 覆盖 `ownerUserId` 导致偶发失败
 
 ## [1.95.1] - 2026-08-01
 

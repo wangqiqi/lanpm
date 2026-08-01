@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Table, Typography } from 'antd'
 import type { OpsAuditEntry } from '@shared/ops/auditTypes'
-import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
 
 interface Props {
@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default function OpsAuditPanel({ groupId }: Props): React.ReactElement {
-  const lanpm = useLanpmApp()
   const { t } = useI18n()
   const [rows, setRows] = useState<OpsAuditEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -17,9 +16,9 @@ export default function OpsAuditPanel({ groupId }: Props): React.ReactElement {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    void lanpm.ops
-      .listAudit(groupId || undefined, 50)
-      .then((entries) => {
+    void getLanpmApi()
+      .ops.listAudit(groupId || undefined, 50)
+      .then((entries: OpsAuditEntry[]) => {
         if (!cancelled) setRows(entries)
       })
       .finally(() => {
@@ -28,7 +27,7 @@ export default function OpsAuditPanel({ groupId }: Props): React.ReactElement {
     return () => {
       cancelled = true
     }
-  }, [lanpm.ops, groupId])
+  }, [groupId])
 
   return (
     <div>

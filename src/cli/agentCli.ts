@@ -1,11 +1,11 @@
 import type { Database } from 'better-sqlite3'
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { getSetupStatus } from '../identity/setup.ts'
-import { joinWithPairingCode } from '../discover/pairingService.ts'
-import { initOpsSyncService, registerLocalOpsAgent, markOpsAgentOffline } from '../ops/opsSyncService.ts'
-import { getNetworkTransport } from '../network/index.ts'
-import { listUserGroups } from '../group/groupService.ts'
+import { getSetupStatus } from '../main/identity/setup.ts'
+import { joinWithPairingCode } from '../main/discover/pairingService.ts'
+import { initOpsSyncService, registerLocalOpsAgent, markOpsAgentOffline } from '../main/ops/opsSyncService.ts'
+import { getNetworkTransport } from '../main/network/index.ts'
+import { listUserGroups } from '../main/group/groupService.ts'
 
 export interface AgentCliStartOptions {
   displayName: string

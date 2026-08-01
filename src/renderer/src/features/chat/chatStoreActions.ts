@@ -21,7 +21,9 @@ export const chatStoreActions = {
   forwardMessage: (
     ...args: Parameters<ReturnType<typeof useChatStore.getState>['forwardMessage']>
   ) => useChatStore.getState().forwardMessage(...args),
-  pickAndSendFile: (groupId: string) => useChatStore.getState().pickAndSendFile(groupId),
+  pickAndSendFile: (
+    ...args: Parameters<ReturnType<typeof useChatStore.getState>['pickAndSendFile']>
+  ) => useChatStore.getState().pickAndSendFile(...args),
   sendFile: (...args: Parameters<ReturnType<typeof useChatStore.getState>['sendFile']>) =>
     useChatStore.getState().sendFile(...args),
   captureAndSendScreenshot: (groupId: string) =>

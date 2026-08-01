@@ -5,7 +5,11 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:net'
 import { setDiscoverableGroupsProvider } from '../../src/main/discover/advertProvider.ts'
-import { listCachedDiscoverGroups } from '../../src/main/discover/discoverGroupRegistry.ts'
+import {
+  clearDiscoverGroupCacheForTests,
+  listCachedDiscoverGroups,
+  rememberPeerGroups
+} from '../../src/main/discover/discoverGroupRegistry.ts'
 import { RealNetworkTransport } from '../../src/main/network/real/RealNetworkTransport.ts'
 
 function reservePort(): Promise<number> {
@@ -27,7 +31,11 @@ function reservePort(): Promise<number> {
 
 const GROUP_ID = 'relay-hop-test-group'
 
-setDiscoverableGroupsProvider(() => [
+clearDiscoverGroupCacheForTests()
+// Global provider is shared by all transports — keep empty so B/C peer_advert do not
+// overwrite A's groupId entry with a different ownerUserId.
+setDiscoverableGroupsProvider(() => [])
+rememberPeerGroups('user_a', 'Relay A', [
   { groupId: GROUP_ID, name: '中继测试群', type: 'project' }
 ])
 
@@ -72,7 +80,7 @@ try {
   )
 
   await hostC.connectManualHost('127.0.0.1', portB)
-  await new Promise((r) => setTimeout(r, 500))
+  await new Promise((r) => setTimeout(r, 1200))
 
   const cachedC = listCachedDiscoverGroups()
   assert.ok(
