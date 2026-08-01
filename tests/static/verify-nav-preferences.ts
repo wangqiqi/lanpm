@@ -16,6 +16,16 @@ assert.match(shared, /sanitizeNavPreferences/)
 assert.match(shared, /resolveVisibleContributedRoutes/)
 assert.match(shared, /hiddenContributedRoutes/)
 assert.match(shared, /contributedOrder/)
+assert.match(
+  shared,
+  /hiddenViews:\s*\['files',\s*'whiteboard'\]/,
+  'DEFAULT_NAV_PREFERENCES must hide files/whiteboard tabs (IA-404)'
+)
+assert.match(
+  shared,
+  /hiddenContributedRoutes:\s*\['mindmap'\]/,
+  'DEFAULT_NAV_PREFERENCES must hide mindmap contributed tab (IA-404)'
+)
 
 const store = readFileSync(join(root, 'src/main/navigation/navPreferencesStore.ts'), 'utf8')
 assert.match(store, /nav-preferences\.json/)

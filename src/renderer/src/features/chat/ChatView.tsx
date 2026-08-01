@@ -5,10 +5,13 @@ import { Button, Dropdown, Input, Modal, Segmented, Select, Typography } from 'a
 import type { MenuProps } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
+  ApartmentOutlined,
   AudioOutlined,
   CameraOutlined,
   CodeOutlined,
   EditOutlined,
+  FolderOpenOutlined,
+  LayoutOutlined,
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
@@ -20,6 +23,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isDmGroupId } from '@shared/chat/dmSession'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { groupViewPath } from '@renderer/routes/paths'
+import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import { parseOpsCommand } from '@shared/chat/opsCommand'
@@ -58,6 +62,11 @@ import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
+import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
+import type { ChatCollaborationPanel } from '@renderer/stores/chatCollaborationStore'
+import { useContributedViews } from '@renderer/plugin/useContributedViews'
+import { usePluginView } from '@renderer/plugin/usePluginView'
+import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { resolveReplyQuote } from '@shared/chat/replyQuote'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import { buildQuoteKindLabels } from '@renderer/features/chat/quoteKindLabels'
@@ -331,6 +340,27 @@ export default function ChatView(): React.ReactElement {
   const taskAllowed = Boolean(gid && !inDm && groupType === 'project')
   const codeAllowed = Boolean(gid && !isMemoryOnlyAnonymous)
   const fileAllowed = codeAllowed
+  const filesLibraryAllowed =
+    Boolean(gid && !inDm) && isViewAllowedForGroup(groupType, 'files', gid)
+  const whiteboardAllowed =
+    Boolean(gid && !inDm) && isViewAllowedForGroup(groupType, 'whiteboard', gid)
+  const contributedViews = useContributedViews()
+  const mindmapPlugin = usePluginView('lanpm.mindmap')
+  const mindmapAllowed =
+    Boolean(gid && !inDm) &&
+    contributedViews.some((v) => v.route === 'mindmap' && v.groupTypes.includes(groupType))
+  const collaborationAllowed = filesLibraryAllowed || whiteboardAllowed || mindmapAllowed
+
+  const openCollaborationPanel = useCallback(
+    (panel: ChatCollaborationPanel) => {
+      if (panel === 'mindmap' && mindmapPlugin && !isPluginLicenseActive(mindmapPlugin)) {
+        message.warning(t('plugin.licenseMissing'))
+        return
+      }
+      useChatCollaborationStore.getState().open(panel)
+    },
+    [mindmapPlugin, message, t]
+  )
 
   const insertMention = useCallback((displayName: string) => {
     setDraft((prev) => {
@@ -1233,6 +1263,34 @@ export default function ChatView(): React.ReactElement {
                               message.error(formatError(err, 'chat.screenshotFailed'))
                             )
                           }
+                        />
+                      )}
+                    </div>
+                  </>
+                )}
+                {collaborationAllowed && (
+                  <>
+                    <div className={styles.toolbarGroupDivider} aria-hidden />
+                    <div className={styles.toolbarCollaborationGroup}>
+                      {filesLibraryAllowed && (
+                        <ComposerIconButton
+                          icon={<FolderOpenOutlined />}
+                          label={t('nav.files')}
+                          onClick={() => openCollaborationPanel('files')}
+                        />
+                      )}
+                      {whiteboardAllowed && (
+                        <ComposerIconButton
+                          icon={<LayoutOutlined />}
+                          label={t('nav.whiteboard')}
+                          onClick={() => openCollaborationPanel('whiteboard')}
+                        />
+                      )}
+                      {mindmapAllowed && (
+                        <ComposerIconButton
+                          icon={<ApartmentOutlined />}
+                          label={t('nav.mindmap')}
+                          onClick={() => openCollaborationPanel('mindmap')}
                         />
                       )}
                     </div>

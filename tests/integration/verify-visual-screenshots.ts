@@ -1,5 +1,5 @@
 /**
- * AUTO-20 / V-14b：亮暗八视图 + setup 截图（Electron 无头，输出至 LANPM_VISUAL_CAPTURE_DIR）。
+ * AUTO-20 / V-14b：亮暗九视图 + setup 截图（Electron 无头，输出至 LANPM_VISUAL_CAPTURE_DIR）。
  * Run: npm run verify:visual-screenshots
  */
 import assert from 'node:assert/strict'
@@ -25,6 +25,7 @@ const THEME_PAGES = [
   'calendar',
   'whiteboard',
   'files',
+  'mindmap',
   'cockpit'
 ] as const
 const THEMES = ['light', 'dark'] as const

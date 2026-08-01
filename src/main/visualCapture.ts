@@ -20,6 +20,7 @@ const APP_PAGES = [
   { slug: 'calendar', hash: `/g/${GROUP_ID}/calendar` },
   { slug: 'whiteboard', hash: `/g/${GROUP_ID}/whiteboard` },
   { slug: 'files', hash: `/g/${GROUP_ID}/files` },
+  { slug: 'mindmap', hash: `/g/${GROUP_ID}/mindmap` },
   { slug: 'cockpit', hash: '/cockpit' }
 ] as const
 
@@ -109,7 +110,7 @@ async function navigateHash(win: BrowserWindow, hashPath: string): Promise<void>
       if (window.location.hash !== next) window.location.hash = next
     })()
   `)
-  await wait(hashPath.includes('gantt') ? 2_200 : 800)
+  await wait(hashPath.includes('gantt') ? 2_200 : hashPath.includes('mindmap') ? 1_800 : 800)
   await waitForHealthyUi(win)
 }
 
@@ -267,6 +268,63 @@ function seedVisualCaptureTasks(db: ReturnType<typeof getDatabase>): void {
   console.info('[lanpm:visual-capture] seeded', rows.length, 'tasks for gantt/board')
 }
 
+async function ensureMindmapRoute(win: BrowserWindow): Promise<void> {
+  const hash = `#/g/${GROUP_ID}/mindmap`
+  const deadline = Date.now() + 45_000
+  while (Date.now() < deadline) {
+    await win.webContents.executeJavaScript(`
+      (function() {
+        const next = ${JSON.stringify(hash)}
+        if (window.location.hash !== next) window.location.hash = next
+      })()
+    `)
+    await wait(1_200)
+    const ready = await win.webContents.executeJavaScript(`
+      (function() {
+        if (!window.location.hash.includes('/mindmap')) return false
+        return !!document.querySelector('[data-contributed-view="mindmap"]')
+      })()
+    `)
+    if (ready) return
+  }
+  throw new Error('mindmap route not ready')
+}
+
+async function waitForMindmapChrome(win: BrowserWindow, marker?: string): Promise<void> {
+  await ensureMindmapRoute(win)
+  await win.webContents.executeJavaScript(`
+    new Promise((resolve, reject) => {
+      const marker = ${JSON.stringify(marker ?? '')}
+      const deadline = Date.now() + 35_000
+      const tick = () => {
+        const engine = document.querySelector('[data-mindmap-engine]')
+        const pluginHost = document.querySelector('[data-plugin-id="lanpm.mindmap"]')
+        if (engine) {
+          const kind = engine.getAttribute('data-mindmap-engine')
+          if (kind === 'mind-elixir') {
+            const topics = document.querySelectorAll('.me-tpc, .map-container .me-node')
+            if (topics.length > 0) return resolve(true)
+          }
+          if (kind === 'stub') {
+            const list = engine.querySelector('ul')
+            if (list && list.children.length > 0) return resolve(true)
+          }
+        }
+        if (pluginHost && (document.body?.innerText ?? '').includes('项目任务')) {
+          return resolve(true)
+        }
+        if (marker && (document.body?.innerText ?? '').includes(marker)) return resolve(true)
+        if (Date.now() > deadline) {
+          const hint = (document.body?.innerText ?? '').slice(0, 160)
+          return reject(new Error('mindmap not ready: ' + hint))
+        }
+        setTimeout(tick, 250)
+      }
+      tick()
+    })
+  `)
+}
+
 async function flushPaint(win: BrowserWindow): Promise<void> {
   await win.webContents.executeJavaScript(`
     new Promise((resolve) => {
@@ -280,10 +338,16 @@ async function capture(
   outDir: string,
   fileName: string,
   theme: (typeof THEMES)[number],
-  opts?: { waitForText?: string; waitForGanttBars?: boolean }
+  opts?: {
+    waitForText?: string
+    waitForGanttBars?: boolean
+    waitForMindmap?: boolean
+    mindmapMarker?: string
+  }
 ): Promise<number | undefined> {
   await waitForHealthyUi(win)
   if (opts?.waitForText) await waitForSeededTaskChrome(win, opts.waitForText)
+  if (opts?.waitForMindmap) await waitForMindmapChrome(win, opts.mindmapMarker)
   let ganttBars: number | undefined
   if (opts?.waitForGanttBars) {
     await expandGanttViewport(win)
@@ -343,14 +407,21 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
     await applyTheme(win, theme)
     await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
     for (const page of rest) {
-      await navigateHash(win, page.hash)
+      if (page.slug === 'mindmap') {
+        await ensureMindmapRoute(win)
+      } else {
+        await navigateHash(win, page.hash)
+      }
       await applyTheme(win, theme)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
       const waitForGanttBars = page.slug === 'gantt'
+      const waitForMindmap = page.slug === 'mindmap'
       const bars = await capture(win, outDir, `${theme}_${page.slug}.png`, theme, {
         waitForText,
-        waitForGanttBars
+        waitForGanttBars,
+        waitForMindmap,
+        mindmapMarker: waitForMindmap ? taskMarker : undefined
       })
       if (bars !== undefined) ganttMeta[theme] = bars
     }

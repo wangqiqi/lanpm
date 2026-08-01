@@ -758,6 +758,7 @@ export type MessageKey =
   | 'chat.linkFileToTaskHint'
   | 'chat.linkFileToTaskPick'
   | 'chat.linkFileToTaskConfirm'
+  | 'chat.collaborationFullscreen'
   | 'chat.linkFileToTaskDone'
   | 'chat.linkMessageToTask'
   | 'chat.linkMessageToTaskTitle'

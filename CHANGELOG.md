@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [1.96.0] - 2026-08-01
+
+### Added
+
+- **聊天协作 IA（SPRINT-15）**：文件库 / 白板 / 脑图从默认底栏 Tab 迁至 **聊天 Composer 工具栏** → `ChatCollaborationDrawer` 侧栏抽屉；保留 `#/g/:id/files|whiteboard|mindmap` 深链与抽屉内「全屏编辑」
+- **`chatCollaborationStore`**：聊天与任务详情共用 `open(panel)` 打开协作面板
+- **导航默认**：`navPreferences` 默认隐藏 `files` / `whiteboard` Tab 与贡献 `mindmap` Tab（老用户偏好仍保留）
+- **静态门禁**：`verify:visual` IA-401～404 · `verify:nav-preferences` 默认 IA 断言
+
+### Changed
+
+- **`TaskDetailPanel`**：附件区「打开文件库」改为呼出聊天协作抽屉，不再跳转 files Tab
+- **文档**：`docs/04` §2 导航 IA · `docs/07` §1.4/§3.4 · `plugins/lanpm.mindmap` README · mock 引导文案
+
 ## [1.95.2] - 2026-08-01
 
 ### Fixed

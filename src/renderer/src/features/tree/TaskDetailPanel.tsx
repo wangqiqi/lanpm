@@ -12,6 +12,7 @@ import { memberSelectFilterOption } from '@shared/chat/matchMemberSearch'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
+import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
 import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import type { TranslateParams } from '@renderer/i18n/messages'
@@ -862,7 +863,19 @@ export default function TaskDetailPanel({
       <PluginSlot slotId="task.detail.section" groupId={groupId} taskId={task.taskId} />
 
       <div className={styles.detailField}>
-        <Text type="secondary">{t('tree.detailAttachments')}</Text>
+        <div className={styles.detailFieldHeader}>
+          <Text type="secondary">{t('tree.detailAttachments')}</Text>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              useChatCollaborationStore.getState().open('files')
+              onClose()
+            }}
+          >
+            {t('nav.files')}
+          </Button>
+        </div>
         {!task.linkedFileIds || task.linkedFileIds.length === 0 ? (
           <Text type="secondary">{t('tree.detailAttachmentsEmpty')}</Text>
         ) : (
@@ -873,9 +886,7 @@ export default function TaskDetailPanel({
                   type="button"
                   className={styles.discussionItem}
                   onClick={() => {
-                    navigate(groupViewPath(groupId, 'files'), {
-                      state: { selectFileId: fileId }
-                    })
+                    useChatCollaborationStore.getState().open('files')
                     onClose()
                   }}
                 >

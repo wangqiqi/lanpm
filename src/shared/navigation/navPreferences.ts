@@ -25,9 +25,9 @@ export const ALL_APP_VIEWS: AppView[] = [
 const TASK_ENTRY_VIEWS: AppView[] = ['board', 'tree']
 
 export const DEFAULT_NAV_PREFERENCES: NavPreferences = {
-  hiddenViews: [],
+  hiddenViews: ['files', 'whiteboard'],
   order: [...ALL_APP_VIEWS],
-  hiddenContributedRoutes: [],
+  hiddenContributedRoutes: ['mindmap'],
   contributedOrder: []
 }
 
@@ -120,8 +120,9 @@ export function normalizeNavPreferences(raw: unknown): NavPreferences {
     return {
       ...DEFAULT_NAV_PREFERENCES,
       order: [...DEFAULT_NAV_PREFERENCES.order],
-      hiddenContributedRoutes: [],
-      contributedOrder: []
+      hiddenViews: [...DEFAULT_NAV_PREFERENCES.hiddenViews],
+      hiddenContributedRoutes: [...DEFAULT_NAV_PREFERENCES.hiddenContributedRoutes],
+      contributedOrder: [...DEFAULT_NAV_PREFERENCES.contributedOrder]
     }
   }
 

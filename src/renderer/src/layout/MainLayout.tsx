@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
+import { isDmGroupId } from '@shared/chat/dmSession'
 import TopBar from '@renderer/layout/TopBar'
 import BottomNav from '@renderer/layout/BottomNav'
 import CommandPalette from '@renderer/layout/CommandPalette'
@@ -10,6 +11,7 @@ import { useNotificationNavigation } from '@renderer/features/meeting/useNotific
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import AiAssistantShell from '@renderer/features/ai/AiAssistantShell'
+import ChatCollaborationDrawer from '@renderer/features/chat/ChatCollaborationDrawer'
 import styles from './MainLayout.module.css'
 
 export default function MainLayout(): React.ReactElement {
@@ -65,6 +67,9 @@ export default function MainLayout(): React.ReactElement {
         </div>
       ) : null}
       <AiAssistantShell />
+      {groupId && !isDmGroupId(groupId) ? (
+        <ChatCollaborationDrawer groupId={groupId} />
+      ) : null}
       <CommandPalette />
     </div>
   )

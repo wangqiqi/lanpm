@@ -162,6 +162,13 @@
   flex-shrink: 0;
 }
 
+.detailFieldHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .detailMetaCaption {
   font-size: var(--lanpm-font-caption);
 }

@@ -773,6 +773,7 @@ const enUS = {
   'chat.linkFileToTaskHint': 'File: {name}',
   'chat.linkFileToTaskPick': 'Select a task',
   'chat.linkFileToTaskConfirm': 'Link',
+  'chat.collaborationFullscreen': 'Open full screen',
   'chat.linkFileToTaskDone': 'Linked to task',
   'chat.linkMessageToTask': 'Link to existing task',
   'chat.linkMessageToTaskTitle': 'Link message to task',

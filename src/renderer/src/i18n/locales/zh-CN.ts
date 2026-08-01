@@ -766,6 +766,7 @@ const zhCN = {
   'chat.linkFileToTaskHint': '文件：{name}',
   'chat.linkFileToTaskPick': '选择任务',
   'chat.linkFileToTaskConfirm': '挂接',
+  'chat.collaborationFullscreen': '全屏编辑',
   'chat.linkFileToTaskDone': '已挂到任务',
   'chat.linkMessageToTask': '关联已有任务',
   'chat.linkMessageToTaskTitle': '将消息关联到任务',

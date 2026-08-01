@@ -1,6 +1,6 @@
 # LanPM Mind Map Plugin
 
-可购思维导图插件 `lanpm.mindmap`：Layer C 整页 Tab + `mind-elixir` 真库渲染，**不进**根 `package.json` 必选依赖。
+可购思维导图插件 `lanpm.mindmap`：Layer C 整页深链 + 聊天 Composer 抽屉入口（v1.96.0）+ `mind-elixir` 真库渲染，**不进**根 `package.json` 必选依赖。
 
 ## 安装 mind-elixir（可选）
 
@@ -14,7 +14,7 @@ npm install --prefix plugins/lanpm.mindmap
 
 ## Manifest
 
-- Layer C：`contributions.views[]` → `/g/:groupId/mindmap`
+- Layer C：`contributions.views[]` → `/g/:groupId/mindmap`（深链全屏）；聊天页 `ChatCollaborationDrawer` 为默认入口
 - Slot：`mindmap.toolbar`（整页 toolbar zone）
 - Capability：`task.list`（只读 POC，不写库）
 

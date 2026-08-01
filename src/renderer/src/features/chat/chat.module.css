@@ -1260,6 +1260,40 @@
   border: 0.5px solid var(--lanpm-border);
 }
 
+.toolbarCollaborationGroup {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border-radius: calc(var(--lanpm-radius-md) - 1px);
+  background: var(--lanpm-fill-tertiary);
+  border: 0.5px solid var(--lanpm-border);
+}
+
+.collaborationDrawer :global(.ant-drawer-body) {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.collaborationPanelBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.collaborationPanelTall {
+  min-height: min(72vh, 720px);
+}
+
+.collaborationPanelLoading {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+}
+
 .toolbarGlyphBtn {
   font-size: var(--lanpm-font-title);
   font-weight: 700;

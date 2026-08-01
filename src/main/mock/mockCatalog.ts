@@ -269,7 +269,7 @@ export const MOCK_PROJECT_MESSAGES: MockMessageDef[] = [
     type: 'text',
     content: {
       kind: 'text',
-      text: '小提示：底部导航可在 聊天 / 看板 / 树 / 甘特 / 文件 五个视图间切换；职能群和匿名群会隐藏部分 Tab。'
+      text: '小提示：底部导航默认在 聊天 / 看板 / 树 / 甘特 / 日历 间切换；文件库、白板、脑图可从聊天输入框旁的工具栏打开。职能群和匿名群会隐藏部分 Tab。'
     },
     minutesAgo: 480
   },

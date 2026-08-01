@@ -939,6 +939,8 @@ assert.ok(
   'chat.module.css must not retain chatWorkspaceDesktop island chrome (IS-403)'
 )
 assert.match(docs04, /甘特、文件、聊天/, 'docs/04 §1.3.1 must list Gantt/Files/Chat island surfaces (IS-404)')
+assert.match(docs04, /ChatCollaborationDrawer/, 'docs/04 must document chat collaboration drawer IA (IA-404)')
+assert.match(docs04, /文件库 · 白板 · 脑图/, 'docs/04 must list collaboration composer buttons (IA-404)')
 
 // --- AP-401~403 audit-polish（审查.md 清尾） ---
 const discoverCoachmarkSrc = readFileSync(
@@ -1029,6 +1031,52 @@ assert.ok(
 assert.ok(
   !/\.loadOlder\s*\{[^}]*opacity:/s.test(chatCss),
   'chat loadOlder must not stack opacity on secondary text (CO-403)'
+)
+
+// --- IA-401~403 chat-collaboration panels (SPRINT-15) ---
+const collaborationDrawerSrc = readFileSync(
+  join(renderer, 'features/chat/ChatCollaborationDrawer.tsx'),
+  'utf8'
+)
+const collaborationStoreSrc = readFileSync(
+  join(renderer, 'stores/chatCollaborationStore.ts'),
+  'utf8'
+)
+assert.match(mainLayoutSrc, /ChatCollaborationDrawer/, 'MainLayout must mount ChatCollaborationDrawer (IA-401)')
+assert.match(
+  mainLayoutSrc,
+  /!isDmGroupId\(groupId\)/,
+  'ChatCollaborationDrawer must not mount in DM sessions (IA-401)'
+)
+assert.match(
+  collaborationStoreSrc,
+  /panel:\s*ChatCollaborationPanel \| null/,
+  'chatCollaborationStore must track active panel (IA-401)'
+)
+assert.match(
+  chatSrc,
+  /toolbarCollaborationGroup/,
+  'ChatView composer must expose collaboration toolbar group (IA-402)'
+)
+assert.match(
+  chatSrc,
+  /openCollaborationPanel/,
+  'ChatView must open collaboration panels from composer (IA-402)'
+)
+assert.match(
+  collaborationDrawerSrc,
+  /chat\.collaborationFullscreen/,
+  'ChatCollaborationDrawer must offer fullscreen escape hatch (IA-403)'
+)
+assert.match(
+  collaborationDrawerSrc,
+  /contributedViewPath\(groupId,\s*'mindmap'\)/,
+  'mindmap fullscreen must use contributed deep link (IA-403)'
+)
+assert.match(
+  taskDetailSrc,
+  /useChatCollaborationStore/,
+  'TaskDetailPanel must open files panel via collaboration store (IA-403)'
 )
 
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---

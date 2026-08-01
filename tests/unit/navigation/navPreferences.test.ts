@@ -16,8 +16,18 @@ import {
 describe('normalizeNavPreferences', () => {
   it('returns defaults for invalid input', () => {
     expect(normalizeNavPreferences(null).order).toEqual(DEFAULT_NAV_PREFERENCES.order)
-    expect(normalizeNavPreferences(null).hiddenContributedRoutes).toEqual([])
+    expect(normalizeNavPreferences(null).hiddenViews).toEqual(['files', 'whiteboard'])
+    expect(normalizeNavPreferences(null).hiddenContributedRoutes).toEqual(['mindmap'])
     expect(normalizeNavPreferences(null).contributedOrder).toEqual([])
+  })
+
+  it('defaults hide files/whiteboard tabs and mindmap contributed route (SPRINT-15 IA)', () => {
+    expect(DEFAULT_NAV_PREFERENCES.hiddenViews).toEqual(['files', 'whiteboard'])
+    expect(DEFAULT_NAV_PREFERENCES.hiddenContributedRoutes).toEqual(['mindmap'])
+    const visible = resolveVisibleViews('project', DEFAULT_NAV_PREFERENCES)
+    expect(visible).not.toContain('files')
+    expect(visible).not.toContain('whiteboard')
+    expect(isContributedRouteVisible(DEFAULT_NAV_PREFERENCES, 'mindmap')).toBe(false)
   })
 
   it('dedupes order and hiddenViews', () => {
@@ -77,6 +87,16 @@ describe('resolveVisibleViews', () => {
 
   it('respects function group tabRules', () => {
     const visible = resolveVisibleViews('function', DEFAULT_NAV_PREFERENCES)
+    expect(visible).toEqual(['chat'])
+  })
+
+  it('function group can show files when user unhides in preferences', () => {
+    const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
+      hiddenViews: ['whiteboard'],
+      order: DEFAULT_NAV_PREFERENCES.order
+    })
+    const visible = resolveVisibleViews('function', prefs)
     expect(visible).toEqual(['chat', 'files'])
   })
 
