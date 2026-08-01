@@ -8,7 +8,7 @@ Project behavior here — not in rules/skills. Learned knowledge → `.cursorGro
 |-----|---------|---------|
 | `profile` | `full` | 安装 profile 标记（`full` · `lite` · `rules-only`） |
 | `plan_file` | `plan.md` | Plan path（**gitignore**，本地工作副本） |
-| `archive_dir` | `archive` | Sprint 归档目录 |
+| `archive_dir` | `.cursorGrowth/archive` | Sprint 归档目录（gitignore，勿放仓库根） |
 | `verify_default` | `./scripts/verify.sh` | 全量验收（plan 内 `VERIFY` 元数据可覆盖） |
 | `workflow.enabled` | `true` | plan/run SOP |
 | `workflow.hooks_enabled` | `true` | run-start / run-stop |
