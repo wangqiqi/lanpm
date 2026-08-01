@@ -103,7 +103,7 @@ assert.ok(
   'lanpm.example version should be >= 0.4.0'
 )
 
-const docs = readFileSync(join(root, 'docs/插件开发.md'), 'utf8')
+const docs = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs, /v0\.4/)
 assert.match(docs, /人审|pending_confirm|confirmCapability/)
 

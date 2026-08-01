@@ -47,4 +47,4 @@ POC 测试密钥对与 `tests/unit/plugin/licenseCanonical.test.ts` 一致（仅
 | 永久 | `--term perpetual` → 无 `expiresAt` |
 | 机器 | 文件级 `machineId`，与 `collect` 一致 |
 
-详见 `docs/插件开发.md` §8.2.2。
+详见 `docs/07_插件与扩展.md` §19。

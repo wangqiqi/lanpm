@@ -97,7 +97,7 @@ assert.ok(parsed?.capabilities.includes('chat.sendText'), 'lanpm.example missing
 assert.ok(parsed?.capabilities.includes('file.upload'), 'lanpm.example missing file.upload')
 assert.equal(exampleManifest.version, '0.5.0')
 
-const docs = readFileSync(join(root, 'docs/插件开发.md'), 'utf8')
+const docs = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs, /v0\.5/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {

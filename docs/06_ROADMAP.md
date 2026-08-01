@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：会议体验产品化 · 见 `plan.md` 候选表 · [插件开发](./插件开发.md) §12。
+**候选下一 Sprint**：会议体验产品化 · 见 `plan.md` 候选表 · [07_插件与扩展](./07_插件与扩展.md) §12。
 
 ---
 
@@ -32,7 +32,7 @@
 | 模块 | 功能 |
 |------|------|
 | 会议 Pro 扩展 | 多人视频会议、录制、日程入会（同一可购包升级档） |
-| 完整插件市场 | **暂不做**（2026-07-31）：无盈利前不单独投商店；侧载+离线许可证 ✅ v1.75–1.76 保留 |
+| 完整插件市场 / 应用商店 | **不做**（2026-08-01）；**离线分发** → [07_插件与扩展](./07_插件与扩展.md) §13 起 |
 | 原生移动 App | iOS + Android |
 | WebRTC DataChannel | 可选；默认仍 TCP+UDP（见 [01](./01_产品需求文档.md) §1.3.1） |
 | 匿名群可持久化历史 | 可选；现状退出即失、无文件 Tab |
@@ -89,11 +89,11 @@
 | 3 | Lite mesh POC（2～4 人 · 投屏代理） | P1 | **已交付** · `verify:meeting-mesh-poc` · v1.68.0 |
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | **已交付** · `verify:meeting-livekit-pro` · v1.71.0 |
 | 5 | 离线许可证（内网可购） | P1～P2 | **已交付** · `verify:plugin-market-spike` · `verify:offline-license-cli` · v1.75–1.76 |
-| 6 | 插件市场安装/更新 | — | **暂缓** · 等盈利后再议（侧载路径已够用） |
+| 6 | 插件市场安装/更新 | — | **Out of scope** · 离线侧载+许可为终态（2026-08-01） |
 
 验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro`。
 
-**下一实现 Sprint Goal（一句话）**：会议体验产品化，或命令 invoke / API v0.3 / Slot 残余（见 `plan.md` 候选 · [插件开发](./插件开发.md) §12）。
+**下一实现 Sprint Goal（一句话）**：会议体验产品化，或命令 invoke / API v0.3 / Slot 残余（见 `plan.md` 候选 · [07_插件与扩展](./07_插件与扩展.md) §12）。
 
 ---
 
@@ -114,7 +114,7 @@
 
 ## 5. 运维协作与远程网关（ops-gateway）
 
-> 真源：[功能扩展](./功能扩展.md) · 金句「聊着聊着就把事干了」。
+> 真源：[07_插件与扩展](./07_插件与扩展.md) §27 起 · 金句「聊着聊着就把事干了」。
 
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
@@ -132,7 +132,7 @@
 |------|------|------|
 | **ops-mvp-p1** | `lanpm-agent` · 入站/出站 · `/logs` 等 | **§5** · **已交付** v1.94.0 |
 | **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
-| 插件市场 SPIKE | 侧载/目录/签名 / **离线许可证** | 侧载+许可 ✅；**商店 UI 暂不做**（等盈利） |
+| 插件离线分发 SPIKE | 侧载/签名 / **离线许可证** | ✅ 已交付；**应用商店不做**（离线分发终态） |
 | 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |
 | PWA | 移动端 Web | 后置 |
 | 真机手验补测 | §4 延期项 | 有设备再开 |
@@ -210,7 +210,7 @@
 | 投屏 / 远程 / 语音视频 / 完整会议 | ❌ | ✅ 可购（Lite mesh 可免费 POC） | `verify:meeting-spike` · §3 |
 | 白板 / 协作画布 | 不进臃肿核心 | ✅ 免费模块形态 | `verify:whiteboard-realtime` · `whiteboard_crdt` |
 | form-js 验收单 | ❌ | ✅ 可购 POC | `verify:plugin-loader` |
-| 插件加载边界 | — | contextIsolation + 单一 `window.lanpm`；禁 `ipcMain`/直连 DB | `verify:plugin-spike` · **插件加载边界** · [插件开发](./插件开发.md) |
+| 插件加载边界 | — | contextIsolation + 单一 `window.lanpm`；禁 `ipcMain`/直连 DB | `verify:plugin-spike` · **插件加载边界** · [07_插件与扩展](./07_插件与扩展.md) |
 
 **仍永不插件化拆卖：** 看板 / 任务树 / 基础甘特 / 群组聊天主轴 / 发现同步。
 
@@ -229,6 +229,6 @@
 | 竞品吸收 · 收费 · 验收锚点 | 本节 **§6** |
 | 依赖 / 开源选型 | [02](./02_技术实现建议.md) §16 · [01](./01_产品需求文档.md) §14 |
 | 开源替换债务 | 本节 **§5.1** |
-| 插件架构 | [插件开发.md](./插件开发.md) |
+| 插件架构 | [07_插件与扩展.md](./07_插件与扩展.md) |
 | 聊天性能（已交付 v1.83–v1.93） | `CHANGELOG` `[1.83.0]`–`[1.93.0]` · 本地 `.cursorGrowth/decisions/chat-perf.md` |
 | Sprint 执行 | `.cursorGrowth/plan.md`（本地） |

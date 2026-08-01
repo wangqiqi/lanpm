@@ -14,7 +14,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
 }
 const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
-const featureDoc = readFileSync(join(root, 'docs/功能扩展.md'), 'utf8')
+const featureDoc = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 
 assert.ok(pkg.scripts?.['verify:ops-gateway-spike'], 'missing verify:ops-gateway-spike script')
 assert.ok(existsSync(join(toolRoot, 'package.json')), 'tools/lanpm-gateway/package.json')

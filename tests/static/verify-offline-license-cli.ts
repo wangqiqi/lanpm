@@ -47,8 +47,8 @@ assert.match(cliReadme, /issue/)
 assert.match(cliReadme, /perpetual/)
 assert.match(cliReadme, /trial/)
 
-const docs = readFileSync(join(root, 'docs/插件开发.md'), 'utf8')
-assert.match(docs, /8\.2\.2/)
+const docs = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
+assert.match(docs, /## 19\. 离线许可证/)
 assert.match(docs, /90/)
 assert.match(docs, /perpetual|永久/)
 

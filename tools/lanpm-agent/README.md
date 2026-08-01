@@ -10,4 +10,4 @@ lanpm agent start --name prod-web-01 --root ./data --pairing-code 847293 --host 
 
 Handles `ops_command` / `ops_inbound` over P2P; writes to `inbound/` and reads `outbound/logs/`.
 
-See `docs/功能扩展.md` · `npm run verify:ops-agent`.
+See `docs/07_插件与扩展.md` §27 起 · `npm run verify:ops-agent`.

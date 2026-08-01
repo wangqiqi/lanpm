@@ -2,7 +2,7 @@
 
 **SPIKE-OPS-001** — 最小 HTTP 文件网关原型（目录列表 + 单文件上传/下载）。
 
-真源：`docs/功能扩展.md` §11 · spec：`.cursorGrowth/specs/012-ops-gateway-spike/spec.md`
+真源：`docs/07_插件与扩展.md` §38 · spec：`.cursorGrowth/specs/012-ops-gateway-spike/spec.md`
 
 ## 快速开始
 

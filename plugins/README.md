@@ -12,4 +12,4 @@ Host（main）从本目录发现 `*/plugin.json`。
 
 Renderer UI 由 Host **builtin registry** 按 `id` 挂载（安全：不执行插件目录任意 JS）。
 
-开发者文档：**`docs/插件开发.md`**（Slot · Capability · manifest · **§3.5 Tab 视图宿主** · 生态规划）。
+开发者文档：**`docs/07_插件与扩展.md`**（上编 Slot/Capability · 中编离线分发 · 下编运维协作）。

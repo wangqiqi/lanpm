@@ -4,13 +4,21 @@
 
 ## [Unreleased]
 
+## [1.94.2] - 2026-08-01
+
+### Changed
+
+- **`docs/07_插件与扩展.md`** — 合并原 `插件开发.md` · `插件离线分发.md` · `功能扩展.md` 为正式 **07** 编号 SSOT（上编 §1–12 · 中编 §13–26 · 下编 §27–42）
+- **`docs/00_文档导航.md`** — 文档体系 **00–07**；插件分发与运维扩展决策链入 §4
+- **全仓引用** — `01` · `03` · `06` · `plugins/README` · `tools/lanpm-*` · `verify:*` 静态守卫路径同步至 `07_插件与扩展.md`
+
 ## [1.94.1] - 2026-08-01
 
 ### Changed
 
 - **ops-status-patch · `/status`**：`statusSnapshot.ts` — uptime · 内存绝对值（used/total）· Agent `root` 磁盘 `statfs`（不可用时 `disk: unavailable`）
 - **`verify:ops-agent`** — 守卫 `statusSnapshot` 落点 · `formatStatus(paths.root)`
-- **`docs/功能扩展.md`** — `/status` 字段说明；GPU defer → Phase 2
+- **`docs/07_插件与扩展.md`** — `/status` 字段说明；GPU defer → Phase 2
 
 ## [1.94.0] - 2026-08-01
 
@@ -29,7 +37,7 @@
 
 - **`docs/03`** §6.5.8 — `ops_*` payload 草案 · `GroupMember.deviceKind`
 - **`docs/06_ROADMAP.md`** §5 Phase 1 标已交付
-- **`docs/功能扩展.md`** · **`docs/插件开发.md`** — Ops MVP 与 `lanpm.ops` 清单同步
+- **`docs/07_插件与扩展.md`** · 上编 — Ops MVP 与 `lanpm.ops` 清单同步
 
 ## [1.93.2] - 2026-08-01
 
@@ -37,7 +45,7 @@
 
 - **SPIKE-OPS-001 · `tools/lanpm-gateway/`**：最小 HTTP 网关（目录列表 + 单文件 upload/download）· localhost bind · path 白名单
 - **`verify:ops-gateway-spike`** — 静态守卫 + `tools/lanpm-gateway` smoke 测试
-- **`docs/功能扩展.md`** — 运维协作讨论稿入库；SPIKE 状态已交付
+- **`docs/07_插件与扩展.md`** 下编 — 运维协作讨论稿入库；SPIKE 状态已交付
 - **`docs/06_ROADMAP.md`** §5 运维协作与远程网关
 
 ## [1.93.1] - 2026-08-01
