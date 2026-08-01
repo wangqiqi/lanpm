@@ -90,8 +90,9 @@
 | 4 | Pro LiveKit 旁路 + 离线 compose 模板 | P1～P2 | **已交付** · `verify:meeting-livekit-pro` · v1.71.0 |
 | 5 | 离线许可证（内网可购） | P1～P2 | **已交付** · `verify:plugin-market-spike` · `verify:offline-license-cli` · v1.75–1.76 |
 | 6 | 插件市场安装/更新 | — | **Out of scope** · 离线侧载+许可为终态（2026-08-01） |
+| 7 | **meeting-media-v2**：语音消息 PTT · Lite mesh 真投屏 · 会议工具栏收纳 | P1 | **已交付** · `verify:chat-voice` · `verify:meeting-media-v2` · v1.98.0 |
 
-验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro`。
+验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro` · `verify:chat-voice` · `verify:meeting-media-v2`。
 
 **下一实现 Sprint Goal（一句话）**：会议体验产品化，或命令 invoke / API v0.3 / Slot 残余（见 `plan.md` 候选 · [07_插件与扩展](./07_插件与扩展.md) §12）。
 

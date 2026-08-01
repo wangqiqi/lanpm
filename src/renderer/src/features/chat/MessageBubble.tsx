@@ -29,6 +29,7 @@ import { useDeferHeavyContent } from '@renderer/features/chat/messageContentDefe
 import { useChatPluginMenuItems } from '@renderer/features/chat/ChatPluginMenusProvider'
 import { isImageFileName } from '@shared/chat/imageFile'
 import MessageReplyStrip from '@renderer/features/chat/MessageReplyStrip'
+import VoiceMessageBubble from '@renderer/features/chat/VoiceMessageBubble'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import styles from './chat.module.css'
 
@@ -432,6 +433,13 @@ function MessageBubble({
         </button>
       )}
 
+      {message.content.kind === 'voice' && (
+        <VoiceMessageBubble
+          fileId={message.content.fileId}
+          durationMs={message.content.durationMs}
+        />
+      )}
+
       {message.content.kind === 'task_ref' && groupId && (
         <button
           type="button"
@@ -456,6 +464,7 @@ function MessageBubble({
         message.content.kind !== 'code' &&
         message.content.kind !== 'task_ref' &&
         message.content.kind !== 'file' &&
+        message.content.kind !== 'voice' &&
         message.content.kind !== 'recalled' && (
           <div>{t('chat.unknownMessage', { type: message.type })}</div>
         )}

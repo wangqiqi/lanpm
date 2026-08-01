@@ -120,7 +120,7 @@ assert.match(
   /\.meetingVideoLabel[\s\S]*text-overflow:\s*ellipsis/,
   'meeting video labels must ellipsis'
 )
-assert.match(meetingToolbar, /<Space[^>]*wrap/, 'meeting toolbar Space must wrap for EN labels')
+assert.match(meetingToolbar, /ComposerIconButton/, 'meeting toolbar must use single composer menu button')
 
 console.log(
   `verify:i18n-en OK (${enKeys.length} keys, no CJK; layout guards: ${LAYOUT_INLINE_KEYS.length} inline keys)`

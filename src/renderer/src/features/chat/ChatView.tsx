@@ -1200,9 +1200,6 @@ export default function ChatView(): React.ReactElement {
           />
           <div className={styles.inputRow}>
             <div className={styles.composerIsland}>
-            {inputMode === 'text' ? (
-              <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
-            ) : null}
             <PluginZoneHost zone="composer" context={{ groupId: gid, view: 'chat' }} />
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>
@@ -1300,6 +1297,9 @@ export default function ChatView(): React.ReactElement {
                     </div>
                   </>
                 )}
+                <div className={styles.toolbarMeetingGroup} data-visual-meeting="toolbar">
+                  <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
+                </div>
               </div>
               <Segmented
                 className={styles.inputModeToggle}

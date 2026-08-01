@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Button, Typography } from 'antd'
-import type { PluginView } from '@shared/plugin/types'
+import { useCallback, useRef } from 'react'
+import { Button, Typography, message } from 'antd'
+import { AudioOutlined } from '@ant-design/icons'
+import { formatVoiceDuration } from '@shared/chat/voiceMessage'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useI18n } from '@renderer/i18n/useI18n'
-import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
-import { resolvePluginComponent } from '@renderer/plugin/registry'
-import { PLUGIN_ENABLED_CHANGED_EVENT } from '@renderer/plugin/pluginEvents'
-import { openProfileTab } from '@renderer/plugin/openProfileTab'
+import { chatStoreActions } from './chatStoreActions'
+import { useVoiceRecorder } from './useVoiceRecorder'
 import styles from './chat.module.css'
 
 const { Text } = Typography
@@ -15,57 +14,87 @@ interface Props {
   groupId: string
 }
 
-/** 聊天语音模式：承载 `toolbar` zone；未启用时展示 CTA */
+/** 聊天语音模式：按住说话发送 voice 消息；会议控制在 Composer 工具栏 */
 export default function ChatVoiceMediaPanel({ groupId }: Props): React.ReactElement {
   const { t } = useI18n()
-  const [slotPlugins, setSlotPlugins] = useState<PluginView[]>([])
-  const [reloadToken, setReloadToken] = useState(0)
+  const { recording, elapsedMs, start, stop, cancel, maxMs } = useVoiceRecorder()
+  const holdingRef = useRef(false)
+  const sendingRef = useRef(false)
 
-  useEffect(() => {
-    const onChanged = (): void => setReloadToken((n) => n + 1)
-    window.addEventListener(PLUGIN_ENABLED_CHANGED_EVENT, onChanged)
-    return () => window.removeEventListener(PLUGIN_ENABLED_CHANGED_EVENT, onChanged)
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    void getLanpmApi()
-      .plugin.listSlotPlugins('chat.toolbar.media')
-      .then((list) => {
-        if (!cancelled) setSlotPlugins(list)
-      })
-      .catch(() => {
-        if (!cancelled) setSlotPlugins([])
-      })
-    return () => {
-      cancelled = true
+  const finishHold = useCallback(async () => {
+    if (!holdingRef.current || sendingRef.current) return
+    holdingRef.current = false
+    sendingRef.current = true
+    try {
+      const payload = await stop()
+      if (!payload) {
+        cancel()
+        return
+      }
+      const msg = await getLanpmApi().chat.sendVoice(
+        groupId,
+        payload.audioBase64,
+        payload.durationMs,
+        payload.mimeType
+      )
+      chatStoreActions.upsertMessage(msg)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : t('chat.voiceSendFailed'))
+      cancel()
+    } finally {
+      sendingRef.current = false
     }
-  }, [groupId, reloadToken])
+  }, [cancel, groupId, stop, t])
 
-  const mounted = useMemo(
-    () => slotPlugins.filter((p) => p.enabled && resolvePluginComponent(p.id)),
-    [slotPlugins]
-  )
+  const onHoldStart = useCallback(() => {
+    if (sendingRef.current) return
+    holdingRef.current = true
+    void start().catch((err: unknown) => {
+      holdingRef.current = false
+      message.error(err instanceof Error ? err.message : t('chat.voiceMicDenied'))
+    })
+  }, [start, t])
 
-  if (mounted.length === 0) {
-    return (
-      <div className={styles.voicePanel} data-testid="chat-voice-media-panel">
-        <Text type="secondary" className={styles.voiceHint}>
-          {t('plugin.meetingVoiceCta')}
-        </Text>
-        <Text type="secondary" className={styles.voiceHint}>
-          {t('plugin.meetingEnableHint')}
-        </Text>
-        <Button type="link" size="small" onClick={() => openProfileTab('plugins')}>
-          {t('plugin.meetingOpenPlugins')}
-        </Button>
-      </div>
-    )
-  }
+  const onHoldEnd = useCallback(() => {
+    void finishHold()
+  }, [finishHold])
 
   return (
     <div className={styles.voicePanel} data-testid="chat-voice-media-panel">
-      <PluginZoneHost zone="toolbar" context={{ groupId, view: 'chat' }} />
+      <Text type="secondary" className={styles.voiceHint}>
+        {t('chat.voiceHoldHint')}
+      </Text>
+      <Button
+        type={recording ? 'primary' : 'default'}
+        shape="circle"
+        size="large"
+        className={styles.voiceHoldBtn}
+        data-testid="chat-voice-hold-btn"
+        icon={<AudioOutlined />}
+        aria-label={t('chat.voiceHoldHint')}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          onHoldStart()
+        }}
+        onMouseUp={onHoldEnd}
+        onMouseLeave={() => {
+          if (holdingRef.current) onHoldEnd()
+        }}
+        onTouchStart={(e) => {
+          e.preventDefault()
+          onHoldStart()
+        }}
+        onTouchEnd={onHoldEnd}
+      />
+      {recording ? (
+        <Text type="secondary" className={styles.voiceHint}>
+          {formatVoiceDuration(elapsedMs)} / {formatVoiceDuration(maxMs)}
+        </Text>
+      ) : (
+        <Text type="secondary" className={styles.voiceHint}>
+          {t('chat.voicePanelHint')}
+        </Text>
+      )}
     </div>
   )
 }

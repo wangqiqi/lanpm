@@ -152,11 +152,16 @@ const chatCss = readSrc('src/renderer/src/features/chat/chat.module.css')
 
 assert.match(
   chatView,
-  /inputMode\s*===\s*['"]text['"][\s\S]*PluginZoneHost[\s\S]*zone="toolbar"/,
-  'ChatView must mount toolbar zone only in text input mode'
+  /toolbarMeetingGroup[\s\S]*PluginZoneHost zone="toolbar"/,
+  'ChatView composer toolbar must host meeting toolbar zone'
 )
-assert.match(voicePanel, /PluginZoneHost/, 'ChatVoiceMediaPanel must use PluginZoneHost')
-assert.match(voicePanel, /zone="toolbar"/, 'ChatVoiceMediaPanel must host toolbar zone')
+assert.doesNotMatch(
+  chatView,
+  /inputMode\s*===\s*['"]text['"][\s\S]*PluginZoneHost[\s\S]*zone="toolbar"/,
+  'meeting toolbar must not be gated to text mode only'
+)
+assert.match(voicePanel, /chat-voice-hold-btn/, 'ChatVoiceMediaPanel must host PTT voice UI')
+assert.doesNotMatch(voicePanel, /zone="toolbar"/, 'ChatVoiceMediaPanel must not host toolbar zone')
 assert.ok(
   !voicePanel.includes('PluginGroupSlot'),
   'ChatVoiceMediaPanel must not use PluginGroupSlot (no dual toolbar mount)'

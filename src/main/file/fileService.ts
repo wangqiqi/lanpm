@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import { extname, join } from 'path'
 import { app, type BrowserWindow } from 'electron'
 import type { FileCategory, FileMeta, FileTransferView } from '../../shared/file/types'
@@ -259,6 +259,49 @@ export async function uploadFileFromPath(
     uploadedBy: status.user.userId,
     uploadedAt: now,
     sha256: sha256File(destPath),
+    storagePath: destPath,
+    previewStatus: 'none',
+    isBookmark: false,
+    updatedAt: now
+  }
+
+  insertFile(db, meta)
+  publishFileMeta(db, meta)
+  await runChunkedUpload(db, meta, status.device.deviceId)
+  await generatePreview(db, meta)
+  return getFileById(db, fileId)!
+}
+
+export async function uploadFileFromBuffer(
+  db: Database,
+  groupId: string,
+  buffer: Buffer,
+  name: string
+): Promise<FileMeta> {
+  assertFileWritable(db, groupId)
+  const status = getSetupStatus(db)
+  if (!status.configured || !status.user || !status.device) {
+    throwLanpm('stub.identityRequired')
+  }
+
+  const ext = extname(name).replace('.', '') || 'bin'
+  const fileId = `file_${randomUUID()}`
+  const groupDir = join(filesRootDir(), groupId)
+  mkdirSync(groupDir, { recursive: true })
+  const destPath = join(groupDir, `${fileId}_${name}`)
+  writeFileSync(destPath, buffer)
+
+  const now = new Date().toISOString()
+  const meta: FileMeta = {
+    fileId,
+    groupId,
+    name,
+    ext,
+    category: inferCategory(ext),
+    size: buffer.byteLength,
+    uploadedBy: status.user.userId,
+    uploadedAt: now,
+    sha256: createHash('sha256').update(buffer).digest('hex'),
     storagePath: destPath,
     previewStatus: 'none',
     isBookmark: false,

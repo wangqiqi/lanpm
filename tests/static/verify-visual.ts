@@ -1056,6 +1056,11 @@ assert.match(
 )
 assert.match(
   chatSrc,
+  /toolbarMeetingGroup/,
+  'ChatView composer must expose meeting toolbar group (IA-405)'
+)
+assert.match(
+  chatSrc,
   /toolbarCollaborationGroup/,
   'ChatView composer must expose collaboration toolbar group (IA-402)'
 )

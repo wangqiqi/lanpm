@@ -10,6 +10,9 @@ export function messagePreviewText(message: ChatMessage, recalledLabel = '[Recal
   if (raw.trim()) return truncatePreview(raw)
   if (message.content.kind === 'code') return `[${message.content.language}]`
   if (message.content.kind === 'file') return message.content.fileName
+  if (message.content.kind === 'voice') {
+    return `[voice ${Math.round(message.content.durationMs / 1000)}s]`
+  }
   if (message.content.kind === 'task_ref') return message.content.title
   return ''
 }

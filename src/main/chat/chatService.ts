@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import type { BrowserWindow } from 'electron'
 import type { DmMessagePreview } from '../../shared/chat/dmPreview'
+import { VOICE_MESSAGE_MAX_MS } from '../../shared/chat/voiceMessage'
 import type { ChatMessage, MessageContent, MessageType } from '../../shared/chat/types'
 import type { ChatMessagePage } from '../../shared/chat/pagination'
 import { CHAT_HISTORY_PAGE_SIZE } from '../../shared/chat/pagination'
@@ -25,7 +26,7 @@ import {
   initMessageRetentionScheduler,
   shutdownMessageRetentionScheduler
 } from '../data/messageRetentionService'
-import { uploadFileFromPath } from '../file/fileService'
+import { uploadFileFromPath, uploadFileFromBuffer } from '../file/fileService'
 import { getFileById } from '../storage/repositories/fileRepository'
 import { getTaskById } from '../storage/repositories/taskRepository'
 import { mergeLinkedFileId } from '../../shared/task/linkFile.ts'
@@ -511,6 +512,37 @@ export async function sendExistingFileMessage(
   maybeLinkFileToTask(db, groupId, fileId, options?.linkTaskId)
 
   return msg
+}
+
+export async function sendVoiceMessage(
+  db: Database,
+  groupId: string,
+  audioBase64: string,
+  durationMs: number,
+  mimeType = 'audio/webm'
+): Promise<ChatMessage> {
+  if (isAnonymousGroup(db, groupId)) {
+    throwLanpm('err.anonymousNoFile')
+  }
+  if (!Number.isFinite(durationMs) || durationMs <= 0 || durationMs > VOICE_MESSAGE_MAX_MS) {
+    throw new Error(`voice duration must be 1–${VOICE_MESSAGE_MAX_MS}ms`)
+  }
+  if (typeof audioBase64 !== 'string' || !audioBase64.trim()) {
+    throw new Error('audio payload required')
+  }
+  const buffer = Buffer.from(audioBase64, 'base64')
+  if (buffer.byteLength === 0) {
+    throw new Error('audio payload empty')
+  }
+  const ext = mimeType.includes('ogg') ? 'ogg' : 'webm'
+  const name = `voice-${Date.now()}.${ext}`
+  const meta = await uploadFileFromBuffer(db, groupId, buffer, name)
+  return publishChatMessage(db, groupId, 'voice', {
+    kind: 'voice',
+    fileId: meta.fileId,
+    durationMs: Math.round(durationMs),
+    mimeType
+  })
 }
 
 export async function sendCodeMessage(

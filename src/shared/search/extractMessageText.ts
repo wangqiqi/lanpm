@@ -11,6 +11,8 @@ export function extractMessageText(content: MessageContent): string {
       return content.title
     case 'file':
       return content.fileName
+    case 'voice':
+      return `[voice ${Math.round(content.durationMs / 1000)}s]`
     case 'system':
       return content.event
     case 'recalled':

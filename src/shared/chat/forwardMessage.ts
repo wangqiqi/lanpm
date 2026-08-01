@@ -29,6 +29,7 @@ export function canForwardMessage(message: ChatMessage): boolean {
     content.kind === 'text' ||
     content.kind === 'code' ||
     content.kind === 'file' ||
+    content.kind === 'voice' ||
     content.kind === 'task_ref'
   )
 }
@@ -58,6 +59,14 @@ export function cloneContentForForward(content: MessageContent): MessageContent 
       fileId: content.fileId,
       fileName: content.fileName,
       size: content.size
+    }
+  }
+  if (content.kind === 'voice') {
+    return {
+      kind: 'voice',
+      fileId: content.fileId,
+      durationMs: content.durationMs,
+      mimeType: content.mimeType
     }
   }
   if (content.kind === 'task_ref') {

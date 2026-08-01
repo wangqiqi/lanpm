@@ -1,12 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Button,
   Divider,
   List,
+  Modal,
   Popover,
   Space,
   Tag,
-  Tooltip,
   Typography,
   message
 } from 'antd'
@@ -25,6 +25,7 @@ import {
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import { useI18n } from '@renderer/i18n/useI18n'
+import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
 import { useMeetingMesh } from './useMeetingMesh'
@@ -42,7 +43,7 @@ interface Props {
   context?: ViewPluginContext
 }
 
-/** 聊天 `chat.toolbar.media` 紧凑会议工具条 + Popover 详情 */
+/** 聊天 Composer 工具栏 `chat.toolbar.media` — 紧凑图标 + Popover 详情 */
 export default function MeetingToolbar({ plugin, groupId, context }: Props): React.ReactElement | null {
   const { t } = useI18n()
   const licenseActive = isPluginLicenseActive(plugin)
@@ -53,9 +54,13 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     busy: meshBusy,
     meshStatus,
     desktopSources,
+    screenSharing: meshScreenSharing,
+    remoteStream,
     joinRoom,
     leaveRoom,
-    loadDesktopSources
+    loadDesktopSources,
+    shareDesktopSource,
+    stopScreenShare
   } = useMeetingMesh(plugin, groupId)
 
   const {
@@ -65,7 +70,7 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     busy: proBusy,
     muted,
     cameraEnabled,
-    screenSharing,
+    screenSharing: proScreenSharing,
     proParticipants,
     sdkMissing,
     joinProRoom,
@@ -118,10 +123,26 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     }
   }
 
-  const onDesktop = async (): Promise<void> => {
+  const [sourceModalOpen, setSourceModalOpen] = useState(false)
+
+  const onPickScreenShare = async (): Promise<void> => {
     try {
       const count = await loadDesktopSources()
-      message.success(t('plugin.meetingDesktopOk', { count }))
+      if (count === 0) {
+        message.warning(t('plugin.meetingDesktopEmpty'))
+        return
+      }
+      setSourceModalOpen(true)
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    }
+  }
+
+  const onShareSource = async (sourceId: string): Promise<void> => {
+    try {
+      await shareDesktopSource(sourceId)
+      setSourceModalOpen(false)
+      message.success(t('plugin.meetingScreenShareStarted'))
     } catch (err) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
     }
@@ -175,9 +196,38 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     }
   }
 
+  const statusHeader = (
+    <div className={styles.meetingStatusRow}>
+      <Tag color={joined ? 'processing' : 'default'}>{liteStatusLabel}</Tag>
+      <Tag color={proJoined ? 'success' : liveKitConfigured ? 'default' : 'warning'}>
+        {proJoined ? t('plugin.meetingStatusProLive') : proStatusLabel}
+      </Tag>
+      {recording ? (
+        <Tag color="error" data-testid="meeting-recording-timer">
+          {t('plugin.meetingRecordTimer', { elapsed: elapsedLabel })}
+        </Tag>
+      ) : null}
+    </div>
+  )
+
   const detailContent = (
     <div className={styles.meetingPopover}>
+      {statusHeader}
       <Text type="secondary">{t('plugin.meetingStubHint')}</Text>
+      {!licenseActive ? (
+        <div className={styles.meetingToolbarCta}>
+          <Text type="secondary">{t('plugin.meetingLicenseCta')}</Text>
+          <Button type="link" size="small" onClick={() => openProfileTab('plugins')}>
+            {t('plugin.meetingOpenPlugins')}
+          </Button>
+        </div>
+      ) : !liveKitConfigured ? (
+        <div className={styles.meetingToolbarCta}>
+          <Button type="link" size="small" onClick={() => openProfileTab('meeting')}>
+            {t('plugin.meetingOpenMeetingConfig')}
+          </Button>
+        </div>
+      ) : null}
       <Divider orientation="left" plain>
         {t('plugin.meetingLiteSection')}
       </Divider>
@@ -250,148 +300,120 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
 
   if (context?.zone !== undefined && context.zone !== 'toolbar') return null
 
-  return (
-    <div className={styles.meetingToolbar} data-plugin-id={plugin.id} data-testid="meeting-toolbar">
-      <Space size={6} wrap align="center">
-        <Tag color={joined ? 'processing' : 'default'}>{liteStatusLabel}</Tag>
-        <Tag color={proJoined ? 'success' : liveKitConfigured ? 'default' : 'warning'}>
-          {proJoined ? t('plugin.meetingStatusProLive') : proStatusLabel}
-        </Tag>
-        {recording ? (
-          <Tag color="error" data-testid="meeting-recording-timer">
-            {t('plugin.meetingRecordTimer', { elapsed: elapsedLabel })}
-          </Tag>
-        ) : null}
-
+  const menuContent = (
+    <div className={styles.meetingMenuPopover} data-testid="meeting-toolbar-menu">
+      {statusHeader}
+      <Space size={6} wrap className={styles.meetingMenuActions}>
         {!joined ? (
-          <Tooltip title={t('plugin.meetingJoin')}>
-            <Button
-              size="small"
-              type="primary"
-              icon={<LoginOutlined />}
-              loading={busy}
-              disabled={controlsDisabled || proJoined}
-              aria-label={t('plugin.meetingJoin')}
-              onClick={() => void onJoin()}
-            />
-          </Tooltip>
+          <Button
+            size="small"
+            type="primary"
+            icon={<LoginOutlined />}
+            disabled={controlsDisabled || busy || proJoined}
+            data-testid="meeting-join"
+            onClick={() => void onJoin()}
+          >
+            {t('plugin.meetingJoin')}
+          </Button>
         ) : (
-          <Tooltip title={t('plugin.meetingLeave')}>
-            <Button
-              size="small"
-              danger
-              icon={<LogoutOutlined />}
-              loading={busy}
-              disabled={controlsDisabled}
-              aria-label={t('plugin.meetingLeave')}
-              onClick={() => void onLeave()}
-            />
-          </Tooltip>
+          <Button
+            size="small"
+            danger
+            icon={<LogoutOutlined />}
+            disabled={controlsDisabled || busy}
+            data-testid="meeting-leave"
+            onClick={() => void onLeave()}
+          >
+            {t('plugin.meetingLeave')}
+          </Button>
         )}
-
-        <Tooltip title={t('plugin.meetingScreenStub')}>
+        {meshScreenSharing ? (
+          <Button size="small" disabled={controlsDisabled || busy} onClick={() => void stopScreenShare()}>
+            {t('plugin.meetingScreenShareStop')}
+          </Button>
+        ) : (
           <Button
             size="small"
             icon={<DesktopOutlined />}
-            loading={busy}
-            disabled={controlsDisabled || !joined}
-            aria-label={t('plugin.meetingScreenStub')}
-            onClick={() => void onDesktop()}
-          />
-        </Tooltip>
-
+            disabled={controlsDisabled || busy || !joined}
+            data-testid="meeting-mesh-screenshare"
+            onClick={() => void onPickScreenShare()}
+          >
+            {t('plugin.meetingScreenStub')}
+          </Button>
+        )}
         {!proJoined ? (
-          <Tooltip title={t('plugin.meetingProJoin')}>
-            <Button
-              size="small"
-              type="primary"
-              icon={<VideoCameraOutlined />}
-              loading={busy}
-              disabled={controlsDisabled || !liveKitConfigured || joined || sdkMissing}
-              aria-label={t('plugin.meetingProJoin')}
-              onClick={() => void onProJoin()}
-            />
-          </Tooltip>
-        ) : (
-          <Tooltip title={t('plugin.meetingProLeave')}>
-            <Button
-              size="small"
-              danger
-              icon={<LogoutOutlined />}
-              loading={busy}
-              disabled={controlsDisabled}
-              aria-label={t('plugin.meetingProLeave')}
-              onClick={() => void onProLeave()}
-            />
-          </Tooltip>
-        )}
-
-        <Tooltip title={t('plugin.meetingProMute')}>
           <Button
             size="small"
-            icon={muted ? <AudioMutedOutlined /> : <AudioOutlined />}
-            disabled={controlsDisabled || !proJoined}
-            aria-label={muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}
-            data-testid="meeting-pro-mute"
-            onClick={() => void toggleProMute()}
-          />
-        </Tooltip>
-
-        <Tooltip title={cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}>
-          <Button
-            size="small"
+            type="primary"
             icon={<VideoCameraOutlined />}
-            disabled={controlsDisabled || !proJoined}
-            aria-label={cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}
-            data-testid="meeting-pro-camera"
-            onClick={() => void toggleProCamera()}
-          />
-        </Tooltip>
-
-        <Tooltip
-          title={
-            screenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')
-          }
-        >
+            disabled={controlsDisabled || busy || !liveKitConfigured || joined || sdkMissing}
+            data-testid="meeting-pro-join"
+            onClick={() => void onProJoin()}
+          >
+            {t('plugin.meetingProJoin')}
+          </Button>
+        ) : (
           <Button
             size="small"
-            icon={<DesktopOutlined />}
-            disabled={controlsDisabled || !proJoined}
-            aria-label={
-              screenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')
-            }
-            data-testid="meeting-pro-screenshare"
-            onClick={() => void toggleProScreenShare()}
-          />
-        </Tooltip>
-
-        {!recording ? (
-          <Tooltip title={t('plugin.meetingRecordStart')}>
-            <Button
-              size="small"
-              icon={<PlayCircleOutlined />}
-              loading={recordingSaving || recordingPhase === 'saving'}
-              disabled={controlsDisabled || !inMeeting}
-              aria-label={t('plugin.meetingRecordStart')}
-              data-testid="meeting-record-start"
-              onClick={() => void onStartRecord()}
-            />
-          </Tooltip>
-        ) : (
-          <Tooltip title={t('plugin.meetingRecordStop')}>
-            <Button
-              size="small"
-              danger
-              icon={<StopOutlined />}
-              loading={recordingSaving}
-              disabled={controlsDisabled}
-              aria-label={t('plugin.meetingRecordStop')}
-              data-testid="meeting-record-stop"
-              onClick={() => void onStopRecord()}
-            />
-          </Tooltip>
+            danger
+            icon={<LogoutOutlined />}
+            disabled={controlsDisabled || busy}
+            data-testid="meeting-pro-leave"
+            onClick={() => void onProLeave()}
+          >
+            {t('plugin.meetingProLeave')}
+          </Button>
         )}
-
+        <Button
+          size="small"
+          icon={muted ? <AudioMutedOutlined /> : <AudioOutlined />}
+          disabled={controlsDisabled || !proJoined}
+          data-testid="meeting-pro-mute"
+          onClick={() => void toggleProMute()}
+        >
+          {muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}
+        </Button>
+        <Button
+          size="small"
+          icon={<VideoCameraOutlined />}
+          disabled={controlsDisabled || !proJoined}
+          data-testid="meeting-pro-camera"
+          onClick={() => void toggleProCamera()}
+        >
+          {cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}
+        </Button>
+        <Button
+          size="small"
+          icon={<DesktopOutlined />}
+          disabled={controlsDisabled || !proJoined}
+          data-testid="meeting-pro-screenshare"
+          onClick={() => void toggleProScreenShare()}
+        >
+          {proScreenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')}
+        </Button>
+        {!recording ? (
+          <Button
+            size="small"
+            icon={<PlayCircleOutlined />}
+            disabled={controlsDisabled || recordingSaving || recordingPhase === 'saving' || !inMeeting}
+            data-testid="meeting-record-start"
+            onClick={() => void onStartRecord()}
+          >
+            {t('plugin.meetingRecordStart')}
+          </Button>
+        ) : (
+          <Button
+            size="small"
+            danger
+            icon={<StopOutlined />}
+            disabled={controlsDisabled || recordingSaving}
+            data-testid="meeting-record-stop"
+            onClick={() => void onStopRecord()}
+          >
+            {t('plugin.meetingRecordStop')}
+          </Button>
+        )}
         <Popover
           title={t('plugin.meetingScheduleTitlePopover')}
           trigger="click"
@@ -404,42 +426,61 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
             />
           }
         >
-          <Button
-            size="small"
-            icon={<CalendarOutlined />}
-            disabled={controlsDisabled}
-            aria-label={t('plugin.meetingScheduleTitlePopover')}
-            data-testid="meeting-schedule-button"
-          />
+          <Button size="small" icon={<CalendarOutlined />} disabled={controlsDisabled} data-testid="meeting-schedule-button">
+            {t('plugin.meetingScheduleTitlePopover')}
+          </Button>
         </Popover>
-
-        <Popover
-          title={t('plugin.meetingToolbarDetails')}
-          trigger="click"
-          content={detailContent}
-        >
-          <Button
-            size="small"
-            icon={<InfoCircleOutlined />}
-            aria-label={t('plugin.meetingToolbarDetails')}
-          />
+        <Popover title={t('plugin.meetingToolbarDetails')} trigger="click" content={detailContent}>
+          <Button size="small" icon={<InfoCircleOutlined />}>
+            {t('plugin.meetingToolbarDetails')}
+          </Button>
         </Popover>
       </Space>
-
-      {!licenseActive ? (
-        <div className={styles.meetingToolbarCta}>
-          <Text type="secondary">{t('plugin.meetingLicenseCta')}</Text>
-          <Button type="link" size="small" onClick={() => openProfileTab('plugins')}>
-            {t('plugin.meetingOpenPlugins')}
-          </Button>
-        </div>
-      ) : !liveKitConfigured ? (
-        <div className={styles.meetingToolbarCta}>
-          <Button type="link" size="small" onClick={() => openProfileTab('meeting')}>
-            {t('plugin.meetingOpenMeetingConfig')}
-          </Button>
-        </div>
+      {remoteStream ? (
+        <video
+          className={styles.meetingRemotePreview}
+          autoPlay
+          playsInline
+          muted
+          ref={(el) => {
+            if (el) el.srcObject = remoteStream
+          }}
+        />
       ) : null}
     </div>
+  )
+
+  return (
+    <>
+      <Modal
+        title={t('plugin.meetingShareScreenPick')}
+        open={sourceModalOpen}
+        onCancel={() => setSourceModalOpen(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <List
+          size="small"
+          dataSource={desktopSources}
+          locale={{ emptyText: t('plugin.meetingDesktopEmpty') }}
+          renderItem={(item) => (
+            <List.Item>
+              <Button type="link" onClick={() => void onShareSource(item.id)}>
+                {item.name}
+              </Button>
+            </List.Item>
+          )}
+        />
+      </Modal>
+      <div className={styles.meetingToolbar} data-plugin-id={plugin.id} data-testid="meeting-toolbar">
+        <Popover content={menuContent} trigger="click" placement="topLeft">
+          <ComposerIconButton
+            icon={<VideoCameraOutlined />}
+            label={t('plugin.meetingToolbarMenu')}
+            data-testid="meeting-toolbar-menu"
+          />
+        </Popover>
+      </div>
+    </>
   )
 }

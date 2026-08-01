@@ -1,6 +1,6 @@
 /** docs/04 §3.3 — chat message types */
 
-export type MessageType = 'text' | 'code' | 'file' | 'task_ref' | 'system'
+export type MessageType = 'text' | 'code' | 'file' | 'voice' | 'task_ref' | 'system'
 
 export type MessageDeliveryStatus = 'sending' | 'sent' | 'read' | 'failed'
 
@@ -23,6 +23,7 @@ export type MessageContent =
   | { kind: 'text'; text: string; meta?: ChatMessageMeta }
   | { kind: 'code'; language: string; code: string; theme?: 'light' | 'dark' }
   | { kind: 'file'; fileId: string; fileName: string; size: number }
+  | { kind: 'voice'; fileId: string; durationMs: number; mimeType?: string }
   | { kind: 'task_ref'; taskId: string; title: string }
   | { kind: 'system'; event: string; payload?: Record<string, unknown> }
   | { kind: 'recalled'; recalledBy: string; recalledAt: string }

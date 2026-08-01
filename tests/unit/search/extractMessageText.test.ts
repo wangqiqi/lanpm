@@ -8,6 +8,10 @@ describe('extractMessageText', () => {
     [{ kind: 'code', language: 'ts', code: 'const x = 1' }, 'const x = 1'],
     [{ kind: 'task_ref', taskId: 't1', title: 'Fix bug' }, 'Fix bug'],
     [{ kind: 'file', fileId: 'f1', fileName: 'spec.pdf', size: 1024 }, 'spec.pdf'],
+    [
+      { kind: 'voice', fileId: 'v1', durationMs: 2500, mimeType: 'audio/webm' },
+      '[voice 3s]'
+    ],
     [{ kind: 'system', event: 'member_joined' }, 'member_joined'],
     [{ kind: 'recalled', recalledBy: 'u1', recalledAt: '2026-01-01' }, '']
   ]

@@ -33,8 +33,8 @@ const voicePanel = readFileSync(
   join(root, 'src/renderer/src/features/chat/ChatVoiceMediaPanel.tsx'),
   'utf8'
 )
-assert.match(voicePanel, /openProfileTab/)
-assert.match(voicePanel, /meetingOpenPlugins/)
+assert.match(voicePanel, /chat-voice-hold-btn/)
+assert.match(voicePanel, /sendVoice/)
 assert.ok(!voicePanel.includes('voiceComingSoon'), 'ChatVoiceMediaPanel must not use voiceComingSoon')
 
 const chatView = readFileSync(join(root, 'src/renderer/src/features/chat/ChatView.tsx'), 'utf8')

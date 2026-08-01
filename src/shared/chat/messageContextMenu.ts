@@ -70,6 +70,9 @@ export function getMessageCopyPayload(message: ChatMessage): MessageCopyPayload 
   if (content.kind === 'file') {
     return { kind: 'fileMeta', text: content.fileName }
   }
+  if (content.kind === 'voice') {
+    return { kind: 'text', text: `[voice ${Math.round(content.durationMs / 1000)}s]` }
+  }
   if (content.kind === 'task_ref') {
     return { kind: 'taskRef', text: content.title }
   }

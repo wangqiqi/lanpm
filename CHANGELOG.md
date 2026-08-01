@@ -6,6 +6,8 @@
 
 ### Added
 
+- **meeting-media-v2（v1.98.0）**：聊天 **语音消息**（`voice` 类型 · PTT 按住说话 · 气泡播放）· **Lite mesh 真投屏**（选源 + `addTrack` + 对端预览）· **会议工具栏收纳**（单「会议」按钮 + Popover 菜单）（TASK-1502～1506）
+- **门禁**：`verify:chat-voice` · `verify:meeting-media-v2`（TASK-1507 · TASK-1509）
 - **Meeting Pro UX（meeting-pro）**：Popover 内 LiveKit 视频格与参会者列表；Pro 摄像头/投屏开关；日程 Join 在 LiveKit 已配置时走 Pro；录制保存对话框 i18n +「仅本机轨」说明（TASK-1402～1406）
 
 ### Fixed
@@ -14,9 +16,10 @@
 
 ### Changed
 
+- **聊天 Composer IA**：会议控件从语音模式主体迁至 **工具栏图标行**；`MeetingToolbar` 单按钮 Popover 收纳；语音模式 PTT 按住说话（TASK-1504 · TASK-1506）
 - **会议静态守卫（TASK-1312）**：`verify:meeting-*` 对齐 `MeetingToolbar` / `PluginZoneHost` 接线
 - **视图 Slot 守卫（TASK-1313）**：`verify:view-slot-hosts` chat `context` zone 落点改 `ChatView`；`verify:visual` 增补 IA-409
-- **文档同步（TASK-1314）**：`docs/06` · `docs/07` 会议 Slot 表述与 `PluginZoneHost` 一致
+- **文档同步（TASK-1314 · TASK-1508）**：`docs/06` §3.4 · `docs/07` §12.4 会议 voice/Lite 投屏与实现一致
 
 ## [1.96.2] - 2026-08-01
 

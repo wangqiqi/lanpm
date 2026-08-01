@@ -46,6 +46,7 @@ const meshHook = readFileSync(
 assert.match(meetingToolbar, /useMeetingMesh/)
 assert.match(meetingToolbar, /plugin\.meetingJoin/)
 assert.match(meshHook, /RTCPeerConnection/)
+assert.match(meshHook, /shareDesktopSource/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

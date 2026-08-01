@@ -88,6 +88,12 @@ export interface LanpmApi {
     sendExistingFile: (groupId: string, fileId: string, options?: SendFileOptions) => Promise<ChatMessage>
     /** 区域截图 + 标注，确认后作为图片文件发送到群聊（仅 Electron） */
     captureAndSendScreenshot: (groupId: string) => Promise<ChatMessage | null>
+    sendVoice: (
+      groupId: string,
+      audioBase64: string,
+      durationMs: number,
+      mimeType?: string
+    ) => Promise<ChatMessage>
     recallMessage: (groupId: string, msgId: string) => Promise<ChatMessage>
     sendTaskRef: (groupId: string, taskId: string) => Promise<ChatMessage>
     /** 手动重试发送失败的本机消息 */

@@ -21,6 +21,18 @@ function pickMeshPeer(
   return others.sort()[0] ?? null
 }
 
+async function captureDesktopSource(sourceId: string): Promise<MediaStream> {
+  return navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      mandatory: {
+        chromeMediaSource: 'desktop',
+        chromeMediaSourceId: sourceId
+      }
+    }
+  } as MediaStreamConstraints)
+}
+
 export function useMeetingMesh(plugin: PluginView, groupId: string) {
   const localUserId = useIdentityStore((s) => s.user?.userId)
   const [roomState, setRoomState] = useState<RoomState | null>(null)
@@ -30,12 +42,16 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
     'idle'
   )
   const [desktopSources, setDesktopSources] = useState<{ id: string; name: string }[]>([])
+  const [screenSharing, setScreenSharing] = useState(false)
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null)
 
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cursorRef = useRef('')
   const peerRef = useRef<string | null>(null)
   const joinedRef = useRef(false)
+  const screenStreamRef = useRef<MediaStream | null>(null)
+  const screenSenderRef = useRef<RTCRtpSender | null>(null)
 
   const refreshRoom = useCallback(async () => {
     const raw = await getLanpmApi().plugin.invokeCapability(plugin.id, 'media.room.state', {
@@ -55,6 +71,21 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
     [plugin.id, groupId]
   )
 
+  const renegotiate = useCallback(
+    async (peerUserId: string) => {
+      const pc = pcRef.current
+      if (!pc) return
+      const offer = await pc.createOffer()
+      await pc.setLocalDescription(offer)
+      await sendSignal({
+        kind: 'offer',
+        toUserId: peerUserId,
+        sdp: offer.sdp ?? undefined
+      })
+    },
+    [sendSignal]
+  )
+
   const ensurePeerConnection = useCallback(
     (peerUserId: string) => {
       if (pcRef.current) return pcRef.current
@@ -71,6 +102,10 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
         const state = pc.connectionState
         if (state === 'connected') setMeshStatus('connected')
         else if (state === 'failed') setMeshStatus('failed')
+      }
+      pc.ontrack = (event) => {
+        const stream = event.streams[0] ?? new MediaStream([event.track])
+        setRemoteStream(stream)
       }
       pcRef.current = pc
       return pc
@@ -172,6 +207,24 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
     }, POLL_MS)
   }, [pollSignals, stopPolling])
 
+  const stopScreenShareInternal = useCallback(async () => {
+    const pc = pcRef.current
+    if (screenSenderRef.current && pc) {
+      try {
+        pc.removeTrack(screenSenderRef.current)
+      } catch {
+        // ignore
+      }
+      screenSenderRef.current = null
+    }
+    screenStreamRef.current?.getTracks().forEach((t) => t.stop())
+    screenStreamRef.current = null
+    setScreenSharing(false)
+    if (peerRef.current && joinedRef.current) {
+      await renegotiate(peerRef.current)
+    }
+  }, [renegotiate])
+
   const joinRoom = useCallback(async () => {
     if (!localUserId) return
     setBusy(true)
@@ -190,6 +243,7 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
   const leaveRoom = useCallback(async () => {
     setBusy(true)
     try {
+      await stopScreenShareInternal()
       if (joinedRef.current) {
         await sendSignal({ kind: 'leave' })
       }
@@ -200,11 +254,12 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
       pcRef.current = null
       peerRef.current = null
       setMeshStatus('idle')
+      setRemoteStream(null)
       await refreshRoom()
     } finally {
       setBusy(false)
     }
-  }, [refreshRoom, sendSignal, stopPolling])
+  }, [refreshRoom, sendSignal, stopPolling, stopScreenShareInternal])
 
   const loadDesktopSources = useCallback(async (): Promise<number> => {
     setBusy(true)
@@ -222,10 +277,43 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
     }
   }, [plugin.id])
 
+  const shareDesktopSource = useCallback(
+    async (sourceId: string): Promise<void> => {
+      if (!joined || !peerRef.current) {
+        throw new Error('join room first')
+      }
+      setBusy(true)
+      try {
+        await stopScreenShareInternal()
+        const stream = await captureDesktopSource(sourceId)
+        screenStreamRef.current = stream
+        const track = stream.getVideoTracks()[0]
+        if (!track) throw new Error('no video track')
+        const pc = ensurePeerConnection(peerRef.current)
+        screenSenderRef.current = pc.addTrack(track, stream)
+        setScreenSharing(true)
+        await renegotiate(peerRef.current)
+      } finally {
+        setBusy(false)
+      }
+    },
+    [ensurePeerConnection, joined, renegotiate, stopScreenShareInternal]
+  )
+
+  const stopScreenShare = useCallback(async () => {
+    setBusy(true)
+    try {
+      await stopScreenShareInternal()
+    } finally {
+      setBusy(false)
+    }
+  }, [stopScreenShareInternal])
+
   useEffect(() => {
     void refreshRoom()
     return () => {
       stopPolling()
+      screenStreamRef.current?.getTracks().forEach((t) => t.stop())
       pcRef.current?.close()
     }
   }, [refreshRoom, stopPolling])
@@ -236,8 +324,12 @@ export function useMeetingMesh(plugin: PluginView, groupId: string) {
     busy,
     meshStatus,
     desktopSources,
+    screenSharing,
+    remoteStream,
     joinRoom,
     leaveRoom,
-    loadDesktopSources
+    loadDesktopSources,
+    shareDesktopSource,
+    stopScreenShare
   }
 }

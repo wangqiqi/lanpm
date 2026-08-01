@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { canForwardMessage, forwardedFromForMessage } from '@shared/chat/forwardMessage'
+import {
+  buildForwardedTextContent,
+  canForwardMessage,
+  cloneContentForForward,
+  forwardedFromForMessage
+} from '@shared/chat/forwardMessage'
 import type { ChatMessage } from '@shared/chat/types'
 
 const base = (content: ChatMessage['content']): ChatMessage => ({
@@ -21,6 +26,19 @@ describe('forwardMessage', () => {
     expect(canForwardMessage(base({ kind: 'recalled', recalledBy: 'u', recalledAt: 't' }))).toBe(false)
   })
 
+  it('canForwardMessage allows voice messages', () => {
+    expect(
+      canForwardMessage(
+        base({
+          kind: 'voice',
+          fileId: 'f1',
+          durationMs: 3000,
+          mimeType: 'audio/webm'
+        })
+      )
+    ).toBe(true)
+  })
+
   it('forwardedFromForMessage captures source metadata', () => {
     const msg = base({ kind: 'text', text: 'hi' })
     expect(forwardedFromForMessage(msg, 'Bob')).toEqual({
@@ -29,5 +47,29 @@ describe('forwardMessage', () => {
       senderDisplayName: 'Bob',
       msgId: 'm1'
     })
+  })
+
+  it('cloneContentForForward copies voice payload', () => {
+    const voice = {
+      kind: 'voice' as const,
+      fileId: 'f1',
+      durationMs: 4500,
+      mimeType: 'audio/webm'
+    }
+    expect(cloneContentForForward(voice)).toEqual(voice)
+  })
+
+  it('buildForwardedTextContent prefixes voice preview', () => {
+    const msg: ChatMessage = {
+      ...base({
+        kind: 'voice',
+        fileId: 'f1',
+        durationMs: 8000,
+        mimeType: 'audio/webm'
+      }),
+      type: 'voice'
+    }
+    const from = forwardedFromForMessage(msg, 'Alice')
+    expect(buildForwardedTextContent(msg, from).text).toBe('[转发] Alice: [voice 8s]')
   })
 })

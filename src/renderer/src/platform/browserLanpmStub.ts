@@ -1223,6 +1223,9 @@ export function createBrowserLanpmStub(): LanpmApi {
       captureAndSendScreenshot: async () => {
         throw stubError('stub.screenshotElectronOnly')
       },
+      sendVoice: async () => {
+        throw stubError('stub.uploadElectronOnly')
+      },
       recallMessage: async (groupId, msgId) => {
         const status = readStatus()
         if (!status.configured || !status.user) {

@@ -9,6 +9,7 @@ import {
   recallMessage,
   sendExistingFileMessage,
   sendFileMessage,
+  sendVoiceMessage,
   sendTextMessage,
   sendTaskRefMessage,
   retryFailedMessage,
@@ -122,6 +123,18 @@ export function registerChatIpc(): void {
     }
     return captureAndSendScreenshot(groupId)
   })
+
+  ipcMain.handle(
+    CHAT_IPC.sendVoice,
+    (_event, groupId: string, audioBase64: string, durationMs: number, mimeType?: string) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof audioBase64 !== 'string' || !audioBase64) throw new Error('audioBase64 required')
+      if (typeof durationMs !== 'number' || !Number.isFinite(durationMs)) {
+        throw new Error('durationMs required')
+      }
+      return sendVoiceMessage(getDatabase(), groupId, audioBase64, durationMs, mimeType)
+    }
+  )
 
   ipcMain.handle(CHAT_IPC.markRead, (_event, groupId: string, msgIds: string[]) => {
     if (typeof groupId !== 'string' || !groupId) {

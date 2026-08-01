@@ -1270,6 +1270,24 @@
   border: 0.5px solid var(--lanpm-border);
 }
 
+.toolbarMeetingGroup {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border-radius: calc(var(--lanpm-radius-md) - 1px);
+  background: var(--lanpm-fill-tertiary);
+  border: 0.5px solid var(--lanpm-border);
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.toolbarMeetingGroup :global([data-plugin-zone='toolbar']) {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .collaborationDrawer :global(.ant-drawer-body) {
   padding: 0;
   display: flex;
@@ -1475,8 +1493,43 @@
 }
 
 .voiceHoldBtn {
+  width: 64px !important;
+  height: 64px !important;
+  flex-shrink: 0;
+}
+
+.voiceBubble {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 160px;
   max-width: 280px;
-  height: 44px !important;
+  padding: 8px 10px;
+  border-radius: var(--lanpm-radius-md);
+  background: var(--lanpm-fill-secondary);
+  border: 0.5px solid var(--lanpm-border);
+}
+
+.voiceBubbleIcon {
+  color: var(--lanpm-accent);
+  font-size: var(--lanpm-font-title);
+}
+
+.voiceAudio {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+}
+
+.voiceDuration {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
+  flex-shrink: 0;
+}
+
+.voiceBubbleLoading {
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-text-secondary);
 }
 
 .voiceHint {

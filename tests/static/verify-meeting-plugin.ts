@@ -48,8 +48,8 @@ const voicePanel = readFileSync(
   join(root, 'src/renderer/src/features/chat/ChatVoiceMediaPanel.tsx'),
   'utf8'
 )
-assert.match(voicePanel, /chat\.toolbar\.media/)
-assert.match(voicePanel, /PluginZoneHost/)
+assert.match(voicePanel, /chat-voice-hold-btn/)
+assert.doesNotMatch(voicePanel, /zone="toolbar"/, 'ChatVoiceMediaPanel must not host toolbar zone')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
