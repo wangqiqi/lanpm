@@ -44,6 +44,9 @@ export type PluginCapabilityId =
   | 'member.list'
   | 'chat.sendTaskRef'
   | 'chat.sendText'
+  | 'chat.sendMarkdown'
+  | 'ai.getThread'
+  | 'ai.streamChat'
   | 'file.upload'
   | 'task.create'
   | 'task.patch'
@@ -134,6 +137,9 @@ export const PLUGIN_CAPABILITY_IDS: readonly PluginCapabilityId[] = [
   'member.list',
   'chat.sendTaskRef',
   'chat.sendText',
+  'chat.sendMarkdown',
+  'ai.getThread',
+  'ai.streamChat',
   'file.upload',
   'task.create',
   'task.patch',

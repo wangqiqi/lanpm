@@ -98,10 +98,10 @@ export function registerPluginIpc(): void {
 
   ipcMain.handle(
     PLUGIN_IPC.confirmCapability,
-    (_event, pluginId: string, pendingId: string) => {
+    (event, pluginId: string, pendingId: string) => {
       if (typeof pluginId !== 'string' || !pluginId) throw new Error('pluginId required')
       if (typeof pendingId !== 'string' || !pendingId) throw new Error('pendingId required')
-      return confirmPluginCapability(pluginId, pendingId)
+      return confirmPluginCapability(pluginId, pendingId, event.sender)
     }
   )
 }

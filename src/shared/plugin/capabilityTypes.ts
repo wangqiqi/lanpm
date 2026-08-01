@@ -2,6 +2,7 @@ import type { FileMeta } from '../file/types'
 import type { ChatMessagePage } from '../chat/pagination'
 import type { GroupMemberView } from '../chat/members'
 import type { ChatMessage } from '../chat/types'
+import type { AiMessage, AiThread } from '../ai/types'
 import type { ChecklistView } from '../task/checklist'
 import type { Task, TaskStatus } from '../task/types'
 import type { TaskPatchWhitelistField } from './taskPatchWhitelist'
@@ -41,6 +42,27 @@ export type FileUploadArgs = {
   sourcePath: string
 }
 
+/** Extension API v0.6 — chat.sendMarkdown */
+export type ChatSendMarkdownArgs = {
+  groupId: string
+  markdown: string
+  replyToMsgId?: string
+}
+
+/** Extension API v0.6 — ai.getThread */
+export type AiGetThreadArgs = {
+  threadId: string
+}
+
+/** Extension API v0.6 — ai.streamChat (plugin subset) */
+export type AiStreamChatCapabilityArgs = {
+  userMessage: string
+  threadId?: string
+  groupId?: string | null
+  taskIds?: string[]
+  createThreadTitle?: string
+}
+
 /** Extension API v0.3 — task.patch payload */
 export type TaskPatchPayload = Partial<
   Pick<Task, TaskPatchWhitelistField>
@@ -75,6 +97,9 @@ export type PluginCapabilityArgsMap = {
   'member.list': MemberListArgs
   'chat.sendTaskRef': ChatSendTaskRefArgs
   'chat.sendText': ChatSendTextArgs
+  'chat.sendMarkdown': ChatSendMarkdownArgs
+  'ai.getThread': AiGetThreadArgs
+  'ai.streamChat': AiStreamChatCapabilityArgs
   'file.upload': FileUploadArgs
   'task.create': TaskCreateArgs
   'task.patch': TaskPatchArgs
@@ -87,6 +112,9 @@ export type PluginCapabilityResultMap = {
   'member.list': GroupMemberView[]
   'chat.sendTaskRef': ChatMessage
   'chat.sendText': ChatMessage
+  'chat.sendMarkdown': ChatMessage
+  'ai.getThread': { thread: AiThread; messages: AiMessage[] }
+  'ai.streamChat': { requestId: string }
   'file.upload': FileMeta
   'task.create': Task
   'task.patch': Task
@@ -111,4 +139,9 @@ export type ExtensionApiV04CapabilityId = keyof Pick<
 export type ExtensionApiV05CapabilityId = keyof Pick<
   PluginCapabilityArgsMap,
   'chat.sendText' | 'file.upload'
+>
+
+export type ExtensionApiV06CapabilityId = keyof Pick<
+  PluginCapabilityArgsMap,
+  'chat.sendMarkdown' | 'ai.getThread' | 'ai.streamChat'
 >

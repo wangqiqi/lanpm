@@ -393,6 +393,27 @@ export async function sendTextMessage(
   )
 }
 
+/** Extension API v0.6 — markdown body as text message (renderer renders markdown). */
+export async function sendMarkdownMessage(
+  db: Database,
+  groupId: string,
+  markdown: string,
+  options?: PublishChatMessageOptions
+): Promise<ChatMessage> {
+  const trimmed = markdown.trim()
+  if (!trimmed) throwLanpm('stub.messageEmpty')
+  const members = await listGroupMembers(db, groupId)
+  const mentions = parseMentions(trimmed, members)
+  return publishChatMessage(
+    db,
+    groupId,
+    'text',
+    { kind: 'text', text: trimmed },
+    mentions,
+    options
+  )
+}
+
 export async function sendAiShareMessage(
   db: Database,
   groupId: string,

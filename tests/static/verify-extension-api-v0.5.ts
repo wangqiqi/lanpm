@@ -33,13 +33,10 @@ for (const cap of ['chat.sendText', 'file.upload'] as const) {
   assert.ok(isHumanReviewCapability(cap), `expected human review: ${cap}`)
 }
 
-assert.deepEqual([...HUMAN_REVIEW_CAPABILITY_IDS], [
-  'task.create',
-  'task.patch',
-  'board.moveTask',
-  'chat.sendText',
-  'file.upload'
-])
+assert.ok(isHumanReviewCapability('chat.sendText'), 'chat.sendText human review')
+assert.ok(isHumanReviewCapability('file.upload'), 'file.upload human review')
+assert.ok(HUMAN_REVIEW_CAPABILITY_IDS.includes('chat.sendText'))
+assert.ok(HUMAN_REVIEW_CAPABILITY_IDS.includes('file.upload'))
 assert.equal(isHumanReviewCapability('chat.sendTaskRef'), false)
 
 assert.deepEqual(CHAT_SEND_TEXT_WHITELIST_FIELDS, ['groupId', 'text', 'replyToMsgId'])

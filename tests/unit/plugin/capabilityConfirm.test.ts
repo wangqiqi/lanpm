@@ -25,6 +25,8 @@ describe('capabilityConfirm', () => {
       'task.patch',
       'board.moveTask',
       'chat.sendText',
+      'chat.sendMarkdown',
+      'ai.streamChat',
       'file.upload'
     ])
     expect(isHumanReviewCapability('task.create')).toBe(true)

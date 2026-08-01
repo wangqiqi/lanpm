@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [1.99.0] - 2026-08-01
+
+### Added
+
+- **Extension API v0.6（extension-v06）**：`chat.sendMarkdown`（人审）· `ai.getThread`（读）· `ai.streamChat`（人审后返回 `requestId` 并走现有 `ai:streamChunk` 通道）；对齐 `lanpm.ai-assistant` manifest（TASK-1601～1608）
+- **门禁**：`verify:extension-api-v0.6`；`verify:extension-api-v0.5` 人审列表断言改为子集检查
+
+### Changed
+
+- **`docs/07_插件与扩展.md`** §4.2 · §4.4 · §9：`v0.6` 路线与验收脚本
+
+## [1.98.0] - 2026-08-01
+
 ### Added
 
 - **meeting-media-v2（v1.98.0）**：聊天 **语音消息**（`voice` 类型 · PTT 按住说话 · 气泡播放）· **Lite mesh 真投屏**（选源 + `addTrack` + 对端预览）· **会议工具栏收纳**（单「会议」按钮 + Popover 菜单）（TASK-1502～1506）

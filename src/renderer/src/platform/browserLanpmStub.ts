@@ -59,6 +59,9 @@ import {
 } from '@shared/plugin/capabilityConfirm'
 import { parseTaskCreateInput } from '@shared/plugin/taskCreateWhitelist'
 import { parseChatSendTextInput } from '@shared/plugin/chatSendTextWhitelist'
+import { parseChatSendMarkdownInput } from '@shared/plugin/chatSendMarkdownWhitelist'
+import { parseAiGetThreadInput } from '@shared/plugin/aiGetThreadWhitelist'
+import { parseAiStreamChatCapabilityInput } from '@shared/plugin/aiStreamChatWhitelist'
 import { parseFileUploadInput } from '@shared/plugin/fileUploadWhitelist'
 import {
   DEFAULT_NAV_PREFERENCES,
@@ -205,7 +208,7 @@ const stubCapabilityPendings = new Map<string, StubCapabilityPending>()
 function executeStubWriteCapability(
   capability: HumanReviewCapabilityId,
   args: Record<string, unknown>
-): Task | ChatMessage | FileMeta {
+): Task | ChatMessage | FileMeta | { requestId: string } {
   if (capability === 'task.create') {
     const parsed = parseTaskCreateInput(args)
     if (!parsed.ok) throw new Error(parsed.message)
@@ -300,6 +303,38 @@ function executeStubWriteCapability(
     writeChatMessages(groupId, [...prev, msg])
     for (const fn of chatListeners) fn(msg)
     return msg
+  }
+  if (capability === 'chat.sendMarkdown') {
+    const parsed = parseChatSendMarkdownInput(args)
+    if (!parsed.ok) throw new Error(parsed.message)
+    const { groupId, markdown, replyToMsgId } = parsed.value
+    const status = readStatus()
+    if (!status.configured || !status.user || !status.device) {
+      throw stubError('stub.identityRequired')
+    }
+    const prev = readChatMessages(groupId)
+    const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+    const members = listStubMembers(groupId)
+    const mentions = parseMentions(markdown, members)
+    const msg: ChatMessage = {
+      msgId: `msg_${crypto.randomUUID()}`,
+      groupId,
+      senderUserId: status.user.userId,
+      senderDeviceId: status.device.deviceId,
+      type: 'text',
+      content: { kind: 'text', text: markdown },
+      lamportTs,
+      createdAt: new Date().toISOString(),
+      deliveryStatus: 'sent',
+      ...(mentions.length > 0 ? { mentions } : {}),
+      ...(replyToMsgId ? { replyToMsgId } : {})
+    }
+    writeChatMessages(groupId, [...prev, msg])
+    for (const fn of chatListeners) fn(msg)
+    return msg
+  }
+  if (capability === 'ai.streamChat') {
+    return { requestId: `stub_aireq_${crypto.randomUUID()}` }
   }
   if (capability === 'file.upload') {
     const parsed = parseFileUploadInput(args)
@@ -2486,6 +2521,23 @@ export function createBrowserLanpmStub(): LanpmApi {
           for (const fn of chatListeners) fn(msg)
           return msg
         }
+        if (capability === 'ai.getThread') {
+          const parsed = parseAiGetThreadInput(args ?? {})
+          if (!parsed.ok) throw new Error(parsed.message)
+          const threadId = parsed.value.threadId
+          return {
+            thread: {
+              threadId,
+              userId: 'stub-user',
+              groupId: 'demo-project',
+              title: 'Stub',
+              context: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            messages: []
+          }
+        }
         if (isHumanReviewCapability(capability)) {
           const status = readStatus()
           if (!status.configured || !status.user) {
@@ -2516,6 +2568,12 @@ export function createBrowserLanpmStub(): LanpmApi {
             if (!moveStatus) throw new Error('status required')
           } else if (capability === 'chat.sendText') {
             const parsed = parseChatSendTextInput(args ?? {})
+            if (!parsed.ok) throw new Error(parsed.message)
+          } else if (capability === 'chat.sendMarkdown') {
+            const parsed = parseChatSendMarkdownInput(args ?? {})
+            if (!parsed.ok) throw new Error(parsed.message)
+          } else if (capability === 'ai.streamChat') {
+            const parsed = parseAiStreamChatCapabilityInput(args ?? {})
             if (!parsed.ok) throw new Error(parsed.message)
           } else if (capability === 'file.upload') {
             const parsed = parseFileUploadInput(args ?? {})

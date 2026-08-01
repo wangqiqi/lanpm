@@ -1,8 +1,13 @@
+import { randomUUID } from 'node:crypto'
 import { existsSync, statSync } from 'node:fs'
+import type { WebContents } from 'electron'
 import type { PluginCapabilityId } from '../../shared/plugin/types.ts'
 import type {
+  AiGetThreadArgs,
+  AiStreamChatCapabilityArgs,
   BoardMoveTaskArgs,
   ChatListMessagesArgs,
+  ChatSendMarkdownArgs,
   ChatSendTaskRefArgs,
   ChatSendTextArgs,
   FileUploadArgs,
@@ -19,6 +24,9 @@ import {
 import { getDisallowedTaskPatchFields } from '../../shared/plugin/taskPatchWhitelist.ts'
 import { parseTaskCreateInput } from '../../shared/plugin/taskCreateWhitelist.ts'
 import { parseChatSendTextInput } from '../../shared/plugin/chatSendTextWhitelist.ts'
+import { parseChatSendMarkdownInput } from '../../shared/plugin/chatSendMarkdownWhitelist.ts'
+import { parseAiGetThreadInput } from '../../shared/plugin/aiGetThreadWhitelist.ts'
+import { parseAiStreamChatCapabilityInput } from '../../shared/plugin/aiStreamChatWhitelist.ts'
 import {
   FILE_UPLOAD_MAX_BYTES,
   parseFileUploadInput
@@ -43,6 +51,7 @@ import {
 import {
   listGroupMessages,
   listOlderGroupMessages,
+  sendMarkdownMessage,
   sendTaskRefMessage,
   sendTextMessage
 } from '../chat/chatService'
@@ -54,9 +63,12 @@ import {
 } from '../media/mediaSignalService'
 import { listDesktopCaptureSources } from '../media/desktopCaptureService'
 import { createLiveKitTokenForGroup } from '../media/livekitTokenService'
-import { getSetupStatus } from '../identity/setup'
+import { getAiGateStatus } from '../ai/aiEndpointProbeService.ts'
+import { getAiThreadWithMessages } from '../ai/aiThreadService.ts'
+import { runAiStreamChat } from '../ai/aiStreamService.ts'
 import { createCapabilityPending, takeCapabilityPending } from './capabilityPendingStore.ts'
 import type { Database } from 'better-sqlite3'
+import { getSetupStatus } from '../identity/setup'
 import { listOpsMachines } from '../ops/opsSyncService.ts'
 import { sendOpsSlashCommand } from '../ops/opsCommandService.ts'
 import { parseOpsCommand } from '../../shared/chat/opsCommand.ts'
@@ -88,6 +100,9 @@ function executeWriteCapability(
   capability: HumanReviewCapabilityId,
   args: CapabilityArgs
 ): unknown {
+  if (capability === 'ai.streamChat') {
+    throw new Error('ai.streamChat must be confirmed via confirmPluginCapability')
+  }
   switch (capability) {
     case 'task.create': {
       const parsed = parseTaskCreateInput(args)
@@ -128,6 +143,17 @@ function executeWriteCapability(
         db,
         groupId,
         text,
+        replyToMsgId ? { replyToMsgId } : undefined
+      )
+    }
+    case 'chat.sendMarkdown': {
+      const parsed = parseChatSendMarkdownInput(args)
+      if (!parsed.ok) throw new Error(parsed.message)
+      const { groupId, markdown, replyToMsgId } = parsed.value
+      return sendMarkdownMessage(
+        db,
+        groupId,
+        markdown,
         replyToMsgId ? { replyToMsgId } : undefined
       )
     }
@@ -182,6 +208,14 @@ export async function invokePluginCapability(
     } else if (capability === 'chat.sendText') {
       const parsed = parseChatSendTextInput(args as ChatSendTextArgs)
       if (!parsed.ok) throw new Error(parsed.message)
+    } else if (capability === 'chat.sendMarkdown') {
+      const parsed = parseChatSendMarkdownInput(args as ChatSendMarkdownArgs)
+      if (!parsed.ok) throw new Error(parsed.message)
+    } else if (capability === 'ai.streamChat') {
+      const parsed = parseAiStreamChatCapabilityInput(args as AiStreamChatCapabilityArgs)
+      if (!parsed.ok) throw new Error(parsed.message)
+      const gate = getAiGateStatus(getDatabase())
+      if (!gate.canStream) throw new Error('AI_NOT_AVAILABLE')
     } else if (capability === 'file.upload') {
       const parsed = parseFileUploadInput(args as FileUploadArgs)
       if (!parsed.ok) throw new Error(parsed.message)
@@ -280,6 +314,12 @@ export async function invokePluginCapability(
       if (!taskId) throw new Error('taskId required')
       return sendTaskRefMessage(db, groupId, taskId)
     }
+    case 'ai.getThread': {
+      const parsed = parseAiGetThreadInput(args as AiGetThreadArgs)
+      if (!parsed.ok) throw new Error(parsed.message)
+      const userId = requireCurrentUserId(db)
+      return getAiThreadWithMessages(db, userId, parsed.value.threadId)
+    }
     case 'ops.machine.list': {
       const groupId = String(args.groupId ?? '')
       if (!groupId) throw new Error('groupId required')
@@ -304,7 +344,8 @@ export async function invokePluginCapability(
 /** After user confirms pending write — execute once and clear pending. */
 export async function confirmPluginCapability(
   pluginId: string,
-  pendingId: string
+  pendingId: string,
+  web?: WebContents
 ): Promise<unknown> {
   if (typeof pluginId !== 'string' || !pluginId) throw new Error('pluginId required')
   if (typeof pendingId !== 'string' || !pendingId) throw new Error('pendingId required')
@@ -318,6 +359,20 @@ export async function confirmPluginCapability(
   const db = getDatabase()
   const userId = requireCurrentUserId(db)
   if (pending.userId !== userId) throw new Error('pending session mismatch')
+
+  if (pending.capability === 'ai.streamChat') {
+    if (!web) throw new Error('webContents required for ai.streamChat')
+    const parsed = parseAiStreamChatCapabilityInput(pending.args as AiStreamChatCapabilityArgs)
+    if (!parsed.ok) throw new Error(parsed.message)
+    const gate = getAiGateStatus(db)
+    if (!gate.canStream) throw new Error('AI_NOT_AVAILABLE')
+    const requestId = `aireq_${randomUUID()}`
+    void runAiStreamChat(db, userId, web, requestId, {
+      ...parsed.value,
+      entrySource: 'global'
+    })
+    return { requestId }
+  }
 
   return executeWriteCapability(db, pending.capability, pending.args)
 }

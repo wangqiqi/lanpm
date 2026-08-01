@@ -6,6 +6,8 @@ export const HUMAN_REVIEW_CAPABILITY_IDS = [
   'task.patch',
   'board.moveTask',
   'chat.sendText',
+  'chat.sendMarkdown',
+  'ai.streamChat',
   'file.upload'
 ] as const satisfies readonly PluginCapabilityId[]
 
