@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { GroupMemberView } from '@shared/chat/members'
 import type { Task } from '@shared/task/types'
 import { shouldRenderChatMarkdown } from '@shared/chat/markdownDetect'
@@ -69,7 +70,7 @@ function renderTextWithTaskRefs(
   )
 }
 
-export default function ChatMessageText({
+function ChatMessageTextInner({
   text,
   members,
   tasks = [],
@@ -137,3 +138,5 @@ export default function ChatMessageText({
     </span>
   )
 }
+
+export default memo(ChatMessageTextInner)

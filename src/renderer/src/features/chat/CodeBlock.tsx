@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { Tag } from 'antd'
 import RegionButton from '@renderer/ui/RegionButton'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
@@ -17,6 +17,7 @@ interface CodeBlockProps {
 }
 
 const HLJS_THEME_ID = 'lanpm-hljs-theme'
+const COLLAPSE_LINE_THRESHOLD = 12
 
 function useHighlightTheme(theme: ThemeMode): void {
   useEffect(() => {
@@ -31,12 +32,18 @@ function useHighlightTheme(theme: ThemeMode): void {
   }, [theme])
 }
 
-export default function CodeBlock({ language, code, theme }: CodeBlockProps): React.ReactElement {
+function CodeBlockInner({ language, code, theme }: CodeBlockProps): React.ReactElement {
   const { t } = useI18n()
   const { message } = useLanpmApp()
   useHighlightTheme(theme)
+  const lineCount = code.split('\n').length
+  const collapsible = lineCount > COLLAPSE_LINE_THRESHOLD
   const [expanded, setExpanded] = useState(false)
-  const html = useMemo(() => highlightCode(code, language), [code, language])
+  const shouldHighlight = !collapsible || expanded
+  const html = useMemo(
+    () => (shouldHighlight ? highlightCode(code, language) : ''),
+    [code, language, shouldHighlight]
+  )
 
   const copyCode = async (): Promise<void> => {
     try {
@@ -53,14 +60,11 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
         <Tag color="default" className={styles.langTag}>
           {language}
         </Tag>
-        <RegionButton
-          variant="caption"
-          onClick={() => void copyCode()}
-        >
+        <RegionButton variant="caption" onClick={() => void copyCode()}>
           <CopyOutlined />
           {t('chat.copyCode')}
         </RegionButton>
-        {code.split('\n').length > 12 && (
+        {collapsible && (
           <RegionButton variant="caption" onClick={() => setExpanded((v) => !v)}>
             {expanded ? t('chat.codeCollapse') : t('chat.codeExpand')}
           </RegionButton>
@@ -70,8 +74,14 @@ export default function CodeBlock({ language, code, theme }: CodeBlockProps): Re
         className={`hljs ${styles.codeBlock} ${expanded ? styles.codeBlockExpanded : ''}`}
         data-theme={theme}
       >
-        <code dangerouslySetInnerHTML={{ __html: html }} />
+        {shouldHighlight ? (
+          <code dangerouslySetInnerHTML={{ __html: html }} />
+        ) : (
+          <code>{code}</code>
+        )}
       </pre>
     </div>
   )
 }
+
+export default memo(CodeBlockInner)

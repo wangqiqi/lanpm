@@ -1,6 +1,12 @@
 import { create } from 'zustand'
 import type { ChatMessage } from '@shared/chat/types'
 import type { SendChatOptions } from '@shared/chat/channels'
+import {
+  downgradeToLastMessage,
+  mergeChatMessage,
+  mergeOlderChatMessages,
+  sortChatMessages
+} from '@shared/chat/messageListMerge'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
 interface ChatState {
@@ -30,28 +36,8 @@ interface ChatState {
   upsertMessage: (message: ChatMessage) => void
   /** DATA-CHATSTORE-EVICT — 本机清理后丢弃内存缓存 */
   evictGroup: (groupId: string) => void
-}
-
-function sortMessages(list: ChatMessage[]): ChatMessage[] {
-  return [...list].sort((a, b) => a.lamportTs - b.lamportTs || a.createdAt.localeCompare(b.createdAt))
-}
-
-function mergeMessage(list: ChatMessage[], message: ChatMessage): ChatMessage[] {
-  const idx = list.findIndex((m) => m.msgId === message.msgId)
-  if (idx >= 0) {
-    const next = [...list]
-    next[idx] = message
-    return sortMessages(next)
-  }
-  return sortMessages([...list, message])
-}
-
-function mergeOlder(existing: ChatMessage[], older: ChatMessage[]): ChatMessage[] {
-  const byId = new Map(existing.map((m) => [m.msgId, m]))
-  for (const m of older) {
-    if (!byId.has(m.msgId)) byId.set(m.msgId, m)
-  }
-  return sortMessages([...byId.values()])
+  /** 切群后非当前群仅保留 lastMessage（DM 预览） */
+  downgradeInactiveGroups: (activeGroupId: string) => void
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -70,7 +56,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const page = await getLanpmApi().chat.listMessages(groupId)
       set((s) => ({
-        messagesByGroup: { ...s.messagesByGroup, [groupId]: sortMessages(page.messages) },
+        messagesByGroup: { ...s.messagesByGroup, [groupId]: sortChatMessages(page.messages) },
         hasMoreByGroup: { ...s.hasMoreByGroup, [groupId]: page.hasMore }
       }))
     } catch {
@@ -90,7 +76,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set((s) => ({
         messagesByGroup: {
           ...s.messagesByGroup,
-          [groupId]: mergeOlder(s.messagesByGroup[groupId] ?? [], page.messages)
+          [groupId]: mergeOlderChatMessages(s.messagesByGroup[groupId] ?? [], page.messages)
         },
         hasMoreByGroup: { ...s.hasMoreByGroup, [groupId]: page.hasMore }
       }))
@@ -158,13 +144,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return { messagesByGroup: rest, hasMoreByGroup: hasMore }
     })
   },
+  downgradeInactiveGroups: (activeGroupId) => {
+    set((s) => {
+      const next: Record<string, ChatMessage[]> = {}
+      for (const [gid, msgs] of Object.entries(s.messagesByGroup)) {
+        if (gid === activeGroupId) next[gid] = msgs
+        else next[gid] = downgradeToLastMessage(msgs)
+      }
+      return { messagesByGroup: next }
+    })
+  },
   upsertMessage: (message) => {
     set((s) => {
       const prev = s.messagesByGroup[message.groupId] ?? []
       return {
         messagesByGroup: {
           ...s.messagesByGroup,
-          [message.groupId]: mergeMessage(prev, message)
+          [message.groupId]: mergeChatMessage(prev, message)
         }
       }
     })

@@ -2,6 +2,23 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.84.0] - 2026-08-01
+
+### Added
+
+- **聊天性能 follow-up（chat-perf-follow）**：`messageListMerge` 增量合并 + 每群 **2000** 条内存窗口
+- **`downgradeInactiveGroups`**：切群后非活跃群仅保留 lastMessage（DM 预览）
+- **`verify:chat-perf-follow`** · Spec `docs/specs/006-chat-perf-follow/spec.md`
+
+### Changed
+
+- **`MemberList`**：侧栏不可见时停止 presence 轮询；间隔 12s + `visibilityState` 门控
+- **`useMarkRead`**：依赖 `otherMsgIdsKey`，己方 delivery 更新不再触发全表扫描
+- **`chatStore`**：`upsertMessage` 追加 O(1) · patch 原位；`mergeOlder` 走共享模块
+- **`DmSessionBar`**：`DmSessionRow` 按会话 selector；仅加载当前 DM 历史
+- **`CodeBlock`**：折叠长代码延后 `highlightCode`；**`ChatMessageText`** `memo`
+- **`docs/优化.md` §6**：序 5–7、9–12 标 **✅ v1.84.0**
+
 ## [1.83.0] - 2026-08-01
 
 ### Added

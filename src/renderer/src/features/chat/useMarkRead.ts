@@ -11,17 +11,24 @@ export function useMarkRead(groupId: string, messages: ChatMessage[], localUserI
   const { message } = useLanpmApp()
   const markedRef = useRef<Set<string>>(new Set())
 
+  const otherMsgIdsKey = (() => {
+    if (!localUserId) return ''
+    return messages
+      .filter((m) => m.senderUserId !== localUserId)
+      .map((m) => m.msgId)
+      .join('\0')
+  })()
+
   useEffect(() => {
     markedRef.current = new Set()
   }, [groupId])
 
   useEffect(() => {
-    if (!groupId || !localUserId || messages.length === 0) return
+    if (!groupId || !localUserId || otherMsgIdsKey.length === 0) return
 
-    const pending = messages
-      .filter((m) => m.senderUserId !== localUserId)
-      .map((m) => m.msgId)
-      .filter((id) => !markedRef.current.has(id))
+    const pending = otherMsgIdsKey
+      .split('\0')
+      .filter((id) => id && !markedRef.current.has(id))
 
     if (pending.length === 0) return
 
@@ -40,5 +47,5 @@ export function useMarkRead(groupId: string, messages: ChatMessage[], localUserI
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [groupId, localUserId, messages, message])
+  }, [groupId, localUserId, otherMsgIdsKey, message])
 }

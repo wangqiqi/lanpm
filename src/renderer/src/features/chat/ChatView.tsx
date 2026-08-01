@@ -136,6 +136,17 @@ export default function ChatView(): React.ReactElement {
   useEffect(() => {
     setDmPickerOpen(false)
   }, [gid])
+
+  const downgradeInactiveGroups = useChatStore((s) => s.downgradeInactiveGroups)
+  const prevGidRef = useRef(gid)
+  useEffect(() => {
+    const prev = prevGidRef.current
+    if (prev && prev !== gid) {
+      downgradeInactiveGroups(gid)
+    }
+    prevGidRef.current = gid
+  }, [gid, downgradeInactiveGroups])
+
   const messages = useChatStore((s) => s.messagesByGroup[gid] ?? [])
   const hasMore = useChatStore((s) => s.hasMoreByGroup[gid] ?? false)
   const loading = useChatStore((s) => s.loading[gid])
@@ -948,6 +959,7 @@ export default function ChatView(): React.ReactElement {
         <MemberList
           groupId={gid}
           members={members}
+          presencePolling={sidebarOpen}
           onRefresh={() => void loadMembers(gid)}
           onInsertMention={(name) => {
             insertMention(name)

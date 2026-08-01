@@ -19,20 +19,23 @@ import styles from './chat.module.css'
 
 const { Text } = Typography
 
-const PRESENCE_POLL_MS = 3_000
+const PRESENCE_POLL_MS = 12_000
 
 interface MemberListProps {
   groupId: string
   members: GroupMemberView[]
   onRefresh: () => void
   onInsertMention: (displayName: string) => void
+  /** 侧栏可见时才轮询 presence */
+  presencePolling?: boolean
 }
 
 export default function MemberList({
   groupId,
   members,
   onRefresh,
-  onInsertMention
+  onInsertMention,
+  presencePolling = true
 }: MemberListProps): React.ReactElement {
   const { t } = useI18n()
   const [search, setSearch] = useState('')
@@ -50,10 +53,15 @@ export default function MemberList({
   )
 
   useEffect(() => {
+    if (!presencePolling) return
     onRefresh()
-    const timer = window.setInterval(onRefresh, PRESENCE_POLL_MS)
+    const tick = (): void => {
+      if (document.visibilityState === 'hidden') return
+      onRefresh()
+    }
+    const timer = window.setInterval(tick, PRESENCE_POLL_MS)
     return () => window.clearInterval(timer)
-  }, [groupId, onRefresh])
+  }, [groupId, onRefresh, presencePolling])
 
   useEffect(() => {
     setSearch('')

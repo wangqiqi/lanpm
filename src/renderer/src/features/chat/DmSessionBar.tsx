@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { groupAllowsDirectMessage } from '@shared/group/guards'
 import { useNavigate } from 'react-router-dom'
 import { Typography } from 'antd'
 import { isDmGroupId } from '@shared/chat/dmSession'
+import type { ChatMessage } from '@shared/chat/types'
 import { lastChatMessage, messagePreviewText } from '@shared/chat/messagePreview'
 import { useDmStore, type DmSession } from '@renderer/stores/dmStore'
 import { useChatStore } from '@renderer/stores/chatStore'
@@ -18,6 +19,8 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
 
 const { Text } = Typography
+
+const EMPTY_MESSAGES: ChatMessage[] = []
 
 export type ChatDmPanelLayout = 'main'
 
@@ -36,6 +39,49 @@ function originLabel(
   return t('chat.dmFromProject', { name })
 }
 
+interface DmSessionRowProps {
+  session: DmSession
+  active: boolean
+  showOrigin: boolean
+  groups: NavGroup[]
+  sessionTimeLabels: { today: string; yesterday: string }
+  locale: string
+  onOpen: (groupId: string) => void
+}
+
+const DmSessionRow = memo(function DmSessionRow({
+  session,
+  active,
+  showOrigin,
+  groups,
+  sessionTimeLabels,
+  locale,
+  onOpen
+}: DmSessionRowProps): React.ReactElement {
+  const { t } = useI18n()
+  const thread = useChatStore((s) => s.messagesByGroup[session.groupId] ?? EMPTY_MESSAGES)
+  const last = lastChatMessage(thread)
+  const preview = last ? messagePreviewText(last, t('chat.recalledPreview')) : ''
+  const timeLabel = last ? formatSessionTime(last.createdAt, locale, sessionTimeLabels) : ''
+
+  return (
+    <button
+      type="button"
+      className={`${styles.dmSessionItem} ${active ? styles.dmSessionItemActive : ''}`}
+      onClick={() => onOpen(session.groupId)}
+    >
+      <span className={styles.dmSessionRowTop}>
+        <span className={styles.dmSessionName}>{session.peerDisplayName}</span>
+        {timeLabel ? <span className={styles.dmSessionTime}>{timeLabel}</span> : null}
+      </span>
+      <span className={styles.dmSessionPreview}>{preview || t('chat.dmNoPreview')}</span>
+      {showOrigin && (
+        <span className={styles.dmSessionOrigin}>{originLabel(session, groups, t)}</span>
+      )}
+    </button>
+  )
+})
+
 export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProps): React.ReactElement {
   const { t, locale } = useI18n()
   const navigate = useNavigate()
@@ -44,7 +90,6 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
   const localUserId = useIdentityStore((s) => s.user?.userId)
   const groups = useNavigationStore((s) => s.groups)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
-  const messagesByGroup = useChatStore((s) => s.messagesByGroup)
   const loadMessages = useChatStore((s) => s.loadMessages)
   const pruneDisallowedOrigins = useDmStore((s) => s.pruneDisallowedOrigins)
   const syncWithDatabase = useDmStore((s) => s.syncWithDatabase)
@@ -73,16 +118,13 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
     return { projectDms: project, otherDms: other }
   }, [sessions, contextProjectId, getGroupType])
 
-  const sessionGroupIds = useMemo(
-    () => [...projectDms, ...otherDms].map((s) => s.groupId).join('\0'),
-    [projectDms, otherDms]
-  )
-
   useEffect(() => {
-    for (const id of sessionGroupIds.split('\0').filter(Boolean)) {
-      void loadMessages(id)
+    if (!isDmGroupId(activeGroupId)) return
+    const existing = useChatStore.getState().messagesByGroup[activeGroupId]
+    if (!existing || existing.length === 0) {
+      void loadMessages(activeGroupId)
     }
-  }, [sessionGroupIds, loadMessages])
+  }, [activeGroupId, loadMessages])
 
   const openDm = (groupId: string): void => {
     navigate(groupViewPath(groupId, 'chat'))
@@ -92,36 +134,6 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
     () => ({ today: t('chat.dayToday'), yesterday: t('chat.dayYesterday') }),
     [t]
   )
-
-  const renderDmRow = (session: DmSession, showOrigin: boolean): React.ReactElement => {
-    const active = session.groupId === activeGroupId
-    const thread = messagesByGroup[session.groupId] ?? []
-    const last = lastChatMessage(thread)
-    const preview = last ? messagePreviewText(last, t('chat.recalledPreview')) : ''
-    const timeLabel = last
-      ? formatSessionTime(last.createdAt, locale, sessionTimeLabels)
-      : ''
-
-    return (
-      <button
-        key={session.groupId}
-        type="button"
-        className={`${styles.dmSessionItem} ${active ? styles.dmSessionItemActive : ''}`}
-        onClick={() => openDm(session.groupId)}
-      >
-        <span className={styles.dmSessionRowTop}>
-          <span className={styles.dmSessionName}>{session.peerDisplayName}</span>
-          {timeLabel ? <span className={styles.dmSessionTime}>{timeLabel}</span> : null}
-        </span>
-        <span className={styles.dmSessionPreview}>
-          {preview || t('chat.dmNoPreview')}
-        </span>
-        {showOrigin && (
-          <span className={styles.dmSessionOrigin}>{originLabel(session, groups, t)}</span>
-        )}
-      </button>
-    )
-  }
 
   const panelClass = layout === 'main' ? styles.dmPanelMain : styles.dmBar
 
@@ -138,7 +150,18 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
             {t('chat.noDmInProject')}
           </Text>
         ) : (
-          projectDms.map((s) => renderDmRow(s, false))
+          projectDms.map((s) => (
+            <DmSessionRow
+              key={s.groupId}
+              session={s}
+              active={s.groupId === activeGroupId}
+              showOrigin={false}
+              groups={groups}
+              sessionTimeLabels={sessionTimeLabels}
+              locale={locale}
+              onOpen={openDm}
+            />
+          ))
         )}
       </div>
 
@@ -146,7 +169,18 @@ export default function DmSessionBar({ activeGroupId, layout }: DmSessionBarProp
         <>
           <Text className={styles.sidebarSectionTitle}>{t('chat.dmOtherProjects')}</Text>
           <div className={styles.dmSessionList}>
-            {otherDms.map((s) => renderDmRow(s, true))}
+            {otherDms.map((s) => (
+              <DmSessionRow
+                key={s.groupId}
+                session={s}
+                active={s.groupId === activeGroupId}
+                showOrigin
+                groups={groups}
+                sessionTimeLabels={sessionTimeLabels}
+                locale={locale}
+                onOpen={openDm}
+              />
+            ))}
           </div>
         </>
       )}
