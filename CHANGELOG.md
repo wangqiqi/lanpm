@@ -2,6 +2,20 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.87.0] - 2026-08-01
+
+### Added
+
+- **聊天性能观测（chat-perf-observe）**：性能预算表 · packaged 抽检 playbook · 人工回归模板
+- **`docs/specs/009-chat-perf-observe/spec.md`** — §Budget · §10.4 步骤 · 通过标准
+- **`docs/templates/chat-perf-regression.md`** — 发版前走查勾选表
+- **`docs/chat-perf-baseline.md`** — v1.86 参考基线 + 历史记录表
+- **`verify:chat-perf-observe`** — 静态守卫 spec · 模板 · 脚本入口
+
+### Changed
+
+- **`docs/优化.md`**：§5.7 预算链到 spec · §9 现状列对齐 v1.83–v1.86 · §10.4 观测链完整 · §11 补 v1.87.0
+
 ## [1.86.0] - 2026-08-01
 
 ### Added

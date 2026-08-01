@@ -95,6 +95,7 @@ First launch runs a short setup wizard, then opens the demo group at `#/g/demo-p
 ```bash
 npm run lint && npm run typecheck && npm run test
 npm run verify:p0          # guards (IPC, i18n, docs, screenshots layout)
+npm run verify:chat-perf-observe  # chat perf docs + static guards (see docs/specs/009-chat-perf-observe/)
 npm run verify:m7          # full RC regression before release
 npm run build
 ```
