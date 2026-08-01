@@ -2,6 +2,19 @@
 
 本文件记录 LanPM 项目变更，最新条目在最上方。
 
+## [1.88.0] - 2026-08-01
+
+### Added
+
+- **优化文档 closeout（docs-optim-closeout）**：`docs/优化.md` §1 状态列 · §2 历史横幅 · §5 开放项对齐
+- **`docs/specs/010-docs-optim-closeout/spec.md`**
+- **`verify:docs-optim-closeout`** — 静态守卫页眉 · ROADMAP · 开放债关键词
+
+### Changed
+
+- **`docs/06_ROADMAP.md`**：聊天性能主序列标 **v1.83–v1.87 已交付**；剩余债单行
+- **`docs/00_文档导航.md`**：`优化.md` 描述为 backlog SSOT
+
 ## [1.87.0] - 2026-08-01
 
 ### Added
