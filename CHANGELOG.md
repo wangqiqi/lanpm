@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Meeting Pro UX（meeting-pro）**：Popover 内 LiveKit 视频格与参会者列表；Pro 摄像头/投屏开关；日程 Join 在 LiveKit 已配置时走 Pro；录制保存对话框 i18n +「仅本机轨」说明（TASK-1402～1406）
+
 ### Fixed
 
 - **底栏 Tab 撑满（TASK-1311）**：`group.tab.overflow` 无插件时不渲染空 `.tabSlot`，隐藏 files/whiteboard/mindmap 后剩余 Tab 等宽撑满（IA-409）

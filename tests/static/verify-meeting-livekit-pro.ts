@@ -52,6 +52,22 @@ const meetingToolbar = readFileSync(
 assert.match(meetingToolbar, /useMeetingLiveKit/)
 assert.match(meetingToolbar, /plugin\.meetingProJoin/)
 
+const liveKitHook = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/useMeetingLiveKit.ts'),
+  'utf8'
+)
+assert.match(liveKitHook, /setCameraEnabled/)
+assert.match(liveKitHook, /setScreenShareEnabled/)
+assert.match(liveKitHook, /toggleProCamera/)
+assert.match(liveKitHook, /proParticipants/)
+
+assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/MeetingLiveKitVideoGrid.tsx')))
+const videoGrid = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/MeetingLiveKitVideoGrid.tsx'),
+  'utf8'
+)
+assert.match(videoGrid, /meeting-livekit-video-grid/)
+
 const loader = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/livekitClientLoader.ts'),
   'utf8'

@@ -38,6 +38,14 @@ assert.match(panel, /meeting-schedule-panel/)
 assert.match(panel, /listSchedules/)
 assert.match(panel, /createSchedule/)
 
+const toolbar = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/MeetingToolbar.tsx'),
+  'utf8'
+)
+assert.match(toolbar, /onScheduleJoin/)
+assert.match(toolbar, /joinProRoom/)
+assert.match(toolbar, /liveKitConfigured/)
+
 const zh = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
 assert.match(zh, /plugin\.meetingScheduleHint/)
 assert.match(zh, /plugin\.meetingReminder5minTitle/)

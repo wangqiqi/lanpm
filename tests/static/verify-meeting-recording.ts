@@ -34,6 +34,10 @@ assert.match(channels, /saveRecording/)
 const meetingIpc = readFileSync(join(root, 'src/main/ipc/meeting.ts'), 'utf8')
 assert.match(meetingIpc, /showSaveDialog/)
 assert.match(meetingIpc, /saveRecording/)
+assert.match(meetingIpc, /meetingSaveRecordingDialogTitle/)
+assert.match(meetingIpc, /readAppLocale/)
+
+assert.ok(existsSync(join(root, 'src/shared/media/meetingRecordingCopy.ts')))
 
 const preload = readFileSync(join(root, 'src/preload/index.ts'), 'utf8')
 assert.match(preload, /saveRecording/)

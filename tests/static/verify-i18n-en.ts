@@ -40,7 +40,12 @@ const LAYOUT_INLINE_KEYS: MessageKey[] = [
   'cockpit.totalProjects',
   'cockpit.execSummaryTitle',
   'cockpit.attentionTitle',
-  'cockpit.attentionOpenBoard'
+  'cockpit.attentionOpenBoard',
+  'plugin.meetingProJoin',
+  'plugin.meetingProCameraOn',
+  'plugin.meetingProScreenShareStart',
+  'plugin.meetingScheduleJoin',
+  'plugin.meetingRecordStart'
 ]
 
 const MAX_INLINE_LABEL_LEN = 52
@@ -65,6 +70,14 @@ const chatCss = readFileSync(
 )
 const cockpitCss = readFileSync(
   join(root, 'src/renderer/src/views/CockpitView.module.css'),
+  'utf8'
+)
+const pluginCss = readFileSync(
+  join(root, 'src/renderer/src/plugin/plugin.module.css'),
+  'utf8'
+)
+const meetingToolbar = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/MeetingToolbar.tsx'),
   'utf8'
 )
 
@@ -101,6 +114,13 @@ assert.match(
   /\.reportPre[\s\S]*word-break:\s*break-word/,
   'cockpit report output must wrap long EN paragraphs'
 )
+
+assert.match(
+  pluginCss,
+  /\.meetingVideoLabel[\s\S]*text-overflow:\s*ellipsis/,
+  'meeting video labels must ellipsis'
+)
+assert.match(meetingToolbar, /<Space[^>]*wrap/, 'meeting toolbar Space must wrap for EN labels')
 
 console.log(
   `verify:i18n-en OK (${enKeys.length} keys, no CJK; layout guards: ${LAYOUT_INLINE_KEYS.length} inline keys)`

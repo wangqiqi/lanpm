@@ -31,6 +31,7 @@ import { useMeetingMesh } from './useMeetingMesh'
 import { useMeetingLiveKit } from './useMeetingLiveKit'
 import { useMeetingRecording } from './useMeetingRecording'
 import MeetingSchedulePanel from './MeetingSchedulePanel'
+import MeetingLiveKitVideoGrid from './MeetingLiveKitVideoGrid'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -63,10 +64,15 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     proJoined,
     busy: proBusy,
     muted,
+    cameraEnabled,
+    screenSharing,
+    proParticipants,
     sdkMissing,
     joinProRoom,
     leaveProRoom,
-    toggleProMute
+    toggleProMute,
+    toggleProCamera,
+    toggleProScreenShare
   } = useMeetingLiveKit(plugin, groupId)
 
   const participants = roomState?.participants ?? []
@@ -139,6 +145,14 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     }
   }
 
+  const onScheduleJoin = async (): Promise<void> => {
+    if (liveKitConfigured && !sdkMissing) {
+      await joinProRoom()
+      return
+    }
+    await joinRoom()
+  }
+
   const onStartRecord = async (): Promise<void> => {
     try {
       await startRecording()
@@ -201,6 +215,13 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
       <Divider orientation="left" plain>
         {t('plugin.meetingProSection')}
       </Divider>
+      <MeetingLiveKitVideoGrid
+        participants={proParticipants}
+        joined={proJoined}
+        participantsLabel={t('plugin.meetingProParticipants', {
+          count: proParticipants.length
+        })}
+      />
       <Text type="secondary" className={styles.meetingState}>
         {proStatusLabel}
       </Text>
@@ -215,9 +236,15 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
       <MeetingSchedulePanel
         groupId={groupId}
         disabled={controlsDisabled}
-        onJoinMeeting={onJoin}
+        onJoinMeeting={onScheduleJoin}
         joinMeetingDisabled={controlsDisabled || joined || proJoined}
       />
+      <Divider orientation="left" plain>
+        {t('plugin.meetingRecordSection')}
+      </Divider>
+      <Text type="secondary" className={styles.meetingState}>
+        {t('plugin.meetingRecordLocalHint')}
+      </Text>
     </div>
   )
 
@@ -299,13 +326,42 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
           </Tooltip>
         )}
 
-        <Tooltip title={muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}>
+        <Tooltip title={t('plugin.meetingProMute')}>
           <Button
             size="small"
             icon={muted ? <AudioMutedOutlined /> : <AudioOutlined />}
             disabled={controlsDisabled || !proJoined}
             aria-label={muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}
+            data-testid="meeting-pro-mute"
             onClick={() => void toggleProMute()}
+          />
+        </Tooltip>
+
+        <Tooltip title={cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}>
+          <Button
+            size="small"
+            icon={<VideoCameraOutlined />}
+            disabled={controlsDisabled || !proJoined}
+            aria-label={cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}
+            data-testid="meeting-pro-camera"
+            onClick={() => void toggleProCamera()}
+          />
+        </Tooltip>
+
+        <Tooltip
+          title={
+            screenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')
+          }
+        >
+          <Button
+            size="small"
+            icon={<DesktopOutlined />}
+            disabled={controlsDisabled || !proJoined}
+            aria-label={
+              screenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')
+            }
+            data-testid="meeting-pro-screenshare"
+            onClick={() => void toggleProScreenShare()}
           />
         </Tooltip>
 
@@ -343,7 +399,7 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
             <MeetingSchedulePanel
               groupId={groupId}
               disabled={controlsDisabled}
-              onJoinMeeting={onJoin}
+              onJoinMeeting={onScheduleJoin}
               joinMeetingDisabled={controlsDisabled || joined || proJoined}
             />
           }

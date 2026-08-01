@@ -2,6 +2,11 @@ import { ipcMain, BrowserWindow } from 'electron'
 import { writeFileSync } from 'fs'
 import { MEETING_IPC } from '../../shared/media/channels.ts'
 import { toLiveKitConfigPublic } from '../../shared/media/livekitConfig.ts'
+import {
+  meetingSaveRecordingDialogTitle,
+  meetingSaveRecordingFilterName
+} from '../../shared/media/meetingRecordingCopy.ts'
+import { readAppLocale } from '../locale/localeStore.ts'
 import { readLiveKitConfig, writeLiveKitConfig } from '../media/liveKitConfigStore.ts'
 import {
   createMeetingSchedule,
@@ -41,10 +46,11 @@ export function registerMeetingIpc(): void {
         : `meeting-recording-${Date.now()}.webm`
 
     const parent = BrowserWindow.fromWebContents(event.sender)
+    const locale = readAppLocale()
     const result = await showSaveDialog(parent, {
-      title: '保存会议录制',
+      title: meetingSaveRecordingDialogTitle(locale),
       defaultPath: suggested,
-      filters: [{ name: 'WebM Video', extensions: ['webm'] }]
+      filters: [{ name: meetingSaveRecordingFilterName(locale), extensions: ['webm'] }]
     })
     if (result.canceled || !result.filePath) {
       return { saved: false as const }

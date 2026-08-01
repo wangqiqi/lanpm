@@ -162,3 +162,45 @@
   display: block;
   margin: 12px 0 4px;
 }
+
+.meetingLiveKitGrid {
+  margin-top: 8px;
+}
+
+.meetingVideoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.meetingVideoTile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.meetingVideoEl {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--lanpm-surface-elevated);
+}
+
+.meetingVideoPlaceholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  background: var(--lanpm-surface-elevated);
+}
+
+.meetingVideoLabel {
+  font-size: 11px;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
