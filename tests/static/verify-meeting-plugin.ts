@@ -49,7 +49,7 @@ const voicePanel = readFileSync(
   'utf8'
 )
 assert.match(voicePanel, /chat\.toolbar\.media/)
-assert.match(voicePanel, /PluginGroupSlot/)
+assert.match(voicePanel, /PluginZoneHost/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>

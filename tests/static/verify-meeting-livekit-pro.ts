@@ -45,12 +45,12 @@ const preload = readFileSync(join(root, 'src/preload/index.ts'), 'utf8')
 assert.match(preload, /meeting:getLiveKitConfig/)
 assert.ok(!preload.includes('apiSecret'), 'preload must not expose apiSecret')
 
-const meetingStub = readFileSync(
-  join(root, 'src/renderer/src/plugin/builtins/MeetingStub.tsx'),
+const meetingToolbar = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/MeetingToolbar.tsx'),
   'utf8'
 )
-assert.match(meetingStub, /useMeetingLiveKit/)
-assert.match(meetingStub, /meetingProJoin/)
+assert.match(meetingToolbar, /useMeetingLiveKit/)
+assert.match(meetingToolbar, /plugin\.meetingProJoin/)
 
 const loader = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/livekitClientLoader.ts'),

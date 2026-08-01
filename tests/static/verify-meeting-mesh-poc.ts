@@ -35,15 +35,16 @@ assert.match(desktop, /desktopCapturer/)
 const chatService = readFileSync(join(root, 'src/main/chat/chatService.ts'), 'utf8')
 assert.match(chatService, /initMediaSignalService/)
 
-const meetingStub = readFileSync(
-  join(root, 'src/renderer/src/plugin/builtins/MeetingStub.tsx'),
+const meetingToolbar = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/MeetingToolbar.tsx'),
   'utf8'
 )
 const meshHook = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/useMeetingMesh.ts'),
   'utf8'
 )
-assert.match(meetingStub, /meetingJoin/)
+assert.match(meetingToolbar, /useMeetingMesh/)
+assert.match(meetingToolbar, /plugin\.meetingJoin/)
 assert.match(meshHook, /RTCPeerConnection/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
