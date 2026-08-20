@@ -10,7 +10,7 @@ import { PathForbiddenError } from './pathGuard.ts'
 import { appendGatewayAudit } from '../ops/gatewayAuditStore.ts'
 import { spawnTerminalSession } from './terminalSession.ts'
 import { DEFAULT_GATEWAY_PATHS, type GatewayPaths } from '../../shared/ops/paths.ts'
-import { gatewayTokenMatches, readBearerToken } from './authToken.ts'
+import { gatewayTokenMatches, readBearerToken, readWsSubprotocolToken } from './authToken.ts'
 
 export type GatewayServer = {
   server: http.Server
@@ -25,7 +25,7 @@ function sendJson(res: http.ServerResponse, status: number, body: unknown): void
 }
 
 function checkAuth(req: http.IncomingMessage, token: string): boolean {
-  const provided = readBearerToken(req.headers)
+  const provided = readBearerToken(req.headers) ?? readWsSubprotocolToken(req.headers)
   if (!provided) return false
   return gatewayTokenMatches(provided, token)
 }

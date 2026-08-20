@@ -43,7 +43,10 @@ assert.deepEqual([...HUMAN_REVIEW_CAPABILITY_IDS], [
   'chat.sendText',
   'chat.sendMarkdown',
   'ai.streamChat',
-  'file.upload'
+  'file.upload',
+  'ops.command.send',
+  'chat.sendTaskRef',
+  'media.livekit.createToken'
 ])
 
 assert.deepEqual(CHAT_SEND_MARKDOWN_WHITELIST_FIELDS, ['groupId', 'markdown', 'replyToMsgId'])

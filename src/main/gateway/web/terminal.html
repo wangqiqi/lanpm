@@ -39,9 +39,8 @@
       if (socket) { socket.close(); socket = null }
       setStatus('Connecting…')
       const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-      const q = token ? '?token=' + encodeURIComponent(token) : ''
-      const url = proto + '//' + location.host + '/api/v1/terminal' + q
-      socket = new WebSocket(url)
+      const url = proto + '//' + location.host + '/api/v1/terminal'
+      socket = new WebSocket(url, token ? [token] : undefined)
       if (!term) {
         term = new Terminal({ cursorBlink: true, fontSize: 14 })
         fitAddon = new FitAddon.FitAddon()

@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.101.3-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.103.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -68,7 +68,7 @@
 | **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health |
 | **Collab** | Excalidraw whiteboard (CRDT over P2P), group files, LibreOffice preview, resumable transfers |
 | **Org & UX** | Project / functional / anonymous groups, leadership cockpit, light/dark, **zh / en** |
-| **Security** | AES-GCM on the wire, local-first data, Win/macOS/Linux × x64/arm64 packages |
+| **Security** | AES-GCM on TCP links (confidentiality). Handshake is ECDH without pairing-bound identity — LAN MITM is out of this claim. Local-first SQLite. Win/macOS/Linux × x64/arm64 packages. |
 
 Full capability list, protocols, and verify scripts → [docs/00](./docs/00_文档导航.md) · [PRD](./docs/01_产品需求文档.md) · [CHANGELOG](./CHANGELOG.md).
 
@@ -117,7 +117,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.93.1`** — SDD specs/decisions in `.cursorGrowth/`; chat-perf guards updated. License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.103.0`** — SDD specs/decisions in `.cursorGrowth/`; chat-perf guards updated. License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

@@ -41,6 +41,7 @@ const env: SyncEnvelope = {
 const sealed = sealEnvelope(aes, env)
 const opened = openEnvelope(aes, sealed)
 assert.deepEqual(opened.payload, env.payload)
+assert.throws(() => openEnvelope(aes, env), /not sealed/)
 
 function reservePort(): Promise<number> {
   return new Promise((resolve, reject) => {

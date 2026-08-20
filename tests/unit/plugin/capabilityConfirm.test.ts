@@ -27,10 +27,13 @@ describe('capabilityConfirm', () => {
       'chat.sendText',
       'chat.sendMarkdown',
       'ai.streamChat',
-      'file.upload'
+      'file.upload',
+      'ops.command.send',
+      'chat.sendTaskRef',
+      'media.livekit.createToken'
     ])
     expect(isHumanReviewCapability('task.create')).toBe(true)
-    expect(isHumanReviewCapability('chat.sendTaskRef')).toBe(false)
+    expect(isHumanReviewCapability('ops.command.send')).toBe(true)
   })
 
   it('detects pending_confirm payloads', () => {

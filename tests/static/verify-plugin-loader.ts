@@ -45,6 +45,9 @@ const detail = readFileSync(
 assert.match(detail, /PluginSlot/)
 assert.match(detail, /task\.detail\.section/)
 
+const discover = readFileSync(join(root, 'src/main/plugin/discover.ts'), 'utf8')
+assert.match(discover, /source === 'builtin'/, 'sideload must not override builtin plugin id')
+
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /capability not granted/)
 assert.match(proxy, /pluginDeclaresCapability/)

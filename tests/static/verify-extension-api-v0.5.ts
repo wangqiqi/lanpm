@@ -37,7 +37,8 @@ assert.ok(isHumanReviewCapability('chat.sendText'), 'chat.sendText human review'
 assert.ok(isHumanReviewCapability('file.upload'), 'file.upload human review')
 assert.ok(HUMAN_REVIEW_CAPABILITY_IDS.includes('chat.sendText'))
 assert.ok(HUMAN_REVIEW_CAPABILITY_IDS.includes('file.upload'))
-assert.equal(isHumanReviewCapability('chat.sendTaskRef'), false)
+assert.equal(isHumanReviewCapability('chat.sendTaskRef'), true)
+assert.ok(isHumanReviewCapability('ops.command.send'))
 
 assert.deepEqual(CHAT_SEND_TEXT_WHITELIST_FIELDS, ['groupId', 'text', 'replyToMsgId'])
 assert.deepEqual(getDisallowedChatSendTextFields({ groupId: 'g', text: 'hi', extra: 1 }), [
@@ -72,7 +73,7 @@ const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'ut
 assert.match(proxy, /case 'chat\.sendText':/)
 assert.match(proxy, /case 'file\.upload':/)
 assert.match(proxy, /sendTextMessage/)
-assert.match(proxy, /uploadFileFromPath/)
+assert.match(proxy, /pickAndUploadFile/)
 
 const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub.ts'), 'utf8')
 assert.match(stub, /chat\.sendText/)

@@ -71,7 +71,7 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
     } finally {
       setBusy(false)
     }
-  }, [groupId, plugin.id, t])
+  }, [confirmCopy, groupId, plugin.id, t])
 
   const onPatchFirstTask = useCallback(async () => {
     setBusy(true)

@@ -7,6 +7,19 @@
 ### Added
 
 - 根目录 `README.html`：`README.md` 的 HTML 导出，便于离线浏览
+
+### Security
+
+- **文件上传**：renderer / 插件不得再传本机绝对路径；仅主进程文件对话框（`TASK-2701`）
+- **P2P 信封**：缺密封字段一律丢弃，不再明文放行（`TASK-2702`）
+- **路径**：`groupId` / 文件名拒绝 `..` 穿越（`TASK-2703`）
+- **插件**：侧载不得覆盖同 id 内置插件；打包忽略 skip-verify 环境变量（`TASK-2704`）
+- **人审**：`ops.command.send` · `chat.sendTaskRef` · `media.livekit.createToken` 须确认；Gateway 禁用 query `?token=`，改 timing-safe Bearer / WS subprotocol（`TASK-2705`）
+- **破坏性 IPC**：重置身份 / 解散群组在主进程二次确认（`TASK-2708`）
+
+### Changed
+
+- README / README.zh-CN 版本与 `package.json` `1.103.0` 对齐；安全声明改为「AES-GCM 保密、不声称防 LAN MITM」（`TASK-2706` · `TASK-2707`）
 - **安全**：路径段校验 `shared/fs/safeSegment`；网关 Bearer `timingSafeEqual`；破坏性操作确认文案模块
 
 ### Changed

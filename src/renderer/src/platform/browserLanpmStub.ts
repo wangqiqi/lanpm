@@ -2791,19 +2791,6 @@ export function createBrowserLanpmStub(): LanpmApi {
           }
           return pending
         }
-        if (capability === 'media.livekit.createToken') {
-          const config = readStubLiveKitConfig()
-          const groupId = String(args?.groupId ?? '')
-          const identity = String(args?.identity ?? '')
-          if (!isLiveKitConfigComplete(config) || !groupId || !identity) {
-            throw new Error('LiveKit not configured')
-          }
-          return {
-            token: 'stub-livekit-token',
-            url: config.url,
-            roomName: liveKitRoomNameForGroup(groupId)
-          }
-        }
         throw new Error(`capability not granted: ${capability}`)
       },
       confirmCapability: async (pluginId, pendingId) => {

@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.101.3-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.103.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -68,7 +68,7 @@
 | **项目管理** | 看板、任务树、甘特、日历、四类依赖、标签、验收清单、Presence、工期健康度 |
 | **协作** | Excalidraw 白板（群内 P2P CRDT）、群文件、LibreOffice 预览、断点续传 |
 | **组织与体验** | 项目 / 职能 / 匿名群、领导驾驶舱、亮暗主题、**中 / 英** |
-| **安全** | AES-GCM 传输、本地优先、Win/macOS/Linux × x64/arm64 安装包 |
+| **安全** | TCP 链路上 AES-GCM（保密）。握手为未绑定配对身份的 ECDH — **不声称**防局域网中间人。本地优先 SQLite。Win/macOS/Linux × x64/arm64 安装包。 |
 
 完整能力、协议与验收脚本 → [docs/00](./docs/00_文档导航.md) · [PRD](./docs/01_产品需求文档.md) · [CHANGELOG](./CHANGELOG.md)。
 
@@ -115,7 +115,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.93.1`** — SDD spec/决策迁入 `.cursorGrowth/`；chat-perf 守卫更新。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.103.0`** — SDD spec/决策迁入 `.cursorGrowth/`；chat-perf 守卫更新。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

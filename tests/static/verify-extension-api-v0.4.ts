@@ -26,7 +26,7 @@ assert.ok(PLUGIN_CAPABILITY_IDS.includes('task.create'), 'PLUGIN_CAPABILITY_IDS 
 for (const cap of HUMAN_REVIEW_CAPABILITY_IDS) {
   assert.ok(isHumanReviewCapability(cap), `expected human review: ${cap}`)
 }
-assert.equal(isHumanReviewCapability('chat.sendTaskRef'), false)
+assert.equal(isHumanReviewCapability('chat.sendTaskRef'), true)
 
 assert.deepEqual(TASK_CREATE_WHITELIST_FIELDS, [
   'groupId',

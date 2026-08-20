@@ -44,13 +44,16 @@ export async function confirmDestructiveIpc(
 ): Promise<boolean> {
   const copy = destructiveConfirmCopy(kind, readAppLocale())
   const parent = BrowserWindow.fromWebContents(sender)
-  const result = await dialog.showMessageBox(parent ?? undefined, {
-    type: 'warning',
+  const opts = {
+    type: 'warning' as const,
     buttons: [copy.cancel, copy.confirm],
     defaultId: 0,
     cancelId: 0,
     message: copy.message,
     detail: copy.detail
-  })
+  }
+  const result = parent
+    ? await dialog.showMessageBox(parent, opts)
+    : await dialog.showMessageBox(opts)
   return result.response === 1
 }
