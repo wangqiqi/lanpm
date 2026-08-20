@@ -1191,6 +1191,7 @@ const enUS = {
   'profile.navToggleAria': 'Show or hide {view}',
   'profile.navLockedChat': 'Chat is the main axis and cannot be hidden.',
   'profile.navLockedTask': 'Keep at least one of Board or Tree visible.',
+  'profile.navLockedCanvas': 'Whiteboard and mind map stay in chat/task tools — they are not bottom tabs.',
   'profile.navSaveFailed': 'Failed to save navigation preferences',
   'profile.notifications': 'Notifications',
   'profile.notifyAllMessages': 'Notify for all new messages when not in chat',

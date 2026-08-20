@@ -76,6 +76,8 @@ assert.match(panel, /useContributedViews/)
 assert.match(panel, /hiddenContributedRoutes/)
 assert.match(panel, /contributedOrder/)
 assert.match(panel, /profile\.navPluginHint/)
+assert.match(panel, /isNeverBottomNavView/)
+assert.match(panel, /profile\.navLockedCanvas/)
 
 const preload = readFileSync(join(root, 'src/preload/index.ts'), 'utf8')
 assert.match(preload, /nav:getPreferences/)

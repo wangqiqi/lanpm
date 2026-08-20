@@ -1161,6 +1161,7 @@ export type MessageKey =
   | 'profile.navToggleAria'
   | 'profile.navLockedChat'
   | 'profile.navLockedTask'
+  | 'profile.navLockedCanvas'
   | 'profile.navSaveFailed'
   | 'profile.notifications'
   | 'profile.notifyAllMessages'

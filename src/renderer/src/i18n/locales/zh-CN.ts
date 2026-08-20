@@ -1174,6 +1174,7 @@ const zhCN = {
   'profile.navToggleAria': '显示或隐藏 {view}',
   'profile.navLockedChat': '「聊天」为主轴，不可隐藏。',
   'profile.navLockedTask': '「看板」与「任务树」至少保留一个可见。',
+  'profile.navLockedCanvas': '白板与脑图是聊天/任务里的工具，不会出现在底栏。',
   'profile.navSaveFailed': '保存导航偏好失败',
   'profile.notifications': '通知',
   'profile.notifyAllMessages': '非当前聊天时也通知新消息',

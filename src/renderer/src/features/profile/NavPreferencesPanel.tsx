@@ -3,6 +3,8 @@ import { Button, List, Segmented, Switch, Typography } from 'antd'
 import { HolderOutlined } from '@ant-design/icons'
 import type { AppView } from '@shared/navigation/types'
 import {
+  isNeverBottomNavContributedRoute,
+  isNeverBottomNavView,
   isViewHideLocked,
   normalizeNavPreferences,
   type NavPreferences
@@ -60,7 +62,9 @@ export default function NavPreferencesPanel({
     for (const route of known) {
       if (!order.includes(route)) order.push(route)
     }
-    return order.filter((route) => known.includes(route))
+    return order.filter(
+      (route) => known.includes(route) && !isNeverBottomNavContributedRoute(route)
+    )
   }, [contributedViews, preferences.contributedOrder])
 
   const titleByRoute = useMemo(() => {
@@ -70,6 +74,11 @@ export default function NavPreferencesPanel({
     }
     return map
   }, [contributedViews, t])
+
+  const coreOrder = useMemo(
+    () => preferences.order.filter((view) => !isNeverBottomNavView(view)),
+    [preferences.order]
+  )
 
   const persist = useCallback(
     async (next: NavPreferences): Promise<void> => {
@@ -86,7 +95,7 @@ export default function NavPreferencesPanel({
   )
 
   const toggleView = (view: AppView, visible: boolean): void => {
-    if (isViewHideLocked(preferences, view)) return
+    if (isNeverBottomNavView(view) || isViewHideLocked(preferences, view)) return
     const hidden = new Set(preferences.hiddenViews)
     if (visible) hidden.delete(view)
     else hidden.add(view)
@@ -94,6 +103,7 @@ export default function NavPreferencesPanel({
   }
 
   const togglePlugin = (route: string, visible: boolean): void => {
+    if (isNeverBottomNavContributedRoute(route)) return
     const hidden = new Set(preferences.hiddenContributedRoutes)
     if (visible) hidden.delete(route)
     else hidden.add(route)
@@ -102,9 +112,10 @@ export default function NavPreferencesPanel({
 
   const onDropCore = (toIndex: number): void => {
     if (dragCoreIndex === null || dragCoreIndex === toIndex) return
-    const nextOrder = moveItem(preferences.order, dragCoreIndex, toIndex)
+    const nextCore = moveItem(coreOrder, dragCoreIndex, toIndex)
+    const canvas = preferences.order.filter((view) => isNeverBottomNavView(view))
     setDragCoreIndex(null)
-    void persist({ ...preferences, order: nextOrder })
+    void persist({ ...preferences, order: [...nextCore, ...canvas] })
   }
 
   const onDropPlugin = (toIndex: number): void => {
@@ -151,7 +162,7 @@ export default function NavPreferencesPanel({
       </Text>
       <List
         className={styles.list}
-        dataSource={preferences.order}
+        dataSource={coreOrder}
         renderItem={(view, index) => {
           const locked = isViewHideLocked(preferences, view)
           const visible = !preferences.hiddenViews.includes(view)
@@ -220,7 +231,10 @@ export default function NavPreferencesPanel({
 }
 
 function lockedHint(
-  t: (key: 'profile.navLockedChat' | 'profile.navLockedTask', params?: never) => string
+  t: (
+    key: 'profile.navLockedChat' | 'profile.navLockedTask' | 'profile.navLockedCanvas',
+    params?: never
+  ) => string
 ): React.ReactElement {
   return (
     <>
@@ -229,6 +243,9 @@ function lockedHint(
       </Text>
       <Text type="secondary" className={styles.footnote}>
         {t('profile.navLockedTask')}
+      </Text>
+      <Text type="secondary" className={styles.footnote}>
+        {t('profile.navLockedCanvas')}
       </Text>
     </>
   )
