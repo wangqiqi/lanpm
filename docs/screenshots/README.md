@@ -14,7 +14,7 @@ npm run screenshots:capture       # build + 18 PNG → baselines/ + generated/
 npm run screenshots:sync-readme   # light_* → assets/（README 引用）
 ```
 
-- 覆盖：**setup** + **主轴视图**（chat · board · tree · gantt · calendar · cockpit）× 亮/暗；**files · whiteboard · mindmap** 为聊天页 **协作抽屉**态（v1.96+ IA，见 `visualCapture.ts` `COLLAB_DRAWER_SLUGS`）
+- 覆盖：**setup** + **主轴视图**（chat · board · tree · gantt · calendar · cockpit）× 亮/暗；**files · whiteboard · mindmap** 为聊天页 **协作抽屉**态（v1.96+ IA，见 `visualCapture.ts` `COLLAB_DRAWER_SLUGS`）。README 门面同步含 `mindmap.png`。
 - Linux：`xvfb-run -a npm run screenshots:capture`
 
 ## 与 CI / 发版

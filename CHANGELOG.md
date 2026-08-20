@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **README 配图**：同步本机最新亮色截图（含协作抽屉 92vw 与脑图 `assets/mindmap.png`）
+
 ## [1.103.2] - 2026-08-20
 
 ### Fixed

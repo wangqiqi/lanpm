@@ -19,6 +19,7 @@ const syncSrc = readFileSync(join(root, 'scripts/sync-readme-screenshots.mjs'), 
 assert.match(syncSrc, /light_chat\.png/, 'sync map must include chat')
 assert.match(syncSrc, /light_calendar\.png/, 'sync map must include calendar')
 assert.match(syncSrc, /light_whiteboard\.png/, 'sync map must include whiteboard')
+assert.match(syncSrc, /light_mindmap\.png/, 'sync map must include mindmap')
 assert.match(syncSrc, /light_cockpit\.png/, 'sync map must include cockpit')
 
 const captureSrc = readFileSync(join(root, 'scripts/screenshots-capture.mjs'), 'utf8')

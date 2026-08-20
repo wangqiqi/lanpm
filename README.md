@@ -43,11 +43,12 @@
     <td width="50%"><img src="assets/calendar.png" alt="Calendar" width="100%" /><br /><sub><b>Calendar</b> — drag to reschedule</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="assets/whiteboard.png" alt="Whiteboard" width="100%" /><br /><sub><b>Whiteboard</b> — realtime Excalidraw collab</sub></td>
-    <td width="50%"><img src="assets/file.png" alt="Files" width="100%" /><br /><sub><b>Files</b> — resumable transfer, deliverables</sub></td>
+    <td width="50%"><img src="assets/whiteboard.png" alt="Whiteboard" width="100%" /><br /><sub><b>Whiteboard</b> — realtime Excalidraw (chat drawer)</sub></td>
+    <td width="50%"><img src="assets/mindmap.png" alt="Mind map" width="100%" /><br /><sub><b>Mind map</b> — Yjs collab (chat drawer)</sub></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="assets/cockpit.png" alt="Leadership cockpit" width="100%" /><br /><sub><b>Cockpit</b> — cross-group attention and project health</sub></td>
+    <td width="50%"><img src="assets/file.png" alt="Files" width="100%" /><br /><sub><b>Files</b> — resumable transfer, deliverables (chat drawer)</sub></td>
+    <td width="50%"><img src="assets/cockpit.png" alt="Leadership cockpit" width="100%" /><br /><sub><b>Cockpit</b> — cross-group attention and project health</sub></td>
   </tr>
 </table>
 

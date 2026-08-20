@@ -43,11 +43,12 @@
     <td width="50%"><img src="assets/calendar.png" alt="日历" width="100%" /><br /><sub><b>日历</b> — 拖拽改期</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="assets/whiteboard.png" alt="白板" width="100%" /><br /><sub><b>白板</b> — Excalidraw 实时同画</sub></td>
-    <td width="50%"><img src="assets/file.png" alt="文件" width="100%" /><br /><sub><b>文件</b> — 断点续传、交付物</sub></td>
+    <td width="50%"><img src="assets/whiteboard.png" alt="白板" width="100%" /><br /><sub><b>白板</b> — Excalidraw 实时同画（聊天抽屉）</sub></td>
+    <td width="50%"><img src="assets/mindmap.png" alt="脑图" width="100%" /><br /><sub><b>脑图</b> — Yjs 协同（聊天抽屉）</sub></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="assets/cockpit.png" alt="领导驾驶舱" width="100%" /><br /><sub><b>驾驶舱</b> — 跨群需关注与项目健康度</sub></td>
+    <td width="50%"><img src="assets/file.png" alt="文件" width="100%" /><br /><sub><b>文件</b> — 断点续传、交付物（聊天抽屉）</sub></td>
+    <td width="50%"><img src="assets/cockpit.png" alt="领导驾驶舱" width="100%" /><br /><sub><b>驾驶舱</b> — 跨群需关注与项目健康度</sub></td>
   </tr>
 </table>
 

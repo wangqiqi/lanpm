@@ -26,6 +26,7 @@ const MAP = {
   'light_files.png': 'file.png',
   'light_calendar.png': 'calendar.png',
   'light_whiteboard.png': 'whiteboard.png',
+  'light_mindmap.png': 'mindmap.png',
   'light_cockpit.png': 'cockpit.png'
 }
 
