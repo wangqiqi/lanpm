@@ -106,7 +106,7 @@ npm run build
 | README images | `npm run screenshots:capture` → `npm run screenshots:sync-readme` ([docs/screenshots](./docs/screenshots/README.md)) |
 | Acceptance | **Electron** (`npm run dev`) is source of truth — not browser stub (`npm run dev:web`) |
 | Chat perf QA | Budget in local `.cursorGrowth/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
-| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
+| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux GPU is off by default (`LANPM_ENABLE_GPU=1` to opt in); Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
 
 Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — details in [`.cursor/`](./.cursor/).
