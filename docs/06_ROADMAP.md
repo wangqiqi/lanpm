@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：见 `plan.md` 候选表（本机手验 · 真网双机等）。`file_chunk` 方案 B（TCP 密文不再二次 Base64）已交付；`file_meta` 目录级仍按需 pull。会议 i18n/深链/join CTA 已交付（v1.89+）；日程 **可编辑** 见 CHANGELOG Unreleased。
+**候选下一 Sprint**：见 `plan.md` 候选表（本机手验 · 真网双机等）。`file_chunk` 方案 B 与 **`file_meta` 目录索引离线补拉**（`file_meta_sync_*` · `verify:file-meta-offline`）已交付；文件**字节**仍按需 `file_pull`。会议 i18n/深链/join CTA 已交付（v1.89+）；日程可编辑见 CHANGELOG。
 
 ---
 
@@ -195,7 +195,7 @@
 | A3 | 项目级文件区 | 群组文件库按任务归档；交付物视图 | **已交付** · `verify:project-files` |
 | A4 | 传输进度 + 可取消 | 大文件进度、取消、失败重试、速率/ETA | **已交付** · `verify:transfer-a4` |
 | A5 | 跨网段 / 发现少配置 | 失败可操作提示 + 发现种子 host:port | **已交付** · `verify:discover-a5` |
-| A6 | 离线补同步（项目优先） | 任务/看板/已读等项目数据补同步 | 进行中 · 群标签字典已补拉（`verify:group-tag-offline`）；`file_meta` 目录级仍按需 pull |
+| A6 | 离线补同步（项目优先） | 任务/看板/已读/文件库索引补同步 | **已交付** · 群标签 `verify:group-tag-offline`；文件索引 `verify:file-meta-offline`（本体仍 `file_pull`） |
 
 跨平台/信创发版矩阵见 [05 §1.4](./05_测试与联调发布.md#14-跨平台发版矩阵) · `verify:platform-matrix`。
 

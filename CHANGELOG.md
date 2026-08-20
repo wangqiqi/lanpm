@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **文件库索引离线补拉**：对端离线期间上传的文件，重连后会出现在文件列表（`remote-pending`）；下载本体仍要点「从局域网下载」（`TASK-4801`–`TASK-4805`）
+
 ### Changed
 
 - **README 配图**：同步本机最新亮色截图（含协作抽屉 92vw 与脑图 `assets/mindmap.png`）
