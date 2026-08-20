@@ -245,9 +245,10 @@ export function cancelPullByTransferId(db: Database, transferId: string): boolea
 function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
   if (envelope.type !== 'file_chunk' || !envelope.groupId) return
   const chunk = envelope.payload as { fileId?: string; offset?: number; done?: boolean }
-  if (!chunk?.fileId) return
+  const fileId = chunk?.fileId
+  if (!fileId) return
 
-  const session = pullSessions.get(chunk.fileId)
+  const session = pullSessions.get(fileId)
   if (!session) return
 
   try {
@@ -259,15 +260,15 @@ function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
 
     const transferred = Math.max(chunk.offset + data.length, statSync(session.partialPath).size)
     updateTransferProgress(db, session.transferId, transferred, 'transferring')
-    broadcastFilesProgress(session.groupId, chunk.fileId, Boolean(chunk.done))
+    broadcastFilesProgress(session.groupId, fileId, Boolean(chunk.done))
 
     if (!chunk.done) return
 
-    void finalizePull(db, chunk.fileId, session).catch((e) => {
-      failPullSession(db, chunk.fileId, e instanceof Error ? e : new Error(String(e)))
+    void finalizePull(db, fileId, session).catch((e) => {
+      failPullSession(db, fileId, e instanceof Error ? e : new Error(String(e)))
     })
   } catch (e) {
-    failPullSession(db, chunk.fileId, e instanceof Error ? e : new Error(String(e)))
+    failPullSession(db, fileId, e instanceof Error ? e : new Error(String(e)))
   }
 }
 

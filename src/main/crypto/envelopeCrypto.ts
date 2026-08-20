@@ -68,7 +68,8 @@ export function sealedCiphertextFromPayload(payload: unknown): Buffer | null {
 
 export function sealEnvelopeParts(aesKey: Buffer, envelope: SyncEnvelope): SealedEnvelopeParts {
   const sealed = sealBytes(aesKey, payloadPlaintext(envelope))
-  const { payload: _payload, ...meta } = envelope
+  const { payload, ...meta } = envelope
+  void payload
   return {
     meta: { ...meta, nonce: sealed.nonce, authTag: sealed.authTag },
     ciphertext: sealed.ciphertext
@@ -103,6 +104,7 @@ export function openEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelo
   if (!ciphertext || !envelope.nonce || !envelope.authTag) {
     throw new Error('envelope not sealed')
   }
-  const { payload: _payload, ...meta } = envelope
+  const { payload, ...meta } = envelope
+  void payload
   return openSealedBytes(aesKey, meta, ciphertext)
 }

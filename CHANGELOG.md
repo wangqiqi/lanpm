@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **发版门禁**：eslint 未用信封 `payload` 绑定；pdfjs 6 `PDFDocumentProxy` 改 `cleanup()`；`file_chunk` 处理收窄 `fileId`（`TASK-4701`）
+
 ### Changed
 
 - **本机手验闭合（Linux）**：`verify:m3` / `verify:dual-stub` / `measure:perf --quick` / `verify:i18n-en` / `verify:visual` + 20 张 PNG 冒烟；`docs/06` §4.1 #4/#5 记本机已测，#8/#9 记脚本已测（全页英文折行与 §2.2 甘特肉眼未做），#6/#7 仍延期（`TASK-3801`–`TASK-3805`）

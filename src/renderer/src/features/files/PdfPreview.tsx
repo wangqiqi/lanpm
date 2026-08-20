@@ -36,7 +36,7 @@ export default function PdfPreview({
     void task.promise
       .then(async (pdf) => {
         if (cancelled) {
-          await pdf.destroy()
+          await pdf.cleanup()
           return
         }
         const total = pdf.numPages
@@ -44,7 +44,7 @@ export default function PdfPreview({
         const pageNum = Math.min(Math.max(page, 1), total)
         const pdfPage = await pdf.getPage(pageNum)
         if (cancelled) {
-          await pdf.destroy()
+          await pdf.cleanup()
           return
         }
         const viewport = pdfPage.getViewport({ scale: 1.25 })
@@ -57,7 +57,7 @@ export default function PdfPreview({
         canvas.style.height = `${Math.floor(viewport.height)}px`
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
         await pdfPage.render({ canvasContext: ctx, viewport, canvas }).promise
-        await pdf.destroy()
+        await pdf.cleanup()
       })
       .catch(() => {
         if (!cancelled) setError(true)
