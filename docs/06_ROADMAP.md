@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：见 `plan.md` 候选表（file_chunk B · 本机手验 · 真网双机等）。A6 群标签离线补拉已交付；`file_meta` 目录级仍按需 pull。会议 i18n/深链/join CTA 已交付（v1.89+）；日程 **可编辑** 见 CHANGELOG Unreleased。
+**候选下一 Sprint**：见 `plan.md` 候选表（本机手验 · 真网双机等）。`file_chunk` 方案 B（TCP 密文不再二次 Base64）已交付；`file_meta` 目录级仍按需 pull。会议 i18n/深链/join CTA 已交付（v1.89+）；日程 **可编辑** 见 CHANGELOG Unreleased。
 
 ---
 

@@ -28,6 +28,7 @@
 
 ### Changed
 
+- **P2P `file_chunk` 方案 B**：双方 handshake 声明 `envBin` 后，TCP 密文走 `envelope_bin`（小 JSON 头 + 原始 AES-GCM 字节），不再塞进 JSON `__enc` Base64。旧对端仍 JSON 信封（`TASK-4201`–`TASK-4205`）
 - **全局搜索引擎**：任务/消息命中改走 OSS `minisearch`（MIT）；不再用 SQL `LIKE` 当主路径。成员检索仍内存匹配。IPC 形状不变（`TASK-3901`–`TASK-3905`）
 - **白板/脑图永不进底栏**：sanitize 强制隐藏；Profile 导航列表不再给出开关。深链与 Composer 抽屉不变。文件库仍可按偏好开 Tab（`TASK-4601`–`TASK-4605`）
 - **许可路径 SPIKE**：建议维持 AGPL-only；有闭源 OEM 先合同例外，常规产品线再双许可。插件离线闸不变。LICENSE 未改（SPIKE-3601–SPIKE-3603）
