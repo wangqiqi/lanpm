@@ -4,10 +4,7 @@ import { useParams } from 'react-router-dom'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import type { AppView } from '@shared/navigation/types'
 import { isDmGroupId } from '@shared/chat/dmSession'
-import BoardView from '@renderer/features/board/BoardView'
 import ChatView from '@renderer/features/chat/ChatView'
-import FilesView from '@renderer/features/files/FilesView'
-import TaskTreeView from '@renderer/features/tree/TaskTreeView'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { useUiStore } from '@renderer/stores/uiStore'
@@ -16,6 +13,9 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { FUNCTION_GUIDE_STORAGE_KEY } from '@shared/navigation/guide'
 import styles from './GroupView.module.css'
 
+const BoardView = lazy(() => import('@renderer/features/board/BoardView'))
+const TaskTreeView = lazy(() => import('@renderer/features/tree/TaskTreeView'))
+const FilesView = lazy(() => import('@renderer/features/files/FilesView'))
 const GanttView = lazy(() => import('@renderer/features/gantt/GanttView'))
 const CalendarView = lazy(() => import('@renderer/features/calendar/CalendarView'))
 const WhiteboardView = lazy(() => import('@renderer/features/whiteboard/WhiteboardView'))
@@ -84,14 +84,14 @@ export default function GroupView({ view }: { view: AppView }): React.ReactEleme
       ) : null}
       <div className={isChat ? styles.chatBody : styles.taskBody}>
         {view === 'chat' && <ChatView />}
-        {view === 'board' && <BoardView />}
-        {view === 'tree' && <TaskTreeView />}
         <Suspense fallback={<HeavyViewFallback />}>
+          {view === 'board' && <BoardView />}
+          {view === 'tree' && <TaskTreeView />}
           {view === 'gantt' && <GanttView />}
           {view === 'calendar' && <CalendarView />}
           {view === 'whiteboard' && <WhiteboardView />}
+          {view === 'files' && <FilesView />}
         </Suspense>
-        {view === 'files' && <FilesView />}
       </div>
     </div>
   )

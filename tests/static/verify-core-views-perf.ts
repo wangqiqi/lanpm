@@ -22,6 +22,9 @@ assert.ok(pkg.scripts?.['verify:core-views-perf'], 'missing verify:core-views-pe
 
 // --- Route-level code splitting (heavy views) ---
 const groupView = readSrc('src/renderer/src/views/GroupView.tsx')
+assert.match(groupView, /lazy\(\(\) => import\('@renderer\/features\/board\/BoardView'\)\)/)
+assert.match(groupView, /lazy\(\(\) => import\('@renderer\/features\/tree\/TaskTreeView'\)\)/)
+assert.match(groupView, /lazy\(\(\) => import\('@renderer\/features\/files\/FilesView'\)\)/)
 assert.match(groupView, /lazy\(\(\) => import\('@renderer\/features\/gantt\/GanttView'\)\)/)
 assert.match(groupView, /lazy\(\(\) => import\('@renderer\/features\/whiteboard\/WhiteboardView'\)\)/)
 assert.match(groupView, /<Suspense[\s\S]*HeavyViewFallback/, 'GroupView must suspend heavy views')
