@@ -48,5 +48,6 @@ resources/logo-*.png
 src/renderer/public/favicon.svg
 src/renderer/public/favicon.png
 src/renderer/public/excalidraw/
+src/renderer/public/pdfjs/
 
 test-results/

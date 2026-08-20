@@ -11,10 +11,10 @@
     "lanpm": "scripts/lanpm.mjs"
   },
   "scripts": {
-    "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs",
+    "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs",
     "dev": "node scripts/dev-run.mjs",
     "dev:web": "node scripts/dev-run.mjs --web",
-    "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && npm run verify:pack-license",
+    "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs && npm run verify:pack-license",
     "build": "electron-vite build",
     "prepreview": "node scripts/ensure-native-deps.mjs",
     "preview": "electron-vite preview",
@@ -26,6 +26,7 @@
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run tests/unit",
     "verify:preview-extensions": "node --experimental-strip-types tests/static/verify-preview-extensions.ts",
+    "verify:pdf-preview": "node --experimental-strip-types tests/static/verify-pdf-preview.ts",
     "verify:format-file-type": "node --experimental-strip-types tests/static/verify-format-file-type.ts",
     "verify:shared": "node --experimental-strip-types tests/runners/verify-shared.ts",
     "verify:task-dep-protocol": "node --experimental-strip-types tests/static/verify-task-dep-protocol.ts",
@@ -276,6 +277,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "knip": "^5.88.1",
+    "pdfjs-dist": "^6.2.108",
     "pinyin-pro": "^3.28.1",
     "rcedit": "^4.0.1",
     "react-markdown": "^10.1.0",
