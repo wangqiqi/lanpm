@@ -45,6 +45,8 @@ const LAYOUT_INLINE_KEYS: MessageKey[] = [
   'plugin.meetingProCameraOn',
   'plugin.meetingProScreenShareStart',
   'plugin.meetingScheduleJoin',
+  'plugin.meetingScheduleEdit',
+  'plugin.meetingScheduleSave',
   'plugin.meetingRecordStart'
 ]
 
@@ -121,6 +123,14 @@ assert.match(
   'meeting video labels must ellipsis'
 )
 assert.match(meetingToolbar, /ComposerIconButton/, 'meeting toolbar must use single composer menu button')
+
+const schedulePanel = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/MeetingSchedulePanel.tsx'),
+  'utf8'
+)
+assert.match(schedulePanel, /plugin\.meetingScheduleEdit/)
+assert.match(schedulePanel, /plugin\.meetingScheduleSave/)
+assert.match(enUS['plugin.meetingScheduleUpdated'] ?? '', /Schedule updated/)
 
 console.log(
   `verify:i18n-en OK (${enKeys.length} keys, no CJK; layout guards: ${LAYOUT_INLINE_KEYS.length} inline keys)`
