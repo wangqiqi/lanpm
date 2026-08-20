@@ -140,6 +140,40 @@ export function listFilesByGroup(
   return rows.map(rowToMeta)
 }
 
+/**
+ * Offline pull: non-bookmark rows with updated_at > sinceUpdatedAt and >= minUpdatedAt.
+ * Ordered ASC so the last row's updatedAt is the next-page cursor.
+ */
+export function listFileMetaSince(
+  db: Database,
+  groupId: string,
+  sinceUpdatedAt: string,
+  minUpdatedAt: string,
+  limit = 80
+): FileMeta[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM files
+       WHERE group_id = ?
+         AND is_bookmark = 0
+         AND updated_at > ?
+         AND updated_at >= ?
+       ORDER BY updated_at ASC, file_id ASC
+       LIMIT ?`
+    )
+    .all(groupId, sinceUpdatedAt, minUpdatedAt, limit) as FileRow[]
+  return rows.map(rowToMeta)
+}
+
+export function getMaxFileMetaUpdatedAt(db: Database, groupId: string): string {
+  const row = db
+    .prepare(
+      `SELECT MAX(updated_at) AS max_at FROM files WHERE group_id = ? AND is_bookmark = 0`
+    )
+    .get(groupId) as { max_at: string | null } | undefined
+  return row?.max_at ?? ''
+}
+
 export function getFileById(db: Database, fileId: string): FileMeta | null {
   const row = db.prepare(`SELECT * FROM files WHERE file_id = ?`).get(fileId) as FileRow | undefined
   return row ? rowToMeta(row) : null
