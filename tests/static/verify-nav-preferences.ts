@@ -89,5 +89,9 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 assert.ok(pkg.scripts?.['verify:nav-preferences'], 'missing verify:nav-preferences script')
 
 assert.ok(existsSync(join(root, 'tests/unit/navigation/navPreferences.test.ts')))
+assert.match(
+  readFileSync(join(root, 'tests/unit/navigation/navPreferences.test.ts'), 'utf8'),
+  /chat', 'board', 'tree/
+)
 
 console.log('verify:nav-preferences OK')

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_HIDDEN_VIEWS,
   DEFAULT_NAV_PREFERENCES,
   hasGroupNavOverride,
   isContributedRouteVisible,
@@ -7,26 +8,27 @@ import {
   isViewVisibleForGroup,
   normalizeNavPreferences,
   normalizeNavPreferencesDocument,
+  rawNavDocumentNeedsV196Writeback,
   resolveNavPreferencesForGroup,
   resolveVisibleContributedRoutes,
   resolveVisibleViews,
-  sanitizeNavPreferences
+  sanitizeNavPreferences,
+  upgradeV196HiddenViews
 } from '@shared/navigation/navPreferences'
 
 describe('normalizeNavPreferences', () => {
   it('returns defaults for invalid input', () => {
     expect(normalizeNavPreferences(null).order).toEqual(DEFAULT_NAV_PREFERENCES.order)
-    expect(normalizeNavPreferences(null).hiddenViews).toEqual(['files', 'whiteboard'])
+    expect(normalizeNavPreferences(null).hiddenViews).toEqual(DEFAULT_HIDDEN_VIEWS)
     expect(normalizeNavPreferences(null).hiddenContributedRoutes).toEqual(['mindmap'])
     expect(normalizeNavPreferences(null).contributedOrder).toEqual([])
   })
 
-  it('defaults hide files/whiteboard tabs and mindmap contributed route (SPRINT-15 IA)', () => {
-    expect(DEFAULT_NAV_PREFERENCES.hiddenViews).toEqual(['files', 'whiteboard'])
+  it('defaults hide files/whiteboard/gantt/calendar; project bar is chat/board/tree (SPRINT-45)', () => {
+    expect(DEFAULT_NAV_PREFERENCES.hiddenViews).toEqual(DEFAULT_HIDDEN_VIEWS)
     expect(DEFAULT_NAV_PREFERENCES.hiddenContributedRoutes).toEqual(['mindmap'])
     const visible = resolveVisibleViews('project', DEFAULT_NAV_PREFERENCES)
-    expect(visible).not.toContain('files')
-    expect(visible).not.toContain('whiteboard')
+    expect(visible).toEqual(['chat', 'board', 'tree'])
     expect(isContributedRouteVisible(DEFAULT_NAV_PREFERENCES, 'mindmap')).toBe(false)
   })
 
@@ -47,6 +49,50 @@ describe('normalizeNavPreferences', () => {
     })
     expect(prefs.hiddenContributedRoutes).toEqual(['mindmap'])
     expect(prefs.contributedOrder).toEqual(['form', 'mindmap'])
+  })
+})
+
+describe('upgradeV196HiddenViews', () => {
+  it('upgrades exact files+whiteboard fingerprint', () => {
+    expect(upgradeV196HiddenViews(['whiteboard', 'files'])).toEqual(DEFAULT_HIDDEN_VIEWS)
+    expect(rawNavDocumentNeedsV196Writeback({ hiddenViews: ['files', 'whiteboard'] })).toBe(true)
+    expect(
+      rawNavDocumentNeedsV196Writeback({
+        global: { hiddenViews: ['files', 'whiteboard'] },
+        byGroup: {}
+      })
+    ).toBe(true)
+  })
+
+  it('does not upgrade customized hidden sets', () => {
+    expect(upgradeV196HiddenViews(['files'])).toEqual(['files'])
+    expect(upgradeV196HiddenViews(['files', 'whiteboard', 'gantt'])).toEqual([
+      'files',
+      'whiteboard',
+      'gantt'
+    ])
+    expect(upgradeV196HiddenViews(['files', 'whiteboard', 'gantt', 'calendar'])).toEqual(
+      DEFAULT_HIDDEN_VIEWS
+    )
+    expect(
+      rawNavDocumentNeedsV196Writeback({
+        global: { hiddenViews: ['files', 'whiteboard', 'gantt', 'calendar'] }
+      })
+    ).toBe(false)
+    expect(
+      rawNavDocumentNeedsV196Writeback({
+        global: { hiddenViews: [] }
+      })
+    ).toBe(false)
+  })
+
+  it('upgrades byGroup fingerprint independently', () => {
+    expect(
+      rawNavDocumentNeedsV196Writeback({
+        global: { hiddenViews: ['calendar'] },
+        byGroup: { 'grp-a': { hiddenViews: ['files', 'whiteboard'] } }
+      })
+    ).toBe(true)
   })
 })
 
