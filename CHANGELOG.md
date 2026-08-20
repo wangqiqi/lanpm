@@ -26,6 +26,7 @@
 
 ### Changed
 
+- **白板/脑图永不进底栏**：sanitize 强制隐藏；Profile 导航列表不再给出开关。深链与 Composer 抽屉不变。文件库仍可按偏好开 Tab（`TASK-4601`–`TASK-4605`）
 - **许可路径 SPIKE**：建议维持 AGPL-only；有闭源 OEM 先合同例外，常规产品线再双许可。插件离线闸不变。LICENSE 未改（SPIKE-3601–SPIKE-3603）
 - **底栏默认三 Tab**：项目群默认聊天 / 看板 / 树；甘特与日历默认藏（Profile 导航可开）。仍为 v1.96「只藏 files+whiteboard」的偏好会补藏时间透镜；已自定义隐藏集不迁（`TASK-4501`–`TASK-4505`）
 - **对外叙事（真网）**：`verify:m6` 标明本机 loopback；双机手验仍走 docs/05 §6，CI 未跑（`TASK-3501`–`TASK-3503`）
