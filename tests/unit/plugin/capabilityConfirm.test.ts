@@ -81,11 +81,12 @@ describe('chatSendTextWhitelist', () => {
 
 describe('fileUploadWhitelist', () => {
   it('defines upload whitelist', () => {
-    expect(FILE_UPLOAD_WHITELIST_FIELDS).toEqual(['groupId', 'sourcePath'])
+    expect(FILE_UPLOAD_WHITELIST_FIELDS).toEqual(['groupId'])
   })
 
   it('parses valid upload input', () => {
-    expect(parseFileUploadInput({ groupId: 'g', sourcePath: '/tmp/a.txt' }).ok).toBe(true)
-    expect(parseFileUploadInput({ groupId: 'g' }).ok).toBe(false)
+    expect(parseFileUploadInput({ groupId: 'g' }).ok).toBe(true)
+    expect(parseFileUploadInput({ groupId: 'g', sourcePath: '/tmp/a.txt' }).ok).toBe(false)
+    expect(parseFileUploadInput({})).toMatchObject({ ok: false })
   })
 })

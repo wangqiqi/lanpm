@@ -59,10 +59,12 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
         message.info(t('plugin.exampleNoTasks'))
         return
       }
-      await getLanpmApi().plugin.invokeCapability(plugin.id, 'chat.sendTaskRef', {
-        groupId,
-        taskId: first.taskId
-      })
+      await invokeCapabilityWithHumanConfirm(
+        plugin.id,
+        'chat.sendTaskRef',
+        { groupId, taskId: first.taskId },
+        confirmCopy('chat.sendTaskRef')
+      )
       message.success(t('plugin.exampleTaskRefSent', { title: first.title }))
     } catch (err: unknown) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
@@ -141,14 +143,12 @@ function ExampleComposerAction({ plugin, groupId }: Props): React.ReactElement {
   }, [confirmCopy, groupId, plugin.id, t])
 
   const onUploadFile = useCallback(async () => {
-    const sourcePath = window.prompt(t('plugin.exampleUploadPrompt'))
-    if (!sourcePath?.trim()) return
     setBusy(true)
     try {
       const meta = (await invokeCapabilityWithHumanConfirm(
         plugin.id,
         'file.upload',
-        { groupId, sourcePath: sourcePath.trim() },
+        { groupId },
         confirmCopy('file.upload')
       )) as FileMeta | null
       if (!meta) return

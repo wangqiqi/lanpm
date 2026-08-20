@@ -58,6 +58,8 @@ export function discoverPlugins(): PluginView[] {
     byId.set(plugin.id, plugin)
   }
   for (const plugin of scanPluginRoot(resolveSideloadPluginsRoot(), 'sideload')) {
+    const existing = byId.get(plugin.id)
+    if (existing?.source === 'builtin') continue
     byId.set(plugin.id, plugin)
   }
   return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id))

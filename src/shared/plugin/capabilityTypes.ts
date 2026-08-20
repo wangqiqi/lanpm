@@ -39,7 +39,6 @@ export type ChatSendTextArgs = {
 /** Extension API v0.5 — file.upload */
 export type FileUploadArgs = {
   groupId: string
-  sourcePath: string
 }
 
 /** Extension API v0.6 — chat.sendMarkdown */

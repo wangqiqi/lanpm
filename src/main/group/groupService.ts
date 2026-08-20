@@ -7,6 +7,7 @@ import type { GroupType } from '../../shared/navigation/types'
 import { GROUP_PUSH_CHANNEL } from '../../shared/group/channels'
 import { LANPM_GUEST_DISPLAY } from '../../shared/constants/display'
 import { throwLanpm } from '../../shared/errors/lanpmError'
+import { assertSafePathSegment } from '../../shared/fs/safeSegment.ts'
 import { MOCK_GROUPS } from '../../shared/group/mock'
 import { LOCAL_REMOVED_PREFIX, REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import { getCachedGroup } from '../discover/discoverGroupRegistry'
@@ -114,12 +115,14 @@ export function applyApprovedDiscoverableJoin(
   groupId: string,
   memberUserId: string
 ): GroupRecord {
+  assertSafePathSegment(groupId, 'groupId')
   let group = getGroupById(db, groupId)
   if (!group) {
     const cached = getCachedGroup(groupId)
     if (!cached) {
       throwLanpm('err.groupNotDiscovered')
     }
+    assertSafePathSegment(cached.advert.groupId, 'groupId')
     const now = new Date().toISOString()
     group = {
       groupId: cached.advert.groupId,

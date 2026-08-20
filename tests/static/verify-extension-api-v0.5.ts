@@ -50,12 +50,13 @@ assert.equal(
   false
 )
 
-assert.deepEqual(FILE_UPLOAD_WHITELIST_FIELDS, ['groupId', 'sourcePath'])
+assert.deepEqual(FILE_UPLOAD_WHITELIST_FIELDS, ['groupId'])
 assert.deepEqual(getDisallowedFileUploadFields({ groupId: 'g', sourcePath: '/a', mode: 'r' }), [
+  'sourcePath',
   'mode'
 ])
-assert.equal(parseFileUploadInput({ groupId: 'g1', sourcePath: '/tmp/x.txt' }).ok, true)
-assert.equal(parseFileUploadInput({ groupId: 'g1' }).ok, false)
+assert.equal(parseFileUploadInput({ groupId: 'g1' }).ok, true)
+assert.equal(parseFileUploadInput({ groupId: 'g1', sourcePath: '/tmp/x.txt' }).ok, false)
 assert.ok(FILE_UPLOAD_MAX_BYTES > 0)
 
 assert.ok(

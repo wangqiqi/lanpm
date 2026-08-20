@@ -34,6 +34,7 @@ import { probeAiEndpoint } from '../ai/aiEndpointProbeService'
 import { refreshAiPatrolScheduler } from '../ai/aiPatrolScheduler'
 import { getDatabase } from '../storage'
 import { listLastMessageAtByGroup } from '../storage/repositories/messageRepository'
+import { confirmDestructiveIpc } from './destructiveConfirm.ts'
 
 export function registerGroupIpc(): void {
   ipcMain.handle(GROUP_IPC.list, () => listUserGroups(getDatabase()))
@@ -97,8 +98,10 @@ export function registerGroupIpc(): void {
     enterAnonymousGroup(getDatabase(), groupId)
   })
 
-  ipcMain.handle(GROUP_IPC.dissolve, (_event, groupId: string) => {
+  ipcMain.handle(GROUP_IPC.dissolve, async (event, groupId: string) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    const ok = await confirmDestructiveIpc(event.sender, 'dissolve')
+    if (!ok) return
     return dissolveGroup(getDatabase(), groupId)
   })
 }

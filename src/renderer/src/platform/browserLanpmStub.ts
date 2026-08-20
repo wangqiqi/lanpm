@@ -349,13 +349,13 @@ function executeStubWriteCapability(
   if (capability === 'file.upload') {
     const parsed = parseFileUploadInput(args)
     if (!parsed.ok) throw new Error(parsed.message)
-    const { groupId, sourcePath } = parsed.value
+    const { groupId } = parsed.value
     const status = readStatus()
     if (!status.configured || !status.user) {
       throw stubError('stub.identityRequired')
     }
-    const name = sourcePath.split(/[/\\]/).pop() ?? 'upload.bin'
-    const ext = name.includes('.') ? name.split('.').pop() ?? 'bin' : 'bin'
+    const name = 'upload.bin'
+    const ext = 'bin'
     const now = new Date().toISOString()
     const meta: FileMeta = {
       fileId: `stub_file_${crypto.randomUUID()}`,
@@ -367,7 +367,7 @@ function executeStubWriteCapability(
       uploadedBy: status.user.userId,
       uploadedAt: now,
       sha256: '',
-      storagePath: sourcePath,
+      storagePath: 'stub://upload.bin',
       previewStatus: 'none',
       isBookmark: false,
       updatedAt: now

@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { existsSync, statSync } from 'node:fs'
-import type { WebContents } from 'electron'
+import { BrowserWindow, type WebContents } from 'electron'
 import type { PluginCapabilityId } from '../../shared/plugin/types.ts'
 import type {
   AiGetThreadArgs,
@@ -27,10 +26,7 @@ import { parseChatSendTextInput } from '../../shared/plugin/chatSendTextWhitelis
 import { parseChatSendMarkdownInput } from '../../shared/plugin/chatSendMarkdownWhitelist.ts'
 import { parseAiGetThreadInput } from '../../shared/plugin/aiGetThreadWhitelist.ts'
 import { parseAiStreamChatCapabilityInput } from '../../shared/plugin/aiStreamChatWhitelist.ts'
-import {
-  FILE_UPLOAD_MAX_BYTES,
-  parseFileUploadInput
-} from '../../shared/plugin/fileUploadWhitelist.ts'
+import { parseFileUploadInput } from '../../shared/plugin/fileUploadWhitelist.ts'
 import { pluginDeclaresCapability } from '../../shared/plugin/validateManifest.ts'
 import { getDatabase } from '../storage'
 import {
@@ -42,7 +38,7 @@ import {
 } from '../task/taskService'
 import { getTaskById } from '../storage/repositories/taskRepository'
 import { getGroupById } from '../group/groupService'
-import { listGroupFiles, uploadFileFromPath } from '../file/fileService'
+import { listGroupFiles, pickAndUploadFile } from '../file/fileService'
 import { findPluginById } from './discover.ts'
 import {
   assertPaidPluginLicensed,
@@ -98,7 +94,8 @@ function assertPluginReady(pluginId: string, capability: PluginCapabilityId): vo
 function executeWriteCapability(
   db: Database,
   capability: HumanReviewCapabilityId,
-  args: CapabilityArgs
+  args: CapabilityArgs,
+  web?: WebContents
 ): unknown {
   if (capability === 'ai.streamChat') {
     throw new Error('ai.streamChat must be confirmed via confirmPluginCapability')
@@ -160,12 +157,33 @@ function executeWriteCapability(
     case 'file.upload': {
       const parsed = parseFileUploadInput(args)
       if (!parsed.ok) throw new Error(parsed.message)
-      const { groupId, sourcePath } = parsed.value
-      if (!existsSync(sourcePath)) throw new Error('source file not found')
-      const stat = statSync(sourcePath)
-      if (!stat.isFile()) throw new Error('source path is not a file')
-      if (stat.size > FILE_UPLOAD_MAX_BYTES) throw new Error('file too large')
-      return uploadFileFromPath(db, groupId, sourcePath)
+      const parent = web ? BrowserWindow.fromWebContents(web) : null
+      return pickAndUploadFile(db, parsed.value.groupId, parent)
+    }
+    case 'ops.command.send': {
+      const groupId = String(args.groupId ?? '')
+      const text = String(args.text ?? '')
+      if (!groupId) throw new Error('groupId required')
+      if (!text.trim()) throw new Error('text required')
+      const parsed = parseOpsCommand(text)
+      if (!parsed) throw new Error('ops_invalid_command')
+      return sendOpsSlashCommand(db, groupId, parsed, text, {
+        linkTaskId: typeof args.linkTaskId === 'string' ? args.linkTaskId : undefined
+      })
+    }
+    case 'chat.sendTaskRef': {
+      const { groupId, taskId } = args as ChatSendTaskRefArgs
+      if (!groupId) throw new Error('groupId required')
+      if (!taskId) throw new Error('taskId required')
+      return sendTaskRefMessage(db, groupId, taskId)
+    }
+    case 'media.livekit.createToken': {
+      const groupId = String(args.groupId ?? '')
+      const identity = String(args.identity ?? '')
+      if (!groupId) throw new Error('groupId required')
+      if (!identity) throw new Error('identity required')
+      const roomName = args.roomName != null ? String(args.roomName) : undefined
+      return createLiveKitTokenForGroup({ groupId, identity, roomName })
     }
     default: {
       const _exhaustive: never = capability
@@ -219,11 +237,21 @@ export async function invokePluginCapability(
     } else if (capability === 'file.upload') {
       const parsed = parseFileUploadInput(args as FileUploadArgs)
       if (!parsed.ok) throw new Error(parsed.message)
-      const { sourcePath } = parsed.value
-      if (!existsSync(sourcePath)) throw new Error('source file not found')
-      const stat = statSync(sourcePath)
-      if (!stat.isFile()) throw new Error('source path is not a file')
-      if (stat.size > FILE_UPLOAD_MAX_BYTES) throw new Error('file too large')
+    } else if (capability === 'ops.command.send') {
+      const groupId = String(args.groupId ?? '')
+      const text = String(args.text ?? '')
+      if (!groupId) throw new Error('groupId required')
+      if (!text.trim()) throw new Error('text required')
+      if (!parseOpsCommand(text)) throw new Error('ops_invalid_command')
+    } else if (capability === 'chat.sendTaskRef') {
+      const { groupId, taskId } = args as ChatSendTaskRefArgs
+      if (!groupId) throw new Error('groupId required')
+      if (!taskId) throw new Error('taskId required')
+    } else if (capability === 'media.livekit.createToken') {
+      const groupId = String(args.groupId ?? '')
+      const identity = String(args.identity ?? '')
+      if (!groupId) throw new Error('groupId required')
+      if (!identity) throw new Error('identity required')
     }
     const db = getDatabase()
     const userId = requireCurrentUserId(db)
@@ -237,7 +265,11 @@ export async function invokePluginCapability(
       status: 'pending_confirm',
       pendingId,
       capability,
-      pluginId
+      pluginId,
+      detail:
+        capability === 'file.upload'
+          ? 'Host will open a native file picker; plugins cannot supply a path.'
+          : undefined
     }
     return pending
   }
@@ -281,14 +313,6 @@ export async function invokePluginCapability(
       if (!groupId) throw new Error('groupId required')
       return getMediaRoomState(db, groupId)
     }
-    case 'media.livekit.createToken': {
-      const groupId = String(args.groupId ?? '')
-      const identity = String(args.identity ?? '')
-      if (!groupId) throw new Error('groupId required')
-      if (!identity) throw new Error('identity required')
-      const roomName = args.roomName != null ? String(args.roomName) : undefined
-      return createLiveKitTokenForGroup({ groupId, identity, roomName })
-    }
     case 'chat.listMessages': {
       const { groupId, beforeLamportTs } = args as ChatListMessagesArgs
       if (!groupId) throw new Error('groupId required')
@@ -308,12 +332,6 @@ export async function invokePluginCapability(
       if (!groupId) throw new Error('groupId required')
       return listGroupMembers(db, groupId)
     }
-    case 'chat.sendTaskRef': {
-      const { groupId, taskId } = args as ChatSendTaskRefArgs
-      if (!groupId) throw new Error('groupId required')
-      if (!taskId) throw new Error('taskId required')
-      return sendTaskRefMessage(db, groupId, taskId)
-    }
     case 'ai.getThread': {
       const parsed = parseAiGetThreadInput(args as AiGetThreadArgs)
       if (!parsed.ok) throw new Error(parsed.message)
@@ -324,17 +342,6 @@ export async function invokePluginCapability(
       const groupId = String(args.groupId ?? '')
       if (!groupId) throw new Error('groupId required')
       return listOpsMachines(groupId)
-    }
-    case 'ops.command.send': {
-      const groupId = String(args.groupId ?? '')
-      const text = String(args.text ?? '')
-      if (!groupId) throw new Error('groupId required')
-      if (!text.trim()) throw new Error('text required')
-      const parsed = parseOpsCommand(text)
-      if (!parsed) throw new Error('ops_invalid_command')
-      return sendOpsSlashCommand(db, groupId, parsed, text, {
-        linkTaskId: typeof args.linkTaskId === 'string' ? args.linkTaskId : undefined
-      })
     }
     default: {
       const _exhaustive: never = capability
@@ -376,5 +383,5 @@ export async function confirmPluginCapability(
     return { requestId }
   }
 
-  return executeWriteCapability(db, pending.capability, pending.args)
+  return executeWriteCapability(db, pending.capability, pending.args, web)
 }

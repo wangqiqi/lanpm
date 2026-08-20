@@ -8,7 +8,10 @@ export const HUMAN_REVIEW_CAPABILITY_IDS = [
   'chat.sendText',
   'chat.sendMarkdown',
   'ai.streamChat',
-  'file.upload'
+  'file.upload',
+  'ops.command.send',
+  'chat.sendTaskRef',
+  'media.livekit.createToken'
 ] as const satisfies readonly PluginCapabilityId[]
 
 export type HumanReviewCapabilityId = (typeof HUMAN_REVIEW_CAPABILITY_IDS)[number]
@@ -26,6 +29,8 @@ export type CapabilityPendingConfirm = {
   pendingId: string
   capability: HumanReviewCapabilityId
   pluginId: string
+  /** Host-authored hint (e.g. picked file path). Never trust plugin-supplied paths. */
+  detail?: string
 }
 
 export function isCapabilityPendingConfirm(value: unknown): value is CapabilityPendingConfirm {

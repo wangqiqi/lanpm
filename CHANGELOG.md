@@ -12,7 +12,12 @@
 ### Changed
 
 - **文件上传 IPC**：渲染进程不再传本地路径，一律走系统文件选择框，避免任意路径写入
+- **插件 `file.upload`**：白名单仅 `groupId`；Host 打开原生选择框，插件不得传路径
 - **信封解密**：未密封 payload 改为抛错，不再静默返回明文
+- **插件发现**：sideload 不得覆盖 builtin 同 id
+- **签名校验**：打包 Host 永不跳过插件签名
+- **网关鉴权**：仅 Bearer + timing-safe 比较，去掉 query `token`
+- **破坏性 IPC**：解散群 / 重置身份走本机确认框
 
 ### Fixed
 

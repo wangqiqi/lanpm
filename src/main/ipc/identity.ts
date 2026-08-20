@@ -12,6 +12,7 @@ import { ensureSeedGroups } from '../group/groupService'
 import { initNetwork, refreshNetworkIdentity, shutdownNetwork } from '../network'
 import { getDatabase } from '../storage'
 import { bindProfileAfterSetup } from '../storage/profilePaths'
+import { confirmDestructiveIpc } from './destructiveConfirm.ts'
 
 export const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
@@ -48,7 +49,9 @@ export function registerIdentityIpc(): void {
     return status
   })
 
-  ipcMain.handle(IDENTITY_CHANNELS.reset, () => {
+  ipcMain.handle(IDENTITY_CHANNELS.reset, async (event) => {
+    const ok = await confirmDestructiveIpc(event.sender, 'resetIdentity')
+    if (!ok) return getSetupStatus(getDatabase())
     const db = getDatabase()
     shutdownNetwork()
     const status = resetIdentity(db)

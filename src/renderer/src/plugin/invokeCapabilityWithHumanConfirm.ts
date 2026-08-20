@@ -26,7 +26,9 @@ export async function invokeCapabilityWithHumanConfirm(
   return await new Promise<unknown | null>((resolve, reject) => {
     Modal.confirm({
       title: copy.title,
-      content: copy.content,
+      content: raw.detail
+        ? `${copy.content}\n\n${raw.detail}`
+        : copy.content,
       okText: copy.okText,
       cancelText: copy.cancelText,
       onOk: async () => {

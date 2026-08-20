@@ -12,9 +12,24 @@ const HOST_TRUSTED_PUBLIC_KEY_PEM = `-----BEGIN PUBLIC KEY-----
 MCowBQYDK2VwAyEA7d8vJ8xqZ0nHk3pL9mR2wY4tF6uC1vB8nK5jQ0xA7eM=
 -----END PUBLIC KEY-----`
 
-export function shouldSkipPluginSignatureVerify(): boolean {
-  if (process.env.LANPM_PLUGIN_SKIP_VERIFY === '1') return true
-  if (process.env.NODE_ENV === 'test') return true
+function isPackagedHost(): boolean {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { app } = require('electron') as typeof import('electron')
+    return Boolean(app?.isPackaged)
+  } catch {
+    return false
+  }
+}
+
+/** Unpackaged tests/dev may skip; packaged Host never skips. */
+export function shouldSkipPluginSignatureVerify(
+  env: NodeJS.ProcessEnv = process.env,
+  packaged: boolean = isPackagedHost()
+): boolean {
+  if (packaged) return false
+  if (env.LANPM_PLUGIN_SKIP_VERIFY === '1') return true
+  if (env.NODE_ENV === 'test') return true
   return false
 }
 

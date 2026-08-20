@@ -1,5 +1,5 @@
-/** Extension API v0.5 — `file.upload` allowed fields */
-export const FILE_UPLOAD_WHITELIST_FIELDS = ['groupId', 'sourcePath'] as const
+/** Extension API v0.5 — file.upload (Host file picker; plugin must not pass a path) */
+export const FILE_UPLOAD_WHITELIST_FIELDS = ['groupId'] as const
 
 export type FileUploadWhitelistField = (typeof FILE_UPLOAD_WHITELIST_FIELDS)[number]
 
@@ -13,7 +13,7 @@ export function getDisallowedFileUploadFields(input: Record<string, unknown>): s
 }
 
 export type ParsedFileUpload =
-  | { ok: true; value: { groupId: string; sourcePath: string } }
+  | { ok: true; value: { groupId: string } }
   | { ok: false; message: string }
 
 export function parseFileUploadInput(input: unknown): ParsedFileUpload {
@@ -26,18 +26,13 @@ export function parseFileUploadInput(input: unknown): ParsedFileUpload {
     return { ok: false, message: `upload field not allowed: ${disallowed.join(', ')}` }
   }
   const groupId = body.groupId
-  const sourcePath = body.sourcePath
   if (typeof groupId !== 'string' || !groupId.trim()) {
     return { ok: false, message: 'groupId required' }
-  }
-  if (typeof sourcePath !== 'string' || !sourcePath.trim()) {
-    return { ok: false, message: 'sourcePath required' }
   }
   return {
     ok: true,
     value: {
-      groupId: groupId.trim(),
-      sourcePath: sourcePath.trim()
+      groupId: groupId.trim()
     }
   }
 }

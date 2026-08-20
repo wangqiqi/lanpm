@@ -10,6 +10,7 @@ import { PathForbiddenError } from './pathGuard.ts'
 import { appendGatewayAudit } from '../ops/gatewayAuditStore.ts'
 import { spawnTerminalSession } from './terminalSession.ts'
 import { DEFAULT_GATEWAY_PATHS, type GatewayPaths } from '../../shared/ops/paths.ts'
+import { gatewayTokenMatches, readBearerToken } from './authToken.ts'
 
 export type GatewayServer = {
   server: http.Server
@@ -24,11 +25,9 @@ function sendJson(res: http.ServerResponse, status: number, body: unknown): void
 }
 
 function checkAuth(req: http.IncomingMessage, token: string): boolean {
-  const header = req.headers.authorization ?? ''
-  if (header === `Bearer ${token}`) return true
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`)
-  const queryToken = url.searchParams.get('token')
-  return queryToken === token
+  const provided = readBearerToken(req.headers)
+  if (!provided) return false
+  return gatewayTokenMatches(provided, token)
 }
 
 async function readBody(req: http.IncomingMessage, maxBytes: number): Promise<Buffer> {

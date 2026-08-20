@@ -301,7 +301,7 @@ export async function uploadFileFromBuffer(
   const meta: FileMeta = {
     fileId,
     groupId,
-    name,
+    name: safeName,
     ext,
     category: inferCategory(ext),
     size: buffer.byteLength,
