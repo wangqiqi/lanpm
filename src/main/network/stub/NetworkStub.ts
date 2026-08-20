@@ -39,6 +39,19 @@ interface BusRecord {
 
 type EnvelopeHandler = (envelope: SyncEnvelope) => void
 
+function stubBusReplacer(_key: string, value: unknown): unknown {
+  if (Buffer.isBuffer(value)) return { __lanpmBuf: value.toString('base64') }
+  return value
+}
+
+function stubBusReviver(_key: string, value: unknown): unknown {
+  if (!value || typeof value !== 'object') return value
+  const rec = value as { __lanpmBuf?: unknown; type?: unknown; data?: unknown }
+  if (typeof rec.__lanpmBuf === 'string') return Buffer.from(rec.__lanpmBuf, 'base64')
+  if (rec.type === 'Buffer' && Array.isArray(rec.data)) return Buffer.from(rec.data as number[])
+  return value
+}
+
 export interface NetworkStubOptions {
   deviceId: string
   userId: string
@@ -177,7 +190,7 @@ export class NetworkStub implements NetworkTransport {
       const trimmed = line.trim()
       if (!trimmed) continue
       try {
-        const record = JSON.parse(trimmed) as BusRecord
+        const record = JSON.parse(trimmed, stubBusReviver) as BusRecord
         this.deliver(record.envelope)
       } catch {
         // skip malformed line
@@ -233,7 +246,7 @@ export class NetworkStub implements NetworkTransport {
       senderUserId: envelope.senderUserId || this.userId
     }
     const record: BusRecord = { envelope: withClock }
-    appendFileSync(STUB_BUS_FILE, `${JSON.stringify(record)}\n`, 'utf8')
+    appendFileSync(STUB_BUS_FILE, `${JSON.stringify(record, stubBusReplacer)}\n`, 'utf8')
   }
 
   subscribe(groupId: string, handler: (envelope: SyncEnvelope) => void): () => void {

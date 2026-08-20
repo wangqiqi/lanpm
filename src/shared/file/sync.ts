@@ -81,3 +81,13 @@ export function filePullFromOffset(payload: FilePullRequestPayload): number {
 export function filePullChunkEncoding(payload: FilePullRequestPayload): FileChunkEncoding {
   return payload.chunkEncoding === 'binary' ? 'binary' : 'base64'
 }
+
+/** Bytes from JSON Base64 chunk or in-memory binary payload. */
+export function fileChunkBody(payload: unknown): Buffer | null {
+  if (!isRecord(payload)) return null
+  if (Buffer.isBuffer(payload.chunk)) return payload.chunk
+  if (typeof payload.chunkBase64 === 'string' && payload.chunkBase64.length > 0) {
+    return Buffer.from(payload.chunkBase64, 'base64')
+  }
+  return null
+}

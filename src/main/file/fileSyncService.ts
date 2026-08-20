@@ -16,11 +16,12 @@ import {
 } from 'fs'
 import { join } from 'path'
 import type {
-  FileChunkPayload,
   FileMetaBroadcastPayload,
   FilePullRequestPayload
 } from '../../shared/file/sync'
 import {
+  fileChunkBody,
+  filePullChunkEncoding,
   filePullFromOffset,
   isFilePullRequestPayload,
   partialFileName,
@@ -163,15 +164,28 @@ async function handleFilePullRequest(db: Database, envelope: SyncEnvelope): Prom
   while (offset < buf.length) {
     const end = Math.min(buf.length, offset + FILE_CHUNK_SIZE)
     const slice = buf.subarray(offset, end)
-    const chunkPayload: FileChunkPayload = {
-      fileId: meta.fileId,
-      groupId: meta.groupId,
-      offset,
-      chunkBase64: slice.toString('base64'),
-      totalBytes: meta.size,
-      sha256: meta.sha256,
-      done: end >= buf.length
-    }
+    const done = end >= buf.length
+    const encoding = filePullChunkEncoding(payload)
+    const chunkPayload =
+      encoding === 'binary'
+        ? {
+            fileId: meta.fileId,
+            groupId: meta.groupId,
+            offset,
+            totalBytes: meta.size,
+            sha256: meta.sha256,
+            done,
+            chunk: slice
+          }
+        : {
+            fileId: meta.fileId,
+            groupId: meta.groupId,
+            offset,
+            chunkBase64: slice.toString('base64'),
+            totalBytes: meta.size,
+            sha256: meta.sha256,
+            done
+          }
     await publishEnvelope(db, meta.groupId, 'file_chunk', chunkPayload)
     offset = end
   }
@@ -230,14 +244,15 @@ export function cancelPullByTransferId(db: Database, transferId: string): boolea
 
 function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
   if (envelope.type !== 'file_chunk' || !envelope.groupId) return
-  const chunk = envelope.payload as FileChunkPayload
+  const chunk = envelope.payload as { fileId?: string; offset?: number; done?: boolean }
   if (!chunk?.fileId) return
 
   const session = pullSessions.get(chunk.fileId)
   if (!session) return
 
   try {
-    const data = Buffer.from(chunk.chunkBase64, 'base64')
+    const data = fileChunkBody(envelope.payload)
+    if (!data || typeof chunk.offset !== 'number') return
     const fd = openSync(session.partialPath, 'r+')
     writeSync(fd, data, 0, data.length, chunk.offset)
     closeSync(fd)
@@ -506,7 +521,8 @@ export async function pullRemoteFile(
   const payload: FilePullRequestPayload = {
     fileId,
     groupId: meta.groupId,
-    fromOffset: fromOffset > 0 ? fromOffset : undefined
+    fromOffset: fromOffset > 0 ? fromOffset : undefined,
+    chunkEncoding: 'binary'
   }
   await publishEnvelope(db, meta.groupId, 'file_pull_request', payload)
 

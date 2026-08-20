@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  fileChunkBody,
   filePullChunkEncoding,
   isFilePullRequestPayload
 } from '../../../src/shared/file/sync.ts'
@@ -51,5 +52,15 @@ describe('file chunk frame', () => {
 
   it('does not treat JSON payloads as frames', () => {
     expect(tryDecodeFileChunkFrame(Buffer.from('{"fileId":"f1"}', 'utf8'))).toBeNull()
+  })
+})
+
+describe('fileChunkBody', () => {
+  it('reads Base64 or Buffer', () => {
+    expect(
+      fileChunkBody({ chunkBase64: Buffer.from('ab').toString('base64') })?.equals(Buffer.from('ab'))
+    ).toBe(true)
+    expect(fileChunkBody({ chunk: Buffer.from('cd') })?.equals(Buffer.from('cd'))).toBe(true)
+    expect(fileChunkBody({})).toBeNull()
   })
 })
