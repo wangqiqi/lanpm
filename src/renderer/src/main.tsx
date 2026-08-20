@@ -1,6 +1,7 @@
 import { installLanpmBridge } from '@renderer/platform/installLanpmBridge'
 import { installDevPreviewClientGuards } from '@renderer/platform/devPreviewClient'
 import { bootstrapDocumentTheme } from '@renderer/theme/initialTheme'
+import { applyLocaleQueryParam } from '@renderer/i18n/bootstrapLocale'
 import './styles/global.css'
 
 declare global {
@@ -13,6 +14,7 @@ declare global {
 window.EXCALIDRAW_ASSET_PATH = `${import.meta.env.BASE_URL}excalidraw/`
 
 bootstrapDocumentTheme()
+applyLocaleQueryParam()
 
 function showFatalError(err: unknown): void {
   bootstrapDocumentTheme()

@@ -192,6 +192,8 @@
     "verify:visual": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-visual.ts",
     "verify:electron-smoke": "node --experimental-strip-types tests/integration/verify-electron-smoke.ts",
     "verify:visual-screenshots": "node --experimental-strip-types tests/integration/verify-visual-screenshots.ts",
+    "verify:visual-screenshots-en": "node --experimental-strip-types tests/integration/verify-visual-screenshots-en.ts",
+    "verify:visual-locale-capture": "node --experimental-strip-types tests/static/verify-visual-locale-capture.ts",
     "verify:screenshots-layout": "node --experimental-strip-types tests/static/verify-screenshots-layout.ts",
     "screenshots:capture": "node scripts/screenshots-capture.mjs",
     "screenshots:sync-readme": "node scripts/sync-readme-screenshots.mjs",

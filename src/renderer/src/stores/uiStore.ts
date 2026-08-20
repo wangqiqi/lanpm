@@ -109,4 +109,8 @@ if (typeof window !== 'undefined') {
     const theme = (ev as CustomEvent<ThemeMode>).detail
     if (theme === 'dark' || theme === 'light') useUiStore.getState().setTheme(theme)
   })
+  window.addEventListener('lanpm-visual-locale', (ev) => {
+    const locale = (ev as CustomEvent<AppLocale>).detail
+    if (locale === 'en-US' || locale === 'zh-CN') useUiStore.getState().setLocale(locale)
+  })
 }

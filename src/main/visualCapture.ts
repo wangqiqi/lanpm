@@ -9,6 +9,8 @@ import { ensureSeedGroups } from './group/groupService'
 import { getDatabase } from './storage'
 import { insertTask, listTasksByGroup } from './storage/repositories/taskRepository'
 import type { TaskPriority, TaskStatus } from '../shared/task/types'
+import { DEFAULT_APP_LOCALE, isAppLocale, type AppLocale } from '../shared/locale/types'
+import { writeAppLocale } from './locale/localeStore'
 
 const GROUP_ID = 'demo-project'
 
@@ -42,12 +44,44 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function themedPageUrl(theme: (typeof THEMES)[number], hashPath: string): string {
+function visualCaptureLocale(): AppLocale {
+  const raw = process.env.LANPM_VISUAL_LOCALE?.trim()
+  return isAppLocale(raw) ? raw : DEFAULT_APP_LOCALE
+}
+
+function visualSlugFilter(): Set<string> | null {
+  const raw = process.env.LANPM_VISUAL_SLUGS?.trim()
+  if (!raw) return null
+  return new Set(raw.split(/[\s,]+/).filter(Boolean))
+}
+
+function slugWanted(filter: Set<string> | null, slug: string): boolean {
+  return filter === null || filter.has(slug)
+}
+
+function themedPageUrl(
+  theme: (typeof THEMES)[number],
+  hashPath: string,
+  locale: AppLocale
+): string {
   const hash = hashPath.startsWith('#') ? hashPath : `#${hashPath}`
-  return `file://${rendererIndexHtml}?theme=${theme}${hash}`
+  return `file://${rendererIndexHtml}?theme=${theme}&locale=${locale}${hash}`
 }
 
 /** file:// 二次导航可能不重新执行 main.tsx，需显式写入 dataset */
+async function applyLocale(win: BrowserWindow, locale: AppLocale): Promise<void> {
+  writeAppLocale(locale)
+  await win.webContents.executeJavaScript(`
+    (function() {
+      const locale = ${JSON.stringify(locale)};
+      localStorage.setItem('locale', locale);
+      document.documentElement.lang = locale === 'en-US' ? 'en' : 'zh-CN';
+      window.dispatchEvent(new CustomEvent('lanpm-visual-locale', { detail: locale }));
+    })()
+  `)
+  await wait(200)
+}
+
 async function applyTheme(win: BrowserWindow, theme: (typeof THEMES)[number]): Promise<void> {
   await win.webContents.executeJavaScript(`
     (function() {
@@ -77,7 +111,8 @@ async function waitForHealthyUi(win: BrowserWindow, timeoutMs = 25_000): Promise
         const hasChrome =
           !!document.querySelector('nav') ||
           !!document.querySelector('header') ||
-          text.includes('欢迎')
+          text.includes('欢迎') ||
+          /Welcome to LanPM/i.test(text)
         if (root && root.childElementCount > 0 && !booting && hasChrome) {
           return resolve(true)
         }
@@ -335,11 +370,13 @@ async function waitForCollabDrawer(win: BrowserWindow, panel: CollabDrawerSlug):
 async function captureCollabDrawerPages(
   win: BrowserWindow,
   outDir: string,
-  theme: (typeof THEMES)[number]
+  theme: (typeof THEMES)[number],
+  slugs: readonly CollabDrawerSlug[] = COLLAB_DRAWER_SLUGS
 ): Promise<void> {
+  if (slugs.length === 0) return
   await navigateHash(win, `/g/${GROUP_ID}/chat`)
   await waitForHealthyUi(win)
-  for (const slug of COLLAB_DRAWER_SLUGS) {
+  for (const slug of slugs) {
     await openCollabDrawer(win, slug)
     await waitForCollabDrawer(win, slug)
     await capture(win, outDir, `${theme}_${slug}.png`, theme)
@@ -388,11 +425,16 @@ async function capture(
 }
 
 /**
- * AUTO-20 / V-14b：无头截取亮暗主题七页（需 build + LANPM_VISUAL_CAPTURE_DIR）。
+ * AUTO-20 / V-14b：无头截取亮暗主题页面（需 build + LANPM_VISUAL_CAPTURE_DIR）。
+ * `LANPM_VISUAL_LOCALE=en-US` · `LANPM_VISUAL_SLUGS=chat,cockpit` 可收窄（TASK-4901）。
  */
 export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<boolean> {
   const outDir = process.env.LANPM_VISUAL_CAPTURE_DIR
   if (!outDir) return false
+
+  const locale = visualCaptureLocale()
+  const slugFilter = visualSlugFilter()
+  writeAppLocale(locale)
 
   mkdirSync(outDir, { recursive: true })
   win.setContentSize(1440, 900)
@@ -401,13 +443,15 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
   if (!win.isVisible()) win.show()
 
   const db = getDatabase()
-  console.info('[lanpm:visual-capture] waiting for initial UI…')
+  console.info('[lanpm:visual-capture] waiting for initial UI… locale=', locale)
   await waitForHealthyUi(win)
+  await applyLocale(win, locale)
 
   if (!getSetupStatus(db).configured) {
     for (const theme of THEMES) {
-      await loadUrl(win, themedPageUrl(theme, '#/'))
+      await loadUrl(win, themedPageUrl(theme, '#/', locale))
       await applyTheme(win, theme)
+      await applyLocale(win, locale)
       void (await capture(win, outDir, `${theme}_setup.png`, theme))
     }
     completeSetup(db, { baseName: 'Visual', department: 'QA' })
@@ -419,16 +463,24 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
   await wait(2_000)
   const taskMarker = VISUAL_CAPTURE_MARKER
   const ganttMeta: Record<string, number> = {}
+  const pages = APP_PAGES.filter((p) => slugWanted(slugFilter, p.slug))
+  const collabSlugs = COLLAB_DRAWER_SLUGS.filter((s) => slugWanted(slugFilter, s))
+  const chatHash = `/g/${GROUP_ID}/chat`
 
   for (const theme of THEMES) {
-    const [first, ...rest] = APP_PAGES
-    await loadUrl(win, themedPageUrl(theme, first.hash))
+    const first = pages[0]
+    const startHash = first?.hash ?? chatHash
+    await loadUrl(win, themedPageUrl(theme, startHash, locale))
     await applyTheme(win, theme)
-    await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
-    await captureCollabDrawerPages(win, outDir, theme)
-    for (const page of rest) {
+    await applyLocale(win, locale)
+    if (first) {
+      await capture(win, outDir, `${theme}_${first.slug}.png`, theme)
+    }
+    await captureCollabDrawerPages(win, outDir, theme, collabSlugs)
+    for (const page of pages.slice(first ? 1 : 0)) {
       await navigateHash(win, page.hash)
       await applyTheme(win, theme)
+      await applyLocale(win, locale)
       const waitForText =
         page.slug === 'gantt' || page.slug === 'board' ? taskMarker : undefined
       const waitForGanttBars = page.slug === 'gantt'
@@ -442,7 +494,16 @@ export async function runVisualCaptureIfRequested(win: BrowserWindow): Promise<b
 
   writeFileSync(
     join(outDir, 'capture-meta.json'),
-    JSON.stringify({ ganttTaskBars: ganttMeta, groupId: GROUP_ID }, null, 2)
+    JSON.stringify(
+      {
+        ganttTaskBars: ganttMeta,
+        groupId: GROUP_ID,
+        locale,
+        slugs: slugFilter ? [...slugFilter] : 'all'
+      },
+      null,
+      2
+    )
   )
   console.info('[lanpm:visual-capture] done →', outDir)
   app.exit(0)
