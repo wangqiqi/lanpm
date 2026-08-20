@@ -96,6 +96,7 @@ First launch runs a short setup wizard, then opens the demo group at `#/g/demo-p
 npm run lint && npm run typecheck && npm run test
 npm run verify:p0          # guards (IPC, i18n, docs, screenshots layout)
 npm run verify:chat-perf-observe  # chat perf code guards (+ local .cursorGrowth/decisions if present)
+npm run measure:perf -- --quick   # Electron baseline JSON → .lanpm/perf/ (see docs/05 §5)
 npm run verify:m7          # full RC regression before release
 npm run build
 ```
@@ -105,6 +106,7 @@ npm run build
 | README images | `npm run screenshots:capture` → `npm run screenshots:sync-readme` ([docs/screenshots](./docs/screenshots/README.md)) |
 | Acceptance | **Electron** (`npm run dev`) is source of truth — not browser stub (`npm run dev:web`) |
 | Chat perf QA | Budget in local `.cursorGrowth/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
+| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
 
 Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — details in [`.cursor/`](./.cursor/).

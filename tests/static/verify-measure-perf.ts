@@ -39,6 +39,8 @@ assert.match(harness, /dbPlainMs/)
 assert.match(harness, /dbCipherMs/)
 assert.match(harness, /notes[\s\S]*gpu/)
 assert.match(harness, /devBudgetMs/)
+assert.match(harness, /LANPM_MEASURE_DB_OUT/)
+assert.ok(existsSync(join(root, 'tests/integration/measure-db-perf.ts')))
 
 const ui = readSrc('scripts/measure-perf-ui.mjs')
 assert.match(ui, /LANPM_MEASURE/)

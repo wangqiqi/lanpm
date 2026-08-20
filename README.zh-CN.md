@@ -95,6 +95,7 @@ chmod +x onekey_run.sh    # 首次（Unix）
 ```bash
 npm run lint && npm run typecheck && npm run test
 npm run verify:p0          # 守卫（IPC、i18n、文档、截图布局）
+npm run measure:perf -- --quick   # Electron 基线 JSON → `.lanpm/perf/`（见 docs/05 §5）
 npm run verify:m7          # 发版前全量回归
 npm run build
 ```
@@ -104,6 +105,7 @@ npm run build
 | README 配图 | `npm run screenshots:capture` → `npm run screenshots:sync-readme`（[docs/screenshots](./docs/screenshots/README.md)） |
 | 验收 | 以 **Electron**（`npm run dev`）为准 — 浏览器 stub（`npm run dev:web`）仅 UI 预览 |
 | 发版 | [docs/05](./docs/05_测试与联调发布.md) · 跨平台矩阵 §1.4 |
+| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) |
 
 Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) — 详见 [`.cursor/`](./.cursor/)。
 

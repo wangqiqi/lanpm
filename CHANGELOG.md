@@ -6,6 +6,7 @@
 
 ### Added
 
+- **`npm run measure:perf`**：Linux 上对 electron-vite 生产构建采集冷启动、RSS、底栏 Tab P95、明文 vs SQLCipher 查询对照；JSON 在 `.lanpm/perf/`（`TASK-2901`–`TASK-2906`）
 - **本机 SQLite 可选通行词加密**（at rest）：明文库默认可用；设置里加密；错口令不建空库（`SPIKE-2701` · `TASK-2701`–`TASK-2705`）
 - **脑图实时协同**：打开中的文档走 Yjs `mindmap_crdt` / awareness / 离线 SV（对标白板；文档列表仍本机）（`SPIKE-2601` · `TASK-2601`–`TASK-2607`）
 - 根目录 `README.html`：`README.md` 的 HTML 导出，便于离线浏览

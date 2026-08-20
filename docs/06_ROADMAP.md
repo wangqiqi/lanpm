@@ -118,7 +118,7 @@
 | 5 | 双实例 Stub | `verify:dual-stub` | [05 §3](./05_测试与联调发布.md#3-双实例-stub-联调) | 延期 |
 | 6 | 真网双机 | `verify:m6` loopback | [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6) | 延期 |
 | 7 | 三平台真机 UI | CI `verify.yml` × `verify:m7` | Win / mac / Linux 七页肉眼 | 延期 |
-| 8 | 性能抽样 | `verify:m7-perf` · `verify:core-views-perf` | [05 §5](./05_测试与联调发布.md#5-性能测量m7) 冷启动 · 内存 · Tab P95 | 延期 |
+| 8 | 性能抽样 | `verify:m7-perf` · `verify:core-views-perf` · `measure:perf` / `verify:measure-perf` | [05 §5](./05_测试与联调发布.md#5-性能测量m7) Linux `out/main` 脚本已交付；安装包双击 / Win/mac 真机仍缺 | 部分 |
 | 9 | 英文折行 | `verify:i18n-en` | cockpit / chat 关键页长文案肉眼 | 延期 |
 
 ### 4.2 延期汇总（有设备再补）
@@ -127,7 +127,7 @@
 |----|------|
 | Win/mac/Linux **真机 UI** 七页肉眼 | 自动化 CI 三 OS × `verify:m7` 已闭合；真机延期 |
 | **真网**双机（发现 → 加群/私聊/已读） | `verify:dual-stub` 已闭合；真网延期 |
-| 冷启动 / 空闲·聊天内存 / Tab P95 手测 | `verify:m7-perf` 部分自动化；`verify:core-views-perf` 静态守卫 board/gantt/tree/whiteboard；生产包真机延期 |
+| 冷启动 / 空闲·聊天内存 / Tab P95 | `verify:m7-perf` + `verify:core-views-perf` + Linux `npm run measure:perf`（vite 生产构建，非安装包双击）；Win/mac 与 GPU-on 对照仍缺 |
 | 英文长文案折行肉眼 | `verify:i18n-en` 无 CJK；全页折行延期 |
 
 方法见 [05](./05_测试与联调发布.md) §2 / §5 / §6。
