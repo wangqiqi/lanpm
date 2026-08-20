@@ -20,7 +20,7 @@
 
 | 模块 | 功能 | 备注 |
 |------|------|------|
-| **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 · **体验产品化** | Host/stub/mesh/LiveKit 路径已交付；见 **§3** · **§6.4** |
+| **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 · **Pro+ 打磨** | Host/stub/mesh/LiveKit + SPRINT-51 UX（CTA · Lite/Pro · 最短运维）已交付；剩余多人格/投屏见 **§2** · **§3.2 Pro+** |
 | 表情、书签浏览器导入导出 | 聊天/书签体验糖 | 低优先级（原 B6 体验） |
 | **高级 Agent 编排** | LangGraph / 多角色 DAG 等 | L3a/L3b 已交付（`verify:ai-pipeline*`）；**可选** 外框架后置 |
 | 移动端 Web | PWA 基础版本 | 后置 |
@@ -66,9 +66,9 @@
 
 ### 3.3 与现有插件底座
 
-| 已有 | 会议插件还需（SPIKE-374–376 已拍板） |
+| 已有 | 会议 UX（SPRINT-51 · `verify:meeting-ux`） |
 |------|--------------------------------------|
-| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **深化** 会议 UX · 媒体 capability 产品化 · LiveKit 旁路运维体验；Slot `chat.toolbar.media` / `PluginZoneHost` **已有** |
+| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **已交付**：未购/未启用升级 CTA；Lite mesh vs Pro（LiveKit）档位可见；LiveKit 旁路本机/内网最短运维（`docs/07` + compose）。Slot `chat.toolbar.media` / `PluginZoneHost` **已有**。剩余 Pro+（多人视频格 / 投屏打磨）见 **§2** |
 | 安全红线：禁插件直连 DB / `ipcMain` | 维持；媒体经 Host 代理；**builtin registry** 注册 `lanpm.meeting`；LiveKit SDK **不进**核心 `dependencies` |
 
 ### 3.4 架构注意（无中心 vs SFU）
@@ -91,8 +91,9 @@
 | 5 | 离线许可证（内网可购） | P1～P2 | **已交付** · `verify:plugin-market-spike` · `verify:offline-license-cli` · v1.75–1.76 |
 | 6 | 插件市场安装/更新 | — | **Out of scope** · 离线侧载+许可为终态（2026-08-01） |
 | 7 | **meeting-media-v2**：语音消息 PTT · Lite mesh 真投屏 · 会议工具栏收纳 | P1 | **已交付** · `verify:chat-voice` · `verify:meeting-media-v2` · v1.98.0 |
+| 8 | **会议体验产品化**：入口 CTA · Lite/Pro 可见 · LiveKit 最短运维 | P1 | **已交付** · `verify:meeting-ux` · SPRINT-51 |
 
-验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro` · `verify:chat-voice` · `verify:meeting-media-v2`。
+验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro` · `verify:chat-voice` · `verify:meeting-media-v2` · `verify:meeting-ux`。
 
 **下一实现 Sprint Goal（一句话）**：以 `.cursorGrowth/plan.md` 候选表为准（本机手验 / 搜索 / 双机真网）；插件 invoke · API v0.3 · Slot 已交付，勿再当缺口。
 

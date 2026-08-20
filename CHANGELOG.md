@@ -12,6 +12,7 @@
 
 - **会议档位**：工具栏主菜单同时展示 Lite mesh 与 Pro（LiveKit SFU）分区；旁路未配置 / 缺 SDK 时给出可读失败文案与配置引导（`TASK-5102`）
 - **会议入口**：未启用会议插件时聊天工具条显示升级引导（打开扩展页）；未购许可时主菜单展示许可证 CTA，Join / Pro Join 禁用且不会走 mesh/LiveKit 入会（`TASK-5101`）
+- **会议 ROADMAP**：`docs/06` §3.3 改为 SPRINT-51 交付说明（CTA · Lite/Pro 可见 · LiveKit 最短运维），不再写成未做的「深化」；`verify:meeting-ux` 锁住本 Sprint 守卫（`TASK-5104`）
 
 ## [1.104.0] - 2026-08-20
 

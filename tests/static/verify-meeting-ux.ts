@@ -1,5 +1,5 @@
 /**
- * TASK-985 — Meeting UX productization guards.
+ * Meeting UX productization guards (TASK-985 · SPRINT-51 TASK-5101–5104).
  * Run: npm run verify:meeting-ux
  */
 import assert from 'node:assert/strict'
@@ -87,6 +87,8 @@ assert.match(toolbar, /plugin\.meetingProSection/)
 
 const en = readFileSync(join(root, 'src/renderer/src/i18n/locales/en-US.ts'), 'utf8')
 const meetingUxKeys = [
+  'plugin.meetingLicenseCta',
+  'plugin.meetingOpenPlugins',
   'plugin.meetingLiteSection',
   'plugin.meetingProSection',
   'plugin.meetingProSdkMissing',
@@ -140,5 +142,17 @@ for (const needle of forbiddenPublicSfu) {
     `compose must not mention ${needle} as default public SFU`
   )
 }
+
+/** TASK-5104 — docs/06 §3.3 points at this Sprint's delivery, not leftover 深化 */
+const section33 = docs06.split('### 3.3')[1]?.split('### 3.4')[0] ?? ''
+assert.ok(section33.length > 0, 'docs/06 §3.3 missing')
+assert.ok(!section33.includes('还需深化'), 'docs/06 §3.3 must not leave 还需深化 as undone')
+assert.ok(!section33.includes('**深化**'), 'docs/06 §3.3 must not mark UX as still 深化')
+assert.match(section33, /CTA/)
+assert.match(section33, /Lite/)
+assert.match(section33, /Pro/)
+assert.match(section33, /最短运维/)
+assert.match(section33, /verify:meeting-ux/)
+assert.match(docs06, /### 3\.5[\s\S]*verify:meeting-ux/)
 
 console.log('verify:meeting-ux OK')
