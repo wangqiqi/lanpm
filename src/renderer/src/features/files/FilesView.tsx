@@ -66,7 +66,9 @@ import {
   type FileSortOrder
 } from '@renderer/features/files/fileListModel'
 import { isTextPreviewFile } from '@shared/file/previewExtensions'
+import { shouldUsePdfJsPreview } from '@shared/file/pdfPreview'
 import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
+import PdfPreview from '@renderer/features/files/PdfPreview'
 import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './files.module.css'
@@ -1015,8 +1017,13 @@ export default function FilesView(): React.ReactElement {
         />
       ) : previewUrl && selected.category === 'image' ? (
         <Image src={previewUrl} alt={selected.name} className={styles.previewImg} />
-      ) : previewUrl && selected.ext.toLowerCase() === 'pdf' ? (
-        <iframe title={selected.name} src={previewUrl} className={styles.previewFrame} />
+      ) : previewUrl &&
+        shouldUsePdfJsPreview({
+          ext: selected.ext,
+          previewPath: selected.previewPath,
+          previewUrl
+        }) ? (
+        <PdfPreview url={previewUrl} title={selected.name} />
       ) : previewText !== null ? (
         <pre className={styles.previewText}>{previewText}</pre>
       ) : (
