@@ -76,6 +76,7 @@ import {
   DEFAULT_NAV_PREFERENCES,
   normalizeNavPreferences,
   normalizeNavPreferencesDocument,
+  rawNavDocumentNeedsV196Writeback,
   type NavPreferences,
   type NavPreferencesDocument
 } from '@shared/navigation/navPreferences'
@@ -136,7 +137,12 @@ function readStubNavDocument(): NavPreferencesDocument {
   try {
     const raw = localStorage.getItem(NAV_PREFS_STORAGE_KEY)
     if (!raw) return normalizeNavPreferencesDocument(DEFAULT_NAV_PREFERENCES)
-    return normalizeNavPreferencesDocument(JSON.parse(raw) as unknown)
+    const parsed: unknown = JSON.parse(raw)
+    const normalized = normalizeNavPreferencesDocument(parsed)
+    if (rawNavDocumentNeedsV196Writeback(parsed)) {
+      return writeStubNavDocument(normalized)
+    }
+    return normalized
   } catch {
     return normalizeNavPreferencesDocument(DEFAULT_NAV_PREFERENCES)
   }

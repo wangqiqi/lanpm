@@ -31,6 +31,7 @@ assert.match(
 
 const store = readFileSync(join(root, 'src/main/navigation/navPreferencesStore.ts'), 'utf8')
 assert.match(store, /nav-preferences\.json/)
+assert.match(store, /rawNavDocumentNeedsV196Writeback/)
 
 const ipc = readFileSync(join(root, 'src/main/ipc/nav.ts'), 'utf8')
 assert.match(ipc, /NAV_IPC/)

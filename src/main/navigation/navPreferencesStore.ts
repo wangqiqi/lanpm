@@ -4,6 +4,7 @@ import { app } from 'electron'
 import {
   normalizeNavPreferences,
   normalizeNavPreferencesDocument,
+  rawNavDocumentNeedsV196Writeback,
   type NavPreferences,
   type NavPreferencesDocument
 } from '../../shared/navigation/navPreferences.ts'
@@ -23,7 +24,12 @@ function readRawDocument(): unknown {
 }
 
 export function readNavPreferencesDocument(): NavPreferencesDocument {
-  return normalizeNavPreferencesDocument(readRawDocument())
+  const raw = readRawDocument()
+  const normalized = normalizeNavPreferencesDocument(raw)
+  if (rawNavDocumentNeedsV196Writeback(raw)) {
+    return writeNavPreferencesDocument(normalized)
+  }
+  return normalized
 }
 
 function writeNavPreferencesDocument(doc: NavPreferencesDocument): NavPreferencesDocument {
