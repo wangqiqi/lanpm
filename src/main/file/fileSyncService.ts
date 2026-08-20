@@ -82,6 +82,21 @@ function broadcastFiles(groupId: string): void {
   }
 }
 
+const FILE_CHUNK_PROGRESS_BROADCAST_MS = 100
+const lastChunkProgressBroadcastAt = new Map<string, number>()
+
+function broadcastFilesProgress(groupId: string, fileId: string, force: boolean): void {
+  const now = Date.now()
+  const last = lastChunkProgressBroadcastAt.get(fileId) ?? 0
+  if (!force && now - last < FILE_CHUNK_PROGRESS_BROADCAST_MS) return
+  lastChunkProgressBroadcastAt.set(fileId, now)
+  broadcastFiles(groupId)
+}
+
+function clearChunkProgressBroadcast(fileId: string): void {
+  lastChunkProgressBroadcastAt.delete(fileId)
+}
+
 async function publishEnvelope(
   db: Database,
   groupId: string,
@@ -193,6 +208,7 @@ function failPullSession(db: Database, fileId: string, err: Error): void {
   clearTimeout(session.timer)
   pullSessions.delete(fileId)
   finishTransfer(db, session.transferId, 'failed', err.message)
+  clearChunkProgressBroadcast(fileId)
   broadcastFiles(session.groupId)
   session.reject(err)
 }
@@ -204,6 +220,7 @@ export function cancelPullByTransferId(db: Database, transferId: string): boolea
     clearTimeout(session.timer)
     pullSessions.delete(fileId)
     finishTransfer(db, session.transferId, 'cancelled')
+    clearChunkProgressBroadcast(fileId)
     broadcastFiles(session.groupId)
     session.reject(new Error('err.transferCancelled'))
     return true
@@ -227,7 +244,7 @@ function handleFileChunk(db: Database, envelope: SyncEnvelope): void {
 
     const transferred = Math.max(chunk.offset + data.length, statSync(session.partialPath).size)
     updateTransferProgress(db, session.transferId, transferred, 'transferring')
-    broadcastFiles(session.groupId)
+    broadcastFilesProgress(session.groupId, chunk.fileId, Boolean(chunk.done))
 
     if (!chunk.done) return
 
@@ -266,6 +283,7 @@ async function finalizePull(db: Database, fileId: string, session: PullSession):
   void generatePreview(db, { ...meta, storagePath: destPath }).catch(
     catchSyncFailure('fileSync.generatePreview', { notify: false })
   )
+  clearChunkProgressBroadcast(fileId)
   broadcastFiles(session.groupId)
   session.resolve(destPath)
 }
