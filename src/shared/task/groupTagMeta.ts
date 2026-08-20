@@ -92,3 +92,55 @@ export function groupTagMetaToColorMap(
 export function isLikelyIsoTimestamp(value: string): boolean {
   return ISO_RE.test(value) && !Number.isNaN(Date.parse(value))
 }
+
+/** A6 offline catch-up (TASK-4101) — 7-day window aligned with chat/task. */
+export interface GroupTagSyncRequestPayload {
+  /** Exclusive lower bound; empty = from epoch */
+  sinceUpdatedAt: string
+  /** 7-day cutoff ISO8601 */
+  minUpdatedAt: string
+}
+
+export interface GroupTagSyncBatchPayload {
+  tags: GroupTagMeta[]
+  hasMore?: boolean
+}
+
+/** Dict is small; keep a page cap for protocol symmetry. */
+export const GROUP_TAG_OFFLINE_SYNC_BATCH_LIMIT = 200
+
+export function splitGroupTagOfflineSyncPage(
+  rows: GroupTagMeta[],
+  limit = GROUP_TAG_OFFLINE_SYNC_BATCH_LIMIT
+): { tags: GroupTagMeta[]; hasMore: boolean } {
+  if (rows.length > limit) {
+    return { tags: rows.slice(0, limit), hasMore: true }
+  }
+  return { tags: rows, hasMore: false }
+}
+
+export function maxUpdatedAtInGroupTags(tags: GroupTagMeta[]): string {
+  let max = ''
+  for (const row of tags) {
+    if (row.updatedAt > max) max = row.updatedAt
+  }
+  return max
+}
+
+export function isGroupTagSyncRequestPayload(
+  value: unknown
+): value is GroupTagSyncRequestPayload {
+  if (!isRecord(value)) return false
+  return (
+    typeof value.sinceUpdatedAt === 'string' &&
+    typeof value.minUpdatedAt === 'string' &&
+    !!value.minUpdatedAt
+  )
+}
+
+export function isGroupTagSyncBatchPayload(value: unknown): value is GroupTagSyncBatchPayload {
+  if (!isRecord(value)) return false
+  if (!Array.isArray(value.tags)) return false
+  if (value.hasMore !== undefined && typeof value.hasMore !== 'boolean') return false
+  return value.tags.every(isGroupTagMeta)
+}

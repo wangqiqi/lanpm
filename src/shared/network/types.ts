@@ -26,6 +26,8 @@ export type SyncMessageType =
   | 'mindmap_crdt_sync_batch'
   | 'mindmap_awareness'
   | 'group_tag_patch'
+  | 'group_tag_sync_request'
+  | 'group_tag_sync_batch'
   | 'file_meta'
   | 'file_pull_request'
   | 'file_chunk'
