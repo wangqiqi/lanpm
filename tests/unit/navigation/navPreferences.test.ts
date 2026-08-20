@@ -37,7 +37,7 @@ describe('normalizeNavPreferences', () => {
       hiddenViews: ['gantt', 'gantt'],
       order: ['files', 'chat', 'board']
     })
-    expect(prefs.hiddenViews).toEqual(['gantt'])
+    expect(prefs.hiddenViews).toEqual(['gantt', 'whiteboard'])
     expect(prefs.order.slice(0, 3)).toEqual(['files', 'chat', 'board'])
     expect(prefs.order).toContain('tree')
   })
@@ -114,7 +114,7 @@ describe('sanitizeNavPreferences', () => {
       hiddenViews: ['board'],
       order: DEFAULT_NAV_PREFERENCES.order
     })
-    expect(prefs.hiddenViews).toEqual(['board'])
+    expect(prefs.hiddenViews).toEqual(['board', 'whiteboard'])
   })
 })
 
@@ -153,7 +153,7 @@ describe('resolveVisibleViews', () => {
 })
 
 describe('isViewHideLocked', () => {
-  it('locks chat and last task entry', () => {
+  it('locks chat, last task entry, and canvas views', () => {
     const prefs = sanitizeNavPreferences({
       ...DEFAULT_NAV_PREFERENCES,
       hiddenViews: ['board'],
@@ -162,6 +162,7 @@ describe('isViewHideLocked', () => {
     expect(isViewHideLocked(prefs, 'chat')).toBe(true)
     expect(isViewHideLocked(prefs, 'tree')).toBe(true)
     expect(isViewHideLocked(prefs, 'gantt')).toBe(false)
+    expect(isViewHideLocked(prefs, 'whiteboard')).toBe(true)
   })
 })
 
@@ -192,7 +193,7 @@ describe('resolveVisibleContributedRoutes', () => {
     const prefs = normalizeNavPreferences({
       contributedOrder: ['gone', 'mindmap']
     })
-    expect(resolveVisibleContributedRoutes(prefs, ['mindmap'])).toEqual(['mindmap'])
+    expect(resolveVisibleContributedRoutes(prefs, ['mindmap'])).toEqual([])
     expect(prefs.contributedOrder).toContain('gone')
   })
 })
@@ -205,6 +206,15 @@ describe('isContributedRouteVisible', () => {
     expect(isContributedRouteVisible(prefs, 'mindmap')).toBe(false)
     expect(isContributedRouteVisible(prefs, 'form')).toBe(true)
   })
+
+  it('never treats mindmap as a visible tab even if prefs omit it from hidden', () => {
+    const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
+      hiddenContributedRoutes: []
+    })
+    expect(prefs.hiddenContributedRoutes).toContain('mindmap')
+    expect(isContributedRouteVisible(prefs, 'mindmap')).toBe(false)
+  })
 })
 
 describe('normalizeNavPreferencesDocument', () => {
@@ -214,7 +224,7 @@ describe('normalizeNavPreferencesDocument', () => {
       order: ['chat', 'board']
     })
     expect(doc.byGroup).toEqual({})
-    expect(doc.global.hiddenViews).toEqual(['gantt'])
+    expect(doc.global.hiddenViews).toEqual(['gantt', 'whiteboard'])
   })
 
   it('reads document with byGroup overrides', () => {
@@ -229,13 +239,35 @@ describe('normalizeNavPreferencesDocument', () => {
   })
 })
 
+describe('canvas never bottom nav (SPRINT-46)', () => {
+  it('omits whiteboard from project tabs even when prefs try to show it', () => {
+    const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
+      hiddenViews: []
+    })
+    expect(prefs.hiddenViews).toContain('whiteboard')
+    expect(resolveVisibleViews('project', prefs)).not.toContain('whiteboard')
+    expect(resolveVisibleViews('project', { ...DEFAULT_NAV_PREFERENCES, hiddenViews: [] })).not.toContain(
+      'whiteboard'
+    )
+  })
+
+  it('omits mindmap from contributed tabs even when prefs try to show it', () => {
+    const prefs = sanitizeNavPreferences({
+      ...DEFAULT_NAV_PREFERENCES,
+      hiddenContributedRoutes: []
+    })
+    expect(resolveVisibleContributedRoutes(prefs, ['mindmap', 'form'])).toEqual(['form'])
+  })
+})
+
 describe('resolveNavPreferencesForGroup', () => {
   it('falls back to global when no override', () => {
     const doc = normalizeNavPreferencesDocument({
       global: { hiddenViews: ['calendar'], order: DEFAULT_NAV_PREFERENCES.order }
     })
     const resolved = resolveNavPreferencesForGroup(doc, 'grp-1')
-    expect(resolved.hiddenViews).toEqual(['calendar'])
+    expect(resolved.hiddenViews).toEqual(['calendar', 'whiteboard'])
   })
 
   it('uses full group override when present', () => {
@@ -246,7 +278,7 @@ describe('resolveNavPreferencesForGroup', () => {
       }
     })
     const resolved = resolveNavPreferencesForGroup(doc, 'grp-1')
-    expect(resolved.hiddenViews).toEqual(['gantt'])
+    expect(resolved.hiddenViews).toEqual(['gantt', 'whiteboard'])
     expect(resolved.hiddenViews).not.toContain('calendar')
   })
 })

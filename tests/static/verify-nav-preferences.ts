@@ -97,5 +97,9 @@ assert.match(
   readFileSync(join(root, 'tests/unit/navigation/navPreferences.test.ts'), 'utf8'),
   /chat', 'board', 'tree/
 )
+assert.match(
+  readFileSync(join(root, 'tests/unit/navigation/navPreferences.test.ts'), 'utf8'),
+  /canvas never bottom nav/
+)
 
 console.log('verify:nav-preferences OK')
