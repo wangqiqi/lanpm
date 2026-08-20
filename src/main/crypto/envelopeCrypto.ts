@@ -4,7 +4,7 @@ import {
   encodeFileChunkFrame,
   isFileChunkBinaryPayload,
   tryDecodeFileChunkFrame
-} from '../../shared/file/chunkFrame'
+} from '../../shared/file/chunkFrame.ts'
 
 const ALGO = 'aes-256-gcm'
 
