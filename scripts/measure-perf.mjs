@@ -215,6 +215,11 @@ async function main() {
     } else {
       const ui = await runUiSlices(opts, report)
       Object.assign(report, ui)
+      if (typeof report.tabSwitchP95Ms === 'number') {
+        report.notes.tabP95Ms = report.tabSwitchP95Ms
+        report.notes.devBudgetMs = 150
+        report.notes.prodBudgetMs = 100
+      }
     }
   }
 

@@ -38,7 +38,7 @@ assert.match(harness, /tabSwitchP95Ms/)
 assert.match(harness, /dbPlainMs/)
 assert.match(harness, /dbCipherMs/)
 assert.match(harness, /notes[\s\S]*gpu/)
-assert.match(harness, /disableHardwareAcceleration/)
+assert.match(harness, /devBudgetMs/)
 
 const ui = readSrc('scripts/measure-perf-ui.mjs')
 assert.match(ui, /LANPM_MEASURE/)
