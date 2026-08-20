@@ -48,6 +48,10 @@ import { LANPM_MAIN_WINDOW_TITLE, setMainWindow } from './mainWindow'
 import { runVisualCaptureIfRequested } from './visualCapture'
 import { attachWebviewGuards } from './webviewGuard'
 import { isAllowedHttpUrl } from '../shared/security/httpUrl'
+import {
+  LINUX_DISABLE_GPU_SWITCHES,
+  shouldDisableLinuxGpu
+} from '../shared/ops/linuxGpuPolicy'
 
 /** Windows 通知 / 任务栏分组须在 ready 前设置；显示名避免 toast 标题为 Electron */
 if (process.platform === 'win32') {
@@ -91,14 +95,12 @@ registerPreviewScheme()
 
 const isDev = !app.isPackaged
 
-/** Linux 无可用 GPU/Vulkan 时 Electron 会直接 FATAL 退出；开发环境禁用硬件加速 */
-if (process.platform === 'linux') {
+/** Linux 无可用 GPU/Vulkan 时 Electron 会 FATAL；默认关加速。有独显：LANPM_ENABLE_GPU=1 */
+if (shouldDisableLinuxGpu()) {
   app.disableHardwareAcceleration()
-  app.commandLine.appendSwitch('disable-gpu')
-  app.commandLine.appendSwitch('disable-gpu-sandbox')
-  /** 无头/旧 libva 时避免 stderr：Installed VAAPI version is too old */
-  app.commandLine.appendSwitch('disable-accelerated-video-decode')
-  app.commandLine.appendSwitch('disable-accelerated-video-encode')
+  for (const sw of LINUX_DISABLE_GPU_SWITCHES) {
+    app.commandLine.appendSwitch(sw)
+  }
 }
 
 function startupErrorMessage(err: unknown): string {
