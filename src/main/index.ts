@@ -38,6 +38,8 @@ import { completeSetup, getSetupStatus } from './identity/setup'
 import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { ensureProfileUserDataPath } from './storage/profilePaths'
+import { probeSqliteAtRest } from './storage/sqliteAtRest'
+import { promptDatabasePassphrase } from './storage/unlockPassphrase'
 import { resolveWindowIcon, resolveAppIconPath } from './appIcon'
 import { attachCloseToTray, hasSystemTray, initSystemTray } from './systemTray'
 import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
@@ -104,6 +106,9 @@ function startupErrorMessage(err: unknown): string {
   if (msg.includes('NODE_MODULE_VERSION') || msg.includes('better_sqlite3')) {
     return `${msg}\n\n请在本项目根目录执行：\nnpm run ensure:native\n\n（开发/构建前会自动检测并重编；勿单独 npm rebuild better-sqlite3）`
   }
+  if (msg === 'err.dbPassphraseRequired') return '数据库已加密，需要通行词（或设置 LANPM_DB_PASSPHRASE）。'
+  if (msg === 'err.dbWrongPassphrase') return '通行词不正确，无法打开数据库。'
+  if (msg === 'err.dbPassphraseTooShort') return '通行词至少 8 个字符。'
   return msg
 }
 
@@ -216,14 +221,26 @@ function createWindow(): BrowserWindow {
   return mainWindow
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   try {
     Menu.setApplicationMenu(null)
 
     if (!visualCaptureDir && !e2eMode) {
       ensureProfileUserDataPath()
     }
-    initDatabase()
+    const dbKind = probeSqliteAtRest(getDatabasePath())
+    let passphrase: string | undefined
+    if (dbKind === 'encrypted') {
+      passphrase = process.env.LANPM_DB_PASSPHRASE?.trim() || undefined
+      if (!passphrase) {
+        passphrase = (await promptDatabasePassphrase()) ?? undefined
+      }
+      if (!passphrase) {
+        app.quit()
+        return
+      }
+    }
+    initDatabase(passphrase ? { passphrase } : undefined)
     if (e2eMode && !getSetupStatus(getDatabase()).configured) {
       const baseName = process.env.LANPM_E2E_NAME?.trim() || 'E2ETest'
       completeSetup(getDatabase(), { baseName })

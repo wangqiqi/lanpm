@@ -19,7 +19,9 @@ import {
   updateLocalRetentionDays
 } from '../data/dataService'
 import { listDistinctDmGroupIds } from '../storage/repositories/messageRepository'
-import { getDatabase } from '../storage'
+import { getDatabase, encryptOpenDatabase, getDatabaseAtRestKind } from '../storage'
+import { SQLITE_AT_REST_MIN_PASSPHRASE } from '../storage/sqliteAtRest'
+import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 import { showOpenDialog, showSaveDialog } from '../systemDialog'
 
 export function registerDataIpc(): void {
@@ -110,4 +112,17 @@ export function registerDataIpc(): void {
       return importGroupBundle(getDatabase(), path, password, mode)
     }
   )
+
+  ipcMain.handle(DATA_IPC.getAtRestStatus, () => ({
+    encrypted: getDatabaseAtRestKind() === 'encrypted',
+    minPassphraseLength: SQLITE_AT_REST_MIN_PASSPHRASE
+  }))
+
+  ipcMain.handle(DATA_IPC.encryptAtRest, (_event, passphrase: string) => {
+    if (getDatabaseAtRestKind() === 'encrypted') {
+      throwLanpm('err.dbEncryptNotPlain')
+    }
+    encryptOpenDatabase(passphrase)
+    return { encrypted: true as const }
+  })
 }

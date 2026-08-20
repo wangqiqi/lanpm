@@ -7,5 +7,7 @@ export const DATA_IPC = {
   listDmGroupIds: 'data:listDmGroupIds',
   exportGroupBundle: 'data:exportGroupBundle',
   previewGroupBundle: 'data:previewGroupBundle',
-  importGroupBundle: 'data:importGroupBundle'
+  importGroupBundle: 'data:importGroupBundle',
+  getAtRestStatus: 'data:getAtRestStatus',
+  encryptAtRest: 'data:encryptAtRest'
 } as const

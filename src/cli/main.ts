@@ -4,6 +4,8 @@ import { runAgentCli } from './agentCli.ts'
 import { initNetwork, shutdownNetwork } from '../main/network/index.ts'
 import { closeDatabase, initDatabase } from '../main/storage/index.ts'
 import { ensureProfileUserDataPath } from '../main/storage/profilePaths.ts'
+import { getDatabasePath } from '../main/storage/database.ts'
+import { probeSqliteAtRest } from '../main/storage/sqliteAtRest.ts'
 
 async function main(): Promise<void> {
   if (process.env.LANPM_USER_DATA) {
@@ -11,7 +13,12 @@ async function main(): Promise<void> {
   }
   await app.whenReady()
   ensureProfileUserDataPath()
-  const db = initDatabase()
+  const kind = probeSqliteAtRest(getDatabasePath())
+  const passphrase = process.env.LANPM_DB_PASSPHRASE?.trim()
+  if (kind === 'encrypted' && !passphrase) {
+    throw new Error('err.dbPassphraseRequired')
+  }
+  const db = initDatabase(passphrase && kind === 'encrypted' ? { passphrase } : undefined)
   initNetwork(db)
   const argv = process.argv.slice(2)
   try {

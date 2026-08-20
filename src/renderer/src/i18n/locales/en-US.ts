@@ -1003,6 +1003,8 @@ const enUS = {
   'stub.uploadElectronOnly': 'Use the Electron app to upload files in browser preview',
   'stub.importBundleElectronOnly':
     'Importing group bundles requires the Electron app in browser preview',
+  'stub.encryptAtRestElectronOnly':
+    'Encrypting the local database requires the Electron app in browser preview',
   'stub.manualPeerPreviewOnly': 'Manual peers are not supported in browser preview',
   'stub.exportBookmarksElectronOnly': 'Use the Electron app to export bookmarks in browser preview',
   'stub.messageNotFound': 'Message not found',
@@ -1058,6 +1060,10 @@ const enUS = {
     'OS secure storage is unavailable; cannot save API key. Enable the system keyring or use a development build.',
   'err.apiKeyDevFallbackForbidden':
     'Packaged builds reject development-only key encryption. Re-enter your API key (OS secure storage).',
+  'err.dbPassphraseRequired': 'The database is encrypted. Enter the passphrase.',
+  'err.dbPassphraseTooShort': 'Passphrase must be at least 8 characters',
+  'err.dbWrongPassphrase': 'Wrong passphrase. The database cannot be opened.',
+  'err.dbEncryptNotPlain': 'This database is already encrypted or is not plaintext SQLite',
   'err.syncTypeUnimplemented': 'This sync message type is not implemented yet and cannot be sent',
   'sync.taskPublishFailed': 'Failed to sync task changes; will retry when connected',
   'sync.filePublishFailed': 'Failed to sync file metadata; will retry when connected',
@@ -1193,6 +1199,17 @@ const enUS = {
   'data.sectionRetention': 'Retention & usage',
   'data.sectionMaintenance': 'Maintenance',
   'data.sectionBackup': 'Backup & restore',
+  'data.sectionAtRest': 'Local database encryption',
+  'data.atRestHint':
+    'Optional: encrypt this device’s SQLite with a passphrase. If you forget it, the database cannot be opened. You will be prompted at next launch. Group file bodies on disk are not encrypted.',
+  'data.atRestPlain': 'Currently plaintext',
+  'data.atRestEncrypted': 'Currently encrypted',
+  'data.atRestPassphrase': 'Passphrase (min 8 characters)',
+  'data.atRestConfirm': 'Confirm passphrase',
+  'data.atRestMismatch': 'Passphrases do not match',
+  'data.atRestEncrypt': 'Encrypt local database',
+  'data.atRestDone': 'Local database is encrypted. Remember your passphrase.',
+  'data.atRestForgetWarning': 'If you forget the passphrase, the data cannot be recovered. Encrypt now?',
   'data.bundleHint': 'Export or import an encrypted .lanpm-bundle for one group.',
   'data.bundleExportSection': 'Export',
   'data.bundleImportSection': 'Import',

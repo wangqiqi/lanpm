@@ -402,7 +402,9 @@ const api: LanpmApi = {
       ipcRenderer.invoke('data:exportGroupBundle', groupId, password, includeFileBodies),
     previewGroupBundle: (password) => ipcRenderer.invoke('data:previewGroupBundle', password),
     importGroupBundle: (password, conflictMode, filePath) =>
-      ipcRenderer.invoke('data:importGroupBundle', password, conflictMode, filePath)
+      ipcRenderer.invoke('data:importGroupBundle', password, conflictMode, filePath),
+    getAtRestStatus: () => ipcRenderer.invoke('data:getAtRestStatus'),
+    encryptAtRest: (passphrase) => ipcRenderer.invoke('data:encryptAtRest', passphrase)
   }
 }
 

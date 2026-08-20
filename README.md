@@ -57,7 +57,7 @@
 |------------|----------------|
 | IM tools don’t do real project views | **8 views**: Chat · Board · Tree · Gantt · Calendar · Whiteboard · Files · Cockpit |
 | Project tools need cloud accounts | **P2P in the group** — LAN discovery, no central server |
-| Sensitive files forced through SaaS | **Local SQLite**, encrypted transport, **LibreOffice preview on device** |
+| Sensitive files forced through SaaS | **Local SQLite** (optional passphrase at rest), encrypted transport, **LibreOffice preview on device** |
 | FeiQ / Feige feel but no tasks | **Familiar IM UX** + boards, calendar, whiteboard, dependencies |
 
 ## 🚀 Features
@@ -68,7 +68,7 @@
 | **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health |
 | **Collab** | Excalidraw whiteboard + mind maps (Yjs CRDT over P2P), group files, LibreOffice preview, resumable transfers |
 | **Org & UX** | Project / functional / anonymous groups, leadership cockpit, light/dark, **zh / en** |
-| **Security** | AES-GCM on TCP links. After pairing or first TOFU, the peer ECDH public key is pinned to `deviceId` — a LAN MITM cannot silently swap keys. The first discovery still trusts on first use. Local-first SQLite. Win/macOS/Linux × x64/arm64 packages. |
+| **Security** | AES-GCM on TCP links. After pairing or first TOFU, the peer ECDH public key is pinned to `deviceId` — a LAN MITM cannot silently swap keys. The first discovery still trusts on first use. Local-first SQLite with **optional passphrase encryption at rest**. Win/macOS/Linux × x64/arm64 packages. |
 
 Full capability list, protocols, and verify scripts → [docs/00](./docs/00_文档导航.md) · [PRD](./docs/01_产品需求文档.md) · [CHANGELOG](./CHANGELOG.md).
 

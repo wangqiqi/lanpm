@@ -17,7 +17,8 @@ const steps = [
   'verify:schema-fk',
   'verify:sec-hardening',
   'verify:storage-path-resolver',
-  'verify:screenshots-layout'
+  'verify:screenshots-layout',
+  'verify:db-at-rest'
 ] as const
 
 for (const step of steps) {

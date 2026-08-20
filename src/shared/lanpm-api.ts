@@ -232,6 +232,8 @@ export interface LanpmApi {
       conflictMode: BundleConflictMode,
       filePath?: string
     ) => Promise<GroupBundleImportResult | null>
+    getAtRestStatus: () => Promise<{ encrypted: boolean; minPassphraseLength: number }>
+    encryptAtRest: (passphrase: string) => Promise<{ encrypted: true }>
   }
   group: {
     list: () => Promise<GroupRecord[]>

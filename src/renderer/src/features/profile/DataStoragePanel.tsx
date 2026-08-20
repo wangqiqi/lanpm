@@ -58,6 +58,10 @@ export default function DataStoragePanel(): React.ReactElement {
   const [importPassword, setImportPassword] = useState('')
   const [importMode, setImportMode] = useState<BundleConflictMode>('skip')
   const [importBusy, setImportBusy] = useState(false)
+  const [atRestEncrypted, setAtRestEncrypted] = useState(false)
+  const [atRestPass, setAtRestPass] = useState('')
+  const [atRestPass2, setAtRestPass2] = useState('')
+  const [atRestBusy, setAtRestBusy] = useState(false)
 
   const modeLabel = (mode: BundleConflictMode): string => {
     if (mode === 'skip') return t('data.bundleConflictSkip')
@@ -185,6 +189,10 @@ export default function DataStoragePanel(): React.ReactElement {
 
   useEffect(() => {
     void loadSettings()
+    void getLanpmApi()
+      .data.getAtRestStatus()
+      .then((s) => setAtRestEncrypted(s.encrypted))
+      .catch(() => setAtRestEncrypted(false))
   }, [loadSettings])
 
   useEffect(() => {
@@ -324,6 +332,67 @@ export default function DataStoragePanel(): React.ReactElement {
             </Button>
           </div>
         </div>
+      </section>
+
+      <section className={styles.card} data-testid="data-at-rest-panel">
+        <Text strong className={styles.cardTitle}>
+          {t('data.sectionAtRest')}
+        </Text>
+        <Text type="secondary" className={styles.hint}>
+          {t('data.atRestHint')}
+        </Text>
+        <Text>{atRestEncrypted ? t('data.atRestEncrypted') : t('data.atRestPlain')}</Text>
+        {!atRestEncrypted ? (
+          <div className={styles.fieldStack}>
+            <Input.Password
+              className={styles.fullWidth}
+              placeholder={t('data.atRestPassphrase')}
+              value={atRestPass}
+              onChange={(e) => setAtRestPass(e.target.value)}
+              autoComplete="new-password"
+            />
+            <Input.Password
+              className={styles.fullWidth}
+              placeholder={t('data.atRestConfirm')}
+              value={atRestPass2}
+              onChange={(e) => setAtRestPass2(e.target.value)}
+              autoComplete="new-password"
+            />
+            <Button
+              disabled={atRestPass.length < 8 || atRestBusy}
+              loading={atRestBusy}
+              onClick={() => {
+                if (atRestPass !== atRestPass2) {
+                  message.error(t('data.atRestMismatch'))
+                  return
+                }
+                Modal.confirm({
+                  title: t('data.atRestEncrypt'),
+                  content: t('data.atRestForgetWarning'),
+                  okText: t('data.atRestEncrypt'),
+                  cancelText: t('common.cancel'),
+                  okButtonProps: { danger: true },
+                  onOk: async () => {
+                    setAtRestBusy(true)
+                    try {
+                      await getLanpmApi().data.encryptAtRest(atRestPass)
+                      setAtRestEncrypted(true)
+                      setAtRestPass('')
+                      setAtRestPass2('')
+                      message.success(t('data.atRestDone'))
+                    } catch (err) {
+                      message.error(formatError(err, 'data.saveFailed'))
+                    } finally {
+                      setAtRestBusy(false)
+                    }
+                  }
+                })
+              }}
+            >
+              {t('data.atRestEncrypt')}
+            </Button>
+          </div>
+        ) : null}
       </section>
 
       <section className={styles.card}>

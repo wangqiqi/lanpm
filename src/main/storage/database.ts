@@ -1,20 +1,36 @@
-import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'path'
 import { applyMigrations } from './migrate.ts'
 import { EXPECTED_TABLES } from './schema.ts'
+import {
+  encryptExistingPlainDatabase,
+  openSqliteDatabase,
+  probeSqliteAtRest,
+  type SqliteAtRestKind
+} from './sqliteAtRest.ts'
+import type Database from 'better-sqlite3'
 
 let dbInstance: Database.Database | null = null
+let sessionPassphrase: string | undefined
 
 export function getDatabasePath(): string {
   return join(app.getPath('userData'), 'lanpm.db')
 }
 
-export function initDatabase(): Database.Database {
+export function getDatabaseAtRestKind(): SqliteAtRestKind {
+  return probeSqliteAtRest(getDatabasePath())
+}
+
+export function initDatabase(options?: { passphrase?: string }): Database.Database {
   if (dbInstance) return dbInstance
 
   const dbPath = getDatabasePath()
-  const db = new Database(dbPath)
+  const kind = probeSqliteAtRest(dbPath)
+  const passphrase = options?.passphrase ?? sessionPassphrase
+  const db = openSqliteDatabase(dbPath, passphrase)
+  if (kind === 'encrypted' && passphrase) {
+    sessionPassphrase = passphrase
+  }
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
 
@@ -48,5 +64,21 @@ export function closeDatabase(): void {
   if (dbInstance) {
     dbInstance.close()
     dbInstance = null
+  }
+}
+
+export function encryptOpenDatabase(passphrase: string): void {
+  const dbPath = getDatabasePath()
+  closeDatabase()
+  try {
+    encryptExistingPlainDatabase(dbPath, passphrase)
+    sessionPassphrase = passphrase
+    initDatabase({ passphrase })
+  } catch (err) {
+    sessionPassphrase = undefined
+    if (probeSqliteAtRest(dbPath) === 'plain') {
+      initDatabase()
+    }
+    throw err
   }
 }

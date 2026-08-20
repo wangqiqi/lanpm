@@ -23,6 +23,8 @@ describe('IPC channel contracts', () => {
     expect(DATA_IPC.setLocalRetentionDays).toBe('data:setLocalRetentionDays')
     expect(DATA_IPC.exportGroupBundle).toBe('data:exportGroupBundle')
     expect(DATA_IPC.importGroupBundle).toBe('data:importGroupBundle')
+    expect(DATA_IPC.getAtRestStatus).toBe('data:getAtRestStatus')
+    expect(DATA_IPC.encryptAtRest).toBe('data:encryptAtRest')
   })
 
   it('chat push and invoke channels', () => {

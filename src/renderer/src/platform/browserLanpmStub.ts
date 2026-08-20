@@ -2929,6 +2929,10 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       importGroupBundle: async () => {
         throw stubError('stub.importBundleElectronOnly')
+      },
+      getAtRestStatus: async () => ({ encrypted: false, minPassphraseLength: 8 }),
+      encryptAtRest: async () => {
+        throw stubError('stub.encryptAtRestElectronOnly')
       }
     }
   }
