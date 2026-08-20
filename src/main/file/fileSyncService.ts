@@ -36,6 +36,11 @@ import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
 import { getFileById, upsertRemoteFileMeta } from '../storage/repositories/fileRepository'
 import {
+  handleFileMetaSyncBatch,
+  handleFileMetaSyncRequest,
+  requestFileMetaOfflineSync
+} from './fileMetaOfflineSyncService'
+import {
   finishTransfer,
   getLatestDownloadTransfer,
   getTransferById,
@@ -320,10 +325,13 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     return
   }
   if (envelope.type === 'file_meta_sync_request') {
+    void handleFileMetaSyncRequest(db, envelope).catch(
+      catchSyncFailure('fileSync.handleMetaSyncRequest', { notify: false })
+    )
     return
   }
   if (envelope.type === 'file_meta_sync_batch') {
-    return
+    handleFileMetaSyncBatch(db, envelope, broadcastFiles)
   }
 }
 
@@ -343,6 +351,9 @@ export function initFileSyncService(db: Database): void {
   for (const group of listUserGroups(db)) {
     ensureSubscribed(db, group.groupId)
   }
+  void requestFileMetaOfflineSync(db).catch(
+    catchSyncFailure('fileSync.requestMetaOffline', { notify: false })
+  )
 }
 
 export function shutdownFileSyncService(): void {
