@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.104.0] - 2026-08-20
+
 ### Added
 
 - **英文无头截图**：`LANPM_VISUAL_LOCALE=en-US` + `LANPM_VISUAL_SLUGS`；`npm run verify:visual-screenshots-en` 产出 cockpit/chat 英文 PNG（`TASK-4901`）
