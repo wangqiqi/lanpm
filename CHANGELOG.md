@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- 根目录 `README.html`：`README.md` 的 HTML 导出，便于离线浏览
+
 ## [1.103.0] - 2026-08-01
 
 ### Added
