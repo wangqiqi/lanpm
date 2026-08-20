@@ -25,6 +25,7 @@
 
 ### Changed
 
+- **P2P `file_chunk` 双栈**：拉取可声明 `chunkEncoding: 'binary'`，密封明文为小 JSON 头 + 原始片；未声明仍走 `chunkBase64`。本机新客户端默认请求 binary（`TASK-3401`–`TASK-3404`）
 - **Linux GPU**：默认仍关闭硬件加速；`LANPM_ENABLE_GPU=1` 可 opt-in 以便对照 RSS（无 Vulkan 会 FATAL）（`TASK-3201`–`TASK-3204`）
 - **SQLite at-rest 探测**：只读 16 字节文件头，加密/明文判断不再整库读入（`TASK-3101`）
 - **任务列表**：创建/更新/移动/聊天建任务后本地 upsert，不再整群 `listTasks`；删除级联与依赖边仍刷新（`TASK-3102` · `TASK-3103`）
