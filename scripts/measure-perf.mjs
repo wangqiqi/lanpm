@@ -8,7 +8,7 @@
  *   npm run measure:perf -- --quick --cold
  *   npm run measure:perf -- --full
  */
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
@@ -159,22 +159,20 @@ async function runUiSlices(opts, report) {
 function runDbSlice(report) {
   const electronNode = join(root, 'scripts', 'run-electron-node.mjs')
   const script = join(root, 'tests', 'integration', 'measure-db-perf.ts')
+  const outFile = join(root, '.lanpm', 'perf', 'db-slice.json')
+  mkdirSync(join(root, '.lanpm', 'perf'), { recursive: true })
   const r = spawnSync(process.execPath, [electronNode, '--experimental-strip-types', script], {
     cwd: root,
     encoding: 'utf8',
-    env: { ...process.env, LANPM_MEASURE_DB_JSON: '1' }
+    env: { ...process.env, LANPM_MEASURE_DB_OUT: outFile }
   })
   if (r.status !== 0) {
     throw new Error(`measure-db-perf failed: ${r.stderr || r.stdout || r.status}`)
   }
-  const line = (r.stdout || '')
-    .split('\n')
-    .map((s) => s.trim())
-    .find((s) => s.startsWith('{') && s.includes('dbPlainMs'))
-  if (!line) {
-    throw new Error('measure-db-perf produced no JSON line')
+  if (!existsSync(outFile)) {
+    throw new Error('measure-db-perf did not write LANPM_MEASURE_DB_OUT')
   }
-  const parsed = JSON.parse(line)
+  const parsed = JSON.parse(readFileSync(outFile, 'utf8'))
   report.dbPlainMs = parsed.dbPlainMs
   report.dbCipherMs = parsed.dbCipherMs
 }
