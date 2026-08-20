@@ -44,6 +44,11 @@ import {
   handleIncomingGroupTagPatch,
   setGroupTagMetaChangedHandler
 } from './groupTagSyncService'
+import {
+  handleGroupTagSyncBatch,
+  handleGroupTagSyncRequest,
+  requestGroupTagOfflineSync
+} from './groupTagOfflineSyncService'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 import { enqueueFailedPublish } from '../sync/outboxEnqueue'
 import { initSyncOutboxFlush, shutdownSyncOutboxFlush } from '../sync/outboxFlushService'
@@ -143,6 +148,16 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'group_tag_patch') {
     handleIncomingGroupTagPatch(db, envelope)
+    return
+  }
+  if (envelope.type === 'group_tag_sync_request') {
+    void handleGroupTagSyncRequest(db, envelope).catch(
+      catchSyncFailure('groupTag.handleSyncRequest', { notify: false })
+    )
+    return
+  }
+  if (envelope.type === 'group_tag_sync_batch') {
+    handleGroupTagSyncBatch(db, envelope, broadcastGroupTagMetaChanged)
   }
 }
 
@@ -255,6 +270,9 @@ export function initTaskSyncService(db: Database): void {
   refreshSubscriptions(db)
   void requestTaskOfflineSync(db).catch(
     catchSyncFailure('taskSync.requestOffline', { notify: false })
+  )
+  void requestGroupTagOfflineSync(db).catch(
+    catchSyncFailure('taskSync.requestGroupTagOffline', { notify: false })
   )
   wireTaskCrdtOfflineSync(db, broadcastTasksChanged)
   initSyncOutboxFlush(db)

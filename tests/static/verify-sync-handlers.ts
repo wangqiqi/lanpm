@@ -31,6 +31,8 @@ const SYNC_TYPES = [
   'mindmap_crdt_sync_batch',
   'mindmap_awareness',
   'group_tag_patch',
+  'group_tag_sync_request',
+  'group_tag_sync_batch',
   'file_meta',
   'file_pull_request',
   'file_chunk',
@@ -62,6 +64,7 @@ const HANDLER_FILES = [
   'src/main/task/taskCrdtOfflineSyncService.ts',
   'src/main/task/taskAwarenessService.ts',
   'src/main/task/groupTagSyncService.ts',
+  'src/main/task/groupTagOfflineSyncService.ts',
   'src/main/whiteboard/whiteboardCrdtService.ts',
   'src/main/whiteboard/whiteboardCrdtOfflineSyncService.ts',
   'src/main/whiteboard/whiteboardAwarenessService.ts',
@@ -117,6 +120,8 @@ assert.match(taskAwarenessSrc, /TaskAwarenessLocalState/, 'TaskAwarenessLocalSta
 const groupTagSrc = readFileSync(join(root, 'src/shared/task/groupTagMeta.ts'), 'utf8')
 assert.match(groupTagSrc, /GroupTagPatchPayload/, 'GroupTagPatchPayload required')
 assert.match(groupTagSrc, /isGroupTagPatchPayload/, 'isGroupTagPatchPayload required')
+assert.match(groupTagSrc, /GroupTagSyncRequestPayload/, 'GroupTagSyncRequestPayload required')
+assert.match(groupTagSrc, /isGroupTagSyncBatchPayload/, 'isGroupTagSyncBatchPayload required')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
