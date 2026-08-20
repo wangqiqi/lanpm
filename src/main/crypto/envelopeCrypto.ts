@@ -46,31 +46,63 @@ function payloadPlaintext(envelope: SyncEnvelope): Buffer {
   return Buffer.from(JSON.stringify(envelope.payload ?? null), 'utf8')
 }
 
-export function sealEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelope {
+export type SealedEnvelopeParts = {
+  meta: Omit<SyncEnvelope, 'payload'>
+  ciphertext: Buffer
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+/** Ciphertext from JSON `__enc` or raw Buffer payload (TASK-4202). */
+export function sealedCiphertextFromPayload(payload: unknown): Buffer | null {
+  if (Buffer.isBuffer(payload)) return payload
+  if (!isRecord(payload)) return null
+  if (Buffer.isBuffer(payload.__encBin)) return payload.__encBin
+  if (typeof payload.__enc === 'string' && payload.__enc.length > 0) {
+    return Buffer.from(payload.__enc, 'base64')
+  }
+  return null
+}
+
+export function sealEnvelopeParts(aesKey: Buffer, envelope: SyncEnvelope): SealedEnvelopeParts {
   const sealed = sealBytes(aesKey, payloadPlaintext(envelope))
+  const { payload: _payload, ...meta } = envelope
   return {
-    ...envelope,
-    payload: { __enc: sealed.ciphertext.toString('base64') },
-    nonce: sealed.nonce,
-    authTag: sealed.authTag
+    meta: { ...meta, nonce: sealed.nonce, authTag: sealed.authTag },
+    ciphertext: sealed.ciphertext
   }
 }
 
-export function openEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelope {
-  const wrapped = envelope.payload as { __enc?: string }
-  if (!wrapped?.__enc || !envelope.nonce || !envelope.authTag) {
-    throw new Error('envelope not sealed')
-  }
-  const plain = openBytes(
-    aesKey,
-    Buffer.from(wrapped.__enc, 'base64'),
-    envelope.nonce,
-    envelope.authTag
-  )
-  const framed = tryDecodeFileChunkFrame(plain)
-  const payload: unknown = framed ?? (JSON.parse(plain.toString('utf8')) as unknown)
+export function sealEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelope {
+  const { meta, ciphertext } = sealEnvelopeParts(aesKey, envelope)
   return {
     ...envelope,
-    payload
+    ...meta,
+    payload: { __enc: ciphertext.toString('base64') }
   }
+}
+
+export function openSealedBytes(
+  aesKey: Buffer,
+  meta: Omit<SyncEnvelope, 'payload'>,
+  ciphertext: Buffer
+): SyncEnvelope {
+  if (!meta.nonce || !meta.authTag) {
+    throw new Error('envelope not sealed')
+  }
+  const plain = openBytes(aesKey, ciphertext, meta.nonce, meta.authTag)
+  const framed = tryDecodeFileChunkFrame(plain)
+  const payload: unknown = framed ?? (JSON.parse(plain.toString('utf8')) as unknown)
+  return { ...meta, payload }
+}
+
+export function openEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelope {
+  const ciphertext = sealedCiphertextFromPayload(envelope.payload)
+  if (!ciphertext || !envelope.nonce || !envelope.authTag) {
+    throw new Error('envelope not sealed')
+  }
+  const { payload: _payload, ...meta } = envelope
+  return openSealedBytes(aesKey, meta, ciphertext)
 }

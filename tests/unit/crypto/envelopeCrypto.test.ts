@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { randomBytes } from 'node:crypto'
-import { openEnvelope, sealEnvelope } from '../../../src/main/crypto/envelopeCrypto.ts'
+import { openEnvelope, openSealedBytes, sealEnvelope, sealEnvelopeParts } from '../../../src/main/crypto/envelopeCrypto.ts'
 import type { SyncEnvelope } from '../../../src/shared/network/types.ts'
 
 const aes = randomBytes(32)
@@ -54,5 +54,14 @@ describe('openEnvelope', () => {
     const sealed = sealEnvelope(aes, base)
     expect(() => openEnvelope(aes, { ...sealed, nonce: '' })).toThrow(/not sealed/)
     expect(() => openEnvelope(aes, { ...sealed, authTag: '' })).toThrow(/not sealed/)
+  })
+
+  it('opens raw ciphertext Buffer without JSON __enc (TASK-4202)', () => {
+    const { meta, ciphertext } = sealEnvelopeParts(aes, base)
+    expect(Buffer.isBuffer(ciphertext)).toBe(true)
+    const viaPayload = openEnvelope(aes, { ...meta, payload: ciphertext })
+    expect(viaPayload.payload).toEqual({ text: 'hi' })
+    const viaParts = openSealedBytes(aes, meta, ciphertext)
+    expect(viaParts.payload).toEqual({ text: 'hi' })
   })
 })
