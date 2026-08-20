@@ -35,6 +35,8 @@
 
 .headerActions {
   justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .backBtnLabel {
