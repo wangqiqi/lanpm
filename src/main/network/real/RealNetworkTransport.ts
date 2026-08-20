@@ -14,7 +14,7 @@ import {
   HEARTBEAT_INTERVAL_MS,
   RECONNECT_BACKOFF_MS
 } from '../../../shared/network/constants.ts'
-import { generateDhKeyPair } from '../../crypto/dhSession.ts'
+import { loadOrCreateDeviceKeyPair } from '../../crypto/deviceKeyStore.ts'
 import { rememberPeerGroups, listCachedDiscoverGroups } from '../../discover/discoverGroupRegistry.ts'
 import { parseHostPort } from '../../../shared/network/manualPeer.ts'
 import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
@@ -77,6 +77,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly deviceId: string
   private readonly userId: string
   private readonly displayName: string
+  private readonly deviceKeys: ReturnType<typeof loadOrCreateDeviceKeyPair>
   private readonly capabilities: string[]
   private readonly listenPort: number
   private readonly disableUdp: boolean
@@ -109,6 +110,7 @@ export class RealNetworkTransport implements NetworkTransport {
     this.deviceId = options.deviceId
     this.userId = options.userId
     this.displayName = options.displayName
+    this.deviceKeys = loadOrCreateDeviceKeyPair(this.deviceId)
     this.capabilities = options.capabilities ?? ['chat', 'file', 'task']
     this.listenPort = options.listenPort ?? 43_124
     this.disableUdp = options.disableUdp ?? false
@@ -168,7 +170,7 @@ export class RealNetworkTransport implements NetworkTransport {
       },
       listenPort: this.listenPort,
       getAdvertGroups: () => getDiscoverableGroupsForAdvert(),
-      keys: generateDhKeyPair(),
+      keys: this.deviceKeys,
       onEnvelope: options.onEnvelope,
       onPeerIdentified: (peer) => {
         this.registerTcpPeer({ ...peer, host: peer.host ?? remoteHost })
@@ -370,6 +372,10 @@ export class RealNetworkTransport implements NetworkTransport {
   /** 发起方：开始分享群组连接码 */
   getListenPort(): number {
     return this.listenPort
+  }
+
+  getLocalPublicKeyHex(): string {
+    return this.deviceKeys.publicKey.toString('hex')
   }
 
   startPairingSession(): PairingSessionView {

@@ -15,11 +15,11 @@
 - **路径**：`groupId` / 文件名拒绝 `..` 穿越（`TASK-2703`）
 - **插件**：侧载不得覆盖同 id 内置插件；打包忽略 skip-verify 环境变量（`TASK-2704`）
 - **人审**：`ops.command.send` · `chat.sendTaskRef` · `media.livekit.createToken` 须确认；Gateway 禁用 query `?token=`，改 timing-safe Bearer / WS subprotocol（`TASK-2705`）
-- **破坏性 IPC**：重置身份 / 解散群组在主进程二次确认（`TASK-2708`）
+- **P2P 握手**：`deviceId` 钉死 ECDH 公钥（pairing / TOFU / peer file）；已钉钥被替换则拒绝 `ready`；配对材料混入 AES KDF（`TASK-2801`–`TASK-2807`）
 
 ### Changed
 
-- README / README.zh-CN 版本与 `package.json` `1.103.0` 对齐；安全声明改为「AES-GCM 保密、不声称防 LAN MITM」（`TASK-2706` · `TASK-2707`）
+- README / README.zh-CN：已钉钥防 MITM；首次发现仍 TOFU（`TASK-2807`）
 - **安全**：路径段校验 `shared/fs/safeSegment`；网关 Bearer `timingSafeEqual`；破坏性操作确认文案模块
 
 ### Changed

@@ -76,7 +76,7 @@
     "verify:pairing-subnet-scan": "node --experimental-strip-types tests/static/verify-pairing-subnet-scan.ts",
     "verify:pairing-peer": "node --experimental-strip-types tests/integration/verify-pairing-peer.ts && vitest run tests/unit/network/peerFile.test.ts",
     "verify:pairing-cli": "node --experimental-strip-types tests/integration/verify-pairing-cli.ts",
-    "verify:pairing-security": "node --experimental-strip-types tests/static/verify-pairing-security.ts && vitest run tests/unit/network/pairingSession.test.ts",
+    "verify:pairing-security": "node --experimental-strip-types tests/static/verify-pairing-security.ts && vitest run tests/unit/network/pairingSession.test.ts tests/unit/crypto/peerTrustStore.test.ts tests/unit/crypto/dhSession.test.ts tests/unit/network/peerHandshakePin.test.ts",
     "verify:pairing-code": "node --experimental-strip-types tests/runners/verify-pairing-code.ts",
     "verify:discover-relay": "node --experimental-strip-types tests/integration/verify-discover-relay.ts",
     "verify:discover-seeds-restart": "node --experimental-strip-types tests/integration/verify-discover-seeds-restart.ts",

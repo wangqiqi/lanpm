@@ -14,11 +14,20 @@ const pairingSession = readFileSync(
 )
 const pairingTypes = readFileSync(join(root, 'src/shared/network/pairingTypes.ts'), 'utf8')
 
+const peerTrust = readFileSync(join(root, 'src/main/crypto/peerTrustStore.ts'), 'utf8')
+const peerLink = readFileSync(join(root, 'src/main/network/real/peerLink.ts'), 'utf8')
+const dhSession = readFileSync(join(root, 'src/main/crypto/dhSession.ts'), 'utf8')
+
 assert.match(pairingTypes, /PAIRING_TTL_MS/)
 assert.match(pairingTypes, /MAX_PAIRING_FAIL_PER_JOINER/)
 assert.match(pairingTypes, /MAX_PAIRING_LOOKUPS_PER_JOINER_PER_MINUTE/)
 assert.match(pairingSession, /consumed/)
 assert.match(pairingSession, /lookupTimestamps/)
 assert.match(pairingSession, /rate_limit/)
+assert.match(peerTrust, /PEER_PUBKEY_MISMATCH/)
+assert.match(peerTrust, /acceptOrPinPeerPublicKey/)
+assert.match(dhSession, /kdfSaltFromPairingCode/)
+assert.match(peerLink, /acceptOrPinPeerPublicKey/)
+assert.match(peerLink, /kdfSaltFromPairingCode/)
 
-console.log('verify:pairing-security OK')
+console.log('verify:pairing-security static OK')

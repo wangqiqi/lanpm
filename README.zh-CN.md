@@ -68,7 +68,7 @@
 | **项目管理** | 看板、任务树、甘特、日历、四类依赖、标签、验收清单、Presence、工期健康度 |
 | **协作** | Excalidraw 白板（群内 P2P CRDT）、群文件、LibreOffice 预览、断点续传 |
 | **组织与体验** | 项目 / 职能 / 匿名群、领导驾驶舱、亮暗主题、**中 / 英** |
-| **安全** | TCP 链路上 AES-GCM（保密）。握手为未绑定配对身份的 ECDH — **不声称**防局域网中间人。本地优先 SQLite。Win/macOS/Linux × x64/arm64 安装包。 |
+| **安全** | TCP 链路上 AES-GCM。配对成功或首次 TOFU 后把对端 ECDH 公钥钉到 `deviceId` — 局域网中间人无法再静默换钥。首次发现仍是信任首次使用。本地优先 SQLite。Win/macOS/Linux × x64/arm64 安装包。 |
 
 完整能力、协议与验收脚本 → [docs/00](./docs/00_文档导航.md) · [PRD](./docs/01_产品需求文档.md) · [CHANGELOG](./CHANGELOG.md)。
 

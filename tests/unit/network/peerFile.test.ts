@@ -41,4 +41,15 @@ describe('peerFile', () => {
       'peer_file_unsupported_version'
     )
   })
+
+  it('includes publicKeyHex in fingerprint', () => {
+    const file = buildLanpmPeerFile({ ...input, publicKeyHex: 'aa'.repeat(32) })
+    expect(file.publicKeyHex).toBe('aa'.repeat(32))
+    const tampered = { ...file, publicKeyHex: 'bb'.repeat(32) }
+    expect(() => parseLanpmPeerFileJson(JSON.stringify(tampered))).toThrow(
+      'peer_file_fingerprint_mismatch'
+    )
+    const parsed = parseLanpmPeerFileJson(serializeLanpmPeerFile(file))
+    expect(parsed.publicKeyHex).toBe('aa'.repeat(32))
+  })
 })

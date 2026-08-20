@@ -3,9 +3,19 @@ import type { DiscoverRelayPacket } from '../../../shared/discover/discoverRelay
 import type { DiscoverableGroupAdvert } from '../../../shared/discover/types'
 import type { DiscoveryPayload } from '../../../shared/network/types'
 import type { SyncEnvelope } from '../../../shared/network/types'
+import { HANDSHAKE_TIMEOUT_MS } from '../../../shared/network/constants.ts'
 import type { PairingResolveFailReason } from '../../../shared/network/pairingTypes.ts'
 import { PAIRING_RESOLVE_TIMEOUT_MS } from '../../../shared/network/pairingTypes.ts'
-import { deriveAesKey, deriveSharedSecret, type DhKeyPair } from '../../crypto/dhSession.ts'
+import {
+  deriveAesKey,
+  deriveSharedSecret,
+  kdfSaltFromPairingCode,
+  type DhKeyPair
+} from '../../crypto/dhSession.ts'
+import {
+  acceptOrPinPeerPublicKey,
+  PEER_PUBKEY_MISMATCH
+} from '../../crypto/peerTrustStore.ts'
 import { openEnvelope, sealEnvelope } from '../../crypto/envelopeCrypto.ts'
 import {
   createWireDecoder,
@@ -69,6 +79,7 @@ export class PeerLink {
     timer: ReturnType<typeof setTimeout>
   } | null = null
   private awaitingPairingOk = false
+  private pairingCode: string | null = null
 
   constructor(opts: PeerLinkOptions) {
     this.opts = opts
@@ -104,17 +115,16 @@ export class PeerLink {
     this.state = 'handshaking'
 
     await new Promise<void>((resolve, reject) => {
+      this.armConnectCompletion(resolve, reject, 'handshake_timeout')
       const host = peer.host ?? '127.0.0.1'
       const socket = net.connect({ host, port: peer.listenPort }, () => {
         this.socket = socket
         this.sendWire(this.localHandshake())
-        resolve()
       })
       socket.on('data', (chunk) => this.decoder.feed(chunk))
       socket.on('close', () => this.close())
       socket.on('error', (err) => {
-        this.close()
-        reject(err)
+        this.failConnect(err)
       })
     })
   }
@@ -128,16 +138,15 @@ export class PeerLink {
     this.state = 'handshaking'
 
     await new Promise<void>((resolve, reject) => {
+      this.armConnectCompletion(resolve, reject, 'handshake_timeout')
       const socket = net.connect({ host, port }, () => {
         this.socket = socket
         this.sendWire(this.localHandshake())
-        resolve()
       })
       socket.on('data', (chunk) => this.decoder.feed(chunk))
       socket.on('close', () => this.close())
       socket.on('error', (err) => {
-        this.close()
-        reject(err)
+        this.failConnect(err)
       })
     })
   }
@@ -155,17 +164,10 @@ export class PeerLink {
     this.remoteHost = host
     this.state = 'handshaking'
     this.awaitingPairingOk = true
+    this.pairingCode = pairing.code
 
     await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        this.failConnect(new Error('pairing_resolve_timeout'))
-      }, PAIRING_RESOLVE_TIMEOUT_MS)
-
-      this.connectCompletion = {
-        resolve,
-        reject,
-        timer
-      }
+      this.armConnectCompletion(resolve, reject, 'pairing_resolve_timeout', PAIRING_RESOLVE_TIMEOUT_MS)
 
       const socket = net.connect({ host, port }, () => {
         this.socket = socket
@@ -203,7 +205,7 @@ export class PeerLink {
   close(): void {
     if (this.state === 'closed') return
     this.state = 'closed'
-    this.clearConnectCompletion()
+    this.clearConnectCompletion(new Error('link_closed'))
     this.socket?.destroy()
     this.socket = null
     this.aesKey = null
@@ -271,6 +273,19 @@ export class PeerLink {
     this.completeConnect()
   }
 
+  private armConnectCompletion(
+    resolve: () => void,
+    reject: (err: Error) => void,
+    timeoutCode: string,
+    timeoutMs?: number
+  ): void {
+    const ms = timeoutMs ?? HANDSHAKE_TIMEOUT_MS
+    const timer = setTimeout(() => {
+      this.failConnect(new Error(timeoutCode))
+    }, ms)
+    this.connectCompletion = { resolve, reject, timer }
+  }
+
   private completeConnect(): void {
     if (!this.connectCompletion) return
     clearTimeout(this.connectCompletion.timer)
@@ -308,6 +323,7 @@ export class PeerLink {
       }
       const result = resolver(msg.code, msg.joinerDeviceId, msg.joinerDisplayName)
       if (result.ok) {
+        this.pairingCode = msg.code
         this.sendWire({
           kind: 'pairing_resolve_ok',
           ...result.profile
@@ -372,9 +388,31 @@ export class PeerLink {
 
   private finishHandshake(peerPublicHex: string): void {
     if (this.state === 'ready') return
-    const peerPublic = Buffer.from(peerPublicHex, 'hex')
-    const secret = deriveSharedSecret(this.opts.keys.privateKey, peerPublic)
-    this.aesKey = deriveAesKey(secret)
+    const deviceId = this.remoteDeviceId
+    if (!deviceId) {
+      this.failConnect(new Error('handshake_missing_device'))
+      return
+    }
+    try {
+      acceptOrPinPeerPublicKey(
+        deviceId,
+        peerPublicHex,
+        this.pairingCode ? 'pairing' : 'tofu'
+      )
+    } catch (err) {
+      const message = err instanceof Error ? err.message : PEER_PUBKEY_MISMATCH
+      this.failConnect(new Error(message))
+      return
+    }
+    try {
+      const peerPublic = Buffer.from(peerPublicHex, 'hex')
+      const secret = deriveSharedSecret(this.opts.keys.privateKey, peerPublic)
+      const salt = this.pairingCode ? kdfSaltFromPairingCode(this.pairingCode) : Buffer.alloc(0)
+      this.aesKey = deriveAesKey(secret, salt)
+    } catch {
+      this.failConnect(new Error('handshake_dh_failed'))
+      return
+    }
     this.state = 'ready'
     this.notifyReady()
   }

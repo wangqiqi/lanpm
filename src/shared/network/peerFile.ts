@@ -9,6 +9,8 @@ export interface LanpmPeerFileV1 {
   deviceId: string
   displayName: string
   fingerprint: string
+  /** 本机 ECDH 公钥（hex）；缺省时导入仍走握手 TOFU */
+  publicKeyHex?: string
 }
 
 export type LanpmPeerFileInput = {
@@ -16,12 +18,17 @@ export type LanpmPeerFileInput = {
   port: number
   deviceId: string
   displayName: string
+  publicKeyHex?: string
 }
 
 export function peerFileFingerprintPayload(
-  input: Pick<LanpmPeerFileV1, 'v' | 'host' | 'port' | 'deviceId' | 'displayName'>
+  input: Pick<LanpmPeerFileV1, 'v' | 'host' | 'port' | 'deviceId' | 'displayName' | 'publicKeyHex'>
 ): string {
-  return `${input.v}|${input.host}|${input.port}|${input.deviceId}|${input.displayName}`
+  const base = `${input.v}|${input.host}|${input.port}|${input.deviceId}|${input.displayName}`
+  if (input.publicKeyHex) {
+    return `${base}|pk|${input.publicKeyHex.trim().toLowerCase()}`
+  }
+  return base
 }
 
 export function computePeerFileFingerprint(input: LanpmPeerFileInput): string {
@@ -31,10 +38,18 @@ export function computePeerFileFingerprint(input: LanpmPeerFileInput): string {
 }
 
 export function buildLanpmPeerFile(input: LanpmPeerFileInput): LanpmPeerFileV1 {
+  const publicKeyHex = input.publicKeyHex?.trim().toLowerCase() || undefined
+  const payload = {
+    host: input.host,
+    port: input.port,
+    deviceId: input.deviceId,
+    displayName: input.displayName,
+    ...(publicKeyHex ? { publicKeyHex } : {})
+  }
   return {
     v: LANPM_PEER_FILE_VERSION,
-    ...input,
-    fingerprint: computePeerFileFingerprint(input)
+    ...payload,
+    fingerprint: computePeerFileFingerprint(payload)
   }
 }
 
@@ -54,6 +69,7 @@ export function parseLanpmPeerFile(raw: unknown): LanpmPeerFileV1 {
   const deviceId = raw.deviceId
   const displayName = raw.displayName
   const fingerprint = raw.fingerprint
+  const publicKeyHexRaw = raw.publicKeyHex
   if (typeof host !== 'string' || !host.trim()) {
     throw new Error('peer_file_invalid_host')
   }
@@ -69,6 +85,13 @@ export function parseLanpmPeerFile(raw: unknown): LanpmPeerFileV1 {
   if (typeof fingerprint !== 'string' || !fingerprint.trim()) {
     throw new Error('peer_file_invalid_fingerprint')
   }
+  let publicKeyHex: string | undefined
+  if (publicKeyHexRaw !== undefined) {
+    if (typeof publicKeyHexRaw !== 'string' || !/^[0-9a-fA-F]+$/.test(publicKeyHexRaw.trim())) {
+      throw new Error('peer_file_invalid_public_key')
+    }
+    publicKeyHex = publicKeyHexRaw.trim().toLowerCase()
+  }
 
   const file: LanpmPeerFileV1 = {
     v: LANPM_PEER_FILE_VERSION,
@@ -76,7 +99,8 @@ export function parseLanpmPeerFile(raw: unknown): LanpmPeerFileV1 {
     port,
     deviceId: deviceId.trim(),
     displayName: displayName.trim(),
-    fingerprint: fingerprint.trim()
+    fingerprint: fingerprint.trim(),
+    ...(publicKeyHex ? { publicKeyHex } : {})
   }
   const expected = computePeerFileFingerprint(file)
   if (expected !== file.fingerprint) {
