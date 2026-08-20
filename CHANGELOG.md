@@ -6,6 +6,7 @@
 
 ### Added
 
+- **群标签离线补拉**：重连后按 LWW 补字典色板（`group_tag_sync_request` / `_batch`），对端离线时改的标签色不再丢（`TASK-4101`–`TASK-4105`）
 - **文件库 PDF 预览**：原生 PDF（及 soffice 转出的 PDF）用 `pdfjs-dist` 翻页，不再走 Chromium iframe（`TASK-4001`–`TASK-4005`）
 - **会议日程可编辑**：近期预约可改标题/时间/时长（`updateSchedule`），不必删了再建（`TASK-3701`–`TASK-3705`）
 - **`npm run measure:perf`**：Linux 上对 electron-vite 生产构建采集冷启动、RSS、底栏 Tab P95、明文 vs SQLCipher 查询对照；JSON 在 `.lanpm/perf/`（`TASK-2901`–`TASK-2906`）
