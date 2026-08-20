@@ -25,6 +25,7 @@
 
 ### Changed
 
+- **许可路径 SPIKE（盘点）**：宿主仍为 AGPL-3.0-or-later；插件 `paid` 闸（离线 `license.feature`）与产品 copyleft 正交；依赖侧继续禁止 GPL/AGPL 库。LICENSE 未改（SPIKE-3601）
 - **对外叙事（真网）**：`verify:m6` 标明本机 loopback；双机手验仍走 docs/05 §6，CI 未跑（`TASK-3501`–`TASK-3503`）
 - **P2P `file_chunk` 双栈**：拉取可声明 `chunkEncoding: 'binary'`，密封明文为小 JSON 头 + 原始片；未声明仍走 `chunkBase64`。本机新客户端默认请求 binary（`TASK-3401`–`TASK-3404`）
 - **Linux GPU**：默认仍关闭硬件加速；`LANPM_ENABLE_GPU=1` 可 opt-in 以便对照 RSS（无 Vulkan 会 FATAL）（`TASK-3201`–`TASK-3204`）
