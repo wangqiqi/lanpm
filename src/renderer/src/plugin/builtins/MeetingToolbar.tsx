@@ -143,6 +143,7 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
   )
 
   const onJoin = async (): Promise<void> => {
+    if (!licenseActive) return
     try {
       await joinRoom()
       message.success(t('plugin.meetingJoinOk'))
@@ -186,6 +187,7 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
   }
 
   const onProJoin = async (): Promise<void> => {
+    if (!licenseActive) return
     try {
       await joinProRoom()
       message.success(t('plugin.meetingProJoinOk'))
@@ -204,6 +206,7 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
   }
 
   const onScheduleJoin = async (): Promise<void> => {
+    if (!licenseActive) return
     if (liveKitConfigured && !sdkMissing) {
       await joinProRoom()
       return
@@ -336,6 +339,14 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
   const menuContent = (
     <div className={styles.meetingMenuPopover} data-testid="meeting-toolbar-menu">
       {statusHeader}
+      {!licenseActive ? (
+        <div className={styles.meetingToolbarCta} data-testid="meeting-license-cta">
+          <Text type="secondary">{t('plugin.meetingLicenseCta')}</Text>
+          <Button type="link" size="small" onClick={() => openProfileTab('plugins')}>
+            {t('plugin.meetingOpenPlugins')}
+          </Button>
+        </div>
+      ) : null}
       <Space size={6} wrap className={styles.meetingMenuActions}>
         {!joined ? (
           <Button

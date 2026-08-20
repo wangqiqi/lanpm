@@ -8,6 +8,7 @@ import {
   ApartmentOutlined,
   AudioOutlined,
   CameraOutlined,
+  VideoCameraOutlined,
   CodeOutlined,
   EditOutlined,
   FolderOpenOutlined,
@@ -68,6 +69,7 @@ import '@renderer/features/chat/openCollaborationPanel'
 import { useContributedViews } from '@renderer/plugin/useContributedViews'
 import { usePluginView } from '@renderer/plugin/usePluginView'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
+import { openProfileTab } from '@renderer/plugin/openProfileTab'
 import { resolveReplyQuote } from '@shared/chat/replyQuote'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import { buildQuoteKindLabels } from '@renderer/features/chat/quoteKindLabels'
@@ -347,6 +349,8 @@ export default function ChatView(): React.ReactElement {
     Boolean(gid && !inDm) && isViewAllowedForGroup(groupType, 'whiteboard', gid)
   const contributedViews = useContributedViews()
   const mindmapPlugin = usePluginView('lanpm.mindmap')
+  const meetingPlugin = usePluginView('lanpm.meeting')
+  const meetingEnabled = Boolean(meetingPlugin?.enabled)
   const mindmapAllowed =
     Boolean(gid && !inDm) &&
     contributedViews.some((v) => v.route === 'mindmap' && v.groupTypes.includes(groupType))
@@ -1306,7 +1310,16 @@ export default function ChatView(): React.ReactElement {
                 )}
                 <div className={styles.toolbarGroupDivider} aria-hidden />
                 <div className={styles.toolbarMeetingGroup} data-visual-meeting="toolbar">
-                  <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
+                  {meetingEnabled ? (
+                    <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'chat' }} />
+                  ) : (
+                    <ComposerIconButton
+                      data-testid="meeting-entry-cta"
+                      icon={<VideoCameraOutlined />}
+                      label={t('plugin.meetingLicenseCta')}
+                      onClick={() => openProfileTab('plugins')}
+                    />
+                  )}
                 </div>
               </div>
               <Segmented

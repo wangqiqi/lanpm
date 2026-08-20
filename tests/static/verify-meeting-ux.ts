@@ -40,6 +40,34 @@ assert.ok(!voicePanel.includes('voiceComingSoon'), 'ChatVoiceMediaPanel must not
 const chatView = readFileSync(join(root, 'src/renderer/src/features/chat/ChatView.tsx'), 'utf8')
 assert.ok(!chatView.includes('voiceComingSoon'), 'ChatView must not hardcode voiceComingSoon')
 
+/** TASK-5101 — unlicensed / disabled meeting entry CTA */
+assert.match(chatView, /toolbarMeetingGroup/)
+assert.match(chatView, /meetingPlugin\?\.enabled/)
+assert.match(chatView, /plugin\.meetingLicenseCta/)
+assert.match(chatView, /openProfileTab/)
+assert.match(
+  chatView,
+  /toolbarMeetingGroup[\s\S]*meetingEnabled \?[\s\S]*PluginZoneHost[\s\S]*plugin\.meetingLicenseCta[\s\S]*openProfileTab/
+)
+
+const menuIdx = toolbar.indexOf('data-testid="meeting-toolbar-menu"')
+assert.ok(menuIdx >= 0, 'MeetingToolbar main menu test id missing')
+const menuSlice = toolbar.slice(menuIdx, menuIdx + 1800)
+assert.match(menuSlice, /plugin\.meetingLicenseCta/)
+assert.match(menuSlice, /openProfileTab/)
+
+assert.match(toolbar, /disabled=\{controlsDisabled \|\| busy \|\| proJoined\}/)
+assert.match(
+  toolbar,
+  /disabled=\{controlsDisabled \|\| busy \|\| !liveKitConfigured \|\| joined \|\| sdkMissing\}/
+)
+assert.match(toolbar, /const onJoin[\s\S]*?if \(!licenseActive\) return[\s\S]*?joinRoom/)
+assert.match(toolbar, /const onProJoin[\s\S]*?if \(!licenseActive\) return[\s\S]*?joinProRoom/)
+
+assert.ok(!toolbar.includes('meet.jit.si'), 'must not invent public SFU')
+assert.ok(!stub.includes('meet.jit.si'), 'MeetingStub must not invent public SFU')
+assert.match(stub, /return <MeetingToolbar/)
+
 const zh = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
 assert.match(zh, /plugin\.meetingLicenseCta/)
 assert.match(zh, /plugin\.meetingOpenPlugins/)
