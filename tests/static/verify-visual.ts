@@ -1086,8 +1086,13 @@ assert.match(
 )
 assert.match(
   collaborationDrawerSrc,
-  /chat\.collaborationFullscreen/,
-  'ChatCollaborationDrawer must offer fullscreen escape hatch (IA-403)'
+  /COLLAB_DRAWER_WIDTH\s*=\s*'92vw'/,
+  'files/whiteboard/mindmap collaboration drawers share max width 92vw'
+)
+assert.doesNotMatch(
+  collaborationDrawerSrc,
+  /PANEL_WIDTH/,
+  'collaboration drawer must not use per-panel widths'
 )
 assert.match(
   collaborationDrawerSrc,

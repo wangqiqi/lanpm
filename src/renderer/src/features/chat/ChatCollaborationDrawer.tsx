@@ -16,11 +16,7 @@ const FilesView = lazy(() => import('@renderer/features/files/FilesView'))
 const WhiteboardView = lazy(() => import('@renderer/features/whiteboard/WhiteboardView'))
 const MindmapView = lazy(() => import('@renderer/plugin/builtins/MindmapView'))
 
-const PANEL_WIDTH: Record<ChatCollaborationPanel, number | string> = {
-  files: 720,
-  whiteboard: '92vw',
-  mindmap: '80vw'
-}
+const COLLAB_DRAWER_WIDTH = '92vw'
 
 function panelTitleKey(panel: ChatCollaborationPanel): 'nav.files' | 'nav.whiteboard' | 'nav.mindmap' {
   switch (panel) {
@@ -53,7 +49,7 @@ export default function ChatCollaborationDrawer({ groupId }: Props): React.React
   const mindmapPlugin = usePluginView('lanpm.mindmap')
 
   const open = panel != null
-  const width = panel ? PANEL_WIDTH[panel] : 720
+  const width = COLLAB_DRAWER_WIDTH
   /** Excalidraw 须在抽屉动画结束且尺寸稳定后再挂载，否则指针与笔迹错位 */
   const [drawerReady, setDrawerReady] = useState(false)
   const showTallPanel = open && drawerReady && (panel === 'whiteboard' || panel === 'mindmap')

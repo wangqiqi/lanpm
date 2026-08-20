@@ -6,6 +6,7 @@
 
 ### Fixed
 
+- **协作抽屉宽度**：聊天侧栏开着时，文件 / 白板 / 脑图统一为 `92vw`（原先 720px / 92vw / 80vw 不一致）
 - **发版门禁**：eslint 未用信封 `payload` 绑定；pdfjs 6 `PDFDocumentProxy` 改 `cleanup()`；`file_chunk` 处理收窄 `fileId`（`TASK-4701`）
 - **顶栏未知插件文案**：`lanpm.ai-assistant` 已声明 `topbar.menu` 但无槽位组件，亮暗截图顶栏出现「未知插件 UI」；现注册空 stub，入口仍走原生「AI 助手」（`TASK-4703`）
 
