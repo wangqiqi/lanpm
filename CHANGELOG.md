@@ -12,6 +12,9 @@
 
 ### Security
 
+- **库加密解锁窗**：preload + `contextIsolation`，窗内不再 `require('electron')`；`finish` 只结算一次（at-rest `TASK-2801`）
+- **profile 迁库**：加密 `lanpm.db` 不再无 key 裸开 SQLite（at-rest `TASK-2802`）
+- **通行词**：桌面/CLI 共用 `resolveDbPassphrase`；关库清 session 口令（at-rest `TASK-2803`）
 - **文件上传**：renderer / 插件不得再传本机绝对路径；仅主进程文件对话框（`TASK-2701`）
 - **P2P 信封**：缺密封字段一律丢弃，不再明文放行（`TASK-2702`）
 - **路径**：`groupId` / 文件名拒绝 `..` 穿越（`TASK-2703`）

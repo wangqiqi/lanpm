@@ -28,6 +28,32 @@ const atRestSrc = readFileSync(join(projectRoot, 'src/main/storage/sqliteAtRest.
 assert.match(atRestSrc, /SQLITE_AT_REST_CIPHER = 'sqlcipher'/, 'must pin SQLCipher cipher')
 assert.doesNotMatch(atRestSrc, /console\.(log|info|debug|warn).*passphrase/, 'must not log passphrase')
 
+const unlockSrc = readFileSync(join(projectRoot, 'src/main/storage/unlockPassphrase.ts'), 'utf8')
+assert.match(unlockSrc, /contextIsolation:\s*true/, 'unlock window must isolate context')
+assert.match(unlockSrc, /nodeIntegration:\s*false/, 'unlock window must not enable nodeIntegration')
+assert.match(unlockSrc, /let settled = false/, 'unlock finish must settle once')
+assert.doesNotMatch(unlockSrc, /require\(['"]electron['"]\)/, 'unlock HTML must not require electron')
+
+const profileSrc = readFileSync(join(projectRoot, 'src/main/storage/profilePaths.ts'), 'utf8')
+assert.match(profileSrc, /openPlainSqliteDatabase/, 'profile migrate must probe before open')
+assert.doesNotMatch(
+  profileSrc,
+  /new DatabaseConstructor\(/,
+  'profilePaths must not unkeyed-open lanpm.db'
+)
+
+const databaseSrc = readFileSync(join(projectRoot, 'src/main/storage/database.ts'), 'utf8')
+assert.match(
+  databaseSrc,
+  /export function closeDatabase\(\)[\s\S]*sessionPassphrase = undefined/,
+  'closeDatabase must clear sessionPassphrase'
+)
+
+const indexSrc = readFileSync(join(projectRoot, 'src/main/index.ts'), 'utf8')
+const cliSrc = readFileSync(join(projectRoot, 'src/cli/main.ts'), 'utf8')
+assert.match(indexSrc, /resolveDbPassphrase\(\{ kind: dbKind, allowPrompt: true \}\)/)
+assert.match(cliSrc, /resolveDbPassphrase\(\{ kind, allowPrompt: false \}\)/)
+
 const dir = mkLanpmTemp('lanpm-at-rest-')
 const dbPath = join(dir, 'lanpm.db')
 const passphrase = 'correct-horse-battery'
