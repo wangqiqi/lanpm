@@ -24,6 +24,11 @@ export const ALL_APP_VIEWS: AppView[] = [
 
 const TASK_ENTRY_VIEWS: AppView[] = ['board', 'tree']
 
+/** 画布工具：禁止作为 BottomNav Tab（深链/抽屉仍可用） */
+export const NEVER_BOTTOM_NAV_VIEWS: readonly AppView[] = ['whiteboard']
+
+export const NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES: readonly string[] = ['mindmap']
+
 /** v1.96 默认隐藏（不含时间透镜）— 恰好此集合才触发补藏甘特/日历 */
 export const V196_HIDDEN_VIEWS: readonly AppView[] = ['files', 'whiteboard']
 
@@ -205,6 +210,9 @@ export function normalizeNavPreferences(raw: unknown): NavPreferences {
 /** 应用主轴硬约束（chat 不可藏 · board/tree 至少留一） */
 export function sanitizeNavPreferences(prefs: NavPreferences): NavPreferences {
   const hidden = new Set<AppView>(prefs.hiddenViews.filter((v) => v !== 'chat'))
+  for (const view of NEVER_BOTTOM_NAV_VIEWS) {
+    hidden.add(view)
+  }
 
   const visibleTask = TASK_ENTRY_VIEWS.filter((v) => !hidden.has(v))
   if (visibleTask.length === 0) {
@@ -219,7 +227,10 @@ export function sanitizeNavPreferences(prefs: NavPreferences): NavPreferences {
   }
 
   const hiddenContributedRoutes = [
-    ...new Set(prefs.hiddenContributedRoutes.filter(isContributedRoute).map((r) => r.trim()))
+    ...new Set([
+      ...prefs.hiddenContributedRoutes.filter(isContributedRoute).map((r) => r.trim()),
+      ...NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES
+    ])
   ]
   const contributedOrder = [
     ...new Set(prefs.contributedOrder.filter(isContributedRoute).map((r) => r.trim()))
@@ -245,7 +256,9 @@ export function resolveVisibleViews(
     isViewAllowedForGroup(groupType, view, groupId)
   )
 
-  const visible = allowed.filter((view) => !hidden.has(view))
+  const visible = allowed.filter(
+    (view) => !hidden.has(view) && !NEVER_BOTTOM_NAV_VIEWS.includes(view)
+  )
 
   const orderIndex = new Map(sanitized.order.map((view, index) => [view, index]))
   visible.sort((a, b) => (orderIndex.get(a) ?? 999) - (orderIndex.get(b) ?? 999))
@@ -273,7 +286,9 @@ export function resolveVisibleContributedRoutes(
   const sanitized = sanitizeNavPreferences(prefs)
   const hidden = new Set(sanitized.hiddenContributedRoutes)
   const known = knownRoutes.filter((r) => isContributedRoute(r))
-  const visible = known.filter((route) => !hidden.has(route))
+  const visible = known.filter(
+    (route) => !hidden.has(route) && !NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES.includes(route)
+  )
 
   const orderIndex = new Map(sanitized.contributedOrder.map((route, index) => [route, index]))
   visible.sort((a, b) => {
@@ -289,13 +304,23 @@ export function isContributedRouteVisible(
   route: string
 ): boolean {
   if (!isContributedRoute(route)) return false
+  if (NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES.includes(route.trim())) return false
   const sanitized = sanitizeNavPreferences(prefs)
   return !sanitized.hiddenContributedRoutes.includes(route)
 }
 
-/** Profile 设置页：该视图是否禁止关闭（主轴） */
+export function isNeverBottomNavView(view: AppView): boolean {
+  return NEVER_BOTTOM_NAV_VIEWS.includes(view)
+}
+
+export function isNeverBottomNavContributedRoute(route: string): boolean {
+  return NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES.includes(route.trim())
+}
+
+/** Profile 设置页：该视图是否禁止关闭（主轴）或禁止当作 Tab 打开（画布） */
 export function isViewHideLocked(prefs: NavPreferences, view: AppView): boolean {
   if (view === 'chat') return true
+  if (isNeverBottomNavView(view)) return true
   if (!TASK_ENTRY_VIEWS.includes(view)) return false
 
   const sanitized = sanitizeNavPreferences(prefs)

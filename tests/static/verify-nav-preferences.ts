@@ -21,7 +21,9 @@ assert.match(
   /hiddenViews:\s*\[\.\.\.DEFAULT_HIDDEN_VIEWS\]/,
   'DEFAULT_NAV_PREFERENCES must hide files/whiteboard/gantt/calendar (SPRINT-45)'
 )
-assert.match(shared, /upgradeV196HiddenViews/)
+assert.match(shared, /NEVER_BOTTOM_NAV_VIEWS/)
+assert.match(shared, /NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES/)
+assert.match(shared, /isNeverBottomNavView/)
 assert.match(shared, /rawNavDocumentNeedsV196Writeback/)
 assert.match(
   shared,
