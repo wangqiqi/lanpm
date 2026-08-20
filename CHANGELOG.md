@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **会议旁路运维**：`docs/07` 会议节增加本机/内网 LiveKit 最短步骤，指向 `plugins/lanpm.meeting/deploy/docker-compose.yml`（`TASK-5103`）
+
 ### Changed
 
 - **会议档位**：工具栏主菜单同时展示 Lite mesh 与 Pro（LiveKit SFU）分区；旁路未配置 / 缺 SDK 时给出可读失败文案与配置引导（`TASK-5102`）

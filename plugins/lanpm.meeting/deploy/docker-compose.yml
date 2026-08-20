@@ -1,5 +1,5 @@
-# LiveKit 自托管旁路（Pro 档位）— 离线部署模板
-# 禁止默认连接 LiveKit Cloud / 公有 Jitsi
+# LiveKit 自托管旁路（Pro 档位）— 本机/内网离线部署模板
+# 禁止默认连接公有 SFU
 
 services:
   livekit:

@@ -18,7 +18,7 @@ docker compose up -d
    - **URL**：`ws://<旁路主机>:7880`（或 `wss://` 若已配 TLS）
    - **API Key** / **API Secret**（与 compose 一致）
 
-**禁止**默认连接 LiveKit Cloud、`meet.jit.si` 等公有 SFU。
+**禁止**默认连接公有 SFU。
 
 ## 可选：livekit-client
 

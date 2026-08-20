@@ -111,4 +111,34 @@ assert.ok(
 
 assert.ok(existsSync(join(root, 'tests/unit/plugin/pluginLicense.test.ts')))
 
+/** TASK-5103 — local/LAN LiveKit bypass shortest ops (no public SFU default) */
+const docs07 = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
+const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+const composePath = 'plugins/lanpm.meeting/deploy/docker-compose.yml'
+const opsDocs = docs07.includes(composePath) ? docs07 : docs06
+assert.match(
+  opsDocs,
+  /本机[\s\S]*内网|内网[\s\S]*本机/,
+  'docs/07 or docs/06 must document shortest local/LAN LiveKit steps'
+)
+assert.ok(
+  opsDocs.includes(composePath),
+  `docs must mention compose path ${composePath}`
+)
+assert.match(opsDocs, /docker compose/)
+assert.match(opsDocs, /ws:\/\//)
+
+const composeFile = readFileSync(join(root, composePath), 'utf8')
+const forbiddenPublicSfu = ['livekit.cloud', 'LiveKit Cloud', 'meet.jit.si'] as const
+for (const needle of forbiddenPublicSfu) {
+  assert.ok(
+    !opsDocs.includes(needle),
+    `ops docs must not mention ${needle} as default public SFU`
+  )
+  assert.ok(
+    !composeFile.includes(needle),
+    `compose must not mention ${needle} as default public SFU`
+  )
+}
+
 console.log('verify:meeting-ux OK')
