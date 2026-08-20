@@ -18,11 +18,13 @@ const MEASURE_PERF_SCHEMA_VERSION = 1
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
-function gpuNote() {
-  if (process.platform === 'linux') {
-    return 'linux-disableHardwareAcceleration (src/main/index.ts); not comparable to GPU-on budgets'
+/** Keep strings aligned with src/shared/ops/linuxGpuPolicy.ts linuxGpuNote() */
+function gpuNote(env = process.env) {
+  if (process.platform !== 'linux') return 'gpu-policy-unspecified'
+  if (env.LANPM_ENABLE_GPU === '1') {
+    return 'linux-LANPM_ENABLE_GPU=1 (hardware acceleration opt-in); compare RSS to default-off'
   }
-  return 'gpu-policy-unspecified'
+  return 'linux-disableHardwareAcceleration (default); set LANPM_ENABLE_GPU=1 to opt in; not comparable to GPU-on budgets'
 }
 
 function emptyMeasureReport(mode) {
@@ -93,6 +95,7 @@ function printHelp() {
   --out <path>    JSON path (default .lanpm/perf/latest.json)
 
 Results are gitignored. Isolated userData under .lanpm/tmp/.
+Linux GPU is off by default. LANPM_ENABLE_GPU=1 opts in (may FATAL without Vulkan).
 `)
 }
 

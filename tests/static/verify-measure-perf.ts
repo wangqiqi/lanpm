@@ -7,6 +7,7 @@ import { existsSync, readFileSync, unlinkSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { linuxGpuNote } from '../../src/shared/ops/linuxGpuPolicy.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -42,6 +43,8 @@ assert.match(harness, /dbCipherMs/)
 assert.match(harness, /notes[\s\S]*gpu/)
 assert.match(harness, /devBudgetMs/)
 assert.match(harness, /LANPM_MEASURE_DB_OUT/)
+assert.match(harness, /LANPM_ENABLE_GPU/)
+assert.match(harness, /linux-LANPM_ENABLE_GPU=1/)
 assert.ok(existsSync(join(root, 'tests/integration/measure-db-perf.ts')))
 
 const ui = readSrc('scripts/measure-perf-ui.mjs')
@@ -57,10 +60,14 @@ assert.match(mainSrc, /\[lanpm:measure\] ready-to-show/)
 const gitignore = readSrc('.gitignore')
 assert.match(gitignore, /^\.lanpm\//m)
 
+const envOff = { ...process.env }
+delete envOff.LANPM_ENABLE_GPU
+
 const outPath = join(root, '.lanpm', 'perf', 'verify-schema.json')
 const r = spawnSync(process.execPath, [join(root, 'scripts/measure-perf.mjs'), '--schema-only', '--out', outPath], {
   cwd: root,
-  encoding: 'utf8'
+  encoding: 'utf8',
+  env: envOff
 })
 assert.equal(r.status, 0, `schema-only failed: ${r.stderr || r.stdout}`)
 assert.ok(existsSync(outPath), 'schema-only must write JSON')
@@ -86,7 +93,23 @@ assert.equal(report.schemaVersion, 1)
 assert.ok(typeof report.userDataDir === 'string' && String(report.userDataDir).includes('lanpm-perf-'))
 const notes = report.notes as { gpu?: string; binary?: string }
 assert.ok(notes?.gpu, 'notes.gpu required')
+assert.equal(notes.gpu, linuxGpuNote(process.platform, envOff))
 assert.match(String(notes.binary), /out\/main/)
 unlinkSync(outPath)
+
+const outOn = join(root, '.lanpm', 'perf', 'verify-schema-gpu-on.json')
+const envOn = { ...envOff, LANPM_ENABLE_GPU: '1' }
+const rOn = spawnSync(process.execPath, [join(root, 'scripts/measure-perf.mjs'), '--schema-only', '--out', outOn], {
+  cwd: root,
+  encoding: 'utf8',
+  env: envOn
+})
+assert.equal(rOn.status, 0, `schema-only opt-in failed: ${rOn.stderr || rOn.stdout}`)
+const reportOn = JSON.parse(readFileSync(outOn, 'utf8')) as { notes?: { gpu?: string } }
+assert.equal(reportOn.notes?.gpu, linuxGpuNote(process.platform, envOn))
+if (process.platform === 'linux') {
+  assert.notEqual(notes.gpu, reportOn.notes?.gpu, 'Linux notes.gpu must differ default-off vs opt-in')
+}
+unlinkSync(outOn)
 
 console.log('verify-measure-perf OK')
