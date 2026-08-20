@@ -19,9 +19,31 @@ const base: SyncEnvelope = {
 }
 
 describe('openEnvelope', () => {
-  it('roundtrips sealed payloads', () => {
-    const sealed = sealEnvelope(aes, base)
-    expect(openEnvelope(aes, sealed).payload).toEqual(base.payload)
+  it('roundtrips framed file_chunk without chunkBase64 in plaintext JSON', () => {
+    const chunk = Buffer.alloc(256, 7)
+    const env: SyncEnvelope = {
+      ...base,
+      type: 'file_chunk',
+      payload: {
+        fileId: 'f1',
+        groupId: 'demo-project',
+        offset: 0,
+        totalBytes: chunk.length,
+        sha256: 'deadbeef',
+        done: true,
+        chunk
+      }
+    }
+    const sealed = sealEnvelope(aes, env)
+    const enc = (sealed.payload as { __enc: string }).__enc
+    const cipher = Buffer.from(enc, 'base64')
+    expect(cipher.includes(Buffer.from('chunkBase64'))).toBe(false)
+    const opened = openEnvelope(aes, sealed)
+    const p = opened.payload as { chunk: Buffer; chunkBase64?: string; fileId: string }
+    expect(p.fileId).toBe('f1')
+    expect(p.chunkBase64).toBeUndefined()
+    expect(Buffer.isBuffer(p.chunk)).toBe(true)
+    expect(p.chunk.equals(chunk)).toBe(true)
   })
 
   it('rejects unsealed envelopes (fail-closed)', () => {

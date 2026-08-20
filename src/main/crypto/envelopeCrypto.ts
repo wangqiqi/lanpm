@@ -1,5 +1,10 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 import type { SyncEnvelope } from '../../shared/network/types'
+import {
+  encodeFileChunkFrame,
+  isFileChunkBinaryPayload,
+  tryDecodeFileChunkFrame
+} from '../../shared/file/chunkFrame'
 
 const ALGO = 'aes-256-gcm'
 
@@ -34,9 +39,15 @@ export function openBytes(
   return Buffer.concat([decipher.update(ciphertext), decipher.final()])
 }
 
+function payloadPlaintext(envelope: SyncEnvelope): Buffer {
+  if (envelope.type === 'file_chunk' && isFileChunkBinaryPayload(envelope.payload)) {
+    return encodeFileChunkFrame(envelope.payload)
+  }
+  return Buffer.from(JSON.stringify(envelope.payload ?? null), 'utf8')
+}
+
 export function sealEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelope {
-  const body = JSON.stringify(envelope.payload ?? null)
-  const sealed = sealBytes(aesKey, Buffer.from(body, 'utf8'))
+  const sealed = sealBytes(aesKey, payloadPlaintext(envelope))
   return {
     ...envelope,
     payload: { __enc: sealed.ciphertext.toString('base64') },
@@ -56,8 +67,10 @@ export function openEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelo
     envelope.nonce,
     envelope.authTag
   )
+  const framed = tryDecodeFileChunkFrame(plain)
+  const payload: unknown = framed ?? (JSON.parse(plain.toString('utf8')) as unknown)
   return {
     ...envelope,
-    payload: JSON.parse(plain.toString('utf8')) as unknown
+    payload
   }
 }

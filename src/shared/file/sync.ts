@@ -5,15 +5,19 @@ export interface FileMetaBroadcastPayload {
   meta: FileMeta
 }
 
+export type FileChunkEncoding = 'base64' | 'binary'
+
 /**
  * docs/03 — file_pull_request。
  * `fromOffset`：已收字节数（续传）；缺省 / 0 = 从头拉取（TASK-164）。
+ * `chunkEncoding`：缺省 / 未知 = base64（旧客户端）；`binary` = framed 密封明文（TASK-3401）。
  */
 export interface FilePullRequestPayload {
   fileId: string
   groupId: string
   /** Inclusive byte offset to start sending chunks; omit or 0 = full file */
   fromOffset?: number
+  chunkEncoding?: FileChunkEncoding
 }
 
 export interface FileChunkPayload {
@@ -62,10 +66,18 @@ export function isFilePullRequestPayload(value: unknown): value is FilePullReque
     if (typeof value.fromOffset !== 'number' || !Number.isFinite(value.fromOffset)) return false
     if (value.fromOffset < 0 || !Number.isInteger(value.fromOffset)) return false
   }
+  if (value.chunkEncoding !== undefined) {
+    if (value.chunkEncoding !== 'base64' && value.chunkEncoding !== 'binary') return false
+  }
   return true
 }
 
 /** Normalize missing fromOffset to 0. */
 export function filePullFromOffset(payload: FilePullRequestPayload): number {
   return payload.fromOffset ?? 0
+}
+
+/** Missing / unknown → base64 (old clients). */
+export function filePullChunkEncoding(payload: FilePullRequestPayload): FileChunkEncoding {
+  return payload.chunkEncoding === 'binary' ? 'binary' : 'base64'
 }
