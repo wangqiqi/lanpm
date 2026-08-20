@@ -72,10 +72,42 @@ const zh = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'u
 assert.match(zh, /plugin\.meetingLicenseCta/)
 assert.match(zh, /plugin\.meetingOpenPlugins/)
 
+/** TASK-5102 — Lite vs Pro tiers on toolbar/panel + readable Pro failures */
+const menuStart = toolbar.indexOf('const menuContent')
+assert.ok(menuStart >= 0, 'MeetingToolbar menuContent missing')
+const menuBlock = toolbar.slice(menuStart)
+assert.match(menuBlock, /plugin\.meetingLiteSection/)
+assert.match(menuBlock, /plugin\.meetingProSection/)
+assert.match(menuBlock, /plugin\.meetingProSdkMissing/)
+assert.match(menuBlock, /plugin\.meetingProNotConfigured/)
+assert.match(menuBlock, /plugin\.meetingProConfigureHint/)
+assert.match(toolbar, /data-testid="meeting-detail-panel"/)
+assert.match(toolbar, /plugin\.meetingLiteSection/)
+assert.match(toolbar, /plugin\.meetingProSection/)
+
+const en = readFileSync(join(root, 'src/renderer/src/i18n/locales/en-US.ts'), 'utf8')
+const meetingUxKeys = [
+  'plugin.meetingLiteSection',
+  'plugin.meetingProSection',
+  'plugin.meetingProSdkMissing',
+  'plugin.meetingProNotConfigured',
+  'plugin.meetingProConfigureHint'
+]
+for (const key of meetingUxKeys) {
+  const re = new RegExp(key.replaceAll('.', '\\.'))
+  assert.match(zh, re, `zh-CN missing ${key}`)
+  assert.match(en, re, `en-US missing ${key}`)
+}
+
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
+  dependencies?: Record<string, string>
 }
 assert.ok(pkg.scripts?.['verify:meeting-ux'], 'missing verify:meeting-ux script')
+assert.ok(
+  !pkg.dependencies?.['livekit-client'],
+  'must not add livekit-client to core dependencies'
+)
 
 assert.ok(existsSync(join(root, 'tests/unit/plugin/pluginLicense.test.ts')))
 

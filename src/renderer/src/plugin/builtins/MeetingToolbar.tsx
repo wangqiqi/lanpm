@@ -315,6 +315,11 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
         <Text type="secondary" className={styles.meetingDetailHint}>
           {t('plugin.meetingProHint')}
         </Text>
+        {!liveKitConfigured ? (
+          <Text type="secondary" className={styles.meetingDetailMeta}>
+            {t('plugin.meetingProConfigureHint')}
+          </Text>
+        ) : null}
         <MeetingLiveKitVideoGrid
           participants={proParticipants}
           joined={proJoined}
@@ -347,95 +352,124 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
           </Button>
         </div>
       ) : null}
-      <Space size={6} wrap className={styles.meetingMenuActions}>
-        {!joined ? (
+      <div className={styles.meetingDetailSection}>
+        <Text strong className={styles.meetingDetailTitle}>
+          {t('plugin.meetingLiteSection')}
+        </Text>
+        <Space size={6} wrap className={styles.meetingMenuActions}>
+          {!joined ? (
+            <Button
+              size="small"
+              type="primary"
+              icon={<LoginOutlined />}
+              disabled={controlsDisabled || busy || proJoined}
+              data-testid="meeting-join"
+              onClick={() => void onJoin()}
+            >
+              {t('plugin.meetingJoin')}
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              danger
+              icon={<LogoutOutlined />}
+              disabled={controlsDisabled || busy}
+              data-testid="meeting-leave"
+              onClick={() => void onLeave()}
+            >
+              {t('plugin.meetingLeave')}
+            </Button>
+          )}
+          {meshScreenSharing ? (
+            <Button size="small" disabled={controlsDisabled || busy} onClick={() => void stopScreenShare()}>
+              {t('plugin.meetingScreenShareStop')}
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              icon={<DesktopOutlined />}
+              disabled={controlsDisabled || busy || !joined}
+              data-testid="meeting-mesh-screenshare"
+              onClick={() => void onPickScreenShare()}
+            >
+              {t('plugin.meetingScreenStub')}
+            </Button>
+          )}
+        </Space>
+      </div>
+      <div className={styles.meetingDetailSection}>
+        <Text strong className={styles.meetingDetailTitle}>
+          {t('plugin.meetingProSection')}
+        </Text>
+        {!liveKitConfigured ? (
+          <div className={styles.meetingToolbarCta} data-testid="meeting-pro-not-configured">
+            <Text type="secondary">{t('plugin.meetingProNotConfigured')}</Text>
+            <Text type="secondary">{t('plugin.meetingProConfigureHint')}</Text>
+            {licenseActive ? (
+              <Button type="link" size="small" onClick={() => openProfileTab('meeting')}>
+                {t('plugin.meetingOpenMeetingConfig')}
+              </Button>
+            ) : null}
+          </div>
+        ) : sdkMissing ? (
+          <Text type="secondary" className={styles.meetingDetailMeta}>
+            {t('plugin.meetingProSdkMissing')}
+          </Text>
+        ) : null}
+        <Space size={6} wrap className={styles.meetingMenuActions}>
+          {!proJoined ? (
+            <Button
+              size="small"
+              type="primary"
+              icon={<VideoCameraOutlined />}
+              disabled={controlsDisabled || busy || !liveKitConfigured || joined || sdkMissing}
+              data-testid="meeting-pro-join"
+              onClick={() => void onProJoin()}
+            >
+              {t('plugin.meetingProJoin')}
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              danger
+              icon={<LogoutOutlined />}
+              disabled={controlsDisabled || busy}
+              data-testid="meeting-pro-leave"
+              onClick={() => void onProLeave()}
+            >
+              {t('plugin.meetingProLeave')}
+            </Button>
+          )}
           <Button
             size="small"
-            type="primary"
-            icon={<LoginOutlined />}
-            disabled={controlsDisabled || busy || proJoined}
-            data-testid="meeting-join"
-            onClick={() => void onJoin()}
+            icon={muted ? <AudioMutedOutlined /> : <AudioOutlined />}
+            disabled={controlsDisabled || !proJoined}
+            data-testid="meeting-pro-mute"
+            onClick={() => void toggleProMute()}
           >
-            {t('plugin.meetingJoin')}
+            {muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}
           </Button>
-        ) : (
           <Button
             size="small"
-            danger
-            icon={<LogoutOutlined />}
-            disabled={controlsDisabled || busy}
-            data-testid="meeting-leave"
-            onClick={() => void onLeave()}
+            icon={<VideoCameraOutlined />}
+            disabled={controlsDisabled || !proJoined}
+            data-testid="meeting-pro-camera"
+            onClick={() => void toggleProCamera()}
           >
-            {t('plugin.meetingLeave')}
+            {cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}
           </Button>
-        )}
-        {meshScreenSharing ? (
-          <Button size="small" disabled={controlsDisabled || busy} onClick={() => void stopScreenShare()}>
-            {t('plugin.meetingScreenShareStop')}
-          </Button>
-        ) : (
           <Button
             size="small"
             icon={<DesktopOutlined />}
-            disabled={controlsDisabled || busy || !joined}
-            data-testid="meeting-mesh-screenshare"
-            onClick={() => void onPickScreenShare()}
+            disabled={controlsDisabled || !proJoined}
+            data-testid="meeting-pro-screenshare"
+            onClick={() => void toggleProScreenShare()}
           >
-            {t('plugin.meetingScreenStub')}
+            {proScreenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')}
           </Button>
-        )}
-        {!proJoined ? (
-          <Button
-            size="small"
-            type="primary"
-            icon={<VideoCameraOutlined />}
-            disabled={controlsDisabled || busy || !liveKitConfigured || joined || sdkMissing}
-            data-testid="meeting-pro-join"
-            onClick={() => void onProJoin()}
-          >
-            {t('plugin.meetingProJoin')}
-          </Button>
-        ) : (
-          <Button
-            size="small"
-            danger
-            icon={<LogoutOutlined />}
-            disabled={controlsDisabled || busy}
-            data-testid="meeting-pro-leave"
-            onClick={() => void onProLeave()}
-          >
-            {t('plugin.meetingProLeave')}
-          </Button>
-        )}
-        <Button
-          size="small"
-          icon={muted ? <AudioMutedOutlined /> : <AudioOutlined />}
-          disabled={controlsDisabled || !proJoined}
-          data-testid="meeting-pro-mute"
-          onClick={() => void toggleProMute()}
-        >
-          {muted ? t('plugin.meetingProUnmute') : t('plugin.meetingProMute')}
-        </Button>
-        <Button
-          size="small"
-          icon={<VideoCameraOutlined />}
-          disabled={controlsDisabled || !proJoined}
-          data-testid="meeting-pro-camera"
-          onClick={() => void toggleProCamera()}
-        >
-          {cameraEnabled ? t('plugin.meetingProCameraOff') : t('plugin.meetingProCameraOn')}
-        </Button>
-        <Button
-          size="small"
-          icon={<DesktopOutlined />}
-          disabled={controlsDisabled || !proJoined}
-          data-testid="meeting-pro-screenshare"
-          onClick={() => void toggleProScreenShare()}
-        >
-          {proScreenSharing ? t('plugin.meetingProScreenShareStop') : t('plugin.meetingProScreenShareStart')}
-        </Button>
+        </Space>
+      </div>
+      <Space size={6} wrap className={styles.meetingMenuActions}>
         {!recording ? (
           <Button
             size="small"

@@ -180,7 +180,7 @@ export function useMeetingLiveKit(plugin: PluginView, groupId: string) {
       setProJoined(true)
       setProStatus('connected')
     } catch (err) {
-      setProStatus('failed')
+      setProStatus((current) => (current === 'unavailable' ? 'unavailable' : 'failed'))
       throw err
     } finally {
       setBusy(false)
