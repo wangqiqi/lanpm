@@ -17,11 +17,17 @@ assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/MeetingSchedul
 const schedule = readFileSync(join(root, 'src/shared/media/meetingSchedule.ts'), 'utf8')
 assert.match(schedule, /MeetingSchedule/)
 assert.match(schedule, /createMeetingScheduleRecord/)
+assert.match(schedule, /validateUpdateMeetingScheduleInput/)
+assert.match(schedule, /applyMeetingScheduleUpdate/)
 
 const channels = readFileSync(join(root, 'src/shared/media/channels.ts'), 'utf8')
 assert.match(channels, /listSchedules/)
 assert.match(channels, /createSchedule/)
+assert.match(channels, /updateSchedule/)
 assert.match(channels, /deleteSchedule/)
+
+const store = readFileSync(join(root, 'src/main/media/meetingScheduleStore.ts'), 'utf8')
+assert.match(store, /updateMeetingSchedule/)
 
 const reminder = readFileSync(join(root, 'src/shared/media/meetingReminderLogic.ts'), 'utf8')
 assert.match(reminder, /scanMeetingReminders/)
@@ -37,6 +43,8 @@ const panel = readFileSync(
 assert.match(panel, /meeting-schedule-panel/)
 assert.match(panel, /listSchedules/)
 assert.match(panel, /createSchedule/)
+assert.match(panel, /updateSchedule/)
+assert.match(panel, /meeting-schedule-edit/)
 
 const toolbar = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/MeetingToolbar.tsx'),
