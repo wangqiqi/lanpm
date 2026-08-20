@@ -3,6 +3,9 @@
  * Run: npm run verify:search
  */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { extractMessageText } from '../../src/shared/search/extractMessageText.ts'
 import {
   AI_PROVIDER_PRESETS,
@@ -19,6 +22,30 @@ assert.equal(
   extractMessageText({ kind: 'task_ref', taskId: 't1', title: 'Fix bug' }),
   'Fix bug'
 )
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
+const adapter = readFileSync(join(root, 'src/main/search/miniSearchIndex.ts'), 'utf8')
+assert.match(adapter, /from 'minisearch'/)
+assert.match(adapter, /searchTasksInDocs/)
+assert.match(adapter, /searchMessagesInDocs/)
+
+const repo = readFileSync(
+  join(root, 'src/main/storage/repositories/searchRepository.ts'),
+  'utf8'
+)
+assert.match(repo, /miniSearchIndex/)
+assert.match(repo, /searchTasksInDocs/)
+assert.match(repo, /searchMessagesInDocs/)
+assert.doesNotMatch(
+  repo,
+  /LIKE \?/,
+  'task/message search must not use SQL LIKE as the primary path'
+)
+
+const service = readFileSync(join(root, 'src/main/search/searchService.ts'), 'utf8')
+assert.match(service, /searchTasksByTitle/)
+assert.match(service, /searchMessagesByContent/)
+assert.match(service, /searchMembersGlobal/)
 
 assert.equal(DEFAULT_AI_PROVIDER, 'deepseek')
 const deepseek = AI_PROVIDER_PRESETS.find((p) => p.value === 'deepseek')
