@@ -317,6 +317,13 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   }
   if (envelope.type === 'file_chunk') {
     handleFileChunk(db, envelope)
+    return
+  }
+  if (envelope.type === 'file_meta_sync_request') {
+    return
+  }
+  if (envelope.type === 'file_meta_sync_batch') {
+    return
   }
 }
 

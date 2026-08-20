@@ -29,6 +29,8 @@ export type SyncMessageType =
   | 'group_tag_sync_request'
   | 'group_tag_sync_batch'
   | 'file_meta'
+  | 'file_meta_sync_request'
+  | 'file_meta_sync_batch'
   | 'file_pull_request'
   | 'file_chunk'
   | 'member_event'

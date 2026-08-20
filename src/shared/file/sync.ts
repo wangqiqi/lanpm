@@ -58,6 +58,85 @@ export function partialFileName(fileId: string): string {
   return `${fileId}${PARTIAL_FILE_SUFFIX}`
 }
 
+/** A6 offline catch-up (TASK-4801) — 7-day window aligned with task/tag. */
+export interface FileMetaSyncRequestPayload {
+  /** Exclusive lower bound; empty = from epoch */
+  sinceUpdatedAt: string
+  /** 7-day cutoff ISO8601 */
+  minUpdatedAt: string
+}
+
+export interface FileMetaSyncBatchPayload {
+  files: FileMeta[]
+  hasMore?: boolean
+}
+
+export const FILE_META_OFFLINE_SYNC_BATCH_LIMIT = 80
+
+export function splitFileMetaOfflineSyncPage(
+  rows: FileMeta[],
+  limit = FILE_META_OFFLINE_SYNC_BATCH_LIMIT
+): { files: FileMeta[]; hasMore: boolean } {
+  if (rows.length > limit) {
+    return { files: rows.slice(0, limit), hasMore: true }
+  }
+  return { files: rows, hasMore: false }
+}
+
+export function maxUpdatedAtInFileMetas(files: FileMeta[]): string {
+  let max = ''
+  for (const row of files) {
+    if (row.updatedAt > max) max = row.updatedAt
+  }
+  return max
+}
+
+export function isFileMetaSyncRequestPayload(
+  value: unknown
+): value is FileMetaSyncRequestPayload {
+  if (!isRecord(value)) return false
+  return (
+    typeof value.sinceUpdatedAt === 'string' &&
+    typeof value.minUpdatedAt === 'string' &&
+    !!value.minUpdatedAt
+  )
+}
+
+function isFileMetaWire(value: unknown): value is FileMeta {
+  if (!isRecord(value)) return false
+  if (typeof value.fileId !== 'string' || !value.fileId) return false
+  if (typeof value.groupId !== 'string' || !value.groupId) return false
+  if (typeof value.name !== 'string' || !value.name) return false
+  if (typeof value.ext !== 'string') return false
+  if (typeof value.category !== 'string' || !value.category) return false
+  if (typeof value.size !== 'number' || !Number.isFinite(value.size)) return false
+  if (typeof value.uploadedBy !== 'string' || !value.uploadedBy) return false
+  if (typeof value.uploadedAt !== 'string' || !value.uploadedAt) return false
+  if (typeof value.sha256 !== 'string' || !value.sha256) return false
+  if (typeof value.storagePath !== 'string' || !value.storagePath) return false
+  if (typeof value.previewStatus !== 'string' || !value.previewStatus) return false
+  if (typeof value.isBookmark !== 'boolean') return false
+  if (typeof value.updatedAt !== 'string' || !value.updatedAt) return false
+  return true
+}
+
+export function isFileMetaSyncBatchPayload(value: unknown): value is FileMetaSyncBatchPayload {
+  if (!isRecord(value)) return false
+  if (!Array.isArray(value.files)) return false
+  if (value.hasMore !== undefined && typeof value.hasMore !== 'boolean') return false
+  return value.files.every(isFileMetaWire)
+}
+
+/** Strip local disk paths before publishing an index row. */
+export function toFileMetaSyncWire(meta: FileMeta): FileMeta {
+  return {
+    ...meta,
+    storagePath: `${REMOTE_PENDING_PREFIX}${meta.fileId}`,
+    previewStatus: 'none',
+    previewPath: undefined
+  }
+}
+
 export function isFilePullRequestPayload(value: unknown): value is FilePullRequestPayload {
   if (!isRecord(value)) return false
   if (typeof value.fileId !== 'string' || !value.fileId) return false

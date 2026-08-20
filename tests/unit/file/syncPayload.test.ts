@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   fileChunkBody,
   filePullChunkEncoding,
-  isFilePullRequestPayload
+  isFileMetaSyncBatchPayload,
+  isFileMetaSyncRequestPayload,
+  isFilePullRequestPayload,
+  splitFileMetaOfflineSyncPage
 } from '../../../src/shared/file/sync.ts'
 import {
   encodeFileChunkFrame,
@@ -62,5 +65,48 @@ describe('fileChunkBody', () => {
     ).toBe(true)
     expect(fileChunkBody({ chunk: Buffer.from('cd') })?.equals(Buffer.from('cd'))).toBe(true)
     expect(fileChunkBody({})).toBeNull()
+  })
+})
+
+describe('file meta offline sync payloads (TASK-4801)', () => {
+  it('accepts request with exclusive since + min cutoff', () => {
+    expect(
+      isFileMetaSyncRequestPayload({
+        sinceUpdatedAt: '2026-08-01T00:00:00.000Z',
+        minUpdatedAt: '2026-08-13T00:00:00.000Z'
+      })
+    ).toBe(true)
+    expect(isFileMetaSyncRequestPayload({ sinceUpdatedAt: '', minUpdatedAt: 'x' })).toBe(true)
+    expect(isFileMetaSyncRequestPayload({ sinceUpdatedAt: 'a' })).toBe(false)
+    expect(isFileMetaSyncRequestPayload({ minUpdatedAt: '' })).toBe(false)
+  })
+
+  it('pages by LIMIT and reports hasMore', () => {
+    const base = {
+      fileId: 'f',
+      groupId: 'g1',
+      name: 'a.txt',
+      ext: 'txt',
+      category: 'other' as const,
+      size: 1,
+      uploadedBy: 'u',
+      uploadedAt: '2026-08-20T00:00:00.000Z',
+      sha256: 'ab',
+      storagePath: 'remote-pending:f',
+      previewStatus: 'none' as const,
+      isBookmark: false,
+      updatedAt: '2026-08-20T00:00:00.000Z'
+    }
+    const rows = [
+      { ...base, fileId: 'f1', updatedAt: '2026-08-20T00:00:00.000Z' },
+      { ...base, fileId: 'f2', updatedAt: '2026-08-20T00:01:00.000Z' },
+      { ...base, fileId: 'f3', updatedAt: '2026-08-20T00:02:00.000Z' }
+    ]
+    expect(splitFileMetaOfflineSyncPage(rows, 2)).toEqual({
+      files: rows.slice(0, 2),
+      hasMore: true
+    })
+    expect(isFileMetaSyncBatchPayload({ files: rows, hasMore: false })).toBe(true)
+    expect(isFileMetaSyncBatchPayload({ files: 'nope' })).toBe(false)
   })
 })

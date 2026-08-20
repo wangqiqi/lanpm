@@ -34,6 +34,8 @@ const SYNC_TYPES = [
   'group_tag_sync_request',
   'group_tag_sync_batch',
   'file_meta',
+  'file_meta_sync_request',
+  'file_meta_sync_batch',
   'file_pull_request',
   'file_chunk',
   'member_event',
@@ -74,6 +76,7 @@ const HANDLER_FILES = [
   'src/main/mindmap/mindmapAwarenessService.ts',
   'src/main/mindmap/mindmapSyncService.ts',
   'src/main/file/fileSyncService.ts',
+  'src/main/file/fileMetaOfflineSyncService.ts',
   'src/main/crypto/groupKeyService.ts',
   'src/main/group/memberEventService.ts',
   'src/main/network/stub/NetworkStub.ts',
@@ -122,6 +125,10 @@ assert.match(groupTagSrc, /GroupTagPatchPayload/, 'GroupTagPatchPayload required
 assert.match(groupTagSrc, /isGroupTagPatchPayload/, 'isGroupTagPatchPayload required')
 assert.match(groupTagSrc, /GroupTagSyncRequestPayload/, 'GroupTagSyncRequestPayload required')
 assert.match(groupTagSrc, /isGroupTagSyncBatchPayload/, 'isGroupTagSyncBatchPayload required')
+
+const fileSyncSrc = readFileSync(join(root, 'src/shared/file/sync.ts'), 'utf8')
+assert.match(fileSyncSrc, /FileMetaSyncRequestPayload/, 'FileMetaSyncRequestPayload required')
+assert.match(fileSyncSrc, /isFileMetaSyncBatchPayload/, 'isFileMetaSyncBatchPayload required')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>
