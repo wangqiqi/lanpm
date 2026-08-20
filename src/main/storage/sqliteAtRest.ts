@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, readFileSync, renameSync, unlinkSync } from 'fs'
+import { closeSync, copyFileSync, existsSync, openSync, readSync, renameSync, unlinkSync } from 'fs'
 import Database from 'better-sqlite3'
 import { throwLanpm } from '../../shared/errors/lanpmError.ts'
 
@@ -17,9 +17,15 @@ export type SqliteAtRestKind = 'missing' | 'plain' | 'encrypted'
 
 export function probeSqliteAtRest(dbPath: string): SqliteAtRestKind {
   if (!existsSync(dbPath)) return 'missing'
-  const buf = readFileSync(dbPath)
-  if (buf.length >= 16 && buf.subarray(0, 16).equals(SQLITE_HEADER)) return 'plain'
-  return 'encrypted'
+  const fd = openSync(dbPath, 'r')
+  try {
+    const buf = Buffer.alloc(SQLITE_HEADER.length)
+    const n = readSync(fd, buf, 0, buf.length, 0)
+    if (n >= SQLITE_HEADER.length && buf.equals(SQLITE_HEADER)) return 'plain'
+    return 'encrypted'
+  } finally {
+    closeSync(fd)
+  }
 }
 
 export function assertPassphrase(passphrase: string): void {
