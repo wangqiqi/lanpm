@@ -43,7 +43,7 @@ assert.match(harness, /disableHardwareAcceleration/)
 const ui = readSrc('scripts/measure-perf-ui.mjs')
 assert.match(ui, /LANPM_MEASURE/)
 assert.match(ui, /coldMs/)
-assert.match(ui, /linuxTreeRssMb/)
+assert.match(ui, /measure-seed-chat/)
 assert.match(ui, /nav-tab-/)
 
 const mainSrc = readSrc('src/main/index.ts')
