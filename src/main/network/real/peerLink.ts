@@ -16,10 +16,11 @@ import {
   acceptOrPinPeerPublicKey,
   PEER_PUBKEY_MISMATCH
 } from '../../crypto/peerTrustStore.ts'
-import { openEnvelope, sealEnvelope } from '../../crypto/envelopeCrypto.ts'
+import { openEnvelope, openSealedBytes, sealEnvelope, sealEnvelopeParts } from '../../crypto/envelopeCrypto.ts'
 import {
   createWireDecoder,
   encodeWire,
+  shouldSendEnvelopeBin,
   type WireMessage,
   type WirePeerProfile
 } from './wireProtocol.ts'
@@ -80,6 +81,7 @@ export class PeerLink {
   } | null = null
   private awaitingPairingOk = false
   private pairingCode: string | null = null
+  private peerEnvBin = false
 
   constructor(opts: PeerLinkOptions) {
     this.opts = opts
@@ -198,6 +200,11 @@ export class PeerLink {
 
   send(envelope: SyncEnvelope): void {
     if (this.state !== 'ready' || !this.aesKey) return
+    if (shouldSendEnvelopeBin(this.peerEnvBin, envelope.type)) {
+      const { meta, ciphertext } = sealEnvelopeParts(this.aesKey, envelope)
+      this.sendWire({ kind: 'envelope_bin', envelope: meta, ciphertext })
+      return
+    }
     const sealed = sealEnvelope(this.aesKey, envelope)
     this.sendWire({ kind: 'envelope', envelope: sealed })
   }
@@ -223,7 +230,8 @@ export class PeerLink {
       userId: this.opts.local.userId,
       displayName: this.opts.local.displayName,
       listenPort: this.opts.listenPort,
-      groups: this.opts.getAdvertGroups()
+      groups: this.opts.getAdvertGroups(),
+      envBin: true
     }
   }
 
@@ -236,7 +244,8 @@ export class PeerLink {
       userId: profile.userId,
       displayName: profile.displayName,
       listenPort: profile.listenPort,
-      groups: profile.groups
+      groups: profile.groups,
+      envBin: profile.envBin
     }
   }
 
@@ -249,7 +258,8 @@ export class PeerLink {
       userId: profile.userId,
       displayName: profile.displayName,
       listenPort: profile.listenPort,
-      groups: profile.groups
+      groups: profile.groups,
+      envBin: profile.envBin
     }
   }
 
@@ -349,6 +359,7 @@ export class PeerLink {
 
     if (msg.kind === 'handshake') {
       this.rememberRemote(msg)
+      this.peerEnvBin = msg.envBin === true
       if (!this.isInitiator) {
         this.sendWire(this.localHandshakeAck())
       }
@@ -358,6 +369,7 @@ export class PeerLink {
 
     if (msg.kind === 'handshake_ack' && this.isInitiator) {
       this.rememberRemote(msg)
+      this.peerEnvBin = msg.envBin === true
       this.finishHandshake(msg.publicKey)
       return
     }
@@ -382,6 +394,16 @@ export class PeerLink {
         this.opts.onEnvelope(opened)
       } catch {
         console.warn('[peerLink] dropped unsealed or invalid envelope')
+      }
+      return
+    }
+
+    if (msg.kind === 'envelope_bin' && this.state === 'ready' && this.aesKey) {
+      try {
+        const opened = openSealedBytes(this.aesKey, msg.envelope, msg.ciphertext)
+        this.opts.onEnvelope(opened)
+      } catch {
+        console.warn('[peerLink] dropped unsealed or invalid envelope_bin')
       }
     }
   }

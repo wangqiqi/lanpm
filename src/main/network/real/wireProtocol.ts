@@ -79,6 +79,17 @@ function decodeEnvelopeBinBody(body: Buffer): WireEnvelopeBin | null {
   }
 }
 
+export function peerAcceptsEnvelopeBin(profile: { envBin?: boolean }): boolean {
+  return profile.envBin === true
+}
+
+export function shouldSendEnvelopeBin(
+  peerEnvBin: boolean,
+  type: SyncEnvelope['type']
+): boolean {
+  return peerEnvBin && type === 'file_chunk'
+}
+
 export function encodeWire(msg: WireMessage): Buffer {
   if (msg.kind === 'envelope_bin') {
     return frameLengthPrefixed(encodeEnvelopeBinBody(msg))

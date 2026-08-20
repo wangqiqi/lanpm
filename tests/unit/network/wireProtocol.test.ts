@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   createWireDecoder,
   encodeWire,
+  peerAcceptsEnvelopeBin,
+  shouldSendEnvelopeBin,
   type WireEnvelopeBin
 } from '../../../src/main/network/real/wireProtocol.ts'
 import type { SyncEnvelope } from '../../../src/shared/network/types.ts'
@@ -74,5 +76,42 @@ describe('wireProtocol dual stack (TASK-4201)', () => {
     const decoded = decodeAll(Buffer.concat([a, b]))
     expect(decoded[0]).toEqual({ kind: 'ping' })
     expect((decoded[1] as WireEnvelopeBin).ciphertext.equals(Buffer.from('raw-cipher'))).toBe(true)
+  })
+})
+
+describe('envelope_bin capability (TASK-4203)', () => {
+  it('only sends binary frames for file_chunk when peer advertised envBin', () => {
+    expect(peerAcceptsEnvelopeBin({})).toBe(false)
+    expect(peerAcceptsEnvelopeBin({ envBin: true })).toBe(true)
+    expect(shouldSendEnvelopeBin(true, 'file_chunk')).toBe(true)
+    expect(shouldSendEnvelopeBin(true, 'chat')).toBe(false)
+    expect(shouldSendEnvelopeBin(false, 'file_chunk')).toBe(false)
+  })
+
+  it('encodes handshake envBin in JSON wire', () => {
+    const framed = encodeWire({
+      kind: 'handshake',
+      publicKey: 'ab',
+      deviceId: 'd',
+      userId: 'u',
+      displayName: 'n',
+      listenPort: 1,
+      envBin: true
+    })
+    expect(framed.subarray(4).toString('utf8')).toContain('"envBin":true')
+  })
+
+  it('peerLink handshake copies envBin onto ack', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { dirname, join } = await import('node:path')
+    const { fileURLToPath } = await import('node:url')
+    const src = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../../../src/main/network/real/peerLink.ts'),
+      'utf8'
+    )
+    expect(src).toMatch(/envBin: true/)
+    expect(src).toMatch(/shouldSendEnvelopeBin/)
+    expect(src).toMatch(/kind: 'envelope_bin'/)
+    expect(src).toMatch(/peerEnvBin = msg\.envBin === true/)
   })
 })
