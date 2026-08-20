@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, DatePicker, Form, Input, List, Select, Typography, message } from 'antd'
-import { DeleteOutlined, LoginOutlined } from '@ant-design/icons'
+import { Button, DatePicker, Form, Input, List, Select, Space, Typography, message } from 'antd'
+import { DeleteOutlined, EditOutlined, LoginOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import type { MeetingSchedule } from '@shared/media/meetingSchedule'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
@@ -24,6 +24,10 @@ interface FormValues {
 }
 
 const DURATION_MINUTES = [15, 30, 45, 60, 90, 120] as const
+
+function defaultFormStartsAt(): Dayjs {
+  return dayjs().add(1, 'hour').minute(0)
+}
 
 function formatScheduleWhen(startsAt: string, locale: string): string {
   const d = new Date(startsAt)
@@ -49,6 +53,7 @@ export default function MeetingSchedulePanel({
   const [schedules, setSchedules] = useState<MeetingSchedule[]>([])
   const [loading, setLoading] = useState(false)
   const [joiningId, setJoiningId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const durationOptions = useMemo(
     () =>
@@ -68,6 +73,11 @@ export default function MeetingSchedulePanel({
     void refresh()
   }, [refresh])
 
+  const resetCreateForm = useCallback((): void => {
+    form.resetFields()
+    form.setFieldsValue({ durationMinutes: 30, startsAt: defaultFormStartsAt() })
+  }, [form])
+
   const onCreate = async (values: FormValues): Promise<void> => {
     setLoading(true)
     try {
@@ -77,8 +87,7 @@ export default function MeetingSchedulePanel({
         startsAt: values.startsAt.toDate().toISOString(),
         durationMinutes: values.durationMinutes
       })
-      form.resetFields()
-      form.setFieldsValue({ durationMinutes: 30, startsAt: dayjs().add(1, 'hour').minute(0) })
+      resetCreateForm()
       await refresh()
       message.success(t('plugin.meetingScheduleCreated'))
     } catch (err) {
@@ -86,6 +95,48 @@ export default function MeetingSchedulePanel({
     } finally {
       setLoading(false)
     }
+  }
+
+  const onUpdate = async (id: string, values: FormValues): Promise<void> => {
+    setLoading(true)
+    try {
+      await getLanpmApi().meeting.updateSchedule({
+        id,
+        title: values.title.trim(),
+        startsAt: values.startsAt.toDate().toISOString(),
+        durationMinutes: values.durationMinutes
+      })
+      setEditingId(null)
+      resetCreateForm()
+      await refresh()
+      message.success(t('plugin.meetingScheduleUpdated'))
+    } catch (err) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const onFinish = (values: FormValues): void => {
+    if (editingId) {
+      void onUpdate(editingId, values)
+      return
+    }
+    void onCreate(values)
+  }
+
+  const beginEdit = (item: MeetingSchedule): void => {
+    setEditingId(item.id)
+    form.setFieldsValue({
+      title: item.title,
+      startsAt: dayjs(item.startsAt),
+      durationMinutes: item.durationMinutes
+    })
+  }
+
+  const cancelEdit = (): void => {
+    setEditingId(null)
+    resetCreateForm()
   }
 
   const onDelete = async (id: string): Promise<void> => {
@@ -119,8 +170,8 @@ export default function MeetingSchedulePanel({
         layout="vertical"
         size="small"
         className={styles.meetingScheduleForm}
-        initialValues={{ durationMinutes: 30, startsAt: dayjs().add(1, 'hour').minute(0) }}
-        onFinish={(values) => void onCreate(values)}
+        initialValues={{ durationMinutes: 30, startsAt: defaultFormStartsAt() }}
+        onFinish={onFinish}
       >
         <Form.Item
           name="title"
@@ -144,9 +195,20 @@ export default function MeetingSchedulePanel({
         <Form.Item name="durationMinutes" label={t('plugin.meetingScheduleDuration')}>
           <Select disabled={disabled} options={durationOptions} />
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading} disabled={disabled} block>
-          {t('plugin.meetingScheduleCreate')}
-        </Button>
+        {editingId ? (
+          <Space direction="vertical" style={{ width: '100%' }} size={8}>
+            <Button type="primary" htmlType="submit" loading={loading} disabled={disabled} block>
+              {t('plugin.meetingScheduleSave')}
+            </Button>
+            <Button htmlType="button" disabled={disabled || loading} block onClick={cancelEdit}>
+              {t('plugin.meetingScheduleCancelEdit')}
+            </Button>
+          </Space>
+        ) : (
+          <Button type="primary" htmlType="submit" loading={loading} disabled={disabled} block>
+            {t('plugin.meetingScheduleCreate')}
+          </Button>
+        )}
       </Form>
 
       {schedules.length > 0 ? (
@@ -177,6 +239,16 @@ export default function MeetingSchedulePanel({
                         </Button>
                       ]
                     : []),
+                  <Button
+                    key="edit"
+                    type="link"
+                    size="small"
+                    icon={<EditOutlined />}
+                    disabled={disabled}
+                    aria-label={t('plugin.meetingScheduleEdit')}
+                    data-testid="meeting-schedule-edit"
+                    onClick={() => beginEdit(item)}
+                  />,
                   <Button
                     key="delete"
                     type="text"
