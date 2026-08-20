@@ -3,6 +3,7 @@ import type { DeleteTaskMode } from '@shared/task/deleteMode'
 import type { CreateTaskInput, GanttScheduleInput, MoveTaskInput, Task, UpdateTaskInput } from '@shared/task/types'
 import type { UpsertDependencyInput } from '@shared/task/dependency'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
+import { upsertTaskInList } from '@shared/task/taskListPatch'
 
 interface TaskState {
   tasksByGroup: Record<string, Task[]>
@@ -19,8 +20,15 @@ interface TaskState {
     title: string,
     options?: { sourceMsgId?: string; linkedFileIds?: string[] }
   ) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
-  referenceFromChat: (groupId: string, taskId: string) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
+  referenceFromChat: (
+    groupId: string,
+    taskId: string
+  ) => Promise<{ task: Task; message: import('@shared/chat/types').ChatMessage }>
   setTasks: (groupId: string, tasks: Task[]) => void
+}
+
+function findGroupIdForTask(tasksByGroup: Record<string, Task[]>, taskId: string): string | undefined {
+  return Object.keys(tasksByGroup).find((gid) => tasksByGroup[gid]?.some((t) => t.taskId === taskId))
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -45,36 +53,36 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createTask: async (input) => {
     const task = await getLanpmApi().task.createTask(input)
-    await get().loadTasks(input.groupId)
+    set((s) => ({
+      tasksByGroup: {
+        ...s.tasksByGroup,
+        [input.groupId]: upsertTaskInList(s.tasksByGroup[input.groupId] ?? [], task)
+      }
+    }))
     return task
   },
 
   updateTask: async (input) => {
     const task = await getLanpmApi().task.updateTask(input)
-    const existing = get().tasksByGroup
-    const groupId = Object.keys(existing).find((gid) =>
-      existing[gid]?.some((t) => t.taskId === input.taskId)
-    )
-    if (groupId) await get().loadTasks(groupId)
+    const groupId = findGroupIdForTask(get().tasksByGroup, input.taskId) ?? task.groupId
+    set((s) => ({
+      tasksByGroup: {
+        ...s.tasksByGroup,
+        [groupId]: upsertTaskInList(s.tasksByGroup[groupId] ?? [], task)
+      }
+    }))
     return task
   },
 
   updateSchedule: async (input) => {
     const task = await getLanpmApi().task.updateSchedule(input)
-    const existing = get().tasksByGroup
-    const groupId = Object.keys(existing).find((gid) =>
-      existing[gid]?.some((t) => t.taskId === input.taskId)
-    )
-    if (groupId) {
-      set((s) => ({
-        tasksByGroup: {
-          ...s.tasksByGroup,
-          [groupId]: (s.tasksByGroup[groupId] ?? []).map((t) =>
-            t.taskId === task.taskId ? task : t
-          )
-        }
-      }))
-    }
+    const groupId = findGroupIdForTask(get().tasksByGroup, input.taskId) ?? task.groupId
+    set((s) => ({
+      tasksByGroup: {
+        ...s.tasksByGroup,
+        [groupId]: upsertTaskInList(s.tasksByGroup[groupId] ?? [], task)
+      }
+    }))
     return task
   },
 
@@ -85,19 +93,18 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   moveTask: async (input) => {
     const task = await getLanpmApi().task.moveTask(input)
-    const existing = get().tasksByGroup
-    const groupId = Object.keys(existing).find((gid) =>
-      existing[gid]?.some((t) => t.taskId === input.taskId)
-    )
-    if (groupId) await get().loadTasks(groupId)
+    const groupId = findGroupIdForTask(get().tasksByGroup, input.taskId) ?? task.groupId
+    set((s) => ({
+      tasksByGroup: {
+        ...s.tasksByGroup,
+        [groupId]: upsertTaskInList(s.tasksByGroup[groupId] ?? [], task)
+      }
+    }))
     return task
   },
 
   deleteTask: async (taskId, mode) => {
-    const existing = get().tasksByGroup
-    const groupId = Object.keys(existing).find((gid) =>
-      existing[gid]?.some((t) => t.taskId === taskId)
-    )
+    const groupId = findGroupIdForTask(get().tasksByGroup, taskId)
     const ok = await getLanpmApi().task.deleteTask(taskId, mode)
     if (ok && groupId) await get().loadTasks(groupId)
     return ok
@@ -105,13 +112,23 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createFromChat: async (groupId, title, options) => {
     const result = await getLanpmApi().task.createFromChat(groupId, title, options)
-    await get().loadTasks(groupId)
+    set((s) => ({
+      tasksByGroup: {
+        ...s.tasksByGroup,
+        [groupId]: upsertTaskInList(s.tasksByGroup[groupId] ?? [], result.task)
+      }
+    }))
     return result
   },
 
   referenceFromChat: async (groupId, taskId) => {
     const result = await getLanpmApi().task.referenceFromChat(groupId, taskId)
-    await get().loadTasks(groupId)
+    set((s) => ({
+      tasksByGroup: {
+        ...s.tasksByGroup,
+        [groupId]: upsertTaskInList(s.tasksByGroup[groupId] ?? [], result.task)
+      }
+    }))
     return result
   }
 }))
