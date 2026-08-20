@@ -18,9 +18,11 @@ assert.match(shared, /hiddenContributedRoutes/)
 assert.match(shared, /contributedOrder/)
 assert.match(
   shared,
-  /hiddenViews:\s*\['files',\s*'whiteboard'\]/,
-  'DEFAULT_NAV_PREFERENCES must hide files/whiteboard tabs (IA-404)'
+  /hiddenViews:\s*\[\.\.\.DEFAULT_HIDDEN_VIEWS\]/,
+  'DEFAULT_NAV_PREFERENCES must hide files/whiteboard/gantt/calendar (SPRINT-45)'
 )
+assert.match(shared, /upgradeV196HiddenViews/)
+assert.match(shared, /rawNavDocumentNeedsV196Writeback/)
 assert.match(
   shared,
   /hiddenContributedRoutes:\s*\['mindmap'\]/,

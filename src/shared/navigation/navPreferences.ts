@@ -24,8 +24,18 @@ export const ALL_APP_VIEWS: AppView[] = [
 
 const TASK_ENTRY_VIEWS: AppView[] = ['board', 'tree']
 
+/** v1.96 默认隐藏（不含时间透镜）— 恰好此集合才触发补藏甘特/日历 */
+export const V196_HIDDEN_VIEWS: readonly AppView[] = ['files', 'whiteboard']
+
+export const DEFAULT_HIDDEN_VIEWS: AppView[] = [
+  'files',
+  'whiteboard',
+  'gantt',
+  'calendar'
+]
+
 export const DEFAULT_NAV_PREFERENCES: NavPreferences = {
-  hiddenViews: ['files', 'whiteboard'],
+  hiddenViews: [...DEFAULT_HIDDEN_VIEWS],
   order: [...ALL_APP_VIEWS],
   hiddenContributedRoutes: ['mindmap'],
   contributedOrder: []
@@ -110,6 +120,41 @@ function isAppView(value: unknown): value is AppView {
   return typeof value === 'string' && (ALL_APP_VIEWS as string[]).includes(value)
 }
 
+export function isV196HiddenViewsFingerprint(hiddenViews: readonly string[]): boolean {
+  if (hiddenViews.length !== 2) return false
+  const set = new Set(hiddenViews)
+  return set.has('files') && set.has('whiteboard')
+}
+
+export function upgradeV196HiddenViews(hiddenViews: AppView[]): AppView[] {
+  if (!isV196HiddenViewsFingerprint(hiddenViews)) return hiddenViews
+  return [...DEFAULT_HIDDEN_VIEWS]
+}
+
+function rawPrefsNeedV196Upgrade(raw: unknown): boolean {
+  if (!raw || typeof raw !== 'object') return false
+  const hv = (raw as Record<string, unknown>).hiddenViews
+  if (!Array.isArray(hv)) return false
+  const views = hv.filter((v): v is string => typeof v === 'string')
+  return isV196HiddenViewsFingerprint([...new Set(views)])
+}
+
+/** 读盘后若仍是 v1.96 仅藏 files+whiteboard，需要写回新默认隐藏集 */
+export function rawNavDocumentNeedsV196Writeback(raw: unknown): boolean {
+  if (!raw || typeof raw !== 'object') return false
+  const record = raw as Record<string, unknown>
+  if (isLegacyNavPreferencesRaw(record)) {
+    return rawPrefsNeedV196Upgrade(record)
+  }
+  if (rawPrefsNeedV196Upgrade(record.global)) return true
+  if (record.byGroup && typeof record.byGroup === 'object') {
+    for (const prefs of Object.values(record.byGroup as Record<string, unknown>)) {
+      if (rawPrefsNeedV196Upgrade(prefs)) return true
+    }
+  }
+  return false
+}
+
 function isContributedRoute(value: unknown): value is string {
   return typeof value === 'string' && /^[a-z][a-z0-9-]{0,63}$/.test(value.trim())
 }
@@ -127,9 +172,11 @@ export function normalizeNavPreferences(raw: unknown): NavPreferences {
   }
 
   const record = raw as Record<string, unknown>
-  const hiddenViews = Array.isArray(record.hiddenViews)
-    ? [...new Set(record.hiddenViews.filter(isAppView))]
-    : []
+  const hiddenViews = upgradeV196HiddenViews(
+    Array.isArray(record.hiddenViews)
+      ? [...new Set(record.hiddenViews.filter(isAppView))]
+      : []
+  )
 
   let order: AppView[] = []
   if (Array.isArray(record.order)) {
