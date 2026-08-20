@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **本机手验闭合（Linux）**：`verify:m3` / `verify:dual-stub` / `measure:perf --quick` / `verify:i18n-en` / `verify:visual` + 20 张 PNG 冒烟；`docs/06` §4.1 #4/#5 记本机已测，#8/#9 记脚本已测（全页英文折行与 §2.2 甘特肉眼未做），#6/#7 仍延期（`TASK-3801`–`TASK-3805`）
+- **`verify:visual`**：`AppRouter` 允许驾驶舱 `lazy()`（对齐 `TASK-3003`），仍禁止 `GroupView` 懒加载以免 Rolldown CJS 循环（`TASK-3805`）
+
 ## [1.103.1] - 2026-08-20
 
 ### Added

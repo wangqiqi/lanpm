@@ -728,9 +728,17 @@ for (const rel of VIS07B_CSS) {
   assert.ok(!pxFonts?.length, `${rel} must use --lanpm-font-* not ${pxFonts?.join(', ')} (VIS-07b)`)
 }
 
-for (const rel of ['app/AppRouter.tsx'] as const) {
-  const src = readFileSync(join(renderer, rel), 'utf8')
-  assert.ok(!/\blazy\s*\(/.test(src), `${rel} must not use React.lazy (Rolldown CJS chunk cycle)`)
+{
+  const src = readFileSync(join(renderer, 'app/AppRouter.tsx'), 'utf8')
+  assert.match(
+    src,
+    /CockpitView\s*=\s*lazy\s*\(/,
+    'AppRouter must lazy-load CockpitView (TASK-3003); GroupView stays eager to avoid Rolldown CJS cycle'
+  )
+  assert.ok(
+    !/GroupView\s*=\s*lazy\s*\(/.test(src),
+    'AppRouter must not lazy-load GroupView (Rolldown CJS chunk cycle)'
+  )
 }
 const groupViewSrc = readFileSync(join(renderer, 'views/GroupView.tsx'), 'utf8')
 assert.ok(
