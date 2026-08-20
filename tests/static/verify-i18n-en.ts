@@ -122,6 +122,18 @@ assert.match(
   /\.meetingVideoLabel[\s\S]*text-overflow:\s*ellipsis/,
   'meeting video labels must ellipsis'
 )
+assert.match(
+  cockpitCss,
+  /\.headerActions[\s\S]*min-width:\s*0/,
+  'cockpit header actions must shrink for long EN labels (TASK-4902)'
+)
+
+assert.match(
+  chatCss,
+  /\.composerIsland[\s\S]*min-width:\s*0/,
+  'chat composer island must shrink for long EN placeholders (TASK-4902)'
+)
+
 assert.match(meetingToolbar, /ComposerIconButton/, 'meeting toolbar must use single composer menu button')
 
 const schedulePanel = readFileSync(
