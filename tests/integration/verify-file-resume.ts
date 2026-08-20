@@ -20,6 +20,8 @@ import Database from 'better-sqlite3'
 import type { FileChunkPayload, FileMetaBroadcastPayload } from '../../src/shared/file/sync.ts'
 import {
   REMOTE_PENDING_PREFIX,
+  fileChunkBody,
+  filePullChunkEncoding,
   filePullFromOffset,
   isFilePullRequestPayload,
   partialFileName
@@ -118,20 +120,33 @@ async function respondPullFromOffset(
   const buf = readFileSync(meta.storagePath)
   let fromOffset = filePullFromOffset(payload)
   if (fromOffset > buf.length) fromOffset = 0
+  const encoding = filePullChunkEncoding(payload)
   let offset = fromOffset
   let chunksSent = 0
   while (offset < buf.length) {
     const end = Math.min(buf.length, offset + TEST_CHUNK)
     const slice = buf.subarray(offset, end)
-    const chunkPayload: FileChunkPayload = {
-      fileId: meta.fileId,
-      groupId: meta.groupId,
-      offset,
-      chunkBase64: slice.toString('base64'),
-      totalBytes: meta.size,
-      sha256: meta.sha256,
-      done: end >= buf.length
-    }
+    const done = end >= buf.length
+    const chunkPayload =
+      encoding === 'binary'
+        ? {
+            fileId: meta.fileId,
+            groupId: meta.groupId,
+            offset,
+            totalBytes: meta.size,
+            sha256: meta.sha256,
+            done,
+            chunk: slice
+          }
+        : {
+            fileId: meta.fileId,
+            groupId: meta.groupId,
+            offset,
+            chunkBase64: slice.toString('base64'),
+            totalBytes: meta.size,
+            sha256: meta.sha256,
+            done
+          }
     await stub.publish({
       version: 1,
       type: 'file_chunk',
@@ -154,13 +169,15 @@ function applyChunkToPartial(
   partialPath: string,
   transferId: string,
   db: Database.Database,
-  chunk: FileChunkPayload
-): void {
-  const data = Buffer.from(chunk.chunkBase64, 'base64')
+  chunk: FileChunkPayload & { chunk?: Buffer; offset: number }
+): Buffer {
+  const data = fileChunkBody(chunk)
+  if (!data) throw new Error('chunk missing body')
   const fd = openSync(partialPath, existsSync(partialPath) ? 'r+' : 'w')
   writeSync(fd, data, 0, data.length, chunk.offset)
   closeSync(fd)
   updateTransferProgress(db, transferId, chunk.offset + data.length, 'transferring')
+  return data
 }
 
 const { db: dbA, dir: dirA } = openDb('a', 'user_resume_a', 'dev_resume_a')
@@ -225,13 +242,13 @@ stubA.subscribe(GROUP, (env) => {
 })
 stubB.subscribe(GROUP, (env) => {
   if (env.type !== 'file_chunk') return
-  const chunk = env.payload as FileChunkPayload
+  const chunk = env.payload as FileChunkPayload & { chunk?: Buffer }
   if (phase === 'interrupt' && chunk.offset >= interruptAfter) {
     // drop remaining chunks — simulate disconnect
     return
   }
-  applyChunkToPartial(partialPath, transferId, dbB, chunk)
-  if (phase === 'interrupt' && chunk.offset + Buffer.from(chunk.chunkBase64, 'base64').length >= interruptAfter) {
+  const data = applyChunkToPartial(partialPath, transferId, dbB, chunk)
+  if (phase === 'interrupt' && chunk.offset + data.length >= interruptAfter) {
     finishTransfer(dbB, transferId, 'failed', 'simulated disconnect')
     return
   }
@@ -323,7 +340,7 @@ try {
     senderDeviceId: 'dev_resume_b',
     groupId: GROUP,
     ts: new Date().toISOString(),
-    payload: { fileId, groupId: GROUP, fromOffset: interruptAfter },
+    payload: { fileId, groupId: GROUP, fromOffset: interruptAfter, chunkEncoding: 'binary' },
     nonce: '',
     authTag: ''
   })

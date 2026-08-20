@@ -8,7 +8,12 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Database from 'better-sqlite3'
 import type { FileChunkPayload, FileMetaBroadcastPayload } from '../../src/shared/file/sync.ts'
-import { REMOTE_PENDING_PREFIX } from '../../src/shared/file/sync.ts'
+import {
+  fileChunkBody,
+  filePullChunkEncoding,
+  isFilePullRequestPayload,
+  REMOTE_PENDING_PREFIX
+} from '../../src/shared/file/sync.ts'
 import { FILE_CHUNK_SIZE } from '../../src/shared/file/channels.ts'
 import type { SyncEnvelope } from '../../src/shared/network/types.ts'
 import { NetworkStub } from '../../src/main/network/stub/NetworkStub.ts'
@@ -73,23 +78,37 @@ async function respondPullRequest(
 ): Promise<void> {
   if (envelope.type !== 'file_pull_request' || !envelope.groupId) return
   if (envelope.senderDeviceId === localDeviceId) return
-  const payload = envelope.payload as { fileId: string }
+  if (!isFilePullRequestPayload(envelope.payload)) return
+  const payload = envelope.payload
   const meta = getFileById(db, payload.fileId)
   if (!meta || meta.storagePath.startsWith(REMOTE_PENDING_PREFIX)) return
   const buf = readFileSync(meta.storagePath)
+  const encoding = filePullChunkEncoding(payload)
   let offset = 0
   while (offset < buf.length) {
     const end = Math.min(buf.length, offset + FILE_CHUNK_SIZE)
     const slice = buf.subarray(offset, end)
-    const chunkPayload: FileChunkPayload = {
-      fileId: meta.fileId,
-      groupId: meta.groupId,
-      offset,
-      chunkBase64: slice.toString('base64'),
-      totalBytes: meta.size,
-      sha256: meta.sha256,
-      done: end >= buf.length
-    }
+    const done = end >= buf.length
+    const chunkPayload =
+      encoding === 'binary'
+        ? {
+            fileId: meta.fileId,
+            groupId: meta.groupId,
+            offset,
+            totalBytes: meta.size,
+            sha256: meta.sha256,
+            done,
+            chunk: slice
+          }
+        : {
+            fileId: meta.fileId,
+            groupId: meta.groupId,
+            offset,
+            chunkBase64: slice.toString('base64'),
+            totalBytes: meta.size,
+            sha256: meta.sha256,
+            done
+          }
     await stub.publish({
       version: 1,
       type: 'file_chunk',
@@ -110,9 +129,11 @@ function assembleChunks(
   db: Database.Database,
   destDir: string,
   chunks: Map<number, Buffer>,
-  chunk: FileChunkPayload
+  chunk: FileChunkPayload & { chunk?: Buffer }
 ): string | null {
-  chunks.set(chunk.offset, Buffer.from(chunk.chunkBase64, 'base64'))
+  const bodyPiece = fileChunkBody(chunk)
+  if (!bodyPiece) throw new Error('chunk missing body')
+  chunks.set(chunk.offset, bodyPiece)
   if (!chunk.done) return null
   const ordered = [...chunks.entries()].sort((a, b) => a[0] - b[0])
   const body = Buffer.concat(ordered.map(([, b]) => b))
@@ -164,6 +185,30 @@ const meta: FileMeta = {
 }
 insertFile(dbA, meta)
 
+const contentBin = Buffer.from('lanpm binary chunk payload')
+const sha256Bin = createHash('sha256').update(contentBin).digest('hex')
+const filePathBin = join(dirA, 'sample-bin.txt')
+writeFileSync(filePathBin, contentBin)
+const fileIdBin = `file_${randomUUID()}`
+const metaBin: FileMeta = {
+  ...meta,
+  fileId: fileIdBin,
+  name: 'sample-bin.txt',
+  size: contentBin.length,
+  sha256: sha256Bin,
+  storagePath: filePathBin
+}
+insertFile(dbA, metaBin)
+
+const expectedByFile = new Map<string, Buffer>([
+  [fileId, content],
+  [fileIdBin, contentBin]
+])
+const chunksByFile = new Map<string, Map<number, Buffer>>([
+  [fileId, new Map()],
+  [fileIdBin, new Map()]
+])
+
 const stubA = new NetworkStub({
   deviceId: 'dev_file_a',
   userId: 'user_file_a',
@@ -175,7 +220,8 @@ const stubB = new NetworkStub({
   displayName: 'File B'
 })
 
-const pullChunks = new Map<number, Buffer>()
+let sawBinaryChunk = false
+let sawLegacyChunk = false
 
 stubA.start()
 stubB.start()
@@ -187,9 +233,14 @@ stubA.subscribe(GROUP, (env) => {
 })
 stubB.subscribe(GROUP, (env) => {
   if (env.type !== 'file_chunk') return
-  const chunk = env.payload as FileChunkPayload
-  const dest = assembleChunks(dbB, dirB, pullChunks, chunk)
-  if (dest && !readFileSync(dest).equals(content)) throw new Error('assembled content mismatch')
+  const chunk = env.payload as FileChunkPayload & { chunk?: Buffer; fileId: string }
+  if (Buffer.isBuffer(chunk.chunk) && chunk.chunkBase64 === undefined) sawBinaryChunk = true
+  if (typeof chunk.chunkBase64 === 'string') sawLegacyChunk = true
+  const map = chunksByFile.get(chunk.fileId)
+  const expectBuf = expectedByFile.get(chunk.fileId)
+  if (!map || !expectBuf) throw new Error(`unexpected file_chunk ${chunk.fileId}`)
+  const dest = assembleChunks(dbB, dirB, map, chunk)
+  if (dest && !readFileSync(dest).equals(expectBuf)) throw new Error('assembled content mismatch')
 })
 
 try {
@@ -230,6 +281,41 @@ try {
   if (!local || local.storagePath.startsWith(REMOTE_PENDING_PREFIX)) {
     throw new Error('file pull did not update storage_path on B')
   }
+  if (!sawLegacyChunk) throw new Error('legacy Base64 file_chunk missing')
+
+  await stubA.publish({
+    version: 1,
+    type: 'file_meta',
+    msgId: `fm_${fileIdBin}`,
+    senderUserId: 'user_file_a',
+    senderDeviceId: 'dev_file_a',
+    groupId: GROUP,
+    ts: now,
+    payload: { meta: metaBin } satisfies FileMetaBroadcastPayload,
+    nonce: '',
+    authTag: ''
+  })
+  await new Promise((r) => setTimeout(r, 500))
+
+  await stubB.publish({
+    version: 1,
+    type: 'file_pull_request',
+    msgId: `fpr_${fileIdBin}`,
+    senderUserId: 'user_file_b',
+    senderDeviceId: 'dev_file_b',
+    groupId: GROUP,
+    ts: new Date().toISOString(),
+    payload: { fileId: fileIdBin, groupId: GROUP, chunkEncoding: 'binary' },
+    nonce: '',
+    authTag: ''
+  })
+  await new Promise((r) => setTimeout(r, 800))
+
+  const localBin = getFileById(dbB, fileIdBin)
+  if (!localBin || localBin.storagePath.startsWith(REMOTE_PENDING_PREFIX)) {
+    throw new Error('binary file pull did not update storage_path on B')
+  }
+  if (!sawBinaryChunk) throw new Error('binary file_chunk missing')
 } finally {
   stubA.stop()
   stubB.stop()
