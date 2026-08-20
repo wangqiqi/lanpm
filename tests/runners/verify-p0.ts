@@ -15,6 +15,7 @@ const steps = [
   'verify:sync-handlers',
   'verify:schema-repo',
   'verify:schema-fk',
+  'verify:task-store-patch',
   'verify:sec-hardening',
   'verify:storage-path-resolver',
   'verify:screenshots-layout',
