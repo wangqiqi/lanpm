@@ -105,7 +105,7 @@ npm run build
 | README 配图 | `npm run screenshots:capture` → `npm run screenshots:sync-readme`（[docs/screenshots](./docs/screenshots/README.md)） |
 | 验收 | 以 **Electron**（`npm run dev`）为准 — 浏览器 stub（`npm run dev:web`）仅 UI 预览 |
 | 发版 | [docs/05](./docs/05_测试与联调发布.md) · 跨平台矩阵 §1.4 |
-| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — 看板/树/文件/驾驶舱 lazy 分包；驾驶舱一次 JOIN；文件 chunk 进度 IPC 100ms 节流 |
+| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — 看板/树/文件/驾驶舱 lazy 分包；驾驶舱一次 JOIN；文件 chunk 进度 IPC 100ms 节流；库探测只读 16 字节头；任务写操作本地 patch |
 
 Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) — 详见 [`.cursor/`](./.cursor/)。
 
