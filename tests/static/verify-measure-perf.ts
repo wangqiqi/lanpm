@@ -40,6 +40,16 @@ assert.match(harness, /dbCipherMs/)
 assert.match(harness, /notes[\s\S]*gpu/)
 assert.match(harness, /disableHardwareAcceleration/)
 
+const ui = readSrc('scripts/measure-perf-ui.mjs')
+assert.match(ui, /LANPM_MEASURE/)
+assert.match(ui, /coldMs/)
+assert.match(ui, /linuxTreeRssMb/)
+assert.match(ui, /nav-tab-/)
+
+const mainSrc = readSrc('src/main/index.ts')
+assert.match(mainSrc, /LANPM_MEASURE/)
+assert.match(mainSrc, /\[lanpm:measure\] ready-to-show/)
+
 const gitignore = readSrc('.gitignore')
 assert.match(gitignore, /^\.lanpm\//m)
 

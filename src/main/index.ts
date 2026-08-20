@@ -179,6 +179,9 @@ function createWindow(): BrowserWindow {
   }
 
   mainWindow.on('ready-to-show', () => {
+    if (process.env.LANPM_MEASURE === '1') {
+      console.log(`[lanpm:measure] ready-to-show ${Date.now()}`)
+    }
     if (!visualCaptureDir) {
       mainWindow.maximize()
       mainWindow.show()
