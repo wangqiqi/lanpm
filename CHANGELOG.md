@@ -6,6 +6,7 @@
 
 ### Added
 
+- **文件库 PDF 预览**：原生 PDF（及 soffice 转出的 PDF）用 `pdfjs-dist` 翻页，不再走 Chromium iframe（`TASK-4001`–`TASK-4005`）
 - **会议日程可编辑**：近期预约可改标题/时间/时长（`updateSchedule`），不必删了再建（`TASK-3701`–`TASK-3705`）
 - **`npm run measure:perf`**：Linux 上对 electron-vite 生产构建采集冷启动、RSS、底栏 Tab P95、明文 vs SQLCipher 查询对照；JSON 在 `.lanpm/perf/`（`TASK-2901`–`TASK-2906`）
 - **本机 SQLite 可选通行词加密**（at rest）：明文库默认可用；设置里加密；错口令不建空库（`SPIKE-2701` · `TASK-2701`–`TASK-2705`）

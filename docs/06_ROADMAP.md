@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：见 `plan.md` 候选表（PDF 预览 · A6 补同步 · file_chunk B · 本机手验 · 真网双机等）。会议 i18n/深链/join CTA 已交付（v1.89+）；日程 **可编辑** 见 CHANGELOG Unreleased。
+**候选下一 Sprint**：见 `plan.md` 候选表（A6 补同步 · file_chunk B · 本机手验 · 真网双机等）。会议 i18n/深链/join CTA 已交付（v1.89+）；日程 **可编辑** 见 CHANGELOG Unreleased。
 
 ---
 
@@ -169,7 +169,7 @@
 
 | 序 | 项 | 首选 | 不够用时 |
 |----|-----|------|----------|
-| 1 | PDF 预览 | `pdfjs-dist` | `3rd/pdfjs-…` 裁剪/主题 |
+| 1 | PDF 预览 | ✅ `pdfjs-dist`（文件库翻页；worker `'self'`） | 裁剪/主题仍可 `3rd/pdfjs-…` |
 | 2 | 全局搜索 | ✅ `minisearch`（任务/消息；成员仍内存） | 深度定制分词仍可 `3rd/` |
 | 3 | 长列表虚拟化 | `react-virtuoso` | — |
 | 4 | WebRTC | `simple-peer` | `3rd/simple-peer` 适配传输面 |
