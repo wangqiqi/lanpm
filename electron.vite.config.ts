@@ -162,6 +162,10 @@ export default defineConfig({
     build: {
       externalizeDeps: false,
       rollupOptions: {
+        input: {
+          index: resolve('src/preload/index.ts'),
+          unlock: resolve('src/preload/unlock.ts')
+        },
         output: {
           format: 'cjs',
           entryFileNames: '[name].js'

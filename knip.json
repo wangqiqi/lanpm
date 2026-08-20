@@ -3,6 +3,7 @@
   "entry": [
     "src/main/index.ts",
     "src/preload/index.ts",
+    "src/preload/unlock.ts",
     "src/renderer/src/main.tsx",
     "src/renderer/src/bootstrap.tsx",
     "src/cli/main.ts",

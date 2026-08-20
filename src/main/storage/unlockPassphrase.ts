@@ -1,6 +1,16 @@
+import { existsSync } from 'fs'
+import { join } from 'path'
 import { BrowserWindow, ipcMain } from 'electron'
+import { DB_UNLOCK_CHANNEL } from '../../shared/data/dbUnlock.ts'
 
-const UNLOCK_CHANNEL = 'lanpm:dbUnlockPassphrase'
+function resolveUnlockPreloadPath(): string {
+  const candidates = [
+    join(__dirname, '../preload/unlock.js'),
+    join(__dirname, '../preload/unlock.cjs'),
+    join(__dirname, '../preload/unlock.mjs')
+  ]
+  return candidates.find((p) => existsSync(p)) ?? candidates[0]!
+}
 
 function unlockHtml(): string {
   return `<!doctype html>
@@ -25,20 +35,19 @@ function unlockHtml(): string {
     </div>
   </form>
   <script>
-    const { ipcRenderer } = require('electron')
     document.getElementById('f').addEventListener('submit', (e) => {
       e.preventDefault()
-      ipcRenderer.send(${JSON.stringify(UNLOCK_CHANNEL)}, document.getElementById('p').value)
+      window.lanpmUnlock.submit(document.getElementById('p').value)
     })
     document.getElementById('q').addEventListener('click', () => {
-      ipcRenderer.send(${JSON.stringify(UNLOCK_CHANNEL)}, null)
+      window.lanpmUnlock.submit(null)
     })
   </script>
 </body>
 </html>`
 }
 
-/** Isolated window (nodeIntegration on this window only). Never logs the value. */
+/** Isolated BrowserWindow: preload + contextIsolation; never logs the value. */
 export function promptDatabasePassphrase(): Promise<string | null> {
   return new Promise((resolve) => {
     const win = new BrowserWindow({
@@ -49,20 +58,25 @@ export function promptDatabasePassphrase(): Promise<string | null> {
       maximizable: false,
       autoHideMenuBar: true,
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        sandbox: false
+        preload: resolveUnlockPreloadPath(),
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true
       }
     })
+    let settled = false
+    const onUnlock = (_event: Electron.IpcMainEvent, value: unknown): void => {
+      finish(typeof value === 'string' ? value : null)
+    }
     const finish = (value: string | null): void => {
-      ipcMain.removeAllListeners(UNLOCK_CHANNEL)
+      if (settled) return
+      settled = true
+      ipcMain.removeListener(DB_UNLOCK_CHANNEL, onUnlock)
       if (!win.isDestroyed()) win.close()
-      const trimmed = typeof value === 'string' ? value : null
+      const trimmed = typeof value === 'string' ? value.trim() : null
       resolve(trimmed && trimmed.length > 0 ? trimmed : null)
     }
-    ipcMain.once(UNLOCK_CHANNEL, (_event, value: unknown) => {
-      finish(typeof value === 'string' ? value : null)
-    })
+    ipcMain.on(DB_UNLOCK_CHANNEL, onUnlock)
     win.on('closed', () => finish(null))
     void win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(unlockHtml())}`)
   })
