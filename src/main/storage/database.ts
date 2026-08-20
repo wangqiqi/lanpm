@@ -61,6 +61,7 @@ export function getDatabase(): Database.Database {
 }
 
 export function closeDatabase(): void {
+  sessionPassphrase = undefined
   if (dbInstance) {
     dbInstance.close()
     dbInstance = null

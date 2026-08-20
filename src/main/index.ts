@@ -39,7 +39,7 @@ import { initNetwork, shutdownNetwork } from './network'
 import { closeDatabase, getDatabase, getDatabasePath, initDatabase } from './storage'
 import { ensureProfileUserDataPath } from './storage/profilePaths'
 import { probeSqliteAtRest } from './storage/sqliteAtRest'
-import { promptDatabasePassphrase } from './storage/unlockPassphrase'
+import { resolveDbPassphrase } from './storage/dbPassphrase'
 import { resolveWindowIcon, resolveAppIconPath } from './appIcon'
 import { attachCloseToTray, hasSystemTray, initSystemTray } from './systemTray'
 import { registerPreviewProtocol, registerPreviewScheme } from './file/previewProtocol'
@@ -229,16 +229,10 @@ app.whenReady().then(async () => {
       ensureProfileUserDataPath()
     }
     const dbKind = probeSqliteAtRest(getDatabasePath())
-    let passphrase: string | undefined
-    if (dbKind === 'encrypted') {
-      passphrase = process.env.LANPM_DB_PASSPHRASE?.trim() || undefined
-      if (!passphrase) {
-        passphrase = (await promptDatabasePassphrase()) ?? undefined
-      }
-      if (!passphrase) {
-        app.quit()
-        return
-      }
+    const passphrase = await resolveDbPassphrase({ kind: dbKind, allowPrompt: true })
+    if (dbKind === 'encrypted' && !passphrase) {
+      app.quit()
+      return
     }
     initDatabase(passphrase ? { passphrase } : undefined)
     if (e2eMode && !getSetupStatus(getDatabase()).configured) {
