@@ -3,6 +3,8 @@ import { LANPM_DM_GROUP_LABEL } from '../../shared/constants/display'
 import type { GlobalSearchHit, GlobalSearchResult } from '../../shared/search/types'
 import { getGroupById } from '../storage/repositories/groupRepository'
 import { searchMessagesByContent, searchTasksByTitle } from '../storage/repositories/searchRepository'
+
+/** 任务/消息命中：searchRepository 灌 SQLite 行后走 miniSearchIndex（minisearch）。成员仍内存匹配。 */
 import { listUserGroups } from '../group/groupService'
 import { listGroupMembers } from '../chat/memberService'
 

@@ -1,6 +1,12 @@
 import type { Database } from 'better-sqlite3'
 import { extractMessageText } from '../../../shared/search/extractMessageText'
 import type { MessageContent } from '../../../shared/chat/types'
+import {
+  searchMessagesInDocs,
+  searchTasksInDocs,
+  type MessageSearchDoc,
+  type TaskSearchDoc
+} from '../../search/miniSearchIndex'
 
 interface TaskHitRow {
   task_id: string
@@ -14,6 +20,9 @@ interface MessageHitRow {
   content_json: string
 }
 
+/** Query-time index cap (no write-path incremental index this sprint). */
+const MAX_MESSAGE_DOCS = 8000
+
 function parseContent(raw: string): MessageContent {
   const parsed = JSON.parse(raw) as { content?: MessageContent } | MessageContent
   if (parsed && typeof parsed === 'object' && 'content' in parsed && parsed.content) {
@@ -22,16 +31,48 @@ function parseContent(raw: string): MessageContent {
   return parsed as MessageContent
 }
 
-function snippet(text: string, query: string, maxLen = 80): string {
-  const lower = text.toLowerCase()
-  const q = query.toLowerCase()
-  const idx = lower.indexOf(q)
-  if (idx < 0) return text.slice(0, maxLen)
-  const start = Math.max(0, idx - 20)
-  const end = Math.min(text.length, idx + query.length + 40)
-  const prefix = start > 0 ? '…' : ''
-  const suffix = end < text.length ? '…' : ''
-  return `${prefix}${text.slice(start, end)}${suffix}`
+function loadTaskDocs(db: Database): TaskSearchDoc[] {
+  const rows = db
+    .prepare(
+      `SELECT task_id, group_id, title FROM tasks
+       WHERE deleted_at IS NULL
+       ORDER BY updated_at DESC`
+    )
+    .all() as TaskHitRow[]
+  return rows.map((r) => ({
+    id: r.task_id,
+    kind: 'task' as const,
+    groupId: r.group_id,
+    title: r.title,
+    body: r.title
+  }))
+}
+
+function loadMessageDocs(db: Database): MessageSearchDoc[] {
+  const rows = db
+    .prepare(
+      `SELECT msg_id, group_id, content_json FROM messages
+       ORDER BY created_at DESC
+       LIMIT ?`
+    )
+    .all(MAX_MESSAGE_DOCS) as MessageHitRow[]
+
+  const docs: MessageSearchDoc[] = []
+  for (const row of rows) {
+    try {
+      const text = extractMessageText(parseContent(row.content_json))
+      if (!text.trim()) continue
+      docs.push({
+        id: row.msg_id,
+        kind: 'message',
+        groupId: row.group_id,
+        body: text
+      })
+    } catch {
+      /* skip malformed */
+    }
+  }
+  return docs
 }
 
 export function searchTasksByTitle(
@@ -39,16 +80,7 @@ export function searchTasksByTitle(
   query: string,
   limit: number
 ): { taskId: string; groupId: string; title: string }[] {
-  const pattern = `%${query}%`
-  const rows = db
-    .prepare(
-      `SELECT task_id, group_id, title FROM tasks
-       WHERE deleted_at IS NULL AND title LIKE ?
-       ORDER BY updated_at DESC
-       LIMIT ?`
-    )
-    .all(pattern, limit) as TaskHitRow[]
-  return rows.map((r) => ({ taskId: r.task_id, groupId: r.group_id, title: r.title }))
+  return searchTasksInDocs(loadTaskDocs(db), query, limit)
 }
 
 export function searchMessagesByContent(
@@ -56,31 +88,5 @@ export function searchMessagesByContent(
   query: string,
   limit: number
 ): { msgId: string; groupId: string; snippet: string }[] {
-  const pattern = `%${query}%`
-  const rows = db
-    .prepare(
-      `SELECT msg_id, group_id, content_json FROM messages
-       WHERE content_json LIKE ?
-       ORDER BY created_at DESC
-       LIMIT ?`
-    )
-    .all(pattern, limit * 3) as MessageHitRow[]
-
-  const hits: { msgId: string; groupId: string; snippet: string }[] = []
-  for (const row of rows) {
-    try {
-      const content = parseContent(row.content_json)
-      const text = extractMessageText(content)
-      if (!text.toLowerCase().includes(query.toLowerCase())) continue
-      hits.push({
-        msgId: row.msg_id,
-        groupId: row.group_id,
-        snippet: snippet(text, query)
-      })
-      if (hits.length >= limit) break
-    } catch {
-      /* skip malformed */
-    }
-  }
-  return hits
+  return searchMessagesInDocs(loadMessageDocs(db), query, limit)
 }
