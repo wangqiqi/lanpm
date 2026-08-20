@@ -25,7 +25,7 @@
 
 ### Changed
 
-- **许可路径 SPIKE（对照）**：AGPL-only vs 双许可 vs OEM 合同例外；插件侧载/离线闸与产品证解耦。LICENSE 未改（SPIKE-3601 · SPIKE-3602）
+- **许可路径 SPIKE**：建议维持 AGPL-only；有闭源 OEM 先合同例外，常规产品线再双许可。插件离线闸不变。LICENSE 未改（SPIKE-3601–SPIKE-3603）
 - **对外叙事（真网）**：`verify:m6` 标明本机 loopback；双机手验仍走 docs/05 §6，CI 未跑（`TASK-3501`–`TASK-3503`）
 - **P2P `file_chunk` 双栈**：拉取可声明 `chunkEncoding: 'binary'`，密封明文为小 JSON 头 + 原始片；未声明仍走 `chunkBase64`。本机新客户端默认请求 binary（`TASK-3401`–`TASK-3404`）
 - **Linux GPU**：默认仍关闭硬件加速；`LANPM_ENABLE_GPU=1` 可 opt-in 以便对照 RSS（无 Vulkan 会 FATAL）（`TASK-3201`–`TASK-3204`）
