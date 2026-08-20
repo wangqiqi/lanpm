@@ -1,14 +1,25 @@
 import { HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
+import { Spin } from 'antd'
 import MainLayout from '@renderer/layout/MainLayout'
 import GroupViewGuard from '@renderer/routes/GroupViewGuard'
 import PluginViewGuard from '@renderer/routes/PluginViewGuard'
 import HomeRedirect from '@renderer/routes/HomeRedirect'
-import CockpitView from '@renderer/views/CockpitView'
 import GroupView from '@renderer/views/GroupView'
 import PluginContributedView from '@renderer/views/PluginContributedView'
 import type { AppView } from '@shared/navigation/types'
 import { groupViewPath } from '@renderer/routes/paths'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
+
+const CockpitView = lazy(() => import('@renderer/views/CockpitView'))
+
+function CockpitFallback(): React.ReactElement {
+  return (
+    <div style={{ display: 'grid', placeItems: 'center', minHeight: 160 }}>
+      <Spin />
+    </div>
+  )
+}
 
 function GroupIndexRedirect(): React.ReactElement {
   const { groupId } = useParams<{ groupId: string }>()
@@ -41,7 +52,14 @@ export default function AppRouter(): React.ReactElement {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route element={<MainLayout />}>
-          <Route path="/cockpit" element={<CockpitView />} />
+          <Route
+            path="/cockpit"
+            element={
+              <Suspense fallback={<CockpitFallback />}>
+                <CockpitView />
+              </Suspense>
+            }
+          />
           <Route path="/g/:groupId" element={<GroupIndexRedirect />} />
           <Route path="/g/:groupId/chat" element={viewRoute('chat')} />
           <Route path="/g/:groupId/board" element={viewRoute('board')} />

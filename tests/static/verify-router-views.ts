@@ -31,6 +31,12 @@ assert.ok(
 assert.ok(existsSync(join(root, 'src/renderer/src/views/GroupView.tsx')), 'GroupView missing')
 assert.ok(existsSync(join(root, 'src/renderer/src/views/CockpitView.tsx')), 'CockpitView missing')
 assert.match(routerSrc, /CockpitView/, 'cockpit route missing')
+assert.match(
+  routerSrc,
+  /lazy\(\(\) => import\('@renderer\/views\/CockpitView'\)\)/,
+  'cockpit route must be lazy()'
+)
+assert.match(routerSrc, /<Suspense[\s\S]*CockpitView/, 'cockpit route must suspend')
 
 for (const view of expected) {
   assert.equal(isViewAllowedForGroup('project', view), true, `project should allow ${view}`)
