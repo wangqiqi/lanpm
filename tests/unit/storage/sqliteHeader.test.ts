@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { probeSqliteAtRest } from '../../../src/main/storage/sqliteAtRest.ts'
+import { openPlainSqliteDatabase, probeSqliteAtRest } from '../../../src/main/storage/sqliteAtRest.ts'
 
 const dirs: string[] = []
 
@@ -30,5 +30,19 @@ describe('probeSqliteAtRest', () => {
     const path = join(dir, 'lanpm.db')
     writeFileSync(path, Buffer.from('not-a-sqlite-header-xxxx'))
     expect(probeSqliteAtRest(path)).toBe('encrypted')
+  })
+})
+
+describe('openPlainSqliteDatabase', () => {
+  it('returns null for encrypted files without opening them', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lanpm-at-rest-'))
+    dirs.push(dir)
+    const path = join(dir, 'lanpm.db')
+    writeFileSync(path, Buffer.from('not-a-sqlite-header-xxxx'))
+    expect(openPlainSqliteDatabase(path)).toBeNull()
+  })
+
+  it('returns null when the file is missing', () => {
+    expect(openPlainSqliteDatabase(join(tmpdir(), `lanpm-no-db-${Date.now()}.db`))).toBeNull()
   })
 })

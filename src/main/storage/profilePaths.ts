@@ -1,9 +1,9 @@
 import { app } from 'electron'
 import { existsSync, mkdirSync, readdirSync, renameSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import DatabaseConstructor from 'better-sqlite3'
 import type { Database } from 'better-sqlite3'
 import { LOCAL_DEVICE_ID_KEY } from '../identity/setup'
+import { openPlainSqliteDatabase } from './sqliteAtRest.ts'
 
 const ACTIVE_PROFILE_FILE = 'active_profile.json'
 
@@ -39,7 +39,8 @@ function writeActiveUserId(userId: string): void {
 function resolveUserIdFromLegacyDb(legacyDbPath: string): string | null {
   if (!existsSync(legacyDbPath)) return null
   try {
-    const db = new DatabaseConstructor(legacyDbPath, { readonly: true })
+    const db = openPlainSqliteDatabase(legacyDbPath, { readonly: true })
+    if (!db) return null
     const deviceId = db
       .prepare(`SELECT value FROM sync_meta WHERE key = ?`)
       .get(LOCAL_DEVICE_ID_KEY) as { value: string } | undefined
@@ -112,8 +113,8 @@ function migrateLegacyToProfile(userId: string): void {
     }
   }
   const profileDb = join(profileDir, 'lanpm.db')
-  if (existsSync(profileDb)) {
-    const db = new DatabaseConstructor(profileDb)
+  const db = openPlainSqliteDatabase(profileDb)
+  if (db) {
     rewriteFilePathsAfterProfileMove(db, join(base, 'files'), join(profileDir, 'files'))
     rewriteFilePathsAfterProfileMove(db, join(base, 'previews'), join(profileDir, 'previews'))
     db.close()

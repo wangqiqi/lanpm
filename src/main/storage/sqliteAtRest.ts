@@ -55,6 +55,15 @@ export function assertDatabaseReadable(db: Database.Database): void {
   }
 }
 
+/** Open only if the file is plaintext SQLite. Encrypted/missing → null (never unkeyed open). */
+export function openPlainSqliteDatabase(
+  dbPath: string,
+  options?: { readonly?: boolean }
+): Database.Database | null {
+  if (probeSqliteAtRest(dbPath) !== 'plain') return null
+  return new Database(dbPath, options)
+}
+
 export function openSqliteDatabase(dbPath: string, passphrase?: string): Database.Database {
   const kind = probeSqliteAtRest(dbPath)
   if (kind === 'encrypted' && !passphrase) {
