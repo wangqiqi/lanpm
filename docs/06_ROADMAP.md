@@ -119,7 +119,7 @@
 | 6 | 真网双机 | `verify:m6` **仅 loopback** | [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6) 手验清单；**未**当作 CI 已测双机 | 延期 |
 | 7 | 三平台真机 UI | CI `verify.yml` × `verify:m7` | Win / mac / Linux 七页肉眼 | 延期 |
 | 8 | 性能抽样 | `verify:m7-perf` · `verify:core-views-perf` · `measure:perf` / `verify:measure-perf` | [05 §5](./05_测试与联调发布.md#5-性能测量m7) **本机 Linux** `measure:perf --quick` 已测（electron-vite `out/main`，非安装包双击；Tab P95 与预算对齐见 `.lanpm/perf/`）；Win/mac 真机仍缺 | 部分 |
-| 9 | 英文折行 | `verify:i18n-en` | **本机 Linux** 脚本守卫已测；cockpit / chat 全页长文案肉眼仍缺 | 部分 |
+| 9 | 英文折行 | `verify:i18n-en` · `verify:visual-screenshots-en` | **本机 Linux** 脚本守卫 + cockpit/chat `en-US` 无头截图（SPRINT-49）；顶栏长标签仍 ellipsis | ✅ |
 
 ### 4.2 延期汇总（有设备再补）
 
@@ -128,7 +128,6 @@
 | Win/mac/Linux **真机 UI** 七页肉眼 | 自动化 CI 三 OS × `verify:m7` 已闭合；真机延期 |
 | **真网**双机（发现 → 加群/私聊/已读） | `verify:dual-stub` 与 `verify:m6` loopback 已闭合；**两台设备手验仍延期**（步骤 [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6)） |
 | 冷启动 / 空闲·聊天内存 / Tab P95 | `verify:m7-perf` + `verify:core-views-perf` + **本机 Linux** `npm run measure:perf -- --quick`（vite 生产构建，非安装包双击）；Win/mac 与 GPU-on 对照仍缺 |
-| 英文长文案折行肉眼 | `verify:i18n-en` 本机已绿；cockpit / chat 全页折行仍延期 |
 
 方法见 [05](./05_测试与联调发布.md) §2 / §5 / §6。
 

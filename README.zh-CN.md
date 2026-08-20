@@ -104,6 +104,7 @@ npm run build
 | 说明 | 注意 |
 |------|------|
 | README 配图 | `npm run screenshots:capture` → `npm run screenshots:sync-readme`（[docs/screenshots](./docs/screenshots/README.md)） |
+| 英文折行 | `npm run verify:i18n-en` · `npm run verify:visual-screenshots-en`（驾驶舱 + 聊天 `en-US` PNG；Linux 用 `xvfb-run`） |
 | 验收 | 以 **Electron**（`npm run dev`）为准 — 浏览器 stub（`npm run dev:web`）仅 UI 预览 |
 | 发版 | [docs/05](./docs/05_测试与联调发布.md) · 跨平台矩阵 §1.4 |
 | 真网 / 局域网 | `npm run verify:m6` 是本机 **loopback**，不是两台电脑。双机手验见 [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6)（人工；CI 不跑） |

@@ -12,6 +12,7 @@
 ### Changed
 
 - **英文 cockpit/chat 折行**：无头 `en-US` 截图无整页横向溢出；驾驶舱动作区 / 聊天输入岛补 `min-width: 0`（`TASK-4902`）
+- **ROADMAP 英文折行**：`docs/06` §4 #9 闭合 cockpit/chat 肉眼缺口；`verify:visual-screenshots-en` 入 `docs/05`（`TASK-4904`）
 - **README 配图**：同步本机最新亮色截图（含协作抽屉 92vw 与脑图 `assets/mindmap.png`）
 
 ## [1.103.2] - 2026-08-20
