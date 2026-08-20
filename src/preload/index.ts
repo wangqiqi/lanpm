@@ -156,7 +156,7 @@ const api: LanpmApi = {
   },
   file: {
     listFiles: (groupId, category) => ipcRenderer.invoke('file:list', groupId, category),
-    upload: (groupId, filePath) => ipcRenderer.invoke('file:upload', groupId, filePath),
+    upload: (groupId) => ipcRenderer.invoke('file:upload', groupId),
     getPreviewUrl: (fileId) => ipcRenderer.invoke('file:getPreviewUrl', fileId),
     getPreviewText: (fileId) => ipcRenderer.invoke('file:getPreviewText', fileId),
     listTransfers: (groupId) => ipcRenderer.invoke('file:listTransfers', groupId),

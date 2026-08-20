@@ -48,7 +48,7 @@ export function sealEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelo
 export function openEnvelope(aesKey: Buffer, envelope: SyncEnvelope): SyncEnvelope {
   const wrapped = envelope.payload as { __enc?: string }
   if (!wrapped?.__enc || !envelope.nonce || !envelope.authTag) {
-    return envelope
+    throw new Error('envelope not sealed')
   }
   const plain = openBytes(
     aesKey,

@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'crypto'
 import type { Database } from 'better-sqlite3'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs'
-import { extname, join } from 'path'
-import { app, type BrowserWindow } from 'electron'
+import { basename, extname } from 'path'
+import { type BrowserWindow } from 'electron'
 import type { FileCategory, FileMeta, FileTransferView } from '../../shared/file/types'
 import { inferCategory } from '../../shared/file/types'
 import {
@@ -33,7 +33,13 @@ import {
 import { chunkDelayMs, getFileTransferSettings } from './transferSettings.ts'
 import { generatePreview } from './previewService.ts'
 import { previewUrlForFileId } from './previewProtocol.ts'
-import { resolveFileDiskPath, resolvePreviewDiskPath } from './storagePathResolver.ts'
+import {
+  filesRootDir,
+  resolveFileDiskPath,
+  resolvePreviewDiskPath
+} from './storagePathResolver.ts'
+import { resolveSafePath } from '../gateway/pathGuard.ts'
+import { assertSafeFileName, assertSafePathSegment } from '../../shared/fs/safeSegment.ts'
 import { assertFileWritable } from './fileServiceHelpers'
 import { showOpenDialog, showSaveDialog } from '../systemDialog'
 import { cancelPullByTransferId, publishFileMeta, pullRemoteFile } from './fileSyncService'
@@ -42,11 +48,6 @@ import { broadcastToAllWindows } from '../utils/broadcast'
 /** 本机假上传循环协作取消 */
 const cancelRequested = new Set<string>()
 
-function filesRootDir(): string {
-  const dir = join(app.getPath('userData'), 'files')
-  mkdirSync(dir, { recursive: true })
-  return dir
-}
 
 function broadcastTransfers(groupId: string): void {
   broadcastToAllWindows(FILE_TRANSFER_PUSH_CHANNEL, groupId)
@@ -239,13 +240,15 @@ export async function uploadFileFromPath(
     throwLanpm('stub.identityRequired')
   }
   if (!existsSync(sourcePath)) throwLanpm('err.fileNotFound')
+  assertSafePathSegment(groupId, 'groupId')
 
-  const name = sourcePath.split(/[/\\]/).pop() ?? 'file'
+  const name = basename(sourcePath)
+  assertSafeFileName(name)
   const ext = extname(name).replace('.', '') || 'bin'
   const fileId = `file_${randomUUID()}`
-  const groupDir = join(filesRootDir(), groupId)
+  const groupDir = resolveSafePath(filesRootDir(), groupId)
   mkdirSync(groupDir, { recursive: true })
-  const destPath = join(groupDir, `${fileId}_${name}`)
+  const destPath = resolveSafePath(groupDir, `${fileId}_${name}`)
   copyFileSync(sourcePath, destPath)
 
   const now = new Date().toISOString()
@@ -284,11 +287,14 @@ export async function uploadFileFromBuffer(
     throwLanpm('stub.identityRequired')
   }
 
-  const ext = extname(name).replace('.', '') || 'bin'
+  assertSafePathSegment(groupId, 'groupId')
+  const safeName = basename(name)
+  assertSafeFileName(safeName)
+  const ext = extname(safeName).replace('.', '') || 'bin'
   const fileId = `file_${randomUUID()}`
-  const groupDir = join(filesRootDir(), groupId)
+  const groupDir = resolveSafePath(filesRootDir(), groupId)
   mkdirSync(groupDir, { recursive: true })
-  const destPath = join(groupDir, `${fileId}_${name}`)
+  const destPath = resolveSafePath(groupDir, `${fileId}_${safeName}`)
   writeFileSync(destPath, buffer)
 
   const now = new Date().toISOString()

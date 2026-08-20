@@ -365,7 +365,7 @@ export class PeerLink {
         const opened = openEnvelope(this.aesKey, msg.envelope)
         this.opts.onEnvelope(opened)
       } catch {
-        // bad frame
+        console.warn('[peerLink] dropped unsealed or invalid envelope')
       }
     }
   }

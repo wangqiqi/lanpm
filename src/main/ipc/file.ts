@@ -18,11 +18,11 @@ import {
   cancelTransfer,
   setFileTransferRateKbps,
   pullRemoteFile,
-  uploadFileFromPath,
   downloadFileToDisk
 } from '../file/fileService'
 import { deleteFileLocally } from '../data/dataService'
 import { getDatabase } from '../storage'
+import { rejectRendererUploadPath } from '../../shared/fs/safeSegment.ts'
 
 export function registerFileIpc(): void {
   ipcMain.handle(FILE_IPC.list, (_event, groupId: string, category?: FileCategory) => {
@@ -30,12 +30,10 @@ export function registerFileIpc(): void {
     return listGroupFiles(getDatabase(), groupId, category)
   })
 
-  ipcMain.handle(FILE_IPC.upload, (event, groupId: string, filePath?: string) => {
+  ipcMain.handle(FILE_IPC.upload, (event, groupId: string, filePath?: unknown) => {
     if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+    rejectRendererUploadPath(filePath)
     const parent = BrowserWindow.fromWebContents(event.sender)
-    if (filePath && typeof filePath === 'string') {
-      return uploadFileFromPath(getDatabase(), groupId, filePath)
-    }
     return pickAndUploadFile(getDatabase(), groupId, parent)
   })
 

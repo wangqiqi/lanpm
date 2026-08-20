@@ -7,6 +7,16 @@
 ### Added
 
 - 根目录 `README.html`：`README.md` 的 HTML 导出，便于离线浏览
+- **安全**：路径段校验 `shared/fs/safeSegment`；网关 Bearer `timingSafeEqual`；破坏性操作确认文案模块
+
+### Changed
+
+- **文件上传 IPC**：渲染进程不再传本地路径，一律走系统文件选择框，避免任意路径写入
+- **信封解密**：未密封 payload 改为抛错，不再静默返回明文
+
+### Fixed
+
+- **文件落盘**：`groupId` / 文件名经 `resolveSafePath`，降低路径穿越风险
 
 ## [1.103.0] - 2026-08-01
 

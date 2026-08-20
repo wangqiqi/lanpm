@@ -189,7 +189,7 @@ export interface LanpmApi {
   }
   file: {
     listFiles: (groupId: string, category?: string) => Promise<import('./file/types').FileMeta[]>
-    upload: (groupId: string, filePath?: string) => Promise<import('./file/types').FileMeta | null>
+    upload: (groupId: string) => Promise<import('./file/types').FileMeta | null>
     getPreviewUrl: (fileId: string) => Promise<string | null>
     getPreviewText: (fileId: string) => Promise<string | null>
     listTransfers: (groupId: string) => Promise<import('./file/types').FileTransferView[]>
