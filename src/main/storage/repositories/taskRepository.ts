@@ -113,6 +113,30 @@ export function listTasksByGroup(db: Database, groupId: string): Task[] {
   return rows.map(rowToTask)
 }
 
+export type TaskWithAssigneeMeta = Task & {
+  assigneeDisplayName?: string
+  assigneeDepartment?: string
+}
+
+/** All non-deleted tasks in project groups, with assignee name/dept in one JOIN. */
+export function listProjectTasksWithAssigneeMeta(db: Database): TaskWithAssigneeMeta[] {
+  const rows = db
+    .prepare(
+      `SELECT t.*, u.display_name AS assignee_display_name, u.department AS assignee_department
+       FROM tasks t
+       INNER JOIN groups g ON g.group_id = t.group_id AND g.type = 'project'
+       LEFT JOIN users u ON u.user_id = t.assignee_user_id
+       WHERE t.deleted_at IS NULL
+       ORDER BY t.sort_order ASC, t.created_at ASC`
+    )
+    .all() as Array<TaskRow & { assignee_display_name: string | null; assignee_department: string | null }>
+  return rows.map((row) => ({
+    ...rowToTask(row),
+    assigneeDisplayName: row.assignee_display_name ?? undefined,
+    assigneeDepartment: row.assignee_department?.trim() || undefined
+  }))
+}
+
 /** All tasks in group including soft-deleted (Y.Doc seed / CRDT). */
 export function listTasksByGroupIncludingDeleted(db: Database, groupId: string): Task[] {
   const rows = db

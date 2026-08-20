@@ -14,8 +14,7 @@ import { buildWeeklyTrend } from '../../shared/cockpit/weeklyTrend'
 import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
-import { listTasksByGroup } from '../storage/repositories/taskRepository'
-import { getUserById } from '../storage/repositories/userRepository'
+import { listProjectTasksWithAssigneeMeta, listTasksByGroup } from '../storage/repositories/taskRepository'
 import { getAiConfig, getDecryptedApiKey } from '../ai/aiConfigService'
 import { isExternalAiAvailable } from '../ai/aiEndpointProbeService'
 
@@ -47,28 +46,30 @@ function aggregateProject(tasks: Task[]): Omit<ProjectDashboardItem, 'groupId' |
 }
 
 export function buildCockpitDashboard(db: Database): CockpitDashboard {
+  const projectGroups = listProjectGroups(db)
+  const allTasks = listProjectTasksWithAssigneeMeta(db)
+  const tasksByGroup = new Map<string, typeof allTasks>()
+  for (const task of allTasks) {
+    const bucket = tasksByGroup.get(task.groupId)
+    if (bucket) bucket.push(task)
+    else tasksByGroup.set(task.groupId, [task])
+  }
+
   const projects = sortCockpitProjects(
-    listProjectGroups(db).map((g) => {
-      const tasks = listTasksByGroup(db, g.groupId)
-      return {
-        groupId: g.groupId,
-        name: g.name,
-        ...aggregateProject(tasks)
-      }
-    })
+    projectGroups.map((g) => ({
+      groupId: g.groupId,
+      name: g.name,
+      ...aggregateProject(tasksByGroup.get(g.groupId) ?? [])
+    }))
   )
 
   const deptMap = new Map<string, { done: number; total: number }>()
-  for (const project of listProjectGroups(db)) {
-    for (const task of listTasksByGroup(db, project.groupId)) {
-      if (task.deletedAt) continue
-      const user = task.assigneeUserId ? getUserById(db, task.assigneeUserId) : null
-      const dept = user?.department?.trim() || COCKPIT_UNASSIGNED_DEPT
-      const bucket = deptMap.get(dept) ?? { done: 0, total: 0 }
-      bucket.total += 1
-      if (task.status === 'done') bucket.done += 1
-      deptMap.set(dept, bucket)
-    }
+  for (const task of allTasks) {
+    const dept = task.assigneeDepartment || COCKPIT_UNASSIGNED_DEPT
+    const bucket = deptMap.get(dept) ?? { done: 0, total: 0 }
+    bucket.total += 1
+    if (task.status === 'done') bucket.done += 1
+    deptMap.set(dept, bucket)
   }
 
   const departments = [...deptMap.entries()]
@@ -91,30 +92,25 @@ export function buildCockpitDashboard(db: Database): CockpitDashboard {
     riskProjectCount: countRiskProjects(projects)
   }
 
-  const projectGroups = listProjectGroups(db)
-  const allTasks = projectGroups.flatMap((g) => listTasksByGroup(db, g.groupId))
   const executiveSummary = buildExecutiveSummary(allTasks, summary.riskProjectCount)
   const weeklyTrend = buildWeeklyTrend(allTasks)
 
+  const groupName = new Map(projectGroups.map((g) => [g.groupId, g.name]))
   const attentionTasks = buildAttentionTasks(
-    projectGroups.flatMap((g) =>
-      listTasksByGroup(db, g.groupId).map((task) => ({
-        taskId: task.taskId,
-        groupId: task.groupId,
-        title: task.title,
-        startDate: task.startDate,
-        endDate: task.endDate,
-        progressPercent: task.progressPercent,
-        status: task.status,
-        milestone: task.milestone,
-        createdAt: task.createdAt,
-        deletedAt: task.deletedAt,
-        projectName: g.name,
-        assigneeName: task.assigneeUserId
-          ? getUserById(db, task.assigneeUserId)?.displayName
-          : undefined
-      }))
-    )
+    allTasks.map((task) => ({
+      taskId: task.taskId,
+      groupId: task.groupId,
+      title: task.title,
+      startDate: task.startDate,
+      endDate: task.endDate,
+      progressPercent: task.progressPercent,
+      status: task.status,
+      milestone: task.milestone,
+      createdAt: task.createdAt,
+      deletedAt: task.deletedAt,
+      projectName: groupName.get(task.groupId) ?? task.groupId,
+      assigneeName: task.assigneeDisplayName
+    }))
   )
 
   return { summary, executiveSummary, weeklyTrend, attentionTasks, projects, departments }
