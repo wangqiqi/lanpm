@@ -108,7 +108,7 @@ npm run build
 | English wrap | `npm run verify:i18n-en` · `npm run verify:visual-screenshots-en` (cockpit + chat `en-US` PNGs; Linux `xvfb-run`) |
 | Acceptance | **Electron** (`npm run dev`) is source of truth — not browser stub (`npm run dev:web`) |
 | Chat perf QA | Budget in local `.cursorGrowth/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
-| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux GPU is off by default (`LANPM_ENABLE_GPU=1` to opt in); Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
+| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux GPU is off by default (`LANPM_ENABLE_GPU=1` to opt in; `--quick` RSS is not the 200MB budget); Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
 | LAN / “real network” | `npm run verify:m6` is **localhost loopback**, not two PCs. Dual-machine steps: [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6) (manual; CI does not run them) |
 
