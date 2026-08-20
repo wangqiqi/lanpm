@@ -14,24 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import os from 'node:os'
 
-export const MEASURE_PERF_SCHEMA_VERSION = 1
-
-export const MEASURE_PERF_REQUIRED_KEYS = [
-  'schemaVersion',
-  'mode',
-  'startedAt',
-  'platform',
-  'arch',
-  'userDataDir',
-  'outPath',
-  'notes',
-  'coldStartMs',
-  'rssIdleMb',
-  'rssChat100Mb',
-  'tabSwitchP95Ms',
-  'dbPlainMs',
-  'dbCipherMs'
-]
+const MEASURE_PERF_SCHEMA_VERSION = 1
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -42,7 +25,7 @@ function gpuNote() {
   return 'gpu-policy-unspecified'
 }
 
-export function emptyMeasureReport(mode) {
+function emptyMeasureReport(mode) {
   const startedAt = new Date().toISOString()
   return {
     schemaVersion: MEASURE_PERF_SCHEMA_VERSION,
@@ -201,23 +184,21 @@ async function main() {
 
   if (opts.db) {
     if (!existsSync(dbScript)) {
-      console.warn('measure-perf: skip --db (measure-db-perf.ts not present yet)')
-    } else {
-      runDbSlice(report)
+      throw new Error(`missing ${dbScript}`)
     }
+    runDbSlice(report)
   }
 
   if (opts.cold || opts.memory || opts.tabs) {
     if (!existsSync(uiScript)) {
-      console.warn('measure-perf: skip UI slices (measure-perf-ui.mjs not present yet)')
-    } else {
-      const ui = await runUiSlices(opts, report)
-      Object.assign(report, ui)
-      if (typeof report.tabSwitchP95Ms === 'number') {
-        report.notes.tabP95Ms = report.tabSwitchP95Ms
-        report.notes.devBudgetMs = 150
-        report.notes.prodBudgetMs = 100
-      }
+      throw new Error(`missing ${uiScript}`)
+    }
+    const ui = await runUiSlices(opts, report)
+    Object.assign(report, ui)
+    if (typeof report.tabSwitchP95Ms === 'number') {
+      report.notes.tabP95Ms = report.tabSwitchP95Ms
+      report.notes.devBudgetMs = 150
+      report.notes.prodBudgetMs = 100
     }
   }
 
