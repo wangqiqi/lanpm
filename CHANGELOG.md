@@ -18,6 +18,7 @@
 - **签名校验**：打包 Host 永不跳过插件签名
 - **网关鉴权**：仅 Bearer + timing-safe 比较，去掉 query `token`
 - **破坏性 IPC**：解散群 / 重置身份走本机确认框
+- **浏览器 stub**：补 `chat.sendTaskRef` / `ops.command.send` / `media.livekit.createToken` 写能力
 
 ### Fixed
 
