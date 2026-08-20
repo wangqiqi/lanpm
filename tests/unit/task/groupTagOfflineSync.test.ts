@@ -1,3 +1,6 @@
+import { readFileSync } from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 import { describe, expect, it } from 'vitest'
 import {
   GROUP_TAG_OFFLINE_SYNC_BATCH_LIMIT,
@@ -8,11 +11,14 @@ import {
   type GroupTagMeta
 } from '../../../src/shared/task/groupTagMeta'
 
-const tag = (tagKey: string, updatedAt: string): GroupTagMeta => ({
-  groupId: 'g1',
+const root = join(dirname(fileURLToPath(import.meta.url)), '../../..')
+
+const tag = (tagKey: string, updatedAt: string, extras: Partial<GroupTagMeta> = {}): GroupTagMeta => ({
+  groupId: extras.groupId ?? 'g1',
   tagKey,
-  color: '#aabbcc',
-  updatedAt
+  color: extras.color ?? '#aabbcc',
+  updatedAt,
+  ...extras
 })
 
 describe('group tag offline sync payloads (TASK-4101)', () => {
@@ -56,5 +62,37 @@ describe('group tag offline sync payloads (TASK-4101)', () => {
       ])
     ).toBe('2026-08-20T03:00:00.000Z')
     expect(maxUpdatedAtInGroupTags([])).toBe('')
+  })
+})
+
+describe('listGroupTagsSince + offline service source (TASK-4102)', () => {
+  it('queries by group_id, since/min updated_at, and LIMIT', () => {
+    const src = readFileSync(
+      join(root, 'src/main/storage/repositories/groupTagMetaRepository.ts'),
+      'utf8'
+    )
+    const start = src.indexOf('function listGroupTagsSince')
+    expect(start).toBeGreaterThanOrEqual(0)
+    const fn = src.slice(start, start + 900)
+    expect(fn).toMatch(/updated_at > \?/)
+    expect(fn).toMatch(/updated_at >= \?/)
+    expect(fn).toMatch(/group_id = \?/)
+    expect(fn).toMatch(/LIMIT \?/)
+    expect(fn).toMatch(/ORDER BY updated_at ASC/)
+    expect(src).toMatch(/function getMaxGroupTagUpdatedAt/)
+  })
+
+  it('service requests, pages, and LWW-upserts batches', () => {
+    const src = readFileSync(
+      join(root, 'src/main/task/groupTagOfflineSyncService.ts'),
+      'utf8'
+    )
+    expect(src).toMatch(/export async function requestGroupTagOfflineSync/)
+    expect(src).toMatch(/export async function handleGroupTagSyncRequest/)
+    expect(src).toMatch(/export function handleGroupTagSyncBatch/)
+    expect(src).toMatch(/type: 'group_tag_sync_request'/)
+    expect(src).toMatch(/type: 'group_tag_sync_batch'/)
+    expect(src).toMatch(/applyRemoteGroupTagUpsert/)
+    expect(src).toMatch(/listGroupTagsSince/)
   })
 })

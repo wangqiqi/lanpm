@@ -104,3 +104,35 @@ export function countGroupTagMeta(db: Database, groupId: string): number {
     .get(groupId) as { c: number }
   return row.c
 }
+
+/**
+ * Offline pull: rows with updated_at > sinceUpdatedAt and >= minUpdatedAt.
+ * Ordered ASC so the last row's updatedAt is the next-page cursor.
+ */
+export function listGroupTagsSince(
+  db: Database,
+  groupId: string,
+  sinceUpdatedAt: string,
+  minUpdatedAt: string,
+  limit = 200
+): GroupTagMeta[] {
+  const rows = db
+    .prepare(
+      `SELECT group_id, tag_key, label, color, updated_at, updated_by_user_id
+       FROM group_tag_meta
+       WHERE group_id = ?
+         AND updated_at > ?
+         AND updated_at >= ?
+       ORDER BY updated_at ASC, tag_key ASC
+       LIMIT ?`
+    )
+    .all(groupId, sinceUpdatedAt, minUpdatedAt, limit) as Row[]
+  return rows.map(rowToMeta)
+}
+
+export function getMaxGroupTagUpdatedAt(db: Database, groupId: string): string {
+  const row = db
+    .prepare(`SELECT MAX(updated_at) AS max_at FROM group_tag_meta WHERE group_id = ?`)
+    .get(groupId) as { max_at: string | null } | undefined
+  return row?.max_at ?? ''
+}
