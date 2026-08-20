@@ -108,7 +108,7 @@ npm run build
 | 验收 | 以 **Electron**（`npm run dev`）为准 — 浏览器 stub（`npm run dev:web`）仅 UI 预览 |
 | 发版 | [docs/05](./docs/05_测试与联调发布.md) · 跨平台矩阵 §1.4 |
 | 真网 / 局域网 | `npm run verify:m6` 是本机 **loopback**，不是两台电脑。双机手验见 [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6)（人工；CI 不跑） |
-| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux 默认关 GPU（`LANPM_ENABLE_GPU=1` 可 opt-in）；看板/树/文件/驾驶舱 lazy 分包；驾驶舱一次 JOIN；文件 chunk 进度 IPC 100ms 节流；库探测只读 16 字节头；任务写操作本地 patch |
+| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux 默认关 GPU（`LANPM_ENABLE_GPU=1` 可 opt-in；`--quick` RSS **不对标** 200MB）；看板/树/文件/驾驶舱 lazy 分包；驾驶舱一次 JOIN；文件 chunk 进度 IPC 100ms 节流；库探测只读 16 字节头；任务写操作本地 patch |
 
 Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) — 详见 [`.cursor/`](./.cursor/)。
 
