@@ -8,7 +8,8 @@ import { _electron as electron } from 'playwright'
 import { resolveElectronBin } from './resolve-electron-bin.mjs'
 import { electronCiChromiumFlags } from './electron-ci-chromium-flags.mjs'
 
-const TABS = ['chat', 'board', 'tree', 'gantt', 'calendar']
+/** Default bottom nav: chat / board / tree (gantt/calendar hidden until Profile → 导航) */
+const TABS = ['chat', 'board', 'tree']
 
 function linuxTreeRssMb(pid) {
   if (process.platform !== 'linux' || !pid) return null
@@ -176,8 +177,10 @@ export async function runMeasurePerfUi(opts) {
     const tabSamples = []
     for (let i = 0; i < opts.tabRepeats; i++) {
       for (const view of TABS) {
+        const tab = page.locator(`[data-testid="nav-tab-${view}"]`)
+        if ((await tab.count()) === 0) continue
         const t0 = Date.now()
-        await page.click(`[data-testid="nav-tab-${view}"]`)
+        await tab.click()
         await page.waitForFunction(
           (v) => document.querySelector(`[data-testid="nav-tab-${v}"]`)?.getAttribute('aria-current') === 'page',
           view,
