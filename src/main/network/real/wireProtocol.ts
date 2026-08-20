@@ -10,6 +10,18 @@ export interface WirePeerProfile {
   displayName: string
   listenPort: number
   groups?: DiscoverableGroupAdvert[]
+  /** TASK-4203: peer accepts envelope_bin (raw ciphertext after JSON header) */
+  envBin?: boolean
+}
+
+/** JSON envelope header without payload; ciphertext follows on the wire. */
+export type WireEnvelopeMeta = Omit<SyncEnvelope, 'payload'>
+
+/** Scheme B: 4B frame + 4B headerLen + JSON header + raw AES-GCM ciphertext. */
+export interface WireEnvelopeBin {
+  kind: 'envelope_bin'
+  envelope: WireEnvelopeMeta
+  ciphertext: Buffer
 }
 
 export type WireMessage =
@@ -26,14 +38,53 @@ export type WireMessage =
   | ({ kind: 'pairing_resolve_ok' } & WirePeerProfile)
   | { kind: 'pairing_resolve_fail'; reason: PairingResolveFailReason }
   | { kind: 'envelope'; envelope: SyncEnvelope }
+  | WireEnvelopeBin
   | { kind: 'ping' }
 
-export function encodeWire(msg: WireMessage): Buffer {
-  const json = JSON.stringify(msg)
-  const body = Buffer.from(json, 'utf8')
+const JSON_OBJECT_START = 0x7b
+
+function frameLengthPrefixed(body: Buffer): Buffer {
   const header = Buffer.alloc(4)
   header.writeUInt32BE(body.length, 0)
   return Buffer.concat([header, body])
+}
+
+function encodeEnvelopeBinBody(msg: WireEnvelopeBin): Buffer {
+  const json = Buffer.from(
+    JSON.stringify({ kind: 'envelope_bin', envelope: msg.envelope }),
+    'utf8'
+  )
+  const jsonLen = Buffer.alloc(4)
+  jsonLen.writeUInt32BE(json.length, 0)
+  return Buffer.concat([jsonLen, json, msg.ciphertext])
+}
+
+function decodeEnvelopeBinBody(body: Buffer): WireEnvelopeBin | null {
+  if (body.length < 4) return null
+  const jsonLen = body.readUInt32BE(0)
+  if (jsonLen < 2 || body.length < 4 + jsonLen) return null
+  try {
+    const header = JSON.parse(body.subarray(4, 4 + jsonLen).toString('utf8')) as {
+      kind?: string
+      envelope?: WireEnvelopeMeta
+    }
+    if (header.kind !== 'envelope_bin' || !header.envelope) return null
+    return {
+      kind: 'envelope_bin',
+      envelope: header.envelope,
+      ciphertext: Buffer.from(body.subarray(4 + jsonLen))
+    }
+  } catch {
+    return null
+  }
+}
+
+export function encodeWire(msg: WireMessage): Buffer {
+  if (msg.kind === 'envelope_bin') {
+    return frameLengthPrefixed(encodeEnvelopeBinBody(msg))
+  }
+  const json = JSON.stringify(msg)
+  return frameLengthPrefixed(Buffer.from(json, 'utf8'))
 }
 
 export function createWireDecoder(onMessage: (msg: WireMessage) => void): {
@@ -49,7 +100,12 @@ export function createWireDecoder(onMessage: (msg: WireMessage) => void): {
       const body = buffer.subarray(4, 4 + len)
       buffer = buffer.subarray(4 + len)
       try {
-        onMessage(JSON.parse(body.toString('utf8')) as WireMessage)
+        if (body.length > 0 && body[0] === JSON_OBJECT_START) {
+          onMessage(JSON.parse(body.toString('utf8')) as WireMessage)
+        } else {
+          const bin = decodeEnvelopeBinBody(body)
+          if (bin) onMessage(bin)
+        }
       } catch {
         // skip malformed
       }
