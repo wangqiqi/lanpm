@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.103.1-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.103.2-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -118,7 +118,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.103.1`** — 群标签离线补拉、pdf.js 预览、minisearch、file_chunk `envelope_bin`。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.103.2`** — 协作抽屉三页同宽；发版门禁/i18n/视觉 PNG 走查；顶栏去掉未知插件文案。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 
