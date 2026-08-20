@@ -218,7 +218,7 @@ const stubCapabilityPendings = new Map<string, StubCapabilityPending>()
 function executeStubWriteCapability(
   capability: HumanReviewCapabilityId,
   args: Record<string, unknown>
-): Task | ChatMessage | FileMeta | { requestId: string } {
+): unknown {
   if (capability === 'task.create') {
     const parsed = parseTaskCreateInput(args)
     if (!parsed.ok) throw new Error(parsed.message)
@@ -375,6 +375,52 @@ function executeStubWriteCapability(
     const files = readAllFiles()[groupId] ?? []
     writeGroupFiles(groupId, [...files, meta])
     return meta
+  }
+  if (capability === 'chat.sendTaskRef') {
+    const groupId = String(args.groupId ?? '')
+    const taskId = String(args.taskId ?? '')
+    if (!groupId) throw new Error('groupId required')
+    if (!taskId) throw new Error('taskId required')
+    const all = readAllTasks()
+    const list = all[groupId] ?? []
+    const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
+    if (!task) throw stubError('stub.taskNotFound')
+    const status = readStatus()
+    if (!status.configured || !status.user || !status.device) {
+      throw stubError('stub.identityRequired')
+    }
+    const prev = readChatMessages(groupId)
+    const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
+    const msg: ChatMessage = {
+      msgId: `msg_${crypto.randomUUID()}`,
+      groupId,
+      senderUserId: status.user.userId,
+      senderDeviceId: status.device.deviceId,
+      type: 'task_ref',
+      content: { kind: 'task_ref', taskId: task.taskId, title: task.title },
+      lamportTs,
+      createdAt: new Date().toISOString(),
+      deliveryStatus: 'sent'
+    }
+    writeChatMessages(groupId, [...prev, msg])
+    for (const fn of chatListeners) fn(msg)
+    return msg
+  }
+  if (capability === 'ops.command.send') {
+    return { ok: true, stub: true }
+  }
+  if (capability === 'media.livekit.createToken') {
+    const config = readStubLiveKitConfig()
+    const groupId = String(args.groupId ?? '')
+    const identity = String(args.identity ?? '')
+    if (!isLiveKitConfigComplete(config) || !groupId || !identity) {
+      throw new Error('LiveKit not configured')
+    }
+    return {
+      token: 'stub-livekit-token',
+      url: config.url,
+      roomName: liveKitRoomNameForGroup(groupId)
+    }
   }
   const _exhaustive: never = capability
   throw new Error(`unknown write capability: ${_exhaustive}`)
@@ -2671,36 +2717,6 @@ export function createBrowserLanpmStub(): LanpmApi {
           const groupId = String(args?.groupId ?? '')
           if (!groupId) throw new Error('groupId required')
           return listStubMembers(groupId)
-        }
-        if (capability === 'chat.sendTaskRef') {
-          const groupId = String(args?.groupId ?? '')
-          const taskId = String(args?.taskId ?? '')
-          if (!groupId) throw new Error('groupId required')
-          if (!taskId) throw new Error('taskId required')
-          const all = readAllTasks()
-          const list = all[groupId] ?? []
-          const task = list.find((t) => t.taskId === taskId && !t.deletedAt)
-          if (!task) throw stubError('stub.taskNotFound')
-          const status = readStatus()
-          if (!status.configured || !status.user || !status.device) {
-            throw stubError('stub.identityRequired')
-          }
-          const prev = readChatMessages(groupId)
-          const lamportTs = (prev.at(-1)?.lamportTs ?? 0) + 1
-          const msg: ChatMessage = {
-            msgId: `msg_${crypto.randomUUID()}`,
-            groupId,
-            senderUserId: status.user.userId,
-            senderDeviceId: status.device.deviceId,
-            type: 'task_ref',
-            content: { kind: 'task_ref', taskId: task.taskId, title: task.title },
-            lamportTs,
-            createdAt: new Date().toISOString(),
-            deliveryStatus: 'sent'
-          }
-          writeChatMessages(groupId, [...prev, msg])
-          for (const fn of chatListeners) fn(msg)
-          return msg
         }
         if (capability === 'ai.getThread') {
           const parsed = parseAiGetThreadInput(args ?? {})
