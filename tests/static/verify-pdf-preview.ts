@@ -43,4 +43,24 @@ assert.ok(
 const gitignore = readFileSync(join(root, '.gitignore'), 'utf8')
 assert.match(gitignore, /src\/renderer\/public\/pdfjs\//)
 
-console.log('verify-pdf-preview: assets+csp OK')
+const filesView = readFileSync(
+  join(root, 'src/renderer/src/features/files/FilesView.tsx'),
+  'utf8'
+)
+assert.match(filesView, /PdfPreview/)
+assert.match(filesView, /shouldUsePdfJsPreview/)
+assert.doesNotMatch(filesView, /<iframe/, 'FilesView must not use iframe for PDF preview')
+
+const preview = readFileSync(
+  join(root, 'src/renderer/src/features/files/PdfPreview.tsx'),
+  'utf8'
+)
+assert.match(preview, /getDocument/)
+assert.match(preview, /PDFJS_WORKER_PUBLIC_PATH/)
+assert.match(preview, /from 'pdfjs-dist'/)
+
+const helper = readFileSync(join(root, 'src/shared/file/pdfPreview.ts'), 'utf8')
+assert.match(helper, /PDFJS_WORKER_PUBLIC_PATH/)
+assert.match(helper, /shouldUsePdfJsPreview/)
+
+console.log('verify-pdf-preview: assets+csp+viewer OK')
