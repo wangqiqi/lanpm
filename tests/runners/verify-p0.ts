@@ -16,6 +16,7 @@ const steps = [
   'verify:schema-repo',
   'verify:schema-fk',
   'verify:task-store-patch',
+  'verify:linux-gpu-policy',
   'verify:sec-hardening',
   'verify:storage-path-resolver',
   'verify:screenshots-layout',

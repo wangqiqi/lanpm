@@ -30,6 +30,7 @@
     "verify:shared": "node --experimental-strip-types tests/runners/verify-shared.ts",
     "verify:task-dep-protocol": "node --experimental-strip-types tests/static/verify-task-dep-protocol.ts",
     "verify:task-store-patch": "node --experimental-strip-types tests/static/verify-task-store-patch.ts",
+    "verify:linux-gpu-policy": "node --experimental-strip-types tests/static/verify-linux-gpu-policy.ts",
     "verify:p0": "node --experimental-strip-types tests/runners/verify-p0.ts",
     "verify:ipc-contract": "node --experimental-strip-types tests/static/verify-ipc-contract.ts",
     "verify:i18n-keys": "node --experimental-strip-types tests/static/verify-i18n-keys.ts",
