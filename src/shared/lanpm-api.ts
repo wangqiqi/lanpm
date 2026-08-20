@@ -490,6 +490,9 @@ export interface LanpmApi {
     createSchedule: (
       input: import('./media/meetingSchedule').CreateMeetingScheduleInput
     ) => Promise<import('./media/meetingSchedule').MeetingSchedule>
+    updateSchedule: (
+      input: import('./media/meetingSchedule').UpdateMeetingScheduleInput
+    ) => Promise<import('./media/meetingSchedule').MeetingSchedule>
     deleteSchedule: (payload: { id: string }) => Promise<{ ok: true }>
   }
 }

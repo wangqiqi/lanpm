@@ -11,7 +11,8 @@ import { readLiveKitConfig, writeLiveKitConfig } from '../media/liveKitConfigSto
 import {
   createMeetingSchedule,
   deleteMeetingSchedule,
-  listMeetingSchedules
+  listMeetingSchedules,
+  updateMeetingSchedule
 } from '../media/meetingScheduleStore.ts'
 import { showSaveDialog } from '../systemDialog.ts'
 
@@ -66,6 +67,10 @@ export function registerMeetingIpc(): void {
 
   ipcMain.handle(MEETING_IPC.createSchedule, (_event, input: unknown) => {
     return createMeetingSchedule(input)
+  })
+
+  ipcMain.handle(MEETING_IPC.updateSchedule, (_event, input: unknown) => {
+    return updateMeetingSchedule(input)
   })
 
   ipcMain.handle(MEETING_IPC.deleteSchedule, (_event, payload: unknown) => {

@@ -16,6 +16,14 @@ export interface CreateMeetingScheduleInput {
   durationMinutes?: number
 }
 
+/** Patch an existing schedule; `groupId` and `createdAt` stay put. */
+export interface UpdateMeetingScheduleInput {
+  id: string
+  title?: string
+  startsAt?: string
+  durationMinutes?: number
+}
+
 const TITLE_MAX = 120
 const DURATION_MIN = 15
 const DURATION_MAX = 240
@@ -80,6 +88,54 @@ export function validateCreateMeetingScheduleInput(
     title,
     startsAt,
     durationMinutes: clampDuration(o.durationMinutes ?? DURATION_DEFAULT)
+  }
+}
+
+export function validateUpdateMeetingScheduleInput(
+  input: unknown
+): UpdateMeetingScheduleInput | null {
+  if (!input || typeof input !== 'object') return null
+  const o = input as Record<string, unknown>
+  const id = typeof o.id === 'string' && o.id.trim() ? o.id.trim() : null
+  if (!id) return null
+
+  const hasTitle = 'title' in o
+  const hasStartsAt = 'startsAt' in o
+  const hasDuration = 'durationMinutes' in o
+  if (!hasTitle && !hasStartsAt && !hasDuration) return null
+
+  const patch: UpdateMeetingScheduleInput = { id }
+  if (hasTitle) {
+    const title =
+      typeof o.title === 'string' && o.title.trim()
+        ? o.title.trim().slice(0, TITLE_MAX)
+        : null
+    if (!title) return null
+    patch.title = title
+  }
+  if (hasStartsAt) {
+    const startsAt = parseStartsAt(o.startsAt)
+    if (!startsAt) return null
+    patch.startsAt = startsAt
+  }
+  if (hasDuration) {
+    patch.durationMinutes = clampDuration(o.durationMinutes)
+  }
+  return patch
+}
+
+export function applyMeetingScheduleUpdate(
+  current: MeetingSchedule,
+  patch: UpdateMeetingScheduleInput
+): MeetingSchedule {
+  return {
+    ...current,
+    title: patch.title ?? current.title,
+    startsAt: patch.startsAt ?? current.startsAt,
+    durationMinutes:
+      patch.durationMinutes !== undefined
+        ? clampDuration(patch.durationMinutes)
+        : current.durationMinutes
   }
 }
 

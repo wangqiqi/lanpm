@@ -388,6 +388,7 @@ const api: LanpmApi = {
     saveRecording: (payload) => ipcRenderer.invoke('meeting:saveRecording', payload),
     listSchedules: (groupId) => ipcRenderer.invoke('meeting:listSchedules', groupId),
     createSchedule: (input) => ipcRenderer.invoke('meeting:createSchedule', input),
+    updateSchedule: (input) => ipcRenderer.invoke('meeting:updateSchedule', input),
     deleteSchedule: (payload) => ipcRenderer.invoke('meeting:deleteSchedule', payload)
   },
   data: {

@@ -7,6 +7,8 @@ import {
   normalizeMeetingSchedule,
   sortSchedulesByStart,
   validateCreateMeetingScheduleInput,
+  validateUpdateMeetingScheduleInput,
+  applyMeetingScheduleUpdate,
   type MeetingSchedule
 } from '../../shared/media/meetingSchedule.ts'
 
@@ -54,6 +56,22 @@ export function createMeetingSchedule(input: unknown): MeetingSchedule {
   all.push(record)
   writeAll(all)
   return record
+}
+
+export function updateMeetingSchedule(input: unknown): MeetingSchedule {
+  const validated = validateUpdateMeetingScheduleInput(input)
+  if (!validated) {
+    throw new Error('Invalid meeting schedule update')
+  }
+  const all = readAll()
+  const idx = all.findIndex((s) => s.id === validated.id)
+  const current = idx >= 0 ? all[idx] : undefined
+  if (idx < 0 || !current) {
+    throw new Error('Schedule not found')
+  }
+  all[idx] = applyMeetingScheduleUpdate(current, validated)
+  writeAll(all)
+  return all[idx]!
 }
 
 export function deleteMeetingSchedule(id: string): boolean {

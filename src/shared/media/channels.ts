@@ -5,5 +5,6 @@ export const MEETING_IPC = {
   saveRecording: 'meeting:saveRecording',
   listSchedules: 'meeting:listSchedules',
   createSchedule: 'meeting:createSchedule',
+  updateSchedule: 'meeting:updateSchedule',
   deleteSchedule: 'meeting:deleteSchedule'
 } as const

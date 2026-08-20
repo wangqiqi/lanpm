@@ -92,6 +92,8 @@ import {
   normalizeMeetingSchedule,
   sortSchedulesByStart,
   validateCreateMeetingScheduleInput,
+  validateUpdateMeetingScheduleInput,
+  applyMeetingScheduleUpdate,
   type MeetingSchedule
 } from '@shared/media/meetingSchedule'
 import { stubError, stubT } from '@renderer/platform/stubTranslate'
@@ -2884,6 +2886,17 @@ export function createBrowserLanpmStub(): LanpmApi {
         all.push(record)
         writeStubMeetingSchedules(all)
         return record
+      },
+      updateSchedule: async (input) => {
+        const validated = validateUpdateMeetingScheduleInput(input)
+        if (!validated) throw new Error('Invalid meeting schedule update')
+        const all = readStubMeetingSchedules()
+        const idx = all.findIndex((s) => s.id === validated.id)
+        const current = idx >= 0 ? all[idx] : undefined
+        if (idx < 0 || !current) throw new Error('Schedule not found')
+        all[idx] = applyMeetingScheduleUpdate(current, validated)
+        writeStubMeetingSchedules(all)
+        return all[idx]!
       },
       deleteSchedule: async (payload) => {
         const id = payload.id.trim()
