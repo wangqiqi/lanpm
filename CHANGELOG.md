@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.103.1] - 2026-08-20
+
 ### Added
 
 - **群标签离线补拉**：重连后按 LWW 补字典色板（`group_tag_sync_request` / `_batch`），对端离线时改的标签色不再丢（`TASK-4101`–`TASK-4105`）
