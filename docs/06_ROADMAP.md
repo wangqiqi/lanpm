@@ -12,7 +12,7 @@
 |--------|------|------|
 | — | 见 `plan.md` 候选表 | — |
 
-**候选下一 Sprint**：会议体验产品化 · 见 `plan.md` 候选表 · [07_插件与扩展](./07_插件与扩展.md) §12。
+**候选下一 Sprint**：见 `plan.md` 候选表（本机手验 · 全局搜索 · 真网双机等）。会议 i18n/深链/join CTA 已交付（v1.89+）；日程 **可编辑** 见 CHANGELOG Unreleased。
 
 ---
 
@@ -94,7 +94,7 @@
 
 验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro` · `verify:chat-voice` · `verify:meeting-media-v2`。
 
-**下一实现 Sprint Goal（一句话）**：会议体验产品化，或命令 invoke / API v0.3 / Slot 残余（见 `plan.md` 候选 · [07_插件与扩展](./07_插件与扩展.md) §12）。
+**下一实现 Sprint Goal（一句话）**：以 `.cursorGrowth/plan.md` 候选表为准（本机手验 / 搜索 / 双机真网）；插件 invoke · API v0.3 · Slot 已交付，勿再当缺口。
 
 ---
 
