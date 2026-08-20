@@ -26,6 +26,7 @@
 
 ### Changed
 
+- **全局搜索引擎**：任务/消息命中改走 OSS `minisearch`（MIT）；不再用 SQL `LIKE` 当主路径。成员检索仍内存匹配。IPC 形状不变（`TASK-3901`–`TASK-3905`）
 - **白板/脑图永不进底栏**：sanitize 强制隐藏；Profile 导航列表不再给出开关。深链与 Composer 抽屉不变。文件库仍可按偏好开 Tab（`TASK-4601`–`TASK-4605`）
 - **许可路径 SPIKE**：建议维持 AGPL-only；有闭源 OEM 先合同例外，常规产品线再双许可。插件离线闸不变。LICENSE 未改（SPIKE-3601–SPIKE-3603）
 - **底栏默认三 Tab**：项目群默认聊天 / 看板 / 树；甘特与日历默认藏（Profile 导航可开）。仍为 v1.96「只藏 files+whiteboard」的偏好会补藏时间透镜；已自定义隐藏集不迁（`TASK-4501`–`TASK-4505`）
