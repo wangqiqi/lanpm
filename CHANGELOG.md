@@ -27,6 +27,7 @@
 ### Changed
 
 - **许可路径 SPIKE**：建议维持 AGPL-only；有闭源 OEM 先合同例外，常规产品线再双许可。插件离线闸不变。LICENSE 未改（SPIKE-3601–SPIKE-3603）
+- **底栏默认三 Tab**：项目群默认聊天 / 看板 / 树；甘特与日历默认藏（Profile 导航可开）。仍为 v1.96「只藏 files+whiteboard」的偏好会补藏时间透镜；已自定义隐藏集不迁（`TASK-4501`–`TASK-4505`）
 - **对外叙事（真网）**：`verify:m6` 标明本机 loopback；双机手验仍走 docs/05 §6，CI 未跑（`TASK-3501`–`TASK-3503`）
 - **P2P `file_chunk` 双栈**：拉取可声明 `chunkEncoding: 'binary'`，密封明文为小 JSON 头 + 原始片；未声明仍走 `chunkBase64`。本机新客户端默认请求 binary（`TASK-3401`–`TASK-3404`）
 - **Linux GPU**：默认仍关闭硬件加速；`LANPM_ENABLE_GPU=1` 可 opt-in 以便对照 RSS（无 Vulkan 会 FATAL）（`TASK-3201`–`TASK-3204`）
