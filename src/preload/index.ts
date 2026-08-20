@@ -330,7 +330,32 @@ const api: LanpmApi = {
     save: (input) => ipcRenderer.invoke('mindmap:save', input),
     rename: (input) => ipcRenderer.invoke('mindmap:rename', input),
     delete: (docId) => ipcRenderer.invoke('mindmap:delete', docId),
-    exportPng: (input) => ipcRenderer.invoke('mindmap:exportPng', input)
+    exportPng: (input) => ipcRenderer.invoke('mindmap:exportPng', input),
+    getDocState: (docId) => ipcRenderer.invoke('mindmap:getDocState', docId),
+    publishUpdate: (docId, updateBase64) =>
+      ipcRenderer.invoke('mindmap:publishUpdate', { docId, updateBase64 }),
+    publishAwareness: (docId, updateBase64) =>
+      ipcRenderer.invoke('mindmap:publishAwareness', { docId, updateBase64 }),
+    onRemoteUpdate: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { groupId: string; docId: string; updateBase64: string }
+      ) => {
+        handler(payload)
+      }
+      ipcRenderer.on('mindmap:remoteUpdate', listener)
+      return () => ipcRenderer.removeListener('mindmap:remoteUpdate', listener)
+    },
+    onRemoteAwareness: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: { groupId: string; docId: string; updateBase64: string }
+      ) => {
+        handler(payload)
+      }
+      ipcRenderer.on('mindmap:remoteAwareness', listener)
+      return () => ipcRenderer.removeListener('mindmap:remoteAwareness', listener)
+    }
   },
   plugin: {
     listPlugins: () => ipcRenderer.invoke('plugin:listPlugins'),

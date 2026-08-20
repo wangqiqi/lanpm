@@ -2523,7 +2523,17 @@ export function createBrowserLanpmStub(): LanpmApi {
         groupFiles.push(meta)
         writeGroupFiles(input.groupId, groupFiles)
         return meta
-      }
+      },
+      getDocState: async (docId: string) => ({
+        docId,
+        groupId: 'stub',
+        anonymous: true,
+        updateBase64: ''
+      }),
+      publishUpdate: async () => undefined,
+      publishAwareness: async () => undefined,
+      onRemoteUpdate: () => () => undefined,
+      onRemoteAwareness: () => () => undefined
     },
     whiteboard: {
       getScene: async (groupId) => readStubWhiteboards()[groupId] ?? null,

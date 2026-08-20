@@ -5,5 +5,10 @@ export const MINDMAP_IPC = {
   save: 'mindmap:save',
   rename: 'mindmap:rename',
   delete: 'mindmap:delete',
-  exportPng: 'mindmap:exportPng'
+  exportPng: 'mindmap:exportPng',
+  getDocState: 'mindmap:getDocState',
+  publishUpdate: 'mindmap:publishUpdate',
+  publishAwareness: 'mindmap:publishAwareness',
+  remoteUpdate: 'mindmap:remoteUpdate',
+  remoteAwareness: 'mindmap:remoteAwareness'
 } as const

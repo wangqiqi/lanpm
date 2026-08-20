@@ -263,6 +263,16 @@ CREATE TABLE mindmap_documents (
 );
 CREATE INDEX idx_mindmap_documents_group ON mindmap_documents(group_id, updated_at);
 
+-- 脑图文档 Yjs 快照（mindmap:{docId}，SPRINT-26）
+CREATE TABLE mindmap_crdt_docs (
+  doc_id TEXT PRIMARY KEY,
+  group_id TEXT NOT NULL,
+  wired_doc_id TEXT NOT NULL,
+  update_blob BLOB NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX idx_mindmap_crdt_docs_group ON mindmap_crdt_docs(group_id);
+
 -- AI 助手会话（本机个人 · 不同步 P2P）
 CREATE TABLE ai_threads (
   thread_id TEXT PRIMARY KEY,

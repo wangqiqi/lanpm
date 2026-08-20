@@ -54,6 +54,10 @@ import {
   initWhiteboardSyncService,
   shutdownWhiteboardSyncService
 } from '../whiteboard/whiteboardSyncService'
+import {
+  initMindmapSyncService,
+  shutdownMindmapSyncService
+} from '../mindmap/mindmapSyncService'
 import { handleIncomingMemberEvent } from '../group/memberEventService'
 import { broadcastMessage } from './chatBroadcast'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
@@ -202,6 +206,7 @@ export function initChatService(db: Database): void {
   initMessageRetentionScheduler(db)
   initTaskSyncService(db)
   initWhiteboardSyncService(db)
+  initMindmapSyncService(db)
   initFileSyncService(db)
   initOpsSyncService(db)
   void requestOfflineSync(db).catch(catchSyncFailure('chat.requestOfflineSync', { notify: false }))
@@ -214,6 +219,7 @@ export function shutdownChatService(): void {
   shutdownMessageRetentionScheduler()
   shutdownTaskSyncService()
   shutdownWhiteboardSyncService()
+  shutdownMindmapSyncService()
   shutdownFileSyncService()
   shutdownOpsSyncService()
   shutdownGroupKeyService()

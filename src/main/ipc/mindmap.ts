@@ -16,6 +16,12 @@ import {
   renameMindmapDocument,
   saveMindmapDocument
 } from '../mindmap/mindmapService.ts'
+import { applyRendererMindmapUpdate, ensureMindmapCrdtWired } from '../mindmap/mindmapCrdtService.ts'
+import { applyRendererMindmapAwareness, ensureMindmapAwarenessWired } from '../mindmap/mindmapAwarenessService.ts'
+import { getMindmapDocStateBase64, loadOrCreateMindmapDoc } from '../mindmap/mindmapCrdtStore.ts'
+import { getMindmapDocument } from '../storage/repositories/mindmapRepository.ts'
+import { isAnonymousGroupType } from '../../shared/group/guards'
+import { resolveGroupType } from '../group/groupService'
 
 export function registerMindmapIpc(): void {
   ipcMain.handle(MINDMAP_IPC.list, (_event, groupId: string) => {
@@ -58,4 +64,49 @@ export function registerMindmapIpc(): void {
     if (!input || typeof input !== 'object') throw new Error('input required')
     return exportMindmapPngToGroup(getDatabase(), input)
   })
+
+  ipcMain.handle(MINDMAP_IPC.getDocState, (_event, docId: string) => {
+    if (typeof docId !== 'string' || !docId) throw new Error('docId required')
+    const db = getDatabase()
+    const meta = getMindmapDocument(db, docId)
+    if (!meta) throw new Error('mindmap document not found')
+    const anonymous = isAnonymousGroupType(resolveGroupType(db, meta.groupId))
+    if (!anonymous) {
+      ensureMindmapCrdtWired(db, docId)
+      ensureMindmapAwarenessWired(db, docId)
+      loadOrCreateMindmapDoc(db, docId)
+    }
+    return {
+      docId,
+      groupId: meta.groupId,
+      anonymous,
+      updateBase64: anonymous ? '' : getMindmapDocStateBase64(db, docId)
+    }
+  })
+
+  ipcMain.handle(
+    MINDMAP_IPC.publishUpdate,
+    (_event, input: { docId: string; updateBase64: string }) => {
+      if (!input || typeof input.docId !== 'string' || !input.docId) {
+        throw new Error('docId required')
+      }
+      if (typeof input.updateBase64 !== 'string' || !input.updateBase64) {
+        throw new Error('updateBase64 required')
+      }
+      applyRendererMindmapUpdate(getDatabase(), input.docId, input.updateBase64)
+    }
+  )
+
+  ipcMain.handle(
+    MINDMAP_IPC.publishAwareness,
+    (_event, input: { docId: string; updateBase64: string }) => {
+      if (!input || typeof input.docId !== 'string' || !input.docId) {
+        throw new Error('docId required')
+      }
+      if (typeof input.updateBase64 !== 'string' || !input.updateBase64) {
+        throw new Error('updateBase64 required')
+      }
+      applyRendererMindmapAwareness(getDatabase(), input.docId, input.updateBase64)
+    }
+  )
 }

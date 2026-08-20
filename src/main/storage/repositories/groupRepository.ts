@@ -132,6 +132,8 @@ export function deleteGroupCascade(db: Database, groupId: string): void {
   db.prepare(`DELETE FROM group_tag_meta WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM whiteboard_scenes WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM whiteboard_crdt_docs WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM mindmap_crdt_docs WHERE group_id = ?`).run(groupId)
+  db.prepare(`DELETE FROM mindmap_documents WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM file_transfers WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM files WHERE group_id = ?`).run(groupId)
   db.prepare(`DELETE FROM group_members WHERE group_id = ?`).run(groupId)

@@ -450,6 +450,7 @@ export type MessageKey =
   | 'plugin.mindmapEmpty'
   | 'plugin.mindmapRoot'
   | 'plugin.mindmapDefaultTitle'
+  | 'plugin.mindmapCollabPeers'
   | 'plugin.mindmapNew'
   | 'plugin.mindmapSave'
   | 'plugin.mindmapSelectDoc'

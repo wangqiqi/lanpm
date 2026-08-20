@@ -462,6 +462,7 @@ const enUS = {
   'plugin.mindmapEmpty': 'No maps yet — click New',
   'plugin.mindmapRoot': 'Project tasks',
   'plugin.mindmapDefaultTitle': 'Mind map',
+  'plugin.mindmapCollabPeers': 'Together',
   'plugin.mindmapNew': 'New',
   'plugin.mindmapSave': 'Save',
   'plugin.mindmapSelectDoc': 'Select map',

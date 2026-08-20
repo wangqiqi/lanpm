@@ -40,6 +40,16 @@ export function listMindmapDocuments(db: Database, groupId: string): MindmapDocu
   }))
 }
 
+export function listAllMindmapDocuments(db: Database): MindmapDocument[] {
+  const rows = db
+    .prepare(
+      `SELECT doc_id, group_id, title, file_id, created_at, updated_at, created_by
+       FROM mindmap_documents`
+    )
+    .all() as Row[]
+  return rows.map(rowToDoc)
+}
+
 export function getMindmapDocument(db: Database, docId: string): MindmapDocument | null {
   const row = db
     .prepare(

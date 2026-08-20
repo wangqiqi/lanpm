@@ -20,7 +20,7 @@ const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8'
 assert.match(schemaSql, /CREATE TABLE mindmap_documents/)
 
 const ipcSrc = readFileSync(join(root, 'src/main/ipc/mindmap.ts'), 'utf8')
-assert.match(ipcSrc, /MINDMAP_IPC\.create/)
+assert.match(ipcSrc, /MINDMAP_IPC\.getDocState/)
 
 const viewSrc = readFileSync(join(root, 'src/renderer/src/plugin/builtins/MindmapView.tsx'), 'utf8')
 assert.match(viewSrc, /useMindmapDocumentStore/)

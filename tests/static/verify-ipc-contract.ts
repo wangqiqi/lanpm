@@ -126,6 +126,7 @@ for (const ch of [...DECLARED].filter((c) => !c.includes('Sync'))) {
   if (ch === IDENTITY_CHANNELS.getSuggestedDeviceNameSync) continue
   // Main→renderer push（preload 用 on，非 invoke）不要求 ipcMain.handle
   if (ch === 'whiteboard:remoteUpdate' || ch === 'whiteboard:remoteAwareness') continue
+  if (ch === 'mindmap:remoteUpdate' || ch === 'mindmap:remoteAwareness') continue
   assert.ok(mainHandlers.has(ch), `declared IPC not registered in main: ${ch}`)
 }
 

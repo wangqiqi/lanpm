@@ -456,6 +456,7 @@ const zhCN = {
   'plugin.mindmapEmpty': '暂无导图，点击「新建」创建',
   'plugin.mindmapRoot': '项目任务',
   'plugin.mindmapDefaultTitle': '思维导图',
+  'plugin.mindmapCollabPeers': '协同',
   'plugin.mindmapNew': '新建',
   'plugin.mindmapSave': '保存',
   'plugin.mindmapSelectDoc': '选择导图',

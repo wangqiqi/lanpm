@@ -415,6 +415,20 @@ export interface LanpmApi {
     exportPng: (
       input: import('./mindmap/types').ExportMindmapPngInput
     ) => Promise<import('./file/types').FileMeta>
+    getDocState: (docId: string) => Promise<{
+      docId: string
+      groupId: string
+      anonymous: boolean
+      updateBase64: string
+    }>
+    publishUpdate: (docId: string, updateBase64: string) => Promise<void>
+    publishAwareness: (docId: string, updateBase64: string) => Promise<void>
+    onRemoteUpdate: (
+      handler: (payload: { groupId: string; docId: string; updateBase64: string }) => void
+    ) => () => void
+    onRemoteAwareness: (
+      handler: (payload: { groupId: string; docId: string; updateBase64: string }) => void
+    ) => () => void
   }
   plugin: {
     listPlugins: () => Promise<import('./plugin/types').PluginView[]>

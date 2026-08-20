@@ -368,6 +368,22 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `CREATE INDEX idx_mindmap_documents_group ON mindmap_documents(group_id, updated_at)`
       )
     }
+  },
+  {
+    fromVersion: 17,
+    description: 'mindmap_crdt_docs Yjs blob per document (SPRINT-26 TASK-2602)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE mindmap_crdt_docs (
+          doc_id TEXT PRIMARY KEY,
+          group_id TEXT NOT NULL,
+          wired_doc_id TEXT NOT NULL,
+          update_blob BLOB NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+      db.exec(`CREATE INDEX idx_mindmap_crdt_docs_group ON mindmap_crdt_docs(group_id)`)
+    }
   }
 ]
 

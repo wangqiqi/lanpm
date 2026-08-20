@@ -65,6 +65,7 @@
     "verify:whiteboard": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-whiteboard.ts",
     "verify:whiteboard-realtime": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-whiteboard-realtime.ts",
     "verify:mindmap": "node --experimental-strip-types tests/static/verify-mindmap.ts",
+    "verify:mindmap-realtime": "node --experimental-strip-types tests/static/verify-mindmap-realtime.ts",
     "verify:suffix": "node --experimental-strip-types tests/static/verify-suffix.ts",
     "verify:network-stub": "node --experimental-strip-types tests/integration/verify-network-stub.ts",
     "verify:network-manual": "node --experimental-strip-types tests/static/verify-network-manual.ts",

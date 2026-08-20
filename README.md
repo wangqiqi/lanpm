@@ -66,7 +66,7 @@
 |------|------------|
 | **Communication** | Groups & DM, @mentions, code blocks, `/task` & `#` refs, message↔task, offline catch-up, discover & VPN seeds |
 | **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health |
-| **Collab** | Excalidraw whiteboard (CRDT over P2P), group files, LibreOffice preview, resumable transfers |
+| **Collab** | Excalidraw whiteboard + mind maps (Yjs CRDT over P2P), group files, LibreOffice preview, resumable transfers |
 | **Org & UX** | Project / functional / anonymous groups, leadership cockpit, light/dark, **zh / en** |
 | **Security** | AES-GCM on TCP links. After pairing or first TOFU, the peer ECDH public key is pinned to `deviceId` — a LAN MITM cannot silently swap keys. The first discovery still trusts on first use. Local-first SQLite. Win/macOS/Linux × x64/arm64 packages. |
 

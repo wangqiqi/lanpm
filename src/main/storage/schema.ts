@@ -41,10 +41,11 @@ export const EXPECTED_TABLES = [
   'task_checklists',
   'task_checklist_items',
   'mindmap_documents',
+  'mindmap_crdt_docs',
   'ai_threads',
   'ai_messages',
   'ai_patrol_runs',
   'ai_pipeline_runs'
 ] as const
 
-export const SCHEMA_VERSION = 17
+export const SCHEMA_VERSION = 18

@@ -36,6 +36,8 @@ import {
   touchMindmapDocument,
   updateMindmapDocumentTitle
 } from '../storage/repositories/mindmapRepository.ts'
+import { deleteMindmapCrdtBlob } from '../storage/repositories/mindmapCrdtRepository.ts'
+import { evictMindmapDoc } from './mindmapCrdtStore.ts'
 
 function sha256Buffer(buf: Buffer): string {
   return createHash('sha256').update(buf).digest('hex')
@@ -126,6 +128,8 @@ export function renameMindmapDocument(db: Database, input: RenameMindmapInput): 
 }
 
 export function removeMindmapDocument(db: Database, docId: string): void {
+  evictMindmapDoc(docId)
+  deleteMindmapCrdtBlob(db, docId)
   const doc = deleteMindmapDocument(db, docId)
   if (!doc) throw new Error('mindmap document not found')
   const meta = getFileById(db, doc.fileId)
