@@ -647,6 +647,8 @@ const enUS = {
   'plugin.agilePoints': 'Story points',
   'plugin.agileColumnSums': 'Column totals',
   'plugin.agileBurndown': 'Burndown',
+  'plugin.agileVelocity': 'Velocity',
+  'plugin.agileVelocityEmpty': 'No completed points',
   'plugin.agileWip': 'WIP',
   'plugin.agileIterationAll': 'All tasks',
   'plugin.agileIterationCreate': 'New iteration',

@@ -11,6 +11,7 @@ import {
   type AgileBurndownView
 } from '@shared/task/agileBurndown'
 import type { AgileIterationSnapshot } from '@shared/task/agileIteration'
+import { velocityBarRects, type AgileVelocityView } from '@shared/task/agileVelocity'
 import {
   COLUMN_WIP_STATUSES,
   countTasksByStatus,
@@ -61,6 +62,7 @@ export default function AgileStub({
   const [tasks, setTasks] = useState<Task[]>([])
   const [busy, setBusy] = useState(false)
   const [burndown, setBurndown] = useState<AgileBurndownView | null>(null)
+  const [velocity, setVelocity] = useState<AgileVelocityView | null>(null)
   const [wipLimits, setWipLimits] = useState<ColumnWipLimits>({})
   const [iterations, setIterations] = useState<AgileIterationSnapshot | null>(null)
   const [draftName, setDraftName] = useState('')
@@ -71,6 +73,7 @@ export default function AgileStub({
     if (!licenseActive || !groupId) {
       setTasks([])
       setBurndown(null)
+      setVelocity(null)
       setWipLimits({})
       setIterations(null)
       if (groupId) clearBridges(groupId)
@@ -90,6 +93,8 @@ export default function AgileStub({
       })
       const chart = await getLanpmApi().task.getAgileBurndown(groupId, iter.currentIterationId)
       setBurndown(chart)
+      const vel = await getLanpmApi().task.getAgileVelocity(groupId)
+      setVelocity(vel)
       const snap = await getLanpmApi().task.getAgileWipLimits(groupId)
       setWipLimits(snap.limits)
       publishAgileWip({
@@ -101,6 +106,7 @@ export default function AgileStub({
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
       setTasks([])
       setBurndown(null)
+      setVelocity(null)
       setWipLimits({})
       setIterations(null)
       clearBridges(groupId)
@@ -289,6 +295,7 @@ export default function AgileStub({
     ? burndownPolyline(burndown.samples, 128, 28, yMax)
     : ''
   const idealLine = burndown ? burndownPolyline(burndown.ideal, 128, 28, yMax) : ''
+  const velocityRects = velocity ? velocityBarRects(velocity.bars, 128, 28) : []
   return (
     <div
       className={styles.scheduleToolbar}
@@ -395,6 +402,28 @@ export default function AgileStub({
           </svg>
         </span>
       ) : null}
+      <span className={styles.agileBurndown} data-testid="agile-velocity">
+        <Text type="secondary">
+          {t('plugin.agileVelocity')}
+          {velocity && velocity.bars.some((b) => b.completedPoints > 0)
+            ? ` ${velocity.bars.map((b) => b.completedPoints).join(' · ')}`
+            : ` ${t('plugin.agileVelocityEmpty')}`}
+        </Text>
+        {velocityRects.length > 0 ? (
+          <svg className={styles.agileBurndownSvg} viewBox="0 0 128 28" aria-hidden>
+            {velocityRects.map((rect) => (
+              <rect
+                key={rect.iterationId}
+                x={rect.x}
+                y={rect.y}
+                width={rect.width}
+                height={rect.height}
+                fill="var(--lanpm-accent)"
+              />
+            ))}
+          </svg>
+        ) : null}
+      </span>
     </div>
   )
 }

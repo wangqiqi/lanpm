@@ -38,6 +38,8 @@ assert.match(stub, /agile-iteration/)
 assert.match(stub, /getAgileIterations/)
 assert.match(stub, /createAgileIteration/)
 assert.match(stub, /agile-iteration-card/)
+assert.match(stub, /agile-velocity/)
+assert.match(stub, /getAgileVelocity/)
 
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /assertPaidPluginLicensed/)

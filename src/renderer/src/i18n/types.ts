@@ -629,6 +629,8 @@ export type MessageKey =
   | 'plugin.agilePoints'
   | 'plugin.agileColumnSums'
   | 'plugin.agileBurndown'
+  | 'plugin.agileVelocity'
+  | 'plugin.agileVelocityEmpty'
   | 'plugin.agileWip'
   | 'plugin.agileIterationAll'
   | 'plugin.agileIterationCreate'

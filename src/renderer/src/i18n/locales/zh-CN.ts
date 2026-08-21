@@ -637,6 +637,8 @@ const zhCN = {
   'plugin.agilePoints': '故事点',
   'plugin.agileColumnSums': '列合计',
   'plugin.agileBurndown': '燃尽',
+  'plugin.agileVelocity': '速度',
+  'plugin.agileVelocityEmpty': '无完成点',
   'plugin.agileWip': 'WIP',
   'plugin.agileIterationAll': '全群',
   'plugin.agileIterationCreate': '新建迭代',
