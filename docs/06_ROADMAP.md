@@ -222,10 +222,10 @@
 | 批次 | 内容 | 收费 |
 |------|------|------|
 | **第一波** | 日历 + 白板 + 基础验收 + 核心三角（任务↔聊↔文件） | **免费** |
-| **第二波** | 高级排程（**薄切片已交付**：`lanpm.schedule` · FS/SS/FF/SF 关键路径 · `verify:schedule-sku` · **资源平衡 / 基线仍后置**）、敏捷包（**薄切片已交付**：`lanpm.agile` · `verify:agile-sku`）、AI 周报（**薄切片已交付**：`lanpm.weekly` · 周报/月报导出许可闸 · `verify:weekly-sku`） | **可购** |
+| **第二波** | 高级排程（**薄切片已交付**：`lanpm.schedule` · FS/SS/FF/SF 关键路径 · `verify:schedule-sku` · **资源平衡 / 基线仍后置**）、敏捷包（**薄切片已交付**：`lanpm.agile` · `verify:agile-sku`）、AI 周报（**薄切片已交付**：`lanpm.weekly` · 周报「下周计划」+ **月报独立模板** · SPRINT-57 许可闸 · SPRINT-64 模板 · `verify:weekly-sku`） | **可购** |
 | **第三波** | 完整会议 SFU、思维导图、知识库增强等 | **可购**为主 |
 
-已交付第一波见 `CHANGELOG`；第二波排程见 SPRINT-54（壳）· SPRINT-62（四类依赖关键路径）、敏捷故事点见 SPRINT-56、周报导出见 SPRINT-57。
+已交付第一波见 `CHANGELOG`；第二波排程见 SPRINT-54（壳）· SPRINT-62（四类依赖关键路径）、敏捷故事点见 SPRINT-56、周报导出见 SPRINT-57 · 周报/月报模板见 SPRINT-64。
 
 ### 6.4 插件边界与 SPIKE 锚点
 
@@ -234,7 +234,7 @@
 | 投屏 / 远程 / 语音视频 / 完整会议 | ❌ | ✅ 可购（Lite mesh 可免费 POC） | `verify:meeting-spike` · §3 |
 | 高级排程（关键路径） | 基础甘特/依赖免费 | ✅ 可购 `lanpm.schedule`（SPRINT-62：FS/SS/FF/SF 边；非日历 CPM） | `verify:schedule-sku` |
 | 敏捷包（故事点） | 看板拖拽/状态免费 | ✅ 可购 `lanpm.agile` | `verify:agile-sku` |
-| AI 周报（导出） | 驾驶舱数字/趋势免费 | ✅ 可购 `lanpm.weekly` | `verify:weekly-sku` |
+| AI 周报（导出） | 驾驶舱数字/趋势免费 | ✅ 可购 `lanpm.weekly`（SPRINT-57 许可闸 · SPRINT-64：下周计划 + 月报独立模板） | `verify:weekly-sku` |
 | 项目备份 / 还原 | 加密与 IPC 仍核心 | ✅ 免费 `lanpm.backup`（SPRINT-63：默认开、可关；非全库备份） | `verify:backup-sku` |
 | 白板 / 协作画布 | 不进臃肿核心 | ✅ 免费模块形态 | `verify:whiteboard-realtime` · `whiteboard_crdt` |
 | form-js 验收单 | ❌ | ✅ 可购 POC | `verify:plugin-loader` |
