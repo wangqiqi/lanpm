@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.106.8-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.106.9-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -124,7 +124,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.106.8`** — Paid agile: remaining-points burndown + column WIP hints + iteration containers. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.106.9`** — Paid agile: remaining-points burndown + column WIP hints + iteration containers. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

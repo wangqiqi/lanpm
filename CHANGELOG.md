@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.9] - 2026-08-21
+
 ### Added
 
 - **迭代容器表**：`agile_iterations` / 当前选中 / 按迭代燃尽样本；`tasks.iteration_id`（schema v23）（`TASK-7001`）
