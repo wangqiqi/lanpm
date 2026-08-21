@@ -30,6 +30,12 @@ assert.ok(
   'evaluateProjects must stay ungated'
 )
 
+const view = readFileSync(join(root, 'src/renderer/src/views/CockpitView.tsx'), 'utf8')
+assert.match(view, /weekly-license-cta/)
+assert.match(view, /openProfileTab/)
+assert.match(view, /lanpm\.weekly/)
+assert.match(view, /runReport\('evaluate'\)/)
+
 const registry = readFileSync(join(root, 'src/renderer/src/plugin/registry.ts'), 'utf8')
 assert.match(registry, /lanpm\.weekly.*WeeklyStub/)
 

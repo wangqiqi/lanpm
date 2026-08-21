@@ -25,6 +25,9 @@ import ViewHeader from '@renderer/ui/ViewHeader'
 import RegionButton from '@renderer/ui/RegionButton'
 import { ViewErrorCenter, ViewLoadingCenter } from '@renderer/ui/ViewState'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { usePluginView } from '@renderer/plugin/usePluginView'
+import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
+import { openProfileTab } from '@renderer/plugin/openProfileTab'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import { useAiAssistantStore } from '@renderer/stores/aiAssistantStore'
@@ -58,8 +61,9 @@ export default function CockpitView(): React.ReactElement {
   const groups = useNavigationStore((s) => s.groups)
   const getActiveGroup = useNavigationStore((s) => s.getActiveGroup)
   const activeGroup = getActiveGroup()
-  const returnToActiveProject = () =>
-    navigate(cockpitReturnPath(activeGroupId, lastNonCockpitPath))
+  const weeklyPlugin = usePluginView('lanpm.weekly')
+  const weeklyExportAllowed =
+    Boolean(weeklyPlugin?.enabled) && weeklyPlugin != null && isPluginLicenseActive(weeklyPlugin)
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -302,16 +306,30 @@ export default function CockpitView(): React.ReactElement {
             <RegionButton
               variant="emphasis"
               loading={reportLoading}
-              onClick={() => void runReport('weekly')}
+              data-testid={weeklyExportAllowed ? 'cockpit-weekly-report' : 'weekly-license-cta'}
+              onClick={() => {
+                if (!weeklyExportAllowed) {
+                  openProfileTab('plugins')
+                  return
+                }
+                void runReport('weekly')
+              }}
             >
-              {t('cockpit.weeklyReport')}
+              {weeklyExportAllowed ? t('cockpit.weeklyReport') : t('plugin.weeklyLicenseCta')}
             </RegionButton>
             <RegionButton
               variant="pill"
               loading={reportLoading}
-              onClick={() => void runReport('monthly')}
+              data-testid={weeklyExportAllowed ? 'cockpit-monthly-report' : 'weekly-license-cta-monthly'}
+              onClick={() => {
+                if (!weeklyExportAllowed) {
+                  openProfileTab('plugins')
+                  return
+                }
+                void runReport('monthly')
+              }}
             >
-              {t('cockpit.monthlyReport')}
+              {weeklyExportAllowed ? t('cockpit.monthlyReport') : t('plugin.weeklyLicenseCta')}
             </RegionButton>
             <RegionButton
               variant="text"

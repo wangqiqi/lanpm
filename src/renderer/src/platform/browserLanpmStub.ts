@@ -1967,7 +1967,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       }),
       generateWeeklyReport: async () => {
         if (!isStubPluginLicensed('lanpm.weekly')) {
-          throw new Error('license required for paid plugin: lanpm.weekly')
+          throw new Error('plugin.weeklyLicenseRequired')
         }
         return {
           format: 'markdown' as const,
@@ -1978,7 +1978,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       },
       generateMonthlyReport: async () => {
         if (!isStubPluginLicensed('lanpm.weekly')) {
-          throw new Error('license required for paid plugin: lanpm.weekly')
+          throw new Error('plugin.weeklyLicenseRequired')
         }
         return {
           format: 'markdown' as const,
