@@ -45,10 +45,26 @@ assert.match(docs07, /lanpm\.weekly/)
 const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(docs06, /lanpm\.weekly/)
 assert.match(docs06, /SPRINT-57/)
+assert.match(docs06, /SPRINT-64/)
 assert.match(docs06, /仍永不插件化拆卖/)
 
 const enabled = readFileSync(join(root, 'src/shared/plugin/enabledDefaults.ts'), 'utf8')
 assert.ok(!enabled.includes("'lanpm.weekly'"), 'paid weekly must not default-enable')
+
+const reportMd = readFileSync(join(root, 'src/shared/cockpit/reportMarkdown.ts'), 'utf8')
+assert.match(reportMd, /## 下周计划/)
+assert.match(reportMd, /## 本月里程碑/)
+assert.match(reportMd, /## 风险汇总/)
+
+assert.doesNotMatch(
+  cockpit,
+  /\.replace\(['"]# LanPM 周报['"]/,
+  'monthly must not be a weekly title-swap'
+)
+assert.match(cockpit, /buildWeeklyReportMarkdown/)
+assert.match(cockpit, /buildMonthlyReportMarkdown/)
+assert.match(cockpit, /selectOpenTasksDueNextWeek/)
+assert.match(cockpit, /selectMilestonesThisMonth/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
