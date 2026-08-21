@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- **排程基线表**：`schedule_baselines`（schema v20）；每群一版，再冻覆盖（`TASK-6501`）
+- **甘特冻结基线**：授权后工具栏冻结当前起止；条色对照延期/提前（`TASK-6502`）
+- **排程 SKU 守卫**：`verify:schedule-sku` 锁住基线表、许可闸、冻结按钮、禁止默认启用（`TASK-6503`）
+- **排程基线口径**：`docs/06` §6.3 · README 记 SPRINT-65；资源平衡仍后置（`TASK-6504`）
+
 ### Changed
 
 - **周报下周计划**：本地 Markdown 列出下 ISO 周到期的未完成任务（`TASK-6401`）

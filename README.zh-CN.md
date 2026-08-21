@@ -66,7 +66,7 @@
 | 领域 | 要点 |
 |------|------|
 | **沟通** | 群聊 / 私聊、@提及、代码高亮、`/task` 与 `#` 引用、消息↔任务、离线补同步（聊天 / 任务 / 已读 / **文件库索引**）、发现与 VPN 种子。可选**会议插件**：未购引导升级；Lite mesh / Pro LiveKit 档位可见；内网旁路最短运维见文档 |
-| **项目管理** | 看板、任务树、甘特、日历、四类依赖、标签、验收清单、Presence、工期健康度。可选**排程插件**（`lanpm.schedule`，可购）：甘特关键路径含 FS/SS/FF/SF |
+| **项目管理** | 看板、任务树、甘特、日历、四类依赖、标签、验收清单、Presence、工期健康度。可选**排程插件**（`lanpm.schedule`，可购）：甘特关键路径含 FS/SS/FF/SF，以及按群冻结基线对照 |
 | **协作** | Excalidraw 白板 + 脑图（群内 P2P Yjs CRDT）、群文件、LibreOffice 预览、断点续传 |
 | **组织与体验** | 项目 / 职能 / 匿名群、领导驾驶舱、亮暗主题、**中 / 英**。可选**周报插件**（`lanpm.weekly`，可购）：周报含下周计划、月报独立模板。可选**备份插件**（`lanpm.backup`，免费、**默认开**）：Profile 里单群加密 `.lanpm-bundle`；关插件则隐藏该区 |
 | **安全** | TCP 链路上 AES-GCM。配对成功或首次 TOFU 后把对端 ECDH 公钥钉到 `deviceId` — 局域网中间人无法再静默换钥。首次发现仍是信任首次使用。本地优先 SQLite，**可选用通行词加密库文件**。Win/macOS/Linux × x64/arm64 安装包。 |
@@ -121,7 +121,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.106.3`** — 免费 `lanpm.backup`（默认开）包单群加密 `.lanpm-bundle`。可购排程关键路径认 FS/SS/FF/SF。Linux `--full` 抽样 + 安装包冒烟。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.3`** — 免费 `lanpm.backup`（默认开）包单群加密 `.lanpm-bundle`。可购排程：FS/SS/FF/SF 关键路径 + 按群冻结基线。Linux `--full` 抽样 + 安装包冒烟。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

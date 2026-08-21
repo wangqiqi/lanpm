@@ -66,7 +66,7 @@
 | Area | Highlights |
 |------|------------|
 | **Communication** | Groups & DM, @mentions, code blocks, `/task` & `#` refs, message↔task, offline catch-up (chat / tasks / receipts / **file library index**), discover & VPN seeds. Optional **meeting plugin**: license CTA; Lite mesh vs Pro LiveKit; Pro video grid (auto-fit, screenshare tile, i18n); LAN LiveKit bypass ops in docs |
-| **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health. Optional **schedule plugin** (`lanpm.schedule`, paid): Gantt critical-path highlight on all four dep types. Optional **agile plugin** (`lanpm.agile`, paid): story points on cards + column totals |
+| **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health. Optional **schedule plugin** (`lanpm.schedule`, paid): Gantt critical-path highlight on all four dep types, plus one frozen baseline per group. Optional **agile plugin** (`lanpm.agile`, paid): story points on cards + column totals |
 | **Collab** | Excalidraw whiteboard + mind maps (Yjs CRDT over P2P), group files, LibreOffice preview, resumable transfers |
 | **Org & UX** | Project / functional / anonymous groups, leadership cockpit, light/dark, **zh / en**. Optional **weekly plugin** (`lanpm.weekly`, paid): license-gated weekly (incl. next-week plan) / monthly (own template) Markdown export. Optional **backup plugin** (`lanpm.backup`, free, **on by default**): encrypted single-group `.lanpm-bundle` in Profile; turn the plugin off to hide the section |
 | **Security** | AES-GCM on TCP links. After pairing or first TOFU, the peer ECDH public key is pinned to `deviceId` — a LAN MITM cannot silently swap keys. The first discovery still trusts on first use. Local-first SQLite with **optional passphrase encryption at rest**. Win/macOS/Linux × x64/arm64 packages. |
@@ -124,7 +124,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.106.3`** — Free `lanpm.backup` (default on) wraps encrypted group `.lanpm-bundle`. Paid schedule critical path uses FS/SS/FF/SF edges. Linux `--full` sample + installer smoke. License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.106.3`** — Free `lanpm.backup` (default on) wraps encrypted group `.lanpm-bundle`. Paid schedule: FS/SS/FF/SF critical path + per-group freeze baseline. Linux `--full` sample + installer smoke. License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 
