@@ -816,6 +816,7 @@ const enUS = {
   'files.pdfNext': 'Next page',
   'files.pdfPage': '{current} / {total}',
   'files.pdfLoadFailed': 'Failed to preview PDF',
+  'files.officeLightPreviewHint': 'Simplified preview (LibreOffice was not used)',
   'files.bookmarkAdded': 'Bookmark added',
   'files.bookmarkAddFailed': 'Failed to add bookmark',
   'files.noBookmarksImported': 'No bookmarks imported',

@@ -32,4 +32,19 @@ const helper = readFileSync(join(root, 'src/shared/file/officeLightPreview.ts'),
 assert.match(helper, /shouldUseOfficeLightPreview/)
 assert.match(helper, /sanitizeOfficeHtmlFragment/)
 
+const filesView = readFileSync(join(root, 'src/renderer/src/features/files/FilesView.tsx'), 'utf8')
+assert.match(filesView, /shouldUsePdfJsPreview/)
+assert.match(filesView, /shouldUseOfficeLightPreview/)
+assert.match(filesView, /OfficeLightPreview/)
+
+const lightUi = readFileSync(
+  join(root, 'src/renderer/src/features/files/OfficeLightPreview.tsx'),
+  'utf8'
+)
+assert.match(lightUi, /sandbox=""/)
+assert.match(lightUi, /office-light-preview/)
+
+const html = readFileSync(join(root, 'src/renderer/index.html'), 'utf8')
+assert.match(html, /frame-src[^"]*lanpm-preview:/)
+
 console.log('verify:office-preview OK')

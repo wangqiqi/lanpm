@@ -796,6 +796,7 @@ export type MessageKey =
   | 'files.pdfNext'
   | 'files.pdfPage'
   | 'files.pdfLoadFailed'
+  | 'files.officeLightPreviewHint'
   | 'files.bookmarkAdded'
   | 'files.bookmarkAddFailed'
   | 'files.noBookmarksImported'

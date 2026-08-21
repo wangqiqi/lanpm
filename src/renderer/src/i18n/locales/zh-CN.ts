@@ -805,6 +805,7 @@ const zhCN = {
   'files.pdfNext': '下一页',
   'files.pdfPage': '{current} / {total}',
   'files.pdfLoadFailed': 'PDF 预览失败',
+  'files.officeLightPreviewHint': '简化预览（未使用 LibreOffice）',
   'files.bookmarkAdded': '书签已添加',
   'files.bookmarkAddFailed': '添加书签失败',
   'files.noBookmarksImported': '未导入书签',

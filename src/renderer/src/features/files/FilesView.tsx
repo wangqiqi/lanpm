@@ -67,8 +67,10 @@ import {
 } from '@renderer/features/files/fileListModel'
 import { isTextPreviewFile } from '@shared/file/previewExtensions'
 import { shouldUsePdfJsPreview } from '@shared/file/pdfPreview'
+import { shouldUseOfficeLightPreview } from '@shared/file/officeLightPreview'
 import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
 import PdfPreview from '@renderer/features/files/PdfPreview'
+import OfficeLightPreview from '@renderer/features/files/OfficeLightPreview'
 import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './files.module.css'
@@ -1024,6 +1026,13 @@ export default function FilesView(): React.ReactElement {
           previewUrl
         }) ? (
         <PdfPreview url={previewUrl} title={selected.name} />
+      ) : previewUrl &&
+        shouldUseOfficeLightPreview({
+          ext: selected.ext,
+          previewPath: selected.previewPath,
+          previewUrl
+        }) ? (
+        <OfficeLightPreview url={previewUrl} title={selected.name} />
       ) : previewText !== null ? (
         <pre className={styles.previewText}>{previewText}</pre>
       ) : (

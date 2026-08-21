@@ -1,0 +1,21 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  gap: 8px;
+}
+
+.hint {
+  flex-shrink: 0;
+}
+
+.frame {
+  flex: 1;
+  min-height: 240px;
+  width: 100%;
+  border: 1px solid var(--lanpm-separator);
+  border-radius: var(--lanpm-radius-sm);
+  background: var(--lanpm-bg);
+}
