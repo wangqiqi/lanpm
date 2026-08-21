@@ -122,7 +122,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.105.0`** — paid SKUs: schedule critical path, agile story points, weekly/monthly report export; anonymous group local history; meeting Pro+ grid. License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.105.0`** — paid SKUs: schedule critical path, agile story points, weekly/monthly report export; anonymous group local history; meeting Pro+ grid. Unreleased: Office light preview (docx/xlsx) when LibreOffice is missing. License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

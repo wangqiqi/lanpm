@@ -9,6 +9,7 @@
 - **Office 轻量预览（主进程）**：无 LibreOffice 时 `docx`/`xlsx` 用 mammoth / exceljs 写出 HTML 预览；有 `soffice` 仍先转 PDF（`TASK-5801`）
 - **文件库 HTML 预览**：docx/xlsx 轻量预览走沙箱 iframe（无 script）；soffice PDF 仍走 `PdfPreview`（`TASK-5802`）
 - **Office 预览口径**：`docs/06` §6.1 #8 标 mammoth/exceljs 轻量切片已交付；浏览器 stub 不转 Office（`TASK-5803`）
+- **Office 预览门禁**：`verify:office-preview` 并入 `verify:p0` / release-gate（`TASK-5804`）
 
 ## [1.105.0] - 2026-08-21
 

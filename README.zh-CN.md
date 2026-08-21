@@ -120,7 +120,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.105.0`** — 可购排程关键路径、敏捷故事点、周报/月报导出；匿名群本机留史；会议 Pro+ 视频格。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.105.0`** — 可购排程关键路径、敏捷故事点、周报/月报导出；匿名群本机留史；会议 Pro+ 视频格。未发布：无 LibreOffice 时的 Office 轻量预览（docx/xlsx）。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

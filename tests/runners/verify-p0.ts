@@ -20,7 +20,8 @@ const steps = [
   'verify:sec-hardening',
   'verify:storage-path-resolver',
   'verify:screenshots-layout',
-  'verify:db-at-rest'
+  'verify:db-at-rest',
+  'verify:office-preview'
 ] as const
 
 for (const step of steps) {

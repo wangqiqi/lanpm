@@ -55,4 +55,7 @@ const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(docs06, /verify:office-preview/)
 assert.match(docs06, /mammoth \/ exceljs/)
 
+const p0 = readFileSync(join(root, 'tests/runners/verify-p0.ts'), 'utf8')
+assert.match(p0, /verify:office-preview/)
+
 console.log('verify:office-preview OK')
