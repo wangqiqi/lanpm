@@ -21,6 +21,8 @@ import {
   LOCAL_RETENTION_DAYS_MIN
 } from '@shared/data/retention'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { usePluginView } from '@renderer/plugin/usePluginView'
+import { defaultPluginEnabled } from '@shared/plugin/enabledDefaults'
 import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import type { DataCleanupOptions } from '@shared/data/types'
 import styles from './DataStoragePanel.module.css'
@@ -39,6 +41,8 @@ export default function DataStoragePanel(): React.ReactElement {
   const clearGroupMessages = useDataStore((s) => s.clearGroupMessages)
   const groups = useNavigationStore((s) => s.groups)
   const evictGroup = useChatStore((s) => s.evictGroup)
+  const backupPlugin = usePluginView('lanpm.backup')
+  const showBackup = backupPlugin ? backupPlugin.enabled : defaultPluginEnabled('lanpm.backup')
 
   const [retention, setRetention] = useState(90)
   const [cleanOpen, setCleanOpen] = useState(false)
@@ -395,7 +399,8 @@ export default function DataStoragePanel(): React.ReactElement {
         ) : null}
       </section>
 
-      <section className={styles.card}>
+      {showBackup ? (
+      <section className={styles.card} data-testid="data-backup-section" data-plugin-slot="profile.data.backup">
         <Text strong className={styles.cardTitle}>
           {t('data.sectionBackup')}
         </Text>
@@ -485,6 +490,7 @@ export default function DataStoragePanel(): React.ReactElement {
           </div>
         </div>
       </section>
+      ) : null}
 
       <Modal
         title={t('data.cleanupOpen')}

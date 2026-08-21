@@ -9,6 +9,7 @@ import AiAssistantStub from './builtins/AiAssistantStub'
 import ScheduleStub from './builtins/ScheduleStub'
 import AgileStub from './builtins/AgileStub'
 import WeeklyStub from './builtins/WeeklyStub'
+import BackupStub from './builtins/BackupStub
 
 export type PluginSlotComponentProps = {
   plugin: PluginView
@@ -26,7 +27,8 @@ const REGISTRY: Record<string, ComponentType<PluginSlotComponentProps>> = {
   'lanpm.ai-assistant': AiAssistantStub,
   'lanpm.schedule': ScheduleStub,
   'lanpm.agile': AgileStub,
-  'lanpm.weekly': WeeklyStub
+  'lanpm.weekly': WeeklyStub,
+  'lanpm.backup': BackupStub
 }
 
 export function resolvePluginComponent(

@@ -9,6 +9,8 @@ describe('defaultPluginEnabled', () => {
     expect(defaultPluginEnabled('lanpm.mindmap')).toBe(true)
     expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.mindmap')).toBe(true)
     expect(defaultPluginEnabled('lanpm.ai-assistant')).toBe(true)
+    expect(defaultPluginEnabled('lanpm.backup')).toBe(true)
+    expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.backup')).toBe(true)
   })
 
   it('keeps example plugin off by default', () => {

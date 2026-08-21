@@ -488,6 +488,7 @@ export type MessageKey =
   | 'plugin.name.example'
   | 'plugin.name.meeting'
   | 'plugin.name.mindmap'
+  | 'plugin.name.backup'
   | 'plugin.importLicense'
   | 'plugin.importLicenseHint'
   | 'plugin.importLicenseOk'

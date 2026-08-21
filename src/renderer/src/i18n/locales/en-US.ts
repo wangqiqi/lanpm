@@ -499,6 +499,7 @@ const enUS = {
   'plugin.toggleFailed': 'Failed to toggle plugin',
   'plugin.name.example': 'Example extension (stub)',
   'plugin.name.mindmap': 'Mind map',
+  'plugin.name.backup': 'Group backup',
   'plugin.importLicense': 'Import offline license',
   'plugin.importLicenseHint': 'Paste signed license JSON from lanpm-license (must include signature)',
   'plugin.importLicenseOk': 'License imported',

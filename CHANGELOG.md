@@ -8,6 +8,8 @@
 
 - **备份插件 manifest**：官方免费插件 `lanpm.backup`（Slot `profile.data.backup`）（`TASK-6301`）
 
+- **备份插件默认开**：`lanpm.backup` 进官方默认启用白名单；关插件后 Profile 备份区隐藏（`TASK-6302`）
+
 ## [1.106.2] - 2026-08-21
 
 ### Changed

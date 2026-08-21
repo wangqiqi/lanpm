@@ -505,6 +505,19 @@ const STUB_PLUGINS: PluginView[] = [
     source: 'builtin',
     signatureValid: true,
     licensed: false
+  },
+  {
+    id: 'lanpm.backup',
+    name: 'Group Backup',
+    version: '0.1.0',
+    slots: ['profile.data.backup'],
+    capabilities: ['group.get'],
+    pricing: 'free',
+    enabled: true,
+    dirName: 'lanpm.backup',
+    source: 'builtin',
+    signatureValid: true,
+    licensed: null
   }
 ]
 

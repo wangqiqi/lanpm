@@ -493,6 +493,7 @@ const zhCN = {
   'plugin.toggleFailed': '切换插件失败',
   'plugin.name.example': '示例扩展（占位）',
   'plugin.name.mindmap': '思维导图',
+  'plugin.name.backup': '群备份',
   'plugin.importLicense': '导入离线许可证',
   'plugin.importLicenseHint': '粘贴由 lanpm-license 签发的 JSON 许可证（含 signature 字段）',
   'plugin.importLicenseOk': '许可证已导入',
