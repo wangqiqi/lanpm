@@ -1,31 +1,14 @@
-import type { ChatMessage } from '../../shared/chat/types'
+import type { Database } from 'better-sqlite3'
+import {
+  deleteAllMessagesInGroup,
+  getMaxLamportTs
+} from '../storage/repositories/messageRepository.ts'
 
-/** 匿名群消息仅驻留内存，退出/重进后清除（M5-02） */
-const sessions = new Map<string, ChatMessage[]>()
-
-export function listAnonymousMessages(groupId: string): ChatMessage[] {
-  return [...(sessions.get(groupId) ?? [])]
+/** 匿名群本机会话：清 SQLite 消息（leave/enter 在 TASK-5203 才停清） */
+export function clearAnonymousSession(db: Database, groupId: string): void {
+  deleteAllMessagesInGroup(db, groupId)
 }
 
-export function appendAnonymousMessage(groupId: string, message: ChatMessage): void {
-  const list = sessions.get(groupId) ?? []
-  list.push(message)
-  sessions.set(groupId, list)
-}
-
-export function replaceAnonymousMessage(groupId: string, message: ChatMessage): void {
-  const list = sessions.get(groupId) ?? []
-  const idx = list.findIndex((m) => m.msgId === message.msgId)
-  if (idx < 0) return
-  const next = [...list]
-  next[idx] = message
-  sessions.set(groupId, next)
-}
-
-export function clearAnonymousSession(groupId: string): void {
-  sessions.delete(groupId)
-}
-
-export function hasAnonymousSession(groupId: string): boolean {
-  return sessions.has(groupId)
+export function hasAnonymousSession(db: Database, groupId: string): boolean {
+  return getMaxLamportTs(db, groupId) > 0
 }

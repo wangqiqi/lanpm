@@ -5,15 +5,9 @@ import type { ChatMessage } from '../../shared/chat/types'
 import { canEditMessage } from '../../shared/chat/messageEdit'
 import type { SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
-import { resolveGroupType } from '../group/groupService'
-import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { getNetworkTransport } from '../network'
 import { broadcastMessage } from './chatBroadcast'
 import { getMessageById, updateMessage } from '../storage/repositories/messageRepository'
-
-function isAnonymousGroup(db: Database, groupId: string): boolean {
-  return isMemoryOnlyChatGroup(groupId, resolveGroupType(db, groupId))
-}
 
 export interface ChatEditPayload {
   groupId: string
@@ -79,10 +73,6 @@ export async function editTextMessage(
   if (!status.configured || !status.user || !status.device) {
     throwLanpm('stub.identityRequired')
   }
-  if (isAnonymousGroup(db, groupId)) {
-    throwLanpm('err.anonymousTextOnly')
-  }
-
   const trimmed = text.trim()
   if (!trimmed) throwLanpm('stub.messageEmpty')
 

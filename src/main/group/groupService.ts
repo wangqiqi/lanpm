@@ -44,7 +44,7 @@ export function applyRemoteGroupDissolved(db: Database, groupId: string): boolea
   if (!group) return false
   purgeGroupFilesFromDisk(db, groupId)
   purgeGroupKeyMeta(db, groupId)
-  clearAnonymousSession(groupId)
+  clearAnonymousSession(db, groupId)
   deleteGroupCascade(db, groupId)
   broadcastGroupsChanged()
   return true
@@ -204,7 +204,7 @@ export async function dissolveGroup(db: Database, groupId: string): Promise<void
 
   purgeGroupFilesFromDisk(db, groupId)
   purgeGroupKeyMeta(db, groupId)
-  clearAnonymousSession(groupId)
+  clearAnonymousSession(db, groupId)
   deleteGroupCascade(db, groupId)
   broadcastGroupsChanged()
 }
@@ -226,7 +226,7 @@ export function leaveAnonymousGroup(db: Database, groupId: string): void {
     removeGroupMember(db, groupId, status.user.userId)
     purgeGroupKeyMeta(db, groupId)
   }
-  clearAnonymousSession(groupId)
+  clearAnonymousSession(db, groupId)
 }
 
 export function enterAnonymousGroup(db: Database, groupId: string): void {
@@ -236,7 +236,7 @@ export function enterAnonymousGroup(db: Database, groupId: string): void {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) return
 
-  clearAnonymousSession(groupId)
+  clearAnonymousSession(db, groupId)
   removeGroupMember(db, groupId, status.user.userId)
   joinGroupMember(db, groupId, status.user.userId, true)
 }

@@ -8,38 +8,20 @@ import {
   type ChatRecallPayload,
   toRecalledMessage
 } from '../../shared/chat/recall'
-import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import type { SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
-import { resolveGroupType } from '../group/groupService'
 import { getNetworkTransport } from '../network'
-import {
-  listAnonymousMessages,
-  replaceAnonymousMessage
-} from './anonymousChatStore'
 import { broadcastMessage } from './chatBroadcast'
 import {
   getMessageById,
   updateMessage
 } from '../storage/repositories/messageRepository'
 
-function isAnonymousGroup(db: Database, groupId: string): boolean {
-  return isMemoryOnlyChatGroup(groupId, resolveGroupType(db, groupId))
-}
-
 export function applyRecallToStoredMessage(
   db: Database,
   groupId: string,
   payload: ChatRecallPayload
 ): ChatMessage | null {
-  if (isAnonymousGroup(db, groupId)) {
-    const existing = listAnonymousMessages(groupId).find((m) => m.msgId === payload.msgId)
-    if (!existing || existing.content.kind === 'recalled') return null
-    const updated = applyRecallPayload(existing, payload)
-    replaceAnonymousMessage(groupId, updated)
-    return updated
-  }
-
   const existing = getMessageById(db, payload.msgId)
   if (!existing || existing.groupId !== groupId) return null
   if (existing.content.kind === 'recalled') return null
@@ -73,12 +55,7 @@ export async function recallMessage(
     throwLanpm('stub.identityRequired')
   }
 
-  let existing: ChatMessage | null | undefined
-  if (isAnonymousGroup(db, groupId)) {
-    existing = listAnonymousMessages(groupId).find((m) => m.msgId === msgId)
-  } else {
-    existing = getMessageById(db, msgId)
-  }
+  const existing = getMessageById(db, msgId)
 
   if (!existing || existing.groupId !== groupId) {
     throwLanpm('stub.messageNotFound')
@@ -90,11 +67,7 @@ export async function recallMessage(
   const recalledAt = new Date().toISOString()
   const updated = toRecalledMessage(existing, status.user.userId, recalledAt)
 
-  if (isAnonymousGroup(db, groupId)) {
-    replaceAnonymousMessage(groupId, updated)
-  } else {
-    updateMessage(db, updated)
-  }
+  updateMessage(db, updated)
 
   broadcastMessage(updated)
 

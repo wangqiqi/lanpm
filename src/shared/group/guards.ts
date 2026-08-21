@@ -9,7 +9,7 @@ export function groupAllowsDirectMessage(type: GroupType): boolean {
   return !isAnonymousGroupType(type)
 }
 
-/** 内存匿名群（非 DM）：仅文本、不走常规持久化聊天链路 */
+/** 内存匿名群（非 DM）：不走离线 chat_sync 补历史；本机消息仍可落 SQLite */
 export function isMemoryOnlyChatGroup(groupId: string, type: GroupType): boolean {
   if (groupId.startsWith('dm:')) return false
   return isAnonymousGroupType(type)

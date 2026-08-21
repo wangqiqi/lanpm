@@ -63,11 +63,6 @@ import { broadcastMessage } from './chatBroadcast'
 import { catchSyncFailure } from '../utils/reportSyncFailure'
 import { getNetworkTransport } from '../network'
 import {
-  appendAnonymousMessage,
-  listAnonymousMessages,
-  replaceAnonymousMessage
-} from './anonymousChatStore'
-import {
   getMaxLamportTs,
   getMessageById,
   insertMessage,
@@ -159,13 +154,7 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
   const incoming = payload?.message
   if (!incoming?.msgId) return
 
-  if (isAnonymousGroup(db, envelope.groupId)) {
-    if (incoming.type !== 'text') return
-    const stored: ChatMessage = { ...incoming, groupId: envelope.groupId, deliveryStatus: 'sent' }
-    appendAnonymousMessage(envelope.groupId, stored)
-    broadcastMessage(stored)
-    return
-  }
+  if (isAnonymousGroup(db, envelope.groupId) && incoming.type !== 'text') return
 
   if (messageExists(db, incoming.msgId)) return
 
@@ -234,10 +223,6 @@ export function listGroupMessages(db: Database, groupId: string): ChatMessagePag
   const transport = getNetworkTransport()
   if (transport) ensureSubscribed(db, transport, groupId)
 
-  if (isAnonymousGroup(db, groupId)) {
-    const messages = listAnonymousMessages(groupId)
-    return { messages, hasMore: false }
-  }
   return listRecentMessagesPage(db, groupId, CHAT_HISTORY_PAGE_SIZE)
 }
 
@@ -249,9 +234,6 @@ export function listOlderGroupMessages(
   const transport = getNetworkTransport()
   if (transport) ensureSubscribed(db, transport, groupId)
 
-  if (isAnonymousGroup(db, groupId)) {
-    return { messages: [], hasMore: false }
-  }
   if (!Number.isFinite(beforeLamportTs) || beforeLamportTs <= 0) {
     return { messages: [], hasMore: false }
   }
@@ -290,9 +272,7 @@ export async function publishChatMessage(
 
   ensureSubscribed(db, transport, groupId)
 
-  const lamportTs = isAnonymousGroup(db, groupId)
-    ? listAnonymousMessages(groupId).length + 1
-    : getMaxLamportTs(db, groupId) + 1
+  const lamportTs = getMaxLamportTs(db, groupId) + 1
   const now = new Date().toISOString()
   const senderUserId = options?.senderOverride?.userId ?? status.user.userId
   const senderDeviceId = options?.senderOverride?.deviceId ?? status.device.deviceId
@@ -308,25 +288,6 @@ export async function publishChatMessage(
     deliveryStatus: 'sending',
     mentions: mentions?.length ? mentions : undefined,
     replyToMsgId: options?.replyToMsgId
-  }
-
-  if (isAnonymousGroup(db, groupId)) {
-    const sending: ChatMessage = { ...msg, deliveryStatus: 'sending' }
-    appendAnonymousMessage(groupId, sending)
-    broadcastMessage(sending)
-
-    try {
-      await runWithPublishRetries(() => transport.publish(buildEnvelope(sending)))
-      const sent: ChatMessage = { ...sending, deliveryStatus: 'sent' }
-      replaceAnonymousMessage(groupId, sent)
-      broadcastMessage(sent)
-      return sent
-    } catch {
-      const failed: ChatMessage = { ...sending, deliveryStatus: 'failed' }
-      replaceAnonymousMessage(groupId, failed)
-      broadcastMessage(failed)
-      return failed
-    }
   }
 
   insertMessage(db, msg)

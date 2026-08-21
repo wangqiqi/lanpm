@@ -15,20 +15,11 @@ import {
 } from '../storage/repositories/groupRepository'
 import { upsertUser } from '../storage/repositories/userRepository'
 import { insertTask, listTasksByGroup } from '../storage/repositories/taskRepository'
-import {
-  deleteAllMessagesInGroup,
-  insertMessage,
-  listMessagesByGroup
-} from '../storage/repositories/messageRepository'
+import { insertMessage, listMessagesByGroup, deleteAllMessagesInGroup } from '../storage/repositories/messageRepository'
 import { getMeta, setMeta } from '../storage/repositories/syncMetaRepository'
 import { createBookmark } from '../file/bookmarkService'
 import { listFilesByGroup } from '../storage/repositories/fileRepository'
-import {
-  appendAnonymousMessage,
-  clearAnonymousSession,
-  hasAnonymousSession,
-  listAnonymousMessages
-} from '../chat/anonymousChatStore'
+import { hasAnonymousSession } from '../chat/anonymousChatStore'
 import {
   MOCK_ANONYMOUS_MESSAGES,
   MOCK_CATALOG_META_KEY,
@@ -288,8 +279,8 @@ function seedBookmarks(
   }
 }
 
-function seedAnonymousMessages(groupId: string, deviceId: string, ownerId: string): void {
-  if (hasAnonymousSession(groupId) && listAnonymousMessages(groupId).length > 0) return
+function seedAnonymousMessages(db: Database, groupId: string, deviceId: string, ownerId: string): void {
+  if (hasAnonymousSession(db, groupId)) return
   let lamport = 1
   for (const def of MOCK_ANONYMOUS_MESSAGES) {
     const msg: ChatMessage = {
@@ -303,7 +294,7 @@ function seedAnonymousMessages(groupId: string, deviceId: string, ownerId: strin
       createdAt: isoMinutesAgo(def.minutesAgo),
       deliveryStatus: 'sent'
     }
-    appendAnonymousMessage(groupId, msg)
+    insertMessage(db, msg)
   }
 }
 
@@ -324,7 +315,7 @@ function seedGroupContent(db: Database, groupId: string, type: string, ownerId: 
     return
   }
   if (type === 'anonymous') {
-    seedAnonymousMessages(groupId, deviceId, ownerId)
+    seedAnonymousMessages(db, groupId, deviceId, ownerId)
   }
 }
 
@@ -349,9 +340,6 @@ export function purgeMockCatalog(db: Database): void {
   for (const mock of MOCK_GROUPS) {
     if (!getGroupById(db, mock.groupId)) continue
     wipeMockGroupContent(db, mock.groupId, mock.type)
-    if (mock.type === 'anonymous') {
-      clearAnonymousSession(mock.groupId)
-    }
     deleteGroupCascade(db, mock.groupId)
   }
   setMeta(db, MOCK_CATALOG_META_KEY, 'purged')
@@ -377,9 +365,6 @@ export function ensureMockCatalog(db: Database): void {
     ensureMockGroupShell(db, mock.groupId, mock.name, mock.type, ownerId)
     if (reseed) {
       wipeMockGroupContent(db, mock.groupId, mock.type)
-      if (mock.type === 'anonymous') {
-        clearAnonymousSession(mock.groupId)
-      }
     }
     seedGroupContent(db, mock.groupId, mock.type, ownerId, deviceId)
   }

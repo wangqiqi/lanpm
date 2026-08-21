@@ -37,7 +37,6 @@ import {
 } from '../storage/repositories/taskDependencyRepository'
 import { publishChatMessage, sendTaskRefMessage } from '../chat/chatService'
 import { broadcastMessage } from '../chat/chatBroadcast'
-import { replaceAnonymousMessage } from '../chat/anonymousChatStore'
 import { toRecalledMessage } from '../../shared/chat/recall'
 import type { DeleteTaskMode } from '../../shared/task/deleteMode'
 import { shouldCompensateCreateTaskFromChat } from '../../shared/task/createFromChatCompensation'
@@ -45,7 +44,6 @@ import { publishTaskDelete, publishTaskDepDelete, publishTaskDepUpsert, publishT
 import { mirrorTaskToCrdt } from './taskCrdtService'
 import { broadcastToAllWindows } from '../utils/broadcast'
 import { updateMessage, listMessagesForTaskDiscussion } from '../storage/repositories/messageRepository'
-import { isAnonymousGroupType } from '../../shared/group/guards'
 import { collectTaskDiscussions, type TaskDiscussionItem } from '../../shared/task/discussions'
 import type {
   ChecklistItem,
@@ -357,11 +355,7 @@ function compensateCreateTaskFromChat(
   const status = getSetupStatus(db)
   const recalledBy = status.user?.userId ?? message.senderUserId
   const recalled = toRecalledMessage(message, recalledBy, now)
-  if (isAnonymousGroupType(resolveGroupType(db, task.groupId))) {
-    replaceAnonymousMessage(task.groupId, recalled)
-  } else {
-    updateMessage(db, recalled)
-  }
+  updateMessage(db, recalled)
   broadcastMessage(recalled)
 }
 
