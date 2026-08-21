@@ -6,6 +6,7 @@ import MeetingStub from './builtins/MeetingStub'
 import OpsStub from './builtins/OpsStub'
 import MindmapSlot from './builtins/MindmapSlot'
 import AiAssistantStub from './builtins/AiAssistantStub'
+import ScheduleStub from './builtins/ScheduleStub'
 
 export type PluginSlotComponentProps = {
   plugin: PluginView
@@ -20,7 +21,8 @@ const REGISTRY: Record<string, ComponentType<PluginSlotComponentProps>> = {
   'lanpm.meeting': MeetingStub,
   'lanpm.ops': OpsStub,
   'lanpm.mindmap': MindmapSlot,
-  'lanpm.ai-assistant': AiAssistantStub
+  'lanpm.ai-assistant': AiAssistantStub,
+  'lanpm.schedule': ScheduleStub
 }
 
 export function resolvePluginComponent(

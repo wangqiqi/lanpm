@@ -19,6 +19,8 @@ describe('defaultPluginEnabled', () => {
   it('keeps meeting plugin off by default', () => {
     expect(defaultPluginEnabled('lanpm.meeting')).toBe(false)
     expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.meeting')).toBe(false)
+    expect(defaultPluginEnabled('lanpm.schedule')).toBe(false)
+    expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.schedule')).toBe(false)
   })
 
   it('denies unknown plugins by default', () => {

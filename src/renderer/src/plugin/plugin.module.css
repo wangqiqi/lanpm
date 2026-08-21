@@ -311,3 +311,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.scheduleToolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+}
