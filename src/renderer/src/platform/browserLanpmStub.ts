@@ -44,6 +44,7 @@ import {
   validateTaskDateRange,
   validateTaskTitle
 } from '@shared/task/validation'
+import { resolveStoryPointsPatch } from '@shared/task/storyPoints'
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
@@ -844,6 +845,7 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
       input.progressPercent !== undefined
         ? clampProgressPercent(input.progressPercent)
         : existing.progressPercent,
+    storyPoints: resolveStoryPointsPatch(input.storyPoints, existing.storyPoints),
     parentTaskId:
       input.parentTaskId === null
         ? undefined

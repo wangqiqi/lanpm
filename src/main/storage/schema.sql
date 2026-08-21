@@ -92,6 +92,7 @@ CREATE TABLE tasks (
   source_msg_id TEXT,
   linked_file_ids_json TEXT NOT NULL DEFAULT '[]',
   progress_percent INTEGER NOT NULL DEFAULT 0,
+  story_points INTEGER,
   start_date TEXT,
   end_date TEXT,
   milestone INTEGER NOT NULL DEFAULT 0,

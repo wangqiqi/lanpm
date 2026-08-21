@@ -13,6 +13,7 @@ import {
   validateTaskDateRange,
   validateTaskTitle
 } from '../../shared/task/validation'
+import { resolveStoryPointsPatch } from '../../shared/task/storyPoints'
 import { filterTagsToGroupDict } from '../../shared/task/tags'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
@@ -265,6 +266,9 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
     ...(input.title !== undefined ? { title: normalizeTaskTitle(input.title) } : {}),
     ...(input.progressPercent !== undefined
       ? { progressPercent: clampProgressPercent(input.progressPercent) }
+      : {}),
+    ...(input.storyPoints !== undefined
+      ? { storyPoints: resolveStoryPointsPatch(input.storyPoints, existing.storyPoints) }
       : {}),
     ...(input.tags !== undefined
       ? { tags: dictFilteredTags(db, existing.groupId, input.tags) }

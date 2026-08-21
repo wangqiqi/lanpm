@@ -384,6 +384,13 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       `)
       db.exec(`CREATE INDEX idx_mindmap_crdt_docs_group ON mindmap_crdt_docs(group_id)`)
     }
+  },
+  {
+    fromVersion: 18,
+    description: 'tasks.story_points for paid agile SKU (SPRINT-56 TASK-5603)',
+    up: (db) => {
+      db.exec(`ALTER TABLE tasks ADD COLUMN story_points INTEGER`)
+    }
   }
 ]
 

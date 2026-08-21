@@ -82,7 +82,7 @@ assert.match(view, /@mizuka-wu\/y-excalidraw/)
 assert.match(view, /onPointerUpdate/)
 
 const schemaTs = readFileSync(join(root, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*18/)
+assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*19/)
 assert.match(schemaTs, /whiteboard_crdt_docs/)
 
 const types = readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8')

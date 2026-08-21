@@ -4,6 +4,7 @@ import { filterTagsToGroupDict, normalizeTaskTags } from '../../../shared/task/t
 import { normalizeLinkedFileIds } from '../../../shared/task/linkedFiles.ts'
 import { listGroupTagMeta } from './groupTagMetaRepository.ts'
 import { clampProgressPercent } from '../../../shared/task/validation.ts'
+import { parseStoryPoints, resolveStoryPointsPatch } from '../../../shared/task/storyPoints.ts'
 import { lwwShouldApply } from '../../../shared/sync/lww.ts'
 import { getMeta } from './syncMetaRepository.ts'
 
@@ -21,6 +22,7 @@ interface TaskRow {
   source_msg_id?: string | null
   linked_file_ids_json?: string | null
   progress_percent: number
+  story_points?: number | null
   start_date: string | null
   end_date: string | null
   milestone: number
@@ -91,6 +93,7 @@ function rowToTask(row: TaskRow): Task {
     sourceMsgId: row.source_msg_id ?? undefined,
     linkedFileIds: parseLinkedFileIdsJson(row.linked_file_ids_json),
     progressPercent: clampProgressPercent(row.progress_percent),
+    storyPoints: parseStoryPoints(row.story_points),
     startDate: row.start_date ?? undefined,
     endDate: row.end_date ?? undefined,
     milestone: row.milestone === 1,
@@ -211,13 +214,13 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
       task_id, group_id, parent_task_id, title, description,
       status, other_reason, priority, assignee_user_id, tags_json,
       source_msg_id, linked_file_ids_json,
-      progress_percent, start_date, end_date, milestone, sort_order,
+      progress_percent, story_points, start_date, end_date, milestone, sort_order,
       created_by, created_at, updated_at, deleted_at, last_writer_device_id
     ) VALUES (
       @taskId, @groupId, @parentTaskId, @title, @description,
       @status, @otherReason, @priority, @assigneeUserId, @tagsJson,
       @sourceMsgId, @linkedFileIdsJson,
-      @progressPercent, @startDate, @endDate, @milestone, @sortOrder,
+      @progressPercent, @storyPoints, @startDate, @endDate, @milestone, @sortOrder,
       @createdBy, @createdAt, @updatedAt, @deletedAt, @lastWriterDeviceId
     )`
   ).run({
@@ -234,6 +237,7 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
     sourceMsgId: task.sourceMsgId ?? null,
     linkedFileIdsJson: linkedFileIdsToJson(linked.length > 0 ? linked : undefined),
     progressPercent: clampProgressPercent(task.progressPercent),
+    storyPoints: parseStoryPoints(task.storyPoints) ?? null,
     startDate: task.startDate ?? null,
     endDate: task.endDate ?? null,
     milestone: task.milestone ? 1 : 0,
@@ -287,6 +291,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       input.progressPercent !== undefined
         ? clampProgressPercent(input.progressPercent)
         : existing.progressPercent,
+    storyPoints: resolveStoryPointsPatch(input.storyPoints, existing.storyPoints),
     parentTaskId:
       input.parentTaskId === null
         ? undefined
@@ -332,6 +337,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       source_msg_id = @sourceMsgId,
       linked_file_ids_json = @linkedFileIdsJson,
       progress_percent = @progressPercent,
+      story_points = @storyPoints,
       parent_task_id = @parentTaskId,
       sort_order = @sortOrder,
       start_date = @startDate,
@@ -352,6 +358,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
     sourceMsgId: next.sourceMsgId ?? null,
     linkedFileIdsJson: linkedFileIdsToJson(next.linkedFileIds),
     progressPercent: next.progressPercent,
+    storyPoints: next.storyPoints ?? null,
     parentTaskId: next.parentTaskId ?? null,
     sortOrder: next.sortOrder,
     startDate: next.startDate ?? null,

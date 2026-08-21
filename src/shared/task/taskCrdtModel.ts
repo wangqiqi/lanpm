@@ -5,6 +5,7 @@
 import * as Y from 'yjs'
 import type { Task } from './types.ts'
 import { normalizeTaskTags } from './tags.ts'
+import { parseStoryPoints } from './storyPoints.ts'
 import { normalizeLinkedFileIds } from './linkedFiles.ts'
 
 export const TASK_CRDT_TASKS_KEY = 'tasks'
@@ -24,6 +25,7 @@ export const TASK_CRDT_FIELD_KEYS = [
   'sourceMsgId',
   'linkedFileIds',
   'progressPercent',
+  'storyPoints',
   'startDate',
   'endDate',
   'milestone',
@@ -58,6 +60,7 @@ export function applyTaskToDoc(doc: Y.Doc, task: Task): void {
   row.set('status', task.status)
   row.set('priority', task.priority)
   row.set('progressPercent', task.progressPercent)
+  setOptional(row, 'storyPoints', task.storyPoints)
   row.set('sortOrder', task.sortOrder)
   row.set('createdBy', task.createdBy)
   row.set('createdAt', task.createdAt)
@@ -164,6 +167,7 @@ export function taskFromYMap(map: Y.Map<unknown>): Task | null {
     status: status as Task['status'],
     priority: priority as Task['priority'],
     progressPercent,
+    storyPoints: parseStoryPoints(map.get('storyPoints')),
     sortOrder,
     createdBy,
     createdAt,

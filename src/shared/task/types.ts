@@ -21,6 +21,8 @@ export interface Task {
   /** 挂到任务的群文件 id 列表（A2） */
   linkedFileIds?: string[]
   progressPercent: number
+  /** Optional story points (1–99); omit = unestimated (paid agile SKU) */
+  storyPoints?: number
   startDate?: string
   endDate?: string
   milestone?: boolean
@@ -61,6 +63,8 @@ export interface UpdateTaskInput {
   /** Set to replace; omit unchanged; `[]` clears */
   linkedFileIds?: string[]
   progressPercent?: number
+  /** Set to replace; `null` clears */
+  storyPoints?: number | null
   parentTaskId?: string | null
   sortOrder?: number
   startDate?: string | null
