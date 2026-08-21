@@ -1,6 +1,6 @@
 import type { Task } from './types.ts'
 
-/** Distinct from baseline slip `#c2410c` and ahead `#0d9488`. */
+/** Distinct from baseline slip (orange) and ahead (teal). */
 export const SCHEDULE_OVERLAP_COLOR = '#7c3aed'
 
 export type YmdRange = {

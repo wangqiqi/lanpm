@@ -26,6 +26,9 @@ assert.match(stub, /computeCriticalPath/)
 assert.match(stub, /schedule-freeze-baseline/)
 assert.match(stub, /freezeScheduleBaseline/)
 assert.match(stub, /getScheduleBaseline/)
+assert.match(stub, /schedule-assignee-overlap/)
+assert.match(stub, /findAssigneeOverlapTaskIds/)
+assert.match(stub, /countAssigneeOverlapTasks/)
 
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /assertPaidPluginLicensed/)
@@ -41,7 +44,10 @@ assert.match(gantt, /PluginZoneHost/)
 assert.match(gantt, /view: 'gantt'/)
 assert.match(gantt, /subscribeScheduleCriticalPath/)
 assert.match(gantt, /subscribeScheduleBaseline/)
+assert.match(gantt, /subscribeScheduleOverlap/)
+assert.match(gantt, /barStylesForAssigneeOverlap/)
 assert.match(gantt, /data-schedule-baseline/)
+assert.match(gantt, /data-schedule-overlap/)
 
 const service = readFileSync(join(root, 'src/main/task/scheduleBaselineService.ts'), 'utf8')
 assert.match(service, /assertPaidPluginLicensed\('lanpm\.schedule'/)
@@ -65,6 +71,20 @@ assert.match(cp, /computeCriticalPath/)
 assert.match(cp, /emptyReason: 'cycle'/)
 assert.match(cp, /DEP_TYPES/)
 assert.doesNotMatch(cp, /dep\.type !== ['"]FS['"]/)
+
+const overlap = readFileSync(join(root, 'src/shared/task/assigneeOverlap.ts'), 'utf8')
+assert.match(overlap, /findAssigneeOverlapTaskIds/)
+assert.match(overlap, /hasExplicitYmdSchedule/)
+assert.match(overlap, /SCHEDULE_OVERLAP_COLOR = '#7c3aed'/)
+assert.doesNotMatch(overlap, /defaultScheduleForTask/)
+assert.doesNotMatch(overlap, /SCHEDULE_OVERLAP_COLOR = '#c2410c'/)
+
+const overlapBridge = readFileSync(
+  join(root, 'src/renderer/src/plugin/scheduleOverlapBridge.ts'),
+  'utf8'
+)
+assert.match(overlapBridge, /publishScheduleOverlap/)
+assert.match(overlapBridge, /subscribeScheduleOverlap/)
 
 const docs07 = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs07, /lanpm\.schedule/)
