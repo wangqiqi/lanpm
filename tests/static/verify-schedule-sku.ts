@@ -21,7 +21,9 @@ const stub = readFileSync(join(root, 'src/renderer/src/plugin/builtins/ScheduleS
 assert.match(stub, /isPluginLicenseActive/)
 assert.match(stub, /schedule-license-cta/)
 assert.match(stub, /openProfileTab/)
-assert.ok(!stub.includes('invokeCapability'), 'toolbar must not invoke capabilities before license UI')
+assert.match(stub, /schedule-critical-path-switch/)
+assert.match(stub, /computeFsCriticalPath/)
+assert.match(stub, /invokeCapability/)
 
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /assertPaidPluginLicensed/)
@@ -35,9 +37,19 @@ assert.match(registry, /lanpm\.schedule.*ScheduleStub/)
 const gantt = readFileSync(join(root, 'src/renderer/src/features/gantt/GanttView.tsx'), 'utf8')
 assert.match(gantt, /PluginZoneHost/)
 assert.match(gantt, /view: 'gantt'/)
+assert.match(gantt, /subscribeScheduleCriticalPath/)
+
+const cp = readFileSync(join(root, 'src/shared/task/criticalPath.ts'), 'utf8')
+assert.match(cp, /computeFsCriticalPath/)
+assert.match(cp, /emptyReason: 'cycle'/)
 
 const docs07 = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs07, /lanpm\.schedule/)
+
+const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(docs06, /lanpm\.schedule/)
+assert.match(docs06, /SPRINT-54/)
+assert.match(docs06, /仍永不插件化拆卖/)
 
 const enabled = readFileSync(join(root, 'src/shared/plugin/enabledDefaults.ts'), 'utf8')
 assert.ok(!enabled.includes("'lanpm.schedule'"), 'paid schedule must not default-enable')

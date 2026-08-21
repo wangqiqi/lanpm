@@ -7,6 +7,7 @@
 - **高级排程许可闸**：甘特工具条无许可证显示 CTA；`task.list` 等能力仍走 Host `assertPaidPluginLicensed`（`TASK-5402`）
 - **FS 关键路径**：纯函数按已有 FS 依赖算最长工期链；环/无日期/无 FS 返回空（`TASK-5403`）
 - **甘特关键路径开关**：授权后工具条 Switch；高亮用 accent 令牌，空链/成环有提示（`TASK-5404`）
+- **排程 SKU 口径**：`docs/06` §6.3 第二波标排程薄切片已交付；核心甘特仍不拆卖（`TASK-5405`）
 - **匿名群本机历史**：匿名群文本消息写入 SQLite（召回/编辑同路径）；离线 `chat_sync` 仍跳过，不从对端补历史（`TASK-5202`）
 - **匿名群退出再进**：leave/enter 不再清空本机消息；解散仍 cascade 删除；提示文案与 docs/01·03·06 对齐（`TASK-5203`）
 - **会议旁路运维**：`docs/07` 会议节增加本机/内网 LiveKit 最短步骤，指向 `plugins/lanpm.meeting/deploy/docker-compose.yml`（`TASK-5103`）
