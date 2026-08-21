@@ -12,6 +12,7 @@ export type PluginSlotId =
   | 'task.detail.section'
   | 'topbar.menu'
   | 'profile.tab'
+  | 'profile.data.backup'
   | 'group.tab.overflow'
   | 'chat.toolbar.media'
   | 'chat.composer.action'
@@ -105,6 +106,7 @@ export const PLUGIN_SLOT_IDS: readonly PluginSlotId[] = [
   'task.detail.section',
   'topbar.menu',
   'profile.tab',
+  'profile.data.backup',
   'group.tab.overflow',
   'chat.toolbar.media',
   'chat.composer.action',

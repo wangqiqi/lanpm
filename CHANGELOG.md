@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **备份插件 manifest**：官方免费插件 `lanpm.backup`（Slot `profile.data.backup`）（`TASK-6301`）
+
 ## [1.106.2] - 2026-08-21
 
 ### Changed

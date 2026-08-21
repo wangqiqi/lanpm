@@ -10,6 +10,20 @@ import {
 } from '@shared/plugin/validateManifest'
 
 describe('parsePluginManifest', () => {
+  it('accepts free backup slot profile.data.backup', () => {
+    const m = parsePluginManifest({
+      id: 'lanpm.backup',
+      name: 'Group Backup',
+      version: '0.1.0',
+      slots: ['profile.data.backup'],
+      capabilities: ['group.get'],
+      pricing: 'free'
+    })
+    expect(m?.id).toBe('lanpm.backup')
+    expect(m?.pricing).toBe('free')
+    expect(m?.slots).toEqual(['profile.data.backup'])
+  })
+
   it('accepts valid free stub', () => {
     const m = parsePluginManifest({
       id: 'lanpm.example',
