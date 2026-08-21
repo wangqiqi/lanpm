@@ -18,6 +18,11 @@ import { groupViewPath } from '@renderer/routes/paths'
 import type { TaskDependencyType } from '@shared/task/dependency'
 import { tasksToGanttBars, ganttDatesToYmd, defaultScheduleForTask } from '@shared/task/ganttAdapter'
 import type { Task } from '@shared/task/types'
+import {
+  barStylesForBaselineVariance,
+  compareScheduleToBaseline,
+  type ScheduleBaselineSnapshot
+} from '@shared/task/scheduleBaseline'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { patchGanttCalendarLabels } from './ganttCalendarLabels'
@@ -55,6 +60,7 @@ import { scrollGanttChartToDateCentered, scrollGanttChartToTask } from './ganttS
 import { evaluateTaskSchedule, scheduleHealthHintKey } from '@renderer/features/task/scheduleHealthUi'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { subscribeScheduleCriticalPath } from '@renderer/plugin/scheduleCriticalPathBridge'
+import { subscribeScheduleBaseline } from '@renderer/plugin/scheduleBaselineBridge'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
@@ -93,6 +99,7 @@ export default function GanttView(): React.ReactElement {
   const [scheduleSaving, setScheduleSaving] = useState(false)
   const [contextTaskId, setContextTaskId] = useState<string | null>(null)
   const [criticalPathIds, setCriticalPathIds] = useState<Set<string>>(() => new Set())
+  const [baselineSnap, setBaselineSnap] = useState<ScheduleBaselineSnapshot | null>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const suppressClickRef = useRef(false)
   const themeMode = useUiStore((s) => s.theme)
@@ -150,24 +157,54 @@ export default function GanttView(): React.ReactElement {
     })
   }, [gid])
 
+  useEffect(() => {
+    return subscribeScheduleBaseline((detail) => {
+      if (detail.groupId !== gid) return
+      setBaselineSnap(detail.snapshot)
+    })
+  }, [gid])
+
+  const baselineByTask = useMemo(() => {
+    const map = new Map<string, { startDate: string; endDate: string }>()
+    for (const row of baselineSnap?.tasks ?? []) {
+      map.set(row.taskId, { startDate: row.startDate, endDate: row.endDate })
+    }
+    return map
+  }, [baselineSnap])
+
   const ganttTasks = useMemo(() => {
     const allDeps = tasks.flatMap((t) => t.dependencies ?? [])
     const bars = tasksToGanttBars(tasks, allDeps)
-    if (criticalPathIds.size === 0) return bars
     return bars.map((bar) => {
-      if (!criticalPathIds.has(bar.id)) return bar
-      return {
-        ...bar,
-        styles: {
-          ...bar.styles,
-          backgroundColor: ganttBarColors.barBackgroundColor,
-          backgroundSelectedColor: ganttBarColors.barBackgroundSelectedColor,
-          progressColor: ganttBarColors.barProgressColor,
-          progressSelectedColor: ganttBarColors.barProgressSelectedColor
+      let next = bar
+      if (criticalPathIds.has(bar.id)) {
+        next = {
+          ...next,
+          styles: {
+            ...next.styles,
+            backgroundColor: ganttBarColors.barBackgroundColor,
+            backgroundSelectedColor: ganttBarColors.barBackgroundSelectedColor,
+            progressColor: ganttBarColors.barProgressColor,
+            progressSelectedColor: ganttBarColors.barProgressSelectedColor
+          }
+        }
+      } else if (baselineByTask.size > 0) {
+        const task = tasks.find((item) => item.taskId === bar.id)
+        const current = task ? defaultScheduleForTask(task) : undefined
+        const variance = compareScheduleToBaseline(
+          current ?? { startDate: '', endDate: '' },
+          baselineByTask.has(bar.id)
+            ? { taskId: bar.id, ...baselineByTask.get(bar.id)! }
+            : undefined
+        )
+        next = {
+          ...next,
+          styles: barStylesForBaselineVariance(next.styles, variance)
         }
       }
+      return next
     })
-  }, [tasks, criticalPathIds, ganttBarColors])
+  }, [tasks, criticalPathIds, ganttBarColors, baselineByTask])
 
   const ganttReady = !loading && ganttTasks.length > 0
   const { highlightId } = useSearchHighlight('task', ganttReady)
@@ -472,6 +509,7 @@ export default function GanttView(): React.ReactElement {
             data-testid="gantt-chart-scroll"
             data-lanpm-visual="gantt-chart"
             data-critical-path={criticalPathIds.size > 0 ? 'on' : 'off'}
+            data-schedule-baseline={baselineSnap?.frozenAt ? 'on' : 'off'}
           >
             <Gantt
             key={locale}
