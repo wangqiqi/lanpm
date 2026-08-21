@@ -3,7 +3,14 @@ import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
 
 const { Text } = Typography
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import { FilePdfOutlined, PlusOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons'
+import {
+  FilePdfOutlined,
+  FileTextOutlined,
+  PlusOutlined,
+  TableOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined
+} from '@ant-design/icons'
 import { Gantt, ViewMode, type Task as GanttTask } from 'gantt-task-react'
 import 'gantt-task-react/dist/index.css'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -15,6 +22,7 @@ import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { patchGanttCalendarLabels } from './ganttCalendarLabels'
 import { exportGanttChart, captureGanttPngBlob } from './ganttExport'
+import { exportGanttTaskTable } from './ganttTableDownload'
 import ViewExportShareActions from '@renderer/components/view/ViewExportShareActions'
 import { sharePngToGroupChat } from '@renderer/lib/exportShare'
 import { computeGanttTimelineDates } from '@shared/task/ganttTimeline'
@@ -313,6 +321,17 @@ export default function GanttView(): React.ReactElement {
     }
   }
 
+  const exportTable = (format: 'md' | 'csv'): void => {
+    try {
+      const stamp = new Date().toISOString().slice(0, 10)
+      const base = `gantt-${gid || 'group'}-${stamp}`
+      exportGanttTaskTable(tasks, format, base, `Gantt ${gid || 'group'} ${stamp}`)
+      message.success(format === 'md' ? t('gantt.exportMdDone') : t('gantt.exportCsvDone'))
+    } catch (err) {
+      message.error(formatError(err, 'gantt.exportFailed'))
+    }
+  }
+
   const exportChart = async (format: 'png' | 'pdf'): Promise<void> => {
     const el = chartRef.current
     if (!el) return
@@ -397,6 +416,20 @@ export default function GanttView(): React.ReactElement {
               onClick={() => void exportChart('pdf')}
             >
               {t('gantt.exportPdf')}
+            </Button>
+            <Button
+              icon={<FileTextOutlined />}
+              disabled={tasks.length === 0}
+              onClick={() => exportTable('md')}
+            >
+              {t('gantt.exportMd')}
+            </Button>
+            <Button
+              icon={<TableOutlined />}
+              disabled={tasks.length === 0}
+              onClick={() => exportTable('csv')}
+            >
+              {t('gantt.exportCsv')}
             </Button>
             <ViewExportShareActions
               onDownload={() => void exportChart('png')}
