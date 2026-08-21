@@ -492,6 +492,19 @@ const STUB_PLUGINS: PluginView[] = [
         }
       ]
     }
+  },
+  {
+    id: 'lanpm.weekly',
+    name: 'LanPM Weekly',
+    version: '0.1.0',
+    slots: ['topbar.menu'],
+    capabilities: ['license.feature'],
+    pricing: 'paid',
+    enabled: false,
+    dirName: 'lanpm.weekly',
+    source: 'builtin',
+    signatureValid: true,
+    licensed: false
   }
 ]
 
@@ -1952,18 +1965,28 @@ export function createBrowserLanpmStub(): LanpmApi {
           }
         ]
       }),
-      generateWeeklyReport: async () => ({
-        format: 'markdown' as const,
-        content: '# Stub 周报',
-        generatedAt: new Date().toISOString(),
-        usedExternalAi: false
-      }),
-      generateMonthlyReport: async () => ({
-        format: 'markdown' as const,
-        content: '# Stub 月报',
-        generatedAt: new Date().toISOString(),
-        usedExternalAi: false
-      }),
+      generateWeeklyReport: async () => {
+        if (!isStubPluginLicensed('lanpm.weekly')) {
+          throw new Error('license required for paid plugin: lanpm.weekly')
+        }
+        return {
+          format: 'markdown' as const,
+          content: '# Stub 周报',
+          generatedAt: new Date().toISOString(),
+          usedExternalAi: false
+        }
+      },
+      generateMonthlyReport: async () => {
+        if (!isStubPluginLicensed('lanpm.weekly')) {
+          throw new Error('license required for paid plugin: lanpm.weekly')
+        }
+        return {
+          format: 'markdown' as const,
+          content: '# Stub 月报',
+          generatedAt: new Date().toISOString(),
+          usedExternalAi: false
+        }
+      },
       evaluateProjects: async () => ({
         format: 'markdown' as const,
         content: '# Stub 评估',

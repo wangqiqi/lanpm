@@ -20,6 +20,16 @@ assert.ok(parsed?.capabilities.includes('license.feature'))
 const stub = readFileSync(join(root, 'src/renderer/src/plugin/builtins/WeeklyStub.tsx'), 'utf8')
 assert.match(stub, /lanpm\.weekly/)
 
+const cockpit = readFileSync(join(root, 'src/main/cockpit/cockpitService.ts'), 'utf8')
+assert.match(cockpit, /assertPaidPluginLicensed\('lanpm\.weekly'/)
+assert.ok(
+  cockpit.includes('export async function evaluateProjects') &&
+    !cockpit
+      .slice(cockpit.indexOf('export async function evaluateProjects'))
+      .includes("assertPaidPluginLicensed('lanpm.weekly'"),
+  'evaluateProjects must stay ungated'
+)
+
 const registry = readFileSync(join(root, 'src/renderer/src/plugin/registry.ts'), 'utf8')
 assert.match(registry, /lanpm\.weekly.*WeeklyStub/)
 

@@ -17,6 +17,7 @@ import { listProjectGroups } from '../storage/repositories/groupRepository'
 import { listProjectTasksWithAssigneeMeta, listTasksByGroup } from '../storage/repositories/taskRepository'
 import { getAiConfig, getDecryptedApiKey } from '../ai/aiConfigService'
 import { isExternalAiAvailable } from '../ai/aiEndpointProbeService'
+import { assertPaidPluginLicensed } from '../plugin/licenseStore.ts'
 
 function projectHealthFromTasks(open: Task[]): ProjectHealth {
   if (open.some((t) => getTaskScheduleHealth(t) === 'overdue')) return 'delayed'
@@ -189,6 +190,7 @@ async function callExternalAi(db: Database, prompt: string): Promise<string | nu
 }
 
 export async function generateWeeklyReport(db: Database): Promise<AiReportResult> {
+  assertPaidPluginLicensed('lanpm.weekly', 'paid')
   const local = localWeeklyMarkdown(db)
   const ai = await callExternalAi(
     db,
@@ -203,6 +205,7 @@ export async function generateWeeklyReport(db: Database): Promise<AiReportResult
 }
 
 export async function generateMonthlyReport(db: Database): Promise<AiReportResult> {
+  assertPaidPluginLicensed('lanpm.weekly', 'paid')
   const local = localMonthlyMarkdown(db)
   const ai = await callExternalAi(
     db,
