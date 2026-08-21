@@ -469,6 +469,7 @@ export default function GanttView(): React.ReactElement {
           <div
             ref={chartRef}
             className={styles.chartInner}
+            data-testid="gantt-chart-scroll"
             data-lanpm-visual="gantt-chart"
             data-critical-path={criticalPathIds.size > 0 ? 'on' : 'off'}
           >

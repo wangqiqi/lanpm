@@ -1120,7 +1120,12 @@ export default function ChatView(): React.ReactElement {
         />
         <div className={styles.chatStreamColumn}>
         <div className={styles.messagesWrap}>
-        <div className={styles.messages} ref={listRef} onScroll={handleMessagesScroll}>
+        <div
+          className={styles.messages}
+          ref={listRef}
+          onScroll={handleMessagesScroll}
+          data-testid="chat-message-list"
+        >
           {loading && messages.length === 0 ? (
             <ViewLoadingCenter />
           ) : loadError && messages.length === 0 ? (

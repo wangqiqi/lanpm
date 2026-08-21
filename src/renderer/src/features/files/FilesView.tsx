@@ -1269,7 +1269,7 @@ export default function FilesView(): React.ReactElement {
         bodyClassName={isNarrow ? `${styles.body} ${styles.bodyNarrow}` : styles.body}
         data-testid="files-island-surface"
       >
-        <div className={styles.listPane}>
+        <div className={styles.listPane} data-testid="files-table-scroll">
           {loading && files.length === 0 ? (
             <ViewLoadingCenter />
           ) : (

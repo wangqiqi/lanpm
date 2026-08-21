@@ -211,6 +211,7 @@ function KanbanColumn({
         }
         className={`${styles.columnPanel} ${isOver ? (invalid ? styles.columnInvalid : styles.columnOver) : ''}`}
         bodyClassName={styles.columnBody}
+        bodyTestId="board-column-scroll"
       >
         {columnCards}
       </IslandPanel>

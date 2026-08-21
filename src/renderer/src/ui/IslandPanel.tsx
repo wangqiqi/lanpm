@@ -19,6 +19,8 @@ export interface IslandPanelProps {
   expanded?: boolean
   onExpandedChange?: (expanded: boolean) => void
   'data-testid'?: string
+  /** Scroll / measure target on the panel body (not the chrome) */
+  bodyTestId?: string
 }
 
 /** Island-style accordion panel (Cockpit · Board · Calendar/Tree surface) */
@@ -36,7 +38,8 @@ export default function IslandPanel({
   defaultCollapsed,
   expanded: expandedControlled,
   onExpandedChange,
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  bodyTestId
 }: IslandPanelProps): React.ReactElement {
   const regionId = useId()
   const collapsible =
@@ -96,10 +99,16 @@ export default function IslandPanel({
           {!expanded && summary != null ? (
             <div className={styles.panelSummary}>{summary}</div>
           ) : null}
-          {expanded ? <div className={bodyClass}>{children}</div> : null}
+          {expanded ? (
+            <div className={bodyClass} data-testid={bodyTestId}>
+              {children}
+            </div>
+          ) : null}
         </div>
       ) : (
-        <div className={bodyClass}>{children}</div>
+        <div className={bodyClass} data-testid={bodyTestId}>
+          {children}
+        </div>
       )}
     </section>
   )

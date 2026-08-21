@@ -29,6 +29,7 @@
     "verify:pdf-preview": "node --experimental-strip-types tests/static/verify-pdf-preview.ts",
     "verify:office-preview": "node --experimental-strip-types tests/static/verify-office-preview.ts",
     "verify:gantt-table-export": "node --experimental-strip-types tests/static/verify-gantt-table-export.ts",
+    "verify:list-scroll-seed": "node --experimental-strip-types tests/static/verify-list-scroll-seed.ts",
     "verify:emoji-mart": "node --experimental-strip-types tests/static/verify-emoji-mart.ts",
     "verify:anonymous-persist": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-anonymous-persist.ts",
     "verify:format-file-type": "node --experimental-strip-types tests/static/verify-format-file-type.ts",
