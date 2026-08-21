@@ -191,10 +191,10 @@
 | 批次 | 内容 | 收费 |
 |------|------|------|
 | **第一波** | 日历 + 白板 + 基础验收 + 核心三角（任务↔聊↔文件） | **免费** |
-| **第二波** | 高级排程（**薄切片已交付**：`lanpm.schedule` · FS/SS/FF/SF 关键路径 · **按群冻结基线** · **指派日期重叠** · `verify:schedule-sku` · **资源平衡仍后置**（容量 leveling / 自动平衡））、敏捷包（**薄切片已交付**：`lanpm.agile` · 故事点 · **按日剩余燃尽** · **列 WIP 上限** · `verify:agile-sku` · **迭代容器仍后置**）、AI 周报（**薄切片已交付**：`lanpm.weekly` · 周报「下周计划」+ **月报独立模板** · SPRINT-57 许可闸 · SPRINT-64 模板 · `verify:weekly-sku`） | **可购** |
+| **第二波** | 高级排程（**薄切片已交付**：`lanpm.schedule` · FS/SS/FF/SF 关键路径 · **按群冻结基线** · **指派日期重叠** · `verify:schedule-sku` · **资源平衡仍后置**（容量 leveling / 自动平衡））、敏捷包（**薄切片已交付**：`lanpm.agile` · 故事点 · **按日剩余燃尽** · **列 WIP 上限** · **迭代容器** · `verify:agile-sku` · **速度图 / carry-over 仍后置**）、AI 周报（**薄切片已交付**：`lanpm.weekly` · 周报「下周计划」+ **月报独立模板** · SPRINT-57 许可闸 · SPRINT-64 模板 · `verify:weekly-sku`） | **可购** |
 | **第三波** | 完整会议 SFU、思维导图、知识库增强等 | **可购**为主 |
 
-已交付第一波见 `CHANGELOG`；第二波排程见 SPRINT-54（壳）· SPRINT-62（四类依赖关键路径）· SPRINT-65（按群冻结基线）· SPRINT-68（指派日期重叠）、敏捷故事点见 SPRINT-56 · 燃尽见 SPRINT-66 · 列 WIP 见 SPRINT-69、周报导出见 SPRINT-57 · 周报/月报模板见 SPRINT-64。
+已交付第一波见 `CHANGELOG`；第二波排程见 SPRINT-54（壳）· SPRINT-62（四类依赖关键路径）· SPRINT-65（按群冻结基线）· SPRINT-68（指派日期重叠）、敏捷故事点见 SPRINT-56 · 燃尽见 SPRINT-66 · 列 WIP 见 SPRINT-69 · 迭代容器见 SPRINT-70、周报导出见 SPRINT-57 · 周报/月报模板见 SPRINT-64。
 
 ### 6.4 插件边界与 SPIKE 锚点
 
@@ -202,7 +202,7 @@
 |------|------|------|------|
 | 投屏 / 远程 / 语音视频 / 完整会议 | ❌ | ✅ 可购（Lite mesh 可免费 POC） | `verify:meeting-spike` · §3 |
 | 高级排程（关键路径 / 基线） | 基础甘特/依赖免费 | ✅ 可购 `lanpm.schedule`（SPRINT-62：FS/SS/FF/SF 边；SPRINT-65：按群冻结基线对照；SPRINT-68：同负责人显式日期重叠；非日历 CPM；**资源平衡仍后置**） | `verify:schedule-sku` |
-| 敏捷包（故事点 / 燃尽） | 看板拖拽/状态免费 | ✅ 可购 `lanpm.agile`（SPRINT-56：故事点；SPRINT-66：按日剩余燃尽；SPRINT-69：列 WIP 张数上限只提示；**迭代容器仍后置**） | `verify:agile-sku` |
+| 敏捷包（故事点 / 燃尽） | 看板拖拽/状态免费 | ✅ 可购 `lanpm.agile`（SPRINT-56：故事点；SPRINT-66：按日剩余燃尽；SPRINT-69：列 WIP 张数上限只提示；SPRINT-70：迭代容器；**速度图 / carry-over 仍后置**） | `verify:agile-sku` |
 | AI 周报（导出） | 驾驶舱数字/趋势免费 | ✅ 可购 `lanpm.weekly`（SPRINT-57 许可闸 · SPRINT-64：下周计划 + 月报独立模板） | `verify:weekly-sku` |
 | 项目备份 / 还原 | 加密与 IPC 仍核心 | ✅ 免费 `lanpm.backup`（SPRINT-63：默认开、可关；非全库备份） | `verify:backup-sku` |
 | 白板 / 协作画布 | 不进臃肿核心 | ✅ 免费模块形态 | `verify:whiteboard-realtime` · `whiteboard_crdt` |
@@ -241,7 +241,6 @@
 
 | 候选 | 说明 | 备注 |
 |------|------|------|
-| **迭代容器** | `lanpm.agile` 第四刀 | 列 WIP 已交付；容器仍后置 |
 | PWA | 移动端 Web | 后置 |
 | 真机手验补测 | §4 延期项（双机真网 · Win/mac） | 有设备再开 |
 | WebRTC DataChannel | 可选 | 非默认路径 |
