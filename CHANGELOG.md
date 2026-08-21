@@ -8,6 +8,7 @@
 
 - **迭代容器表**：`agile_iterations` / 当前选中 / 按迭代燃尽样本；`tasks.iteration_id`（schema v23）（`TASK-7001`）
 - **迭代 IPC**：建/选当前迭代；燃尽按迭代窗口采样；`task.patch` 可挂 `iterationId`（`TASK-7002`）
+- **看板迭代过滤**：工具栏建/选迭代；卡片挂入；未挂任务不进当前迭代看板（`TASK-7003`）
 
 ## [1.106.8] - 2026-08-21
 

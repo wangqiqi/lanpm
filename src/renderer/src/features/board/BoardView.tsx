@@ -63,6 +63,8 @@ import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import IslandPanel from '@renderer/ui/IslandPanel'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { subscribeAgileWip } from '@renderer/plugin/agileWipBridge'
+import { subscribeAgileIteration } from '@renderer/plugin/agileIterationBridge'
+import { tasksInCurrentIteration } from '@shared/task/agileIteration'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -263,6 +265,7 @@ export default function BoardView(): React.ReactElement {
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [assigneeSearch, setAssigneeSearch] = useState('')
   const [wipOverCols, setWipOverCols] = useState<Set<TaskStatus>>(() => new Set())
+  const [iterationId, setIterationId] = useState<string | null>(null)
   const boardBodyRef = useRef<HTMLDivElement>(null)
   const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
   const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
@@ -305,6 +308,13 @@ export default function BoardView(): React.ReactElement {
     })
   }, [gid])
 
+  useEffect(() => {
+    return subscribeAgileIteration((detail) => {
+      if (detail.groupId !== gid) return
+      setIterationId(detail.currentIterationId)
+    })
+  }, [gid])
+
   const relationMap = useMemo(() => buildBoardRelationMap(tasks), [tasks])
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.taskId, t])), [tasks])
   const activeRelationId = relationFocusId ?? relationHoverId
@@ -321,7 +331,7 @@ export default function BoardView(): React.ReactElement {
       other: []
     }
     const visible = filterTasksByAssigneeSearch(
-      filterTasksByTags(tasks, tagFilter),
+      filterTasksByTags(tasksInCurrentIteration(tasks, iterationId), tagFilter),
       members,
       assigneeSearch
     )
@@ -332,18 +342,21 @@ export default function BoardView(): React.ReactElement {
       map[col].sort((a, b) => a.sortOrder - b.sortOrder)
     }
     return map
-  }, [tasks, tagFilter, members, assigneeSearch])
+  }, [tasks, tagFilter, members, assigneeSearch, iterationId])
 
   const availableTags = useMemo(() => collectUniqueTaskTags(tasks), [tasks])
   const filteredCount = useMemo(
     () =>
-      filterTasksByAssigneeSearch(filterTasksByTags(tasks, tagFilter), members, assigneeSearch)
-        .length,
-    [tasks, tagFilter, members, assigneeSearch]
+      filterTasksByAssigneeSearch(
+        filterTasksByTags(tasksInCurrentIteration(tasks, iterationId), tagFilter),
+        members,
+        assigneeSearch
+      ).length,
+    [tasks, tagFilter, members, assigneeSearch, iterationId]
   )
   const tagFilterActive = tagFilter.some((t) => t.trim().length > 0)
   const assigneeFilterActive = assigneeSearch.trim().length > 0
-  const boardFilterActive = tagFilterActive || assigneeFilterActive
+  const boardFilterActive = tagFilterActive || assigneeFilterActive || Boolean(iterationId)
 
   useEffect(() => {
     if (!gid) return
@@ -626,7 +639,10 @@ export default function BoardView(): React.ReactElement {
   }, [])
 
   return (
-    <div className={styles.root}>
+    <div
+      className={styles.root}
+      data-iteration-filter={iterationId ?? 'all'}
+    >
       <ViewToolbar
         start={
           showBoardToolbar ? (

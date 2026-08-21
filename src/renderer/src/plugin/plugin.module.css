@@ -351,6 +351,28 @@
   gap: 4px;
 }
 
+.agileIterRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.agileIterSelect {
+  min-width: 120px;
+}
+
+.agileIterName {
+  width: 112px;
+}
+
+.agileCardIter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+}
+
 .agileCardPoints {
   display: inline-flex;
   align-items: center;

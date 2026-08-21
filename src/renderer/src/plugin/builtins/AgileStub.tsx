@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, InputNumber, Typography, message } from 'antd'
+import { Button, Input, InputNumber, Select, Switch, Typography, message } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { Task, TaskStatus } from '@shared/task/types'
 import { formatColumnPointSums, parseStoryPoints, sumStoryPointsByStatus } from '@shared/task/storyPoints'
 import {
+  addDaysYmd,
   burndownPolyline,
+  localYmd,
   type AgileBurndownView
 } from '@shared/task/agileBurndown'
+import type { AgileIterationSnapshot } from '@shared/task/agileIteration'
 import {
   COLUMN_WIP_STATUSES,
   countTasksByStatus,
@@ -21,6 +24,7 @@ import { invokeCapabilityWithHumanConfirm } from '@renderer/plugin/invokeCapabil
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
 import { publishAgileWip } from '@renderer/plugin/agileWipBridge'
+import { publishAgileIteration } from '@renderer/plugin/agileIterationBridge'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -40,7 +44,12 @@ const STATUS_LABEL_KEYS: Record<TaskStatus, 'board.columnTodo' | 'board.columnDo
     other: 'board.columnOther'
   }
 
-/** `lanpm.agile` — 无许可 CTA；授权后列合计 + 卡片估点 */
+function clearBridges(groupId: string): void {
+  publishAgileWip({ groupId, limits: {}, over: [] })
+  publishAgileIteration({ groupId, currentIterationId: null })
+}
+
+/** `lanpm.agile` — 无许可 CTA；授权后列合计 + 卡片估点 + 迭代容器 */
 export default function AgileStub({
   plugin,
   groupId,
@@ -53,13 +62,18 @@ export default function AgileStub({
   const [busy, setBusy] = useState(false)
   const [burndown, setBurndown] = useState<AgileBurndownView | null>(null)
   const [wipLimits, setWipLimits] = useState<ColumnWipLimits>({})
+  const [iterations, setIterations] = useState<AgileIterationSnapshot | null>(null)
+  const [draftName, setDraftName] = useState('')
+  const [draftStart, setDraftStart] = useState(() => localYmd(new Date()))
+  const [draftEnd, setDraftEnd] = useState(() => addDaysYmd(localYmd(new Date()), 13))
 
   const reload = useCallback(async () => {
     if (!licenseActive || !groupId) {
       setTasks([])
       setBurndown(null)
       setWipLimits({})
-      if (groupId) publishAgileWip({ groupId, limits: {}, over: [] })
+      setIterations(null)
+      if (groupId) clearBridges(groupId)
       return
     }
     try {
@@ -68,7 +82,13 @@ export default function AgileStub({
       })) as Task[]
       const live = list.filter((task) => !task.deletedAt)
       setTasks(live)
-      const chart = await getLanpmApi().task.getAgileBurndown(groupId)
+      const iter = await getLanpmApi().task.getAgileIterations(groupId)
+      setIterations(iter)
+      publishAgileIteration({
+        groupId,
+        currentIterationId: iter.currentIterationId
+      })
+      const chart = await getLanpmApi().task.getAgileBurndown(groupId, iter.currentIterationId)
       setBurndown(chart)
       const snap = await getLanpmApi().task.getAgileWipLimits(groupId)
       setWipLimits(snap.limits)
@@ -82,21 +102,22 @@ export default function AgileStub({
       setTasks([])
       setBurndown(null)
       setWipLimits({})
-      publishAgileWip({ groupId, limits: {}, over: [] })
+      setIterations(null)
+      clearBridges(groupId)
     }
   }, [groupId, licenseActive, plugin.id, t])
 
   useEffect(() => {
     void reload()
     if (!licenseActive || !groupId) {
-      return () => publishAgileWip({ groupId, limits: {}, over: [] })
+      return () => clearBridges(groupId)
     }
     const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
       if (changedGroupId === groupId) void reload()
     })
     return () => {
       unsub()
-      publishAgileWip({ groupId, limits: {}, over: [] })
+      clearBridges(groupId)
     }
   }, [reload, groupId, licenseActive])
 
@@ -131,6 +152,29 @@ export default function AgileStub({
     [confirmCopy, groupId, plugin.id, reload, t]
   )
 
+  const onToggleIteration = useCallback(
+    async (id: string, inIteration: boolean) => {
+      const current = iterations?.currentIterationId
+      if (!current) return
+      setBusy(true)
+      try {
+        const updated = await invokeCapabilityWithHumanConfirm(
+          plugin.id,
+          'task.patch',
+          { groupId, taskId: id, patch: { iterationId: inIteration ? current : null } },
+          confirmCopy
+        )
+        if (updated == null) return
+        await reload()
+      } catch (err: unknown) {
+        message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+      } finally {
+        setBusy(false)
+      }
+    },
+    [confirmCopy, groupId, iterations?.currentIterationId, plugin.id, reload, t]
+  )
+
   const onSaveWip = useCallback(
     async (status: TaskStatus, next: number | null) => {
       setBusy(true)
@@ -150,6 +194,34 @@ export default function AgileStub({
     },
     [groupId, t, tasks]
   )
+
+  const onSelectIteration = useCallback(
+    async (value: string) => {
+      setBusy(true)
+      try {
+        await getLanpmApi().task.setCurrentAgileIteration(groupId, value || null)
+        await reload()
+      } catch (err: unknown) {
+        message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+      } finally {
+        setBusy(false)
+      }
+    },
+    [groupId, reload, t]
+  )
+
+  const onCreateIteration = useCallback(async () => {
+    setBusy(true)
+    try {
+      await getLanpmApi().task.createAgileIteration(groupId, draftName, draftStart, draftEnd)
+      setDraftName('')
+      await reload()
+    } catch (err: unknown) {
+      message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }, [draftEnd, draftName, draftStart, groupId, reload, t])
 
   if (context?.view !== 'board') return null
 
@@ -175,6 +247,7 @@ export default function AgileStub({
     if (!taskId) return null
     const task = tasks.find((item) => item.taskId === taskId)
     const points = parseStoryPoints(task?.storyPoints)
+    const currentId = iterations?.currentIterationId ?? null
     return (
       <div className={styles.agileCardPoints} data-testid="agile-story-points" data-task-id={taskId}>
         <InputNumber
@@ -189,6 +262,17 @@ export default function AgileStub({
             void onSavePoints(taskId, n)
           }}
         />
+        {currentId ? (
+          <label className={styles.agileCardIter} data-testid="agile-iteration-card">
+            <Switch
+              size="small"
+              disabled={busy}
+              checked={task?.iterationId === currentId}
+              onChange={(checked) => void onToggleIteration(taskId, checked)}
+            />
+            <Text type="secondary">{t('plugin.agileIterationIn')}</Text>
+          </label>
+        ) : null}
       </div>
     )
   }
@@ -211,6 +295,55 @@ export default function AgileStub({
       data-testid="agile-board-toolbar"
       data-plugin-id={plugin.id}
     >
+      <span className={styles.agileIterRow} data-testid="agile-iteration">
+        <Select
+          size="small"
+          disabled={busy}
+          className={styles.agileIterSelect}
+          data-testid="agile-iteration-select"
+          value={iterations?.currentIterationId ?? ''}
+          onChange={(value) => void onSelectIteration(value)}
+          options={[
+            { value: '', label: t('plugin.agileIterationAll') },
+            ...(iterations?.iterations ?? []).map((row) => ({
+              value: row.iterationId,
+              label: row.name
+            }))
+          ]}
+        />
+        <Input
+          size="small"
+          disabled={busy}
+          className={styles.agileIterName}
+          placeholder={t('plugin.agileIterationName')}
+          value={draftName}
+          onChange={(e) => setDraftName(e.target.value)}
+        />
+        <Input
+          size="small"
+          type="date"
+          disabled={busy}
+          value={draftStart}
+          aria-label={t('plugin.agileIterationStart')}
+          onChange={(e) => setDraftStart(e.target.value)}
+        />
+        <Input
+          size="small"
+          type="date"
+          disabled={busy}
+          value={draftEnd}
+          aria-label={t('plugin.agileIterationEnd')}
+          onChange={(e) => setDraftEnd(e.target.value)}
+        />
+        <Button
+          size="small"
+          disabled={busy}
+          data-testid="agile-iteration-create"
+          onClick={() => void onCreateIteration()}
+        >
+          {t('plugin.agileIterationCreate')}
+        </Button>
+      </span>
       <Text type="secondary" data-testid="agile-column-sums">
         {t('plugin.agileColumnSums')}: {formatColumnPointSums(sums, labels)}
       </Text>
