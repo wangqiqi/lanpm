@@ -204,7 +204,7 @@
 |----|------|------|
 | B1 | 文件断点续传 + 传输队列 | 交付物失败成阻塞再立项 |
 | B2 | 成员搜索 / 轻量分组 | **已交付**（看板筛 · 指派拼音 · 聊天侧栏） |
-| B3 | 项目备份 / 还原 | **已加固**（v1.25.0）；可插件化 |
+| B3 | 项目备份 / 还原 | **已交付插件壳**（SPRINT-63 · 免费 `lanpm.backup` · 默认开启 · 可关；加密包仍 v1.25.0） |
 | B4 | 弱网下项目同步不丢 | task_crdt / 同步可靠性主线 |
 | B5 | 甘特导出 PNG/PDF | **图导出已有**；**任务表 MD/CSV 已交付**（SPRINT-59 · `verify:gantt-table-export`） |
 | B6 | 表情、书签导入等 | **已交付**（`emoji-mart` · Netscape 书签导入导出） |
@@ -235,6 +235,7 @@
 | 高级排程（关键路径） | 基础甘特/依赖免费 | ✅ 可购 `lanpm.schedule`（SPRINT-62：FS/SS/FF/SF 边；非日历 CPM） | `verify:schedule-sku` |
 | 敏捷包（故事点） | 看板拖拽/状态免费 | ✅ 可购 `lanpm.agile` | `verify:agile-sku` |
 | AI 周报（导出） | 驾驶舱数字/趋势免费 | ✅ 可购 `lanpm.weekly` | `verify:weekly-sku` |
+| 项目备份 / 还原 | 加密与 IPC 仍核心 | ✅ 免费 `lanpm.backup`（SPRINT-63：默认开、可关；非全库备份） | `verify:backup-sku` |
 | 白板 / 协作画布 | 不进臃肿核心 | ✅ 免费模块形态 | `verify:whiteboard-realtime` · `whiteboard_crdt` |
 | form-js 验收单 | ❌ | ✅ 可购 POC | `verify:plugin-loader` |
 | 插件加载边界 | — | contextIsolation + 单一 `window.lanpm`；禁 `ipcMain`/直连 DB | `verify:plugin-spike` · **插件加载边界** · [07_插件与扩展](./07_插件与扩展.md) |

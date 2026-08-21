@@ -10,6 +10,8 @@
 
 - **备份插件默认开**：`lanpm.backup` 进官方默认启用白名单；关插件后 Profile 备份区隐藏（`TASK-6302`）
 
+- **备份 SKU 守卫**：`verify:backup-sku` 锁住 free、默认开、禁止 paid 闸（`TASK-6303`）
+
 ## [1.106.2] - 2026-08-21
 
 ### Changed

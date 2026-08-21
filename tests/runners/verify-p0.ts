@@ -24,7 +24,8 @@ const steps = [
   'verify:office-preview',
   'verify:gantt-table-export',
   'verify:list-scroll-seed',
-  'verify:list-scroll'
+  'verify:list-scroll',
+  'verify:backup-sku'
 ] as const
 
 for (const step of steps) {
