@@ -30,6 +30,10 @@ assert.match(stub, /invokeCapability/)
 assert.match(stub, /agile-burndown/)
 assert.match(stub, /getAgileBurndown/)
 assert.match(stub, /burndownPolyline/)
+assert.match(stub, /agile-wip/)
+assert.match(stub, /setAgileWipLimit/)
+assert.match(stub, /getAgileWipLimits/)
+assert.match(stub, /overWipColumns/)
 
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /assertPaidPluginLicensed/)
@@ -40,6 +44,9 @@ assert.match(registry, /lanpm\.agile.*AgileStub/)
 const board = readFileSync(join(root, 'src/renderer/src/features/board/BoardView.tsx'), 'utf8')
 assert.match(board, /PluginZoneHost/)
 assert.match(board, /view: 'board'/)
+assert.match(board, /subscribeAgileWip/)
+assert.match(board, /data-wip-over/)
+assert.match(board, /invalid=\{false\}/)
 
 const docs07 = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs07, /lanpm\.agile/)
@@ -54,11 +61,17 @@ assert.match(docs06, /仍永不插件化拆卖/)
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
 assert.match(schemaSql, /story_points/)
 assert.match(schemaSql, /agile_burndown_samples/)
+assert.match(schemaSql, /agile_wip_limits/)
 
 const service = readFileSync(join(root, 'src/main/task/agileBurndownService.ts'), 'utf8')
 assert.match(service, /assertPaidPluginLicensed\('lanpm\.agile'/)
 assert.match(service, /getAgileBurndown/)
 assert.match(service, /upsertAgileBurndownSample/)
+
+const wipService = readFileSync(join(root, 'src/main/task/agileWipService.ts'), 'utf8')
+assert.match(wipService, /assertPaidPluginLicensed\('lanpm\.agile'/)
+assert.match(wipService, /getAgileWipLimits/)
+assert.match(wipService, /setAgileWipLimit/)
 
 const editModal = readFileSync(
   join(root, 'src/renderer/src/features/board/TaskEditModal.tsx'),
@@ -77,5 +90,6 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 assert.ok(pkg.scripts?.['verify:agile-sku'], 'missing verify:agile-sku script')
 assert.match(pkg.scripts['verify:agile-sku'] ?? '', /verify-agile-burndown/)
+assert.match(pkg.scripts['verify:agile-sku'] ?? '', /verify-agile-wip/)
 
 console.log('verify:agile-sku OK')
