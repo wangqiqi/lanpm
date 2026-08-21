@@ -419,7 +419,7 @@ assert.match(
 )
 assert.match(
   islandPanelSrc,
-  /expanded \? <div className=\{bodyClass\}>/,
+  /expanded \? <div className=\{bodyClass\}/,
   'IslandPanel must hide detail children when aria-expanded=false (CK-413)'
 )
 assert.match(cockpitCss, /\.accordionSummary\b/, 'Accordion summary styles (CK-413)')

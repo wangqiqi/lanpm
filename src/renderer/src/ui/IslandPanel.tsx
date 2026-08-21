@@ -99,11 +99,7 @@ export default function IslandPanel({
           {!expanded && summary != null ? (
             <div className={styles.panelSummary}>{summary}</div>
           ) : null}
-          {expanded ? (
-            <div className={bodyClass} data-testid={bodyTestId}>
-              {children}
-            </div>
-          ) : null}
+          {expanded ? <div className={bodyClass} data-testid={bodyTestId}>{children}</div> : null}
         </div>
       ) : (
         <div className={bodyClass} data-testid={bodyTestId}>
