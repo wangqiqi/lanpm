@@ -618,6 +618,9 @@ const enUS = {
   'plugin.meetingProScreenShareStart': 'Share screen',
   'plugin.meetingProScreenShareStop': 'Stop sharing',
   'plugin.meetingProParticipants': 'Participants ({count})',
+  'plugin.meetingTileScreen': '{name} (screen)',
+  'plugin.meetingParticipantLocal': 'local',
+  'plugin.meetingParticipantMuted': 'muted',
   'plugin.meetingRecordSection': 'Recording',
   'plugin.meetingRecordLocalHint':
     'Saves local camera/mic only — not a full room mix. Cloud/SFU recording is not supported.',

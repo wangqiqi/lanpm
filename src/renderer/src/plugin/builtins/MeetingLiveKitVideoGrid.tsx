@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { List, Typography } from 'antd'
+import { useI18n } from '@renderer/i18n/useI18n'
 import type { ProParticipantView } from './useMeetingLiveKit'
 import styles from '../plugin.module.css'
 
@@ -66,6 +67,7 @@ export default function MeetingLiveKitVideoGrid({
   joined,
   participantsLabel
 }: Props): React.ReactElement | null {
+  const { t } = useI18n()
   if (!joined) return null
 
   const tiles = participants.flatMap((p) => {
@@ -80,7 +82,7 @@ export default function MeetingLiveKitVideoGrid({
       items.push({
         key: `${p.identity}-screen`,
         track: p.screenShareTrack,
-        label: `${p.name} (screen)`,
+        label: t('plugin.meetingTileScreen', { name: p.name }),
         isScreen: true
       })
     }
@@ -117,8 +119,8 @@ export default function MeetingLiveKitVideoGrid({
           <List.Item>
             <Text>
               {p.name}
-              {p.isLocal ? ' · local' : ''}
-              {p.audioMuted ? ' · muted' : ''}
+              {p.isLocal ? ` · ${t('plugin.meetingParticipantLocal')}` : ''}
+              {p.audioMuted ? ` · ${t('plugin.meetingParticipantMuted')}` : ''}
             </Text>
           </List.Item>
         )}
