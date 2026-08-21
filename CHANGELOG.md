@@ -11,6 +11,7 @@
 - **Office 预览口径**：`docs/06` §6.1 #8 标 mammoth/exceljs 轻量切片已交付；浏览器 stub 不转 Office（`TASK-5803`）
 - **Office 预览门禁**：`verify:office-preview` 并入 `verify:p0` / release-gate（`TASK-5804`）
 - **甘特任务表导出**：工具栏导出 Markdown（给人/模型）与 CSV（给表格软件）；PNG/PDF 图导出保留（`TASK-5901` · `TASK-5902`）
+- **甘特 B5 口径**：`docs/06` 标任务表 MD/CSV 已交付；图导出仍是 html2canvas（`TASK-5903`）
 
 ## [1.105.0] - 2026-08-21
 

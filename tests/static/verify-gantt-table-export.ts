@@ -34,4 +34,8 @@ assert.match(view, /gantt\.exportCsv/)
 assert.match(view, /gantt\.exportPng/)
 assert.match(view, /gantt\.exportPdf/)
 
+const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(docs06, /verify:gantt-table-export/)
+assert.match(docs06, /MD\/CSV/)
+
 console.log('verify:gantt-table-export OK')
