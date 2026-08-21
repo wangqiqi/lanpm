@@ -3,7 +3,7 @@ import { Button, Switch, Typography, message } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { Task } from '@shared/task/types'
-import { computeFsCriticalPath } from '@shared/task/criticalPath'
+import { computeCriticalPath } from '@shared/task/criticalPath'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
@@ -19,7 +19,7 @@ interface Props {
   context?: ViewPluginContext
 }
 
-/** `lanpm.schedule` — 无许可 CTA；授权后开关 FS 关键路径高亮 */
+/** `lanpm.schedule` — 无许可 CTA；授权后开关关键路径高亮（FS/SS/FF/SF 边） */
 export default function ScheduleStub({ plugin, groupId, context }: Props): React.ReactElement | null {
   const { t } = useI18n()
   const licenseActive = isPluginLicenseActive(plugin)
@@ -38,7 +38,7 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
         const tasks = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.list', {
           groupId
         })) as Task[]
-        const result = computeFsCriticalPath(tasks)
+        const result = computeCriticalPath(tasks)
         setPathOn(true)
         publishScheduleCriticalPath({
           groupId,

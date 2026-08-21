@@ -621,7 +621,7 @@ const zhCN = {
   'plugin.scheduleLicenseCta': '高级排程需有效离线许可证，请在扩展页导入许可。',
   'plugin.scheduleLicensedIdle': '高级排程已授权',
   'plugin.scheduleCriticalPath': '关键路径',
-  'plugin.scheduleCriticalPathEmpty': '没有可高亮的 FS 关键路径',
+  'plugin.scheduleCriticalPathEmpty': '没有可高亮的依赖关键路径',
   'plugin.scheduleCriticalPathCycle': '依赖成环，无法计算关键路径',
   'plugin.agileLicenseCta': '敏捷扩展需有效离线许可证，请在扩展页导入许可。',
   'plugin.agileLicensedIdle': '敏捷扩展已授权',

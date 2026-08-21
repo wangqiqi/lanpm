@@ -631,7 +631,7 @@ const enUS = {
   'plugin.scheduleLicenseCta': 'Advanced scheduling needs a valid offline license — import one under Extensions.',
   'plugin.scheduleLicensedIdle': 'Advanced scheduling is licensed',
   'plugin.scheduleCriticalPath': 'Critical path',
-  'plugin.scheduleCriticalPathEmpty': 'No FS critical path to highlight',
+  'plugin.scheduleCriticalPathEmpty': 'No dependency critical path to highlight',
   'plugin.scheduleCriticalPathCycle': 'Dependency cycle — critical path skipped',
   'plugin.agileLicenseCta': 'Agile needs a valid offline license — import one under Extensions.',
   'plugin.agileLicensedIdle': 'Agile is licensed',
