@@ -63,7 +63,7 @@
 .columnWipOver {
   margin-left: var(--lanpm-space-1);
   font-size: var(--lanpm-font-caption);
-  color: var(--lanpm-danger, #c2410c);
+  color: var(--lanpm-danger);
 }
 
 .columnBody {
