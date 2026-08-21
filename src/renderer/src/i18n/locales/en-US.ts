@@ -628,6 +628,8 @@ const enUS = {
   'plugin.meetingEnableHint': 'Enable LanPM Meeting under Profile → Extensions to show meeting tools here.',
   'plugin.meetingLicenseCta': 'Meeting requires a valid offline license — import one under Extensions.',
   'plugin.meetingOpenPlugins': 'Open extensions',
+  'plugin.scheduleLicenseCta': 'Advanced scheduling needs a valid offline license — import one under Extensions.',
+  'plugin.scheduleLicensedIdle': 'Advanced scheduling is licensed',
   'plugin.meetingOpenMeetingConfig': 'Configure meeting bypass',
   'plugin.meetingToolbarDetails': 'Meeting details',
   'plugin.meetingStatusIdle': 'Not joined',

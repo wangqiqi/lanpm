@@ -618,6 +618,8 @@ const zhCN = {
   'plugin.meetingEnableHint': '在「个人资料 → 扩展」中启用 LanPM 会议后，此处将显示会议工具。',
   'plugin.meetingLicenseCta': '会议扩展需有效离线许可证，请在扩展页导入许可。',
   'plugin.meetingOpenPlugins': '打开扩展管理',
+  'plugin.scheduleLicenseCta': '高级排程需有效离线许可证，请在扩展页导入许可。',
+  'plugin.scheduleLicensedIdle': '高级排程已授权',
   'plugin.meetingOpenMeetingConfig': '配置会议旁路',
   'plugin.meetingToolbarDetails': '会议详情',
   'plugin.meetingStatusIdle': '未加入',

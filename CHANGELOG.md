@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-- **可购高级排程壳**：`lanpm.schedule`（`pricing: paid`，Slot `gantt.toolbar`）；默认关闭，不拆卖基础甘特（`TASK-5401`）
+- **高级排程许可闸**：甘特工具条无许可证显示 CTA；`task.list` 等能力仍走 Host `assertPaidPluginLicensed`（`TASK-5402`）
 - **匿名群本机历史**：匿名群文本消息写入 SQLite（召回/编辑同路径）；离线 `chat_sync` 仍跳过，不从对端补历史（`TASK-5202`）
 - **匿名群退出再进**：leave/enter 不再清空本机消息；解散仍 cascade 删除；提示文案与 docs/01·03·06 对齐（`TASK-5203`）
 - **会议旁路运维**：`docs/07` 会议节增加本机/内网 LiveKit 最短步骤，指向 `plugins/lanpm.meeting/deploy/docker-compose.yml`（`TASK-5103`）

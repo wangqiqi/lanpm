@@ -17,7 +17,17 @@ assert.equal(parsed?.pricing, 'paid')
 assert.ok(parsed?.slots.includes('gantt.toolbar'))
 assert.ok(parsed?.capabilities.includes('task.list'))
 
-assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/ScheduleStub.tsx')))
+const stub = readFileSync(join(root, 'src/renderer/src/plugin/builtins/ScheduleStub.tsx'), 'utf8')
+assert.match(stub, /isPluginLicenseActive/)
+assert.match(stub, /schedule-license-cta/)
+assert.match(stub, /openProfileTab/)
+assert.ok(!stub.includes('invokeCapability'), 'toolbar must not invoke capabilities before license UI')
+
+const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
+assert.match(proxy, /assertPaidPluginLicensed/)
+
+const licenseStore = readFileSync(join(root, 'src/main/plugin/licenseStore.ts'), 'utf8')
+assert.match(licenseStore, /assertPaidPluginLicensed/)
 
 const registry = readFileSync(join(root, 'src/renderer/src/plugin/registry.ts'), 'utf8')
 assert.match(registry, /lanpm\.schedule.*ScheduleStub/)

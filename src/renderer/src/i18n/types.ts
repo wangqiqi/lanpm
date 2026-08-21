@@ -610,6 +610,8 @@ export type MessageKey =
   | 'plugin.meetingEnableHint'
   | 'plugin.meetingLicenseCta'
   | 'plugin.meetingOpenPlugins'
+  | 'plugin.scheduleLicenseCta'
+  | 'plugin.scheduleLicensedIdle'
   | 'plugin.meetingOpenMeetingConfig'
   | 'plugin.meetingToolbarDetails'
   | 'plugin.meetingStatusIdle'
