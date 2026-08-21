@@ -175,7 +175,7 @@
 | 5 | IndexedDB | `idb` / `y-indexeddb` | — |
 | 6 | i18n | `i18next` | — |
 | 7 | 表情 / 思维导图 | ✅ `emoji-mart`（Composer）· 导图 Layer C 已有 | — |
-| 8 | Office 轻量预览 | mammoth / exceljs | — |
+| 8 | Office 轻量预览 | ✅ mammoth / exceljs（无 soffice 时 HTML；有 LibreOffice 仍转 PDF）· `verify:office-preview` | .doc/.xls/pptx 仍靠 soffice |
 
 **保持不动**：Yjs、antd、dnd-kit、gantt-task-react、better-sqlite3、highlight.js、FullCalendar、Excalidraw、electron。
 

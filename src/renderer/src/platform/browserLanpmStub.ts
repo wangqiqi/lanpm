@@ -1757,6 +1757,7 @@ export function createBrowserLanpmStub(): LanpmApi {
       upload: async () => {
         throw stubError('stub.uploadElectronOnly')
       },
+      /** Office light preview (mammoth/exceljs) is Electron-only; browser stub has no soffice path. */
       getPreviewUrl: async () => null,
       getPreviewText: async () => null,
       listTransfers: async () => [],

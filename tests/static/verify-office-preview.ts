@@ -47,4 +47,12 @@ assert.match(lightUi, /office-light-preview/)
 const html = readFileSync(join(root, 'src/renderer/index.html'), 'utf8')
 assert.match(html, /frame-src[^"]*lanpm-preview:/)
 
+const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub.ts'), 'utf8')
+assert.match(stub, /Office light preview/)
+assert.match(stub, /getPreviewUrl/)
+
+const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(docs06, /verify:office-preview/)
+assert.match(docs06, /mammoth \/ exceljs/)
+
 console.log('verify:office-preview OK')
