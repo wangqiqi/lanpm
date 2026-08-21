@@ -345,3 +345,12 @@ CREATE TABLE agile_burndown_samples (
   PRIMARY KEY (group_id, day)
 );
 CREATE INDEX idx_agile_burndown_samples_group ON agile_burndown_samples(group_id, day);
+
+-- 付费敏捷：按群按列 WIP 张数上限（无行 = 不限）
+CREATE TABLE agile_wip_limits (
+  group_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  wip_limit INTEGER NOT NULL,
+  PRIMARY KEY (group_id, status)
+);
+CREATE INDEX idx_agile_wip_limits_group ON agile_wip_limits(group_id);

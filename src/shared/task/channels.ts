@@ -24,6 +24,8 @@ export const TASK_IPC = {
   freezeScheduleBaseline: 'task:freezeScheduleBaseline',
   getScheduleBaseline: 'task:getScheduleBaseline',
   getAgileBurndown: 'task:getAgileBurndown',
+  getAgileWipLimits: 'task:getAgileWipLimits',
+  setAgileWipLimit: 'task:setAgileWipLimit',
   upsertDependency: 'task:upsertDependency',
   removeDependency: 'task:removeDependency',
   deleteTask: 'task:deleteTask',

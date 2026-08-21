@@ -53,6 +53,12 @@ import {
   remainingStoryPoints,
   type BurndownPoint
 } from '@shared/task/agileBurndown'
+import {
+  parseWipLimit,
+  isWipStatus,
+  type ColumnWipLimits,
+  type AgileWipSnapshot
+} from '@shared/task/columnWip'
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
@@ -192,6 +198,7 @@ function writeStubLiveKitConfig(input: LiveKitConfig): ReturnType<typeof toLiveK
 const STUB_PLUGIN_LICENSES_KEY = 'lanpm.stub.pluginLicenses'
 const STUB_SCHEDULE_BASELINE_KEY = 'lanpm.stub.scheduleBaselines'
 const STUB_AGILE_BURNDOWN_KEY = 'lanpm.stub.agileBurndown'
+const STUB_AGILE_WIP_KEY = 'lanpm.stub.agileWip'
 
 function readStubPluginLicenses(): Record<string, { features: string[]; expiresAt?: number }> {
   try {
@@ -245,6 +252,23 @@ function writeStubAgileBurndownSample(groupId: string, point: BurndownPoint): vo
   )
   all[groupId] = next
   localStorage.setItem(STUB_AGILE_BURNDOWN_KEY, JSON.stringify(all))
+}
+
+function readStubAgileWip(): Record<string, ColumnWipLimits> {
+  try {
+    const raw = localStorage.getItem(STUB_AGILE_WIP_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, ColumnWipLimits>
+  } catch {
+    return {}
+  }
+}
+
+function writeStubAgileWip(groupId: string, limits: ColumnWipLimits): AgileWipSnapshot {
+  const all = readStubAgileWip()
+  all[groupId] = limits
+  localStorage.setItem(STUB_AGILE_WIP_KEY, JSON.stringify(all))
+  return { groupId, limits }
 }
 
 function isStubPluginLicensed(pluginId: string): boolean {
@@ -1772,6 +1796,25 @@ export function createBrowserLanpmStub(): LanpmApi {
           today,
           samples: readStubAgileBurndown()[groupId] ?? []
         })
+      },
+      getAgileWipLimits: async (groupId) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        return { groupId, limits: readStubAgileWip()[groupId] ?? {} }
+      },
+      setAgileWipLimit: async (groupId, status, limit) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        if (!isWipStatus(status)) {
+          throw new Error('status must be todo, doing, done, or other')
+        }
+        const prev = { ...(readStubAgileWip()[groupId] ?? {}) }
+        const parsed = parseWipLimit(limit)
+        if (parsed === undefined) delete prev[status]
+        else prev[status] = parsed
+        return writeStubAgileWip(groupId, prev)
       },
       upsertDependency: async (input) => {
         void input

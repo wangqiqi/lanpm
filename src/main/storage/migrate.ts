@@ -426,6 +426,21 @@ export const MIGRATIONS: readonly MigrationStep[] = [
         `CREATE INDEX idx_agile_burndown_samples_group ON agile_burndown_samples(group_id, day)`
       )
     }
+  },
+  {
+    fromVersion: 21,
+    description: 'agile_wip_limits per-group column card caps (SPRINT-69 TASK-6901)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE agile_wip_limits (
+          group_id TEXT NOT NULL,
+          status TEXT NOT NULL,
+          wip_limit INTEGER NOT NULL,
+          PRIMARY KEY (group_id, status)
+        )
+      `)
+      db.exec(`CREATE INDEX idx_agile_wip_limits_group ON agile_wip_limits(group_id)`)
+    }
   }
 ]
 

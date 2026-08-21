@@ -120,6 +120,9 @@ const api: LanpmApi = {
       ipcRenderer.invoke('task:freezeScheduleBaseline', groupId),
     getScheduleBaseline: (groupId) => ipcRenderer.invoke('task:getScheduleBaseline', groupId),
     getAgileBurndown: (groupId) => ipcRenderer.invoke('task:getAgileBurndown', groupId),
+    getAgileWipLimits: (groupId) => ipcRenderer.invoke('task:getAgileWipLimits', groupId),
+    setAgileWipLimit: (groupId, status, limit) =>
+      ipcRenderer.invoke('task:setAgileWipLimit', groupId, status, limit),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>
       ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),

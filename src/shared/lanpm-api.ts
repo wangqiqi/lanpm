@@ -156,6 +156,14 @@ export interface LanpmApi {
     getAgileBurndown: (
       groupId: string
     ) => Promise<import('./task/agileBurndown').AgileBurndownView>
+    getAgileWipLimits: (
+      groupId: string
+    ) => Promise<import('./task/columnWip').AgileWipSnapshot>
+    setAgileWipLimit: (
+      groupId: string,
+      status: import('./task/types').TaskStatus,
+      limit: number | null
+    ) => Promise<import('./task/columnWip').AgileWipSnapshot>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>

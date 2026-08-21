@@ -29,6 +29,7 @@ import {
   getScheduleBaseline
 } from '../task/scheduleBaselineService'
 import { getAgileBurndown } from '../task/agileBurndownService'
+import { getAgileWipLimits, setAgileWipLimit } from '../task/agileWipService'
 import {
   listRemoteTaskAwareness,
   setLocalTaskAwareness
@@ -167,6 +168,17 @@ export function registerTaskIpc(): void {
   ipcMain.handle(TASK_IPC.getAgileBurndown, (_event, groupId: string) => {
     return getAgileBurndown(getDatabase(), groupId)
   })
+
+  ipcMain.handle(TASK_IPC.getAgileWipLimits, (_event, groupId: string) => {
+    return getAgileWipLimits(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(
+    TASK_IPC.setAgileWipLimit,
+    (_event, groupId: string, status: string, limit: number | null) => {
+      return setAgileWipLimit(getDatabase(), groupId, status, limit)
+    }
+  )
 
   ipcMain.handle(TASK_IPC.upsertDependency, (_event, input: UpsertDependencyInput) => {
     return upsertTaskDependency(getDatabase(), input)

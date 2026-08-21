@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **列 WIP 上限表**：`agile_wip_limits`（schema v22）；按群按列整数张数，无行不限（`TASK-6901`）
+
 ## [1.106.5] - 2026-08-21
 
 ### Added
