@@ -46,6 +46,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { scrollGanttChartToDateCentered, scrollGanttChartToTask } from './ganttScroll'
 import { evaluateTaskSchedule, scheduleHealthHintKey } from '@renderer/features/task/scheduleHealthUi'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
+import { subscribeScheduleCriticalPath } from '@renderer/plugin/scheduleCriticalPathBridge'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
@@ -83,6 +84,7 @@ export default function GanttView(): React.ReactElement {
   const [scheduleEnd, setScheduleEnd] = useState('')
   const [scheduleSaving, setScheduleSaving] = useState(false)
   const [contextTaskId, setContextTaskId] = useState<string | null>(null)
+  const [criticalPathIds, setCriticalPathIds] = useState<Set<string>>(() => new Set())
   const chartRef = useRef<HTMLDivElement>(null)
   const suppressClickRef = useRef(false)
   const themeMode = useUiStore((s) => s.theme)
@@ -133,10 +135,31 @@ export default function GanttView(): React.ReactElement {
     return unsub
   }, [gid, loadTasks])
 
+  useEffect(() => {
+    return subscribeScheduleCriticalPath((detail) => {
+      if (detail.groupId !== gid) return
+      setCriticalPathIds(detail.active ? new Set(detail.taskIds) : new Set())
+    })
+  }, [gid])
+
   const ganttTasks = useMemo(() => {
     const allDeps = tasks.flatMap((t) => t.dependencies ?? [])
-    return tasksToGanttBars(tasks, allDeps)
-  }, [tasks])
+    const bars = tasksToGanttBars(tasks, allDeps)
+    if (criticalPathIds.size === 0) return bars
+    return bars.map((bar) => {
+      if (!criticalPathIds.has(bar.id)) return bar
+      return {
+        ...bar,
+        styles: {
+          ...bar.styles,
+          backgroundColor: ganttBarColors.barBackgroundColor,
+          backgroundSelectedColor: ganttBarColors.barBackgroundSelectedColor,
+          progressColor: ganttBarColors.barProgressColor,
+          progressSelectedColor: ganttBarColors.barProgressSelectedColor
+        }
+      }
+    })
+  }, [tasks, criticalPathIds, ganttBarColors])
 
   const ganttReady = !loading && ganttTasks.length > 0
   const { highlightId } = useSearchHighlight('task', ganttReady)
@@ -410,7 +433,12 @@ export default function GanttView(): React.ReactElement {
           bodyClassName={styles.chartWrap}
           data-testid="gantt-island-surface"
         >
-          <div ref={chartRef} className={styles.chartInner} data-lanpm-visual="gantt-chart">
+          <div
+            ref={chartRef}
+            className={styles.chartInner}
+            data-lanpm-visual="gantt-chart"
+            data-critical-path={criticalPathIds.size > 0 ? 'on' : 'off'}
+          >
             <Gantt
             key={locale}
             tasks={ganttTasks}

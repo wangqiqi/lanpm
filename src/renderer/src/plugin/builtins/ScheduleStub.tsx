@@ -1,9 +1,14 @@
-import { Button, Typography } from 'antd'
+import { useCallback, useState } from 'react'
+import { Button, Switch, Typography, message } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
+import type { Task } from '@shared/task/types'
+import { computeFsCriticalPath } from '@shared/task/criticalPath'
 import { useI18n } from '@renderer/i18n/useI18n'
+import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
+import { publishScheduleCriticalPath } from '@renderer/plugin/scheduleCriticalPathBridge'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -14,10 +19,49 @@ interface Props {
   context?: ViewPluginContext
 }
 
-/** `lanpm.schedule` — 甘特工具条：无许可 CTA；有许可不绕过 Host 许可闸 */
-export default function ScheduleStub({ plugin, context }: Props): React.ReactElement | null {
+/** `lanpm.schedule` — 无许可 CTA；授权后开关 FS 关键路径高亮 */
+export default function ScheduleStub({ plugin, groupId, context }: Props): React.ReactElement | null {
   const { t } = useI18n()
   const licenseActive = isPluginLicenseActive(plugin)
+  const [pathOn, setPathOn] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  const applyPath = useCallback(
+    async (next: boolean) => {
+      if (!next) {
+        setPathOn(false)
+        publishScheduleCriticalPath({ groupId, active: false, taskIds: [] })
+        return
+      }
+      setBusy(true)
+      try {
+        const tasks = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.list', {
+          groupId
+        })) as Task[]
+        const result = computeFsCriticalPath(tasks)
+        setPathOn(true)
+        publishScheduleCriticalPath({
+          groupId,
+          active: true,
+          taskIds: result.taskIds
+        })
+        if (result.taskIds.length === 0) {
+          if (result.emptyReason === 'cycle') {
+            message.info(t('plugin.scheduleCriticalPathCycle'))
+          } else {
+            message.info(t('plugin.scheduleCriticalPathEmpty'))
+          }
+        }
+      } catch (err: unknown) {
+        setPathOn(false)
+        publishScheduleCriticalPath({ groupId, active: false, taskIds: [] })
+        message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+      } finally {
+        setBusy(false)
+      }
+    },
+    [groupId, plugin.id, t]
+  )
 
   if (context?.view !== 'gantt') return null
 
@@ -28,7 +72,16 @@ export default function ScheduleStub({ plugin, context }: Props): React.ReactEle
       data-plugin-id={plugin.id}
     >
       {licenseActive ? (
-        <Text type="secondary">{t('plugin.scheduleLicensedIdle')}</Text>
+        <label className={styles.scheduleToggle}>
+          <Switch
+            size="small"
+            checked={pathOn}
+            loading={busy}
+            data-testid="schedule-critical-path-switch"
+            onChange={(checked) => void applyPath(checked)}
+          />
+          <Text>{t('plugin.scheduleCriticalPath')}</Text>
+        </label>
       ) : (
         <div className={styles.meetingToolbarCta} data-testid="schedule-license-cta">
           <Text type="secondary">{t('plugin.scheduleLicenseCta')}</Text>
