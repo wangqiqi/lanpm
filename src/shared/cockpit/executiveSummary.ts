@@ -67,6 +67,11 @@ function isDueNextWeek(endDate: string | undefined, ref: Date): boolean {
   return isDayInRange(due, nextWeekStart, nextWeekEnd)
 }
 
+/** Open-task due date falls in the next ISO week (Mon–Sun after this week). */
+export function taskDueNextIsoWeek(endDate: string | undefined, ref: Date = new Date()): boolean {
+  return isDueNextWeek(endDate, ref)
+}
+
 export function buildExecutiveSummary(
   tasks: ExecutiveSummaryTaskInput[],
   riskProjectCount: number,

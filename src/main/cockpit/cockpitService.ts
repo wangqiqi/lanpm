@@ -6,11 +6,19 @@ import type {
   ProjectDashboardItem,
   ProjectHealth
 } from '../../shared/cockpit/types'
-import { COCKPIT_UNASSIGNED_DEPT, formatDeptForReport } from '../../shared/cockpit/constants'
+import { COCKPIT_UNASSIGNED_DEPT } from '../../shared/cockpit/constants'
 import { countRiskProjects, sortCockpitProjects } from '../../shared/cockpit/sortProjects'
 import { buildExecutiveSummary } from '../../shared/cockpit/executiveSummary'
 import { buildAttentionTasks } from '../../shared/cockpit/attentionTasks'
 import { buildWeeklyTrend } from '../../shared/cockpit/weeklyTrend'
+import {
+  buildMonthlyReportMarkdown,
+  buildWeeklyReportMarkdown,
+  formatReportTaskLine,
+  projectRiskLines,
+  selectMilestonesThisMonth,
+  selectOpenTasksDueNextWeek
+} from '../../shared/cockpit/reportMarkdown'
 import { countScheduleHealth, getTaskScheduleHealth } from '../../shared/task/scheduleHealth'
 import type { Task } from '../../shared/task/types'
 import { listProjectGroups } from '../storage/repositories/groupRepository'
@@ -132,37 +140,42 @@ function desensitizeTasks(db: Database, groupId: string): AiTaskAuditPayload[] {
     }))
 }
 
+function reportTaskLines(
+  tasks: { title: string; groupId: string; endDate?: string }[],
+  names: Map<string, string>
+): string[] {
+  return tasks.map((t) =>
+    formatReportTaskLine({
+      title: t.title,
+      projectName: names.get(t.groupId) ?? t.groupId,
+      endDate: t.endDate
+    })
+  )
+}
+
 function localWeeklyMarkdown(db: Database): string {
   const dash = buildCockpitDashboard(db)
-  const lines = [
-    '# LanPM 周报',
-    '',
-    `生成时间：${new Date().toISOString()}`,
-    '',
-    '## 概览',
-    `- 项目总数：${dash.summary.totalProjects}`,
-    `- 进行中任务：${dash.summary.inProgressCount}`,
-    `- 风险项目：${dash.summary.riskProjectCount}`,
-    `- 延期任务：${dash.summary.delayedCount}`,
-    '',
-    '## 项目进度',
-    ...dash.projects.map(
-      (p) =>
-        `- **${p.name}**：${p.progressPercent}%（${p.status}，进行中 ${p.inProgressCount}，延期 ${p.delayedCount}）`
-    ),
-    '',
-    '## 部门完成率',
-    ...dash.departments.map(
-      (d) =>
-        `- ${formatDeptForReport(d.department)}：${d.completionPercent}%（${d.doneCount}/${d.taskCount} 项完成）`
-    )
-  ]
-  return lines.join('\n')
+  const allTasks = listProjectTasksWithAssigneeMeta(db)
+  const names = new Map(listProjectGroups(db).map((g) => [g.groupId, g.name]))
+  const nextWeek = selectOpenTasksDueNextWeek(allTasks)
+  return buildWeeklyReportMarkdown(
+    dash,
+    reportTaskLines(nextWeek, names),
+    new Date().toISOString()
+  )
 }
 
 function localMonthlyMarkdown(db: Database): string {
-  const weekly = localWeeklyMarkdown(db)
-  return weekly.replace('# LanPM 周报', '# LanPM 月报').replace('## 概览', '## 本月概览')
+  const dash = buildCockpitDashboard(db)
+  const allTasks = listProjectTasksWithAssigneeMeta(db)
+  const names = new Map(listProjectGroups(db).map((g) => [g.groupId, g.name]))
+  const milestones = selectMilestonesThisMonth(allTasks)
+  return buildMonthlyReportMarkdown(
+    dash,
+    reportTaskLines(milestones, names),
+    projectRiskLines(dash),
+    new Date().toISOString()
+  )
 }
 
 async function callExternalAi(db: Database, prompt: string): Promise<string | null> {
