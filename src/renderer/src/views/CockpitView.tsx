@@ -64,6 +64,8 @@ export default function CockpitView(): React.ReactElement {
   const weeklyPlugin = usePluginView('lanpm.weekly')
   const weeklyExportAllowed =
     Boolean(weeklyPlugin?.enabled) && weeklyPlugin != null && isPluginLicenseActive(weeklyPlugin)
+  const returnToActiveProject = () =>
+    navigate(cockpitReturnPath(activeGroupId, lastNonCockpitPath))
   const [dashboard, setDashboard] = useState<CockpitDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
