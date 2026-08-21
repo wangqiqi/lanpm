@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.105.0] - 2026-08-21
+
 ### Added
 
 - **可购周报壳**：`lanpm.weekly`（`pricing: paid`）；默认关闭，不拆卖驾驶舱数字看板（`TASK-5701`）
