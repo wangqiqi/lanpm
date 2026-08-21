@@ -47,6 +47,12 @@ import {
 import { resolveStoryPointsPatch } from '@shared/task/storyPoints'
 import { defaultScheduleForTask } from '@shared/task/ganttAdapter'
 import type { ScheduleBaselineSnapshot } from '@shared/task/scheduleBaseline'
+import {
+  buildAgileBurndownView,
+  localYmd,
+  remainingStoryPoints,
+  type BurndownPoint
+} from '@shared/task/agileBurndown'
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
@@ -185,6 +191,7 @@ function writeStubLiveKitConfig(input: LiveKitConfig): ReturnType<typeof toLiveK
 
 const STUB_PLUGIN_LICENSES_KEY = 'lanpm.stub.pluginLicenses'
 const STUB_SCHEDULE_BASELINE_KEY = 'lanpm.stub.scheduleBaselines'
+const STUB_AGILE_BURNDOWN_KEY = 'lanpm.stub.agileBurndown'
 
 function readStubPluginLicenses(): Record<string, { features: string[]; expiresAt?: number }> {
   try {
@@ -218,6 +225,26 @@ function writeStubScheduleBaseline(groupId: string, snap: ScheduleBaselineSnapsh
 
 function readStubScheduleBaseline(groupId: string): ScheduleBaselineSnapshot {
   return readStubScheduleBaselines()[groupId] ?? { groupId, frozenAt: null, tasks: [] }
+}
+
+function readStubAgileBurndown(): Record<string, BurndownPoint[]> {
+  try {
+    const raw = localStorage.getItem(STUB_AGILE_BURNDOWN_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, BurndownPoint[]>
+  } catch {
+    return {}
+  }
+}
+
+function writeStubAgileBurndownSample(groupId: string, point: BurndownPoint): void {
+  const all = readStubAgileBurndown()
+  const prev = all[groupId] ?? []
+  const next = [...prev.filter((p) => p.day !== point.day), point].sort((a, b) =>
+    a.day < b.day ? -1 : a.day > b.day ? 1 : 0
+  )
+  all[groupId] = next
+  localStorage.setItem(STUB_AGILE_BURNDOWN_KEY, JSON.stringify(all))
 }
 
 function isStubPluginLicensed(pluginId: string): boolean {
@@ -1728,6 +1755,23 @@ export function createBrowserLanpmStub(): LanpmApi {
           throw new Error('plugin.scheduleLicenseRequired')
         }
         return readStubScheduleBaseline(groupId)
+      },
+      getAgileBurndown: async (groupId) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        const tasks = (readAllTasks()[groupId] ?? []).filter((t) => !t.deletedAt)
+        const today = localYmd(new Date())
+        writeStubAgileBurndownSample(groupId, {
+          day: today,
+          remaining: remainingStoryPoints(tasks)
+        })
+        return buildAgileBurndownView({
+          groupId,
+          tasks,
+          today,
+          samples: readStubAgileBurndown()[groupId] ?? []
+        })
       },
       upsertDependency: async (input) => {
         void input

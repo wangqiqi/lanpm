@@ -408,6 +408,24 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       `)
       db.exec(`CREATE INDEX idx_schedule_baselines_group ON schedule_baselines(group_id)`)
     }
+  },
+  {
+    fromVersion: 20,
+    description: 'agile_burndown_samples daily remaining points (SPRINT-66 TASK-6601)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE agile_burndown_samples (
+          group_id TEXT NOT NULL,
+          day TEXT NOT NULL,
+          remaining_points INTEGER NOT NULL,
+          sampled_at TEXT NOT NULL,
+          PRIMARY KEY (group_id, day)
+        )
+      `)
+      db.exec(
+        `CREATE INDEX idx_agile_burndown_samples_group ON agile_burndown_samples(group_id, day)`
+      )
+    }
   }
 ]
 

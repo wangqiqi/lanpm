@@ -335,3 +335,13 @@ CREATE TABLE schedule_baselines (
   PRIMARY KEY (group_id, task_id)
 );
 CREATE INDEX idx_schedule_baselines_group ON schedule_baselines(group_id);
+
+-- 付费敏捷：按群按日剩余故事点（当日覆盖）
+CREATE TABLE agile_burndown_samples (
+  group_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  remaining_points INTEGER NOT NULL,
+  sampled_at TEXT NOT NULL,
+  PRIMARY KEY (group_id, day)
+);
+CREATE INDEX idx_agile_burndown_samples_group ON agile_burndown_samples(group_id, day);

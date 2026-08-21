@@ -153,6 +153,9 @@ export interface LanpmApi {
     getScheduleBaseline: (
       groupId: string
     ) => Promise<import('./task/scheduleBaseline').ScheduleBaselineSnapshot>
+    getAgileBurndown: (
+      groupId: string
+    ) => Promise<import('./task/agileBurndown').AgileBurndownView>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>

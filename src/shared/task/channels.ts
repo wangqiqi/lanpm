@@ -23,6 +23,7 @@ export const TASK_IPC = {
   updateSchedule: 'task:updateSchedule',
   freezeScheduleBaseline: 'task:freezeScheduleBaseline',
   getScheduleBaseline: 'task:getScheduleBaseline',
+  getAgileBurndown: 'task:getAgileBurndown',
   upsertDependency: 'task:upsertDependency',
   removeDependency: 'task:removeDependency',
   deleteTask: 'task:deleteTask',

@@ -28,6 +28,7 @@ import {
   freezeScheduleBaseline,
   getScheduleBaseline
 } from '../task/scheduleBaselineService'
+import { getAgileBurndown } from '../task/agileBurndownService'
 import {
   listRemoteTaskAwareness,
   setLocalTaskAwareness
@@ -161,6 +162,10 @@ export function registerTaskIpc(): void {
 
   ipcMain.handle(TASK_IPC.getScheduleBaseline, (_event, groupId: string) => {
     return getScheduleBaseline(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(TASK_IPC.getAgileBurndown, (_event, groupId: string) => {
+    return getAgileBurndown(getDatabase(), groupId)
   })
 
   ipcMain.handle(TASK_IPC.upsertDependency, (_event, input: UpsertDependencyInput) => {
