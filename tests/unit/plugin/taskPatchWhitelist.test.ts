@@ -5,13 +5,14 @@ import {
 } from '../../../src/shared/plugin/taskPatchWhitelist.ts'
 
 describe('taskPatchWhitelist', () => {
-  it('defines five whitelist fields', () => {
+  it('defines whitelist fields', () => {
     expect(TASK_PATCH_WHITELIST_FIELDS).toEqual([
       'title',
       'status',
       'progressPercent',
       'priority',
-      'tags'
+      'tags',
+      'storyPoints'
     ])
   })
 

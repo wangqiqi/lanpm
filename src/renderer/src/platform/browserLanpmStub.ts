@@ -257,6 +257,7 @@ function executeStubWriteCapability(
       progressPercent?: number
       priority?: Task['priority']
       tags?: string[]
+      storyPoints?: number | null
     }
     return stubUpdateTask({
       taskId,

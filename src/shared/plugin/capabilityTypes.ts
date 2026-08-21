@@ -64,8 +64,10 @@ export type AiStreamChatCapabilityArgs = {
 
 /** Extension API v0.3 — task.patch payload */
 export type TaskPatchPayload = Partial<
-  Pick<Task, TaskPatchWhitelistField>
->
+  Pick<Task, Exclude<TaskPatchWhitelistField, 'storyPoints'>>
+> & {
+  storyPoints?: number | null
+}
 
 export type TaskPatchArgs = {
   groupId: string
