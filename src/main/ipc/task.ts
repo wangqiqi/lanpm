@@ -35,6 +35,7 @@ import {
   getAgileIterations,
   setCurrentAgileIteration
 } from '../task/agileIterationService'
+import { getAgileVelocity } from '../task/agileVelocityService'
 import {
   listRemoteTaskAwareness,
   setLocalTaskAwareness
@@ -205,6 +206,10 @@ export function registerTaskIpc(): void {
       return setCurrentAgileIteration(getDatabase(), groupId, iterationId)
     }
   )
+
+  ipcMain.handle(TASK_IPC.getAgileVelocity, (_event, groupId: string) => {
+    return getAgileVelocity(getDatabase(), groupId)
+  })
 
   ipcMain.handle(TASK_IPC.upsertDependency, (_event, input: UpsertDependencyInput) => {
     return upsertTaskDependency(getDatabase(), input)

@@ -178,6 +178,9 @@ export interface LanpmApi {
       groupId: string,
       iterationId: string | null
     ) => Promise<import('./task/agileIteration').AgileIterationSnapshot>
+    getAgileVelocity: (
+      groupId: string
+    ) => Promise<import('./task/agileVelocity').AgileVelocityView>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>

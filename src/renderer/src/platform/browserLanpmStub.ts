@@ -58,6 +58,7 @@ import {
   isWipStatus,
   type ColumnWipLimits,
   type AgileWipSnapshot
+} from '@shared/task/columnWip'
 import {
   parseIterationDates,
   parseIterationName,
@@ -65,6 +66,7 @@ import {
   type AgileIteration,
   type AgileIterationSnapshot
 } from '@shared/task/agileIteration'
+import { buildAgileVelocityView } from '@shared/task/agileVelocity'
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
@@ -1949,6 +1951,14 @@ export function createBrowserLanpmStub(): LanpmApi {
         store[groupId] = prev
         writeStubAgileIter(store)
         return stubIterSnapshot(groupId)
+      },
+      getAgileVelocity: async (groupId) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        const snap = stubIterSnapshot(groupId)
+        const tasks = (readAllTasks()[groupId] ?? []).filter((t) => !t.deletedAt)
+        return buildAgileVelocityView(groupId, snap.iterations, tasks)
       },
       upsertDependency: async (input) => {
         void input

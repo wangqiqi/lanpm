@@ -129,6 +129,7 @@ const api: LanpmApi = {
       ipcRenderer.invoke('task:createAgileIteration', groupId, name, startDate, endDate),
     setCurrentAgileIteration: (groupId, iterationId) =>
       ipcRenderer.invoke('task:setCurrentAgileIteration', groupId, iterationId),
+    getAgileVelocity: (groupId) => ipcRenderer.invoke('task:getAgileVelocity', groupId),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>
       ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),

@@ -29,6 +29,7 @@ export const TASK_IPC = {
   getAgileIterations: 'task:getAgileIterations',
   createAgileIteration: 'task:createAgileIteration',
   setCurrentAgileIteration: 'task:setCurrentAgileIteration',
+  getAgileVelocity: 'task:getAgileVelocity',
   upsertDependency: 'task:upsertDependency',
   removeDependency: 'task:removeDependency',
   deleteTask: 'task:deleteTask',
