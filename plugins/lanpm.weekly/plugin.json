@@ -1,0 +1,8 @@
+{
+  "id": "lanpm.weekly",
+  "name": "LanPM Weekly",
+  "version": "0.1.0",
+  "slots": ["topbar.menu"],
+  "capabilities": ["license.feature"],
+  "pricing": "paid"
+}

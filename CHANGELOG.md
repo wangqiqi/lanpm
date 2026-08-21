@@ -6,6 +6,7 @@
 
 ### Added
 
+- **可购周报壳**：`lanpm.weekly`（`pricing: paid`）；默认关闭，不拆卖驾驶舱数字看板（`TASK-5701`）
 - **可购敏捷包壳**：`lanpm.agile`（`pricing: paid`，Slot `board.toolbar` / `board.card.footer`）；默认关闭，不拆卖看板（`TASK-5601`）
 - **敏捷许可闸**：看板工具条无许可证显示 CTA；不展示故事点（`TASK-5602`）
 - **故事点字段**：`tasks.story_points` + CRDT `storyPoints`（1–99，可空）；走任务同步（`TASK-5603`）
