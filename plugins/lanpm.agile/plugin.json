@@ -1,0 +1,8 @@
+{
+  "id": "lanpm.agile",
+  "name": "LanPM Agile",
+  "version": "0.1.0",
+  "slots": ["board.toolbar", "board.card.footer"],
+  "capabilities": ["task.list", "task.patch"],
+  "pricing": "paid"
+}

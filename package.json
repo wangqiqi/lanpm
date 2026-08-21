@@ -111,6 +111,7 @@
     "verify:ops-p2-remaining": "node --experimental-strip-types tests/static/verify-ops-p2-remaining.ts",
     "verify:meeting-plugin": "node --experimental-strip-types tests/static/verify-meeting-plugin.ts",
     "verify:schedule-sku": "node --experimental-strip-types tests/static/verify-schedule-sku.ts",
+    "verify:agile-sku": "node --experimental-strip-types tests/static/verify-agile-sku.ts",
     "verify:meeting-mesh-poc": "node --experimental-strip-types tests/static/verify-meeting-mesh-poc.ts",
     "verify:meeting-livekit-pro": "node --experimental-strip-types tests/static/verify-meeting-livekit-pro.ts",
     "verify:meeting-ux": "node --experimental-strip-types tests/static/verify-meeting-ux.ts",

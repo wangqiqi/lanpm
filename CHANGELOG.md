@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **可购敏捷包壳**：`lanpm.agile`（`pricing: paid`，Slot `board.toolbar` / `board.card.footer`）；默认关闭，不拆卖看板（`TASK-5601`）
+- **可购高级排程壳**：`lanpm.schedule`（`pricing: paid`，Slot `gantt.toolbar`）；默认关闭，不拆卖基础甘特（`TASK-5401`）
 - **高级排程许可闸**：甘特工具条无许可证显示 CTA；`task.list` 等能力仍走 Host `assertPaidPluginLicensed`（`TASK-5402`）
 - **FS 关键路径**：纯函数按已有 FS 依赖算最长工期链；环/无日期/无 FS 返回空（`TASK-5403`）
 - **甘特关键路径开关**：授权后工具条 Switch；高亮用 accent 令牌，空链/成环有提示（`TASK-5404`）
