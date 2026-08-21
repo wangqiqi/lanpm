@@ -27,7 +27,9 @@ assert.match(stub, /openProfileTab/)
 assert.match(stub, /agile-story-points/)
 assert.match(stub, /sumStoryPointsByStatus/)
 assert.match(stub, /invokeCapability/)
-assert.match(stub, /task.patch/)
+assert.match(stub, /agile-burndown/)
+assert.match(stub, /getAgileBurndown/)
+assert.match(stub, /burndownPolyline/)
 
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /assertPaidPluginLicensed/)
@@ -45,10 +47,18 @@ assert.match(docs07, /lanpm\.agile/)
 const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(docs06, /lanpm\.agile/)
 assert.match(docs06, /SPRINT-56/)
+assert.match(docs06, /SPRINT-66/)
+assert.match(docs06, /WIP \/ 迭代容器仍后置/)
 assert.match(docs06, /仍永不插件化拆卖/)
 
 const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
 assert.match(schemaSql, /story_points/)
+assert.match(schemaSql, /agile_burndown_samples/)
+
+const service = readFileSync(join(root, 'src/main/task/agileBurndownService.ts'), 'utf8')
+assert.match(service, /assertPaidPluginLicensed\('lanpm\.agile'/)
+assert.match(service, /getAgileBurndown/)
+assert.match(service, /upsertAgileBurndownSample/)
 
 const editModal = readFileSync(
   join(root, 'src/renderer/src/features/board/TaskEditModal.tsx'),
@@ -66,5 +76,6 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
 }
 assert.ok(pkg.scripts?.['verify:agile-sku'], 'missing verify:agile-sku script')
+assert.match(pkg.scripts['verify:agile-sku'] ?? '', /verify-agile-burndown/)
 
 console.log('verify:agile-sku OK')

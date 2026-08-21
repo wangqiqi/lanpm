@@ -115,7 +115,7 @@
     "verify:ops-p2-remaining": "node --experimental-strip-types tests/static/verify-ops-p2-remaining.ts",
     "verify:meeting-plugin": "node --experimental-strip-types tests/static/verify-meeting-plugin.ts",
     "verify:schedule-sku": "node --experimental-strip-types tests/static/verify-schedule-sku.ts && node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-schedule-baseline.ts",
-    "verify:agile-sku": "node --experimental-strip-types tests/static/verify-agile-sku.ts",
+    "verify:agile-sku": "node --experimental-strip-types tests/static/verify-agile-sku.ts && node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-agile-burndown.ts",
     "verify:weekly-sku": "node --experimental-strip-types tests/static/verify-weekly-sku.ts",
     "verify:backup-sku": "node --experimental-strip-types tests/static/verify-backup-sku.ts",
     "verify:meeting-mesh-poc": "node --experimental-strip-types tests/static/verify-meeting-mesh-poc.ts",
