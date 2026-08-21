@@ -3,7 +3,7 @@
  * Run: npm run verify:schedule-sku
  */
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 import { parsePluginManifest } from '../../src/shared/plugin/validateManifest.ts'
