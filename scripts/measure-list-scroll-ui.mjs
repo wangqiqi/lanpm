@@ -61,6 +61,7 @@ async function measureOne(page, view, testId) {
   if (view === 'board') {
     await page.locator(`[data-testid="${testId}"]`).first().waitFor({ state: 'visible' })
   }
+  await page.waitForTimeout(800)
 
   const raw = await page.evaluate(async ({ testId: id, view: v }) => {
     const nodes = [...document.querySelectorAll(`[data-testid="${id}"]`)]
@@ -91,7 +92,7 @@ async function measureOne(page, view, testId) {
       observer = new PerformanceObserver((list) => {
         for (const e of list.getEntries()) longTasks.push(e.duration)
       })
-      observer.observe({ type: 'longtask', buffered: true })
+      observer.observe({ type: 'longtask', buffered: false })
     } catch {
       observer = null
     }

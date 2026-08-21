@@ -37,6 +37,7 @@ assert.equal(LIST_SCROLL_FRAME_P95_GO_MS, 50)
 assert.equal(LIST_SCROLL_LONG_TASK_GO_MS, 50)
 
 const ui = readSrc('scripts/measure-list-scroll-ui.mjs')
+assert.match(ui, /buffered: false/)
 assert.match(ui, /measure-seed-lists/)
 assert.match(ui, /launchMeasured/)
 assert.match(ui, /nav-tab-\$\{view\}/)

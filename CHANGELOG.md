@@ -6,6 +6,7 @@
 
 ### Added
 
+- **长列表测量（Linux）**：聊天/看板/文件/甘特均可滚；滚动 rAF P95≈16.7ms、无 longtask；**NO-GO** 不装 virtuoso（`TASK-6003`）
 - **四页长列表滚动测量**：`measure:list-scroll` 灌数后滚聊天/看板/文件/甘特；P95≥50ms 或长任务≥50ms 才 GO 装 virtuoso（`TASK-6002`）
 - **四页长列表灌数**：`measure-seed-lists` 给 demo-project 补消息/任务/文件，并露出甘特/文件 Tab；四页滚动容器带 testid（`TASK-6001`）
 - **Office 轻量预览（主进程）**：无 LibreOffice 时 `docx`/`xlsx` 用 mammoth / exceljs 写出 HTML 预览；有 `soffice` 仍先转 PDF（`TASK-5801`）
