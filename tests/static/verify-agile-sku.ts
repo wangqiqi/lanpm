@@ -66,7 +66,12 @@ assert.match(docs06, /SPRINT-56/)
 assert.match(docs06, /SPRINT-66/)
 assert.match(docs06, /SPRINT-69/)
 assert.match(docs06, /SPRINT-70/)
+assert.match(docs06, /SPRINT-71/)
 assert.doesNotMatch(docs06, /迭代容器仍后置/)
+assert.doesNotMatch(docs06, /速度图仍后置/)
+assert.doesNotMatch(docs06, /速度图 \/ carry-over 仍后置/)
+assert.match(docs06, /速度图已交付/)
+assert.match(docs06, /carry-over 仍后置/)
 assert.match(docs06, /迭代容器/)
 assert.match(docs06, /仍永不插件化拆卖/)
 
@@ -93,6 +98,11 @@ const iterService = readFileSync(join(root, 'src/main/task/agileIterationService
 assert.match(iterService, /assertPaidPluginLicensed\('lanpm\.agile'/)
 assert.match(iterService, /createAgileIteration/)
 assert.match(iterService, /setCurrentAgileIteration/)
+
+const velService = readFileSync(join(root, 'src/main/task/agileVelocityService.ts'), 'utf8')
+assert.match(velService, /assertPaidPluginLicensed\('lanpm\.agile'/)
+assert.match(velService, /getAgileVelocity/)
+assert.match(velService, /buildAgileVelocityView/)
 
 const editModal = readFileSync(
   join(root, 'src/renderer/src/features/board/TaskEditModal.tsx'),
