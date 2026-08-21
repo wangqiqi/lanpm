@@ -6,6 +6,10 @@
 
 ### Added
 
+- **敏捷燃尽表**：`agile_burndown_samples`（schema v21）；按群按日覆盖剩余故事点（`TASK-6601`）
+- **看板燃尽图**：授权后工具条折线对照理想直线；无许可仍 CTA（`TASK-6602`）
+- **敏捷 SKU 守卫**：`verify:agile-sku` 锁住燃尽表、许可闸、工具条图、禁止默认启用（`TASK-6603`）
+- **敏捷燃尽口径**：`docs/06` §6.3 · README 记 SPRINT-66；WIP / 迭代容器仍后置（`TASK-6604`）
 - **排程基线表**：`schedule_baselines`（schema v20）；每群一版，再冻覆盖（`TASK-6501`）
 - **甘特冻结基线**：授权后工具栏冻结当前起止；条色对照延期/提前（`TASK-6502`）
 - **排程 SKU 守卫**：`verify:schedule-sku` 锁住基线表、许可闸、冻结按钮、禁止默认启用（`TASK-6503`）
