@@ -326,6 +326,18 @@
   cursor: pointer;
 }
 
+.agileBurndown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agileBurndownSvg {
+  width: 128px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
 .agileCardPoints {
   display: inline-flex;
   align-items: center;

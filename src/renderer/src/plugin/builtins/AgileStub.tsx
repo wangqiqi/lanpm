@@ -4,6 +4,10 @@ import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { Task, TaskStatus } from '@shared/task/types'
 import { formatColumnPointSums, parseStoryPoints, sumStoryPointsByStatus } from '@shared/task/storyPoints'
+import {
+  burndownPolyline,
+  type AgileBurndownView
+} from '@shared/task/agileBurndown'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { invokeCapabilityWithHumanConfirm } from '@renderer/plugin/invokeCapabilityWithHumanConfirm'
@@ -39,6 +43,7 @@ export default function AgileStub({
   const licenseActive = isPluginLicenseActive(plugin)
   const [tasks, setTasks] = useState<Task[]>([])
   const [busy, setBusy] = useState(false)
+  const [burndown, setBurndown] = useState<AgileBurndownView | null>(null)
 
   const reload = useCallback(async () => {
     if (!licenseActive || !groupId) {
@@ -50,9 +55,12 @@ export default function AgileStub({
         groupId
       })) as Task[]
       setTasks(list.filter((task) => !task.deletedAt))
+      const chart = await getLanpmApi().task.getAgileBurndown(groupId)
+      setBurndown(chart)
     } catch (err: unknown) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
       setTasks([])
+      setBurndown(null)
     }
   }, [groupId, licenseActive, plugin.id, t])
 
@@ -140,6 +148,11 @@ export default function AgileStub({
     done: t(STATUS_LABEL_KEYS.done),
     other: t(STATUS_LABEL_KEYS.other)
   }
+  const yMax = Math.max(burndown?.total ?? 0, burndown?.remaining ?? 0, 1)
+  const actualLine = burndown
+    ? burndownPolyline(burndown.samples, 128, 28, yMax)
+    : ''
+  const idealLine = burndown ? burndownPolyline(burndown.ideal, 128, 28, yMax) : ''
   return (
     <div
       className={styles.scheduleToolbar}
@@ -149,6 +162,35 @@ export default function AgileStub({
       <Text type="secondary" data-testid="agile-column-sums">
         {t('plugin.agileColumnSums')}: {formatColumnPointSums(sums, labels)}
       </Text>
+      {burndown ? (
+        <span className={styles.agileBurndown} data-testid="agile-burndown">
+          <Text type="secondary">
+            {t('plugin.agileBurndown')} {burndown.remaining}/{burndown.total}
+          </Text>
+          <svg
+            className={styles.agileBurndownSvg}
+            viewBox="0 0 128 28"
+            aria-hidden
+          >
+            {idealLine ? (
+              <polyline
+                fill="none"
+                stroke="var(--lanpm-border)"
+                strokeWidth="1.5"
+                points={idealLine}
+              />
+            ) : null}
+            {actualLine ? (
+              <polyline
+                fill="none"
+                stroke="var(--lanpm-accent)"
+                strokeWidth="1.5"
+                points={actualLine}
+              />
+            ) : null}
+          </svg>
+        </span>
+      ) : null}
     </div>
   )
 }

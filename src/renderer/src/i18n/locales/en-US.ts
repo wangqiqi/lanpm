@@ -643,6 +643,8 @@ const enUS = {
   'plugin.agileLicensedIdle': 'Agile is licensed',
   'plugin.agilePoints': 'Story points',
   'plugin.agileColumnSums': 'Column totals',
+  'plugin.agileBurndown': 'Burndown',
+  'plugin.agileLicenseRequired': 'Burndown needs a valid agile license',
   'plugin.weeklyLicenseCta': 'Weekly export needs a valid offline license — import one under Extensions.',
   'plugin.weeklyLicenseRequired': 'Weekly/monthly export requires a valid license',
   'plugin.meetingOpenMeetingConfig': 'Configure meeting bypass',

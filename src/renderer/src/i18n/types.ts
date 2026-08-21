@@ -625,6 +625,8 @@ export type MessageKey =
   | 'plugin.agileLicensedIdle'
   | 'plugin.agilePoints'
   | 'plugin.agileColumnSums'
+  | 'plugin.agileBurndown'
+  | 'plugin.agileLicenseRequired'
   | 'plugin.weeklyLicenseCta'
   | 'plugin.weeklyLicenseRequired'
   | 'plugin.meetingOpenMeetingConfig'

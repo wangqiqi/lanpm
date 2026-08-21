@@ -633,6 +633,8 @@ const zhCN = {
   'plugin.agileLicensedIdle': '敏捷扩展已授权',
   'plugin.agilePoints': '故事点',
   'plugin.agileColumnSums': '列合计',
+  'plugin.agileBurndown': '燃尽',
+  'plugin.agileLicenseRequired': '燃尽需要有效的敏捷许可证',
   'plugin.weeklyLicenseCta': '周报导出需有效离线许可证，请在扩展页导入许可。',
   'plugin.weeklyLicenseRequired': '周报/月报导出需要有效许可证',
   'plugin.meetingOpenMeetingConfig': '配置会议旁路',
