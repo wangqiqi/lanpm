@@ -8,11 +8,13 @@ const { Text } = Typography
 function VideoTile({
   track,
   label,
-  mutedPlayback
+  mutedPlayback,
+  isScreen
 }: {
   track: MediaStreamTrack | null
   label: string
   mutedPlayback?: boolean
+  isScreen?: boolean
 }): React.ReactElement {
   const ref = useRef<HTMLVideoElement>(null)
 
@@ -31,8 +33,15 @@ function VideoTile({
     }
   }, [track])
 
+  const tileClass = [styles.meetingVideoTile, isScreen ? styles.meetingVideoTileScreen : '']
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className={styles.meetingVideoTile} data-testid="meeting-livekit-video-tile">
+    <div
+      className={tileClass}
+      data-testid={isScreen ? 'meeting-livekit-video-tile-screen' : 'meeting-livekit-video-tile'}
+    >
       {track ? (
         <video ref={ref} className={styles.meetingVideoEl} playsInline autoPlay muted={mutedPlayback} />
       ) : (
@@ -60,13 +69,19 @@ export default function MeetingLiveKitVideoGrid({
   if (!joined) return null
 
   const tiles = participants.flatMap((p) => {
-    const items: Array<{ key: string; track: MediaStreamTrack | null; label: string; muted?: boolean }> =
-      []
+    const items: Array<{
+      key: string
+      track: MediaStreamTrack | null
+      label: string
+      muted?: boolean
+      isScreen?: boolean
+    }> = []
     if (p.screenShareTrack) {
       items.push({
         key: `${p.identity}-screen`,
         track: p.screenShareTrack,
-        label: `${p.name} (screen)`
+        label: `${p.name} (screen)`,
+        isScreen: true
       })
     }
     items.push({
@@ -90,6 +105,7 @@ export default function MeetingLiveKitVideoGrid({
             track={tile.track}
             label={tile.label}
             mutedPlayback={tile.muted}
+            isScreen={tile.isScreen}
           />
         ))}
       </div>

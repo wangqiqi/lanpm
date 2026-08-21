@@ -263,7 +263,7 @@
 
 .meetingVideoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
   margin: 8px 0;
 }
@@ -273,6 +273,19 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+}
+
+.meetingVideoTileScreen {
+  grid-column: 1 / -1;
+  outline: 2px solid var(--lanpm-accent, #1677ff);
+  outline-offset: 1px;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.meetingVideoTileScreen .meetingVideoEl,
+.meetingVideoTileScreen .meetingVideoPlaceholder {
+  aspect-ratio: 16 / 9;
 }
 
 .meetingVideoEl {

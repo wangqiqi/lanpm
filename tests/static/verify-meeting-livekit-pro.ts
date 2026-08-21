@@ -67,6 +67,13 @@ const videoGrid = readFileSync(
   'utf8'
 )
 assert.match(videoGrid, /meeting-livekit-video-grid/)
+assert.match(videoGrid, /meetingVideoTileScreen/)
+assert.match(videoGrid, /isScreen/)
+
+const pluginCss = readFileSync(join(root, 'src/renderer/src/plugin/plugin.module.css'), 'utf8')
+assert.match(pluginCss, /auto-fit/)
+assert.match(pluginCss, /\.meetingVideoTileScreen/)
+assert.match(pluginCss, /grid-column: 1 \/ -1/)
 
 const loader = readFileSync(
   join(root, 'src/renderer/src/plugin/builtins/livekitClientLoader.ts'),
