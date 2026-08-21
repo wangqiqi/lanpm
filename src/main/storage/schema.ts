@@ -45,7 +45,8 @@ export const EXPECTED_TABLES = [
   'ai_threads',
   'ai_messages',
   'ai_patrol_runs',
-  'ai_pipeline_runs'
+  'ai_pipeline_runs',
+  'schedule_baselines'
 ] as const
 
-export const SCHEMA_VERSION = 19
+export const SCHEMA_VERSION = 20

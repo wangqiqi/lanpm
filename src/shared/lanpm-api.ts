@@ -147,6 +147,12 @@ export interface LanpmApi {
       item: import('./task/checklist').ChecklistItem
     }>
     updateSchedule: (input: GanttScheduleInput) => Promise<Task>
+    freezeScheduleBaseline: (
+      groupId: string
+    ) => Promise<import('./task/scheduleBaseline').FreezeScheduleBaselineResult>
+    getScheduleBaseline: (
+      groupId: string
+    ) => Promise<import('./task/scheduleBaseline').ScheduleBaselineSnapshot>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>

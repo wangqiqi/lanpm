@@ -324,3 +324,14 @@ CREATE TABLE ai_pipeline_runs (
   degraded INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX idx_ai_pipeline_runs_user_started ON ai_pipeline_runs(user_id, started_at DESC);
+
+-- 付费排程：每群一版甘特基线（再冻覆盖）
+CREATE TABLE schedule_baselines (
+  group_id TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  start_date TEXT NOT NULL,
+  end_date TEXT NOT NULL,
+  frozen_at TEXT NOT NULL,
+  PRIMARY KEY (group_id, task_id)
+);
+CREATE INDEX idx_schedule_baselines_group ON schedule_baselines(group_id);

@@ -25,6 +25,10 @@ import {
   upsertTaskDependency
 } from '../task/taskService'
 import {
+  freezeScheduleBaseline,
+  getScheduleBaseline
+} from '../task/scheduleBaselineService'
+import {
   listRemoteTaskAwareness,
   setLocalTaskAwareness
 } from '../task/taskAwarenessService'
@@ -149,6 +153,14 @@ export function registerTaskIpc(): void {
 
   ipcMain.handle(TASK_IPC.updateSchedule, (_event, input: GanttScheduleInput) => {
     return updateTaskSchedule(getDatabase(), input)
+  })
+
+  ipcMain.handle(TASK_IPC.freezeScheduleBaseline, (_event, groupId: string) => {
+    return freezeScheduleBaseline(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(TASK_IPC.getScheduleBaseline, (_event, groupId: string) => {
+    return getScheduleBaseline(getDatabase(), groupId)
   })
 
   ipcMain.handle(TASK_IPC.upsertDependency, (_event, input: UpsertDependencyInput) => {

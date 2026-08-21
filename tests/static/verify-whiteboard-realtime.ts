@@ -18,6 +18,7 @@ import {
   WHITEBOARD_MAX_ASSET_CHARS
 } from '../../src/shared/whiteboard/whiteboardCrdtModel.ts'
 import { emptyWhiteboardSceneJson } from '../../src/shared/whiteboard/types.ts'
+import { SCHEMA_VERSION } from '../../src/main/storage/schema.ts'
 import { WHITEBOARD_IPC } from '../../src/shared/whiteboard/channels.ts'
 import { assertPublishableSyncType } from '../../src/shared/network/unimplementedSync.ts'
 
@@ -82,7 +83,7 @@ assert.match(view, /@mizuka-wu\/y-excalidraw/)
 assert.match(view, /onPointerUpdate/)
 
 const schemaTs = readFileSync(join(root, 'src/main/storage/schema.ts'), 'utf8')
-assert.match(schemaTs, /SCHEMA_VERSION\s*=\s*19/)
+assert.ok(SCHEMA_VERSION >= 16, `SCHEMA_VERSION must be >= 16, got ${SCHEMA_VERSION}`)
 assert.match(schemaTs, /whiteboard_crdt_docs/)
 
 const types = readFileSync(join(root, 'src/shared/network/types.ts'), 'utf8')

@@ -391,6 +391,23 @@ export const MIGRATIONS: readonly MigrationStep[] = [
     up: (db) => {
       db.exec(`ALTER TABLE tasks ADD COLUMN story_points INTEGER`)
     }
+  },
+  {
+    fromVersion: 19,
+    description: 'schedule_baselines per-group freeze (SPRINT-65 TASK-6501)',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE schedule_baselines (
+          group_id TEXT NOT NULL,
+          task_id TEXT NOT NULL,
+          start_date TEXT NOT NULL,
+          end_date TEXT NOT NULL,
+          frozen_at TEXT NOT NULL,
+          PRIMARY KEY (group_id, task_id)
+        )
+      `)
+      db.exec(`CREATE INDEX idx_schedule_baselines_group ON schedule_baselines(group_id)`)
+    }
   }
 ]
 

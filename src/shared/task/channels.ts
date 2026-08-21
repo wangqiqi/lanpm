@@ -21,6 +21,8 @@ export const TASK_IPC = {
   removeChecklistItem: 'task:removeChecklistItem',
   createSubtaskFromChecklistItem: 'task:createSubtaskFromChecklistItem',
   updateSchedule: 'task:updateSchedule',
+  freezeScheduleBaseline: 'task:freezeScheduleBaseline',
+  getScheduleBaseline: 'task:getScheduleBaseline',
   upsertDependency: 'task:upsertDependency',
   removeDependency: 'task:removeDependency',
   deleteTask: 'task:deleteTask',

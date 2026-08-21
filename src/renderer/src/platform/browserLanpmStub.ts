@@ -45,6 +45,8 @@ import {
   validateTaskTitle
 } from '@shared/task/validation'
 import { resolveStoryPointsPatch } from '@shared/task/storyPoints'
+import { defaultScheduleForTask } from '@shared/task/ganttAdapter'
+import type { ScheduleBaselineSnapshot } from '@shared/task/scheduleBaseline'
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
@@ -182,6 +184,7 @@ function writeStubLiveKitConfig(input: LiveKitConfig): ReturnType<typeof toLiveK
 }
 
 const STUB_PLUGIN_LICENSES_KEY = 'lanpm.stub.pluginLicenses'
+const STUB_SCHEDULE_BASELINE_KEY = 'lanpm.stub.scheduleBaselines'
 
 function readStubPluginLicenses(): Record<string, { features: string[]; expiresAt?: number }> {
   try {
@@ -195,6 +198,26 @@ function readStubPluginLicenses(): Record<string, { features: string[]; expiresA
 
 function writeStubPluginLicenses(map: Record<string, { features: string[]; expiresAt?: number }>): void {
   localStorage.setItem(STUB_PLUGIN_LICENSES_KEY, JSON.stringify(map))
+}
+
+function readStubScheduleBaselines(): Record<string, ScheduleBaselineSnapshot> {
+  try {
+    const raw = localStorage.getItem(STUB_SCHEDULE_BASELINE_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as Record<string, ScheduleBaselineSnapshot>
+  } catch {
+    return {}
+  }
+}
+
+function writeStubScheduleBaseline(groupId: string, snap: ScheduleBaselineSnapshot): void {
+  const all = readStubScheduleBaselines()
+  all[groupId] = snap
+  localStorage.setItem(STUB_SCHEDULE_BASELINE_KEY, JSON.stringify(all))
+}
+
+function readStubScheduleBaseline(groupId: string): ScheduleBaselineSnapshot {
+  return readStubScheduleBaselines()[groupId] ?? { groupId, frozenAt: null, tasks: [] }
 }
 
 function isStubPluginLicensed(pluginId: string): boolean {
@@ -1686,6 +1709,26 @@ export function createBrowserLanpmStub(): LanpmApi {
           startDate: input.startDate,
           endDate: input.endDate
         }),
+      freezeScheduleBaseline: async (groupId) => {
+        if (!isStubPluginLicensed('lanpm.schedule')) {
+          throw new Error('plugin.scheduleLicenseRequired')
+        }
+        const frozenAt = new Date().toISOString()
+        const tasks = (readAllTasks()[groupId] ?? [])
+          .filter((t) => !t.deletedAt)
+          .map((t) => {
+            const dates = defaultScheduleForTask(t)
+            return { taskId: t.taskId, startDate: dates.startDate, endDate: dates.endDate }
+          })
+        writeStubScheduleBaseline(groupId, { groupId, frozenAt, tasks })
+        return { groupId, frozenAt, count: tasks.length }
+      },
+      getScheduleBaseline: async (groupId) => {
+        if (!isStubPluginLicensed('lanpm.schedule')) {
+          throw new Error('plugin.scheduleLicenseRequired')
+        }
+        return readStubScheduleBaseline(groupId)
+      },
       upsertDependency: async (input) => {
         void input
         throw stubError('stub.ganttDepsUnsupported')
