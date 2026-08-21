@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
-import type { ColumnWipLimits, TaskStatus } from '../../../shared/task/columnWip.ts'
+import type { TaskStatus } from '../../../shared/task/types.ts'
+import type { ColumnWipLimits } from '../../../shared/task/columnWip.ts'
 import { isWipStatus, parseWipLimit } from '../../../shared/task/columnWip.ts'
 
 interface LimitRow {

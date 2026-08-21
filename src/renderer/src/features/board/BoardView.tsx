@@ -62,6 +62,7 @@ import {
 import { groupTagMetaToColorMap } from '@shared/task/groupTagMeta'
 import IslandPanel from '@renderer/ui/IslandPanel'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
+import { subscribeAgileWip } from '@renderer/plugin/agileWipBridge'
 import styles from './board.module.css'
 
 const COLUMN_TITLE_KEYS: Record<TaskStatus, MessageKey> = {
@@ -129,7 +130,8 @@ function KanbanColumn({
   onPinRelations,
   onLocateTask,
   peersByTask,
-  tagColorOverrides
+  tagColorOverrides,
+  wipOver
 }: {
   groupId: string
   status: TaskStatus
@@ -151,6 +153,7 @@ function KanbanColumn({
   onLocateTask: (taskId: string, view: 'board' | 'tree' | 'gantt') => void
   peersByTask: Map<string, AwarenessPeer[]>
   tagColorOverrides?: Readonly<Record<string, string>> | null
+  wipOver?: boolean
 }): React.ReactElement {
   const { t } = useI18n()
   const { setNodeRef } = useDroppable({ id: status })
@@ -200,12 +203,22 @@ function KanbanColumn({
   ) : null
 
   return (
-    <div ref={setNodeRef} className={styles.columnShell} data-testid="board-column-island">
+    <div
+      ref={setNodeRef}
+      className={styles.columnShell}
+      data-testid="board-column-island"
+      data-wip-over={wipOver ? 'true' : 'false'}
+    >
       <IslandPanel
         title={t(COLUMN_TITLE_KEYS[status])}
         extra={
           <>
             <span className={styles.columnCount}>{tasks.length}</span>
+            {wipOver ? (
+              <span className={styles.columnWipOver} data-testid="board-column-wip-over">
+                {t('board.wipOver')}
+              </span>
+            ) : null}
             {columnExtra}
           </>
         }
@@ -249,6 +262,7 @@ export default function BoardView(): React.ReactElement {
   const [relationHoverId, setRelationHoverId] = useState<string | null>(null)
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [assigneeSearch, setAssigneeSearch] = useState('')
+  const [wipOverCols, setWipOverCols] = useState<Set<TaskStatus>>(() => new Set())
   const boardBodyRef = useRef<HTMLDivElement>(null)
   const boardShowAllFsLines = useUiStore((s) => s.boardShowAllFsLines)
   const setBoardShowAllFsLines = useUiStore((s) => s.setBoardShowAllFsLines)
@@ -283,6 +297,13 @@ export default function BoardView(): React.ReactElement {
     setRelationFocusId(highlightId)
     setRelationHoverId(null)
   }, [highlightId])
+
+  useEffect(() => {
+    return subscribeAgileWip((detail) => {
+      if (detail.groupId !== gid) return
+      setWipOverCols(new Set(detail.over))
+    })
+  }, [gid])
 
   const relationMap = useMemo(() => buildBoardRelationMap(tasks), [tasks])
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.taskId, t])), [tasks])
@@ -698,6 +719,7 @@ export default function BoardView(): React.ReactElement {
                 onLocateTask={locateTask}
                 peersByTask={peersByTask}
                 tagColorOverrides={tagColorOverrides}
+                wipOver={wipOverCols.has(status)}
               />
             ))}
             </div>

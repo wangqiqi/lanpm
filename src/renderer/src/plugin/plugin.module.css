@@ -338,6 +338,19 @@
   flex-shrink: 0;
 }
 
+.agileWipRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.agileWipField {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .agileCardPoints {
   display: inline-flex;
   align-items: center;

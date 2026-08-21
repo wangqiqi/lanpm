@@ -60,6 +60,12 @@
   color: var(--lanpm-text-secondary);
 }
 
+.columnWipOver {
+  margin-left: var(--lanpm-space-1);
+  font-size: var(--lanpm-font-caption);
+  color: var(--lanpm-danger, #c2410c);
+}
+
 .columnBody {
   flex: 1;
   overflow-y: auto;

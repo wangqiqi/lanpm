@@ -8,11 +8,19 @@ import {
   burndownPolyline,
   type AgileBurndownView
 } from '@shared/task/agileBurndown'
+import {
+  COLUMN_WIP_STATUSES,
+  countTasksByStatus,
+  overWipColumns,
+  parseWipLimit,
+  type ColumnWipLimits
+} from '@shared/task/columnWip'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { invokeCapabilityWithHumanConfirm } from '@renderer/plugin/invokeCapabilityWithHumanConfirm'
 import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
+import { publishAgileWip } from '@renderer/plugin/agileWipBridge'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -44,29 +52,53 @@ export default function AgileStub({
   const [tasks, setTasks] = useState<Task[]>([])
   const [busy, setBusy] = useState(false)
   const [burndown, setBurndown] = useState<AgileBurndownView | null>(null)
+  const [wipLimits, setWipLimits] = useState<ColumnWipLimits>({})
 
   const reload = useCallback(async () => {
     if (!licenseActive || !groupId) {
       setTasks([])
+      setBurndown(null)
+      setWipLimits({})
+      if (groupId) publishAgileWip({ groupId, limits: {}, over: [] })
       return
     }
     try {
       const list = (await getLanpmApi().plugin.invokeCapability(plugin.id, 'task.list', {
         groupId
       })) as Task[]
-      setTasks(list.filter((task) => !task.deletedAt))
+      const live = list.filter((task) => !task.deletedAt)
+      setTasks(live)
       const chart = await getLanpmApi().task.getAgileBurndown(groupId)
       setBurndown(chart)
+      const snap = await getLanpmApi().task.getAgileWipLimits(groupId)
+      setWipLimits(snap.limits)
+      publishAgileWip({
+        groupId,
+        limits: snap.limits,
+        over: overWipColumns(countTasksByStatus(live), snap.limits)
+      })
     } catch (err: unknown) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
       setTasks([])
       setBurndown(null)
+      setWipLimits({})
+      publishAgileWip({ groupId, limits: {}, over: [] })
     }
   }, [groupId, licenseActive, plugin.id, t])
 
   useEffect(() => {
     void reload()
-  }, [reload])
+    if (!licenseActive || !groupId) {
+      return () => publishAgileWip({ groupId, limits: {}, over: [] })
+    }
+    const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
+      if (changedGroupId === groupId) void reload()
+    })
+    return () => {
+      unsub()
+      publishAgileWip({ groupId, limits: {}, over: [] })
+    }
+  }, [reload, groupId, licenseActive])
 
   const confirmCopy = useMemo(
     () => ({
@@ -97,6 +129,26 @@ export default function AgileStub({
       }
     },
     [confirmCopy, groupId, plugin.id, reload, t]
+  )
+
+  const onSaveWip = useCallback(
+    async (status: TaskStatus, next: number | null) => {
+      setBusy(true)
+      try {
+        const snap = await getLanpmApi().task.setAgileWipLimit(groupId, status, next)
+        setWipLimits(snap.limits)
+        publishAgileWip({
+          groupId,
+          limits: snap.limits,
+          over: overWipColumns(countTasksByStatus(tasks), snap.limits)
+        })
+      } catch (err: unknown) {
+        message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
+      } finally {
+        setBusy(false)
+      }
+    },
+    [groupId, t, tasks]
   )
 
   if (context?.view !== 'board') return null
@@ -162,6 +214,25 @@ export default function AgileStub({
       <Text type="secondary" data-testid="agile-column-sums">
         {t('plugin.agileColumnSums')}: {formatColumnPointSums(sums, labels)}
       </Text>
+      <span className={styles.agileWipRow} data-testid="agile-wip">
+        {COLUMN_WIP_STATUSES.map((status) => (
+          <label key={status} className={styles.agileWipField}>
+            <Text type="secondary">{labels[status]}</Text>
+            <InputNumber
+              size="small"
+              min={1}
+              max={99}
+              disabled={busy}
+              placeholder={t('plugin.agileWip')}
+              value={parseWipLimit(wipLimits[status]) ?? null}
+              onChange={(value) => {
+                const n = typeof value === 'number' ? value : null
+                void onSaveWip(status, n)
+              }}
+            />
+          </label>
+        ))}
+      </span>
       {burndown ? (
         <span className={styles.agileBurndown} data-testid="agile-burndown">
           <Text type="secondary">
