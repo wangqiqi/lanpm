@@ -50,6 +50,10 @@ assert.match(docs06, /SPRINT-63/)
 const docs07 = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs07, /lanpm\.backup/)
 
+const readme = readFileSync(join(root, 'README.md'), 'utf8')
+assert.match(readme, /lanpm\.backup/)
+assert.match(readme, /on by default/)
+
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
 }

@@ -12,6 +12,8 @@
 
 - **备份 SKU 守卫**：`verify:backup-sku` 锁住 free、默认开、禁止 paid 闸（`TASK-6303`）
 
+- **备份口径**：`docs/06` B3 / `docs/07` 标免费 `lanpm.backup` 默认开；README 同步（`TASK-6304`）
+
 ## [1.106.2] - 2026-08-21
 
 ### Changed

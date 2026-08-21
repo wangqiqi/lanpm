@@ -5,6 +5,7 @@ Host（main）从本目录发现 `*/plugin.json`。
 | 目录 | id | 说明 |
 |------|-----|------|
 | `lanpm.example/` | `lanpm.example` | 免费 stub，验证 Slot |
+| `lanpm.backup/` | `lanpm.backup` | 免费群备份（`profile.data.backup` · **默认开启**） |
 | `lanpm.meeting/` | `lanpm.meeting` | 可购会议 stub（`chat.toolbar.media` · 媒体 capability；默认关闭） |
 
 启用态：`userData/plugin-enabled.json`（默认启用）。
