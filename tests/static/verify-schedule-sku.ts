@@ -51,6 +51,7 @@ assert.match(docs07, /lanpm\.schedule/)
 const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(docs06, /lanpm\.schedule/)
 assert.match(docs06, /SPRINT-54/)
+assert.match(docs06, /SPRINT-62/)
 assert.match(docs06, /仍永不插件化拆卖/)
 
 const enabled = readFileSync(join(root, 'src/shared/plugin/enabledDefaults.ts'), 'utf8')
