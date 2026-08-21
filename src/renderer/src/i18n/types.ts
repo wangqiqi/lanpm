@@ -977,8 +977,6 @@ export type MessageKey =
   | 'chat.voiceComingSoon'
   | 'chat.emojiBtn'
   | 'chat.emojiPicker'
-  | 'chat.emojiSmileys'
-  | 'chat.emojiGestures'
   | 'stub.identityRequired'
   | 'stub.taskTitleEmpty'
   | 'stub.messageEmpty'

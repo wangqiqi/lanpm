@@ -6,6 +6,7 @@
 
 ### Added
 
+- **聊天表情盘**：Composer 改用 `emoji-mart`（MIT，系统原生 glyph），下线自研分类网格（`TASK-5201`）
 - **会议旁路运维**：`docs/07` 会议节增加本机/内网 LiveKit 最短步骤，指向 `plugins/lanpm.meeting/deploy/docker-compose.yml`（`TASK-5103`）
 
 ### Changed

@@ -986,8 +986,6 @@ const zhCN = {
   'chat.voiceComingSoon': '语音消息即将支持，请先用文字输入',
   'chat.emojiBtn': '表情',
   'chat.emojiPicker': '选择表情',
-  'chat.emojiSmileys': '表情',
-  'chat.emojiGestures': '手势与常用',
   'stub.identityRequired': '请先完成身份配置',
   'stub.taskTitleEmpty': '任务标题不能为空',
   'stub.messageEmpty': '消息不能为空',

@@ -1,50 +1,14 @@
 .panel {
-  width: 280px;
-  max-height: 240px;
-  overflow-y: auto;
+  max-height: 360px;
+  overflow: hidden;
+}
+
+.panel :global(em-emoji-picker) {
+  --rgb-background: var(--lanpm-bg-elevated, 255, 255, 255);
 }
 
 .trigger {
   display: inline-flex;
   align-items: center;
   line-height: 0;
-}
-
-.group + .group {
-  margin-top: 8px;
-}
-
-.groupLabel {
-  font-size: var(--lanpm-font-caption);
-  color: var(--lanpm-text-secondary);
-  margin-bottom: 4px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 2px;
-}
-
-.emojiBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: none;
-  border-radius: var(--lanpm-radius-sm);
-  background: transparent;
-  font-size: var(--lanpm-font-title);
-  line-height: 1;
-  cursor: pointer;
-}
-
-.emojiBtn:hover {
-  background: var(--lanpm-hover-bg);
-}
-
-.emojiBtn:active {
-  background: var(--lanpm-accent-fill);
 }

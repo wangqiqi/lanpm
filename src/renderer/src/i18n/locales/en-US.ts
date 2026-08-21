@@ -997,8 +997,6 @@ const enUS = {
   'chat.voiceComingSoon': 'Voice messages are coming soon — use text for now',
   'chat.emojiBtn': 'Emoji',
   'chat.emojiPicker': 'Pick emoji',
-  'chat.emojiSmileys': 'Smileys',
-  'chat.emojiGestures': 'Gestures & common',
   'stub.identityRequired': 'Complete identity setup first',
   'stub.taskTitleEmpty': 'Task title cannot be empty',
   'stub.messageEmpty': 'Message cannot be empty',
