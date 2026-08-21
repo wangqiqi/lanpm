@@ -13,7 +13,7 @@
 
 ### Changed
 
-- **会议 Pro 视频格**：Popover 内 `auto-fit` 列；投屏格跨整行并描边突出（`TASK-5301`）
+- **会议 Pro 视频格**：Popover 内 `auto-fit` 列；投屏格跨整行并以 `--lanpm-accent` 描边突出（`TASK-5301`）
 - **会议 Pro 标签 i18n**：投屏格与参会者「本机 / 已静音」走 locales，不再硬编码英文（`TASK-5302`）
 - **会议 ROADMAP Pro+**：`docs/06` §3.2/§3.3/§3.5 将 Popover 格/投屏/i18n 标已交付（SPRINT-53）；真多人/全屏仍后置（`TASK-5303`）
 - **会议档位**：工具栏主菜单同时展示 Lite mesh 与 Pro（LiveKit SFU）分区；旁路未配置 / 缺 SDK 时给出可读失败文案与配置引导（`TASK-5102`）

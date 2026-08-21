@@ -277,7 +277,7 @@
 
 .meetingVideoTileScreen {
   grid-column: 1 / -1;
-  outline: 2px solid var(--lanpm-accent, #1677ff);
+  outline: 2px solid var(--lanpm-accent);
   outline-offset: 1px;
   border-radius: 8px;
   padding: 2px;
