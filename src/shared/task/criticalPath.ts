@@ -1,5 +1,8 @@
 import { diffDaysInclusive } from './scheduleHealth.ts'
+import type { TaskDependencyType } from './dependency.ts'
 import type { Task } from './types.ts'
+
+const DEP_TYPES: ReadonlySet<TaskDependencyType> = new Set(['FS', 'SS', 'FF', 'SF'])
 
 export type CriticalPathEmptyReason = 'no_eligible' | 'no_fs' | 'cycle'
 
@@ -25,7 +28,7 @@ export function taskDurationDays(task: Task): number {
   return Math.max(1, diffDaysInclusive(parseYmd(task.startDate), parseYmd(task.endDate)))
 }
 
-function collectFsEdges(tasks: Task[], eligible: Set<string>): Array<[string, string]> {
+function collectDepEdges(tasks: Task[], eligible: Set<string>): Array<[string, string]> {
   const edges: Array<[string, string]> = []
   const seen = new Set<string>()
   const push = (from: string, to: string): void => {
@@ -38,7 +41,7 @@ function collectFsEdges(tasks: Task[], eligible: Set<string>): Array<[string, st
   }
   for (const task of tasks) {
     for (const dep of task.dependencies ?? []) {
-      if (dep.type !== 'FS') continue
+      if (!DEP_TYPES.has(dep.type)) continue
       const from = dep.fromTaskId
       const to = dep.toTaskId || task.taskId
       push(from, to)
@@ -71,14 +74,17 @@ function hasCycle(ids: string[], edges: Array<[string, string]>): boolean {
   return false
 }
 
-/** Longest FS chain by inclusive duration. SS/FF/SF ignored. */
-export function computeFsCriticalPath(tasks: Task[]): CriticalPathResult {
+/**
+ * Longest dependency chain by inclusive duration.
+ * FS/SS/FF/SF are directed edges from→to (no lag / calendar CPM).
+ */
+export function computeCriticalPath(tasks: Task[]): CriticalPathResult {
   const eligibleTasks = tasks.filter(isCriticalPathEligible)
   if (eligibleTasks.length === 0) {
     return { taskIds: [], emptyReason: 'no_eligible' }
   }
   const eligible = new Set(eligibleTasks.map((t) => t.taskId))
-  const edges = collectFsEdges(tasks, eligible)
+  const edges = collectDepEdges(tasks, eligible)
   if (edges.length === 0) {
     return { taskIds: [], emptyReason: 'no_fs' }
   }
@@ -149,4 +155,9 @@ export function computeFsCriticalPath(tasks: Task[]): CriticalPathResult {
   }
   path.reverse()
   return { taskIds: path }
+}
+
+/** @deprecated same as computeCriticalPath (kept for SPRINT-54 callers) */
+export function computeFsCriticalPath(tasks: Task[]): CriticalPathResult {
+  return computeCriticalPath(tasks)
 }
