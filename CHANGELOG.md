@@ -9,6 +9,7 @@
 - **可购周报壳**：`lanpm.weekly`（`pricing: paid`）；默认关闭，不拆卖驾驶舱数字看板（`TASK-5701`）
 - **周报/月报许可闸**：`generateWeeklyReport` / `generateMonthlyReport` 走 `assertPaidPluginLicensed`；评语接口仍免费（`TASK-5702`）
 - **驾驶舱周报 CTA**：无许可周报/月报按钮引导扩展页；授权后仍可生成并复制 Markdown（`TASK-5703`）
+- **周报 SKU 口径**：`docs/06` §6.3 第二波标周报导出薄切片已交付；驾驶舱数字仍不拆卖（`TASK-5704`）
 - **可购敏捷包壳**：`lanpm.agile`（`pricing: paid`，Slot `board.toolbar` / `board.card.footer`）；默认关闭，不拆卖看板（`TASK-5601`）
 - **敏捷许可闸**：看板工具条无许可证显示 CTA；不展示故事点（`TASK-5602`）
 - **故事点字段**：`tasks.story_points` + CRDT `storyPoints`（1–99，可空）；走任务同步（`TASK-5603`）

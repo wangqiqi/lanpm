@@ -42,6 +42,11 @@ assert.match(registry, /lanpm\.weekly.*WeeklyStub/)
 const docs07 = readFileSync(join(root, 'docs/07_插件与扩展.md'), 'utf8')
 assert.match(docs07, /lanpm\.weekly/)
 
+const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(docs06, /lanpm\.weekly/)
+assert.match(docs06, /SPRINT-57/)
+assert.match(docs06, /仍永不插件化拆卖/)
+
 const enabled = readFileSync(join(root, 'src/shared/plugin/enabledDefaults.ts'), 'utf8')
 assert.ok(!enabled.includes("'lanpm.weekly'"), 'paid weekly must not default-enable')
 
