@@ -226,7 +226,6 @@ export function leaveAnonymousGroup(db: Database, groupId: string): void {
     removeGroupMember(db, groupId, status.user.userId)
     purgeGroupKeyMeta(db, groupId)
   }
-  clearAnonymousSession(db, groupId)
 }
 
 export function enterAnonymousGroup(db: Database, groupId: string): void {
@@ -236,7 +235,6 @@ export function enterAnonymousGroup(db: Database, groupId: string): void {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) return
 
-  clearAnonymousSession(db, groupId)
   removeGroupMember(db, groupId, status.user.userId)
   joinGroupMember(db, groupId, status.user.userId, true)
 }

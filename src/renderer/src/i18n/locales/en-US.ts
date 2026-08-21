@@ -112,7 +112,7 @@ const enUS = {
   'group.typeFunction': 'Function group',
   'group.typeAnonymous': 'Anonymous group',
   'group.createFailed': 'Failed to create group',
-  'group.anonymousHint': 'Anonymous groups support chat only (no task/file history)',
+  'group.anonymousHint': 'Anonymous groups are chat-only (no tasks/files). Local chat history is kept if you leave and rejoin.',
   'group.leaveAnonymousTitle': 'Leave anonymous group?',
   'group.leaveAnonymousContent': 'You will end the current anonymous session',
   'group.dissolve': 'Dissolve group',

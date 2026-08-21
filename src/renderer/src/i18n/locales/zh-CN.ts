@@ -111,7 +111,7 @@ const zhCN = {
   'group.typeFunction': '职能群',
   'group.typeAnonymous': '匿名群',
   'group.createFailed': '创建群组失败',
-  'group.anonymousHint': '匿名群仅支持聊天，无历史任务与文件协作',
+  'group.anonymousHint': '匿名群仅支持聊天（无任务/文件）；本机记录退出后再进仍在',
   'group.leaveAnonymousTitle': '离开匿名群？',
   'group.leaveAnonymousContent': '离开后将结束当前匿名会话',
   'group.dissolve': '解散群组',

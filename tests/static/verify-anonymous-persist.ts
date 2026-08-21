@@ -38,6 +38,18 @@ const recall = readFileSync(join(root, 'src/main/chat/recallMessageService.ts'),
 assert.match(recall, /updateMessage\(db, updated\)/)
 assert.doesNotMatch(recall, /listAnonymousMessages/)
 
+const groupSrc = readFileSync(join(root, 'src/main/group/groupService.ts'), 'utf8')
+const leaveIdx = groupSrc.indexOf('export function leaveAnonymousGroup')
+const enterIdx = groupSrc.indexOf('export function enterAnonymousGroup')
+const dissolveIdx = groupSrc.indexOf('export async function dissolveGroup')
+assert.ok(leaveIdx >= 0 && enterIdx > leaveIdx, 'leave/enter order')
+const leaveFn = groupSrc.slice(leaveIdx, enterIdx)
+const enterFn = groupSrc.slice(enterIdx, enterIdx + 500)
+assert.doesNotMatch(leaveFn, /clearAnonymousSession/)
+assert.doesNotMatch(enterFn, /clearAnonymousSession/)
+assert.match(groupSrc, /clearAnonymousSession\(db, groupId\)/)
+assert.ok(dissolveIdx >= 0 || groupSrc.includes('deleteGroupCascade'), 'dissolve still cascades')
+
 const offline = readFileSync(join(root, 'src/main/chat/offlineSyncService.ts'), 'utf8')
 assert.match(offline, /isMemoryOnlyChatGroup/)
 

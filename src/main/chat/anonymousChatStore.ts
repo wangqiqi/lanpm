@@ -4,7 +4,7 @@ import {
   getMaxLamportTs
 } from '../storage/repositories/messageRepository.ts'
 
-/** 匿名群本机会话：清 SQLite 消息（leave/enter 在 TASK-5203 才停清） */
+/** 匿名群本机消息：解散时清 SQLite（leave/enter 不清） */
 export function clearAnonymousSession(db: Database, groupId: string): void {
   deleteAllMessagesInGroup(db, groupId)
 }
