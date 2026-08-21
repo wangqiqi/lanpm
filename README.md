@@ -98,7 +98,7 @@ npm run lint && npm run typecheck && npm run test
 npm run verify:p0          # guards (IPC, i18n, docs, screenshots layout)
 npm run verify:chat-perf-observe  # chat perf code guards (+ local .cursorGrowth/decisions if present)
 npm run measure:perf -- --quick   # Electron baseline JSON → .lanpm/perf/ (see docs/05 §5)
-npm run verify:linux-installer-smoke  # Linux unpacked installer to nav-tab-chat (skips if no dist/)
+npm run verify:linux-installer-smoke  # Linux installer guards; LANPM_REQUIRE_INSTALLER=1 launches unpacked
 npm run measure:list-scroll -- --schema-only   # four-view list scroll schema (full run needs build)
 npm run verify:m7          # full RC regression before release
 npm run build
@@ -110,7 +110,7 @@ npm run build
 | English wrap | `npm run verify:i18n-en` · `npm run verify:visual-screenshots-en` (cockpit + chat `en-US` PNGs; Linux `xvfb-run`) |
 | Acceptance | **Electron** (`npm run dev`) is source of truth — not browser stub (`npm run dev:web`) |
 | Chat perf QA | Budget in local `.cursorGrowth/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
-| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · `measure:list-scroll` / `verify:list-scroll` (chat/board/files/gantt jank) · `verify:linux-installer-smoke` (Linux unpacked → chat tab; skip if no `dist/`) · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux GPU is off by default (`LANPM_ENABLE_GPU=1` to opt in; `--quick` RSS is not the 200MB budget); Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
+| App perf baseline | `npm run measure:perf` · `verify:measure-perf` · `measure:list-scroll` / `verify:list-scroll` (chat/board/files/gantt jank) · `verify:linux-installer-smoke` (static; `LANPM_REQUIRE_INSTALLER=1` launches unpacked → chat tab) · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux GPU is off by default (`LANPM_ENABLE_GPU=1` to opt in; `--quick` RSS is not the 200MB budget); Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
 | LAN / “real network” | `npm run verify:m6` is **localhost loopback**, not two PCs. Dual-machine steps: [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6) (manual; CI does not run them) |
 

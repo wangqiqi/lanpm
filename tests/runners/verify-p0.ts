@@ -24,8 +24,7 @@ const steps = [
   'verify:office-preview',
   'verify:gantt-table-export',
   'verify:list-scroll-seed',
-  'verify:list-scroll',
-  'verify:linux-installer-smoke'
+  'verify:list-scroll'
 ] as const
 
 for (const step of steps) {

@@ -8,7 +8,7 @@
 
 - **Linux `--full` 性能抽样**：本机 Ubuntu `measure:perf --full`（冷启动×3 · idle 60s · Tab×10）；median 冷启动 790ms；idle RSS≈607MB（关 GPU，**不对标** 200MB）；Tab P95 152ms（`TASK-6101`）
 - **Linux x64 安装包（本机）**：`dist:linux:x64` 产出 `LanPM-1.106.0.AppImage` 与 `lanpm_1.106.0_amd64.deb`（不上传 Release）（`TASK-6102`）
-- **Linux 安装包冷启动冒烟**：`verify:linux-installer-smoke` 起 `dist/linux-unpacked/lanpm` 直到 `nav-tab-chat` 可点；无产物则跳过（CI）；`LANPM_REQUIRE_INSTALLER=1` 强制失败（`TASK-6103`）
+- **Linux 安装包冷启动冒烟**：`verify:linux-installer-smoke` 静态守卫；`LANPM_REQUIRE_INSTALLER=1` 才起 `dist/linux-unpacked/lanpm` 到 `nav-tab-chat`（无产物 / CI 默认跳过启动）（`TASK-6103`）
 - **Linux 发版抽样口径**：`docs/06` §4 #8 / §4.2 与 `docs/05` §5.1 记 `--full` + unpacked 冒烟已做；Win/mac 仍延期（`TASK-6104`）
 
 ## [1.106.0] - 2026-08-21
