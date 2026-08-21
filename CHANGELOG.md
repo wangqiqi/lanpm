@@ -15,6 +15,7 @@
 
 - **会议 Pro 视频格**：Popover 内 `auto-fit` 列；投屏格跨整行并描边突出（`TASK-5301`）
 - **会议 Pro 标签 i18n**：投屏格与参会者「本机 / 已静音」走 locales，不再硬编码英文（`TASK-5302`）
+- **会议 ROADMAP Pro+**：`docs/06` §3.2/§3.3/§3.5 将 Popover 格/投屏/i18n 标已交付（SPRINT-53）；真多人/全屏仍后置（`TASK-5303`）
 - **会议档位**：工具栏主菜单同时展示 Lite mesh 与 Pro（LiveKit SFU）分区；旁路未配置 / 缺 SDK 时给出可读失败文案与配置引导（`TASK-5102`）
 - **会议入口**：未启用会议插件时聊天工具条显示升级引导（打开扩展页）；未购许可时主菜单展示许可证 CTA，Join / Pro Join 禁用且不会走 mesh/LiveKit 入会（`TASK-5101`）
 - **会议 ROADMAP**：`docs/06` §3.3 改为 SPRINT-51 交付说明（CTA · Lite/Pro 可见 · LiveKit 最短运维），不再写成未做的「深化」；`verify:meeting-ux` 锁住本 Sprint 守卫（`TASK-5104`）

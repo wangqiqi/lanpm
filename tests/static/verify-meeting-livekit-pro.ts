@@ -69,6 +69,11 @@ const videoGrid = readFileSync(
 assert.match(videoGrid, /meeting-livekit-video-grid/)
 assert.match(videoGrid, /meetingVideoTileScreen/)
 assert.match(videoGrid, /isScreen/)
+assert.match(videoGrid, /plugin\.meetingTileScreen/)
+assert.match(videoGrid, /plugin\.meetingParticipantLocal/)
+assert.match(videoGrid, /plugin\.meetingParticipantMuted/)
+assert.ok(!videoGrid.includes(' · local'), 'participant local flag must be i18n')
+assert.ok(!videoGrid.includes('(screen)'), 'screen tile label must be i18n')
 
 const pluginCss = readFileSync(join(root, 'src/renderer/src/plugin/plugin.module.css'), 'utf8')
 assert.match(pluginCss, /auto-fit/)
@@ -89,6 +94,9 @@ assert.match(profile, /LiveKitConfigPanel/)
 
 const roadmap = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(roadmap, /Pro LiveKit/)
+assert.match(roadmap, /SPRINT-53/)
+assert.ok(!roadmap.includes('meeting-pro v1.97.0 交付中'), 'Pro+ must not stay in 交付中')
+assert.ok(!roadmap.includes('剩余 Pro+（多人视频格'), 'Pro+ popover polish must be marked delivered')
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>

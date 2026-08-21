@@ -65,7 +65,7 @@
 
 | Area | Highlights |
 |------|------------|
-| **Communication** | Groups & DM, @mentions, code blocks, `/task` & `#` refs, message↔task, offline catch-up (chat / tasks / receipts / **file library index**), discover & VPN seeds. Optional **meeting plugin**: license CTA when unlicensed; Lite mesh vs Pro LiveKit tiers; LAN LiveKit bypass ops in docs |
+| **Communication** | Groups & DM, @mentions, code blocks, `/task` & `#` refs, message↔task, offline catch-up (chat / tasks / receipts / **file library index**), discover & VPN seeds. Optional **meeting plugin**: license CTA; Lite mesh vs Pro LiveKit; Pro video grid (auto-fit, screenshare tile, i18n); LAN LiveKit bypass ops in docs |
 | **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health |
 | **Collab** | Excalidraw whiteboard + mind maps (Yjs CRDT over P2P), group files, LibreOffice preview, resumable transfers |
 | **Org & UX** | Project / functional / anonymous groups, leadership cockpit, light/dark, **zh / en** |

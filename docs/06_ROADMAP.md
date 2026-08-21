@@ -20,7 +20,7 @@
 
 | 模块 | 功能 | 备注 |
 |------|------|------|
-| **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 · **Pro+ 打磨** | Host/stub/mesh/LiveKit + SPRINT-51 UX（CTA · Lite/Pro · 最短运维）已交付；剩余多人格/投屏见 **§2** · **§3.2 Pro+** |
+| **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 | Host/stub/mesh/LiveKit + SPRINT-51 UX + **SPRINT-53 Pro+ Popover 格/投屏/i18n 已交付**；真多人联调 / 全屏房间 / Egress 见 **§2** |
 | **高级 Agent 编排** | LangGraph / 多角色 DAG 等 | L3a/L3b 已交付（`verify:ai-pipeline*`）；**可选** 外框架后置 |
 | 移动端 Web | PWA 基础版本 | 后置 |
 
@@ -58,7 +58,7 @@
 |------|------|----------|------|
 | **Lite / POC** | 1v1～小房间语音 + 屏幕共享（约 2～4 人） | WebRTC **mesh** + Host 代理 `desktopCapturer`；信令经 `SyncEnvelope` | 可免费试用或低价 |
 | **Pro** | 语音 + 视频 + 群组会议室 | 内网旁路 **LiveKit 自托管 SFU**（**首选**；Jitsi 为 Plan B） | **可购** |
-| **Pro+（P2）** | 多人会议视频格 · Pro 投屏 · 录制/日程入会打磨 | 同一插件升级档 · **meeting-pro v1.97.0 交付中** | 同授权或升级 SKU |
+| **Pro+（P2）** | 多人会议视频格 · Pro 投屏 · 录制/日程入会打磨 | 同一插件升级档 · **已交付**（meeting-pro v1.97 + SPRINT-53：Popover `auto-fit` 格、投屏格、标签 i18n） | 同授权或升级 SKU |
 
 > 单一插件 id（如 `lanpm.meeting`）+ 能力档位；屏幕共享归入会议包。
 
@@ -66,7 +66,7 @@
 
 | 已有 | 会议 UX（SPRINT-51 · `verify:meeting-ux`） |
 |------|--------------------------------------|
-| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **已交付**：未购/未启用升级 CTA；Lite mesh vs Pro（LiveKit）档位可见；LiveKit 旁路本机/内网最短运维（`docs/07` + compose）。Slot `chat.toolbar.media` / `PluginZoneHost` **已有**。剩余 Pro+（多人视频格 / 投屏打磨）见 **§2** |
+| `plugins/` 发现 · `pricing: free \| paid` · Profile 启停 · Slot / Host 能力白名单 · **离线许可证闸**（`license.feature` ✅ v1.75–1.76） | **已交付**：未购/未启用升级 CTA；Lite mesh vs Pro（LiveKit）档位可见；LiveKit 旁路本机/内网最短运维（`docs/07` + compose）。Slot `chat.toolbar.media` / `PluginZoneHost` **已有**。**Pro+ Popover**（视频格 auto-fit · 投屏格 · i18n）**已交付**（SPRINT-53）；全屏会议室 / 真多人仍见 **§2** |
 | 安全红线：禁插件直连 DB / `ipcMain` | 维持；媒体经 Host 代理；**builtin registry** 注册 `lanpm.meeting`；LiveKit SDK **不进**核心 `dependencies` |
 
 ### 3.4 架构注意（无中心 vs SFU）
@@ -90,6 +90,7 @@
 | 6 | 插件市场安装/更新 | — | **Out of scope** · 离线侧载+许可为终态（2026-08-01） |
 | 7 | **meeting-media-v2**：语音消息 PTT · Lite mesh 真投屏 · 会议工具栏收纳 | P1 | **已交付** · `verify:chat-voice` · `verify:meeting-media-v2` · v1.98.0 |
 | 8 | **会议体验产品化**：入口 CTA · Lite/Pro 可见 · LiveKit 最短运维 | P1 | **已交付** · `verify:meeting-ux` · SPRINT-51 |
+| 9 | **Pro+ 本机收口**：Popover 视频格 auto-fit · 投屏格 · 标签 i18n | P2 | **已交付** · `verify:meeting-livekit-pro` · SPRINT-53 |
 
 验收锚点：`verify:meeting-spike` · `verify:meeting-plugin` · `verify:meeting-mesh-poc` · `verify:meeting-livekit-pro` · `verify:chat-voice` · `verify:meeting-media-v2` · `verify:meeting-ux`。
 
