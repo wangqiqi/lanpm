@@ -121,7 +121,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.106.5`** — 可购排程：冻结基线 + 指派日期重叠提示。可购敏捷剩余故事点燃尽。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.5`** — 可购敏捷：剩余故事点燃尽 + 列 WIP 提示。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 
