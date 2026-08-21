@@ -222,10 +222,10 @@
 | 批次 | 内容 | 收费 |
 |------|------|------|
 | **第一波** | 日历 + 白板 + 基础验收 + 核心三角（任务↔聊↔文件） | **免费** |
-| **第二波** | 高级排程（**薄切片已交付**：`lanpm.schedule` · 甘特 FS 关键路径 · `verify:schedule-sku`）、敏捷包、AI 周报 | **可购** |
+| **第二波** | 高级排程（**薄切片已交付**：`lanpm.schedule` · `verify:schedule-sku`）、敏捷包（**薄切片已交付**：`lanpm.agile` · 故事点 · `verify:agile-sku`）、AI 周报 | **可购** |
 | **第三波** | 完整会议 SFU、思维导图、知识库增强等 | **可购**为主 |
 
-已交付第一波见 `CHANGELOG`；第二波排程壳+关键路径见 SPRINT-54；敏捷包 / AI 周报仍待排期。
+已交付第一波见 `CHANGELOG`；第二波排程见 SPRINT-54、敏捷故事点见 SPRINT-56；AI 周报仍待排期。
 
 ### 6.4 插件边界与 SPIKE 锚点
 
@@ -233,6 +233,7 @@
 |------|------|------|------|
 | 投屏 / 远程 / 语音视频 / 完整会议 | ❌ | ✅ 可购（Lite mesh 可免费 POC） | `verify:meeting-spike` · §3 |
 | 高级排程（关键路径） | 基础甘特/依赖免费 | ✅ 可购 `lanpm.schedule` | `verify:schedule-sku` |
+| 敏捷包（故事点） | 看板拖拽/状态免费 | ✅ 可购 `lanpm.agile` | `verify:agile-sku` |
 | 白板 / 协作画布 | 不进臃肿核心 | ✅ 免费模块形态 | `verify:whiteboard-realtime` · `whiteboard_crdt` |
 | form-js 验收单 | ❌ | ✅ 可购 POC | `verify:plugin-loader` |
 | 插件加载边界 | — | contextIsolation + 单一 `window.lanpm`；禁 `ipcMain`/直连 DB | `verify:plugin-spike` · **插件加载边界** · [07_插件与扩展](./07_插件与扩展.md) |
