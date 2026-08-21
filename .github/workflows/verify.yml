@@ -5,7 +5,15 @@ name: verify
 on:
   push:
     branches: [main, master, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '.cursor/**'
+      - '**.md'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '.cursor/**'
+      - '**.md'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: ${{ github.event_name == 'pull_request' && fromJSON('["ubuntu-latest", "macos-latest", "windows-latest"]') || fromJSON('["ubuntu-latest"]') }}
     steps:
       - uses: actions/checkout@v4
 

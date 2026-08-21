@@ -5,7 +5,8 @@ name: e2e-nightly
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 18 * * *' # 02:00 UTC+8
+    # 每周日 02:00 UTC+8（降频省 Actions 分钟）
+    - cron: '0 18 * * 0'
 
 permissions:
   contents: read
