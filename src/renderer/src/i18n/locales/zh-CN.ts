@@ -625,6 +625,8 @@ const zhCN = {
   'plugin.scheduleCriticalPathCycle': '依赖成环，无法计算关键路径',
   'plugin.agileLicenseCta': '敏捷扩展需有效离线许可证，请在扩展页导入许可。',
   'plugin.agileLicensedIdle': '敏捷扩展已授权',
+  'plugin.agilePoints': '故事点',
+  'plugin.agileColumnSums': '列合计',
   'plugin.meetingOpenMeetingConfig': '配置会议旁路',
   'plugin.meetingToolbarDetails': '会议详情',
   'plugin.meetingStatusIdle': '未加入',

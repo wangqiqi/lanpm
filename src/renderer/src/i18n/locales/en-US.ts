@@ -635,6 +635,8 @@ const enUS = {
   'plugin.scheduleCriticalPathCycle': 'Dependency cycle — critical path skipped',
   'plugin.agileLicenseCta': 'Agile needs a valid offline license — import one under Extensions.',
   'plugin.agileLicensedIdle': 'Agile is licensed',
+  'plugin.agilePoints': 'Story points',
+  'plugin.agileColumnSums': 'Column totals',
   'plugin.meetingOpenMeetingConfig': 'Configure meeting bypass',
   'plugin.meetingToolbarDetails': 'Meeting details',
   'plugin.meetingStatusIdle': 'Not joined',

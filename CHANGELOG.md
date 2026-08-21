@@ -10,6 +10,7 @@
 - **敏捷许可闸**：看板工具条无许可证显示 CTA；不展示故事点（`TASK-5602`）
 - **故事点字段**：`tasks.story_points` + CRDT `storyPoints`（1–99，可空）；走任务同步（`TASK-5603`）
 - **估点走 Host patch**：`task.patch` 白名单含 `storyPoints`，无许可仍被 `assertPaidPluginLicensed` 拦住（`TASK-5604`）
+- **看板故事点**：授权后卡片可估 1–99 点，工具条按列合计；未估不计入（`TASK-5605`）
 - **可购高级排程壳**：`lanpm.schedule`（`pricing: paid`，Slot `gantt.toolbar`）；默认关闭，不拆卖基础甘特（`TASK-5401`）
 - **高级排程许可闸**：甘特工具条无许可证显示 CTA；`task.list` 等能力仍走 Host `assertPaidPluginLicensed`（`TASK-5402`）
 - **FS 关键路径**：纯函数按已有 FS 依赖算最长工期链；环/无日期/无 FS 返回空（`TASK-5403`）

@@ -325,3 +325,9 @@
   gap: 8px;
   cursor: pointer;
 }
+
+.agileCardPoints {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 4px;
+}
