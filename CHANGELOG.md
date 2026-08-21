@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.4] - 2026-08-21
+
 ### Added
 
 - **敏捷燃尽表**：`agile_burndown_samples`（schema v21）；按群按日覆盖剩余故事点（`TASK-6601`）
