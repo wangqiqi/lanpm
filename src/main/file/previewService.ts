@@ -5,8 +5,10 @@ import { promisify } from 'util'
 import { app } from 'electron'
 import type { Database } from 'better-sqlite3'
 import type { FileMeta, FilePreviewStatus } from '../../shared/file/types'
+import { isOfficeLightExtension } from '../../shared/file/officeLightPreview.ts'
 import { isDirectPreviewReady } from '../../shared/file/previewExtensions.ts'
 import { updateFilePreview } from '../storage/repositories/fileRepository'
+import { convertOfficeLightHtml } from './officeLightConvert.ts'
 
 const execFileAsync = promisify(execFile)
 
@@ -50,6 +52,18 @@ export async function generatePreview(db: Database, meta: FileMeta): Promise<Fil
     }
   } catch {
     /* LibreOffice 未安装 */
+  }
+
+  if (isOfficeLightExtension(ext) && existsSync(meta.storagePath)) {
+    try {
+      const htmlPath = await convertOfficeLightHtml(meta.storagePath, ext, outDir)
+      if (htmlPath && existsSync(htmlPath)) {
+        updateFilePreview(db, meta.fileId, 'ready', htmlPath)
+        return 'ready'
+      }
+    } catch {
+      /* mammoth / exceljs 解析失败 */
+    }
   }
 
   updateFilePreview(db, meta.fileId, 'failed')

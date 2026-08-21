@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Office 轻量预览（主进程）**：无 LibreOffice 时 `docx`/`xlsx` 用 mammoth / exceljs 写出 HTML 预览；有 `soffice` 仍先转 PDF（`TASK-5801`）
+
 ## [1.105.0] - 2026-08-21
 
 ### Added
