@@ -4,14 +4,13 @@
 
 ## [Unreleased]
 
+## [1.106.3] - 2026-08-21
+
 ### Added
 
 - **备份插件 manifest**：官方免费插件 `lanpm.backup`（Slot `profile.data.backup`）（`TASK-6301`）
-
 - **备份插件默认开**：`lanpm.backup` 进官方默认启用白名单；关插件后 Profile 备份区隐藏（`TASK-6302`）
-
 - **备份 SKU 守卫**：`verify:backup-sku` 锁住 free、默认开、禁止 paid 闸（`TASK-6303`）
-
 - **备份口径**：`docs/06` B3 / `docs/07` 标免费 `lanpm.backup` 默认开；README 同步（`TASK-6304`）
 
 ## [1.106.2] - 2026-08-21
