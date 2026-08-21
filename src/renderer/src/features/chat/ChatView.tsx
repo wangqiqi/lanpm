@@ -5,17 +5,17 @@ import { Button, Dropdown, Input, Modal, Segmented, Select, Typography } from 'a
 import type { MenuProps } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
-  ApartmentOutlined,
   AudioOutlined,
   CameraOutlined,
   VideoCameraOutlined,
   CodeOutlined,
   EditOutlined,
-  FolderOpenOutlined,
-  LayoutOutlined,
+  FolderOutlined,
+  HighlightOutlined,
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
+  NodeIndexOutlined,
   PaperClipOutlined,
   PlusSquareOutlined,
   SendOutlined
@@ -1287,7 +1287,7 @@ export default function ChatView(): React.ReactElement {
                         <ComposerIconButton
                           data-visual-collab="files"
                           data-testid="collab-open-files"
-                          icon={<FolderOpenOutlined />}
+                          icon={<FolderOutlined />}
                           label={t('nav.files')}
                           onClick={() => openCollaborationPanel('files')}
                         />
@@ -1296,7 +1296,7 @@ export default function ChatView(): React.ReactElement {
                         <ComposerIconButton
                           data-visual-collab="whiteboard"
                           data-testid="collab-open-whiteboard"
-                          icon={<LayoutOutlined />}
+                          icon={<HighlightOutlined />}
                           label={t('nav.whiteboard')}
                           onClick={() => openCollaborationPanel('whiteboard')}
                         />
@@ -1305,7 +1305,7 @@ export default function ChatView(): React.ReactElement {
                         <ComposerIconButton
                           data-visual-collab="mindmap"
                           data-testid="collab-open-mindmap"
-                          icon={<ApartmentOutlined />}
+                          icon={<NodeIndexOutlined />}
                           label={t('nav.mindmap')}
                           onClick={() => openCollaborationPanel('mindmap')}
                         />

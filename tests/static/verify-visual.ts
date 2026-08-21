@@ -1048,6 +1048,24 @@ assert.ok(
   !/\.loadOlder\s*\{[^}]*opacity:/s.test(chatCss),
   'chat loadOlder must not stack opacity on secondary text (CO-403)'
 )
+assert.match(
+  chatCss,
+  /\.sendIconBtn\s+:global\(\.anticon\)\s*\{[^}]*transform:\s*rotate\(-90deg\)/,
+  'chat send glyph must point up into the transcript'
+)
+assert.match(
+  aiAssistantCss,
+  /\.sendIconBtn\s+:global\(\.anticon\)\s*\{[^}]*transform:\s*rotate\(-90deg\)/,
+  'AI assistant send glyph must match chat (point up)'
+)
+assert.match(chatSrc, /FolderOutlined/, 'composer files icon must match BottomNav FolderOutlined')
+assert.match(chatSrc, /HighlightOutlined/, 'composer whiteboard icon must match BottomNav HighlightOutlined')
+assert.match(chatSrc, /NodeIndexOutlined/, 'composer mindmap icon must match BottomNav NodeIndexOutlined')
+assert.doesNotMatch(
+  chatSrc,
+  /collab-open-whiteboard[\s\S]{0,80}LayoutOutlined/,
+  'whiteboard composer must not use left-rail LayoutOutlined'
+)
 
 // --- IA-401~403 chat-collaboration panels (SPRINT-15) ---
 const collaborationDrawerSrc = readFileSync(

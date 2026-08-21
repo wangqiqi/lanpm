@@ -1476,6 +1476,11 @@
     opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard) !important;
 }
 
+.sendIconBtn :global(.anticon) {
+  /* SendOutlined 默认朝右；会话在输入框上方，朝上送入 */
+  transform: rotate(-90deg);
+}
+
 .sendIconBtn:hover:not(:disabled) {
   background: var(--lanpm-accent-hover) !important;
   transform: scale(1.08);

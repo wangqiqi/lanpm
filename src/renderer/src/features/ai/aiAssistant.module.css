@@ -546,6 +546,10 @@
     opacity var(--lanpm-motion-fast) var(--lanpm-ease-standard) !important;
 }
 
+.sendIconBtn :global(.anticon) {
+  transform: rotate(-90deg);
+}
+
 .sendIconBtn:hover:not(:disabled) {
   background: var(--lanpm-accent-hover) !important;
   transform: scale(1.08);
