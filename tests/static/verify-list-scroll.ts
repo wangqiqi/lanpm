@@ -64,4 +64,8 @@ assert.equal(report.notes?.frameP95GoMs, 50)
 assert.equal(report.notes?.longTaskGoMs, 50)
 unlinkSync(outPath)
 
+const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
+assert.match(docs06, /measure:list-scroll/)
+assert.match(docs06, /NO-GO/)
+
 console.log('verify-list-scroll OK')

@@ -6,6 +6,7 @@
 
 ### Added
 
+- **长列表口径**：`docs/06` §6.1 #3 / `docs/05` §5 记 SPRINT-60 **NO-GO**；`verify:list-scroll` 入 `verify:p0`（`TASK-6004`）
 - **长列表测量（Linux）**：聊天/看板/文件/甘特均可滚；滚动 rAF P95≈16.7ms、无 longtask；**NO-GO** 不装 virtuoso（`TASK-6003`）
 - **四页长列表滚动测量**：`measure:list-scroll` 灌数后滚聊天/看板/文件/甘特；P95≥50ms 或长任务≥50ms 才 GO 装 virtuoso（`TASK-6002`）
 - **四页长列表灌数**：`measure-seed-lists` 给 demo-project 补消息/任务/文件，并露出甘特/文件 Tab；四页滚动容器带 testid（`TASK-6001`）

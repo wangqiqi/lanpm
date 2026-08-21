@@ -118,7 +118,7 @@
 | 5 | 双实例 Stub | `verify:dual-stub` | [05 §3](./05_测试与联调发布.md#3-双实例-stub-联调) | 本机 Linux 已测 |
 | 6 | 真网双机 | `verify:m6` **仅 loopback** | [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6) 手验清单；**未**当作 CI 已测双机 | 延期 |
 | 7 | 三平台真机 UI | CI `verify.yml` × `verify:m7` | Win / mac / Linux 七页肉眼 | 延期 |
-| 8 | 性能抽样 | `verify:m7-perf` · `verify:core-views-perf` · `measure:perf` / `verify:measure-perf` | [05 §5](./05_测试与联调发布.md#5-性能测量m7) **本机 Linux** `--quick` 已测（`out/main`，非安装包）；**GPU-on 对照（SPRINT-50）**：default-off `rssIdleMb`≈634 vs `LANPM_ENABLE_GPU=1`≈857（`--quick`，**不对标** 200MB）；Win/mac 真机与 `--full` 仍缺 | 部分 |
+| 8 | 性能抽样 | `verify:m7-perf` · `verify:core-views-perf` · `measure:perf` / `verify:measure-perf` · `measure:list-scroll` / `verify:list-scroll` | [05 §5](./05_测试与联调发布.md#5-性能测量m7) **本机 Linux** `--quick` 已测（`out/main`，非安装包）；**GPU-on 对照（SPRINT-50）**：default-off `rssIdleMb`≈634 vs `LANPM_ENABLE_GPU=1`≈857（`--quick`，**不对标** 200MB）；**四页长列表滚动（SPRINT-60）**：`measure:list-scroll` **NO-GO** 不装 virtuoso；Win/mac 真机与 `--full` 仍缺 | 部分 |
 | 9 | 英文折行 | `verify:i18n-en` · `verify:visual-screenshots-en` | **本机 Linux** 脚本守卫 + cockpit/chat `en-US` 无头截图（SPRINT-49）；顶栏长标签仍 ellipsis | ✅ |
 
 ### 4.2 延期汇总（有设备再补）
@@ -170,7 +170,7 @@
 |----|-----|------|----------|
 | 1 | PDF 预览 | ✅ `pdfjs-dist`（文件库翻页；worker `'self'`） | 裁剪/主题仍可 `3rd/pdfjs-…` |
 | 2 | 全局搜索 | ✅ `minisearch`（任务/消息；成员仍内存） | 深度定制分词仍可 `3rd/` |
-| 3 | 长列表虚拟化 | `react-virtuoso` | — |
+| 3 | 长列表虚拟化 | 本机 Linux `measure:list-scroll` **NO-GO**（SPRINT-60：四页可滚、rAF P95≈16.7ms）；**不装** `react-virtuoso`，卡顿复现再开 | 有卡再装 `react-virtuoso` |
 | 4 | WebRTC | `simple-peer` | `3rd/simple-peer` 适配传输面 |
 | 5 | IndexedDB | `idb` / `y-indexeddb` | — |
 | 6 | i18n | `i18next` | — |

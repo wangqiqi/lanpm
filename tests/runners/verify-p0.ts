@@ -22,7 +22,9 @@ const steps = [
   'verify:screenshots-layout',
   'verify:db-at-rest',
   'verify:office-preview',
-  'verify:gantt-table-export'
+  'verify:gantt-table-export',
+  'verify:list-scroll-seed',
+  'verify:list-scroll'
 ] as const
 
 for (const step of steps) {
