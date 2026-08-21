@@ -4,6 +4,7 @@ import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { Task } from '@shared/task/types'
 import { computeCriticalPath } from '@shared/task/criticalPath'
+import { countAssigneeOverlapTasks, findAssigneeOverlapTaskIds } from '@shared/task/assigneeOverlap'
 import { countSlippedVsBaseline, type ScheduleBaselineSnapshot } from '@shared/task/scheduleBaseline'
 import { defaultScheduleForTask as taskDates } from '@shared/task/ganttAdapter'
 import { useI18n } from '@renderer/i18n/useI18n'
@@ -12,6 +13,7 @@ import { isPluginLicenseActive } from '@renderer/plugin/pluginLicense'
 import { openProfileTab } from '@renderer/plugin/openProfileTab'
 import { publishScheduleCriticalPath } from '@renderer/plugin/scheduleCriticalPathBridge'
 import { publishScheduleBaseline } from '@renderer/plugin/scheduleBaselineBridge'
+import { publishScheduleOverlap } from '@renderer/plugin/scheduleOverlapBridge'
 import styles from '../plugin.module.css'
 
 const { Text } = Typography
@@ -22,7 +24,7 @@ interface Props {
   context?: ViewPluginContext
 }
 
-/** `lanpm.schedule` — 无许可 CTA；授权后关键路径 + 冻结基线 */
+/** `lanpm.schedule` — 无许可 CTA；授权后关键路径 + 冻结基线 + 指派重叠 */
 export default function ScheduleStub({ plugin, groupId, context }: Props): React.ReactElement | null {
   const { t } = useI18n()
   const licenseActive = isPluginLicenseActive(plugin)
@@ -43,6 +45,16 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
     [groupId]
   )
 
+  const publishOverlap = useCallback(
+    (listed: Task[]) => {
+      publishScheduleOverlap({
+        groupId,
+        taskIds: [...findAssigneeOverlapTaskIds(listed)]
+      })
+    },
+    [groupId]
+  )
+
   const loadBaseline = useCallback(async () => {
     const api = getLanpmApi()
     const snap = await api.task.getScheduleBaseline(groupId)
@@ -51,13 +63,24 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
     })) as Task[]
     setTasks(listed)
     publishSnap(snap.frozenAt ? snap : null)
-  }, [groupId, plugin.id, publishSnap])
+    publishOverlap(listed)
+  }, [groupId, plugin.id, publishSnap, publishOverlap])
 
   useEffect(() => {
     if (!licenseActive || context?.view !== 'gantt') return
-    void loadBaseline().catch(() => publishSnap(null))
-    return () => publishScheduleBaseline({ groupId, snapshot: null })
-  }, [licenseActive, context?.view, groupId, loadBaseline, publishSnap])
+    void loadBaseline().catch(() => {
+      publishSnap(null)
+      publishOverlap([])
+    })
+    const unsub = getLanpmApi().task.onTasksChanged((changedGroupId) => {
+      if (changedGroupId === groupId) void loadBaseline().catch(() => publishOverlap([]))
+    })
+    return () => {
+      unsub()
+      publishScheduleBaseline({ groupId, snapshot: null })
+      publishScheduleOverlap({ groupId, taskIds: [] })
+    }
+  }, [licenseActive, context?.view, groupId, loadBaseline, publishSnap, publishOverlap])
 
   const applyPath = useCallback(
     async (next: boolean) => {
@@ -72,6 +95,7 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
           groupId
         })) as Task[]
         setTasks(listed)
+        publishOverlap(listed)
         const result = computeCriticalPath(listed)
         setPathOn(true)
         publishScheduleCriticalPath({
@@ -94,7 +118,7 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
         setBusy(false)
       }
     },
-    [groupId, plugin.id, t]
+    [groupId, plugin.id, t, publishOverlap]
   )
 
   const freeze = useCallback(async () => {
@@ -121,6 +145,7 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
           snapshot
         )
       : 0
+  const overlapCount = countAssigneeOverlapTasks(tasks)
 
   return (
     <div
@@ -155,6 +180,11 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
                 : t('plugin.scheduleBaselineOnTrack')}
             </Text>
           ) : null}
+          <Text type="secondary" data-testid="schedule-assignee-overlap">
+            {overlapCount > 0
+              ? t('plugin.scheduleAssigneeOverlap', { count: overlapCount })
+              : t('plugin.scheduleAssigneeOverlapNone')}
+          </Text>
         </>
       ) : (
         <div className={styles.meetingToolbarCta} data-testid="schedule-license-cta">

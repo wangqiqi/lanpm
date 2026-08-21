@@ -621,6 +621,8 @@ export type MessageKey =
   | 'plugin.scheduleBaselineFrozen'
   | 'plugin.scheduleBaselineSlipped'
   | 'plugin.scheduleBaselineOnTrack'
+  | 'plugin.scheduleAssigneeOverlap'
+  | 'plugin.scheduleAssigneeOverlapNone'
   | 'plugin.agileLicenseCta'
   | 'plugin.agileLicensedIdle'
   | 'plugin.agilePoints'

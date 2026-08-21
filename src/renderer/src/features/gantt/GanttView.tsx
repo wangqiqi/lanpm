@@ -23,6 +23,7 @@ import {
   compareScheduleToBaseline,
   type ScheduleBaselineSnapshot
 } from '@shared/task/scheduleBaseline'
+import { barStylesForAssigneeOverlap } from '@shared/task/assigneeOverlap'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { patchGanttCalendarLabels } from './ganttCalendarLabels'
@@ -61,6 +62,7 @@ import { evaluateTaskSchedule, scheduleHealthHintKey } from '@renderer/features/
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import { subscribeScheduleCriticalPath } from '@renderer/plugin/scheduleCriticalPathBridge'
 import { subscribeScheduleBaseline } from '@renderer/plugin/scheduleBaselineBridge'
+import { subscribeScheduleOverlap } from '@renderer/plugin/scheduleOverlapBridge'
 import styles from './gantt.module.css'
 
 const GANTT_ROW_HEIGHT = 44
@@ -99,6 +101,7 @@ export default function GanttView(): React.ReactElement {
   const [scheduleSaving, setScheduleSaving] = useState(false)
   const [contextTaskId, setContextTaskId] = useState<string | null>(null)
   const [criticalPathIds, setCriticalPathIds] = useState<Set<string>>(() => new Set())
+  const [overlapIds, setOverlapIds] = useState<Set<string>>(() => new Set())
   const [baselineSnap, setBaselineSnap] = useState<ScheduleBaselineSnapshot | null>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const suppressClickRef = useRef(false)
@@ -164,6 +167,13 @@ export default function GanttView(): React.ReactElement {
     })
   }, [gid])
 
+  useEffect(() => {
+    return subscribeScheduleOverlap((detail) => {
+      if (detail.groupId !== gid) return
+      setOverlapIds(new Set(detail.taskIds))
+    })
+  }, [gid])
+
   const baselineByTask = useMemo(() => {
     const map = new Map<string, { startDate: string; endDate: string }>()
     for (const row of baselineSnap?.tasks ?? []) {
@@ -188,6 +198,11 @@ export default function GanttView(): React.ReactElement {
             progressSelectedColor: ganttBarColors.barProgressSelectedColor
           }
         }
+      } else if (overlapIds.has(bar.id)) {
+        next = {
+          ...next,
+          styles: barStylesForAssigneeOverlap(next.styles, true)
+        }
       } else if (baselineByTask.size > 0) {
         const task = tasks.find((item) => item.taskId === bar.id)
         const current = task ? defaultScheduleForTask(task) : undefined
@@ -204,7 +219,7 @@ export default function GanttView(): React.ReactElement {
       }
       return next
     })
-  }, [tasks, criticalPathIds, ganttBarColors, baselineByTask])
+  }, [tasks, criticalPathIds, overlapIds, ganttBarColors, baselineByTask])
 
   const ganttReady = !loading && ganttTasks.length > 0
   const { highlightId } = useSearchHighlight('task', ganttReady)
@@ -510,6 +525,7 @@ export default function GanttView(): React.ReactElement {
             data-lanpm-visual="gantt-chart"
             data-critical-path={criticalPathIds.size > 0 ? 'on' : 'off'}
             data-schedule-baseline={baselineSnap?.frozenAt ? 'on' : 'off'}
+            data-schedule-overlap={overlapIds.size > 0 ? 'on' : 'off'}
           >
             <Gantt
             key={locale}

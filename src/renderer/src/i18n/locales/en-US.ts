@@ -639,6 +639,8 @@ const enUS = {
   'plugin.scheduleBaselineFrozen': 'Baseline frozen from current dates for this group',
   'plugin.scheduleBaselineSlipped': '{count} task(s) later than baseline',
   'plugin.scheduleBaselineOnTrack': 'Vs baseline: on track',
+  'plugin.scheduleAssigneeOverlap': '{count} overlapping assigned task(s)',
+  'plugin.scheduleAssigneeOverlapNone': 'No assignee date overlaps',
   'plugin.agileLicenseCta': 'Agile needs a valid offline license — import one under Extensions.',
   'plugin.agileLicensedIdle': 'Agile is licensed',
   'plugin.agilePoints': 'Story points',

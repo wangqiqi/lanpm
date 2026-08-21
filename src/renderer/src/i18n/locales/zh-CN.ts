@@ -629,6 +629,8 @@ const zhCN = {
   'plugin.scheduleBaselineFrozen': '已按当前工期冻结本群基线',
   'plugin.scheduleBaselineSlipped': '{count} 项晚于基线',
   'plugin.scheduleBaselineOnTrack': '对照基线：未延期',
+  'plugin.scheduleAssigneeOverlap': '{count} 项指派日期重叠',
+  'plugin.scheduleAssigneeOverlapNone': '无指派日期重叠',
   'plugin.agileLicenseCta': '敏捷扩展需有效离线许可证，请在扩展页导入许可。',
   'plugin.agileLicensedIdle': '敏捷扩展已授权',
   'plugin.agilePoints': '故事点',
