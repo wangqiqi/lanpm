@@ -23,7 +23,9 @@ assert.match(stub, /schedule-license-cta/)
 assert.match(stub, /openProfileTab/)
 assert.match(stub, /schedule-critical-path-switch/)
 assert.match(stub, /computeCriticalPath/)
-assert.match(stub, /invokeCapability/)
+assert.match(stub, /schedule-freeze-baseline/)
+assert.match(stub, /freezeScheduleBaseline/)
+assert.match(stub, /getScheduleBaseline/)
 
 const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
 assert.match(proxy, /assertPaidPluginLicensed/)
@@ -38,6 +40,25 @@ const gantt = readFileSync(join(root, 'src/renderer/src/features/gantt/GanttView
 assert.match(gantt, /PluginZoneHost/)
 assert.match(gantt, /view: 'gantt'/)
 assert.match(gantt, /subscribeScheduleCriticalPath/)
+assert.match(gantt, /subscribeScheduleBaseline/)
+assert.match(gantt, /data-schedule-baseline/)
+
+const service = readFileSync(join(root, 'src/main/task/scheduleBaselineService.ts'), 'utf8')
+assert.match(service, /assertPaidPluginLicensed\('lanpm\.schedule'/)
+assert.match(service, /freezeScheduleBaseline/)
+assert.match(service, /replaceGroupScheduleBaseline/)
+assert.match(service, /listTasksByGroup/)
+
+const schemaTs = readFileSync(join(root, 'src/main/storage/schema.ts'), 'utf8')
+assert.match(schemaTs, /schedule_baselines/)
+assert.ok(Number(schemaTs.match(/SCHEMA_VERSION\s*=\s*(\d+)/)?.[1] ?? 0) >= 20)
+
+const schemaSql = readFileSync(join(root, 'src/main/storage/schema.sql'), 'utf8')
+assert.match(schemaSql, /CREATE TABLE schedule_baselines/)
+
+const migrate = readFileSync(join(root, 'src/main/storage/migrate.ts'), 'utf8')
+assert.match(migrate, /fromVersion: 19/)
+assert.match(migrate, /schedule_baselines/)
 
 const cp = readFileSync(join(root, 'src/shared/task/criticalPath.ts'), 'utf8')
 assert.match(cp, /computeCriticalPath/)
@@ -51,7 +72,9 @@ assert.match(docs07, /lanpm\.schedule/)
 const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(docs06, /lanpm\.schedule/)
 assert.match(docs06, /SPRINT-54/)
-assert.match(docs06, /SPRINT-62/)
+assert.match(docs06, /SPRINT-65/)
+assert.match(docs06, /资源平衡仍后置/)
+assert.doesNotMatch(docs06, /基线仍后置/)
 assert.match(docs06, /仍永不插件化拆卖/)
 
 const enabled = readFileSync(join(root, 'src/shared/plugin/enabledDefaults.ts'), 'utf8')
@@ -61,5 +84,10 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>
 }
 assert.ok(pkg.scripts?.['verify:schedule-sku'], 'missing verify:schedule-sku script')
+assert.match(
+  pkg.scripts['verify:schedule-sku'] ?? '',
+  /verify-schedule-baseline/,
+  'schedule-sku must run baseline sqlite round-trip'
+)
 
 console.log('verify:schedule-sku OK')
