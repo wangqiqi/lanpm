@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.106.6-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.106.7-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -66,7 +66,7 @@
 | Area | Highlights |
 |------|------------|
 | **Communication** | Groups & DM, @mentions, code blocks, `/task` & `#` refs, message↔task, offline catch-up (chat / tasks / receipts / **file library index**), discover & VPN seeds. Optional **meeting plugin**: license CTA; Lite mesh vs Pro LiveKit; Pro video grid (auto-fit, screenshare tile, i18n); LAN LiveKit bypass ops in docs |
-| **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health. Optional **schedule plugin** (`lanpm.schedule`, paid): Gantt critical-path highlight on all four dep types, plus one frozen baseline per group. Optional **agile plugin** (`lanpm.agile`, paid): story points on cards, column totals, and a remaining-points burndown |
+| **Project mgmt** | Kanban, tree, Gantt, calendar, FS/SS/FF/SF deps, tags, acceptance checklist, presence, schedule health. Optional **schedule plugin** (`lanpm.schedule`, paid): Gantt critical-path on FS/SS/FF/SF, one frozen baseline per group, and same-assignee explicit-date overlap hints. Optional **agile plugin** (`lanpm.agile`, paid): story points, column totals, remaining-points burndown, and per-column WIP hints (never blocks drag) |
 | **Collab** | Excalidraw whiteboard + mind maps (Yjs CRDT over P2P), group files, LibreOffice preview, resumable transfers |
 | **Org & UX** | Project / functional / anonymous groups, leadership cockpit, light/dark, **zh / en**. Optional **weekly plugin** (`lanpm.weekly`, paid): license-gated weekly (incl. next-week plan) / monthly (own template) Markdown export. Optional **backup plugin** (`lanpm.backup`, free, **on by default**): encrypted single-group `.lanpm-bundle` in Profile; turn the plugin off to hide the section |
 | **Security** | AES-GCM on TCP links. After pairing or first TOFU, the peer ECDH public key is pinned to `deviceId` — a LAN MITM cannot silently swap keys. The first discovery still trusts on first use. Local-first SQLite with **optional passphrase encryption at rest**. Win/macOS/Linux × x64/arm64 packages. |
@@ -124,7 +124,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.106.6`** — Paid agile: remaining-points burndown + column WIP hints. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.106.7`** — Paid agile: remaining-points burndown + column WIP hints. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

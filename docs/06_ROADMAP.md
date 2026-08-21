@@ -136,7 +136,7 @@
 ## 5. 运维协作与远程网关（ops）
 
 > 真源：[07_插件与扩展](./07_插件与扩展.md) §27 起 · 金句「聊着聊着就把事干了」。  
-> **Phase 1 已闭合**（v1.94.0–v1.94.1）；**Phase 2 部分已交付**（见 [07](./07_插件与扩展.md) §35–§38）；本节列 **未完成** 项。
+> **Phase 1–3 已闭合**（见下表 · [07](./07_插件与扩展.md) §35–§38）。未完成工作见 **§8** 候选 / `plan.md`，本节不再当缺口。
 
 | 序 | 项 | 阶段 | 状态 |
 |----|-----|------|------|
@@ -150,40 +150,9 @@
 
 ---
 
-## 6. 候选队列（建议序）
-
-| 候选 | 说明 | 备注 |
-|------|------|------|
-| **Ops Phase 2（剩余）** | Ops 助手 Bot · Gateway HTTP · 出站 watch · 任务挂包 | **§5** |
-| **SPIKE-会议插件** | mesh vs LiveKit；`lanpm.meeting` 可购 SKU | **§3** · SPIKE 已交付 |
-| 插件离线分发 SPIKE | 侧载/签名 / **离线许可证** | ✅ 已交付；**应用商店不做**（离线分发终态） |
-| 思维导图 | 可购插件 | ✅ Layer C · v1.74.0（见 CHANGELOG） |
-| PWA | 移动端 Web | 后置 |
-| 真机手验补测 | §4 延期项 | 有设备再开 |
-| WebRTC DataChannel | 可选 | 非默认路径 |
-
-### 6.1 开源替换债务（OSS-first）
-
-> 选型纪律见 [01](./01_产品需求文档.md) §14 · [02](./02_技术实现建议.md) §16；立项走 `/plan`。
-
-| 序 | 项 | 首选 | 不够用时 |
-|----|-----|------|----------|
-| 1 | PDF 预览 | ✅ `pdfjs-dist`（文件库翻页；worker `'self'`） | 裁剪/主题仍可 `3rd/pdfjs-…` |
-| 2 | 全局搜索 | ✅ `minisearch`（任务/消息；成员仍内存） | 深度定制分词仍可 `3rd/` |
-| 3 | 长列表虚拟化 | 本机 Linux `measure:list-scroll` **NO-GO**（SPRINT-60：四页可滚、rAF P95≈16.7ms）；**不装** `react-virtuoso`，卡顿复现再开 | 有卡再装 `react-virtuoso` |
-| 4 | WebRTC | `simple-peer` | `3rd/simple-peer` 适配传输面 |
-| 5 | IndexedDB | `idb` / `y-indexeddb` | — |
-| 6 | i18n | `i18next` | — |
-| 7 | 表情 / 思维导图 | ✅ `emoji-mart`（Composer）· 导图 Layer C 已有 | — |
-| 8 | Office 轻量预览 | ✅ mammoth / exceljs（无 soffice 时 HTML；有 LibreOffice 仍转 PDF）· `verify:office-preview` | .doc/.xls/pptx 仍靠 soffice |
-
-**保持不动**：Yjs、antd、dnd-kit、gantt-task-react、better-sqlite3、highlight.js、FullCalendar、Excalidraw、electron。
-
----
-
 ## 6. 竞品吸收与收费边界（飞鸽 / 飞秋）
 
-> 品类定位见 [01](./01_产品需求文档.md) §13。开源实现态见 [02](./02_技术实现建议.md) §16 · 替换队列见本节 §5.1。
+> 品类定位见 [01](./01_产品需求文档.md) §13。开源实现态见 [02](./02_技术实现建议.md) §16 · 替换队列见 **§7**。
 
 ### 6.1 优先吸收（LAN+PM · 项目语义）
 
@@ -246,7 +215,41 @@
 
 ---
 
-## 7. 文档指针
+## 7. 开源替换债务（OSS-first）
+
+> 选型纪律见 [01](./01_产品需求文档.md) §14 · [02](./02_技术实现建议.md) §16；立项走 `/plan`。  
+> **用这个节号**：互引写 **`06` §7**。旧文 **§5.1** 已废（Ops 占用 §5 后撞号）。历史 CHANGELOG 里的 `06` §6.1 #n（OSS 表）= 本表序号。
+
+| 序 | 项 | 首选 | 不够用时 |
+|----|-----|------|----------|
+| 1 | PDF 预览 | ✅ `pdfjs-dist`（文件库翻页；worker `'self'`） | 裁剪/主题仍可 `3rd/pdfjs-…` |
+| 2 | 全局搜索 | ✅ `minisearch`（任务/消息；成员仍内存） | 深度定制分词仍可 `3rd/` |
+| 3 | 长列表虚拟化 | 本机 Linux `measure:list-scroll` **NO-GO**（SPRINT-60：四页可滚、rAF P95≈16.7ms）；**不装** `react-virtuoso`，卡顿复现再开 | 有卡再装 `react-virtuoso` |
+| 4 | WebRTC | `simple-peer` | `3rd/simple-peer` 适配传输面 |
+| 5 | IndexedDB | `idb` / `y-indexeddb` | — |
+| 6 | i18n | `i18next` | — |
+| 7 | 表情 / 思维导图 | ✅ `emoji-mart`（Composer）· 导图 Layer C 已有 | — |
+| 8 | Office 轻量预览 | ✅ mammoth / exceljs（无 soffice 时 HTML；有 LibreOffice 仍转 PDF）· `verify:office-preview` | .doc/.xls/pptx 仍靠 soffice |
+
+**保持不动**：Yjs、antd、dnd-kit、gantt-task-react、better-sqlite3、highlight.js、FullCalendar、Excalidraw、electron。
+
+---
+
+## 8. 候选队列（建议序）
+
+> 已交付项（Ops Phase 2、会议 SPIKE/SKU、离线许可证、脑图）见 `CHANGELOG` / §3 / §5，**不**再当缺口。下一刀以 `.cursorGrowth/plan.md` 为准。
+
+| 候选 | 说明 | 备注 |
+|------|------|------|
+| **迭代容器** | `lanpm.agile` 第四刀 | 列 WIP 已交付；容器仍后置 |
+| PWA | 移动端 Web | 后置 |
+| 真机手验补测 | §4 延期项（双机真网 · Win/mac） | 有设备再开 |
+| WebRTC DataChannel | 可选 | 非默认路径 |
+| 容量 leveling | 排程资源平衡 | SPRINT-67 **NO-GO** |
+
+---
+
+## 9. 文档指针
 
 | 内容 | 位置 |
 |------|------|
@@ -256,7 +259,8 @@
 | 竞品定位 | [01](./01_产品需求文档.md) §13 |
 | 竞品吸收 · 收费 · 验收锚点 | 本节 **§6** |
 | 依赖 / 开源选型 | [02](./02_技术实现建议.md) §16 · [01](./01_产品需求文档.md) §14 |
-| 开源替换债务 | 本节 **§5.1** |
+| 开源替换债务 | 本节 **§7** |
+| 候选队列 | 本节 **§8** |
 | 插件架构 | [07_插件与扩展.md](./07_插件与扩展.md) |
 | 聊天性能（已交付 v1.83–v1.93） | `CHANGELOG` `[1.83.0]`–`[1.93.0]` · 本地 `.cursorGrowth/decisions/chat-perf.md` |
 | Sprint 执行 | `.cursorGrowth/plan.md`（本地） |

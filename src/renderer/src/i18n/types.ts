@@ -695,7 +695,6 @@ export type MessageKey =
   | 'calendar.scheduleFailed'
   | 'calendar.scheduleInvalid'
   | 'calendar.inferredHint'
-  | 'whiteboard.placeholder'
   | 'whiteboard.save'
   | 'whiteboard.toolbarHint'
   | 'whiteboard.linkedHint'

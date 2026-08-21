@@ -715,7 +715,6 @@ const enUS = {
   'calendar.scheduleInvalid': 'Invalid date range; reverted',
   'calendar.inferredHint':
     'Dates shown are inferred from task progress when no explicit schedule is set.',
-  'whiteboard.placeholder': 'Whiteboard canvas lands in later tasks this sprint (Excalidraw).',
   'whiteboard.save': 'Save',
   'whiteboard.toolbarHint': 'Autosave · realtime collab · one board per group',
   'whiteboard.linkedHint': 'Linked to task {taskId}… · autosave',

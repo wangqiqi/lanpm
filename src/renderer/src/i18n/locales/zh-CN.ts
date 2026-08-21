@@ -704,7 +704,6 @@ const zhCN = {
   'calendar.scheduleFailed': '更新日历排期失败',
   'calendar.scheduleInvalid': '无效的日期范围，已还原',
   'calendar.inferredHint': '以下日程由任务进度推算，未单独设置排期。',
-  'whiteboard.placeholder': '白板画布将在本 Sprint 后续任务接入（Excalidraw）。',
   'whiteboard.save': '保存',
   'whiteboard.toolbarHint': '自动保存 · 实时同画 · 一群一板',
   'whiteboard.linkedHint': '已关联任务 {taskId}… · 自动保存',
