@@ -21,7 +21,6 @@
 | 模块 | 功能 | 备注 |
 |------|------|------|
 | **会议插件（可购）** | 语音 / 视频 / 屏幕共享 / 会议室 · **Pro+ 打磨** | Host/stub/mesh/LiveKit + SPRINT-51 UX（CTA · Lite/Pro · 最短运维）已交付；剩余多人格/投屏见 **§2** · **§3.2 Pro+** |
-| 表情、书签浏览器导入导出 | 聊天/书签体验糖 | 低优先级（原 B6 体验） |
 | **高级 Agent 编排** | LangGraph / 多角色 DAG 等 | L3a/L3b 已交付（`verify:ai-pipeline*`）；**可选** 外框架后置 |
 | 移动端 Web | PWA 基础版本 | 后置 |
 
@@ -35,7 +34,6 @@
 | 完整插件市场 / 应用商店 | **不做**（2026-08-01）；**离线分发** → [07_插件与扩展](./07_插件与扩展.md) §13 起 |
 | 原生移动 App | iOS + Android |
 | WebRTC DataChannel | 可选；默认仍 TCP+UDP（见 [01](./01_产品需求文档.md) §1.3.1） |
-| 匿名群可持久化历史 | **已交付（本机）**；文件 Tab 仍不开 |
 
 ---
 
@@ -175,7 +173,7 @@
 | 4 | WebRTC | `simple-peer` | `3rd/simple-peer` 适配传输面 |
 | 5 | IndexedDB | `idb` / `y-indexeddb` | — |
 | 6 | i18n | `i18next` | — |
-| 7 | 表情 / 思维导图 | emoji-mart / `@xyflow/react` | 不适配 → `3rd/` |
+| 7 | 表情 / 思维导图 | ✅ `emoji-mart`（Composer）· 导图 Layer C 已有 | — |
 | 8 | Office 轻量预览 | mammoth / exceljs | — |
 
 **保持不动**：Yjs、antd、dnd-kit、gantt-task-react、better-sqlite3、highlight.js、FullCalendar、Excalidraw、electron。
@@ -208,7 +206,7 @@
 | B3 | 项目备份 / 还原 | **已加固**（v1.25.0）；可插件化 |
 | B4 | 弱网下项目同步不丢 | task_crdt / 同步可靠性主线 |
 | B5 | 甘特导出 PNG/PDF | 标配或高级导出插件 |
-| B6 | 表情、书签导入等 | 低优先级体验糖 |
+| B6 | 表情、书签导入等 | **已交付**（`emoji-mart` · Netscape 书签导入导出） |
 
 ### 6.3 免费 vs 收费（已拍板）
 
