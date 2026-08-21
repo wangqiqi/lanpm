@@ -6,6 +6,12 @@ import {
   upsertAgileBurndownSample
 } from '../storage/repositories/agileBurndownRepository.ts'
 import {
+  getAgileIteration,
+  listAgileIterationSamples,
+  upsertAgileIterationSample
+} from '../storage/repositories/agileIterationRepository.ts'
+import { tasksInCurrentIteration } from '../../shared/task/agileIteration.ts'
+import {
   buildAgileBurndownView,
   localYmd,
   remainingStoryPoints,
@@ -19,6 +25,7 @@ function requirePaidAgile(): void {
 export function getAgileBurndown(
   db: Database,
   groupId: string,
+  iterationId?: string | null,
   now = new Date()
 ): AgileBurndownView {
   requirePaidAgile()
@@ -26,8 +33,25 @@ export function getAgileBurndown(
     throw new Error('groupId required')
   }
   const gid = groupId.trim()
-  const tasks = listTasksByGroup(db, gid)
+  const all = listTasksByGroup(db, gid)
   const today = localYmd(now)
+  const scopedId = iterationId && iterationId.trim() ? iterationId.trim() : null
+  if (scopedId) {
+    const iteration = getAgileIteration(db, scopedId)
+    if (!iteration || iteration.groupId !== gid) throw new Error('iteration not in group')
+    const tasks = tasksInCurrentIteration(all, scopedId)
+    const remaining = remainingStoryPoints(tasks)
+    upsertAgileIterationSample(db, scopedId, today, remaining, now.toISOString())
+    return buildAgileBurndownView({
+      groupId: gid,
+      tasks,
+      today,
+      samples: listAgileIterationSamples(db, scopedId),
+      window: { start: iteration.startDate, end: iteration.endDate },
+      iterationId: scopedId
+    })
+  }
+  const tasks = all
   upsertAgileBurndownSample(db, gid, today, remainingStoryPoints(tasks), now.toISOString())
   return buildAgileBurndownView({
     groupId: gid,

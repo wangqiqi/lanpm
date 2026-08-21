@@ -14,6 +14,7 @@ import {
   validateTaskTitle
 } from '../../shared/task/validation'
 import { resolveStoryPointsPatch } from '../../shared/task/storyPoints'
+import { assertTaskIterationInGroup } from './agileIterationService'
 import { filterTagsToGroupDict } from '../../shared/task/tags'
 import { assertGroupAllowsTasks } from '../../shared/group/guards'
 import { resolveGroupType } from '../group/groupService'
@@ -273,6 +274,14 @@ export function updateGroupTask(db: Database, input: UpdateTaskInput): Task {
     ...(input.tags !== undefined
       ? { tags: dictFilteredTags(db, existing.groupId, input.tags) }
       : {})
+  }
+
+  if (input.iterationId !== undefined) {
+    assertTaskIterationInGroup(
+      db,
+      existing.groupId,
+      input.iterationId === '' ? null : input.iterationId
+    )
   }
 
   const updated = updateTaskRow(db, patch)

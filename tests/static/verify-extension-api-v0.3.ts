@@ -70,7 +70,8 @@ assert.deepEqual(TASK_PATCH_WHITELIST_FIELDS, [
   'progressPercent',
   'priority',
   'tags',
-  'storyPoints'
+  'storyPoints',
+  'iterationId'
 ])
 assert.deepEqual(getDisallowedTaskPatchFields({ title: 'x', assigneeUserId: 'u1' }), [
   'assigneeUserId'

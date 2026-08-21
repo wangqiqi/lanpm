@@ -5,7 +5,8 @@ export const TASK_PATCH_WHITELIST_FIELDS = [
   'progressPercent',
   'priority',
   'tags',
-  'storyPoints'
+  'storyPoints',
+  'iterationId'
 ] as const
 
 export type TaskPatchWhitelistField = (typeof TASK_PATCH_WHITELIST_FIELDS)[number]

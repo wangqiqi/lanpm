@@ -154,7 +154,8 @@ export interface LanpmApi {
       groupId: string
     ) => Promise<import('./task/scheduleBaseline').ScheduleBaselineSnapshot>
     getAgileBurndown: (
-      groupId: string
+      groupId: string,
+      iterationId?: string | null
     ) => Promise<import('./task/agileBurndown').AgileBurndownView>
     getAgileWipLimits: (
       groupId: string
@@ -164,6 +165,19 @@ export interface LanpmApi {
       status: import('./task/types').TaskStatus,
       limit: number | null
     ) => Promise<import('./task/columnWip').AgileWipSnapshot>
+    getAgileIterations: (
+      groupId: string
+    ) => Promise<import('./task/agileIteration').AgileIterationSnapshot>
+    createAgileIteration: (
+      groupId: string,
+      name: string,
+      startDate: string,
+      endDate: string
+    ) => Promise<import('./task/agileIteration').AgileIterationSnapshot>
+    setCurrentAgileIteration: (
+      groupId: string,
+      iterationId: string | null
+    ) => Promise<import('./task/agileIteration').AgileIterationSnapshot>
     upsertDependency: (input: UpsertDependencyInput) => Promise<TaskDependency>
     removeDependency: (groupId: string, fromTaskId: string, toTaskId: string) => Promise<boolean>
     deleteTask: (taskId: string, mode?: DeleteTaskMode) => Promise<boolean>

@@ -26,6 +26,7 @@ export const TASK_CRDT_FIELD_KEYS = [
   'linkedFileIds',
   'progressPercent',
   'storyPoints',
+  'iterationId',
   'startDate',
   'endDate',
   'milestone',
@@ -61,6 +62,7 @@ export function applyTaskToDoc(doc: Y.Doc, task: Task): void {
   row.set('priority', task.priority)
   row.set('progressPercent', task.progressPercent)
   setOptional(row, 'storyPoints', task.storyPoints)
+  setOptional(row, 'iterationId', task.iterationId)
   row.set('sortOrder', task.sortOrder)
   row.set('createdBy', task.createdBy)
   row.set('createdAt', task.createdAt)
@@ -168,6 +170,7 @@ export function taskFromYMap(map: Y.Map<unknown>): Task | null {
     priority: priority as Task['priority'],
     progressPercent,
     storyPoints: parseStoryPoints(map.get('storyPoints')),
+    iterationId: asString(map.get('iterationId')),
     sortOrder,
     createdBy,
     createdAt,

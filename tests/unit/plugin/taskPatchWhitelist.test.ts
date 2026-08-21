@@ -12,7 +12,8 @@ describe('taskPatchWhitelist', () => {
       'progressPercent',
       'priority',
       'tags',
-      'storyPoints'
+      'storyPoints',
+      'iterationId'
     ])
   })
 

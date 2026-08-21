@@ -14,6 +14,7 @@ export type AgileBurndownView = {
   windowEnd: string
   samples: BurndownPoint[]
   ideal: BurndownPoint[]
+  iterationId?: string
 }
 
 const YMD = /^\d{4}-\d{2}-\d{2}$/
@@ -95,10 +96,12 @@ export function buildAgileBurndownView(input: {
   tasks: readonly Task[]
   today: string
   samples: BurndownPoint[]
+  window?: { start: string; end: string }
+  iterationId?: string
 }): AgileBurndownView {
   const remaining = remainingStoryPoints(input.tasks)
   const total = totalEstimatedStoryPoints(input.tasks)
-  const { start, end } = burndownWindow(input.tasks, input.today)
+  const { start, end } = input.window ?? burndownWindow(input.tasks, input.today)
   const byDay = new Map(input.samples.map((s) => [s.day, s.remaining]))
   byDay.set(input.today, remaining)
   const samples = [...byDay.entries()]
@@ -112,7 +115,8 @@ export function buildAgileBurndownView(input: {
     windowStart: start,
     windowEnd: end,
     samples,
-    ideal: idealBurndown(start, end, total)
+    ideal: idealBurndown(start, end, total),
+    ...(input.iterationId ? { iterationId: input.iterationId } : {})
   }
 }
 

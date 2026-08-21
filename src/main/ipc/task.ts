@@ -31,6 +31,11 @@ import {
 import { getAgileBurndown } from '../task/agileBurndownService'
 import { getAgileWipLimits, setAgileWipLimit } from '../task/agileWipService'
 import {
+  createAgileIteration,
+  getAgileIterations,
+  setCurrentAgileIteration
+} from '../task/agileIterationService'
+import {
   listRemoteTaskAwareness,
   setLocalTaskAwareness
 } from '../task/taskAwarenessService'
@@ -165,9 +170,12 @@ export function registerTaskIpc(): void {
     return getScheduleBaseline(getDatabase(), groupId)
   })
 
-  ipcMain.handle(TASK_IPC.getAgileBurndown, (_event, groupId: string) => {
-    return getAgileBurndown(getDatabase(), groupId)
-  })
+  ipcMain.handle(
+    TASK_IPC.getAgileBurndown,
+    (_event, groupId: string, iterationId?: string | null) => {
+      return getAgileBurndown(getDatabase(), groupId, iterationId)
+    }
+  )
 
   ipcMain.handle(TASK_IPC.getAgileWipLimits, (_event, groupId: string) => {
     return getAgileWipLimits(getDatabase(), groupId)
@@ -177,6 +185,24 @@ export function registerTaskIpc(): void {
     TASK_IPC.setAgileWipLimit,
     (_event, groupId: string, status: string, limit: number | null) => {
       return setAgileWipLimit(getDatabase(), groupId, status, limit)
+    }
+  )
+
+  ipcMain.handle(TASK_IPC.getAgileIterations, (_event, groupId: string) => {
+    return getAgileIterations(getDatabase(), groupId)
+  })
+
+  ipcMain.handle(
+    TASK_IPC.createAgileIteration,
+    (_event, groupId: string, name: string, startDate: string, endDate: string) => {
+      return createAgileIteration(getDatabase(), groupId, name, startDate, endDate)
+    }
+  )
+
+  ipcMain.handle(
+    TASK_IPC.setCurrentAgileIteration,
+    (_event, groupId: string, iterationId: string | null) => {
+      return setCurrentAgileIteration(getDatabase(), groupId, iterationId)
     }
   )
 

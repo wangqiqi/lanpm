@@ -119,10 +119,16 @@ const api: LanpmApi = {
     freezeScheduleBaseline: (groupId) =>
       ipcRenderer.invoke('task:freezeScheduleBaseline', groupId),
     getScheduleBaseline: (groupId) => ipcRenderer.invoke('task:getScheduleBaseline', groupId),
-    getAgileBurndown: (groupId) => ipcRenderer.invoke('task:getAgileBurndown', groupId),
+    getAgileBurndown: (groupId, iterationId) =>
+      ipcRenderer.invoke('task:getAgileBurndown', groupId, iterationId ?? null),
     getAgileWipLimits: (groupId) => ipcRenderer.invoke('task:getAgileWipLimits', groupId),
     setAgileWipLimit: (groupId, status, limit) =>
       ipcRenderer.invoke('task:setAgileWipLimit', groupId, status, limit),
+    getAgileIterations: (groupId) => ipcRenderer.invoke('task:getAgileIterations', groupId),
+    createAgileIteration: (groupId, name, startDate, endDate) =>
+      ipcRenderer.invoke('task:createAgileIteration', groupId, name, startDate, endDate),
+    setCurrentAgileIteration: (groupId, iterationId) =>
+      ipcRenderer.invoke('task:setCurrentAgileIteration', groupId, iterationId),
     upsertDependency: (input) => ipcRenderer.invoke('task:upsertDependency', input),
     removeDependency: (groupId, fromTaskId, toTaskId) =>
       ipcRenderer.invoke('task:removeDependency', groupId, fromTaskId, toTaskId),

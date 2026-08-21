@@ -58,7 +58,13 @@ import {
   isWipStatus,
   type ColumnWipLimits,
   type AgileWipSnapshot
-} from '@shared/task/columnWip'
+import {
+  parseIterationDates,
+  parseIterationName,
+  tasksInCurrentIteration,
+  type AgileIteration,
+  type AgileIterationSnapshot
+} from '@shared/task/agileIteration'
 import { filterTagsToGroupDict } from '@shared/task/tags'
 import { normalizeLinkedFileIds } from '@shared/task/linkedFiles'
 import { collectTaskDiscussions } from '@shared/task/discussions'
@@ -199,6 +205,7 @@ const STUB_PLUGIN_LICENSES_KEY = 'lanpm.stub.pluginLicenses'
 const STUB_SCHEDULE_BASELINE_KEY = 'lanpm.stub.scheduleBaselines'
 const STUB_AGILE_BURNDOWN_KEY = 'lanpm.stub.agileBurndown'
 const STUB_AGILE_WIP_KEY = 'lanpm.stub.agileWip'
+const STUB_AGILE_ITER_KEY = 'lanpm.stub.agileIterations'
 
 function readStubPluginLicenses(): Record<string, { features: string[]; expiresAt?: number }> {
   try {
@@ -269,6 +276,38 @@ function writeStubAgileWip(groupId: string, limits: ColumnWipLimits): AgileWipSn
   all[groupId] = limits
   localStorage.setItem(STUB_AGILE_WIP_KEY, JSON.stringify(all))
   return { groupId, limits }
+}
+
+type StubAgileIterStore = Record<
+  string,
+  {
+    currentIterationId: string | null
+    iterations: AgileIteration[]
+    samples: Record<string, BurndownPoint[]>
+  }
+>
+
+function readStubAgileIter(): StubAgileIterStore {
+  try {
+    const raw = localStorage.getItem(STUB_AGILE_ITER_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw) as StubAgileIterStore
+  } catch {
+    return {}
+  }
+}
+
+function writeStubAgileIter(store: StubAgileIterStore): void {
+  localStorage.setItem(STUB_AGILE_ITER_KEY, JSON.stringify(store))
+}
+
+function stubIterSnapshot(groupId: string): AgileIterationSnapshot {
+  const row = readStubAgileIter()[groupId]
+  return {
+    groupId,
+    currentIterationId: row?.currentIterationId ?? null,
+    iterations: row?.iterations ?? []
+  }
 }
 
 function isStubPluginLicensed(pluginId: string): boolean {
@@ -947,6 +986,12 @@ function stubUpdateTask(input: UpdateTaskInput): Task {
         ? clampProgressPercent(input.progressPercent)
         : existing.progressPercent,
     storyPoints: resolveStoryPointsPatch(input.storyPoints, existing.storyPoints),
+    iterationId:
+      input.iterationId === null
+        ? undefined
+        : input.iterationId !== undefined
+          ? input.iterationId.trim() || undefined
+          : existing.iterationId,
     parentTaskId:
       input.parentTaskId === null
         ? undefined
@@ -1780,12 +1825,42 @@ export function createBrowserLanpmStub(): LanpmApi {
         }
         return readStubScheduleBaseline(groupId)
       },
-      getAgileBurndown: async (groupId) => {
+      getAgileBurndown: async (groupId, iterationId) => {
         if (!isStubPluginLicensed('lanpm.agile')) {
           throw new Error('plugin.agileLicenseRequired')
         }
-        const tasks = (readAllTasks()[groupId] ?? []).filter((t) => !t.deletedAt)
+        const all = (readAllTasks()[groupId] ?? []).filter((t) => !t.deletedAt)
         const today = localYmd(new Date())
+        const scopedId = iterationId && iterationId.trim() ? iterationId.trim() : null
+        if (scopedId) {
+          const snap = stubIterSnapshot(groupId)
+          const iteration = snap.iterations.find((row) => row.iterationId === scopedId)
+          if (!iteration) throw new Error('iteration not in group')
+          const tasks = tasksInCurrentIteration(all, scopedId)
+          const remaining = remainingStoryPoints(tasks)
+          const store = readStubAgileIter()
+          const prev = store[groupId] ?? {
+            currentIterationId: null,
+            iterations: [],
+            samples: {}
+          }
+          const points = [...(prev.samples[scopedId] ?? []).filter((p) => p.day !== today), {
+            day: today,
+            remaining
+          }]
+          prev.samples[scopedId] = points
+          store[groupId] = prev
+          writeStubAgileIter(store)
+          return buildAgileBurndownView({
+            groupId,
+            tasks,
+            today,
+            samples: points,
+            window: { start: iteration.startDate, end: iteration.endDate },
+            iterationId: scopedId
+          })
+        }
+        const tasks = all
         writeStubAgileBurndownSample(groupId, {
           day: today,
           remaining: remainingStoryPoints(tasks)
@@ -1815,6 +1890,65 @@ export function createBrowserLanpmStub(): LanpmApi {
         if (parsed === undefined) delete prev[status]
         else prev[status] = parsed
         return writeStubAgileWip(groupId, prev)
+      },
+      getAgileIterations: async (groupId) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        return stubIterSnapshot(groupId)
+      },
+      createAgileIteration: async (groupId, name, startDate, endDate) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        const parsedName = parseIterationName(name)
+        if (!parsedName) throw new Error('iteration name required')
+        const dates = parseIterationDates(startDate, endDate)
+        if (!dates) throw new Error('iteration dates must be YYYY-MM-DD and start <= end')
+        const now = new Date().toISOString()
+        const iterationId = `it_${crypto.randomUUID()}`
+        const row: AgileIteration = {
+          iterationId,
+          groupId,
+          name: parsedName,
+          startDate: dates.startDate,
+          endDate: dates.endDate,
+          createdAt: now,
+          updatedAt: now
+        }
+        const store = readStubAgileIter()
+        const prev = store[groupId] ?? {
+          currentIterationId: null,
+          iterations: [],
+          samples: {}
+        }
+        prev.iterations = [...prev.iterations, row]
+        prev.currentIterationId = iterationId
+        store[groupId] = prev
+        writeStubAgileIter(store)
+        return stubIterSnapshot(groupId)
+      },
+      setCurrentAgileIteration: async (groupId, iterationId) => {
+        if (!isStubPluginLicensed('lanpm.agile')) {
+          throw new Error('plugin.agileLicenseRequired')
+        }
+        const store = readStubAgileIter()
+        const prev = store[groupId] ?? {
+          currentIterationId: null,
+          iterations: [],
+          samples: {}
+        }
+        if (iterationId) {
+          if (!prev.iterations.some((row) => row.iterationId === iterationId)) {
+            throw new Error('iteration not in group')
+          }
+          prev.currentIterationId = iterationId
+        } else {
+          prev.currentIterationId = null
+        }
+        store[groupId] = prev
+        writeStubAgileIter(store)
+        return stubIterSnapshot(groupId)
       },
       upsertDependency: async (input) => {
         void input
