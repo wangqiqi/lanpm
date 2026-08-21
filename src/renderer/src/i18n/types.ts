@@ -615,6 +615,8 @@ export type MessageKey =
   | 'plugin.scheduleCriticalPath'
   | 'plugin.scheduleCriticalPathEmpty'
   | 'plugin.scheduleCriticalPathCycle'
+  | 'plugin.agileLicenseCta'
+  | 'plugin.agileLicensedIdle'
   | 'plugin.meetingOpenMeetingConfig'
   | 'plugin.meetingToolbarDetails'
   | 'plugin.meetingStatusIdle'

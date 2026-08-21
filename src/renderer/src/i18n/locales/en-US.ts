@@ -633,6 +633,8 @@ const enUS = {
   'plugin.scheduleCriticalPath': 'Critical path',
   'plugin.scheduleCriticalPathEmpty': 'No FS critical path to highlight',
   'plugin.scheduleCriticalPathCycle': 'Dependency cycle — critical path skipped',
+  'plugin.agileLicenseCta': 'Agile needs a valid offline license — import one under Extensions.',
+  'plugin.agileLicensedIdle': 'Agile is licensed',
   'plugin.meetingOpenMeetingConfig': 'Configure meeting bypass',
   'plugin.meetingToolbarDetails': 'Meeting details',
   'plugin.meetingStatusIdle': 'Not joined',

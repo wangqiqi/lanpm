@@ -21,6 +21,13 @@ assert.ok(parsed?.capabilities.includes('task.patch'))
 
 const stub = readFileSync(join(root, 'src/renderer/src/plugin/builtins/AgileStub.tsx'), 'utf8')
 assert.match(stub, /data-testid="agile-board-toolbar"/)
+assert.match(stub, /isPluginLicenseActive/)
+assert.match(stub, /agile-license-cta/)
+assert.match(stub, /openProfileTab/)
+assert.ok(!stub.includes('invokeCapability'), 'unlicensed shell must not invoke capabilities')
+
+const proxy = readFileSync(join(root, 'src/main/plugin/capabilityProxy.ts'), 'utf8')
+assert.match(proxy, /assertPaidPluginLicensed/)
 
 const registry = readFileSync(join(root, 'src/renderer/src/plugin/registry.ts'), 'utf8')
 assert.match(registry, /lanpm\.agile.*AgileStub/)

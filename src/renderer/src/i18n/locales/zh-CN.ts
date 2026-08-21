@@ -623,6 +623,8 @@ const zhCN = {
   'plugin.scheduleCriticalPath': '关键路径',
   'plugin.scheduleCriticalPathEmpty': '没有可高亮的 FS 关键路径',
   'plugin.scheduleCriticalPathCycle': '依赖成环，无法计算关键路径',
+  'plugin.agileLicenseCta': '敏捷扩展需有效离线许可证，请在扩展页导入许可。',
+  'plugin.agileLicensedIdle': '敏捷扩展已授权',
   'plugin.meetingOpenMeetingConfig': '配置会议旁路',
   'plugin.meetingToolbarDetails': '会议详情',
   'plugin.meetingStatusIdle': '未加入',
