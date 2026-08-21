@@ -9,7 +9,7 @@ import AiAssistantStub from './builtins/AiAssistantStub'
 import ScheduleStub from './builtins/ScheduleStub'
 import AgileStub from './builtins/AgileStub'
 import WeeklyStub from './builtins/WeeklyStub'
-import BackupStub from './builtins/BackupStub
+import BackupStub from './builtins/BackupStub'
 
 export type PluginSlotComponentProps = {
   plugin: PluginView
