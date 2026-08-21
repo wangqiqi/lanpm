@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Linux `--full` 性能抽样**：本机 Ubuntu `measure:perf --full`（冷启动×3 · idle 60s · Tab×10）；median 冷启动 790ms；idle RSS≈607MB（关 GPU，**不对标** 200MB）；Tab P95 152ms（`TASK-6101`）
+
 ## [1.106.0] - 2026-08-21
 
 ### Added
