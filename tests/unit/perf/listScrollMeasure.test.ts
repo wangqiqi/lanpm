@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   LIST_SCROLL_SURFACES,
   listScrollNavPreferencesDocument,
-  listScrollSurfaceByView
+  listScrollSurfaceByView,
+  listScrollVerdict
 } from '../../../src/shared/perf/listScrollMeasure'
 
 describe('listScrollMeasure', () => {
@@ -17,5 +18,17 @@ describe('listScrollMeasure', () => {
     const doc = listScrollNavPreferencesDocument()
     expect(doc.global.hiddenViews).not.toContain('files')
     expect(doc.global.hiddenViews).not.toContain('gantt')
+  })
+
+  it('GO only when a scrollable surface exceeds 50ms p95 or long task', () => {
+    expect(
+      listScrollVerdict([{ view: 'chat', scrollable: true, frameP95Ms: 16, longTaskMaxMs: 0 }])
+    ).toBe('NO-GO')
+    expect(
+      listScrollVerdict([{ view: 'chat', scrollable: true, frameP95Ms: 50, longTaskMaxMs: 0 }])
+    ).toBe('GO')
+    expect(
+      listScrollVerdict([{ view: 'board', scrollable: false, frameP95Ms: 80, longTaskMaxMs: 80 }])
+    ).toBe('NO-GO')
   })
 })

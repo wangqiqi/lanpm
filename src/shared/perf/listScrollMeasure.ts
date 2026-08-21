@@ -26,6 +26,26 @@ export const LIST_SCROLL_SURFACES: readonly ListScrollSurface[] = [
   { view: 'gantt', testId: 'gantt-chart-scroll', minCount: 80, kind: 'tasks' }
 ]
 
+/** GO (consider virtuoso) if any *scrollable* surface meets/exceeds these during seeded scroll. */
+export const LIST_SCROLL_FRAME_P95_GO_MS = 50
+export const LIST_SCROLL_LONG_TASK_GO_MS = 50
+
+export interface ListScrollSample {
+  view: ListScrollView
+  scrollable: boolean
+  frameP95Ms: number | null
+  longTaskMaxMs: number | null
+}
+
+export function listScrollVerdict(samples: readonly ListScrollSample[]): 'GO' | 'NO-GO' {
+  for (const s of samples) {
+    if (!s.scrollable) continue
+    if ((s.frameP95Ms ?? 0) >= LIST_SCROLL_FRAME_P95_GO_MS) return 'GO'
+    if ((s.longTaskMaxMs ?? 0) >= LIST_SCROLL_LONG_TASK_GO_MS) return 'GO'
+  }
+  return 'NO-GO'
+}
+
 export function listScrollSurfaceByView(view: ListScrollView): ListScrollSurface {
   const found = LIST_SCROLL_SURFACES.find((s) => s.view === view)
   if (!found) throw new Error(`unknown list-scroll view: ${view}`)

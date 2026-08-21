@@ -49,7 +49,7 @@ async function waitForLanpmWindow(app, timeoutMs = 90_000) {
   return app.firstWindow()
 }
 
-async function launchMeasured(opts) {
+export async function launchMeasured(opts) {
   const electronBin = resolveElectronBin()
   if (!electronBin) throw new Error('electron binary missing — run npm install')
   const mainJs = join(opts.root, 'out/main/index.js')
@@ -78,7 +78,7 @@ async function launchMeasured(opts) {
   return { app, page, coldMs }
 }
 
-async function closeApp(app) {
+export async function closeApp(app) {
   const proc = app.process()
   try {
     await Promise.race([
