@@ -23,6 +23,8 @@ export interface Task {
   progressPercent: number
   /** Optional story points (1–99); omit = unestimated (paid agile SKU) */
   storyPoints?: number
+  /** Paid agile iteration container; omit = not in a sprint */
+  iterationId?: string
   startDate?: string
   endDate?: string
   milestone?: boolean
@@ -65,6 +67,8 @@ export interface UpdateTaskInput {
   progressPercent?: number
   /** Set to replace; `null` clears */
   storyPoints?: number | null
+  /** Paid agile iteration; `null` clears */
+  iterationId?: string | null
   parentTaskId?: string | null
   sortOrder?: number
   startDate?: string | null

@@ -93,6 +93,7 @@ CREATE TABLE tasks (
   linked_file_ids_json TEXT NOT NULL DEFAULT '[]',
   progress_percent INTEGER NOT NULL DEFAULT 0,
   story_points INTEGER,
+  iteration_id TEXT,
   start_date TEXT,
   end_date TEXT,
   milestone INTEGER NOT NULL DEFAULT 0,
@@ -354,3 +355,30 @@ CREATE TABLE agile_wip_limits (
   PRIMARY KEY (group_id, status)
 );
 CREATE INDEX idx_agile_wip_limits_group ON agile_wip_limits(group_id);
+
+-- 付费敏捷：迭代容器（名称 + 起止日）
+CREATE TABLE agile_iterations (
+  iteration_id TEXT PRIMARY KEY,
+  group_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  start_date TEXT NOT NULL,
+  end_date TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX idx_agile_iterations_group ON agile_iterations(group_id);
+
+-- 当前选中迭代；iteration_id 空 = 全群视图
+CREATE TABLE agile_iteration_current (
+  group_id TEXT PRIMARY KEY,
+  iteration_id TEXT
+);
+
+-- 按迭代按日剩余故事点（与整群 samples 分表，避免互相覆盖）
+CREATE TABLE agile_iteration_samples (
+  iteration_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  remaining_points INTEGER NOT NULL,
+  sampled_at TEXT NOT NULL,
+  PRIMARY KEY (iteration_id, day)
+);

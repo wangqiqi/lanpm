@@ -48,7 +48,10 @@ export const EXPECTED_TABLES = [
   'ai_pipeline_runs',
   'schedule_baselines',
   'agile_burndown_samples',
-  'agile_wip_limits'
+  'agile_wip_limits',
+  'agile_iterations',
+  'agile_iteration_current',
+  'agile_iteration_samples'
 ] as const
 
-export const SCHEMA_VERSION = 22
+export const SCHEMA_VERSION = 23

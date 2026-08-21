@@ -441,6 +441,40 @@ export const MIGRATIONS: readonly MigrationStep[] = [
       `)
       db.exec(`CREATE INDEX idx_agile_wip_limits_group ON agile_wip_limits(group_id)`)
     }
+  },
+  {
+    fromVersion: 22,
+    description: 'agile iterations + tasks.iteration_id (SPRINT-70 TASK-7001)',
+    up: (db) => {
+      db.exec(`ALTER TABLE tasks ADD COLUMN iteration_id TEXT`)
+      db.exec(`
+        CREATE TABLE agile_iterations (
+          iteration_id TEXT PRIMARY KEY,
+          group_id TEXT NOT NULL,
+          name TEXT NOT NULL,
+          start_date TEXT NOT NULL,
+          end_date TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+      db.exec(`CREATE INDEX idx_agile_iterations_group ON agile_iterations(group_id)`)
+      db.exec(`
+        CREATE TABLE agile_iteration_current (
+          group_id TEXT PRIMARY KEY,
+          iteration_id TEXT
+        )
+      `)
+      db.exec(`
+        CREATE TABLE agile_iteration_samples (
+          iteration_id TEXT NOT NULL,
+          day TEXT NOT NULL,
+          remaining_points INTEGER NOT NULL,
+          sampled_at TEXT NOT NULL,
+          PRIMARY KEY (iteration_id, day)
+        )
+      `)
+    }
   }
 ]
 

@@ -23,6 +23,7 @@ interface TaskRow {
   linked_file_ids_json?: string | null
   progress_percent: number
   story_points?: number | null
+  iteration_id?: string | null
   start_date: string | null
   end_date: string | null
   milestone: number
@@ -94,6 +95,7 @@ function rowToTask(row: TaskRow): Task {
     linkedFileIds: parseLinkedFileIdsJson(row.linked_file_ids_json),
     progressPercent: clampProgressPercent(row.progress_percent),
     storyPoints: parseStoryPoints(row.story_points),
+    iterationId: row.iteration_id?.trim() ? row.iteration_id : undefined,
     startDate: row.start_date ?? undefined,
     endDate: row.end_date ?? undefined,
     milestone: row.milestone === 1,
@@ -214,13 +216,13 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
       task_id, group_id, parent_task_id, title, description,
       status, other_reason, priority, assignee_user_id, tags_json,
       source_msg_id, linked_file_ids_json,
-      progress_percent, story_points, start_date, end_date, milestone, sort_order,
+      progress_percent, story_points, iteration_id, start_date, end_date, milestone, sort_order,
       created_by, created_at, updated_at, deleted_at, last_writer_device_id
     ) VALUES (
       @taskId, @groupId, @parentTaskId, @title, @description,
       @status, @otherReason, @priority, @assigneeUserId, @tagsJson,
       @sourceMsgId, @linkedFileIdsJson,
-      @progressPercent, @storyPoints, @startDate, @endDate, @milestone, @sortOrder,
+      @progressPercent, @storyPoints, @iterationId, @startDate, @endDate, @milestone, @sortOrder,
       @createdBy, @createdAt, @updatedAt, @deletedAt, @lastWriterDeviceId
     )`
   ).run({
@@ -238,6 +240,7 @@ export function insertTask(db: Database, task: Task, writerDeviceId?: string): v
     linkedFileIdsJson: linkedFileIdsToJson(linked.length > 0 ? linked : undefined),
     progressPercent: clampProgressPercent(task.progressPercent),
     storyPoints: parseStoryPoints(task.storyPoints) ?? null,
+    iterationId: task.iterationId?.trim() ? task.iterationId : null,
     startDate: task.startDate ?? null,
     endDate: task.endDate ?? null,
     milestone: task.milestone ? 1 : 0,
@@ -292,6 +295,12 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
         ? clampProgressPercent(input.progressPercent)
         : existing.progressPercent,
     storyPoints: resolveStoryPointsPatch(input.storyPoints, existing.storyPoints),
+    iterationId:
+      input.iterationId === null
+        ? undefined
+        : input.iterationId !== undefined
+          ? input.iterationId.trim() || undefined
+          : existing.iterationId,
     parentTaskId:
       input.parentTaskId === null
         ? undefined
@@ -338,6 +347,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
       linked_file_ids_json = @linkedFileIdsJson,
       progress_percent = @progressPercent,
       story_points = @storyPoints,
+      iteration_id = @iterationId,
       parent_task_id = @parentTaskId,
       sort_order = @sortOrder,
       start_date = @startDate,
@@ -359,6 +369,7 @@ export function updateTaskRow(db: Database, input: UpdateTaskInput): Task | null
     linkedFileIdsJson: linkedFileIdsToJson(next.linkedFileIds),
     progressPercent: next.progressPercent,
     storyPoints: next.storyPoints ?? null,
+    iterationId: next.iterationId ?? null,
     parentTaskId: next.parentTaskId ?? null,
     sortOrder: next.sortOrder,
     startDate: next.startDate ?? null,
