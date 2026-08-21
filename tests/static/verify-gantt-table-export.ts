@@ -38,4 +38,7 @@ const docs06 = readFileSync(join(root, 'docs/06_ROADMAP.md'), 'utf8')
 assert.match(docs06, /verify:gantt-table-export/)
 assert.match(docs06, /MD\/CSV/)
 
+const p0 = readFileSync(join(root, 'tests/runners/verify-p0.ts'), 'utf8')
+assert.match(p0, /verify:gantt-table-export/)
+
 console.log('verify:gantt-table-export OK')

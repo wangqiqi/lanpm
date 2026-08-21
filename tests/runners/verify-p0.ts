@@ -21,7 +21,8 @@ const steps = [
   'verify:storage-path-resolver',
   'verify:screenshots-layout',
   'verify:db-at-rest',
-  'verify:office-preview'
+  'verify:office-preview',
+  'verify:gantt-table-export'
 ] as const
 
 for (const step of steps) {
