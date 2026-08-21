@@ -4,12 +4,10 @@
 
 ## [Unreleased]
 
+## [1.106.0] - 2026-08-21
+
 ### Added
 
-- **长列表口径**：`docs/06` §6.1 #3 / `docs/05` §5 记 SPRINT-60 **NO-GO**；`verify:list-scroll` 入 `verify:p0`（`TASK-6004`）
-- **长列表测量（Linux）**：聊天/看板/文件/甘特均可滚；滚动 rAF P95≈16.7ms、无 longtask；**NO-GO** 不装 virtuoso（`TASK-6003`）
-- **四页长列表滚动测量**：`measure:list-scroll` 灌数后滚聊天/看板/文件/甘特；P95≥50ms 或长任务≥50ms 才 GO 装 virtuoso（`TASK-6002`）
-- **四页长列表灌数**：`measure-seed-lists` 给 demo-project 补消息/任务/文件，并露出甘特/文件 Tab；四页滚动容器带 testid（`TASK-6001`）
 - **Office 轻量预览（主进程）**：无 LibreOffice 时 `docx`/`xlsx` 用 mammoth / exceljs 写出 HTML 预览；有 `soffice` 仍先转 PDF（`TASK-5801`）
 - **文件库 HTML 预览**：docx/xlsx 轻量预览走沙箱 iframe（无 script）；soffice PDF 仍走 `PdfPreview`（`TASK-5802`）
 - **Office 预览口径**：`docs/06` §6.1 #8 标 mammoth/exceljs 轻量切片已交付；浏览器 stub 不转 Office（`TASK-5803`）
@@ -17,6 +15,10 @@
 - **甘特任务表导出**：工具栏导出 Markdown（给人/模型）与 CSV（给表格软件）；PNG/PDF 图导出保留（`TASK-5901` · `TASK-5902`）
 - **甘特 B5 口径**：`docs/06` 标任务表 MD/CSV 已交付；图导出仍是 html2canvas（`TASK-5903`）
 - **甘特表导出门禁**：`verify:gantt-table-export` 并入 `verify:p0`（`TASK-5904`）
+- **四页长列表灌数**：`measure-seed-lists` 给 demo-project 补消息/任务/文件，并露出甘特/文件 Tab；四页滚动容器带 testid（`TASK-6001`）
+- **四页长列表滚动测量**：`measure:list-scroll` 灌数后滚聊天/看板/文件/甘特；P95≥50ms 或长任务≥50ms 才 GO 装 virtuoso（`TASK-6002`）
+- **长列表测量（Linux）**：聊天/看板/文件/甘特均可滚；滚动 rAF P95≈16.7ms、无 longtask；**NO-GO** 不装 virtuoso（`TASK-6003`）
+- **长列表口径**：`docs/06` §6.1 #3 / `docs/05` §5 记 SPRINT-60 **NO-GO**；`verify:list-scroll` 入 `verify:p0`（`TASK-6004`）
 
 ## [1.105.0] - 2026-08-21
 

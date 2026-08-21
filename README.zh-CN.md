@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.105.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.106.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -39,7 +39,7 @@
     <td width="50%"><img src="assets/task-tree.png" alt="任务树" width="100%" /><br /><sub><b>任务树</b> — 层级、汇总、跨视图定位</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="assets/gantt.png" alt="甘特图" width="100%" /><br /><sub><b>甘特图</b> — 时间轴、依赖、导出 PNG/PDF</sub></td>
+    <td width="50%"><img src="assets/gantt.png" alt="甘特图" width="100%" /><br /><sub><b>甘特图</b> — 时间轴、依赖、导出 PNG/PDF/Markdown/CSV</sub></td>
     <td width="50%"><img src="assets/calendar.png" alt="日历" width="100%" /><br /><sub><b>日历</b> — 拖拽改期</sub></td>
   </tr>
   <tr>
@@ -121,7 +121,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.105.0`** — 可购排程关键路径、敏捷故事点、周报/月报导出；匿名群本机留史；会议 Pro+ 视频格。未发布：无 LibreOffice 时的 Office 轻量预览（docx/xlsx）；甘特任务表导出（Markdown + CSV）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.0`** — 无 LibreOffice 时的 Office 轻量预览（docx/xlsx）；甘特任务表 Markdown/CSV；长列表测量（不装 virtuoso）。可购排程关键路径、敏捷故事点、周报/月报导出；匿名群本机留史；会议 Pro+ 视频格。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

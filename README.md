@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.105.0-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-1.106.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/sync-P2P%20%7C%20no%20central%20server-success" alt="sync" />
@@ -39,7 +39,7 @@
     <td width="50%"><img src="assets/task-tree.png" alt="Task tree" width="100%" /><br /><sub><b>Task tree</b> — hierarchy, roll-up, cross-view locate</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="assets/gantt.png" alt="Gantt chart" width="100%" /><br /><sub><b>Gantt</b> — timeline, deps, export PNG/PDF</sub></td>
+    <td width="50%"><img src="assets/gantt.png" alt="Gantt chart" width="100%" /><br /><sub><b>Gantt</b> — timeline, deps, export PNG/PDF/Markdown/CSV</sub></td>
     <td width="50%"><img src="assets/calendar.png" alt="Calendar" width="100%" /><br /><sub><b>Calendar</b> — drag to reschedule</sub></td>
   </tr>
   <tr>
@@ -123,7 +123,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.105.0`** — paid SKUs: schedule critical path, agile story points, weekly/monthly report export; anonymous group local history; meeting Pro+ grid. Unreleased: Office light preview (docx/xlsx) when LibreOffice is missing; Gantt task table export (Markdown + CSV). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.106.0`** — Office light preview (docx/xlsx without LibreOffice); Gantt task table Markdown/CSV; list-scroll measure (no virtuoso). Paid SKUs: schedule critical path, agile story points, weekly/monthly report export; anonymous group local history; meeting Pro+ grid. License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 
