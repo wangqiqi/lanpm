@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.106.10",
+  "version": "1.106.11",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -207,6 +207,10 @@
     "verify:visual-screenshots-en": "node --experimental-strip-types tests/integration/verify-visual-screenshots-en.ts",
     "verify:visual-locale-capture": "node --experimental-strip-types tests/static/verify-visual-locale-capture.ts",
     "verify:screenshots-layout": "node --experimental-strip-types tests/static/verify-screenshots-layout.ts",
+    "website:prepare": "node scripts/website-prepare-public.mjs",
+    "docs:dev": "npm run website:prepare && vitepress dev website",
+    "docs:build": "npm run website:prepare && vitepress build website",
+    "docs:preview": "vitepress preview website",
     "screenshots:capture": "node scripts/screenshots-capture.mjs",
     "screenshots:sync-readme": "node scripts/sync-readme-screenshots.mjs",
     "verify:screenshots-sync": "node --experimental-strip-types tests/static/verify-screenshots-sync.ts",
@@ -309,6 +313,7 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1",
     "vite": "^8.0.14",
+    "vitepress": "^1.6.4",
     "vitest": "^3.2.4",
     "zustand": "^4.5.6"
   }

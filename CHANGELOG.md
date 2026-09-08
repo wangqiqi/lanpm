@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [1.106.11] - 2026-09-08
+
+### Added
+
+- **项目主页**：VitePress 站点（`website/`），中英分路由（`/` · `/zh/`），含快速开始 / 能力 / 贡献指南
+- **GitHub Pages**：`.github/workflows/pages.yml` 自动部署至 `https://wangqiqi.github.io/lanpm/`
+- **仓库主页链接**：README 与 GitHub `homepage` 指向 Pages 站点
+
+### Fixed
+
+- 站点内 GitHub 外链统一为 `master` 分支（原 `main` 404）
+
 ## [1.106.10] - 2026-08-21
 
 ### Added

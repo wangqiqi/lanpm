@@ -27,6 +27,11 @@ docs/screenshots/generated/
 # Test artifacts
 coverage/
 
+# VitePress (generated)
+website/public/
+website/.vitepress/cache
+website/.vitepress/dist
+
 # Dependencies
 node_modules/
 dist/
