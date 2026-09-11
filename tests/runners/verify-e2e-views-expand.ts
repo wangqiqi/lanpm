@@ -9,7 +9,8 @@ import { electronMainJs, projectRoot } from '../projectRoot.ts'
 const mainJs = electronMainJs
 const specs = [
   'tests/e2e/views-extended-tab-smoke.spec.ts',
-  'tests/e2e/collab-drawer-smoke.spec.ts'
+  'tests/e2e/collab-drawer-smoke.spec.ts',
+  'tests/e2e/nav-preferences-files-tab.spec.ts'
 ]
 
 console.log('verify:e2e-views-expand: building electron app…')

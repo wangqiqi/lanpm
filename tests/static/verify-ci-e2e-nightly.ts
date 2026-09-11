@@ -27,15 +27,23 @@ assert.equal(
 const specPath = join(root, 'tests/e2e/views-tab-smoke.spec.ts')
 const extendedSpecPath = join(root, 'tests/e2e/views-extended-tab-smoke.spec.ts')
 const collabSpecPath = join(root, 'tests/e2e/collab-drawer-smoke.spec.ts')
+const navFilesSpecPath = join(root, 'tests/e2e/nav-preferences-files-tab.spec.ts')
 const runnerPath = join(root, 'tests/runners/verify-e2e-views.ts')
 const expandRunnerPath = join(root, 'tests/runners/verify-e2e-views-expand.ts')
+const expandRunner = readFileSync(expandRunnerPath, 'utf8')
 const workflowPath = join(root, '.github/workflows/e2e-nightly.yml')
 
 assert.ok(existsSync(specPath), 'views-tab-smoke.spec.ts exists')
 assert.ok(existsSync(extendedSpecPath), 'views-extended-tab-smoke.spec.ts exists')
 assert.ok(existsSync(collabSpecPath), 'collab-drawer-smoke.spec.ts exists')
+assert.ok(existsSync(navFilesSpecPath), 'nav-preferences-files-tab.spec.ts exists')
 assert.ok(existsSync(runnerPath), 'verify-e2e-views.ts runner exists')
 assert.ok(existsSync(expandRunnerPath), 'verify-e2e-views-expand.ts runner exists')
+assert.match(
+  expandRunner,
+  /nav-preferences-files-tab\.spec\.ts/,
+  'expand runner includes nav-preferences files tab spec'
+)
 assert.ok(existsSync(workflowPath), 'e2e-nightly.yml workflow exists')
 
 const spec = readFileSync(specPath, 'utf8')
@@ -56,6 +64,10 @@ assert.match(extendedSpec, /calendar-island-surface/, 'extended spec asserts cal
 const collabSpec = readFileSync(collabSpecPath, 'utf8')
 assert.match(collabSpec, /waitForCollabPanelReady/, 'collab spec waits for panel ready')
 assert.match(collabSpec, /collab-open-files/, 'collab spec uses composer testid')
+
+const navFilesSpec = readFileSync(navFilesSpecPath, 'utf8')
+assert.match(navFilesSpec, /nav-tab-files/, 'nav files spec clicks files tab')
+assert.match(navFilesSpec, /files-island-surface/, 'nav files spec asserts files island')
 
 const chatView = readFileSync(join(root, 'src/renderer/src/features/chat/ChatView.tsx'), 'utf8')
 assert.match(chatView, /data-testid="collab-open-files"/, 'ChatView collab files testid')

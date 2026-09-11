@@ -17,6 +17,8 @@ chmod +x onekey_run.sh    # first time (Unix)
 
 First launch runs a short setup wizard, then opens the demo group at `#/g/demo-project/chat`.
 
+**Navigation:** Gantt, calendar, and **Files** are hidden from the bottom bar by default—enable them under **avatar → Profile → Navigation & views**. **Whiteboard** is only available from the chat collaboration drawer or a direct URL (not a bottom tab).
+
 ## Verify locally
 
 ```bash
