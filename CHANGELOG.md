@@ -6,6 +6,7 @@
 
 ### Changed
 
+- **发现/组网 UX P1（SPRINT-UX-85）**：`verify:discover` 守卫跨网段同层 IP、idle 无配对文件、粘贴 6 位自动连接、Setup→Coachmark；`docs/04` 加入方文案与实现对齐；E2E 断言跨网段 host 输入可见（`TASK-8501`..`TASK-8505`）
 - **发现/组网 UX P0（SPRINT-UX-84）**：`verify:discover` 守卫单群自动入群、零群首屏、顶栏网络下拉无「添加节点」；`docs/05` §1.2.5 手验 ≤3 步说明（`TASK-8401`..`TASK-8404`）
 - **文档**：仓库根 `优化.md` 迁出；UX 开放项跟踪在 `.cursorGrowth/plan.md`（UX-TODO）；历史快照在 Growth `archive/20260911_214500_体验评审_心智负担优化.md`；`verify:docs-optim-closeout` 禁止根目录回退
 

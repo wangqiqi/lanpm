@@ -82,6 +82,38 @@ assert.match(modal, /join_pending/)
 // TASK-8402: 零群首屏 → 驾驶舱 + 自动打开发现
 assert.match(homeRedirect, /groups\.length === 0/)
 assert.match(homeRedirect, /cockpitPath\(\)/)
+
+// TASK-8501: 跨网段 host/尾段同层；子网扫描在 Collapse 内
+const crossSubnetUi = pairingPanel.slice(
+  pairingPanel.indexOf('{crossSubnet ?'),
+  pairingPanel.indexOf(') : null}', pairingPanel.indexOf('{crossSubnet ?'))
+)
+assert.match(crossSubnetUi, /data-testid="discover-pairing-unicast-host"/)
+assert.match(crossSubnetUi, /<Collapse/)
+const beforeCollapse = crossSubnetUi.split('<Collapse')[0]!
+assert.match(beforeCollapse, /discover-pairing-unicast-host/)
+
+// TASK-8502: 分享态复制配对信息（E2E 见 discover.spec.ts）
+assert.match(pairingPanel, /handleCopyPairingInfo/)
+
+// TASK-8503: idle 无导入/导出；配对文件在 DiscoverModal 高级区
+const idleUi = pairingPanel.slice(
+  pairingPanel.indexOf("  if (mode === 'idle') {\n    return"),
+  pairingPanel.indexOf("  if (mode === 'share'")
+)
+assert.doesNotMatch(idleUi, /importPeerFile|exportPeerFile/)
+assert.match(modal, /data-testid="discover-import-peer-file"/)
+assert.match(modal, /data-testid="discover-export-peer-file"/)
+
+// TASK-8504: 查找聚焦 + 粘贴 6 位自动 runFind
+assert.match(pairingPanel, /handleCodePaste/)
+assert.match(pairingPanel, /code\.length !== 6/)
+assert.match(pairingPanel, /void runFind\(code\)/)
+assert.match(pairingPanel, /codeInputRef\.current\?\.focus/)
+
+// TASK-8505: Setup 跳过网络 → Coachmark（零群路径见 TopBar effect）
+assert.match(setupWizard, /if \(networkSkipped\)/)
+
 assert.match(preload, /discover:snapshot/)
 assert.match(preload, /group:join/)
 assert.match(preload, /pairing:start/)

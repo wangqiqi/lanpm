@@ -46,6 +46,7 @@ test.describe('discover modal E2E', () => {
     await expect(crossSubnet).toBeVisible()
     await crossSubnet.check()
     await expect(crossSubnet).toBeChecked()
+    await expect(dialog.getByTestId('discover-pairing-unicast-host')).toBeVisible()
   })
 
   test('network help modal opens and closes', async ({ appPage }) => {
