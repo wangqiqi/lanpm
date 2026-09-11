@@ -39,6 +39,9 @@ export const DEFAULT_HIDDEN_VIEWS: AppView[] = [
   'calendar'
 ]
 
+/** 项目群无 byGroup 覆盖时，解析层额外折叠（不写盘） */
+export const PROJECT_DEFAULT_COLLAPSE_VIEWS: readonly AppView[] = ['gantt', 'calendar']
+
 export const DEFAULT_NAV_PREFERENCES: NavPreferences = {
   hiddenViews: [...DEFAULT_HIDDEN_VIEWS],
   order: [...ALL_APP_VIEWS],
@@ -103,17 +106,29 @@ export function normalizeNavPreferencesDocument(raw: unknown): NavPreferencesDoc
   return { global, byGroup }
 }
 
-/** 本群有效偏好：有整包覆盖则用覆盖，否则回落 global */
+/** 无群覆盖时，按类型把低频 Tab 叠进 hidden（纯解析，不写盘） */
+export function overlayTypeDefaultHiddenViews(
+  prefs: NavPreferences,
+  groupType?: GroupType | null
+): NavPreferences {
+  if (groupType !== 'project') return sanitizeNavPreferences(prefs)
+  const hidden = new Set(prefs.hiddenViews)
+  for (const view of PROJECT_DEFAULT_COLLAPSE_VIEWS) hidden.add(view)
+  return sanitizeNavPreferences({ ...prefs, hiddenViews: [...hidden] })
+}
+
+/** 本群有效偏好：有整包覆盖则用覆盖；否则 global + 类型默认折叠 */
 export function resolveNavPreferencesForGroup(
   doc: NavPreferencesDocument,
-  groupId?: string | null
+  groupId?: string | null,
+  groupType?: GroupType | null
 ): NavPreferences {
   const normalized = normalizeNavPreferencesDocument(doc)
-  if (!groupId || !isGroupIdKey(groupId)) {
-    return normalized.global
+  if (groupId && isGroupIdKey(groupId)) {
+    const override = normalized.byGroup[groupId]
+    if (override) return override
   }
-  const override = normalized.byGroup[groupId]
-  return override ?? normalized.global
+  return overlayTypeDefaultHiddenViews(normalized.global, groupType)
 }
 
 export function hasGroupNavOverride(doc: NavPreferencesDocument, groupId: string): boolean {

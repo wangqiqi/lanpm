@@ -8,6 +8,8 @@ import {
   isViewVisibleForGroup,
   normalizeNavPreferences,
   normalizeNavPreferencesDocument,
+  overlayTypeDefaultHiddenViews,
+  PROJECT_DEFAULT_COLLAPSE_VIEWS,
   rawNavDocumentNeedsV196Writeback,
   resolveNavPreferencesForGroup,
   resolveVisibleContributedRoutes,
@@ -262,7 +264,7 @@ describe('canvas never bottom nav (SPRINT-46)', () => {
 })
 
 describe('resolveNavPreferencesForGroup', () => {
-  it('falls back to global when no override', () => {
+  it('falls back to global when no override and no groupType', () => {
     const doc = normalizeNavPreferencesDocument({
       global: { hiddenViews: ['calendar'], order: DEFAULT_NAV_PREFERENCES.order }
     })
@@ -277,8 +279,41 @@ describe('resolveNavPreferencesForGroup', () => {
         'grp-1': { hiddenViews: ['gantt'], order: DEFAULT_NAV_PREFERENCES.order }
       }
     })
-    const resolved = resolveNavPreferencesForGroup(doc, 'grp-1')
+    const resolved = resolveNavPreferencesForGroup(doc, 'grp-1', 'project')
     expect(resolved.hiddenViews).toEqual(['gantt', 'whiteboard'])
     expect(resolved.hiddenViews).not.toContain('calendar')
+  })
+
+  it('overlays gantt/calendar for project groups without override (SPRINT-UX-87)', () => {
+    const doc = normalizeNavPreferencesDocument({
+      global: { hiddenViews: [], order: DEFAULT_NAV_PREFERENCES.order },
+      byGroup: {}
+    })
+    const resolved = resolveNavPreferencesForGroup(doc, 'grp-1', 'project')
+    expect(resolved.hiddenViews).toEqual(expect.arrayContaining([...PROJECT_DEFAULT_COLLAPSE_VIEWS]))
+    expect(resolveVisibleViews('project', resolved)).not.toContain('gantt')
+    expect(resolveVisibleViews('project', resolved)).not.toContain('calendar')
+  })
+
+  it('does not overlay type defaults when byGroup override exists', () => {
+    const doc = normalizeNavPreferencesDocument({
+      global: { hiddenViews: [], order: DEFAULT_NAV_PREFERENCES.order },
+      byGroup: {
+        'grp-1': { hiddenViews: [], order: DEFAULT_NAV_PREFERENCES.order }
+      }
+    })
+    const resolved = resolveNavPreferencesForGroup(doc, 'grp-1', 'project')
+    expect(resolved.hiddenViews).toEqual(['whiteboard'])
+    expect(resolveVisibleViews('project', resolved)).toContain('gantt')
+    expect(resolveVisibleViews('project', resolved)).toContain('calendar')
+  })
+
+  it('does not overlay project collapse on function groups', () => {
+    const prefs = overlayTypeDefaultHiddenViews(
+      sanitizeNavPreferences({ ...DEFAULT_NAV_PREFERENCES, hiddenViews: [] }),
+      'function'
+    )
+    expect(prefs.hiddenViews).not.toContain('gantt')
+    expect(prefs.hiddenViews).not.toContain('calendar')
   })
 })
