@@ -23,11 +23,19 @@ assert.equal(
   'string',
   'verify:ci-e2e-nightly script'
 )
+assert.equal(
+  typeof pkg.scripts['verify:e2e-dev-web'],
+  'string',
+  'verify:e2e-dev-web script'
+)
 
 const specPath = join(root, 'tests/e2e/views-tab-smoke.spec.ts')
 const extendedSpecPath = join(root, 'tests/e2e/views-extended-tab-smoke.spec.ts')
 const collabSpecPath = join(root, 'tests/e2e/collab-drawer-smoke.spec.ts')
 const navFilesSpecPath = join(root, 'tests/e2e/nav-preferences-files-tab.spec.ts')
+const devWebSpecPath = join(root, 'tests/e2e/dev-web-smoke.spec.ts')
+const devWebConfigPath = join(root, 'playwright.dev-web.config.ts')
+const devWebRunnerPath = join(root, 'tests/runners/verify-e2e-dev-web.ts')
 const runnerPath = join(root, 'tests/runners/verify-e2e-views.ts')
 const expandRunnerPath = join(root, 'tests/runners/verify-e2e-views-expand.ts')
 const expandRunner = readFileSync(expandRunnerPath, 'utf8')
@@ -37,6 +45,9 @@ assert.ok(existsSync(specPath), 'views-tab-smoke.spec.ts exists')
 assert.ok(existsSync(extendedSpecPath), 'views-extended-tab-smoke.spec.ts exists')
 assert.ok(existsSync(collabSpecPath), 'collab-drawer-smoke.spec.ts exists')
 assert.ok(existsSync(navFilesSpecPath), 'nav-preferences-files-tab.spec.ts exists')
+assert.ok(existsSync(devWebSpecPath), 'dev-web-smoke.spec.ts exists')
+assert.ok(existsSync(devWebConfigPath), 'playwright.dev-web.config.ts exists')
+assert.ok(existsSync(devWebRunnerPath), 'verify-e2e-dev-web.ts runner exists')
 assert.ok(existsSync(runnerPath), 'verify-e2e-views.ts runner exists')
 assert.ok(existsSync(expandRunnerPath), 'verify-e2e-views-expand.ts runner exists')
 assert.match(
@@ -82,9 +93,18 @@ assert.match(workflow, /xvfb-run/, 'nightly uses xvfb-run')
 assert.match(workflow, /verify:e2e-discover/, 'nightly runs verify:e2e-discover')
 assert.match(workflow, /verify:e2e-views/, 'nightly runs verify:e2e-views')
 
+const devWebConfig = readFileSync(devWebConfigPath, 'utf8')
+assert.match(devWebConfig, /webServer/, 'dev-web playwright config defines webServer')
+assert.match(devWebConfig, /LANPM_E2E_DEV_WEB/, 'dev-web config pins E2E port env')
+
+const devWebSpec = readFileSync(devWebSpecPath, 'utf8')
+assert.match(devWebSpec, /completeSetupWizard/, 'dev-web spec runs setup wizard')
+assert.match(devWebSpec, /topbar-discover/, 'dev-web spec asserts discover shell')
+
 const docs05 = readFileSync(join(root, 'docs/05_测试与联调发布.md'), 'utf8')
 assert.match(docs05, /verify:e2e-views/, 'docs/05 documents verify:e2e-views')
 assert.match(docs05, /verify:e2e-views-expand/, 'docs/05 documents verify:e2e-views-expand')
+assert.match(docs05, /verify:e2e-dev-web/, 'docs/05 documents verify:e2e-dev-web')
 assert.match(docs05, /e2e-nightly/, 'docs/05 documents e2e-nightly workflow')
 
 console.log('verify:ci-e2e-nightly OK')

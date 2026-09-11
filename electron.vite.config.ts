@@ -17,6 +17,8 @@ const viteOutPreload = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'preloa
 const viteOutRenderer = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'renderer')
 const viteOutResources = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'resources')
 const isBrowserDev = process.env.LANPM_BROWSER_DEV === '1'
+/** E2E webServer 固定 5173，避免 Vite 避让导致 Playwright baseURL 失配（docs/05 §1.2.8） */
+const isDevWebE2e = process.env.LANPM_E2E_DEV_WEB === '1'
 
 /** 插件子包已安装时，让 renderer 动态 import 可解析 mind-elixir */
 function mindElixirPluginAliases(): { find: string | RegExp; replacement: string }[] {
@@ -198,7 +200,7 @@ export default defineConfig({
     },
     server: {
       host: 'localhost',
-      strictPort: false,
+      ...(isDevWebE2e ? { port: 5173, strictPort: true } : { strictPort: false }),
       /** 浏览器专用 dev：关闭 HMR；其它开发态也关闭错误遮罩，避免 Cursor 内嵌页无法点击 */
       hmr: isBrowserDev ? false : { overlay: false },
       watch: devWatch

@@ -6,6 +6,7 @@
 
 ### Added
 
+- **E2E**：`dev:web` 浏览器 stub smoke（`dev-web-smoke.spec.ts` · `playwright.dev-web.config.ts` · `verify:e2e-dev-web`）（`TASK-7701`..`TASK-7704`）
 - **E2E**：日历 mock 排期事件 · 点击编辑 · 拖拽改期（`tests/e2e/calendar.spec.ts` · `verify:e2e-calendar`）（`TASK-7601`..`TASK-7604`）
 
 ### Changed
