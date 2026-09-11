@@ -125,4 +125,8 @@ assert.match(groupIpc, /requestJoinDiscoverableGroup/)
 assert.match(pairingIpc, /startPairingSession/)
 assert.match(pairingIpc, /importPeerFile/)
 
+const docs05 = readFileSync(join(root, 'docs/05_测试与联调发布.md'), 'utf8')
+assert.match(docs05, /verify:dual-machine-playbook/, 'docs/05 links dual-machine playbook guard')
+assert.match(docs05, /discover-connect-peer-cta|无法发现/, 'docs/05 §6 manual peer via discover')
+
 console.log('verify:discover: ok')
