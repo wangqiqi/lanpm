@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [1.106.12] - 2026-09-11
+
+### Changed
+
+- **代码卫生**：删除未引用的 `whiteboardLink` 重导出；`knip` 补 CLI/测量脚本入口与 `.d.ts` 忽略，减少误报；`dayjs` · `@eslint/js` 写入 `package.json` 对齐直接引用；ESLint 忽略 `website/.vitepress/cache`
+- **文档守卫**：`verify:docs-code` 校验 README/站点版本锚点与 `package.json` 一致；中文 README 补充 `verify:linux-installer-smoke` · 聊天性能守卫说明
+
+### Removed
+
+- `src/renderer/src/features/whiteboard/whiteboardLink.ts`（逻辑已在 `@shared/whiteboard/paths`）
+
 ## [1.106.11] - 2026-09-08
 
 ### Added

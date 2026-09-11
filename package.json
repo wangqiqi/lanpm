@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.106.11",
+  "version": "1.106.12",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -256,6 +256,7 @@
     "@tanstack/react-virtual": "^3.14.9",
     "better-sqlite3": "npm:better-sqlite3-multiple-ciphers@^12.10.0",
     "chokidar": "^3.6.0",
+    "dayjs": "^1.11.21",
     "electron-screenshots": "^0.6.1",
     "emoji-mart": "^5.6.0",
     "exceljs": "^4.4.0",
@@ -274,6 +275,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/utilities": "^3.2.2",
     "@electron/rebuild": "^4.0.4",
+    "@eslint/js": "^9.39.4",
     "@excalidraw/excalidraw": "^0.18.0",
     "@fullcalendar/core": "^6.1.21",
     "@fullcalendar/daygrid": "^6.1.21",

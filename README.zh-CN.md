@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.106.11-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.106.12-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -97,7 +97,9 @@ chmod +x onekey_run.sh    # 首次（Unix）
 ```bash
 npm run lint && npm run typecheck && npm run test
 npm run verify:p0          # 守卫（IPC、i18n、文档、截图布局）
+npm run verify:chat-perf-observe  # 聊天性能代码守卫（本地 .cursorGrowth/decisions 若存在）
 npm run measure:perf -- --quick   # Electron 基线 JSON → `.lanpm/perf/`（见 docs/05 §5）
+npm run verify:linux-installer-smoke  # Linux 安装包守卫；LANPM_REQUIRE_INSTALLER=1 可启动 unpacked
 npm run measure:list-scroll -- --schema-only   # 四页长列表滚动 schema（完整跑需要 build）
 npm run verify:m7          # 发版前全量回归
 npm run build
@@ -108,9 +110,10 @@ npm run build
 | README 配图 | `npm run screenshots:capture` → `npm run screenshots:sync-readme`（[docs/screenshots](./docs/screenshots/README.md)） |
 | 英文折行 | `npm run verify:i18n-en` · `npm run verify:visual-screenshots-en`（驾驶舱 + 聊天 `en-US` PNG；Linux 用 `xvfb-run`） |
 | 验收 | 以 **Electron**（`npm run dev`）为准 — 浏览器 stub（`npm run dev:web`）仅 UI 预览 |
+| 聊天性能 QA | 预算见本地 `.cursorGrowth/decisions/chat-perf.md` · 守卫 → `verify:chat-perf*` |
 | 发版 | [docs/05](./docs/05_测试与联调发布.md) · 跨平台矩阵 §1.4 |
 | 真网 / 局域网 | `npm run verify:m6` 是本机 **loopback**，不是两台电脑。双机手验见 [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6)（人工；CI 不跑） |
-| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · `measure:list-scroll` / `verify:list-scroll`（聊天/看板/文件/甘特卡顿）· [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux 默认关 GPU（`LANPM_ENABLE_GPU=1` 可 opt-in；`--quick` RSS **不对标** 200MB）；看板/树/文件/驾驶舱 lazy 分包；驾驶舱一次 JOIN；文件 chunk 进度 IPC 100ms 节流；库探测只读 16 字节头；任务写操作本地 patch |
+| 性能基线 | `npm run measure:perf` · `verify:measure-perf` · `measure:list-scroll` / `verify:list-scroll`（聊天/看板/文件/甘特卡顿）· `verify:linux-installer-smoke`（静态；`LANPM_REQUIRE_INSTALLER=1` 启动 unpacked → 聊天 Tab）· [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux 默认关 GPU（`LANPM_ENABLE_GPU=1` 可 opt-in；`--quick` RSS **不对标** 200MB）；看板/树/文件/驾驶舱 lazy 分包；驾驶舱一次 JOIN；文件 chunk 进度 IPC 100ms 节流；库探测只读 16 字节头；任务写操作本地 patch |
 
 Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) — 详见 [`.cursor/`](./.cursor/)。
 
@@ -123,7 +126,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.106.11`** — GitHub Pages 项目主页（VitePress）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.12`** — GitHub Pages 项目主页（VitePress）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

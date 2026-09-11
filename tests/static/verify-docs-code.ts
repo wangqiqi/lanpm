@@ -34,13 +34,54 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
 }
 const version = pkg.version
 
+function badgeVersion(text: string, pattern: RegExp): string | null {
+  return text.match(pattern)?.[1] ?? null
+}
+
+// --- README / 站点版本锚点 ---
+const readme = readFileSync(join(root, 'README.md'), 'utf8')
+const readmeZh = readFileSync(join(root, 'README.zh-CN.md'), 'utf8')
+const readmeBadge = badgeVersion(readme, /badge\/version-([\d.]+)/)
+const readmeZhBadge = badgeVersion(readmeZh, /badge\/版本-([\d.]+)/)
+const footerEn = readme.match(/\*\*Current `([\d.]+)`\*\*/)?.[1]
+const footerZh = readmeZh.match(/\*\*当前版本 `([\d.]+)`\*\*/)?.[1]
+for (const [source, docVer] of [
+  ['README.md badge', readmeBadge],
+  ['README.zh-CN badge', readmeZhBadge],
+  ['README.md footer', footerEn],
+  ['README.zh-CN footer', footerZh]
+] as const) {
+  if (docVer && docVer !== version) {
+    add({
+      severity: 'P1',
+      source,
+      doc: `声明 ${docVer}`,
+      code: `package.json → ${version}`,
+      fix: '与 package.json version 对齐'
+    })
+  }
+}
+
+const vitepressConfig = readFileSync(join(root, 'website/.vitepress/config.ts'), 'utf8')
+if (/const version = ['"][\d.]+['"]/.test(vitepressConfig)) {
+  const siteVer = vitepressConfig.match(/const version = ['"]([\d.]+)['"]/)?.[1]
+  if (siteVer && siteVer !== version) {
+    add({
+      severity: 'P1',
+      source: 'website/.vitepress/config.ts',
+      doc: `硬编码 v${siteVer}`,
+      code: `package.json → ${version}`,
+      fix: '从 package.json 读取 version 或更新常量'
+    })
+  }
+}
+
 function extractRcLabel(text: string): string | null {
   const m = text.match(/1\.0\.0-rc\.\d+/g)
   return m?.[m.length - 1] ?? null
 }
 
 // --- RC 版本号 ---
-const readme = readFileSync(join(root, 'README.md'), 'utf8')
 const readmeRc = extractRcLabel(readme)
 if (readmeRc && readmeRc !== version) {
   add({

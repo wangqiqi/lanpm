@@ -1,8 +1,14 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 
 const repo = 'https://github.com/wangqiqi/lanpm'
 const branch = 'master'
-const version = '1.106.11'
+const pkg = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../package.json'), 'utf8')
+) as { version: string }
+const version = pkg.version
 
 export default defineConfig({
   title: 'LanPM',

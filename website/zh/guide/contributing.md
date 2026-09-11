@@ -20,6 +20,18 @@ npm run verify:m7
 npm run build
 ```
 
+## 常用验收
+
+| 场景 | 命令 | 说明 |
+|------|------|------|
+| 日常 / PR | `npm run verify:p0` | IPC、i18n、文档链、截图布局 |
+| 文档 ↔ 代码 | `npm run verify:docs-code -- --strict` | 亦含于 `verify:project` |
+| 聊天性能守卫 | `npm run verify:chat-perf-observe` | 预算见本地 `.cursorGrowth/decisions/chat-perf.md`（若有） |
+| 打 tag 前 | `npm run verify:m7` | 全量 RC 回归 |
+| 产品验收 | `npm run dev` | **Electron** 为准 — 非 `npm run dev:web`（浏览器 stub） |
+
+完整矩阵：[docs/05 §1](https://github.com/wangqiqi/lanpm/blob/master/docs/05_测试与联调发布.md#1-自动化验收脚本)。
+
 ## README 截图
 
 ```bash

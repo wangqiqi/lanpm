@@ -1,6 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
+    "electron.vite.config.ts",
+    "eslint.config.js",
     "src/main/index.ts",
     "src/preload/index.ts",
     "src/preload/unlock.ts",
@@ -9,14 +11,31 @@
     "src/cli/main.ts",
     "scripts/lanpm.mjs",
     "scripts/onekey-preflight.mjs",
+    "scripts/onekey-dev-url.mjs",
+    "scripts/linux-installer-smoke.mjs",
+    "scripts/measure-perf.mjs",
+    "scripts/measure-perf-ui.mjs",
+    "scripts/measure-list-scroll.mjs",
+    "scripts/measure-list-scroll-ui.mjs",
     "tests/static/verify-*.ts",
     "tests/runners/verify-*.ts",
     "tests/integration/verify-*.ts",
-    "tests/e2e/**/*.spec.ts"
+    "tests/e2e/**/*.spec.ts",
+    "tests/integration/measure-db-perf.ts",
+    "tests/integration/measure-seed-chat.ts",
+    "tests/integration/measure-seed-lists.ts",
+    "tests/integration/discover-sim/db-scenarios.ts"
   ],
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{mjs,js,ts}"],
   "ignore": ["out/**", "dist/**", "node_modules/**"],
-  "ignoreDependencies": ["@electron/rebuild", "@resvg/resvg-js"],
+  "ignoreFiles": ["src/renderer/src/env.d.ts", "src/renderer/src/vite-env.d.ts"],
+  "ignoreDependencies": [
+    "@electron/rebuild",
+    "@resvg/resvg-js",
+    "@types/better-sqlite3",
+    "mind-elixir",
+    "playwright"
+  ],
   "ignoreExportsUsedInFile": true,
   "rules": {
     "files": "warn",

@@ -24,7 +24,7 @@ npm run lint && npm run typecheck && npm run test
 npm run verify:p0
 ```
 
-**注意：** 验收以 **Electron**（`npm run dev`）为准，不是浏览器 stub（`npm run dev:web`）。
+**注意：** 验收以 **Electron**（`npm run dev`）为准，不是浏览器 stub（`npm run dev:web`）。更多命令见 [参与贡献](/zh/guide/contributing#常用验收)。
 
 ## 安装包
 

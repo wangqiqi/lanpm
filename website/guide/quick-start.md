@@ -24,7 +24,7 @@ npm run lint && npm run typecheck && npm run test
 npm run verify:p0
 ```
 
-**Note:** Acceptance source of truth is **Electron** (`npm run dev`), not the browser stub (`npm run dev:web`).
+**Note:** Acceptance source of truth is **Electron** (`npm run dev`), not the browser stub (`npm run dev:web`). See [Contributing — Verification](/guide/contributing#verification-common) for more guards.
 
 ## Downloads
 
