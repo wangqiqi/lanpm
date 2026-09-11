@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **E2E**：日历 mock 排期事件 · 点击编辑 · 拖拽改期（`tests/e2e/calendar.spec.ts` · `verify:e2e-calendar`）（`TASK-7601`..`TASK-7604`）
+
 ### Changed
 
 - **发现/组网 UX P1（SPRINT-UX-85）**：`verify:discover` 守卫跨网段同层 IP、idle 无配对文件、粘贴 6 位自动连接、Setup→Coachmark；`docs/04` 加入方文案与实现对齐；E2E 断言跨网段 host 输入可见（`TASK-8501`..`TASK-8505`）

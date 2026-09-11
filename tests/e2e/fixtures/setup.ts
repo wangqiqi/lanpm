@@ -97,6 +97,20 @@ export async function openDemoProjectView(page: Page, view: E2eTabView): Promise
   })
 }
 
+/** demo-project 日历：依赖 `ensureSeedGroups` 注入的 MOCK_PROJECT_TASKS 显式排期。 */
+export async function expectCalendarTaskEvents(page: Page, minCount = 1): Promise<void> {
+  const surface = page.getByTestId('calendar-island-surface')
+  await expect(surface).toBeVisible({ timeout: 60_000 })
+  const events = surface.locator('.fc-event')
+  await expect(events.first()).toBeVisible({ timeout: 60_000 })
+  await expect.poll(async () => events.count(), { timeout: 30_000 }).toBeGreaterThanOrEqual(minCount)
+}
+
+export async function openDemoProjectCalendarWithEvents(page: Page): Promise<void> {
+  await openDemoProjectView(page, 'calendar')
+  await expectCalendarTaskEvents(page)
+}
+
 export async function clickBottomNavTab(page: Page, view: E2eTabView): Promise<void> {
   await page.getByTestId(`nav-tab-${view}`).click()
   await expect(page.getByTestId(`nav-tab-${view}`)).toHaveAttribute('aria-current', 'page', {

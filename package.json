@@ -180,6 +180,7 @@
     "verify:discover-sim-full": "node --experimental-strip-types tests/runners/verify-discover-sim-full.ts",
     "test:e2e": "playwright test tests/e2e/discover.spec.ts",
     "verify:e2e-discover": "node --experimental-strip-types tests/runners/verify-e2e-discover.ts",
+    "verify:e2e-calendar": "node --experimental-strip-types tests/runners/verify-e2e-calendar.ts",
     "verify:e2e-pairing": "node --experimental-strip-types tests/runners/verify-e2e-pairing.ts",
     "verify:e2e-views": "node --experimental-strip-types tests/runners/verify-e2e-views.ts",
     "verify:e2e-views-expand": "node --experimental-strip-types tests/runners/verify-e2e-views-expand.ts",

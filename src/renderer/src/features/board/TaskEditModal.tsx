@@ -191,6 +191,7 @@ export default function TaskEditModal({
     <Modal
       title={t('board.editTitle')}
       open={open}
+      data-testid="task-edit-modal"
       destroyOnClose
       confirmLoading={saving}
       okText={t('common.save')}
