@@ -6,6 +6,7 @@
 
 ### Added
 
+- **测试债务终局**：`docs/05` §9 改为已收口账本；`verify:docs-test-todo-closeout` 禁止根目录 `测试.md` 回退（`TASK-8301`..`TASK-8305`）
 - **测试**：插件离线分发回归 playbook `verify:plugin-distribution-playbook` · 手验模板 · `docs/05` §1.2.10（`TASK-8201`..`TASK-8205`）
 
 ## [1.106.14] - 2026-09-11

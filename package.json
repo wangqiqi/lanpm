@@ -162,6 +162,7 @@
     "verify:chat-perf-observe": "node --experimental-strip-types tests/static/verify-chat-perf-observe.ts",
     "verify:dm-preview-ipc": "node --experimental-strip-types tests/static/verify-dm-preview-ipc.ts",
     "verify:docs-optim-closeout": "node --experimental-strip-types tests/static/verify-docs-optim-closeout.ts",
+    "verify:docs-test-todo-closeout": "node --experimental-strip-types tests/static/verify-docs-test-todo-closeout.ts",
     "verify:view-slot-hosts": "node --experimental-strip-types tests/static/verify-view-slot-hosts.ts",
     "verify:sync-outbox": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-sync-outbox.ts",
     "verify:bundle": "node scripts/run-electron-node.mjs --experimental-strip-types tests/integration/verify-bundle.ts",
