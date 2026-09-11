@@ -1327,6 +1327,9 @@ const enUS = {
   'discover.tabPeople': 'People',
   'discover.refresh': 'Refresh',
   'discover.hint': 'Use a pairing code to open the group directory, or scan the LAN for joinable groups',
+  'discover.wizardConnect': 'Connect',
+  'discover.wizardJoin': 'Join a group',
+  'discover.wizardContinueJoin': 'Next: choose a group',
   'discover.sharePairingCode': 'Share group pairing code',
   'discover.findGroupsByCode': 'Find groups by code',
   'discover.codesExplainer':
@@ -1340,6 +1343,9 @@ const enUS = {
   'discover.cockpitNoGroupsTitle': 'No groups joined yet',
   'discover.cockpitNoGroupsHint': 'Join a peer with a pairing code, or share your groups for others to discover',
   'discover.cockpitJoinWithCode': 'Join with pairing code',
+  'discover.cockpitNoProjectTitle': 'No project group yet',
+  'discover.cockpitNoProjectHint':
+    'Cockpit summarizes cross-project progress. Join or create a project group to see attention items and reports.',
   'discover.copyPairingInfo': 'Copy pairing info',
   'discover.copyPairingSuccess': 'Pairing info copied',
   'discover.copyPairingFailed': 'Could not copy to clipboard',

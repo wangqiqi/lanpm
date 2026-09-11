@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Avatar, Button, Collapse, Empty, Input, List, Modal, Space, Tabs, Tag, Typography } from 'antd'
+import { Alert, Avatar, Button, Collapse, Empty, Input, List, Modal, Space, Steps, Tabs, Tag, Typography } from 'antd'
 import { DownloadOutlined, PlusOutlined, ReloadOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
 import type { JoinRequestRecord } from '@shared/group/joinRequest'
 import type { DiscoverGroupView, DiscoverPeerView, DiscoverSnapshot } from '@shared/discover/types'
@@ -83,6 +83,7 @@ export default function DiscoverModal({
   const [inviteJoining, setInviteJoining] = useState(false)
   const [sharingInviteGroupId, setSharingInviteGroupId] = useState<string | null>(null)
   const [pairingMode, setPairingMode] = useState<PairingPanelMode>('idle')
+  const [wizardStep, setWizardStep] = useState<'connect' | 'join'>('connect')
   const [peerFileLoading, setPeerFileLoading] = useState(false)
 
   const refresh = useCallback(async (): Promise<void> => {
@@ -113,6 +114,7 @@ export default function DiscoverModal({
     if (!open) return
     setTab('groups')
     setPairingMode('idle')
+    setWizardStep('connect')
     void refresh()
   }, [open, refresh])
 
@@ -170,6 +172,7 @@ export default function DiscoverModal({
       }
       setSnapshot(data)
       setTab('groups')
+      setWizardStep('join')
       message.success(
         t('discover.pairingJoinSuccess', {
           name: peerName,
@@ -188,6 +191,7 @@ export default function DiscoverModal({
       message.success(t('discover.peerFileImportSuccess', { name: result.file.displayName }))
       await tryAutoJoinAfterSnapshot(result.snapshot)
       setPairingMode('idle')
+      setWizardStep('join')
     } catch (err) {
       message.error(formatError(err, 'discover.peerFileImportFailed'))
     } finally {
@@ -357,6 +361,20 @@ export default function DiscoverModal({
         </Button>
       </div>
 
+      <Steps
+        size="small"
+        className={styles.wizardSteps}
+        current={wizardStep === 'connect' ? 0 : 1}
+        onChange={(current) => setWizardStep(current === 0 ? 'connect' : 'join')}
+        data-testid="discover-wizard-steps"
+        items={[
+          { title: t('discover.wizardConnect') },
+          { title: t('discover.wizardJoin') }
+        ]}
+      />
+
+      {wizardStep === 'connect' ? (
+        <>
       {showHealthAlert ? (
         <Alert
           className={styles.healthAlert}
@@ -379,62 +397,18 @@ export default function DiscoverModal({
         onPairingJoined={handlePairingJoined}
       />
 
-      {singleJoinableGroup ? (
+      {incomingRequests.length > 0 ? (
         <Alert
           className={styles.singleGroupAlert}
           type="info"
           showIcon
-          message={t('discover.singleGroupHint', { name: singleJoinableGroup.name })}
+          message={t('discover.incomingJoinRequests')}
           action={
-            <Button
-              size="small"
-              type="primary"
-              loading={joiningId === singleJoinableGroup.groupId}
-              onClick={() => void handleJoinGroup(singleJoinableGroup)}
-            >
-              {t('discover.requestJoinNamed', { name: singleJoinableGroup.name })}
+            <Button size="small" type="primary" onClick={() => setWizardStep('join')}>
+              {t('discover.wizardJoin')}
             </Button>
           }
         />
-      ) : null}
-
-      {incomingRequests.length > 0 ? (
-        <div className={styles.seedsBlock}>
-          <Text strong>{t('discover.incomingJoinRequests')}</Text>
-          <List
-            className={styles.list}
-            dataSource={incomingRequests}
-            renderItem={(req) => (
-              <List.Item
-                className={styles.row}
-                actions={[
-                  <Button
-                    key="approve"
-                    type="primary"
-                    size="small"
-                    loading={actingRequestId === req.requestId}
-                    onClick={() => void handleApproveRequest(req.requestId)}
-                  >
-                    {t('discover.approveJoin')}
-                  </Button>,
-                  <Button
-                    key="reject"
-                    size="small"
-                    loading={actingRequestId === req.requestId}
-                    onClick={() => void handleRejectRequest(req.requestId)}
-                  >
-                    {t('discover.rejectJoin')}
-                  </Button>
-                ]}
-              >
-                <List.Item.Meta
-                  title={req.applicantDisplayName}
-                  description={t('discover.joinRequestForGroup', { groupId: req.groupId })}
-                />
-              </List.Item>
-            )}
-          />
-        </div>
       ) : null}
 
       <Collapse
@@ -529,6 +503,77 @@ export default function DiscoverModal({
         ]}
       />
 
+      {snapshot.groups.length > 0 ? (
+        <Button
+          type="primary"
+          className={styles.wizardContinue}
+          data-testid="discover-wizard-to-join"
+          onClick={() => setWizardStep('join')}
+        >
+          {t('discover.wizardContinueJoin')}
+        </Button>
+      ) : null}
+        </>
+      ) : (
+        <>
+      {singleJoinableGroup ? (
+        <Alert
+          className={styles.singleGroupAlert}
+          type="info"
+          showIcon
+          message={t('discover.singleGroupHint', { name: singleJoinableGroup.name })}
+          action={
+            <Button
+              size="small"
+              type="primary"
+              loading={joiningId === singleJoinableGroup.groupId}
+              onClick={() => void handleJoinGroup(singleJoinableGroup)}
+            >
+              {t('discover.requestJoinNamed', { name: singleJoinableGroup.name })}
+            </Button>
+          }
+        />
+      ) : null}
+
+      {incomingRequests.length > 0 ? (
+        <div className={styles.seedsBlock}>
+          <Text strong>{t('discover.incomingJoinRequests')}</Text>
+          <List
+            className={styles.list}
+            dataSource={incomingRequests}
+            renderItem={(req) => (
+              <List.Item
+                className={styles.row}
+                actions={[
+                  <Button
+                    key="approve"
+                    type="primary"
+                    size="small"
+                    loading={actingRequestId === req.requestId}
+                    onClick={() => void handleApproveRequest(req.requestId)}
+                  >
+                    {t('discover.approveJoin')}
+                  </Button>,
+                  <Button
+                    key="reject"
+                    size="small"
+                    loading={actingRequestId === req.requestId}
+                    onClick={() => void handleRejectRequest(req.requestId)}
+                  >
+                    {t('discover.rejectJoin')}
+                  </Button>
+                ]}
+              >
+                <List.Item.Meta
+                  title={req.applicantDisplayName}
+                  description={t('discover.joinRequestForGroup', { groupId: req.groupId })}
+                />
+              </List.Item>
+            )}
+          />
+        </div>
+      ) : null}
+
       <Tabs
         activeKey={tab}
         onChange={(key) => setTab(key as 'groups' | 'people')}
@@ -538,7 +583,13 @@ export default function DiscoverModal({
             label: t('discover.tabGroups'),
             children: snapshot.groups.length === 0 ? (
               <Empty description={t('discover.emptyGroups')}>
-                <Button type="primary" onClick={() => setPairingMode('find')}>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setWizardStep('connect')
+                    setPairingMode('find')
+                  }}
+                >
                   {t('discover.findGroupsByCode')}
                 </Button>
               </Empty>
@@ -630,6 +681,8 @@ export default function DiscoverModal({
           }
         ]}
       />
+        </>
+      )}
     </Modal>
   )
 }

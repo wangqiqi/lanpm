@@ -126,7 +126,7 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.106.14`** — VitePress project homepage on GitHub Pages. Test playbooks: calendar & dev:web E2E, dual-machine / cold-start / meeting / AI `verify:*-playbook` guards; discover UX P0/P1. Paid agile: remaining-points burndown + column WIP hints + iteration containers + completed-points velocity chart. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.106.14`** — VitePress project homepage on GitHub Pages. Test playbooks: calendar & dev:web E2E, dual-machine / cold-start / meeting / AI `verify:*-playbook` guards; discover UX P0–P2 (project groups land on the board; discover is a two-step connect→join wizard). Paid agile: remaining-points burndown + column WIP hints + iteration containers + completed-points velocity chart. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

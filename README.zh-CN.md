@@ -126,7 +126,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.106.14`** — GitHub Pages 项目主页（VitePress）。测试收口：日历与 dev:web E2E、双机/冷启动/会议/AI 等 `verify:*-playbook` 守卫；发现/组网 UX P0/P1。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.14`** — GitHub Pages 项目主页（VitePress）。测试收口：日历与 dev:web E2E、双机/冷启动/会议/AI 等 `verify:*-playbook` 守卫；发现/组网 UX P0–P2（项目群默认看板；发现弹窗连通→选群两步）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 

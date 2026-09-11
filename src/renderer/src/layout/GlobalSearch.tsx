@@ -7,7 +7,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import type { GlobalSearchHit } from '@shared/search/types'
-import { defaultViewForGroup, isViewAllowedForGroup } from '@shared/navigation/tabRules'
+import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { groupViewPath } from '@renderer/routes/paths'
 import { VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
@@ -31,8 +31,7 @@ function destinationViewForHit(
     return isViewAllowedForGroup(type, 'board', hit.groupId) ? 'board' : 'tree'
   }
   if (hit.kind === 'message') {
-    const d = defaultViewForGroup(type)
-    return d === 'chat' ? 'chat' : d
+    return 'chat'
   }
   return 'chat'
 }
@@ -129,8 +128,7 @@ export default function GlobalSearch({ className }: GlobalSearchProps): React.Re
         state: { highlightTaskId: hit.taskId }
       })
     } else if (hit.kind === 'message') {
-      const view = defaultViewForGroup(type)
-      navigate(groupViewPath(hit.groupId, view === 'chat' ? 'chat' : view), {
+      navigate(groupViewPath(hit.groupId, 'chat'), {
         state: { highlightMsgId: hit.msgId }
       })
     } else {

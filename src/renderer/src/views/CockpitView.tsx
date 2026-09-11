@@ -20,6 +20,7 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
+import { shouldHighlightCockpit } from '@shared/navigation/tabRules'
 import AiConfigModal from '@renderer/features/cockpit/AiConfigModal'
 import ViewHeader from '@renderer/ui/ViewHeader'
 import RegionButton from '@renderer/ui/RegionButton'
@@ -59,6 +60,7 @@ export default function CockpitView(): React.ReactElement {
   const lastNonCockpitPath = useNavigationStore((s) => s.lastNonCockpitPath)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const groups = useNavigationStore((s) => s.groups)
+  const highlightCockpit = shouldHighlightCockpit(groups)
   const getActiveGroup = useNavigationStore((s) => s.getActiveGroup)
   const activeGroup = getActiveGroup()
   const weeklyPlugin = usePluginView('lanpm.weekly')
@@ -349,13 +351,21 @@ export default function CockpitView(): React.ReactElement {
         }
       />
 
-      {groups.length === 0 ? (
+      {!highlightCockpit ? (
         <Alert
           type="info"
           showIcon
           className={styles.emptyGroupsBanner}
-          message={t('discover.cockpitNoGroupsTitle')}
-          description={t('discover.cockpitNoGroupsHint')}
+          message={
+            groups.length === 0
+              ? t('discover.cockpitNoGroupsTitle')
+              : t('discover.cockpitNoProjectTitle')
+          }
+          description={
+            groups.length === 0
+              ? t('discover.cockpitNoGroupsHint')
+              : t('discover.cockpitNoProjectHint')
+          }
           action={
             <RegionButton
               variant="emphasis"
@@ -369,6 +379,7 @@ export default function CockpitView(): React.ReactElement {
         />
       ) : null}
 
+      {highlightCockpit ? (
       <div className={styles.scrollBody} data-lanpm-view-scroll>
       <div
         className={`${styles.attention} ${
@@ -942,6 +953,7 @@ export default function CockpitView(): React.ReactElement {
         </IslandPanel>
       ) : null}
       </div>
+      ) : null}
 
       <AiConfigModal
         open={aiConfigOpen}

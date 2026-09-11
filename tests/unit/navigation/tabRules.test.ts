@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { defaultViewForGroup, isViewAllowedForGroup } from '@shared/navigation/tabRules'
+import {
+  defaultViewForGroup,
+  isViewAllowedForGroup,
+  shouldHighlightCockpit
+} from '@shared/navigation/tabRules'
 import type { AppView } from '@shared/navigation/types'
 
 const views: AppView[] = ['chat', 'board', 'tree', 'gantt', 'calendar', 'whiteboard', 'files']
@@ -29,7 +33,22 @@ describe('isViewAllowedForGroup', () => {
 })
 
 describe('defaultViewForGroup', () => {
-  it.each(['project', 'function', 'anonymous'] as const)('%s defaults to chat', (type) => {
+  it('project defaults to board', () => {
+    expect(defaultViewForGroup('project')).toBe('board')
+  })
+
+  it.each(['function', 'anonymous'] as const)('%s defaults to chat', (type) => {
     expect(defaultViewForGroup(type)).toBe('chat')
+  })
+})
+
+describe('shouldHighlightCockpit', () => {
+  it('is false without project groups', () => {
+    expect(shouldHighlightCockpit([])).toBe(false)
+    expect(shouldHighlightCockpit([{ type: 'anonymous' }])).toBe(false)
+  })
+
+  it('is true when any project group exists', () => {
+    expect(shouldHighlightCockpit([{ type: 'anonymous' }, { type: 'project' }])).toBe(true)
   })
 })

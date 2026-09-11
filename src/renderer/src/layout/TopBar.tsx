@@ -30,7 +30,7 @@ import UserAvatar from '@renderer/ui/UserAvatar'
 import { useUiStore } from '@renderer/stores/uiStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { isDmGroupId, getDmPeerUserId } from '@shared/chat/dmSession'
-import { isViewAllowedForGroup, defaultViewForGroup } from '@shared/navigation/tabRules'
+import { isViewAllowedForGroup, defaultViewForGroup, shouldHighlightCockpit } from '@shared/navigation/tabRules'
 import type { AppView, GroupType } from '@shared/navigation/types'
 import { cockpitPath, cockpitReturnPath, groupViewPath } from '@renderer/routes/paths'
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
@@ -518,7 +518,7 @@ export default function TopBar(): React.ReactElement {
         <span className={styles.barDivider} aria-hidden />
         <div className={styles.barGroup}>
           <div className={styles.barWideActions} role="toolbar" aria-label={t('topbar.moreActions')}>
-            {!isCockpitRoute ? (
+            {!isCockpitRoute && shouldHighlightCockpit(groups) ? (
               <button
                 type="button"
                 className={styles.barAction}

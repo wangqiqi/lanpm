@@ -31,6 +31,8 @@ const discoverIpc = readFileSync(join(root, 'src/main/ipc/discover.ts'), 'utf8')
 const groupIpc = readFileSync(join(root, 'src/main/ipc/group.ts'), 'utf8')
 const pairingIpc = readFileSync(join(root, 'src/main/ipc/pairing.ts'), 'utf8')
 
+const tabRules = readFileSync(join(root, 'src/shared/navigation/tabRules.ts'), 'utf8')
+
 assert.match(topbar, /DiscoverModal/)
 assert.match(topbar, /topbar\.discover/)
 assert.match(modal, /discover\.snapshot/)
@@ -112,7 +114,15 @@ assert.match(pairingPanel, /void runFind\(code\)/)
 assert.match(pairingPanel, /codeInputRef\.current\?\.focus/)
 
 // TASK-8505: Setup 跳过网络 → Coachmark（零群路径见 TopBar effect）
-assert.match(setupWizard, /if \(networkSkipped\)/)
+assert.match(modal, /data-testid="discover-wizard-steps"/)
+assert.match(modal, /wizardStep/)
+assert.match(modal, /discover-wizard-to-join/)
+assert.match(homeRedirect, /defaultViewForGroup/)
+assert.match(tabRules, /shouldHighlightCockpit/)
+assert.match(tabRules, /case 'project':\s*return 'board'/)
+assert.match(topbar, /shouldHighlightCockpit\(groups\)/)
+assert.match(cockpit, /shouldHighlightCockpit/)
+assert.match(cockpit, /cockpitNoProjectTitle/)
 
 assert.match(preload, /discover:snapshot/)
 assert.match(preload, /group:join/)

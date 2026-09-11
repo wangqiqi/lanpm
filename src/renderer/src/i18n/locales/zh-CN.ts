@@ -1305,6 +1305,9 @@ const zhCN = {
   'discover.tabPeople': '成员',
   'discover.refresh': '刷新',
   'discover.hint': '用连接码打通群组发现目录，或扫描局域网可加入的群组',
+  'discover.wizardConnect': '连通',
+  'discover.wizardJoin': '加入群组',
+  'discover.wizardContinueJoin': '下一步：选择群组',
   'discover.sharePairingCode': '分享群组连接码',
   'discover.findGroupsByCode': '用连接码查找群组',
   'discover.codesExplainer':
@@ -1318,6 +1321,8 @@ const zhCN = {
   'discover.cockpitNoGroupsTitle': '还没有加入任何群组',
   'discover.cockpitNoGroupsHint': '用连接码加入同事的群组，或分享你的群组让对方发现',
   'discover.cockpitJoinWithCode': '用连接码加入',
+  'discover.cockpitNoProjectTitle': '还没有项目群',
+  'discover.cockpitNoProjectHint': '驾驶舱汇总跨项目进度。加入或创建一个项目群后，这里会显示需关注项与报表。',
   'discover.copyPairingInfo': '复制配对信息',
   'discover.copyPairingSuccess': '已复制配对信息',
   'discover.copyPairingFailed': '无法复制到剪贴板',

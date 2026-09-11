@@ -19,6 +19,14 @@
   margin-bottom: 8px;
 }
 
+.wizardSteps {
+  margin-bottom: 12px;
+}
+
+.wizardContinue {
+  margin-top: 8px;
+}
+
 .list {
   max-height: 360px;
   overflow: auto;
