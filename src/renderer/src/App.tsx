@@ -81,13 +81,16 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     if (!configured) return
-    const syncGroup = (groupId: string): void => {
-      useNavPreferencesStore.getState().setActiveGroupId(groupId || null)
+    const syncGroup = (): void => {
+      const nav = useNavigationStore.getState()
+      const groupId = nav.activeGroupId || null
+      const groupType = groupId ? nav.getGroupType(groupId) : null
+      useNavPreferencesStore.getState().setActiveGroupId(groupId, groupType)
     }
-    syncGroup(useNavigationStore.getState().activeGroupId)
+    syncGroup()
     return useNavigationStore.subscribe((state, prev) => {
-      if (state.activeGroupId !== prev.activeGroupId) {
-        syncGroup(state.activeGroupId)
+      if (state.activeGroupId !== prev.activeGroupId || state.groups !== prev.groups) {
+        syncGroup()
       }
     })
   }, [configured])

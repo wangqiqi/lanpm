@@ -9,19 +9,21 @@ import {
   type NavPreferences,
   type NavPreferencesDocument
 } from '@shared/navigation/navPreferences'
+import type { GroupType } from '@shared/navigation/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
 export type NavEditScope = 'global' | 'group'
 
 interface NavPreferencesState {
   document: NavPreferencesDocument
-  /** 当前群有效偏好（BottomNav / 路由守卫） */
+  /** 当前群有效偏好（BottomNav / 路由守卫；含类型默认折叠） */
   preferences: NavPreferences
   activeGroupId: string | null
+  activeGroupType: GroupType | null
   editScope: NavEditScope
   hydrated: boolean
   hydrate: () => Promise<void>
-  setActiveGroupId: (groupId: string | null) => void
+  setActiveGroupId: (groupId: string | null, groupType?: GroupType | null) => void
   setEditScope: (scope: NavEditScope) => void
   setPreferences: (prefs: NavPreferences) => Promise<void>
   clearGroupOverride: (groupId: string) => Promise<void>
@@ -29,12 +31,13 @@ interface NavPreferencesState {
 
 function applyDocument(
   document: NavPreferencesDocument,
-  activeGroupId: string | null
+  activeGroupId: string | null,
+  activeGroupType: GroupType | null
 ): Pick<NavPreferencesState, 'document' | 'preferences'> {
   const normalized = normalizeNavPreferencesDocument(document)
   return {
     document: normalized,
-    preferences: resolveNavPreferencesForGroup(normalized, activeGroupId)
+    preferences: resolveNavPreferencesForGroup(normalized, activeGroupId, activeGroupType)
   }
 }
 
@@ -50,26 +53,29 @@ export const useNavPreferencesStore = create<NavPreferencesState>((set, get) => 
   document: normalizeNavPreferencesDocument(DEFAULT_NAV_PREFERENCES_DOCUMENT),
   preferences: normalizeNavPreferences(DEFAULT_NAV_PREFERENCES),
   activeGroupId: null,
+  activeGroupType: null,
   editScope: 'global',
   hydrated: false,
   hydrate: async () => {
     try {
       const doc = await getLanpmApi().nav.getDocument()
-      const activeGroupId = get().activeGroupId
-      set({ ...applyDocument(doc, activeGroupId), hydrated: true })
+      const { activeGroupId, activeGroupType } = get()
+      set({ ...applyDocument(doc, activeGroupId, activeGroupType), hydrated: true })
     } catch {
-      const activeGroupId = get().activeGroupId
+      const { activeGroupId, activeGroupType } = get()
       set({
-        ...applyDocument(DEFAULT_NAV_PREFERENCES_DOCUMENT, activeGroupId),
+        ...applyDocument(DEFAULT_NAV_PREFERENCES_DOCUMENT, activeGroupId, activeGroupType),
         hydrated: true
       })
     }
   },
-  setActiveGroupId: (groupId) => {
-    const { document } = get()
+  setActiveGroupId: (groupId, groupType) => {
+    const { document, activeGroupType } = get()
+    const nextType = groupType === undefined ? activeGroupType : groupType
     set({
       activeGroupId: groupId,
-      preferences: resolveNavPreferencesForGroup(document, groupId)
+      activeGroupType: nextType,
+      preferences: resolveNavPreferencesForGroup(document, groupId, nextType)
     })
   },
   setEditScope: (scope) => set({ editScope: scope }),
@@ -82,7 +88,7 @@ export const useNavPreferencesStore = create<NavPreferencesState>((set, get) => 
         ...document,
         byGroup: { ...document.byGroup, [activeGroupId]: normalizeNavPreferences(saved) }
       }
-      set(applyDocument(nextDoc, activeGroupId))
+      set(applyDocument(nextDoc, activeGroupId, get().activeGroupType))
       return
     }
     const saved = await getLanpmApi().nav.setPreferences(normalized)
@@ -90,14 +96,14 @@ export const useNavPreferencesStore = create<NavPreferencesState>((set, get) => 
       ...document,
       global: normalizeNavPreferences(saved)
     }
-    set(applyDocument(nextDoc, activeGroupId))
+    set(applyDocument(nextDoc, activeGroupId, get().activeGroupType))
   },
   clearGroupOverride: async (groupId) => {
     const trimmed = groupId.trim()
     if (!trimmed) return
     const doc = await getLanpmApi().nav.clearGroupOverride(trimmed)
-    const activeGroupId = get().activeGroupId
-    set(applyDocument(doc, activeGroupId))
+    const { activeGroupId, activeGroupType } = get()
+    set(applyDocument(doc, activeGroupId, activeGroupType))
   }
 }))
 

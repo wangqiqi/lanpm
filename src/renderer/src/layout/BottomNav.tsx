@@ -19,6 +19,7 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import { NAV_DISABLED_HINT_KEYS, VIEW_MESSAGE_KEYS } from '@renderer/i18n/navKeys'
 import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import {
+  resolveNavPreferencesForGroup,
   resolveVisibleContributedRoutes,
   resolveVisibleViews
 } from '@shared/navigation/navPreferences'
@@ -145,7 +146,11 @@ export default function BottomNav(): React.ReactElement {
   }, [gid, activeView, markBoardSeenAndRefresh])
 
   const groupType = groupId ? getGroupType(groupId) : null
-  const navPreferences = useNavPreferencesStore((s) => s.preferences)
+  const navDocument = useNavPreferencesStore((s) => s.document)
+  const navPreferences = useMemo(
+    () => resolveNavPreferencesForGroup(navDocument, groupId ?? null, groupType),
+    [navDocument, groupId, groupType]
+  )
 
   const visibleTabs = useMemo(() => {
     if (!groupId || !groupType) return []
