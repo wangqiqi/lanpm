@@ -254,6 +254,7 @@
     "verify:ai-orchestration-spike": "node --experimental-strip-types tests/static/verify-ai-orchestration-spike.ts",
     "verify:ai-pipeline": "node --experimental-strip-types tests/static/verify-ai-pipeline.ts",
     "verify:ai-pipeline-human": "node --experimental-strip-types tests/static/verify-ai-pipeline-human.ts",
+    "verify:ai-regression-playbook": "node --experimental-strip-types tests/static/verify-ai-regression-playbook.ts",
     "verify:platform-matrix": "node --experimental-strip-types tests/static/verify-platform-matrix.ts",
     "postinstall": "node scripts/ensure-native-deps.mjs"
   },
