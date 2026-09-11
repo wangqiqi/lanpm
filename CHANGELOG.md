@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **文档**：仓库根 `优化.md` 迁出；UX 开放项跟踪在 `.cursorGrowth/plan.md`（UX-TODO）；历史快照在 Growth `archive/20260911_214500_体验评审_心智负担优化.md`；`verify:docs-optim-closeout` 禁止根目录回退
+
 ## [1.106.13] - 2026-09-11
 
 ### Added

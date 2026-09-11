@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 assert.ok(!existsSync(join(root, 'docs/优化.md')), 'docs/优化.md must not remain in docs/')
+assert.ok(!existsSync(join(root, '优化.md')), 'root 优化.md must not remain (track in .cursorGrowth/plan UX-TODO)')
 assert.ok(!existsSync(join(root, 'docs/specs')), 'docs/specs must live under .cursorGrowth/specs')
 assert.ok(!existsSync(join(root, 'docs/decisions')), 'docs/decisions must live under .cursorGrowth/decisions')
 
