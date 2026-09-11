@@ -70,6 +70,18 @@ assert.match(pairingClipboard, /formatPairingShareClipboard/)
 assert.match(cockpit, /cockpit-join-with-code/)
 assert.match(cockpit, /requestDiscoverOpen/)
 assert.match(topbar, /data-testid="topbar-discover"/)
+// TASK-8404: 顶栏网络下拉仅刷新/重连；手动节点经发现内 CTA → ManualPeerModal
+const netDropdownBlock = topbar.slice(
+  topbar.indexOf("key: 'refresh'"),
+  topbar.indexOf('<ManualPeerModal')
+)
+assert.doesNotMatch(netDropdownBlock, /addManualPeer|manualPeerTitle|setManualPeerOpen/)
+assert.match(modal, /tryAutoJoinAfterSnapshot/)
+assert.match(modal, /handlePairingJoined/)
+assert.match(modal, /join_pending/)
+// TASK-8402: 零群首屏 → 驾驶舱 + 自动打开发现
+assert.match(homeRedirect, /groups\.length === 0/)
+assert.match(homeRedirect, /cockpitPath\(\)/)
 assert.match(preload, /discover:snapshot/)
 assert.match(preload, /group:join/)
 assert.match(preload, /pairing:start/)
