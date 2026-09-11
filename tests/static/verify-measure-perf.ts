@@ -94,7 +94,7 @@ assert.ok(typeof report.userDataDir === 'string' && String(report.userDataDir).i
 const notes = report.notes as { gpu?: string; binary?: string }
 assert.ok(notes?.gpu, 'notes.gpu required')
 assert.equal(notes.gpu, linuxGpuNote(process.platform, envOff))
-assert.match(String(notes.binary), /out\/main/)
+assert.match(String(notes.binary), /\.lanpm\/artifact\/out\/main/)
 unlinkSync(outPath)
 
 const outOn = join(root, '.lanpm', 'perf', 'verify-schema-gpu-on.json')

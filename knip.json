@@ -27,7 +27,7 @@
     "tests/integration/discover-sim/db-scenarios.ts"
   ],
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{mjs,js,ts}"],
-  "ignore": ["out/**", "dist/**", "node_modules/**"],
+  "ignore": [".lanpm/artifact/out/**", ".lanpm/artifact/dist/**", "node_modules/**"],
   "ignoreFiles": ["src/renderer/src/env.d.ts", "src/renderer/src/vite-env.d.ts"],
   "ignoreDependencies": [
     "@electron/rebuild",

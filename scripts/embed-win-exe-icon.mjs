@@ -5,20 +5,22 @@
  * Run: node scripts/embed-win-exe-icon.mjs [path/to/LanPM.exe ...]
  */
 import { existsSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import rcedit from 'rcedit'
+import { builderDistDir, repoRoot } from './lanpm-artifact-paths.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = repoRoot(fileURLToPath(new URL('.', import.meta.url)))
 const defaultIco = join(root, 'resources/icon.ico')
 
 function defaultTargets() {
   const names = ['LanPM.exe']
-  const dirs = ['dist/win-unpacked', 'dist/win-arm64-unpacked']
+  const dist = builderDistDir(root)
+  const dirs = [join(dist, 'win-unpacked'), join(dist, 'win-arm64-unpacked')]
   const out = []
   for (const dir of dirs) {
     for (const name of names) {
-      const p = join(root, dir, name)
+      const p = join(dir, name)
       if (existsSync(p)) out.push(p)
     }
   }

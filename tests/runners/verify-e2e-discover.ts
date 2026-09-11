@@ -4,10 +4,9 @@
  */
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { projectRoot } from '../projectRoot.ts'
+import { electronMainJs, projectRoot } from '../projectRoot.ts'
 
-const mainJs = join(projectRoot, 'out/main/index.js')
+const mainJs = electronMainJs
 
 if (!existsSync(mainJs)) {
   console.log('verify:e2e-discover: building electron app…')

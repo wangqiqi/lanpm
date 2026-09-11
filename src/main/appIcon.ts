@@ -3,7 +3,7 @@ import { existsSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
-/** Compiled main lives in out/main — reliable dev path to repo resources/ */
+/** Compiled main lives in .lanpm/artifact/out/main — dev path to repo resources/ */
 const mainDir = dirname(fileURLToPath(import.meta.url))
 
 function iconCandidateDirs(): string[] {

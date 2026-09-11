@@ -315,7 +315,7 @@ function Invoke-Action([string]$Act, [string]$Ext) {
       Invoke-Preflight -Quiet
       Write-Host '[lanpm] building ...' -ForegroundColor Cyan
       Invoke-Npm @('run', 'build')
-      Write-Host '[lanpm] build done -> out/' -ForegroundColor Green
+      Write-Host '[lanpm] build done -> .lanpm/artifact/out/' -ForegroundColor Green
     }
     'preview' {
       Write-Host '[lanpm] preview (foreground) ...' -ForegroundColor Cyan
@@ -350,7 +350,9 @@ function Invoke-Action([string]$Act, [string]$Ext) {
     'clean' {
       if (Test-DevRunning) { Stop-Dev }
       Write-Host '[lanpm] cleaning rebuildable artifacts (keep userData) ...' -ForegroundColor Cyan
-      Remove-Item -Recurse -Force (Join-Path $Root 'out'), (Join-Path $Root 'dist'), (Join-Path $Root 'coverage') -ErrorAction SilentlyContinue
+      $artifact = Join-Path $RunDir 'artifact'
+      Remove-Item -Recurse -Force (Join-Path $artifact 'out'), (Join-Path $artifact 'dist'), (Join-Path $artifact 'test-results') -ErrorAction SilentlyContinue
+      Remove-Item -Recurse -Force (Join-Path $Root 'out'), (Join-Path $Root 'dist'), (Join-Path $Root 'build'), (Join-Path $Root 'test-results'), (Join-Path $Root 'coverage') -ErrorAction SilentlyContinue
       Get-ChildItem $Root -Filter '*.tsbuildinfo' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
       if (Test-Path $RunDir) {
         Remove-Item $PidFile, $ModeFile -ErrorAction SilentlyContinue
@@ -364,7 +366,7 @@ function Invoke-Action([string]$Act, [string]$Ext) {
       }
       Get-ChildItem ([System.IO.Path]::GetTempPath()) -Filter 'lanpm*' -ErrorAction SilentlyContinue |
         Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-      Write-Host '[lanpm] cleaned out/ dist/ coverage/ .lanpm rebuildables' -ForegroundColor Green
+      Write-Host '[lanpm] cleaned .lanpm/artifact + legacy out/dist .lanpm rebuildables' -ForegroundColor Green
       if ($Ext -eq 'deep') {
         Write-Host '[lanpm] deep clean: node_modules + electron cache ...' -ForegroundColor Yellow
         Remove-Item -Recurse -Force (Join-Path $Root 'node_modules') -ErrorAction SilentlyContinue
@@ -375,8 +377,8 @@ function Invoke-Action([string]$Act, [string]$Ext) {
       }
     }
     'pack' {
-      if (-not (Test-Path (Join-Path $Root 'out\main'))) {
-        Write-Host '[lanpm] out/ missing; building first ...' -ForegroundColor Yellow
+      if (-not (Test-Path (Join-Path $RunDir 'artifact\out\main'))) {
+        Write-Host '[lanpm] .lanpm/artifact/out missing; building first ...' -ForegroundColor Yellow
         Invoke-Npm @('run', 'build')
       }
       Write-Host '[lanpm] packing (electron-builder) ...' -ForegroundColor Cyan
@@ -387,7 +389,7 @@ function Invoke-Action([string]$Act, [string]$Ext) {
       } finally {
         Pop-Location
       }
-      Write-Host '[lanpm] pack done -> dist/' -ForegroundColor Green
+      Write-Host '[lanpm] pack done -> .lanpm/artifact/dist/' -ForegroundColor Green
     }
     default {
       Write-Host "unknown action: $Act" -ForegroundColor Red

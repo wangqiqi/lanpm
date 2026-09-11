@@ -12,6 +12,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { viteOutRenderer } from '../../scripts/lanpm-artifact-paths.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const renderer = join(root, 'src/renderer/src')
@@ -1185,7 +1186,7 @@ assert.match(
 )
 
 // --- production bundle: global design tokens must ship (global.css, not dev-only) ---
-const outAssets = join(root, 'out/renderer/assets')
+const outAssets = join(viteOutRenderer(root), 'assets')
 if (existsSync(outAssets)) {
   const globalProdCss = readdirSync(outAssets).find(
     (name) => name.startsWith('global-') && name.endsWith('.css')
@@ -1200,12 +1201,12 @@ if (existsSync(outAssets)) {
     prodCss.includes("html[data-theme='light']"),
     `production ${globalProdCss} must include light theme token block`
   )
-  const indexHtml = join(root, 'out/renderer/index.html')
+  const indexHtml = join(viteOutRenderer(root), 'index.html')
   if (existsSync(indexHtml)) {
     const html = readFileSync(indexHtml, 'utf8')
     assert.ok(
       html.includes(globalProdCss),
-      'out/renderer/index.html must link global design-token stylesheet'
+      '.lanpm/artifact/out/renderer/index.html must link global design-token stylesheet'
     )
   }
 }

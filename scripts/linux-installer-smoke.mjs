@@ -1,19 +1,21 @@
 /**
  * Cold-start the Linux unpacked installer until nav-tab-chat is clickable (TASK-6103).
- * Skips when dist/linux-unpacked/lanpm is missing unless LANPM_REQUIRE_INSTALLER=1.
+ * Skips when .lanpm/artifact/dist/linux-unpacked/lanpm is missing unless LANPM_REQUIRE_INSTALLER=1.
  */
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { _electron as electron } from 'playwright'
+import { builderDistDir, repoRoot } from './lanpm-artifact-paths.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const unpackedBin = join(root, 'dist', 'linux-unpacked', 'lanpm')
+const root = repoRoot(fileURLToPath(new URL('.', import.meta.url)))
+const distDir = builderDistDir(root)
+const unpackedDir = join(distDir, 'linux-unpacked')
+const unpackedBin = join(unpackedDir, 'lanpm')
 const requireInstaller = process.env.LANPM_REQUIRE_INSTALLER === '1'
 
 function findArtifact(pred) {
-  const distDir = join(root, 'dist')
   if (!existsSync(distDir)) return null
   return readdirSync(distDir).find(pred) ?? null
 }
@@ -39,7 +41,8 @@ const appImage = findArtifact((n) => n.endsWith('.AppImage') && n.includes('LanP
 const deb = findArtifact((n) => n.endsWith('_amd64.deb') && n.startsWith('lanpm_'))
 
 if (!existsSync(unpackedBin)) {
-  const msg = 'linux-installer-smoke: dist/linux-unpacked/lanpm missing — run npm run dist:linux:x64'
+  const msg =
+    'linux-installer-smoke: .lanpm/artifact/dist/linux-unpacked/lanpm missing — run npm run dist:linux:x64'
   if (requireInstaller) {
     console.error(msg)
     process.exit(1)
@@ -64,7 +67,7 @@ if (process.env.CI === 'true' || process.env.CI === '1') {
   }
 }
 
-spawnSync('pkill', ['-f', `${root}/dist/linux-unpacked/lanpm`], { encoding: 'utf8' })
+spawnSync('pkill', ['-f', unpackedBin], { encoding: 'utf8' })
 
 const tmpRoot = join(root, '.lanpm', 'tmp')
 mkdirSync(tmpRoot, { recursive: true })
@@ -88,7 +91,7 @@ try {
       '--disable-gpu-sandbox',
       '--disable-dev-shm-usage'
     ],
-    cwd: join(root, 'dist', 'linux-unpacked'),
+    cwd: unpackedDir,
     env,
     timeout: 120_000
   })

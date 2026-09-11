@@ -7,6 +7,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
 RUN_DIR="$ROOT/.lanpm"
+ARTIFACT_DIR="$RUN_DIR/artifact"
+VITE_OUT="$ARTIFACT_DIR/out"
+BUILDER_DIST="$ARTIFACT_DIR/dist"
 PID_FILE="$RUN_DIR/dev.pid"
 LOG_FILE="$RUN_DIR/dev.log"
 MODE_FILE="$RUN_DIR/dev.mode"
@@ -450,7 +453,7 @@ cmd_build() {
   }
   info "生产构建 …"
   npm run build
-  ok "构建完成 → out/"
+  ok "构建完成 → .lanpm/artifact/out/"
 }
 
 cmd_preview() {
@@ -503,13 +506,13 @@ cmd_verify() {
 cmd_pack() {
   need_cmd npm
   need_cmd npx
-  if [[ ! -d "$ROOT/out/main" ]]; then
-    warn "未找到 out/，先执行 build …"
+  if [[ ! -d "$VITE_OUT/main" ]]; then
+    warn "未找到 .lanpm/artifact/out/，先执行 build …"
     cmd_build
   fi
   info "打包安装包 (electron-builder) …"
   npx electron-builder --config electron-builder.yml
-  ok "打包完成 → dist/"
+  ok "打包完成 → .lanpm/artifact/dist/"
 }
 
 cmd_clean() {
@@ -519,7 +522,8 @@ cmd_clean() {
     cmd_stop || true
   fi
   info "清理构建/测试可重建产物（保留 ~/.config/lanpm）…"
-  rm -rf "$ROOT/out" "$ROOT/dist" "$ROOT/coverage"
+  rm -rf "$ARTIFACT_DIR/out" "$ARTIFACT_DIR/dist" "$ARTIFACT_DIR/test-results" \
+    "$ROOT/out" "$ROOT/dist" "$ROOT/build" "$ROOT/test-results" "$ROOT/coverage"
   rm -f "$ROOT"/*.tsbuildinfo
   find "$ROOT" -name '*.tsbuildinfo' -delete 2>/dev/null || true
   # .lanpm：临时库、Stub 总线、视觉截图、双实例手验目录；保留目录骨架
@@ -532,7 +536,7 @@ cmd_clean() {
   fi
   # 系统 /tmp 残留（历史路径）
   find /tmp -maxdepth 1 -user "$(id -un)" -name 'lanpm*' -exec rm -rf {} + 2>/dev/null || true
-  ok "已清理 out/ dist/ coverage/ .lanpm/{tmp,stub-bus,visual-screenshots,dev-*} 与 /tmp/lanpm*"
+  ok "已清理 .lanpm/artifact/{out,dist,test-results}、遗留根 out/dist 与 .lanpm/{tmp,stub-bus,…}、/tmp/lanpm*"
 
   if [[ "$deep" == "deep" || "$deep" == "--deep" ]]; then
     warn "深度清理: node_modules + Electron 工具链缓存（可重建）…"

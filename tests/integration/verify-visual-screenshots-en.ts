@@ -11,10 +11,11 @@ import { fileURLToPath } from 'node:url'
 import { electronCiChromiumFlags } from '../../scripts/electron-ci-chromium-flags.mjs'
 import { resolveElectronBin } from '../../scripts/resolve-electron-bin.mjs'
 import { mkLanpmTemp, rmLanpmTemp } from '../lanpmTemp.ts'
+import { packageMainAbs } from '../../scripts/lanpm-artifact-paths.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const electronBin = resolveElectronBin()
-const mainJs = join(root, 'out/main/index.js')
+const mainJs = packageMainAbs(root)
 const outDir = process.env.LANPM_VISUAL_CAPTURE_DIR ?? join(root, '.lanpm/visual-screenshots-en')
 
 const THEME_PAGES = ['chat', 'cockpit'] as const
@@ -26,7 +27,7 @@ const EXPECTED = [
 ] as const
 
 assert.ok(electronBin, 'electron binary missing')
-assert.ok(existsSync(mainJs), 'out/main/index.js missing — run npm run build first')
+assert.ok(existsSync(mainJs), '.lanpm/artifact/out/main/index.js missing — run npm run build first')
 
 const userData = mkLanpmTemp('lanpm-visual-en-')
 

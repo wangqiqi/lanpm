@@ -290,7 +290,7 @@ if errorlevel 1 (
 echo [lanpm] building ...
 call npm run build
 if errorlevel 1 exit /b %ERRORLEVEL%
-echo [lanpm] build done -^> out/
+echo [lanpm] build done -^> .lanpm/artifact/out/
 exit /b 0
 :cmd_preview
 echo [lanpm] preview - foreground ...
@@ -336,8 +336,13 @@ if not defined CLEAN_DEEP if defined EXT set "CLEAN_DEEP=!EXT!"
 call :test_dev_running
 if not errorlevel 1 call :cmd_stop
 echo [lanpm] cleaning rebuildable artifacts (keep userData) ...
+if exist "%RUN_DIR%\artifact\out" rmdir /s /q "%RUN_DIR%\artifact\out"
+if exist "%RUN_DIR%\artifact\dist" rmdir /s /q "%RUN_DIR%\artifact\dist"
+if exist "%RUN_DIR%\artifact\test-results" rmdir /s /q "%RUN_DIR%\artifact\test-results"
 if exist "%ROOT%\out" rmdir /s /q "%ROOT%\out"
 if exist "%ROOT%\dist" rmdir /s /q "%ROOT%\dist"
+if exist "%ROOT%\build" rmdir /s /q "%ROOT%\build"
+if exist "%ROOT%\test-results" rmdir /s /q "%ROOT%\test-results"
 if exist "%ROOT%\coverage" rmdir /s /q "%ROOT%\coverage"
 del "%PID_FILE%" "%MODE_FILE%" 2>nul
 type nul >"%LOG_FILE%" 2>nul
@@ -359,8 +364,8 @@ if /i "%CLEAN_DEEP%"=="deep" (
 )
 exit /b 0
 :cmd_pack
-if not exist "%ROOT%\out\main" (
-  echo [lanpm] out/ missing; building first ...
+if not exist "%RUN_DIR%\artifact\out\main" (
+  echo [lanpm] .lanpm/artifact/out missing; building first ...
   call npm run build
   if errorlevel 1 exit /b %ERRORLEVEL%
 )

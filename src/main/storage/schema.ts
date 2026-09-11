@@ -15,7 +15,7 @@ function loadSchemaSql(): string {
   throw new Error('schema.sql not found (expected beside bundle or in src/main/storage)')
 }
 
-/** Load DDL from schema.sql (copied to out/main on build). */
+/** Load DDL from schema.sql (copied to .lanpm/artifact/out/main on build). */
 export const SCHEMA_SQL = loadSchemaSql()
 
 /** Expected tables after schema v1 (for startup verification). */

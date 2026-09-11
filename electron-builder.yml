@@ -2,7 +2,7 @@ appId: com.lanpm.app
 productName: LanPM
 directories:
   buildResources: resources
-  output: dist
+  output: .lanpm/artifact/dist
 # 仅保留中英；可砍掉 ~40MB+ Chromium locales
 electronLanguages:
   - en-US
@@ -16,6 +16,7 @@ files:
   - '!.cursor/**'
   - '!.cursorGrowth/**'
   - '!.lanpm/**'
+  - '!.lanpm/artifact/dist/**'
   - '!dist/**'
   - '!dist-*/**'
   - '!dist-pack/**'

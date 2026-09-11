@@ -52,8 +52,11 @@ async function waitForLanpmWindow(app, timeoutMs = 90_000) {
 export async function launchMeasured(opts) {
   const electronBin = resolveElectronBin()
   if (!electronBin) throw new Error('electron binary missing — run npm install')
-  const mainJs = join(opts.root, 'out/main/index.js')
-  if (!existsSync(mainJs)) throw new Error('out/main/index.js missing — run npm run build first')
+  const { packageMainAbs } = await import('./lanpm-artifact-paths.mjs')
+  const mainJs = packageMainAbs(opts.root)
+  if (!existsSync(mainJs)) {
+    throw new Error('.lanpm/artifact/out/main/index.js missing — run npm run build first')
+  }
   const env = { ...process.env }
   delete env.ELECTRON_RUN_AS_NODE
   env.LANPM_E2E = '1'

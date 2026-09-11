@@ -132,20 +132,20 @@ jobs:
 
       - name: List dist output
         shell: bash
-        run: ls -lah dist/ || true
+        run: ls -lah .lanpm/artifact/dist/ || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{ matrix.artifact }}
           path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.AppImage
-            dist/*.deb
-            dist/*.blockmap
-            dist/latest*.yml
-            dist/latest-*.yml
+            .lanpm/artifact/dist/*.exe
+            .lanpm/artifact/dist/*.dmg
+            .lanpm/artifact/dist/*.AppImage
+            .lanpm/artifact/dist/*.deb
+            .lanpm/artifact/dist/*.blockmap
+            .lanpm/artifact/dist/latest*.yml
+            .lanpm/artifact/dist/latest-*.yml
           if-no-files-found: error
 
   publish:

@@ -66,7 +66,7 @@ function printHelp() {
   --out <path>    JSON path (default .lanpm/perf/list-scroll-latest.json)
 
 GO if a scrollable surface has frame P95 ≥ ${FRAME_P95_GO_MS}ms or long-task ≥ ${LONG_TASK_GO_MS}ms.
-Needs out/main/index.js (npm run build). Isolated userData under .lanpm/tmp/.
+Needs .lanpm/artifact/out/main/index.js (npm run build). Isolated userData under .lanpm/tmp/.
 `)
 }
 

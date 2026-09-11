@@ -39,7 +39,7 @@ function emptyMeasureReport(mode) {
     outPath: '',
     notes: {
       gpu: gpuNote(),
-      binary: 'out/main/index.js (electron-vite build, not electron-builder installers)',
+      binary: '.lanpm/artifact/out/main/index.js (electron-vite build, not electron-builder installers)',
       budgetAligned: mode === 'full',
       docs05: 'docs/05 §5 cold-start / memory / Tab P95'
     },

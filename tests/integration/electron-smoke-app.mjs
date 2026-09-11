@@ -6,10 +6,11 @@ import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { viteOutPreload, viteOutRenderer } from '../../scripts/lanpm-artifact-paths.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
-const rendererHtml = join(root, 'out/renderer/index.html')
-const preloadJs = join(root, 'out/preload/index.js')
+const rendererHtml = join(viteOutRenderer(root), 'index.html')
+const preloadJs = join(viteOutPreload(root), 'index.js')
 
 if (!existsSync(rendererHtml)) {
   console.error('[electron-smoke] missing', rendererHtml, '— run npm run build first')

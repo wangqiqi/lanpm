@@ -5,18 +5,18 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { electronCiChromiumFlags } from '../../scripts/electron-ci-chromium-flags.mjs'
 import { resolveElectronBin } from '../../scripts/resolve-electron-bin.mjs'
+import { electronRendererHtml, projectRoot } from '../projectRoot.ts'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
+const root = projectRoot
 const electronBin = resolveElectronBin()
 const smokeApp = join(root, 'tests/integration/electron-smoke-app.mjs')
-const rendererHtml = join(root, 'out/renderer/index.html')
+const rendererHtml = electronRendererHtml
 
 assert.ok(electronBin, 'electron binary missing — run npm install')
-assert.ok(existsSync(rendererHtml), 'out/renderer/index.html missing — run npm run build first')
+assert.ok(existsSync(rendererHtml), '.lanpm/artifact/out/renderer/index.html missing — run npm run build first')
 assert.ok(existsSync(smokeApp), `missing ${smokeApp}`)
 
 const smokeEnv = { ...process.env }

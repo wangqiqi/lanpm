@@ -6,6 +6,7 @@
 
 ### Changed
 
+- **构建产物目录**：electron-vite / electron-builder / Playwright 输出迁至 `.lanpm/artifact/{out,dist,test-results}`；路径 SSOT `scripts/lanpm-artifact-paths.mjs` · `verify:artifact-paths`；`onekey_run` clean 同时清遗留根目录 `out`/`dist`
 - **文档矩阵**：`docs/02` §16 思维导图标 ✅（官方 `lanpm.mindmap`），与 `docs/06` §7 序 7 对齐；新增 `verify:docs-matrix` 防回退
 
 ## [1.106.12] - 2026-09-11

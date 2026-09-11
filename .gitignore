@@ -21,6 +21,7 @@ npm-debug.log*
 tmp/
 temp/
 .lanpm/
+# 构建产物：.lanpm/artifact/{out,dist,test-results}（见 scripts/lanpm-artifact-paths.mjs）
 .lanpm/visual-screenshots/
 docs/screenshots/generated/
 
@@ -34,10 +35,12 @@ website/.vitepress/dist
 
 # Dependencies
 node_modules/
+# 遗留根目录产物（迁移后 clean 会删；保留规则防误提交）
 dist/
 dist-*
 build/
 out/
+test-results/
 *.tsbuildinfo
 
 # Super Cursor 项目特化（plan / learn / archive）— 本地 only，不纳入 Git
@@ -54,5 +57,3 @@ src/renderer/public/favicon.svg
 src/renderer/public/favicon.png
 src/renderer/public/excalidraw/
 src/renderer/public/pdfjs/
-
-test-results/

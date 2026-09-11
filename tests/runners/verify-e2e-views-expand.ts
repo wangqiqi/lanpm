@@ -4,10 +4,9 @@
  */
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { projectRoot } from '../projectRoot.ts'
+import { electronMainJs, projectRoot } from '../projectRoot.ts'
 
-const mainJs = join(projectRoot, 'out/main/index.js')
+const mainJs = electronMainJs
 const specs = [
   'tests/e2e/views-extended-tab-smoke.spec.ts',
   'tests/e2e/collab-drawer-smoke.spec.ts'
@@ -24,7 +23,7 @@ if (build.status !== 0) {
   process.exit(build.status ?? 1)
 }
 if (!existsSync(mainJs)) {
-  console.error('verify:e2e-views-expand: build did not produce out/main/index.js')
+  console.error('verify:e2e-views-expand: build did not produce .lanpm/artifact/out/main/index.js')
   process.exit(1)
 }
 

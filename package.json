@@ -6,7 +6,7 @@
   "author": "LanPM <zhou24388@163.com>",
   "private": true,
   "type": "module",
-  "main": "./out/main/index.js",
+  "main": "./.lanpm/artifact/out/main/index.js",
   "bin": {
     "lanpm": "scripts/lanpm.mjs"
   },
@@ -144,6 +144,7 @@
     "measure:perf": "node scripts/measure-perf.mjs",
     "measure:list-scroll": "node scripts/measure-list-scroll.mjs",
     "verify:measure-perf": "node --experimental-strip-types tests/static/verify-measure-perf.ts",
+    "verify:artifact-paths": "node --experimental-strip-types tests/static/verify-artifact-paths.ts",
     "verify:list-scroll": "node --experimental-strip-types tests/static/verify-list-scroll.ts",
     "verify:nav-preferences": "node --experimental-strip-types tests/static/verify-nav-preferences.ts",
     "verify:nav-per-group": "node --experimental-strip-types tests/static/verify-nav-per-group.ts",
@@ -228,7 +229,7 @@
     "dist": "npm run build && electron-builder --publish never",
     "dist:win": "npm run build && electron-builder --win --x64 --arm64 --publish never",
     "embed:win-icon": "node scripts/embed-win-exe-icon.mjs",
-    "dist:win:x64": "npm run build && electron-builder --win --x64 --dir && node scripts/embed-win-exe-icon.mjs && electron-builder --win --x64 --prepackaged dist/win-unpacked --publish never",
+    "dist:win:x64": "npm run build && electron-builder --win --x64 --dir && node scripts/embed-win-exe-icon.mjs && electron-builder --win --x64 --prepackaged .lanpm/artifact/dist/win-unpacked --publish never",
     "dist:win:arm64": "npm run build && electron-builder --win --arm64 --publish never",
     "dist:mac": "npm run build && electron-builder --mac --x64 --arm64 --publish never",
     "dist:mac:x64": "npm run build && electron-builder --mac --x64 --publish never",

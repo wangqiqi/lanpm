@@ -6,11 +6,16 @@ import { fileURLToPath } from 'url'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import type { HotPayload, Plugin } from 'vite'
-
 /** Node 17+ 默认先解析 localhost → ::1；配合 host: 'localhost' 一般可同时访问 localhost / 127.0.0.1 */
 dns.setDefaultResultOrder('ipv4first')
 
 const root = dirname(fileURLToPath(import.meta.url))
+/** Keep in sync with scripts/lanpm-artifact-paths.mjs */
+const LANPM_ARTIFACT_REL = '.lanpm/artifact'
+const viteOutMain = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'main')
+const viteOutPreload = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'preload')
+const viteOutRenderer = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'renderer')
+const viteOutResources = (r: string) => join(r, LANPM_ARTIFACT_REL, 'out', 'resources')
 const isBrowserDev = process.env.LANPM_BROWSER_DEV === '1'
 
 /** 插件子包已安装时，让 renderer 动态 import 可解析 mind-elixir */
@@ -123,7 +128,7 @@ function copySchemaSqlPlugin(): Plugin {
   return {
     name: 'copy-schema-sql',
     closeBundle() {
-      const outDir = join(root, 'out/main')
+      const outDir = viteOutMain(root)
       mkdirSync(outDir, { recursive: true })
       copyFileSync(
         join(root, 'src/main/storage/schema.sql'),
@@ -139,7 +144,7 @@ function copyAppIconsPlugin(): Plugin {
     name: 'copy-app-icons',
     closeBundle() {
       const res = join(root, 'resources')
-      const outRes = join(root, 'out/resources')
+      const outRes = viteOutResources(root)
       mkdirSync(outRes, { recursive: true })
       for (const name of ['icon.ico', 'icon.png'] as const) {
         const src = join(res, name)
@@ -152,7 +157,10 @@ function copyAppIconsPlugin(): Plugin {
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin(), copySchemaSqlPlugin(), copyAppIconsPlugin()],
-    server: { watch: devWatch }
+    server: { watch: devWatch },
+    build: {
+      outDir: viteOutMain(root)
+    }
   },
   preload: {
     server: { watch: devWatch },
@@ -160,6 +168,7 @@ export default defineConfig({
       external: ['electron']
     },
     build: {
+      outDir: viteOutPreload(root),
       externalizeDeps: false,
       rollupOptions: {
         input: {
@@ -208,6 +217,7 @@ export default defineConfig({
      * build.rolldownOptions 导致 electron-vite 校验丢失 input。
      */
     build: {
+      outDir: viteOutRenderer(root),
       rollupOptions: {
         input: resolve('src/renderer/index.html'),
         experimental: {

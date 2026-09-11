@@ -7,9 +7,10 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveElectronBin } from '../../../scripts/resolve-electron-bin.mjs'
 import { electronCiChromiumFlags } from '../../../scripts/electron-ci-chromium-flags.mjs'
+import { packageMainAbs } from '../../../scripts/lanpm-artifact-paths.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../../..')
-const mainJs = join(root, 'out/main/index.js')
+const mainJs = packageMainAbs(root)
 
 export type LanpmLaunchOptions = {
   userDataDir: string
@@ -51,7 +52,7 @@ export async function launchLanpmElectron(options: LanpmLaunchOptions): Promise<
     throw new Error('electron binary missing — run npm install')
   }
   if (!existsSync(mainJs)) {
-    throw new Error('out/main/index.js missing — run npm run build first')
+    throw new Error('.lanpm/artifact/out/main/index.js missing — run npm run build first')
   }
   const env = { ...process.env }
   delete env.ELECTRON_RUN_AS_NODE
