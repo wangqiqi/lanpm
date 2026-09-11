@@ -6,6 +6,7 @@
 
 ### Added
 
+- **测试**：三平台冷启动 playbook `verify:platform-cold-start-playbook` · 手验模板 · `docs/05` §5.1.1（`TASK-7901`..`TASK-7905`）
 - **测试**：真网双机手验 playbook 静态守卫 `verify:dual-machine-playbook` · Growth 手验模板 · `docs/05` §6.4（`TASK-7801`..`TASK-7805`）
 - **E2E**：`dev:web` 浏览器 stub smoke（`dev-web-smoke.spec.ts` · `playwright.dev-web.config.ts` · `verify:e2e-dev-web`）（`TASK-7701`..`TASK-7704`）
 - **E2E**：日历 mock 排期事件 · 点击编辑 · 拖拽改期（`tests/e2e/calendar.spec.ts` · `verify:e2e-calendar`）（`TASK-7601`..`TASK-7604`）

@@ -47,4 +47,7 @@ if (process.env.LANPM_REQUIRE_INSTALLER === '1') {
 } else {
   console.log('linux-installer-smoke launch skipped (set LANPM_REQUIRE_INSTALLER=1 after dist:linux:x64)')
 }
+const docs05 = readFileSync(join(root, 'docs/05_测试与联调发布.md'), 'utf8')
+assert.match(docs05, /verify:platform-cold-start-playbook/, 'docs/05 links platform cold-start playbook')
+
 console.log('verify-linux-installer-smoke OK')
