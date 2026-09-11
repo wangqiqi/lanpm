@@ -6,6 +6,10 @@
   min-height: 0;
 }
 
+.scheduleHint {
+  flex-shrink: 0;
+}
+
 .columns {
   display: flex;
   gap: var(--lanpm-spacing-module);

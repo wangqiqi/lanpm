@@ -10,7 +10,7 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { Button, Form, Input, Modal, Select, Switch } from 'antd'
+import { Button, Form, Input, Modal, Select, Switch, Alert } from 'antd'
 import {
   filterTasksByAssigneeSearch
 } from '@shared/chat/matchMemberSearch'
@@ -25,8 +25,16 @@ import type { MessageKey } from '@renderer/i18n/messages'
 import { useTaskStore } from '@renderer/stores/taskStore'
 import { useChatStore } from '@renderer/stores/chatStore'
 import { useChatMembersStore } from '@renderer/stores/chatMembersStore'
+import { useNavigationStore } from '@renderer/stores/navigationStore'
+import { useNavPreferencesStore } from '@renderer/stores/navPreferencesStore'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
+import { openProfileTab } from '@renderer/plugin/openProfileTab'
+import {
+  readBoardScheduleHintDismissed,
+  shouldShowBoardScheduleHint,
+  writeBoardScheduleHintDismissed
+} from '@shared/navigation/boardScheduleHint'
 import KanbanCard from './KanbanCard'
 import BoardDependencyLines from './BoardDependencyLines'
 import BoardRelationLegend from './BoardRelationLegend'
@@ -239,6 +247,16 @@ export default function BoardView(): React.ReactElement {
   const { message } = useLanpmApp()
   const { groupId } = useParams<{ groupId: string }>()
   const gid = groupId ?? ''
+  const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const navPreferences = useNavPreferencesStore((s) => s.preferences)
+  const [scheduleHintDismissed, setScheduleHintDismissed] = useState(() =>
+    typeof localStorage === 'undefined' ? false : readBoardScheduleHintDismissed(localStorage)
+  )
+  const showScheduleHint = shouldShowBoardScheduleHint({
+    groupType: gid ? getGroupType(gid) : null,
+    hiddenViews: navPreferences.hiddenViews,
+    dismissed: scheduleHintDismissed
+  })
   const navigate = useNavigate()
   const tasks = useTaskStore((s) => s.tasksByGroup[gid] ?? [])
   const loading = useTaskStore((s) => s.loading[gid])
@@ -691,6 +709,32 @@ export default function BoardView(): React.ReactElement {
           </ViewCrossLink>
         }
       />
+
+      {showScheduleHint ? (
+        <Alert
+          type="info"
+          showIcon
+          closable
+          data-testid="board-schedule-nav-hint"
+          className={styles.scheduleHint}
+          message={t('board.scheduleNavHint')}
+          action={
+            <Button
+              size="small"
+              type="link"
+              onClick={() => openProfileTab('nav')}
+            >
+              {t('board.scheduleNavHintAction')}
+            </Button>
+          }
+          onClose={() => {
+            writeBoardScheduleHintDismissed(
+              typeof localStorage === 'undefined' ? undefined : localStorage
+            )
+            setScheduleHintDismissed(true)
+          }}
+        />
+      ) : null}
 
       <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'board' }} />
 

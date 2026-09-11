@@ -287,6 +287,8 @@ const zhCN = {
   'ai.prompt.globalHelp.message': '在 LanPM 项目协作场景下，你可以帮我做哪些事？',
   'board.newTask': '新建任务',
   'board.treeViewLink': '任务树视图',
+  'board.scheduleNavHint': '甘特与日历默认不出现在底栏，可在「导航与视图」打开。',
+  'board.scheduleNavHintAction': '打开导航偏好',
   'board.createTitle': '新建任务',
   'board.taskTitlePlaceholder': '任务标题',
   'board.moveFailed': '移动失败',

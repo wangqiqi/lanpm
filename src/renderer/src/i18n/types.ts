@@ -283,6 +283,8 @@ export type MessageKey =
   | 'ai.prompt.globalHelp.message'
   | 'board.newTask'
   | 'board.treeViewLink'
+  | 'board.scheduleNavHint'
+  | 'board.scheduleNavHintAction'
   | 'board.createTitle'
   | 'board.taskTitlePlaceholder'
   | 'board.moveFailed'

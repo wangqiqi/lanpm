@@ -293,6 +293,8 @@ const enUS = {
   'ai.prompt.globalHelp.message': 'What can you help me with in LanPM project collaboration?',
   'board.newTask': 'New task',
   'board.treeViewLink': 'Tree view',
+  'board.scheduleNavHint': 'Gantt and calendar stay off the bottom bar by default. Turn them on in Navigation & views.',
+  'board.scheduleNavHintAction': 'Open navigation preferences',
   'board.createTitle': 'New task',
   'board.taskTitlePlaceholder': 'Task title',
   'board.moveFailed': 'Move failed',
