@@ -43,6 +43,7 @@
     "verify:i18n-keys": "node --experimental-strip-types tests/static/verify-i18n-keys.ts",
     "verify:docs-links": "node --experimental-strip-types tests/static/verify-docs-links.ts",
     "verify:docs-code": "node --experimental-strip-types tests/static/verify-docs-code.ts",
+    "verify:docs-matrix": "node --experimental-strip-types tests/static/verify-docs-matrix.ts",
     "verify:rc-reality": "node --experimental-strip-types tests/static/verify-rc-reality.ts",
     "verify:router-views": "node --experimental-strip-types tests/static/verify-router-views.ts",
     "verify:stub-parity": "node --experimental-strip-types tests/static/verify-stub-parity.ts",

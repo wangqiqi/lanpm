@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **文档矩阵**：`docs/02` §16 思维导图标 ✅（官方 `lanpm.mindmap`），与 `docs/06` §7 序 7 对齐；新增 `verify:docs-matrix` 防回退
+
 ## [1.106.12] - 2026-09-11
 
 ### Changed
