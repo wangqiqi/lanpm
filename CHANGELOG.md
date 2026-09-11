@@ -6,6 +6,12 @@
 
 ### Added
 
+- **测试**：插件离线分发回归 playbook `verify:plugin-distribution-playbook` · 手验模板 · `docs/05` §1.2.10（`TASK-8201`..`TASK-8205`）
+
+## [1.106.14] - 2026-09-11
+
+### Added
+
 - **测试**：AI 助手回归 playbook `verify:ai-regression-playbook` · 手验模板 · `docs/05` §1.2.7（`TASK-8101`..`TASK-8105`）
 - **测试**：会议/LiveKit 回归 playbook `verify:meeting-regression-playbook` · `docs/05` §1.2.9（`TASK-8001`..`TASK-8005`）
 - **测试**：三平台冷启动 playbook `verify:platform-cold-start-playbook` · 手验模板 · `docs/05` §5.1.1（`TASK-7901`..`TASK-7905`）
