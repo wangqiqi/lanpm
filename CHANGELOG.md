@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.13] - 2026-09-11
+
 ### Added
 
 - **E2E**：导航偏好开启 **文件** 底栏 Tab 冒烟（`nav-preferences-files-tab.spec.ts`，纳入 `verify:e2e-views-expand`）（`TASK-7502`）
@@ -14,8 +16,8 @@
 - **测试债务**：仓库根 `测试.md` 迁出；开放项跟踪在 plan **TEST-TODO**
 - **`verify:linux-installer-smoke`**：静态守卫对齐 `.lanpm/artifact/dist` 路径（`TASK-7503`）
 - **文档**：`3rd/README.md` 并入 `docs/02` §16.2；删除空 `3rd/` 目录，交叉引用改链文档
-- **构建产物目录**：electron-vite / electron-builder / Playwright 输出迁至 `.lanpm/artifact/{out,dist,test-results}`；路径 SSOT `scripts/lanpm-artifact-paths.mjs` · `verify:artifact-paths`；`onekey_run` clean 同时清遗留根目录 `out`/`dist`
-- **文档矩阵**：`docs/02` §16 思维导图标 ✅（官方 `lanpm.mindmap`），与 `docs/06` §7 序 7 对齐；新增 `verify:docs-matrix` 防回退
+- **构建产物目录**：electron-vite / electron-builder / Playwright 输出迁至 `.lanpm/artifact/{out,dist,test-results}`；路径 SSOT `scripts/lanpm-artifact-paths.mjs` · `verify:artifact-paths`；`onekey_run` clean 同时清遗留根目录 `out`/`dist`（`TASK-7401..7407`）
+- **文档矩阵**：`docs/02` §16 思维导图标 ✅（官方 `lanpm.mindmap`），与 `docs/06` §7 序 7 对齐；新增 `verify:docs-matrix` 防回退（`TASK-7301..7304`）
 
 ## [1.106.12] - 2026-09-11
 

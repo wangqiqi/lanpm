@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.106.12-blue" alt="version" />
+  <img src="https://img.shields.io/badge/版本-1.106.13-blue" alt="version" />
   <img src="https://img.shields.io/badge/平台-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="platform" />
   <img src="https://img.shields.io/badge/技术栈-Electron%20%2B%20React%20%2B%20TypeScript-61dafb" alt="stack" />
   <img src="https://img.shields.io/badge/架构-无中心服务器%20%7C%20P2P-success" alt="sync" />
@@ -126,7 +126,7 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.106.12`** — GitHub Pages 项目主页（VitePress）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.13`** — GitHub Pages 项目主页（VitePress）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 
