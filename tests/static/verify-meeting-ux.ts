@@ -155,4 +155,8 @@ assert.match(section33, /最短运维/)
 assert.match(section33, /verify:meeting-ux/)
 assert.match(docs06, /### 3\.5[\s\S]*verify:meeting-ux/)
 
+const docs05 = readFileSync(join(root, 'docs/05_测试与联调发布.md'), 'utf8')
+assert.match(docs05, /verify:meeting-regression-playbook/, 'docs/05 links meeting regression playbook')
+assert.match(docs05, /verify:meeting-ux/, 'docs/05 §1.2.9 lists meeting-ux')
+
 console.log('verify:meeting-ux OK')

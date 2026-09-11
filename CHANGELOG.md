@@ -6,6 +6,7 @@
 
 ### Added
 
+- **测试**：会议/LiveKit 回归 playbook `verify:meeting-regression-playbook` · `docs/05` §1.2.9（`TASK-8001`..`TASK-8005`）
 - **测试**：三平台冷启动 playbook `verify:platform-cold-start-playbook` · 手验模板 · `docs/05` §5.1.1（`TASK-7901`..`TASK-7905`）
 - **测试**：真网双机手验 playbook 静态守卫 `verify:dual-machine-playbook` · Growth 手验模板 · `docs/05` §6.4（`TASK-7801`..`TASK-7805`）
 - **E2E**：`dev:web` 浏览器 stub smoke（`dev-web-smoke.spec.ts` · `playwright.dev-web.config.ts` · `verify:e2e-dev-web`）（`TASK-7701`..`TASK-7704`）
