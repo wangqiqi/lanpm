@@ -25,6 +25,13 @@ assert.match(shared, /NEVER_BOTTOM_NAV_VIEWS/)
 assert.match(shared, /NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES/)
 assert.match(shared, /isNeverBottomNavView/)
 assert.match(shared, /rawNavDocumentNeedsV196Writeback/)
+assert.match(shared, /overlayTypeDefaultHiddenViews/)
+assert.match(shared, /PROJECT_DEFAULT_COLLAPSE_VIEWS/)
+assert.match(
+  shared,
+  /resolveNavPreferencesForGroup\([\s\S]*groupType/,
+  'resolveNavPreferencesForGroup must accept groupType for project collapse overlay'
+)
 assert.match(
   shared,
   /hiddenContributedRoutes:\s*\['mindmap'\]/,
@@ -41,6 +48,7 @@ assert.match(ipc, /NAV_IPC/)
 const bottomNav = readFileSync(join(root, 'src/renderer/src/layout/BottomNav.tsx'), 'utf8')
 assert.match(bottomNav, /resolveVisibleViews/)
 assert.match(bottomNav, /resolveVisibleContributedRoutes/)
+assert.match(bottomNav, /resolveNavPreferencesForGroup/)
 assert.match(bottomNav, /useNavPreferencesStore/)
 assert.match(
   bottomNav,
@@ -100,6 +108,18 @@ assert.match(
 assert.match(
   readFileSync(join(root, 'tests/unit/navigation/navPreferences.test.ts'), 'utf8'),
   /canvas never bottom nav/
+)
+assert.match(
+  readFileSync(join(root, 'src/renderer/src/stores/navPreferencesStore.ts'), 'utf8'),
+  /activeGroupType/
+)
+assert.match(
+  readFileSync(join(root, 'src/renderer/src/features/board/BoardView.tsx'), 'utf8'),
+  /board-schedule-nav-hint/
+)
+assert.match(
+  readFileSync(join(root, 'src/shared/navigation/boardScheduleHint.ts'), 'utf8'),
+  /shouldShowBoardScheduleHint/
 )
 
 console.log('verify:nav-preferences OK')
