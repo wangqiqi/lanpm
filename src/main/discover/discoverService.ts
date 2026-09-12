@@ -20,6 +20,7 @@ import {
 } from '../network'
 import { getAggregatedUserPresence } from '../presence/presenceRegistry'
 import { listCachedDiscoverGroups } from './discoverGroupRegistry'
+import { includeDiscoveredPeer } from '../../shared/discover/includeDiscoveredPeer'
 import { listPendingJoinRequestGroupIds } from '../storage/repositories/groupJoinRequestRepository'
 
 function loadSeeds(db: Database): string[] {
@@ -143,6 +144,7 @@ export async function fetchDiscoverSnapshot(
 ): Promise<DiscoverSnapshot> {
   const status = getSetupStatus(db)
   const localUserId = status.configured && status.user ? status.user.userId : undefined
+  const localDeviceId = status.configured && status.device ? status.device.deviceId : undefined
   const seeds = loadSeeds(db)
 
   if (options?.connectSeeds !== false && seeds.length > 0) {
@@ -152,11 +154,12 @@ export async function fetchDiscoverSnapshot(
 
   const transport = getNetworkTransport()
   const discovered = transport ? await transport.discoverPeers() : []
+  const readyLinks =
+    transport instanceof RealNetworkTransport ? transport.countReadyLinks() : 0
 
   const peerMap = new Map<string, { displayName: string; devices: Set<string> }>()
   for (const peer of discovered) {
-    if (!peer.userId || peer.userId === '__lanpm_probe__') continue
-    if (localUserId && peer.userId === localUserId) continue
+    if (!includeDiscoveredPeer(peer, { deviceId: localDeviceId })) continue
     const existing = peerMap.get(peer.userId)
     if (existing) {
       existing.devices.add(peer.deviceId)
@@ -207,7 +210,10 @@ export async function fetchDiscoverSnapshot(
     return a.name.localeCompare(b.name)
   })
 
-  const health = buildHealth({ peerCount: peers.length, groupCount: groups.length })
+  const health = buildHealth({
+    peerCount: Math.max(peers.length, readyLinks),
+    groupCount: groups.length
+  })
 
   return { peers, groups, health, seeds }
 }

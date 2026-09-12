@@ -336,6 +336,14 @@ export class RealNetworkTransport implements NetworkTransport {
     return peers
   }
 
+  countReadyLinks(): number {
+    let n = 0
+    for (const link of this.links.values()) {
+      if (link.isReady()) n++
+    }
+    return n
+  }
+
   getDiscoveryDiagnostics(): {
     udpDisabled: boolean
     bindOk: boolean
