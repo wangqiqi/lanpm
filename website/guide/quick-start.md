@@ -1,39 +1,38 @@
-# Quick Start
+# 快速开始
 
-**Prerequisites:** Node.js 20+, npm 10+, Git.
+**环境：** Node.js 20+、npm 10+、Git。
 
 ```bash
 git clone https://github.com/wangqiqi/lanpm.git
 cd lanpm
-chmod +x onekey_run.sh    # first time (Unix)
-./onekey_run.sh start     # or: npm install && npm run dev
+chmod +x onekey_run.sh    # Unix 首次
+./onekey_run.sh start     # 或 npm install && npm run dev
 ```
 
-| OS | Command |
-|----|---------|
+| 系统 | 命令 |
+|------|------|
 | Windows CMD | `onekey_run.bat start` |
 | PowerShell | `.\onekey_run.ps1 start` |
 | Git Bash / WSL | `./onekey_run.sh start` |
 
-First launch runs a short setup wizard, then opens the demo group at `#/g/demo-project/chat`.
+首次启动会跑简短配置向导，然后打开演示群 `#/g/demo-project/chat`。
 
-**Navigation:** Gantt, calendar, and **Files** are hidden from the bottom bar by default—enable them under **avatar → Profile → Navigation & views**. **Whiteboard** is only available from the chat collaboration drawer or a direct URL (not a bottom tab).
+**导航提示：** 甘特、日历、**文件** 等视图默认不在底栏；在 **头像 → 个人资料 → 导航与视图** 中开启。**白板** 仅能通过聊天协作抽屉或地址栏深链打开（不能作为底栏 Tab）。
 
-## Verify locally
+## 本地验收
 
 ```bash
 npm run lint && npm run typecheck && npm run test
 npm run verify:p0
 ```
 
-**Note:** Acceptance source of truth is **Electron** (`npm run dev`), not the browser stub (`npm run dev:web`). See [Contributing — Verification](/guide/contributing#verification-common) for more guards.
+**注意：** 验收以 **Electron**（`npm run dev`）为准，不是浏览器 stub（`npm run dev:web`）。更多命令见 [参与贡献](/guide/contributing#常用验收)。
 
-## Downloads
+## 安装包
 
-Pre-built installers are published via [GitHub Releases](https://github.com/wangqiqi/lanpm/releases). Pick the package for your OS and architecture.
+预编译安装包见 [GitHub Releases](https://github.com/wangqiqi/lanpm/releases)，按系统与架构选择。
 
-## Next steps
+## 下一步
 
-- [Features](/guide/features)
-- [Contributing](/guide/contributing)
-- [Engineering docs](https://github.com/wangqiqi/lanpm/tree/master/docs)
+- [核心能力](/guide/features)
+- [参与贡献](/guide/contributing)

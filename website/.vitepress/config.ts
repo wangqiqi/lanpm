@@ -12,8 +12,8 @@ const version = pkg.version
 
 export default defineConfig({
   title: 'LanPM',
-  description:
-    'Decentralized LAN/VPN collaboration desktop app — FeiQ-speed chat and real PM tooling without shipping IP to the cloud.',
+  lang: 'zh-CN',
+  description: '飞秋般畅聊，项目经理般协作，数据留在你的局域网。',
   base: '/lanpm/',
   cleanUrls: true,
   lastUpdated: true,
@@ -25,69 +25,26 @@ export default defineConfig({
 
   locales: {
     root: {
-      label: 'English',
-      lang: 'en-US',
+      label: '简体中文',
+      lang: 'zh-CN',
       title: 'LanPM',
-      description:
-        'Chat like FeiQ. Plan like a PM. Keep everything on your LAN.',
+      description: '飞秋般畅聊，项目经理般协作，数据留在你的局域网。',
       themeConfig: {
         nav: [
-          { text: 'Home', link: '/' },
-          { text: 'Quick Start', link: '/guide/quick-start' },
-          { text: 'Features', link: '/guide/features' },
-          {
-            text: 'Docs',
-            link: `${repo}/tree/${branch}/docs/00_文档导航.md`
-          },
+          { text: '首页', link: '/' },
+          { text: '快速开始', link: '/guide/quick-start' },
+          { text: '核心能力', link: '/guide/features' },
+          { text: '参与贡献', link: '/guide/contributing' },
           { text: 'v' + version, link: `${repo}/blob/${branch}/CHANGELOG.md` }
         ],
         sidebar: {
           '/guide/': [
             {
-              text: 'Guide',
-              items: [
-                { text: 'Quick Start', link: '/guide/quick-start' },
-                { text: 'Features', link: '/guide/features' },
-                { text: 'Contributing', link: '/guide/contributing' }
-              ]
-            }
-          ]
-        },
-        socialLinks: [{ icon: 'github', link: repo }],
-        footer: {
-          message: 'Released under AGPL-3.0-or-later',
-          copyright: 'Copyright © LanPM contributors'
-        },
-        editLink: {
-          pattern: `${repo}/edit/${branch}/website/:path`
-        }
-      }
-    },
-    zh: {
-      label: '简体中文',
-      lang: 'zh-CN',
-      link: '/zh/',
-      title: 'LanPM',
-      description: '飞秋般畅聊，项目经理般协作，数据留在你的局域网。',
-      themeConfig: {
-        nav: [
-          { text: '首页', link: '/zh/' },
-          { text: '快速开始', link: '/zh/guide/quick-start' },
-          { text: '核心能力', link: '/zh/guide/features' },
-          {
-            text: '文档',
-            link: `${repo}/tree/${branch}/docs/00_文档导航.md`
-          },
-          { text: 'v' + version, link: `${repo}/blob/${branch}/CHANGELOG.md` }
-        ],
-        sidebar: {
-          '/zh/guide/': [
-            {
               text: '指南',
               items: [
-                { text: '快速开始', link: '/zh/guide/quick-start' },
-                { text: '核心能力', link: '/zh/guide/features' },
-                { text: '参与贡献', link: '/zh/guide/contributing' }
+                { text: '快速开始', link: '/guide/quick-start' },
+                { text: '核心能力', link: '/guide/features' },
+                { text: '参与贡献', link: '/guide/contributing' }
               ]
             }
           ]
@@ -100,6 +57,42 @@ export default defineConfig({
         editLink: {
           pattern: `${repo}/edit/${branch}/website/:path`,
           text: '在 GitHub 上编辑此页'
+        }
+      }
+    },
+    en: {
+      label: 'English',
+      lang: 'en-US',
+      link: '/en/',
+      title: 'LanPM',
+      description: 'Chat like FeiQ. Plan like a PM. Keep everything on your LAN.',
+      themeConfig: {
+        nav: [
+          { text: 'Home', link: '/en/' },
+          { text: 'Quick Start', link: '/en/guide/quick-start' },
+          { text: 'Features', link: '/en/guide/features' },
+          { text: 'Contributing', link: '/en/guide/contributing' },
+          { text: 'v' + version, link: `${repo}/blob/${branch}/CHANGELOG.md` }
+        ],
+        sidebar: {
+          '/en/guide/': [
+            {
+              text: 'Guide',
+              items: [
+                { text: 'Quick Start', link: '/en/guide/quick-start' },
+                { text: 'Features', link: '/en/guide/features' },
+                { text: 'Contributing', link: '/en/guide/contributing' }
+              ]
+            }
+          ]
+        },
+        socialLinks: [{ icon: 'github', link: repo }],
+        footer: {
+          message: 'Released under AGPL-3.0-or-later',
+          copyright: 'Copyright © LanPM contributors'
+        },
+        editLink: {
+          pattern: `${repo}/edit/${branch}/website/:path`
         }
       }
     }

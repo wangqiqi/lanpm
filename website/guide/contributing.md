@@ -1,54 +1,55 @@
-# Contributing
+# 参与贡献
 
-Thank you for helping improve LanPM.
+感谢你愿意改进 LanPM。
 
-## Development workflow
+## 开发流程
 
 ```bash
 npm install
-npm run dev          # Electron app (source of truth)
+npm run dev          # Electron（验收真源）
 npm run lint
 npm run typecheck
 npm run test
-npm run verify:p0    # guards: IPC, i18n, docs, screenshots layout
+npm run verify:p0    # IPC、i18n、文档、截图布局等门禁
 ```
 
-Before a release candidate:
+发版候选前：
 
 ```bash
 npm run verify:m7
 npm run build
 ```
 
-## Verification (common)
+## 常用验收
 
-| When | Command | Note |
-|------|---------|------|
-| Daily / PR | `npm run verify:p0` | IPC, i18n, docs links, screenshot layout |
-| Docs ↔ code | `npm run verify:docs-code -- --strict` | Also in `verify:project` |
-| Chat perf guards | `npm run verify:chat-perf-observe` | Local budget: `.cursorGrowth/decisions/chat-perf.md` if present |
-| Before tag | `npm run verify:m7` | Full RC regression |
-| Acceptance | `npm run dev` | **Electron** — not `npm run dev:web` (browser stub) |
+| 场景 | 命令 | 说明 |
+|------|------|------|
+| 日常 / PR | `npm run verify:p0` | IPC、i18n、文档链、截图布局 |
+| 文档 ↔ 代码 | `npm run verify:docs-code -- --strict` | 亦含于 `verify:project` |
+| 聊天性能守卫 | `npm run verify:chat-perf-observe` | 预算文件在本地 `.cursorGrowth/`（若有） |
+| 打 tag 前 | `npm run verify:m7` | 全量 RC 回归 |
+| 发版候选 | `npm run verify:release-gate` | 聚合 p0 + project + 配对 + 视觉策略 |
+| 产品验收 | `npm run dev` | **Electron** 为准 — 非 `npm run dev:web`（浏览器 stub） |
 
-Full matrix: [docs/05 §1](https://github.com/wangqiqi/lanpm/blob/master/docs/05_测试与联调发布.md#1-自动化验收脚本).
+命令清单以 `package.json` 的 `scripts` 为准。其余 `verify:*` 给维护者用，第一次贡献不必全跑。
 
-## README screenshots
+## README 截图
 
 ```bash
 npm run screenshots:capture
 npm run screenshots:sync-readme
 ```
 
-See [docs/screenshots](https://github.com/wangqiqi/lanpm/tree/master/docs/screenshots) for the visual baseline workflow.
+capture 会生成亮/暗主题 PNG（配置向导 + 主视图）。`sync-readme` 把亮色图拷到 `assets/`，供 GitHub README 和本站使用。Linux 可加 `xvfb-run -a`。截图管线**不是** PR 硬门禁。
 
-## Agent workflow (Super Cursor)
+## Agent 工作流（Super Cursor）
 
-This repo ships [Super Cursor](https://github.com/wangqiqi/lanpm/tree/master/.cursor) SOP: `/plan` · `/run` · `/master`. See [`.cursor/AGENTS.md`](https://github.com/wangqiqi/lanpm/blob/master/.cursor/AGENTS.md).
+本仓在 `.cursor/` 内置 SOP：`/plan` · `/run` · `/master`。克隆后见 `.cursor/AGENTS.md`。
 
-## License
+## 许可证
 
-LanPM is released under [AGPL-3.0-or-later](https://github.com/wangqiqi/lanpm/blob/master/LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.
+LanPM 以 [AGPL-3.0-or-later](https://github.com/wangqiqi/lanpm/blob/master/LICENSE) 发布。贡献即表示同意以相同许可授权。
 
-## Report issues
+## 反馈问题
 
-Use [GitHub Issues](https://github.com/wangqiqi/lanpm/issues) with environment, repro steps, expected vs actual behavior.
+请在 [GitHub Issues](https://github.com/wangqiqi/lanpm/issues) 提供环境、复现步骤、预期与实际行为。

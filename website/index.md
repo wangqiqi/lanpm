@@ -3,14 +3,14 @@ layout: home
 
 hero:
   name: LanPM
-  text: Chat like FeiQ. Plan like a PM.
-  tagline: Decentralized LAN/VPN collaboration — instant messaging and project management in one Electron shell, with peer-to-peer sync and no mandatory cloud.
+  text: 飞秋般畅聊，项目经理般协作
+  tagline: 分布式局域网 / VPN 协作桌面客户端 — 即时通讯与项目管理装进同一 Electron 壳，群组内 P2P 同步，不绑公有云。
   image:
     src: /logo.svg
     alt: LanPM
   actions:
     - theme: brand
-      text: Quick Start
+      text: 快速开始
       link: /guide/quick-start
     - theme: alt
       text: GitHub
@@ -18,58 +18,58 @@ hero:
 
 features:
   - icon: 💬
-    title: Eight views, one shell
-    details: Chat, Board, Tree, Gantt, Calendar, Whiteboard, Files, and Leadership Cockpit — without switching between IM and PM tools.
+    title: 八大视图，一个壳
+    details: 聊天、看板、任务树、甘特、日历、白板、文件、驾驶舱 — 不必在 IM 与项目管理工具之间来回切换。
   - icon: 🔗
-    title: P2P inside the group
-    details: LAN discovery, encrypted transport, optional passphrase at rest. No central server required for day-to-day collaboration.
+    title: 群组内 P2P
+    details: 局域网发现、传输加密、库文件可选用通行词加密。日常协作无需中心服务器。
   - icon: 🛡️
-    title: Security by design
-    details: AES-GCM on TCP links, TOFU key pinning after pairing, local SQLite with optional encryption, LibreOffice preview on device.
+    title: 安全优先
+    details: TCP 链路 AES-GCM、配对后 TOFU 公钥钉扎、本地 SQLite、LibreOffice 本地预览。
   - icon: 🧩
-    title: Official plugins
-    details: Meeting, schedule, agile, weekly reports, backup, mind map, and ops — extend the core without forking the app.
+    title: 官方插件
+    details: 会议、排程、敏捷、周报、备份、脑图、运维等 — 在不 fork 主应用的前提下扩展能力。
   - icon: 🌐
-    title: zh / en
-    details: Bilingual UI and docs. Light and dark themes for long sessions on the LAN.
+    title: 中 / 英双语
+    details: 界面与文档双语，亮暗主题适配长时间局域网协作。
   - icon: 🖥️
-    title: Cross-platform desktop
-    details: Windows, macOS, and Linux packages (x64 / arm64). Electron + React + TypeScript stack you can verify locally.
+    title: 跨平台桌面
+    details: Windows、macOS、Linux（x64 / arm64）安装包。Electron + React + TypeScript，可本地验收。
 ---
 
-## Product preview
+## 产品预览
 
 <div class="lanpm-screenshot-grid">
 
 <figure>
-  <img src="/assets/chat.png" alt="LanPM chat view" />
-  <figcaption><strong>Chat</strong> — groups, DMs, members, code highlights</figcaption>
+  <img src="/assets/chat.png" alt="LanPM 聊天视图" />
+  <figcaption><strong>聊天</strong> — 群聊 / 私聊、成员、代码高亮</figcaption>
 </figure>
 
 <figure>
-  <img src="/assets/kanban.png" alt="Kanban board" />
-  <figcaption><strong>Board</strong> — drag columns, tags, schedule health</figcaption>
+  <img src="/assets/kanban.png" alt="看板" />
+  <figcaption><strong>看板</strong> — 拖拽流转、标签、工期健康度</figcaption>
 </figure>
 
 <figure>
-  <img src="/assets/gantt.png" alt="Gantt chart" />
-  <figcaption><strong>Gantt</strong> — timeline, dependencies, exports</figcaption>
+  <img src="/assets/gantt.png" alt="甘特图" />
+  <figcaption><strong>甘特</strong> — 时间轴、依赖、多格式导出</figcaption>
 </figure>
 
 <figure>
-  <img src="/assets/cockpit.png" alt="Leadership cockpit" />
-  <figcaption><strong>Cockpit</strong> — cross-group attention and health</figcaption>
+  <img src="/assets/cockpit.png" alt="领导驾驶舱" />
+  <figcaption><strong>驾驶舱</strong> — 跨群需关注与项目健康度</figcaption>
 </figure>
 
 </div>
 
-## Why teams pick LanPM
+## 为什么选 LanPM
 
-| Pain today | LanPM answer |
-|------------|--------------|
-| IM tools don’t do real project views | **8 views** in one desktop shell |
-| Project tools need cloud accounts | **P2P in the group** — LAN discovery |
-| Sensitive files forced through SaaS | **Local SQLite**, encrypted transport, on-device preview |
-| FeiQ / Feige feel but no tasks | **Familiar IM UX** + boards, calendar, whiteboard |
+| 常见痛点 | LanPM 的做法 |
+|----------|----------------|
+| 聊天工具做不了正经项目视图 | **八大视图** 同一桌面壳 |
+| 项目管理强依赖云端账号 | **群组内 P2P**，局域网发现 |
+| 敏感文件只能走 SaaS | **本地 SQLite**、传输加密、本地预览 |
+| 飞秋好用但没有任务 | **保留 IM 体验** + 看板、日历、白板 |
 
-[See full feature matrix →](/guide/features) · [Engineering docs on GitHub →](https://github.com/wangqiqi/lanpm/tree/master/docs)
+[查看完整能力矩阵 →](/guide/features) · [参与贡献 →](/guide/contributing)
