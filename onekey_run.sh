@@ -47,6 +47,28 @@ is_windows() {
   return 1
 }
 
+# Git Bash 默认 UTF-8；Windows PowerShell 5.1 默认 OEM/GBK。
+# 双引号里的 $_ 会被 bash 展开成上一命令参数（常见 expand_aliases），
+# 中文错误再按 GBK 喷到 UTF-8 终端就会乱码。进程探测走 -File，勿用 -Command。
+if is_windows; then
+  export LANG="${LANG:-C.UTF-8}"
+  export LC_ALL="${LC_ALL:-C.UTF-8}"
+fi
+
+# PowerShell Set-Content -Encoding utf8 会写 UTF-8 BOM
+strip_bom() {
+  printf '%s' "${1#$'\xEF\xBB\xBF'}"
+}
+
+read_mode() {
+  local mode="electron"
+  if [[ -f "$MODE_FILE" ]]; then
+    mode="$(strip_bom "$(tr -d '[:space:]' <"$MODE_FILE")")"
+    [[ -n "$mode" ]] || mode="electron"
+  fi
+  printf '%s' "$mode"
+}
+
 pid_alive() {
   local p="$1"
   [[ -n "$p" && "$p" =~ ^[0-9]+$ ]] || return 1
@@ -82,11 +104,7 @@ lanpm_vite_procs() {
     return
   fi
   if is_windows && command -v powershell.exe >/dev/null 2>&1; then
-    powershell.exe -NoProfile -Command "
-      Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" -ErrorAction SilentlyContinue |
-        Where-Object { \$_.CommandLine -match 'electron-vite' -and \$_.CommandLine -match 'lanpm' } |
-        ForEach-Object { \$_.ProcessId.ToString() + ' ' + \$_.CommandLine }
-    " 2>/dev/null || true
+    powershell.exe -NoProfile -NonInteractive -File "$ROOT/scripts/onekey-win-vite-procs.ps1" 2>/dev/null || true
   fi
 }
 
@@ -101,11 +119,7 @@ lanpm_vite_root_pid() {
 
 win_stop_lanpm_vite() {
   command -v powershell.exe >/dev/null 2>&1 || return 0
-  powershell.exe -NoProfile -Command "
-    Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" -ErrorAction SilentlyContinue |
-      Where-Object { \$_.CommandLine -match 'electron-vite' -and \$_.CommandLine -match 'lanpm' } |
-      ForEach-Object { Stop-Process -Id \$_.ProcessId -Force -ErrorAction SilentlyContinue }
-  " >/dev/null 2>&1 || true
+  powershell.exe -NoProfile -NonInteractive -File "$ROOT/scripts/onekey-win-vite-procs.ps1" -Stop >/dev/null 2>&1 || true
 }
 
 ensure_run_dir() {
@@ -115,7 +129,7 @@ ensure_run_dir() {
 read_pid() {
   [[ -f "$PID_FILE" ]] || return 1
   local p
-  p="$(tr -d '[:space:]' <"$PID_FILE")"
+  p="$(strip_bom "$(tr -d '[:space:]' <"$PID_FILE")")"
   [[ -n "$p" && "$p" =~ ^[0-9]+$ ]] || return 1
   echo "$p"
 }
@@ -260,8 +274,7 @@ menu_status_brief() {
   if is_running; then
     local p mode
     p="$(read_pid)"
-    mode="electron"
-    [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
+    mode="$(read_mode)"
     ok "dev: 运行中  pid=$p  mode=$mode"
     print_dev_url_hint "$mode"
   else
@@ -279,8 +292,7 @@ cmd_status() {
   if is_running; then
     local p mode
     p="$(read_pid)"
-    mode="electron"
-    [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
+    mode="$(read_mode)"
     ok "开发服务: 运行中 (pid=$p, mode=$mode)"
     print_dev_url_hint "$mode"
   else
@@ -429,7 +441,7 @@ cmd_stop() {
 
 cmd_restart() {
   local mode="electron"
-  [[ -f "$MODE_FILE" ]] && mode="$(<"$MODE_FILE")"
+  [[ -f "$MODE_FILE" ]] && mode="$(read_mode)"
   cmd_stop || true
   sleep 1
   start_dev "$mode"

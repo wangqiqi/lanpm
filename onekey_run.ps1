@@ -6,10 +6,30 @@ param(
   [string]$Extra = ''
 )
 
-if ($PSVersionTable.PSVersion.Major -lt 6) {
-  [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-  $OutputEncoding = [Console]::OutputEncoding
+# Git Bash / Windows Terminal 走 UTF-8；仅设 OutputEncoding 而不切代码页会在 CP936 控制台乱码。
+function Use-Utf8Console {
+  try { $null = cmd.exe /c "chcp 65001 >nul" } catch {}
+  $utf8 = New-Object System.Text.UTF8Encoding $false
+  try {
+    [Console]::InputEncoding = $utf8
+    [Console]::OutputEncoding = $utf8
+  } catch {}
+  $global:OutputEncoding = $utf8
 }
+
+# PS 5.1 的 Set-Content -Encoding utf8 会写 BOM，Git Bash 读 mode/pid 会带 U+FEFF。
+function Write-LanpmText([string]$Path, [string]$Value) {
+  $utf8 = New-Object System.Text.UTF8Encoding $false
+  [System.IO.File]::WriteAllText($Path, $Value, $utf8)
+}
+
+function Read-LanpmText([string]$Path) {
+  if (-not (Test-Path $Path)) { return '' }
+  $raw = [System.IO.File]::ReadAllText($Path)
+  return ($raw -replace '^\uFEFF', '').Trim()
+}
+
+Use-Utf8Console
 
 $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
@@ -41,7 +61,7 @@ function Test-PidAlive([int]$ProcessId) {
 
 function Test-DevRunning {
   if (Test-Path $PidFile) {
-    $pidText = (Get-Content $PidFile -Raw).Trim()
+    $pidText = Read-LanpmText $PidFile
     if ($pidText -match '^\d+$' -and (Test-PidAlive ([int]$pidText))) { return $true }
   }
   return @(Get-LanpmViteProcesses).Count -gt 0
@@ -167,8 +187,8 @@ function Start-Dev([string]$Mode) {
 
   $npmScript = if ($Mode -eq 'web') { 'dev:web' } else { 'dev' }
   Clear-DevUrl
-  '' | Set-Content -Path $LogFile -Encoding utf8
-  Set-Content -Path $ModeFile -Value $Mode -Encoding utf8 -NoNewline
+  Write-LanpmText $LogFile ''
+  Write-LanpmText $ModeFile $Mode
 
   Write-Host "[lanpm] starting dev mode: $Mode ..." -ForegroundColor Cyan
   Write-Host "[lanpm] log: $LogFile" -ForegroundColor Cyan
@@ -182,14 +202,14 @@ function Start-Dev([string]$Mode) {
     -WindowStyle Hidden
 
   $devPid = $p.Id
-  Set-Content -Path $PidFile -Value $devPid -Encoding utf8 -NoNewline
+  Write-LanpmText $PidFile "$devPid"
   Start-Sleep -Seconds 3
 
   if (-not (Test-PidAlive $devPid)) {
     $vitePid = Get-ViteRootPid
     if ($vitePid) {
       $devPid = $vitePid
-      Set-Content -Path $PidFile -Value $devPid -Encoding utf8 -NoNewline
+      Write-LanpmText $PidFile "$devPid"
     }
   }
 
@@ -241,8 +261,9 @@ function Show-Status {
   Write-Host "[lanpm] version: v$ver" -ForegroundColor Cyan
   Write-Host ''
   if (Test-DevRunning) {
-    $devPid = if (Test-Path $PidFile) { (Get-Content $PidFile -Raw).Trim() } else { '?' }
-    $mode = if (Test-Path $ModeFile) { (Get-Content $ModeFile -Raw).Trim() } else { 'electron' }
+    $devPid = if (Test-Path $PidFile) { Read-LanpmText $PidFile } else { '?' }
+    $mode = if (Test-Path $ModeFile) { Read-LanpmText $ModeFile } else { 'electron' }
+    if (-not $mode) { $mode = 'electron' }
     Write-Host "[lanpm] dev: running (pid=$devPid, mode=$mode)" -ForegroundColor Green
     $hintUrl = Read-DevUrl
     if ($hintUrl) {
@@ -261,14 +282,15 @@ function Show-Status {
   Write-Host ''
   if (Test-Path $LogFile) {
     Write-Host "[lanpm] recent log ($LogFile):" -ForegroundColor Cyan
-    Get-Content $LogFile -Tail 8 | ForEach-Object { Write-Host "  $_" }
+    Get-Content $LogFile -Encoding UTF8 -Tail 8 | ForEach-Object { Write-Host "  $_" }
   }
 }
 
 function Show-MenuBrief {
   if (Test-DevRunning) {
-    $devPid = if (Test-Path $PidFile) { (Get-Content $PidFile -Raw).Trim() } else { '?' }
-    $mode = if (Test-Path $ModeFile) { (Get-Content $ModeFile -Raw).Trim() } else { 'electron' }
+    $devPid = if (Test-Path $PidFile) { Read-LanpmText $PidFile } else { '?' }
+    $mode = if (Test-Path $ModeFile) { Read-LanpmText $ModeFile } else { 'electron' }
+    if (-not $mode) { $mode = 'electron' }
     Write-Host "[lanpm] dev: running  pid=$devPid  mode=$mode" -ForegroundColor Green
   } else {
     Write-Host '[lanpm] dev: not running (use start/web)' -ForegroundColor Yellow
@@ -283,7 +305,7 @@ function Tail-Logs {
     exit 1
   }
   $lines = if ($Extra -match '^\d+$') { [int]$Extra } else { 50 }
-  Get-Content $LogFile -Tail $lines -Wait
+  Get-Content $LogFile -Encoding UTF8 -Tail $lines -Wait
 }
 
 function Invoke-Npm([string[]]$NpmArgs) {
@@ -303,7 +325,8 @@ function Invoke-Action([string]$Act, [string]$Ext) {
     'web' { Start-Dev 'web' }
     'stop' { Stop-Dev }
     'restart' {
-      $mode = if (Test-Path $ModeFile) { (Get-Content $ModeFile -Raw).Trim() } else { 'electron' }
+      $mode = if (Test-Path $ModeFile) { Read-LanpmText $ModeFile } else { 'electron' }
+      if (-not $mode) { $mode = 'electron' }
       Stop-Dev
       Start-Sleep -Seconds 1
       Start-Dev $mode
