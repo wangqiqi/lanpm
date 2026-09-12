@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Checkbox, Collapse, Input, List, Segmented, Space, Tag, Typography } from 'antd'
 import type { InputRef } from 'antd'
 import { ShareAltOutlined, DownloadOutlined, CopyOutlined } from '@ant-design/icons'
-import { formatPairingShareClipboard } from '@shared/discover/pairingShareClipboard'
+import {
+  formatPairingShareClipboard,
+  parsePairingShareClipboard
+} from '@shared/discover/pairingShareClipboard'
 import type { DiscoverSnapshot } from '@shared/discover/types'
 import type { PairingSessionView } from '@shared/discover/pairing'
 import type { GroupType } from '@shared/navigation/types'
@@ -130,15 +133,16 @@ export default function DiscoverPairingPanel({
   }
 
   const runFind = useCallback(
-    async (codeRaw: string): Promise<void> => {
+    async (codeRaw: string, hostOverride?: string): Promise<void> => {
       const code = digitsOnly(codeRaw)
       if (code.length < 6) return
+      const host = (hostOverride ?? unicastHost).trim() || undefined
       setFindLoading(true)
       try {
         const result = await getLanpmApi().pairing.join({
           code,
-          crossSubnet,
-          unicastHost: crossSubnet ? unicastHost.trim() || undefined : undefined,
+          crossSubnet: crossSubnet || Boolean(host),
+          unicastHost: host,
           subnetScan: crossSubnet ? subnetScan : undefined
         })
         await onPairingJoined({
@@ -166,11 +170,13 @@ export default function DiscoverPairingPanel({
 
   const handleCodePaste = (e: React.ClipboardEvent<HTMLInputElement>): void => {
     const pasted = e.clipboardData.getData('text')
-    const code = digitsOnly(pasted)
+    const parsed = parsePairingShareClipboard(pasted)
+    const code = parsed.code ?? digitsOnly(pasted)
     if (code.length !== 6) return
     e.preventDefault()
     setFindCode(code)
-    void runFind(code)
+    if (parsed.host) setUnicastHost(parsed.host)
+    void runFind(code, parsed.host)
   }
 
   const handleExportPeerFile = async (): Promise<void> => {
@@ -362,6 +368,16 @@ export default function DiscoverPairingPanel({
           autoComplete="one-time-code"
           data-testid="discover-pairing-code-input"
         />
+        <Input
+          placeholder={t('discover.pairingHostPlaceholder')}
+          value={unicastHost}
+          onChange={(e) => setUnicastHost(e.target.value)}
+          onPressEnter={() => void handleFind()}
+          data-testid="discover-pairing-unicast-host"
+        />
+        <Text type="secondary" className={styles.seedsHint}>
+          {t('discover.pairingTailHint')}
+        </Text>
         <Checkbox
           checked={crossSubnet}
           onChange={(e) => setCrossSubnet(e.target.checked)}
@@ -373,16 +389,6 @@ export default function DiscoverPairingPanel({
           <>
             <Text type="secondary" className={styles.seedsHint}>
               {t('discover.pairingRouteHint')}
-            </Text>
-            <Input
-              placeholder={t('discover.pairingHostPlaceholder')}
-              value={unicastHost}
-              onChange={(e) => setUnicastHost(e.target.value)}
-              onPressEnter={() => void handleFind()}
-              data-testid="discover-pairing-unicast-host"
-            />
-            <Text type="secondary" className={styles.seedsHint}>
-              {t('discover.pairingTailHint')}
             </Text>
             <Collapse
               ghost

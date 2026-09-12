@@ -94,15 +94,20 @@ assert.match(modal, /join_pending/)
 assert.match(homeRedirect, /groups\.length === 0/)
 assert.match(homeRedirect, /cockpitPath\(\)/)
 
-// TASK-8501: 跨网段 host/尾段同层；子网扫描在 Collapse 内
+// TASK-8801: 加入方主路径始终露出 IP；子网扫描仍在跨网段 Collapse
+assert.match(pairingPanel, /data-testid="discover-pairing-unicast-host"/)
+assert.match(pairingPanel, /parsePairingShareClipboard/)
+assert.match(pairingPanel, /crossSubnet: crossSubnet || Boolean\(host\)/)
+assert.match(modal, /TASK-8801/)
 const crossSubnetUi = pairingPanel.slice(
   pairingPanel.indexOf('{crossSubnet ?'),
   pairingPanel.indexOf(') : null}', pairingPanel.indexOf('{crossSubnet ?'))
 )
-assert.match(crossSubnetUi, /data-testid="discover-pairing-unicast-host"/)
+assert.doesNotMatch(crossSubnetUi, /discover-pairing-unicast-host/)
 assert.match(crossSubnetUi, /<Collapse/)
-const beforeCollapse = crossSubnetUi.split('<Collapse')[0]!
-assert.match(beforeCollapse, /discover-pairing-unicast-host/)
+const findHostIdx = pairingPanel.indexOf('data-testid="discover-pairing-unicast-host"')
+const crossIdx = pairingPanel.indexOf('{crossSubnet ?')
+assert.ok(findHostIdx > 0 && findHostIdx < crossIdx, 'unicast host field must sit above crossSubnet')
 
 // TASK-8502: 分享态复制配对信息（E2E 见 discover.spec.ts）
 assert.match(pairingPanel, /handleCopyPairingInfo/)
@@ -119,7 +124,7 @@ assert.match(modal, /data-testid="discover-export-peer-file"/)
 // TASK-8504: 查找聚焦 + 粘贴 6 位自动 runFind
 assert.match(pairingPanel, /handleCodePaste/)
 assert.match(pairingPanel, /code\.length !== 6/)
-assert.match(pairingPanel, /void runFind\(code\)/)
+assert.match(pairingPanel, /void runFind\(code, parsed.host\)/)
 assert.match(pairingPanel, /codeInputRef\.current\?\.focus/)
 
 // TASK-8505: Setup 跳过网络 → Coachmark（零群路径见 TopBar effect）

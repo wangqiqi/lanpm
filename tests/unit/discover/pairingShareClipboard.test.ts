@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { formatPairingShareClipboard } from '../../../src/shared/discover/pairingShareClipboard'
+import {
+  formatPairingShareClipboard,
+  parsePairingShareClipboard
+} from '../../../src/shared/discover/pairingShareClipboard'
 
 const fmt = {
   lineCode: (code: string) => `code:${code}`,
@@ -35,5 +38,17 @@ describe('formatPairingShareClipboard', () => {
       fmt
     )
     expect(text).toBe('code:123456\ngroups:Alpha, Beta')
+  })
+})
+
+describe('parsePairingShareClipboard', () => {
+  it('reads spaced code and ipv4 from copy-pairing blob', () => {
+    expect(
+      parsePairingShareClipboard('Pairing code: 781 293\nTail 16 (192.168.20.16)\nGroups: Demo')
+    ).toEqual({ code: '781293', host: '192.168.20.16' })
+  })
+
+  it('does not treat ip octets as the pairing code', () => {
+    expect(parsePairingShareClipboard('IP: 10.0.0.8')).toEqual({ host: '10.0.0.8' })
   })
 })

@@ -1336,7 +1336,7 @@ const zhCN = {
   'discover.coachmarkDescription': '点「发现」用连接码加入同事的群组，或分享你的群组',
   'discover.pairingShareTitle': '让同事发现我的群组',
   'discover.pairingFindTitle': '加入同事的群组目录',
-  'discover.pairingFindHint': '输入对方屏幕上的 6 位连接码',
+  'discover.pairingFindHint': '输入 6 位连接码；同网 Wi‑Fi 隔离时请同时填对方 IP（走 TCP 43124）',
   'discover.pairingCodePlaceholder': '例如 847 293',
   'discover.pairingCrossSubnet': '对方和我不在同一 WiFi（跨网段）',
   'discover.pairingRouteHint': '通常只需连接码；将按本机路由表向各子网发送查找',

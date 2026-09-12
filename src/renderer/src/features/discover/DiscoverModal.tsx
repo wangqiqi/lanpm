@@ -116,7 +116,9 @@ export default function DiscoverModal({
     setPairingMode('idle')
     setWizardStep('connect')
     void refresh()
-  }, [open, refresh])
+    // TASK-8801: 不要依赖 refresh 身份；否则 snapshot 回调一变就把正在分享的连接码 UI 清掉
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅随弹窗打开重置向导
+  }, [open])
 
   const openGroup = useCallback((group: DiscoverGroupView): void => {
     navigate(groupViewPath(group.groupId, defaultViewForGroup(group.type)))
