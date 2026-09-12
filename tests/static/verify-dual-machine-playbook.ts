@@ -57,8 +57,14 @@ assert.match(manualPeer, /topbar\.manualPeerPlaceholder/)
 const zhCn = readFileSync(join(root, 'src/renderer/src/i18n/locales/zh-CN.ts'), 'utf8')
 assert.match(zhCn, /topbar\.manualPeerPlaceholder.*43124/, 'zh-CN manual peer placeholder cites 43124')
 
-const templatePath = join(root, '.cursorGrowth/archive/templates/dual_machine_handtest_TEMPLATE.md')
-assert.ok(existsSync(templatePath), 'hand-test template exists in Growth archive/templates')
+const templatePaths = [
+  join(root, '.cursor/templates/dual_machine_handtest_TEMPLATE.md'),
+  join(root, '.cursorGrowth/archive/templates/dual_machine_handtest_TEMPLATE.md')
+]
+assert.ok(
+  templatePaths.some((p) => existsSync(p)),
+  'hand-test template exists (.cursor/templates or .cursorGrowth/archive/templates)'
+)
 
 const m6Runner = readFileSync(join(root, 'tests/integration/verify-m6.ts'), 'utf8')
 assert.match(m6Runner, /UDP_DISCOVERY_PORT/, 'verify:m6 imports discovery port constant')

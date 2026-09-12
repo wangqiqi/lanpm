@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **真网双机手验**：`.cursor/templates/dual_machine_handtest_TEMPLATE.md` · `verify:dual-machine-playbook` 支持母版/Growth 双路径 · `docs/05` §6.4（`TASK-DUAL-01`）
+
 ### Fixed
 
 - **E2E**：发现顶栏只用 `topbar-discover`（避免看板卡片「发现」撞名）；配对成功横幅在自动入群时也会出；`expectPairingJoinSuccess` 等「已连接 {peer}」
