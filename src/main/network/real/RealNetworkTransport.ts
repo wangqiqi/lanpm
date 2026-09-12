@@ -12,8 +12,10 @@ import {
   DISCOVERY_INTERVAL_MS,
   DEFAULT_TCP_LISTEN_PORT,
   HEARTBEAT_INTERVAL_MS,
+  PEER_TTL_MS,
   RECONNECT_BACKOFF_MS
 } from '../../../shared/network/constants.ts'
+import { collapseDiscoveredPeersOnePerHost } from '../../../shared/discover/collapsePeersByHost.ts'
 import { loadOrCreateDeviceKeyPair } from '../../crypto/deviceKeyStore.ts'
 import { rememberPeerGroups, listCachedDiscoverGroups } from '../../discover/discoverGroupRegistry.ts'
 import { parseHostPort } from '../../../shared/network/manualPeer.ts'
@@ -96,6 +98,8 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
   /** TCP 握手 / peer_advert 识别的对端（跨子网手动节点） */
   private readonly tcpPeers = new Map<string, DiscoveryPayload>()
+  /** 中继/握手写入 tcpPeers 的时间；无活跃 UDP/链路且过期则剔除，避免历史 userId 常驻发现 */
+  private readonly tcpPeerSeenAt = new Map<string, number>()
   private readonly manualHosts = new Map<string, { host: string; port: number }>()
   private discovery: UdpDiscovery | null = null
   private tcpServer: net.Server | null = null
@@ -153,8 +157,37 @@ export class RealNetworkTransport implements NetworkTransport {
       groups: peer.groups
     }
     this.tcpPeers.set(peer.deviceId, payload)
+    this.tcpPeerSeenAt.set(peer.deviceId, Date.now())
     rememberPeerGroups(peer.userId, peer.displayName, peer.groups)
     touchDiscoveryPeer(payload)
+  }
+
+  private isDeviceLinkLive(deviceId: string): boolean {
+    const link = this.links.get(deviceId)
+    return Boolean(link?.isReady() || link?.isHandshaking())
+  }
+
+  private isUdpPeerLive(deviceId: string): boolean {
+    return (this.discovery?.listPeers() ?? []).some((p) => p.deviceId === deviceId)
+  }
+
+  private isTcpPeerLive(deviceId: string, now = Date.now()): boolean {
+    if (this.isDeviceLinkLive(deviceId)) return true
+    if (this.isUdpPeerLive(deviceId)) return true
+    const seen = this.tcpPeerSeenAt.get(deviceId)
+    return seen != null && now - seen <= PEER_TTL_MS
+  }
+
+  private pruneStaleTcpPeers(now = Date.now()): void {
+    for (const deviceId of [...this.tcpPeers.keys()]) {
+      if (this.isTcpPeerLive(deviceId, now)) continue
+      this.tcpPeers.delete(deviceId)
+      this.tcpPeerSeenAt.delete(deviceId)
+    }
+  }
+
+  private noteRelayTcpPeer(payload: DiscoveryPayload): void {
+    this.tcpPeerSeenAt.set(payload.deviceId, Date.now())
   }
 
   private createPeerLink(options: {
@@ -286,6 +319,7 @@ export class RealNetworkTransport implements NetworkTransport {
     for (const link of this.links.values()) link.close()
     this.links.clear()
     this.tcpPeers.clear()
+    this.tcpPeerSeenAt.clear()
     this.manualHosts.clear()
     this.knownSeedAddresses.clear()
     this.tcpServer?.close()
@@ -331,17 +365,21 @@ export class RealNetworkTransport implements NetworkTransport {
 
   async discoverPeers(): Promise<DiscoveryPayload[]> {
     if (!this.started) this.start()
+    this.pruneStaleTcpPeers()
     const merged = new Map<string, DiscoveryPayload>()
     for (const peer of this.discovery?.listPeers() ?? []) {
       merged.set(peer.deviceId, peer)
     }
     for (const peer of this.tcpPeers.values()) {
+      if (!this.isTcpPeerLive(peer.deviceId)) continue
       merged.set(peer.deviceId, peer)
     }
-    const peers = [...merged.values()]
-    refreshLanUserIds(peers)
-    for (const peer of peers) touchDiscoveryPeer(peer)
-    return peers
+    const collapsed = collapseDiscoveredPeersOnePerHost([...merged.values()], (deviceId) =>
+      this.isDeviceLinkLive(deviceId)
+    )
+    refreshLanUserIds(collapsed)
+    for (const peer of collapsed) touchDiscoveryPeer(peer)
+    return collapsed
   }
 
   countReadyLinks(): number {
@@ -769,7 +807,7 @@ export class RealNetworkTransport implements NetworkTransport {
     peerMap.delete(this.deviceId)
 
     const peers = [...peerMap.values()]
-      .filter((p) => p.userId && p.host)
+      .filter((p) => p.userId && p.host && this.isTcpPeerLive(p.deviceId))
       .map((p) => ({
         deviceId: p.deviceId,
         userId: p.userId,
@@ -807,7 +845,9 @@ export class RealNetworkTransport implements NetworkTransport {
   ): void {
     if (packet.viaDeviceId === this.deviceId) return
 
-    mergeRelayPeers(this.tcpPeers, packet.peers, this.capabilities)
+    mergeRelayPeers(this.tcpPeers, packet.peers, this.capabilities, (payload) => {
+      this.noteRelayTcpPeer(payload)
+    })
     applyRelayGroups(packet.groups)
 
     const newSeeds = collectNewSeedAddresses(packet.seeds, this.knownSeedAddresses)

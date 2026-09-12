@@ -6,12 +6,11 @@ import type {
 } from '../../../shared/discover/discoverRelay'
 import { rememberPeerGroups } from '../../discover/discoverGroupRegistry.ts'
 import { parseHostPort } from '../../../shared/network/manualPeer.ts'
-import { touchDiscoveryPeer } from '../../presence/presenceRegistry.ts'
-
 export function mergeRelayPeers(
   existing: Map<string, DiscoveryPayload>,
   incoming: DiscoverRelayPeer[],
-  capabilities: string[]
+  capabilities: string[],
+  onMerged?: (payload: DiscoveryPayload) => void
 ): void {
   for (const peer of incoming) {
     if (!peer.deviceId || !peer.userId || peer.userId === '__lanpm_probe__') continue
@@ -24,7 +23,7 @@ export function mergeRelayPeers(
       capabilities
     }
     existing.set(peer.deviceId, payload)
-    touchDiscoveryPeer(payload)
+    onMerged?.(payload)
   }
 }
 
