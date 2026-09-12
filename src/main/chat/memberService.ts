@@ -16,7 +16,6 @@ import {
 } from '../../shared/ops/bot.ts'
 import { getOpsGroupSettings } from '../ops/opsGroupSettingsStore.ts'
 import { getUserById } from '../storage/repositories/userRepository'
-import { listDistinctMessageSenderUserIds } from '../storage/repositories/messageRepository'
 import { isLanpmNoDemoEnv } from '../../shared/env/lanpmNoDemo.ts'
 
 /** 非匿名群占位成员，便于 @提及联调 */
@@ -41,6 +40,77 @@ function withPresence(members: GroupMemberView[], localUserId?: string): GroupMe
       presence: resolvePresence(m.userId, localUserId)
     }
   })
+}
+
+/** no-demo 群：仅本机与当前 LAN 发现到的 userId 计在线，避免陈旧 device 心跳把历史成员标绿 */
+function withPresenceLanScoped(
+  members: GroupMemberView[],
+  localUserId?: string,
+  liveLanUserIds?: Set<string>
+): GroupMemberView[] {
+  return members.map((m) => {
+    if (m.deviceKind === 'machine' || m.deviceKind === 'bot') {
+      return { ...m, presence: m.presence ?? 'offline' }
+    }
+    if (
+      liveLanUserIds &&
+      m.userId !== localUserId &&
+      !liveLanUserIds.has(m.userId)
+    ) {
+      return { ...m, presence: 'offline' }
+    }
+    return {
+      ...m,
+      presence: resolvePresence(m.userId, localUserId)
+    }
+  })
+}
+
+function looksLikeFallbackDisplayName(displayName: string, userId: string): boolean {
+  if (displayName === userId) return true
+  if (/^u[a-f0-9]{6,}$/i.test(displayName) && displayName.length <= 12) return true
+  return /^[\d.]+:\d+$/.test(displayName)
+}
+
+function mergeDisplayName(
+  userId: string,
+  current: string,
+  incoming: string | undefined,
+  dbUser: ReturnType<typeof getUserById>
+): string {
+  const fromDb = dbUser?.displayName
+  if (fromDb && !looksLikeFallbackDisplayName(fromDb, userId)) return fromDb
+  if (incoming?.trim() && !looksLikeFallbackDisplayName(incoming, userId)) {
+    if (looksLikeFallbackDisplayName(current, userId)) return incoming.trim()
+    return current
+  }
+  if (!looksLikeFallbackDisplayName(current, userId)) return current
+  return fromDb?.trim() || incoming?.trim() || userId
+}
+
+function applyPeerDisplayNames(
+  members: Map<string, GroupMemberView>,
+  peers: Array<{ userId: string; displayName: string }>,
+  db: Database
+): void {
+  for (const peer of peers) {
+    if (!peer.userId || peer.userId === '__lanpm_probe__') continue
+    const existing = members.get(peer.userId)
+    if (!existing) continue
+    const dbUser = getUserById(db, peer.userId)
+    const displayName = mergeDisplayName(
+      peer.userId,
+      existing.displayName,
+      peer.displayName,
+      dbUser
+    )
+    if (displayName === existing.displayName) continue
+    members.set(peer.userId, {
+      ...existing,
+      displayName,
+      mentionKeys: dbUser ? [dbUser.baseName, peer.userId] : existing.mentionKeys
+    })
+  }
 }
 
 /** 本地 users 表已知头像；peer 尚未同步时可为 undefined（UI 确定性兜底） */
@@ -142,9 +212,21 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
     const members = new Map(roster.map((m) => [m.userId, m]))
 
     const addKnownUser = (userId: string, displayName?: string) => {
-      if (!userId || members.has(userId)) return
+      if (!userId) return
       const user = getUserById(db, userId)
-      const name = displayName ?? user?.displayName ?? userId
+      const existing = members.get(userId)
+      if (existing) {
+        const merged = mergeDisplayName(userId, existing.displayName, displayName, user)
+        if (merged !== existing.displayName) {
+          members.set(userId, {
+            ...existing,
+            displayName: merged,
+            mentionKeys: user ? [user.baseName, userId] : existing.mentionKeys
+          })
+        }
+        return
+      }
+      const name = mergeDisplayName(userId, userId, displayName, user)
       members.set(userId, {
         userId,
         displayName: name,
@@ -153,18 +235,22 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
       })
     }
 
-    for (const userId of listDistinctMessageSenderUserIds(db, groupId)) {
-      addKnownUser(userId)
-    }
-
     const transport = getNetworkTransport()
+    const liveLanUserIds = new Set<string>()
+    if (localUserId) liveLanUserIds.add(localUserId)
+    let discoveredPeers: Array<{ userId: string; displayName: string; groups?: { groupId: string }[] }> =
+      []
     if (transport) {
-      const peers = await transport.discoverPeers()
-      for (const peer of peers) {
+      discoveredPeers = await transport.discoverPeers()
+      for (const peer of discoveredPeers) {
+        if (peer.userId) liveLanUserIds.add(peer.userId)
+      }
+      for (const peer of discoveredPeers) {
         if (!peer.userId || peer.userId === '__lanpm_probe__') continue
         if (!peer.groups?.some((g) => g.groupId === groupId)) continue
         addKnownUser(peer.userId, peer.displayName)
       }
+      applyPeerDisplayNames(members, discoveredPeers, db)
     }
 
     for (const machine of listOpsMachines(groupId)) {
@@ -188,8 +274,8 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
         presence: 'online'
       })
     }
-    return withPresence([...members.values()], localUserId).sort((a, b) =>
-      a.displayName.localeCompare(b.displayName)
+    return withPresenceLanScoped([...members.values()], localUserId, liveLanUserIds).sort(
+      (a, b) => a.displayName.localeCompare(b.displayName)
     )
   }
 

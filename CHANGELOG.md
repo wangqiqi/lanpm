@@ -15,6 +15,7 @@
 
 ### Fixed
 
+- **no-demo 双机成员栏**（`TASK-DUAL-04a`）：合并发现 peer 的 `displayName`（修复先入库 userId 后不再更新、Windows 中文名在 Ubuntu 显示为 `u…`）；在线数仅计本机 + 当前 LAN 发现用户（修复历史成员误显示在线）；不再把「仅发过消息、不在群 roster」的 userId 塞进侧栏
 - **no-demo 成员**（`TASK-DUAL-04a`）：聊天收/发写入 `group_members`；成员列表合并消息发送者与同群发现 peer；新消息后刷新成员栏
 - **Setup**（`TASK-DUAL-04b`）：完成向导前关闭 SQLite 再迁 profile，修复 Windows `EBUSY` rename
 - **会议**（`TASK-DUAL-04c`）：离开房间统一释放 Lite/Pro/本地录制并关闭摄像头与麦克风轨道

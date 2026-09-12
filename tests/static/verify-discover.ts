@@ -161,7 +161,11 @@ assert.match(
 )
 assert.match(
   readFileSync(join(root, 'src/main/chat/memberService.ts'), 'utf8'),
-  /listDistinctMessageSenderUserIds/
+  /withPresenceLanScoped/
+)
+assert.match(
+  readFileSync(join(root, 'src/main/chat/memberService.ts'), 'utf8'),
+  /mergeDisplayName/
 )
 assert.match(
   readFileSync(join(root, 'src/main/group/groupService.ts'), 'utf8'),
