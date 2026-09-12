@@ -34,10 +34,20 @@ if (noDemo && withDemo) {
 
 const env = { ...process.env }
 delete env.ELECTRON_RUN_AS_NODE
-if (noDemo) env.LANPM_NO_DEMO = '1'
-if (withDemo) env.LANPM_NO_DEMO = '0'
+if (withDemo) {
+  env.LANPM_DEMO = '1'
+  env.LANPM_NO_DEMO = '0'
+} else if (noDemo) {
+  env.LANPM_NO_DEMO = '1'
+} else if (env.LANPM_NO_DEMO !== '0') {
+  // 默认部署态：无演示群 / 无 mock catalog（双机验证）
+  env.LANPM_NO_DEMO = '1'
+}
 if (env.LANPM_NO_DEMO === '1') {
   console.log('[lanpm] LANPM_NO_DEMO=1 (no mock catalog)')
+}
+if (env.LANPM_DEMO === '1') {
+  console.log('[lanpm] LANPM_DEMO=1 (mock catalog enabled)')
 } else if (withDemo) {
   console.log('[lanpm] mock catalog enabled (demo groups + dev member roster)')
 }

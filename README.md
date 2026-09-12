@@ -90,7 +90,7 @@ chmod +x onekey_run.sh    # first time (Unix)
 | PowerShell | `.\onekey_run.ps1 start` |
 | Git Bash / WSL | `./onekey_run.sh start` |
 
-First launch runs a short setup wizard, then opens the demo group at `#/g/demo-project/chat`.
+First launch runs a short setup wizard (empty catalog by default; `npm run dev:demo` for mock demo groups).
 
 ## 🛠️ For contributors
 

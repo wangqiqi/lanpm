@@ -27,8 +27,10 @@ describe('shouldSeedMockCatalog', () => {
     process.env = env
   })
 
-  it('seeds in dev (unpackaged)', () => {
+  it('skips in dev unless LANPM_DEMO=1', () => {
     isPackaged.value = false
+    expect(shouldSeedMockCatalog()).toBe(false)
+    process.env.LANPM_DEMO = '1'
     expect(shouldSeedMockCatalog()).toBe(true)
   })
 

@@ -18,6 +18,8 @@
     "dev:dual-peer": "node scripts/dev-with-seeds.mjs",
     "dev:fresh": "node scripts/dev-fresh.mjs --wipe",
     "dev:fresh:no-demo": "node scripts/dev-fresh.mjs --wipe --no-demo",
+    "userdata:wipe": "node scripts/wipe-local-userdata.mjs",
+    "dev:deploy-test": "node scripts/dev-deploy-test.mjs",
     "dev:web": "node scripts/dev-run.mjs --web",
     "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs && npm run verify:pack-license",
     "build": "electron-vite build",

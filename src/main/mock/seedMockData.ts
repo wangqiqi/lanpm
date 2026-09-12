@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto'
-import { app } from 'electron'
 import type { Database } from 'better-sqlite3'
 import type { ChatMessage, MessageType } from '../../shared/chat/types'
 import type { Task } from '../../shared/task/types'
@@ -329,12 +328,15 @@ function markSeeded(db: Database): void {
   setMeta(db, MOCK_CATALOG_META_KEY, MOCK_CATALOG_VERSION)
 }
 
-/** 开发 / 演示 / 截图流水线注入 mock；正式打包安装包默认不注入 */
+/**
+ * 仅显式演示 / 截图流水线注入 mock。
+ * 开发与打包默认一致：不注入（双机验证 · 部署态）；`npm run dev:demo` 或 `LANPM_DEMO=1`。
+ */
 export function shouldSeedMockCatalog(): boolean {
   if (isLanpmNoDemoEnv()) return false
   if (process.env.LANPM_DEMO === '1') return true
   if (process.env.LANPM_VISUAL_CAPTURE_DIR) return true
-  return !app.isPackaged
+  return false
 }
 
 /** 移除本地演示群及 mock 内容（打包版启动时保持干净库） */
