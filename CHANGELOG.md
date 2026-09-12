@@ -7,6 +7,7 @@
 ### Added
 
 - **真网双机自动对接**：`LANPM_DISCOVER_SEEDS` 启动合并发现种子并自动连对端 · `npm run dev:dual-peer` · `docs/05` §6.1（`TASK-DUAL-02` 辅助）
+- **真网双机 TCP 探测**：`verify:dual-peer-link`（`LANPM_DUAL_PEER`）查对端 43124 可连 + 本机 ESTAB；CI 无环境变量跳过（`TASK-8801`）
 - **真网双机手验**：`.cursor/templates/dual_machine_handtest_TEMPLATE.md` · `verify:dual-machine-playbook` 支持母版/Growth 双路径 · `docs/05` §6.4（`TASK-DUAL-01`）
 
 ### Fixed

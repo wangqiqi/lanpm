@@ -209,6 +209,7 @@
     "verify:m5": "node --experimental-strip-types tests/static/verify-m5.ts",
     "verify:m6": "node --experimental-strip-types tests/integration/verify-m6.ts",
     "verify:dual-machine-playbook": "node --experimental-strip-types tests/static/verify-dual-machine-playbook.ts",
+    "verify:dual-peer-link": "node --experimental-strip-types tests/integration/verify-dual-peer-link.ts",
     "verify:platform-cold-start-playbook": "node --experimental-strip-types tests/static/verify-platform-cold-start-playbook.ts",
     "verify:search": "node --experimental-strip-types tests/static/verify-search.ts",
     "verify:visual": "node scripts/run-electron-node.mjs --experimental-strip-types tests/static/verify-visual.ts",

@@ -33,6 +33,8 @@ assert.match(docs05, /UDP `43123`/, 'docs/05 UDP port')
 assert.match(docs05, /TCP `43124`/, 'docs/05 TCP port')
 assert.match(docs05, /LANPM_DISCOVER_SEEDS/, 'docs/05 auto peer seeds env')
 assert.equal(typeof pkg.scripts['dev:dual-peer'], 'string', 'dev:dual-peer script')
+assert.equal(typeof pkg.scripts['verify:dual-peer-link'], 'string', 'verify:dual-peer-link live TCP probe')
+assert.match(docs05, /verify:dual-peer-link/, 'docs/05 cites live dual-peer TCP probe')
 
 const stepTable = docs05.slice(
   docs05.indexOf('### 6.2 步骤'),
