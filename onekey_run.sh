@@ -549,7 +549,7 @@ cmd_clean() {
   fi
   # 系统 /tmp 残留（历史路径）
   find /tmp -maxdepth 1 -user "$(id -un)" -name 'lanpm*' -exec rm -rf {} + 2>/dev/null || true
-  ok "已清理 .lanpm/artifact/{out,dist,test-results}、遗留根 out/dist 与 .lanpm/{tmp,stub-bus,…}、/tmp/lanpm*"
+  ok "已清理 .lanpm/artifact/{out,dist,test-results}、.lanpm/coverage、遗留根 out/dist/coverage 与 .lanpm/{tmp,stub-bus,…}、/tmp/lanpm*"
 
   if [[ "$deep" == "deep" || "$deep" == "--deep" ]]; then
     warn "深度清理: node_modules + Electron 工具链缓存（可重建）…"
@@ -615,7 +615,7 @@ show_menu() {
   echo "  6) logs       跟踪日志"
   echo "  7) build      生产构建"
   echo "  8) install    npm install"
-  echo "  9) clean      清理 out/dist/coverage/.lanpm 可重建项"
+  echo "  9) clean      清理 .lanpm 可重建项与遗留根 out/dist/coverage"
   echo " 10) pack       安装包 (electron-builder)"
   echo " 11) 更多维护   check/verify/rebuild/…"
   echo "  0) exit"
@@ -694,7 +694,7 @@ usage() {
   install                   npm install
   check [quick]             typecheck + lint [+ verify:m0]
   verify                    npm run verify:m7
-  clean [deep]              清理 out/dist/coverage/.lanpm 可重建项 [+ node_modules + electron 缓存]
+  clean [deep]              清理 .lanpm 可重建项与遗留根 out/dist/coverage [+ node_modules + electron 缓存]
   pack                      构建安装包 (electron-builder, 需先 build)
   menu                      交互菜单 (默认)
   help                      本帮助

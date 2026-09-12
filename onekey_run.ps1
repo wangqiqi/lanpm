@@ -375,6 +375,7 @@ function Invoke-Action([string]$Act, [string]$Ext) {
       Write-Host '[lanpm] cleaning rebuildable artifacts (keep userData) ...' -ForegroundColor Cyan
       $artifact = Join-Path $RunDir 'artifact'
       Remove-Item -Recurse -Force (Join-Path $artifact 'out'), (Join-Path $artifact 'dist'), (Join-Path $artifact 'test-results') -ErrorAction SilentlyContinue
+      Remove-Item -Recurse -Force (Join-Path $RunDir 'coverage') -ErrorAction SilentlyContinue
       Remove-Item -Recurse -Force (Join-Path $Root 'out'), (Join-Path $Root 'dist'), (Join-Path $Root 'build'), (Join-Path $Root 'test-results'), (Join-Path $Root 'coverage') -ErrorAction SilentlyContinue
       Get-ChildItem $Root -Filter '*.tsbuildinfo' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
       if (Test-Path $RunDir) {
@@ -501,7 +502,7 @@ function Show-InteractiveMenu {
     Write-Host '  6) logs       跟踪日志'
     Write-Host '  7) build      生产构建'
     Write-Host '  8) install    npm install'
-    Write-Host '  9) clean      清理 out/dist/coverage/.lanpm 可重建项'
+    Write-Host '  9) clean      清理 .lanpm 可重建项与遗留根 out/dist/coverage'
     Write-Host ' 10) pack       安装包 (electron-builder)'
     Write-Host ' 11) 更多维护   check/verify/rebuild/...'
     Write-Host '  0) exit'

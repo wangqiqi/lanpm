@@ -355,7 +355,7 @@ if exist "%RUN_DIR%\dev-b" rmdir /s /q "%RUN_DIR%\dev-b"
 mkdir "%RUN_DIR%\tmp" 2>nul
 mkdir "%RUN_DIR%\stub-bus" 2>nul
 mkdir "%RUN_DIR%\visual-screenshots" 2>nul
-echo [lanpm] cleaned out/ dist/ coverage/ .lanpm rebuildables
+echo [lanpm] cleaned .lanpm rebuildables and legacy root out/dist/coverage
 if /i "%CLEAN_DEEP%"=="deep" (
   echo [lanpm] deep clean: node_modules + electron cache ...
   if exist "%ROOT%\node_modules" rmdir /s /q "%ROOT%\node_modules"
@@ -440,7 +440,7 @@ call :print "  5) status     查看状态"
 call :print "  6) logs       跟踪日志"
 call :print "  7) build      生产构建"
 call :print "  8) install    npm install"
-call :print "  9) clean      清理 out/dist/coverage/.lanpm 可重建项"
+call :print "  9) clean      清理 .lanpm 可重建项与遗留根 out/dist/coverage"
 call :print " 10) pack       安装包 - electron-builder"
 call :print " 11) 更多维护   check/verify/rebuild/..."
 call :print "  0) exit"
