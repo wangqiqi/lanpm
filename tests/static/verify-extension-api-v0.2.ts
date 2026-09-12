@@ -44,7 +44,7 @@ assert.match(proxy, /listTaskChecklist/)
 assert.match(proxy, /listGroupMembers/)
 
 const exampleManifest = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 )
 const parsed = parsePluginManifest(exampleManifest)
 assert.equal(parsed?.id, 'lanpm.example')
@@ -53,14 +53,9 @@ for (const cap of ['chat.sendTaskRef', 'chat.listMessages', 'member.list'] as co
   assert.ok(parsed?.capabilities.includes(cap), `lanpm.example missing ${cap}`)
 }
 
-const exampleStub = readFileSync(
-  join(root, 'src/renderer/src/plugin/builtins/ExampleStub.tsx'),
-  'utf8'
-)
-assert.match(exampleStub, /chat\.sendTaskRef/)
-assert.match(exampleStub, /chat\.listMessages/)
-
 const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub.ts'), 'utf8')
+assert.match(stub, /chat\.sendTaskRef/)
+assert.match(stub, /chat\.listMessages/)
 for (const cap of v02Caps) {
   assert.match(stub, new RegExp(`capability === '${cap.replace('.', '\\.')}'`))
 }

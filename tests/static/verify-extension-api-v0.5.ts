@@ -79,16 +79,8 @@ const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub
 assert.match(stub, /chat\.sendText/)
 assert.match(stub, /file\.upload/)
 
-const exampleStub = readFileSync(
-  join(root, 'src/renderer/src/plugin/builtins/ExampleStub.tsx'),
-  'utf8'
-)
-assert.match(exampleStub, /invokeCapabilityWithHumanConfirm/)
-assert.match(exampleStub, /chat\.sendText/)
-assert.match(exampleStub, /file\.upload/)
-
 const exampleManifest = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 )
 const parsed = parsePluginManifest(exampleManifest)
 assert.equal(parsed?.id, 'lanpm.example')

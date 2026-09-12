@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **官方扩展**：移除安装包内 `lanpm.example`；`plugins/*` 全部 `pricing: free`（个人设置仅显示「免费」，无需离线许可证即可启用）
 - **Mock 默认关闭**：开发与安装包均不注入演示 catalog，除非 `LANPM_DEMO=1` / `npm run dev:demo`；`npm run dev` 默认 `LANPM_NO_DEMO=1`（部署态）
 - **双机验证**：`npm run userdata:wipe` · `npm run dev:deploy-test -- <peer>:43124`（清库 + 连种子 + TCP 探测后启动）；`docs/05` §6.1 · README（`TASK-DUAL-A04`）
 - **协作**：`.cursorGrowth/plan.md` 纳入版本库（其余 Growth 仍本地忽略）

@@ -45,7 +45,7 @@ assert.match(proxy, /updateGroupTask/)
 assert.match(proxy, /moveGroupTask/)
 
 const exampleManifest = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 )
 const parsed = parsePluginManifest(exampleManifest)
 assert.equal(parsed?.id, 'lanpm.example')
@@ -53,11 +53,11 @@ for (const cap of v03Caps) {
   assert.ok(parsed?.capabilities.includes(cap), `lanpm.example missing ${cap}`)
 }
 
-const exampleStub = readFileSync(
-  join(root, 'src/renderer/src/plugin/builtins/ExampleStub.tsx'),
+const agileStub = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/AgileStub.tsx'),
   'utf8'
 )
-assert.match(exampleStub, /task\.patch/)
+assert.match(agileStub, /task\.patch/)
 
 const stub = readFileSync(join(root, 'src/renderer/src/platform/browserLanpmStub.ts'), 'utf8')
 for (const cap of v03Caps) {

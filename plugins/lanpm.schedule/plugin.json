@@ -4,5 +4,5 @@
   "version": "0.1.0",
   "slots": ["gantt.toolbar"],
   "capabilities": ["task.list"],
-  "pricing": "paid"
+  "pricing": "free"
 }

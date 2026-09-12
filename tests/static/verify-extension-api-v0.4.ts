@@ -85,15 +85,14 @@ const helper = readFileSync(
 assert.match(helper, /isCapabilityPendingConfirm/)
 assert.match(helper, /confirmCapability/)
 
-const exampleStub = readFileSync(
-  join(root, 'src/renderer/src/plugin/builtins/ExampleStub.tsx'),
+const agileStub = readFileSync(
+  join(root, 'src/renderer/src/plugin/builtins/AgileStub.tsx'),
   'utf8'
 )
-assert.match(exampleStub, /invokeCapabilityWithHumanConfirm/)
-assert.match(exampleStub, /task\.create/)
+assert.match(agileStub, /invokeCapabilityWithHumanConfirm/)
 
 const exampleManifest = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 )
 const parsed = parsePluginManifest(exampleManifest)
 assert.equal(parsed?.id, 'lanpm.example')

@@ -16,17 +16,18 @@ assert.ok(PLUGIN_SECURITY_RULES.includes('no-plugin-ipcMain'))
 assert.equal(PLUGIN_IPC.listPlugins, 'plugin:listPlugins')
 
 const example = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 )
 const meeting = JSON.parse(readFileSync(join(root, 'plugins/lanpm.meeting/plugin.json'), 'utf8'))
 assert.equal(parsePluginManifest(example)?.id, 'lanpm.example')
-assert.equal(parsePluginManifest(meeting)?.pricing, 'paid')
+assert.equal(parsePluginManifest(meeting)?.pricing, 'free')
+assert.ok(!existsSync(join(root, 'plugins/lanpm.example')), 'lanpm.example must not ship under plugins/')
 
 assert.ok(existsSync(join(root, 'src/main/plugin/discover.ts')))
 assert.ok(existsSync(join(root, 'src/main/plugin/capabilityProxy.ts')))
 assert.ok(existsSync(join(root, 'src/main/ipc/plugin.ts')))
 assert.ok(existsSync(join(root, 'src/renderer/src/plugin/PluginSlot.tsx')))
-assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/ExampleStub.tsx')))
+assert.ok(existsSync(join(root, 'src/renderer/src/plugin/builtins/MindmapSlot.tsx')))
 
 const mainIndex = readFileSync(join(root, 'src/main/index.ts'), 'utf8')
 assert.match(mainIndex, /registerPluginIpc/)

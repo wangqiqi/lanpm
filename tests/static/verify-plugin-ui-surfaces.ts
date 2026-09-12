@@ -68,24 +68,24 @@ for (const locale of ['zh-CN.ts', 'en-US.ts'] as const) {
   assert.match(src, /['"]plugin\.slotSection['"]:/, `${locale} must define plugin.slotSection`)
 }
 
-// --- example task.detail.section visual surface ---
+// --- plugin card chrome (fixture manifest + mindmap slot) ---
 const exampleManifest = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 ) as { slots?: string[] }
 assert.ok(
   exampleManifest.slots?.includes('task.detail.section'),
-  'lanpm.example must declare task.detail.section'
+  'fixture manifest must declare task.detail.section for API guards'
 )
 
-const exampleStub = readSrc('src/renderer/src/plugin/builtins/ExampleStub.tsx')
-assert.match(exampleStub, /data-plugin-id=\{plugin\.id\}/, 'ExampleStub must stamp data-plugin-id')
-assert.match(exampleStub, /styles\.card/, 'ExampleStub must use plugin card chrome')
+const mindmapStub = readSrc('src/renderer/src/plugin/builtins/MindmapStub.tsx')
+assert.match(mindmapStub, /data-plugin-id=\{plugin\.id\}/, 'MindmapStub must stamp data-plugin-id')
+assert.match(mindmapStub, /styles\.card/, 'MindmapStub must use plugin card chrome')
 
 const pluginCss = readSrc('src/renderer/src/plugin/plugin.module.css')
 assert.match(pluginCss, /var\(--lanpm-border\)/, 'plugin card chrome must use design tokens')
 assert.doesNotMatch(pluginCss, /#[0-9a-fA-F]{3,8}/, 'plugin.module.css must not hardcode hex colors')
 
 const registry = readSrc('src/renderer/src/plugin/registry.ts')
-assert.match(registry, /lanpm\.example.*ExampleStub/, 'registry must map lanpm.example to ExampleStub')
+assert.match(registry, /lanpm\.mindmap.*MindmapSlot/, 'registry must map lanpm.mindmap to MindmapSlot')
 
 console.log('verify:plugin-ui-surfaces OK')

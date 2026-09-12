@@ -4,5 +4,5 @@
   "version": "0.1.0",
   "slots": ["board.toolbar", "board.card.footer"],
   "capabilities": ["task.list", "task.patch"],
-  "pricing": "paid"
+  "pricing": "free"
 }

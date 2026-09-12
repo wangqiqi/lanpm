@@ -60,7 +60,7 @@ assert.match(stub, /listMenus/)
 assert.match(stub, /listStubMenus/)
 
 const example = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 ) as { menus?: Array<{ location: string }> }
 assert.ok(Array.isArray(example.menus) && example.menus.length > 0)
 

@@ -13,7 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const manifest = JSON.parse(readFileSync(join(root, 'plugins/lanpm.weekly/plugin.json'), 'utf8'))
 const parsed = parsePluginManifest(manifest)
 assert.equal(parsed?.id, 'lanpm.weekly')
-assert.equal(parsed?.pricing, 'paid')
+assert.equal(parsed?.pricing, 'free')
 assert.ok(parsed?.slots.includes('topbar.menu'))
 assert.ok(parsed?.capabilities.includes('license.feature'))
 

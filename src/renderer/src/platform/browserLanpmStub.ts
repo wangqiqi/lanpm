@@ -553,48 +553,17 @@ function executeStubWriteCapability(
 
 const STUB_PLUGINS: PluginView[] = [
   {
-    id: 'lanpm.example',
-    name: 'Example Slot Stub',
-    version: '0.5.0',
-    slots: ['task.detail.section', 'chat.composer.action'],
-    capabilities: [
-      'task.get',
-      'task.list',
-      'chat.listMessages',
-      'task.getChecklist',
-      'member.list',
-      'chat.sendTaskRef',
-      'chat.sendText',
-      'file.upload',
-      'task.create',
-      'task.patch',
-      'board.moveTask',
-      'license.feature'
-    ],
-    pricing: 'free',
-    enabled: true,
-    dirName: 'lanpm.example',
-    source: 'builtin',
-    signatureValid: true,
-    licensed: null,
-    commands: [{ id: 'hello', titleKey: 'command.example.hello' }],
-    menus: [
-      { location: 'topbar.user', items: [{ command: 'hello' }] },
-      { location: 'chat.message.context', items: [{ command: 'hello' }] }
-    ]
-  },
-  {
     id: 'lanpm.mindmap',
     name: 'Mind Map',
     version: '0.1.0',
     slots: ['mindmap.toolbar'],
     capabilities: ['task.list', 'license.feature'],
-    pricing: 'paid',
+    pricing: 'free',
     enabled: true,
     dirName: 'lanpm.mindmap',
     source: 'builtin',
     signatureValid: true,
-    licensed: false,
+    licensed: null,
     contributions: {
       views: [
         {
@@ -603,7 +572,7 @@ const STUB_PLUGINS: PluginView[] = [
           titleKey: 'nav.mindmap',
           icon: 'apartment',
           groupTypes: ['project'],
-          pricing: 'paid'
+          pricing: 'free'
         }
       ]
     }
@@ -614,12 +583,12 @@ const STUB_PLUGINS: PluginView[] = [
     version: '0.1.0',
     slots: ['topbar.menu'],
     capabilities: ['license.feature'],
-    pricing: 'paid',
+    pricing: 'free',
     enabled: false,
     dirName: 'lanpm.weekly',
     source: 'builtin',
     signatureValid: true,
-    licensed: false
+    licensed: null
   },
   {
     id: 'lanpm.backup',

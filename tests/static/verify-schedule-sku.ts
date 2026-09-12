@@ -13,7 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const manifest = JSON.parse(readFileSync(join(root, 'plugins/lanpm.schedule/plugin.json'), 'utf8'))
 const parsed = parsePluginManifest(manifest)
 assert.equal(parsed?.id, 'lanpm.schedule')
-assert.equal(parsed?.pricing, 'paid')
+assert.equal(parsed?.pricing, 'free')
 assert.ok(parsed?.slots.includes('gantt.toolbar'))
 assert.ok(parsed?.capabilities.includes('task.list'))
 

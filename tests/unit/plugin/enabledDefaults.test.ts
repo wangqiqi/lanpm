@@ -13,11 +13,6 @@ describe('defaultPluginEnabled', () => {
     expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.backup')).toBe(true)
   })
 
-  it('keeps example plugin off by default', () => {
-    expect(defaultPluginEnabled('lanpm.example')).toBe(false)
-    expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.example')).toBe(false)
-  })
-
   it('keeps meeting plugin off by default', () => {
     expect(defaultPluginEnabled('lanpm.meeting')).toBe(false)
     expect(BUILTIN_DEFAULT_ENABLED_PLUGIN_IDS.has('lanpm.meeting')).toBe(false)

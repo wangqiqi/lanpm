@@ -13,11 +13,7 @@ export type PluginCommandHandler = (
   ctx: PluginCommandHandlerContext
 ) => void | Promise<void>
 
-const REGISTRY: Record<string, PluginCommandHandler> = {
-  'lanpm.example:hello': (ctx) => {
-    ctx.message.info(ctx.t('command.example.helloDone'))
-  }
-}
+const REGISTRY: Record<string, PluginCommandHandler> = {}
 
 export async function runPluginCommandHandler(
   pluginId: string,

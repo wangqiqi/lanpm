@@ -14,15 +14,10 @@ function localizedPluginName(
   pluginId: string,
   fallback: string,
   t: (
-    key:
-      | 'plugin.name.example'
-      | 'plugin.name.meeting'
-      | 'plugin.name.mindmap'
-      | 'plugin.name.backup',
+    key: 'plugin.name.meeting' | 'plugin.name.mindmap' | 'plugin.name.backup',
     params?: never
   ) => string
 ): string {
-  if (pluginId === 'lanpm.example') return t('plugin.name.example')
   if (pluginId === 'lanpm.meeting') return t('plugin.name.meeting')
   if (pluginId === 'lanpm.mindmap') return t('plugin.name.mindmap')
   if (pluginId === 'lanpm.backup') return t('plugin.name.backup')

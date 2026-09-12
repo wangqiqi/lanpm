@@ -4,5 +4,5 @@
   "version": "0.1.0",
   "slots": ["topbar.menu"],
   "capabilities": ["license.feature"],
-  "pricing": "paid"
+  "pricing": "free"
 }

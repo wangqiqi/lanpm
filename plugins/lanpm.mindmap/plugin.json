@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "slots": ["mindmap.toolbar"],
   "capabilities": ["task.list"],
-  "pricing": "paid",
+  "pricing": "free",
   "contributions": {
     "views": [
       {
@@ -13,7 +13,7 @@
         "titleKey": "nav.mindmap",
         "icon": "apartment",
         "groupTypes": ["project"],
-        "pricing": "paid"
+        "pricing": "free"
       }
     ]
   }

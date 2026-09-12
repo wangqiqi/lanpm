@@ -167,9 +167,9 @@ assert.ok(
   'ChatVoiceMediaPanel must not use PluginGroupSlot (no dual toolbar mount)'
 )
 
-const exampleStub = readSrc('src/renderer/src/plugin/builtins/ExampleStub.tsx')
+const opsStub = readSrc('src/renderer/src/plugin/builtins/OpsStub.tsx')
 const meetingToolbar = readSrc('src/renderer/src/plugin/builtins/MeetingToolbar.tsx')
-assert.match(exampleStub, /zone\s*!==\s*['"]composer['"]/)
+assert.match(opsStub, /context\?\.zone === 'composer'/)
 assert.match(meetingToolbar, /zone\s*!==\s*['"]toolbar['"]/)
 
 assert.match(

@@ -75,7 +75,7 @@ assert.match(stub, /resolveCommandAction/)
 assert.doesNotMatch(stub, /plugin stub|core stub/)
 
 const example = JSON.parse(
-  readFileSync(join(root, 'plugins/lanpm.example/plugin.json'), 'utf8')
+  readFileSync(join(root, 'tests/fixtures/lanpm.example.plugin.json'), 'utf8')
 ) as { commands?: Array<{ id: string }> }
 assert.ok(Array.isArray(example.commands) && example.commands.length > 0)
 
