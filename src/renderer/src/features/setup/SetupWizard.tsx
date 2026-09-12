@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Avatar, Button, Form, Input, Upload, type UploadProps } from 'antd'
+import { Alert, Avatar, Button, Form, Input, Upload, type UploadProps } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { ReloadOutlined, UploadOutlined } from '@ant-design/icons'
 import type { SetupStatus } from '@shared/identity'
@@ -14,6 +14,8 @@ import styles from './SetupWizard.module.css'
 
 interface SetupWizardProps {
   onComplete: (status: SetupStatus) => void
+  /** 注销后建议重启（仍可在本进程内继续原身份） */
+  needsRelaunch?: boolean
 }
 
 interface FormValues {
@@ -23,7 +25,10 @@ interface FormValues {
 
 type SetupStep = 'network' | 'profile'
 
-export default function SetupWizard({ onComplete }: SetupWizardProps): React.ReactElement {
+export default function SetupWizard({
+  onComplete,
+  needsRelaunch = false
+}: SetupWizardProps): React.ReactElement {
   const { t, formatError } = useI18n()
   const { message } = useLanpmApp()
   const theme = useUiStore((s) => s.theme)
@@ -34,6 +39,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
   const [avatarUrl, setAvatarUrl] = useState(() => defaultAvatarDataUrl('LP', theme))
   const [submitting, setSubmitting] = useState(false)
   const [deviceName, setDeviceName] = useState('')
+  const [pendingRebind, setPendingRebind] = useState<SetupStatus['pendingRebind']>()
 
   const baseName = Form.useWatch('baseName', form) ?? ''
 
@@ -49,8 +55,16 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     void getLanpmApi()
       .identity.getSetupStatus()
       .then((status) => {
-        if (!cancelled && status.suggestedDeviceName) {
-          setDeviceName(status.suggestedDeviceName)
+        if (cancelled) return
+        if (status.suggestedDeviceName) setDeviceName(status.suggestedDeviceName)
+        if (status.pendingRebind) {
+          setPendingRebind(status.pendingRebind)
+          const u = status.pendingRebind.user
+          form.setFieldsValue({
+            baseName: u.baseName,
+            department: u.department
+          })
+          setAvatarUrl(u.avatarUrl ?? defaultAvatarDataUrl(u.baseName.slice(0, 2), theme))
         }
       })
       .catch(() => {
@@ -59,7 +73,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [form, theme])
 
   const handleRandomAvatar = (): void => {
     setAvatarUrl(randomAvatarDataUrl(baseName || 'LP'))
@@ -82,23 +96,48 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     return Upload.LIST_IGNORE
   }
 
-  const onFinish = async (values: FormValues): Promise<void> => {
+  const finishReactivate = async (values: FormValues): Promise<void> => {
     setSubmitting(true)
     try {
-      const status = await getLanpmApi().identity.completeSetup({
+      const status = await getLanpmApi().identity.reactivateLocalIdentity({
         baseName: values.baseName.trim(),
         department: values.department?.trim() || undefined,
         avatarUrl
       })
-      message.success(t('setup.saved'))
-      if (networkSkipped) {
-        requestDiscoverCoachmark()
-      }
+      message.success(t('setup.reactivateSaved'))
+      if (networkSkipped) requestDiscoverCoachmark()
       onComplete(status)
     } catch (err) {
       message.error(formatError(err, 'setup.saveFailed'))
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const finishNewUser = async (values: FormValues): Promise<void> => {
+    setSubmitting(true)
+    try {
+      const status = await getLanpmApi().identity.completeSetup({
+        baseName: values.baseName.trim(),
+        department: values.department?.trim() || undefined,
+        avatarUrl,
+        intent: 'new_user'
+      })
+      message.success(t('setup.saved'))
+      if (networkSkipped) requestDiscoverCoachmark()
+      onComplete(status)
+    } catch (err) {
+      message.error(formatError(err, 'setup.saveFailed'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const onFinish = async (values: FormValues): Promise<void> => {
+    if (pendingRebind) {
+      await finishReactivate(values)
+    } else {
+      await finishNewUser(values)
     }
   }
 
@@ -119,14 +158,22 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
     )
   }
 
+  const rebindDisplayName = pendingRebind?.user.displayName ?? ''
+
   return (
     <div className={styles.wrap}>
       <div className={styles.sheet}>
         <header className={styles.hero}>
           <img src={logoUrl} alt="" className={styles.appIcon} width={64} height={64} />
           <h1 className={styles.title}>{t('setup.welcome')}</h1>
-          <p className={styles.subtitle}>{t('setup.subtitle')}</p>
+          <p className={styles.subtitle}>
+            {pendingRebind ? t('setup.subtitleRebind') : t('setup.subtitle')}
+          </p>
         </header>
+
+        {needsRelaunch ? (
+          <Alert type="info" showIcon message={t('setup.relaunchHint')} className={styles.relaunchAlert} />
+        ) : null}
 
         <section className={styles.avatarBlock}>
           <Avatar src={avatarUrl} size={88} className={styles.avatar} />
@@ -193,16 +240,41 @@ export default function SetupWizard({ onComplete }: SetupWizardProps): React.Rea
 
           <p className={styles.footnote}>{t('setup.footnote')}</p>
 
-          <Button
-            type="primary"
-            htmlType="submit"
-            block
-            loading={submitting}
-            className={styles.submitBtn}
-            data-testid="setup-submit"
-          >
-            {t('setup.continue')}
-          </Button>
+          {pendingRebind ? (
+            <>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={submitting}
+                className={styles.submitBtn}
+                data-testid="setup-reactivate"
+              >
+                {t('setup.continueAs', { name: rebindDisplayName })}
+              </Button>
+              <Button
+                type="link"
+                block
+                disabled={submitting}
+                className={styles.newIdentityBtn}
+                data-testid="setup-new-identity"
+                onClick={() => void finishNewUser(form.getFieldsValue())}
+              >
+                {t('setup.newIdentity')}
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={submitting}
+              className={styles.submitBtn}
+              data-testid="setup-submit"
+            >
+              {t('setup.continue')}
+            </Button>
+          )}
         </Form>
       </div>
     </div>

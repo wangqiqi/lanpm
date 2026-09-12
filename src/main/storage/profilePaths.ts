@@ -2,8 +2,11 @@ import { app } from 'electron'
 import { existsSync, mkdirSync, readdirSync, renameSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { Database } from 'better-sqlite3'
+import { readRebindHint } from '../identity/rebindHint'
 import { LOCAL_DEVICE_ID_KEY } from '../identity/setup'
 import { openPlainSqliteDatabase } from './sqliteAtRest.ts'
+import type { UserProfile } from './types'
+import { getUserById } from './repositories/userRepository'
 
 const ACTIVE_PROFILE_FILE = 'active_profile.json'
 
@@ -14,6 +17,8 @@ interface ActiveProfileFile {
 let rootUserDataPath: string | null = null
 
 export function getRootUserDataPath(): string {
+  const envRoot = process.env.LANPM_USER_DATA?.trim()
+  if (envRoot) return envRoot
   return rootUserDataPath ?? app.getPath('userData')
 }
 
@@ -168,4 +173,37 @@ export function bindProfileAfterSetup(userId: string): void {
 export function clearActiveProfileBinding(): void {
   const path = activeProfilePath()
   if (existsSync(path)) unlinkSync(path)
+}
+
+/** 新建身份：在独立空 profile 目录上跑 Setup（不写 active_profile，由 bind 收尾） */
+export function prepareFreshProfileUserDataShell(): string {
+  const base = getRootUserDataPath()
+  const shellId = `_new_${Date.now().toString(36)}`
+  const profileDir = join(base, 'profiles', shellId)
+  mkdirSync(profileDir, { recursive: true })
+  app.setPath('userData', profileDir)
+  return profileDir
+}
+
+export function readUserProfileInProfileDir(userId: string): UserProfile | null {
+  const dbPath = join(getRootUserDataPath(), 'profiles', userId, 'lanpm.db')
+  const db = openPlainSqliteDatabase(dbPath, { readonly: true })
+  if (!db) return null
+  try {
+    return getUserById(db, userId)
+  } finally {
+    db.close()
+  }
+}
+
+export function getPendingRebindFromDisk(): {
+  userId: string
+  deviceId: string
+  user: UserProfile
+} | null {
+  const hint = readRebindHint(getRootUserDataPath())
+  if (!hint) return null
+  const user = readUserProfileInProfileDir(hint.userId)
+  if (!user) return null
+  return { userId: hint.userId, deviceId: hint.deviceId, user }
 }

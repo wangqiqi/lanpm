@@ -429,7 +429,12 @@ export default function TopBar(): React.ReactElement {
               const status = await getLanpmApi().identity.resetIdentity()
               useIdentityStore
                 .getState()
-                .setFromStatus(status.configured, status.user, status.device)
+                .setFromStatus(
+                  status.configured,
+                  status.user,
+                  status.device,
+                  status.needsRelaunch
+                )
             }
           })
         }

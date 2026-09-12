@@ -26,6 +26,7 @@ import { NOTIFICATION_IPC } from '../../src/shared/notification/channels.ts'
 const IDENTITY_CHANNELS = {
   getStatus: 'identity:getStatus',
   complete: 'identity:completeSetup',
+  reactivate: 'identity:reactivateLocalIdentity',
   updateProfile: 'identity:updateProfile',
   reset: 'identity:resetIdentity',
   getSuggestedDeviceNameSync: 'identity:getSuggestedDeviceNameSync'

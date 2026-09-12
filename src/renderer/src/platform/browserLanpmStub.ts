@@ -18,7 +18,7 @@ import { dmPreviewFromMessage } from '@shared/chat/dmPreview'
 import { lastChatMessage } from '@shared/chat/messagePreview'
 import type { UserPresence } from '@shared/network/types'
 import { parseHostPort } from '@shared/network/manualPeer'
-import type { ProfileUpdateInput, SetupInput, SetupStatus } from '@shared/identity'
+import type { ProfileUpdateInput, ReactivateInput, SetupInput, SetupStatus } from '@shared/identity'
 import { resolveDeviceName } from '@shared/identity/deviceName'
 
 import type { LanpmApi } from '@shared/lanpm-api'
@@ -1331,10 +1331,42 @@ export function createBrowserLanpmStub(): LanpmApi {
         writeStatus(next)
         return next
       },
+      reactivateLocalIdentity: async (input?: ReactivateInput) => {
+        const current = readStatus()
+        const pending = current.pendingRebind
+        if (!pending) {
+          throw stubError('err.rebindNotAvailable')
+        }
+        const baseName = (input?.baseName ?? pending.user.baseName).trim()
+        const suffix = pending.user.suffix
+        const displayName = suffix ? `${baseName}${suffix}` : baseName
+        const status: SetupStatus = {
+          configured: true,
+          user: {
+            ...pending.user,
+            baseName,
+            displayName,
+            department: input?.department?.trim() || pending.user.department,
+            avatarUrl: input?.avatarUrl ?? pending.user.avatarUrl
+          },
+          device: { deviceId: pending.deviceId, deviceName: previewDeviceName() }
+        }
+        writeStatus(status)
+        return status
+      },
       resetIdentity: async () => {
+        const prev = readStatus()
         const status: SetupStatus = {
           configured: false,
-          suggestedDeviceName: previewDeviceName()
+          suggestedDeviceName: previewDeviceName(),
+          pendingRebind:
+            prev.configured && prev.user && prev.device
+              ? {
+                  userId: prev.user.userId,
+                  deviceId: prev.device.deviceId,
+                  user: prev.user
+                }
+              : undefined
         }
         writeStatus(status)
         return status

@@ -12,6 +12,14 @@
   max-width: 400px;
 }
 
+.relaunchAlert {
+  margin-bottom: 16px;
+}
+
+.newIdentityBtn {
+  margin-top: 4px;
+}
+
 /* —— Hero（类似 macOS 首次设置） —— */
 .hero {
   text-align: center;

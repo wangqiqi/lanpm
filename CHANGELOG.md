@@ -6,11 +6,13 @@
 
 ### Added
 
+- **本机身份**：注销后 Setup 默认「继续原身份」（同 `userId`）；「新建身份」才分配新用户；`identity:reactivateLocalIdentity` · `identity_rebind_hint.json`（`SPRINT-LOCAL-IDENTITY-01`）
 - **聊天**：输入框支持从系统剪贴板粘贴图片（`chat:sendPastedImage`）
 - **开发零数据启动**：`LANPM_USER_DATA` 在 Electron 主进程生效 · `npm run dev:fresh` · `npm run dev:fresh:no-demo`（零数据 + 无 mock）
 
 ### Changed
 
+- **注销文案**：与 reuse_only / reactivate 行为对齐（中/英）
 - **聊天 Composer**（`SPRINT-CHAT-COMPOSER-UX-01`）：Ops 提示移至 toolbar 下 hint 带（单行默认可展开）；协作入口收进「更多」；工具栏横向滚动；输入区最小高度 72px；默认 composer 略增高
 - **官方扩展**：移除安装包内 `lanpm.example`；`plugins/*` 全部 `pricing: free`（个人设置仅显示「免费」，无需离线许可证即可启用）
 - **Mock 默认关闭**：开发与安装包均不注入演示 catalog，除非 `LANPM_DEMO=1` / `npm run dev:demo`；`npm run dev` 默认 `LANPM_NO_DEMO=1`（部署态）

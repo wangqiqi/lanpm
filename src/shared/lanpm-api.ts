@@ -4,7 +4,7 @@ import type { ChatMessage } from './chat/types'
 import type { ChatMessagePage } from './chat/pagination'
 import type { SendChatOptions, SendFileOptions } from './chat/channels'
 import type { GroupMemberView } from './chat/members'
-import type { ProfileUpdateInput, SetupInput, SetupStatus } from './identity'
+import type { ProfileUpdateInput, ReactivateInput, SetupInput, SetupStatus } from './identity'
 import type {
   CreateTaskInput,
   GanttScheduleInput,
@@ -65,6 +65,7 @@ export interface LanpmApi {
   identity: {
     getSetupStatus: () => Promise<SetupStatus>
     completeSetup: (input: SetupInput) => Promise<SetupStatus>
+    reactivateLocalIdentity: (input?: ReactivateInput) => Promise<SetupStatus>
     updateProfile: (input: ProfileUpdateInput) => Promise<SetupStatus>
     resetIdentity: () => Promise<SetupStatus>
   }

@@ -30,6 +30,7 @@ export default function App(): React.ReactElement {
   messageRef.current = message
   const hydrated = useIdentityStore((s) => s.hydrated)
   const configured = useIdentityStore((s) => s.configured)
+  const needsRelaunch = useIdentityStore((s) => s.needsRelaunch)
   const bootFailed = useIdentityStore((s) => s.bootFailed)
   const setFromStatus = useIdentityStore((s) => s.setFromStatus)
   const setHydrated = useIdentityStore((s) => s.setHydrated)
@@ -47,7 +48,7 @@ export default function App(): React.ReactElement {
         .identity.getSetupStatus()
         .then((status) => {
           if (!cancelled) {
-            setFromStatus(status.configured, status.user, status.device)
+            setFromStatus(status.configured, status.user, status.device, status.needsRelaunch)
             void loadGroupsRef.current().then((ok) => {
               if (!ok) {
                 messageRef.current.error?.(
@@ -132,7 +133,7 @@ export default function App(): React.ReactElement {
   }, [loadIdentity])
 
   const handleSetupComplete = (status: SetupStatus): void => {
-    setFromStatus(status.configured, status.user, status.device)
+    setFromStatus(status.configured, status.user, status.device, status.needsRelaunch)
     void loadGroups().then((ok) => {
       if (!ok) message.error?.(t('nav.groupsLoadFailed'))
     })
@@ -167,7 +168,7 @@ export default function App(): React.ReactElement {
   }
 
   if (!configured) {
-    return <SetupWizard onComplete={handleSetupComplete} />
+    return <SetupWizard onComplete={handleSetupComplete} needsRelaunch={needsRelaunch} />
   }
 
   return (

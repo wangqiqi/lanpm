@@ -48,6 +48,7 @@
     "verify:linux-gpu-policy": "node --experimental-strip-types tests/static/verify-linux-gpu-policy.ts",
     "verify:p0": "node --experimental-strip-types tests/runners/verify-p0.ts",
     "verify:ipc-contract": "node --experimental-strip-types tests/static/verify-ipc-contract.ts",
+    "verify:identity-lifecycle": "node --experimental-strip-types tests/static/verify-identity-lifecycle.ts",
     "verify:i18n-keys": "node --experimental-strip-types tests/static/verify-i18n-keys.ts",
     "verify:docs-links": "node --experimental-strip-types tests/static/verify-docs-links.ts",
     "verify:docs-code": "node --experimental-strip-types tests/static/verify-docs-code.ts",

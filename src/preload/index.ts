@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { DmMessagePreview } from '../shared/chat/dmPreview'
 import type { ChatMessage } from '../shared/chat/types'
-import type { ProfileUpdateInput, SetupInput } from '../shared/identity'
+import type { ProfileUpdateInput, ReactivateInput, SetupInput } from '../shared/identity'
 import type { LanpmApi } from '../shared/lanpm-api'
 import { OPS_IPC } from '../shared/ops/channels'
 import { CHAT_IPC, CHAT_PUSH_CHANNEL } from '../shared/chat/channels'
@@ -53,6 +53,8 @@ const api: LanpmApi = {
   identity: {
     getSetupStatus: () => ipcRenderer.invoke('identity:getStatus'),
     completeSetup: (input: SetupInput) => ipcRenderer.invoke('identity:completeSetup', input),
+    reactivateLocalIdentity: (input?: ReactivateInput) =>
+      ipcRenderer.invoke('identity:reactivateLocalIdentity', input),
     updateProfile: (input: ProfileUpdateInput) =>
       ipcRenderer.invoke('identity:updateProfile', input),
     resetIdentity: () => ipcRenderer.invoke('identity:resetIdentity')

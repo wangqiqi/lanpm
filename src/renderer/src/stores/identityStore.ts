@@ -5,9 +5,15 @@ interface IdentityState {
   configured: boolean
   user: SetupUserView | null
   device: SetupDeviceView | null
+  needsRelaunch: boolean
   hydrated: boolean
   bootFailed: boolean
-  setFromStatus: (configured: boolean, user?: SetupUserView, device?: SetupDeviceView) => void
+  setFromStatus: (
+    configured: boolean,
+    user?: SetupUserView,
+    device?: SetupDeviceView,
+    needsRelaunch?: boolean
+  ) => void
   setHydrated: (hydrated: boolean) => void
   setBootFailed: (failed: boolean) => void
 }
@@ -16,13 +22,15 @@ export const useIdentityStore = create<IdentityState>((set) => ({
   configured: false,
   user: null,
   device: null,
+  needsRelaunch: false,
   hydrated: false,
   bootFailed: false,
-  setFromStatus: (configured, user, device) =>
+  setFromStatus: (configured, user, device, needsRelaunch) =>
     set({
       configured,
       user: user ?? null,
       device: device ?? null,
+      needsRelaunch: configured ? false : Boolean(needsRelaunch),
       hydrated: true,
       bootFailed: false
     }),
