@@ -43,8 +43,9 @@ out/
 test-results/
 *.tsbuildinfo
 
-# Super Cursor 项目特化（plan / learn / archive）— 本地 only，不纳入 Git
-.cursorGrowth/
+# Super Cursor 项目特化（learn / archive 等）— 默认本地；执行面板 plan.md 入库协作
+.cursorGrowth/*
+!.cursorGrowth/plan.md
 
 # 勿在仓库根重建 archive/（SSOT：.cursorGrowth/archive，见 workflow.json archive_dir）
 /archive/

@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- **开发零数据启动**：`LANPM_USER_DATA` 在 Electron 主进程生效 · `npm run dev:fresh`（`.lanpm/fresh-zero`）
+
+### Changed
+
+- **协作**：`.cursorGrowth/plan.md` 纳入版本库（其余 Growth 仍本地忽略）
+
 ## [1.106.17] - 2026-09-12
 
 ### Changed

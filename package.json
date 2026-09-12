@@ -16,6 +16,7 @@
     "dev:demo": "node scripts/dev-run.mjs --demo",
     "dev:no-demo": "node scripts/dev-run.mjs --no-demo",
     "dev:dual-peer": "node scripts/dev-with-seeds.mjs",
+    "dev:fresh": "node scripts/dev-fresh.mjs --wipe",
     "dev:web": "node scripts/dev-run.mjs --web",
     "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs && npm run verify:pack-license",
     "build": "electron-vite build",

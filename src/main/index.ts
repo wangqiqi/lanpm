@@ -59,6 +59,12 @@ if (process.platform === 'win32') {
 }
 app.setName('LanPM')
 
+const envUserDataDir = process.env.LANPM_USER_DATA?.trim()
+if (envUserDataDir) {
+  mkdirSync(envUserDataDir, { recursive: true })
+  app.setPath('userData', envUserDataDir)
+}
+
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
 const e2eMode = process.env.LANPM_E2E === '1'
 const isolatedLaunch = Boolean(visualCaptureDir || e2eMode)
