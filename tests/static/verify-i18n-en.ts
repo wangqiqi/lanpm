@@ -36,6 +36,7 @@ const LAYOUT_INLINE_KEYS: MessageKey[] = [
   'chat.collaborationFullscreen',
   'chat.inputModeText',
   'chat.inputModeVoice',
+  'chat.toolbarMore',
   'cockpit.title',
   'cockpit.totalProjects',
   'cockpit.execSummaryTitle',

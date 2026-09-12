@@ -59,6 +59,51 @@
   gap: 6px;
 }
 
+.composerHintBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.composerHintSummary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.composerHintText {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--lanpm-font-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composerHintDetail {
+  display: block;
+  font-size: var(--lanpm-font-caption);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.composerHintToggle {
+  flex-shrink: 0;
+  padding: 0 4px !important;
+  height: auto !important;
+  font-size: var(--lanpm-font-caption) !important;
+}
+
+.zoneHostComposerHint {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  line-height: normal;
+}
+
 .crash {
   border: 1px dashed var(--lanpm-danger);
   border-radius: 8px;

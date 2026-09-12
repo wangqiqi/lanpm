@@ -1453,6 +1453,9 @@ export function createBrowserLanpmStub(): LanpmApi {
       captureAndSendScreenshot: async () => {
         throw stubError('stub.screenshotElectronOnly')
       },
+      sendPastedImage: async () => {
+        throw stubError('stub.uploadElectronOnly')
+      },
       sendVoice: async () => {
         throw stubError('stub.uploadElectronOnly')
       },

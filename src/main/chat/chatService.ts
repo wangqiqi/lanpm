@@ -473,6 +473,41 @@ export async function sendFileMessage(
   return sendExistingFileMessage(db, groupId, meta.fileId, options)
 }
 
+export async function sendPastedImageMessage(
+  db: Database,
+  groupId: string,
+  imageBase64: string,
+  mimeType: string,
+  fileName?: string,
+  options?: SendFileOptions
+): Promise<ChatMessage> {
+  if (isAnonymousGroup(db, groupId)) {
+    throwLanpm('err.anonymousNoFile')
+  }
+  if (typeof imageBase64 !== 'string' || !imageBase64.trim()) {
+    throwLanpm('err.pasteImagePayloadRequired')
+  }
+  const buffer = Buffer.from(imageBase64, 'base64')
+  if (buffer.byteLength === 0) {
+    throwLanpm('err.pasteImagePayloadEmpty')
+  }
+  const safeMime = typeof mimeType === 'string' && mimeType.startsWith('image/') ? mimeType : 'image/png'
+  const ext =
+    safeMime.includes('jpeg') || safeMime.includes('jpg')
+      ? 'jpg'
+      : safeMime.includes('webp')
+        ? 'webp'
+        : safeMime.includes('gif')
+          ? 'gif'
+          : 'png'
+  const name =
+    typeof fileName === 'string' && fileName.trim()
+      ? fileName.trim()
+      : `paste-${Date.now()}.${ext}`
+  const meta = await uploadFileFromBuffer(db, groupId, buffer, name)
+  return sendExistingFileMessage(db, groupId, meta.fileId, options)
+}
+
 export async function sendExistingFileMessage(
   db: Database,
   groupId: string,

@@ -15,6 +15,7 @@ import {
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
+  MoreOutlined,
   NodeIndexOutlined,
   PaperClipOutlined,
   PlusSquareOutlined,
@@ -28,6 +29,7 @@ import { isViewAllowedForGroup } from '@shared/navigation/tabRules'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { parseTaskCommand } from '@shared/chat/taskCommand'
 import { parseOpsCommand } from '@shared/chat/opsCommand'
+import { fileToBase64, readClipboardImageFile } from '@shared/chat/clipboardImage'
 import type { Task } from '@shared/task/types'
 import { linkedFileIdsFromMessage, titleFromChatMessage } from '@shared/task/fromMessage'
 import { useChatStore } from '@renderer/stores/chatStore'
@@ -117,9 +119,9 @@ function ChatWorkspaceFrame({
 const { Text } = Typography
 const { TextArea } = Input
 
-const COMPOSER_MIN = 96
+const COMPOSER_MIN = 128
 const COMPOSER_MAX = 360
-const COMPOSER_DEFAULT = 176
+const COMPOSER_DEFAULT = 200
 const MESSAGES_MIN = 96
 
 const SIDEBAR_MIN = 160
@@ -350,7 +352,9 @@ export default function ChatView(): React.ReactElement {
   const contributedViews = useContributedViews()
   const mindmapPlugin = usePluginView('lanpm.mindmap')
   const meetingPlugin = usePluginView('lanpm.meeting')
+  const opsPlugin = usePluginView('lanpm.ops')
   const meetingEnabled = Boolean(meetingPlugin?.enabled)
+  const opsComposerHintEnabled = Boolean(opsPlugin?.enabled)
   const mindmapAllowed =
     Boolean(gid && !inDm) &&
     contributedViews.some((v) => v.route === 'mindmap' && v.groupTypes.includes(groupType))
@@ -366,6 +370,43 @@ export default function ChatView(): React.ReactElement {
     },
     [mindmapPlugin, message, t]
   )
+
+  const collabMenuItems = useMemo((): MenuProps['items'] => {
+    if (!collaborationAllowed) return []
+    const items: NonNullable<MenuProps['items']> = []
+    if (filesLibraryAllowed) {
+      items.push({
+        key: 'files',
+        icon: <FolderOutlined />,
+        label: t('nav.files'),
+        onClick: () => openCollaborationPanel('files')
+      })
+    }
+    if (whiteboardAllowed) {
+      items.push({
+        key: 'whiteboard',
+        icon: <HighlightOutlined />,
+        label: t('nav.whiteboard'),
+        onClick: () => openCollaborationPanel('whiteboard')
+      })
+    }
+    if (mindmapAllowed) {
+      items.push({
+        key: 'mindmap',
+        icon: <NodeIndexOutlined />,
+        label: t('nav.mindmap'),
+        onClick: () => openCollaborationPanel('mindmap')
+      })
+    }
+    return items
+  }, [
+    collaborationAllowed,
+    filesLibraryAllowed,
+    whiteboardAllowed,
+    mindmapAllowed,
+    openCollaborationPanel,
+    t
+  ])
 
   const insertMention = useCallback((displayName: string) => {
     setDraft((prev) => {
@@ -436,6 +477,40 @@ export default function ChatView(): React.ReactElement {
     if (!taskAllowed) return undefined
     return resolveComposerTaskLink(draft, tasks, pickedTaskRefIdRef.current)
   }, [draft, tasks, taskAllowed])
+
+  const handleComposerPaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const imageFile = readClipboardImageFile(e.clipboardData)
+      if (!imageFile || !gid) return
+      e.preventDefault()
+      if (!fileAllowed) {
+        message.warning(t('chat.pasteImageNotAllowed'))
+        return
+      }
+      const linkTaskId = resolveFileLinkTaskId()
+      void (async () => {
+        try {
+          const electronPath = (imageFile as File & { path?: string }).path
+          if (electronPath) {
+            await chatStoreActions.sendFile(gid, electronPath, linkTaskId ? { linkTaskId } : undefined)
+            return
+          }
+          const base64 = await fileToBase64(imageFile)
+          const msg = await getLanpmApi().chat.sendPastedImage(
+            gid,
+            base64,
+            imageFile.type || 'image/png',
+            imageFile.name,
+            linkTaskId ? { linkTaskId } : undefined
+          )
+          chatStoreActions.upsertMessage(msg)
+        } catch (err) {
+          message.error(formatError(err, 'chat.pasteImageFailed'))
+        }
+      })()
+    },
+    [fileAllowed, formatError, gid, message, resolveFileLinkTaskId, t]
+  )
 
   const suggestMode = useMemo(
     () => activeComposerSuggest(draft, taskAllowed),
@@ -1215,9 +1290,9 @@ export default function ChatView(): React.ReactElement {
           />
           <div className={styles.inputRow}>
             <div className={styles.composerIsland}>
-            <PluginZoneHost zone="composer" context={{ groupId: gid, view: 'chat' }} />
             <div className={styles.toolbar}>
               <div className={styles.toolbarActions}>
+                <PluginZoneHost zone="composer" context={{ groupId: gid, view: 'chat' }} />
                 <EmojiPicker onPick={insertEmoji} />
                 <div className={styles.toolbarGroupDivider} aria-hidden />
                 <div className={styles.toolbarRefGroup}>
@@ -1281,40 +1356,21 @@ export default function ChatView(): React.ReactElement {
                     </div>
                   </>
                 )}
-                {collaborationAllowed && (
+                {collabMenuItems && collabMenuItems.length > 0 ? (
                   <>
                     <div className={styles.toolbarGroupDivider} aria-hidden />
-                    <div className={styles.toolbarCollaborationGroup}>
-                      {filesLibraryAllowed && (
+                    <Dropdown menu={{ items: collabMenuItems }} trigger={['click']}>
+                      <span>
                         <ComposerIconButton
-                          data-visual-collab="files"
-                          data-testid="collab-open-files"
-                          icon={<FolderOutlined />}
-                          label={t('nav.files')}
-                          onClick={() => openCollaborationPanel('files')}
+                          data-visual-collab="more"
+                          data-testid="collab-open-more"
+                          icon={<MoreOutlined />}
+                          label={t('chat.toolbarMore')}
                         />
-                      )}
-                      {whiteboardAllowed && (
-                        <ComposerIconButton
-                          data-visual-collab="whiteboard"
-                          data-testid="collab-open-whiteboard"
-                          icon={<HighlightOutlined />}
-                          label={t('nav.whiteboard')}
-                          onClick={() => openCollaborationPanel('whiteboard')}
-                        />
-                      )}
-                      {mindmapAllowed && (
-                        <ComposerIconButton
-                          data-visual-collab="mindmap"
-                          data-testid="collab-open-mindmap"
-                          icon={<NodeIndexOutlined />}
-                          label={t('nav.mindmap')}
-                          onClick={() => openCollaborationPanel('mindmap')}
-                        />
-                      )}
-                    </div>
+                      </span>
+                    </Dropdown>
                   </>
-                )}
+                ) : null}
                 <div className={styles.toolbarGroupDivider} aria-hidden />
                 <div className={styles.toolbarMeetingGroup} data-visual-meeting="toolbar">
                   {meetingEnabled ? (
@@ -1348,6 +1404,14 @@ export default function ChatView(): React.ReactElement {
                 ]}
               />
             </div>
+            {opsComposerHintEnabled ? (
+              <div className={styles.composerHintRow}>
+                <PluginZoneHost
+                  zone="composerHint"
+                  context={{ groupId: gid, view: 'chat', composerDraft: draft }}
+                />
+              </div>
+            ) : null}
             {pendingReplyQuote ? (
               <ReplyQuoteBar quote={pendingReplyQuote} onDismiss={() => setReplyToMsgId(null)} />
             ) : null}
@@ -1380,6 +1444,7 @@ export default function ChatView(): React.ReactElement {
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
                         onKeyDown={onKeyDown}
+                        onPaste={(e) => void handleComposerPaste(e)}
                       />
                       <Button
                         type="primary"

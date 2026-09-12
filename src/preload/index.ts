@@ -76,6 +76,15 @@ const api: LanpmApi = {
       ipcRenderer.invoke('chat:sendExistingFile', groupId, fileId, options),
     captureAndSendScreenshot: (groupId) =>
       ipcRenderer.invoke('chat:captureAndSendScreenshot', groupId),
+    sendPastedImage: (groupId, imageBase64, mimeType, fileName, options) =>
+      ipcRenderer.invoke(
+        'chat:sendPastedImage',
+        groupId,
+        imageBase64,
+        mimeType,
+        fileName,
+        options
+      ),
     sendVoice: (groupId, audioBase64, durationMs, mimeType) =>
       ipcRenderer.invoke('chat:sendVoice', groupId, audioBase64, durationMs, mimeType),
     recallMessage: (groupId, msgId) => ipcRenderer.invoke('chat:recallMessage', groupId, msgId),

@@ -159,7 +159,7 @@ export function PluginZoneHost({ zone, context }: PluginZoneHostProps): React.Re
   const zoneContext: ViewPluginContext = { ...context, zone }
   return (
     <div
-      className={styles.zoneHost}
+      className={`${styles.zoneHost}${zone === 'composerHint' ? ` ${styles.zoneHostComposerHint}` : ''}`}
       data-plugin-zone={zone}
       data-plugin-view={context.view}
     >

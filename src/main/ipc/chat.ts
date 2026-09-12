@@ -9,6 +9,7 @@ import {
   recallMessage,
   sendExistingFileMessage,
   sendFileMessage,
+  sendPastedImageMessage,
   sendVoiceMessage,
   sendTextMessage,
   sendTaskRefMessage,
@@ -114,6 +115,23 @@ export function registerChatIpc(): void {
         throw new Error('fileId required')
       }
       return sendExistingFileMessage(getDatabase(), groupId, fileId, options)
+    }
+  )
+
+  ipcMain.handle(
+    CHAT_IPC.sendPastedImage,
+    (
+      _event,
+      groupId: string,
+      imageBase64: string,
+      mimeType: string,
+      fileName?: string,
+      options?: SendFileOptions
+    ) => {
+      if (typeof groupId !== 'string' || !groupId) throw new Error('groupId required')
+      if (typeof imageBase64 !== 'string' || !imageBase64) throw new Error('imageBase64 required')
+      if (typeof mimeType !== 'string' || !mimeType) throw new Error('mimeType required')
+      return sendPastedImageMessage(getDatabase(), groupId, imageBase64, mimeType, fileName, options)
     }
   )
 

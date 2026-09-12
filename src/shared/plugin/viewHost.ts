@@ -17,6 +17,7 @@ export const GLOBAL_PLUGIN_SLOT_IDS: readonly GlobalPluginSlotId[] = [
 export type ViewPluginZone =
   | 'toolbar'
   | 'composer'
+  | 'composerHint'
   | 'detail'
   | 'card'
   | 'context'
@@ -34,6 +35,8 @@ export type ViewPluginContext = {
     fileId?: string
     messageId?: string
   }
+  /** Chat composer draft — ops hint expand when typing `/` */
+  composerDraft?: string
 }
 
 /** PluginSlotHost 契约（§3.5.2） */

@@ -10,6 +10,7 @@ export const VIEW_SLOT_MAP: Record<
   chat: {
     toolbar: ['chat.toolbar.media'],
     composer: ['chat.composer.action'],
+    composerHint: ['chat.composer.action'],
     context: ['chat.message.action']
   },
   board: {
