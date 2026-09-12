@@ -48,7 +48,12 @@ const LAYOUT_INLINE_KEYS: MessageKey[] = [
   'plugin.meetingScheduleJoin',
   'plugin.meetingScheduleEdit',
   'plugin.meetingScheduleSave',
-  'plugin.meetingRecordStart'
+  'plugin.meetingRecordStart',
+  'discover.wizardConnect',
+  'discover.wizardJoin',
+  'discover.wizardContinueJoin',
+  'discover.wizardBackConnect',
+  'discover.wizardJoinNeedConnect'
 ]
 
 const MAX_INLINE_LABEL_LEN = 52
@@ -144,6 +149,27 @@ const schedulePanel = readFileSync(
 assert.match(schedulePanel, /plugin\.meetingScheduleEdit/)
 assert.match(schedulePanel, /plugin\.meetingScheduleSave/)
 assert.match(enUS['plugin.meetingScheduleUpdated'] ?? '', /Schedule updated/)
+
+const discoverCss = readFileSync(
+  join(root, 'src/renderer/src/features/discover/discover.module.css'),
+  'utf8'
+)
+const discoverModal = readFileSync(
+  join(root, 'src/renderer/src/features/discover/DiscoverModal.tsx'),
+  'utf8'
+)
+assert.match(discoverModal, /discover\.wizardJoinNeedConnect/)
+assert.match(discoverModal, /discover\.wizardBackConnect/)
+assert.match(
+  discoverCss,
+  /\.wizardSteps[\s\S]*word-break:\s*break-word/,
+  'discover wizard step titles must wrap long EN labels'
+)
+assert.match(
+  discoverCss,
+  /\.pairingPanel[\s\S]*min-width:\s*0/,
+  'discover pairing panel must shrink for long EN copy'
+)
 
 console.log(
   `verify:i18n-en OK (${enKeys.length} keys, no CJK; layout guards: ${LAYOUT_INLINE_KEYS.length} inline keys)`
