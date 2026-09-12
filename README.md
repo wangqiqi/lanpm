@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="README.zh-CN.md">简体中文</a> ·
-  <a href="https://wangqiqi.github.io/lanpm/">Website</a> ·
+  <a href="https://wangqiqi.github.io/lanpm/en/">Website</a> ·
   <a href="#-more-views">Views</a> ·
   <a href="#-why-lanpm">Why</a> ·
   <a href="#-features">Features</a> ·
@@ -121,12 +121,12 @@ Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — deta
 
 | | |
 |--|--|
-| [Project website](https://wangqiqi.github.io/lanpm/) | VitePress homepage (quick start, features) |
+| [Project website](https://wangqiqi.github.io/lanpm/en/) | VitePress homepage (English; Chinese is the default at `/lanpm/`) |
 | [docs/00 — Index](./docs/00_文档导航.md) | All product & engineering docs |
 | [ROADMAP](./docs/06_ROADMAP.md) | Backlog & milestones |
 | [plugins](./plugins/README.md) | Official plugin layout |
 
-**Current `1.106.18`** — VitePress project homepage on GitHub Pages. Test playbooks: calendar & dev:web E2E, dual-machine / cold-start / meeting / AI `verify:*-playbook` guards; dual-peer seeds skip the local `IP:43124`; discover UX P0–P2 (project groups land on the board; discover is a two-step connect→join wizard); project groups keep Gantt/calendar off the bottom bar by default (enable in Navigation & views). Paid agile: remaining-points burndown + column WIP hints + iteration containers + completed-points velocity chart. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
+**Current `1.106.18`** — VitePress project homepage on GitHub Pages. Test playbooks: calendar & dev:web E2E, dual-machine / cold-start / meeting / AI `verify:*-playbook` guards; dual-peer seeds skip the local `IP:43124`; discover UX P0–P2 (project groups land on the board; discover is a two-step connect→join wizard with empty-step guidance and named join requests); project groups keep Gantt/calendar off the bottom bar by default (enable in Navigation & views). Paid agile: remaining-points burndown + column WIP hints + iteration containers + completed-points velocity chart. Paid schedule: freeze baseline + assignee date-overlap hints. Weekly next-week plan + independent monthly template. Free `lanpm.backup` (default on). License [AGPL-3.0-or-later](./LICENSE).
 
 ---
 

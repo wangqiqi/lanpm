@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="README.md">English</a> ·
-  <a href="https://wangqiqi.github.io/lanpm/zh/">项目主页</a> ·
+  <a href="https://wangqiqi.github.io/lanpm/">项目主页</a> ·
   <a href="#-更多视图">视图</a> ·
   <a href="#-为什么选择-lanpm">为什么</a> ·
   <a href="#-核心能力">能力</a> ·
@@ -121,12 +121,12 @@ Agent 工作流（Super Cursor）：[`/plan` · `/run`](./.cursor/AGENTS.md) —
 
 | | |
 |--|--|
-| [项目主页](https://wangqiqi.github.io/lanpm/zh/) | VitePress 站点（快速开始、能力概览） |
+| [项目主页](https://wangqiqi.github.io/lanpm/) | VitePress 站点（默认中文；英文 `/en/`） |
 | [docs/00 — 导航](./docs/00_文档导航.md) | 产品与工程文档索引 |
 | [ROADMAP](./docs/06_ROADMAP.md) | backlog 与里程碑 |
 | [plugins](./plugins/README.md) | 官方插件目录 |
 
-**当前版本 `1.106.18`** — GitHub Pages 项目主页（VitePress）。测试收口：日历与 dev:web E2E、双机/冷启动/会议/AI 等 `verify:*-playbook` 守卫；双机种子会跳过本机 `IP:43124`；发现/组网 UX P0–P2（项目群默认看板；发现弹窗连通→选群两步）；项目群底栏默认折叠甘特/日历（导航偏好可开）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
+**当前版本 `1.106.18`** — GitHub Pages 项目主页（VitePress）。测试收口：日历与 dev:web E2E、双机/冷启动/会议/AI 等 `verify:*-playbook` 守卫；双机种子会跳过本机 `IP:43124`；发现/组网 UX P0–P2（项目群默认看板；发现弹窗连通→选群两步，空列表引导回连通、入群申请显示群名）；项目群底栏默认折叠甘特/日历（导航偏好可开）。可购敏捷：剩余故事点燃尽 + 列 WIP 提示 + 迭代容器 + 完成点速度图。可购排程：冻结基线 + 指派日期重叠提示。周报下周计划 + 月报独立模板。免费 `lanpm.backup`（默认开）。许可 [AGPL-3.0-or-later](./LICENSE)。
 
 ---
 
