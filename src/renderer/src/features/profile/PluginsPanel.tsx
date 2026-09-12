@@ -67,6 +67,9 @@ export default function PluginsPanel(): React.ReactElement {
       message.success(
         enabled ? t('plugin.toggleOn', { name: label }) : t('plugin.toggleOff', { name: label })
       )
+      if (enabled && plugin.pricing === 'paid' && plugin.licensed !== true) {
+        message.info(t('plugin.toggleOnPaidHint', { name: label }))
+      }
     } catch (err) {
       message.error(formatError(err, 'plugin.toggleFailed'))
       await load()

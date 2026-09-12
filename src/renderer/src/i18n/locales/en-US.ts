@@ -496,6 +496,8 @@ const enUS = {
   'plugin.emptyList': 'No plugins discovered',
   'plugin.statusOff': 'Off',
   'plugin.toggleOn': 'Enabled “{name}”',
+  'plugin.toggleOnPaidHint':
+    '“{name}” is a paid plugin: preference saved; import a license below to unlock capabilities.',
   'plugin.toggleOff': 'Disabled “{name}”',
   'plugin.toggleAria': 'Toggle plugin {name}',
   'plugin.listFailed': 'Failed to load plugins',

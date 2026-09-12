@@ -13,7 +13,7 @@ import { parseMentions } from '../../shared/chat/mentions'
 import { runWithPublishRetries } from '../../shared/chat/publishRetry'
 import type { NetworkTransport, SyncEnvelope } from '../../shared/network'
 import { getSetupStatus } from '../identity/setup'
-import { listUserGroups, resolveGroupType } from '../group/groupService'
+import { ensureGroupParticipant, listUserGroups, resolveGroupType } from '../group/groupService'
 import { listGroupMembers } from './memberService'
 import { handleGroupKeyRotate, initGroupKeyService, shutdownGroupKeyService } from '../crypto/groupKeyService'
 import {
@@ -164,6 +164,7 @@ function handleIncoming(db: Database, envelope: SyncEnvelope): void {
     deliveryStatus: 'sent'
   }
   insertMessage(db, stored)
+  ensureGroupParticipant(db, envelope.groupId, stored.senderUserId)
   broadcastMessage(stored)
 }
 
@@ -291,6 +292,7 @@ export async function publishChatMessage(
   }
 
   insertMessage(db, msg)
+  ensureGroupParticipant(db, groupId, senderUserId)
   broadcastMessage(msg)
 
   try {

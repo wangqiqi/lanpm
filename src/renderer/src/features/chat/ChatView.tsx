@@ -531,7 +531,9 @@ export default function ChatView(): React.ReactElement {
     void chatStoreActions.loadMessages(gid)
     void chatStoreActions.loadMembers(gid)
     const unsub = getLanpmApi().chat.onMessage((msg) => {
-      if (msg.groupId === gid) chatStoreActions.upsertMessage(msg)
+      if (msg.groupId !== gid) return
+      chatStoreActions.upsertMessage(msg)
+      void chatStoreActions.loadMembers(gid)
     })
     return unsub
   }, [gid])

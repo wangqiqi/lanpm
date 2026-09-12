@@ -10,7 +10,7 @@ import {
 } from '../identity/setup'
 import { ensureSeedGroups } from '../group/groupService'
 import { initNetwork, refreshNetworkIdentity, shutdownNetwork } from '../network'
-import { getDatabase } from '../storage'
+import { closeDatabase, getDatabase, initDatabase } from '../storage'
 import { bindProfileAfterSetup } from '../storage/profilePaths'
 import { confirmDestructiveIpc } from './destructiveConfirm.ts'
 
@@ -35,7 +35,13 @@ export function registerIdentityIpc(): void {
     const db = getDatabase()
     const status = completeSetup(db, input)
     if (status.configured && status.user?.userId) {
+      shutdownNetwork()
+      closeDatabase()
       bindProfileAfterSetup(status.user.userId)
+      const dbAfter = initDatabase()
+      ensureSeedGroups(dbAfter)
+      refreshNetworkIdentity(dbAfter)
+      return status
     }
     ensureSeedGroups(db)
     refreshNetworkIdentity(db)

@@ -13,6 +13,7 @@ import { SYNC_WINDOW_DAYS } from '../../shared/data/retention'
 import type { SyncEnvelope } from '../../shared/network/types'
 import { isMemoryOnlyChatGroup } from '../../shared/group/guards'
 import { listUserGroups, resolveGroupType } from '../group/groupService'
+import { ensureGroupParticipant } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { getNetworkTransport } from '../network'
 import {
@@ -51,6 +52,7 @@ function upsertIncomingChatMessage(db: Database, incoming: ChatMessage, groupId:
   }
   const stored: ChatMessage = { ...incoming, groupId, deliveryStatus: 'sent' }
   insertMessage(db, stored)
+  ensureGroupParticipant(db, groupId, stored.senderUserId)
   broadcastMessage(stored)
 }
 

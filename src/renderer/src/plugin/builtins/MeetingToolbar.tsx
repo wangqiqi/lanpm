@@ -120,7 +120,8 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     recording,
     saving: recordingSaving,
     startRecording,
-    stopAndSave
+    stopAndSave,
+    abortRecording
   } = useMeetingRecording(inMeeting && licenseActive)
 
   const liteStatusLabel = useMemo(() => {
@@ -152,9 +153,15 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
     }
   }
 
+  const leaveMeetingAll = async (): Promise<void> => {
+    if (recordingPhase === 'recording') abortRecording()
+    if (proJoined) await leaveProRoom()
+    if (joined) await leaveRoom()
+  }
+
   const onLeave = async (): Promise<void> => {
     try {
-      await leaveRoom()
+      await leaveMeetingAll()
       message.info(t('plugin.meetingLeaveOk'))
     } catch (err) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))
@@ -198,7 +205,7 @@ export default function MeetingToolbar({ plugin, groupId, context }: Props): Rea
 
   const onProLeave = async (): Promise<void> => {
     try {
-      await leaveProRoom()
+      await leaveMeetingAll()
       message.info(t('plugin.meetingProLeaveOk'))
     } catch (err) {
       message.warning(err instanceof Error ? err.message : t('plugin.capabilityFailed'))

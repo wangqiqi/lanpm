@@ -59,6 +59,12 @@ function nextAnonymousAlias(db: Database, groupId: string): string {
   return `${LANPM_GUEST_DISPLAY}:${n}`
 }
 
+/** 聊天/同步侧：把实际参与者写入 group_members（no-demo 成员列表依赖此表） */
+export function ensureGroupParticipant(db: Database, groupId: string, userId: string): void {
+  if (!userId || groupId.startsWith('dm:')) return
+  joinGroupMember(db, groupId, userId, resolveGroupType(db, groupId) === 'anonymous')
+}
+
 function joinGroupMember(db: Database, groupId: string, userId: string, anonymous: boolean): void {
   const group = getGroupById(db, groupId)
   if (!group) return

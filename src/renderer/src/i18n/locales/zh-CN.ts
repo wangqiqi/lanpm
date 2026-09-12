@@ -490,6 +490,8 @@ const zhCN = {
   'plugin.emptyList': '未发现插件包',
   'plugin.statusOff': '已关闭',
   'plugin.toggleOn': '已启用「{name}」',
+  'plugin.toggleOnPaidHint':
+    '「{name}」为可购插件：开关已保存，但能力需在下方导入许可证后才会解锁。',
   'plugin.toggleOff': '已关闭「{name}」',
   'plugin.toggleAria': '启停插件 {name}',
   'plugin.listFailed': '加载插件列表失败',

@@ -159,6 +159,14 @@ assert.match(
   readFileSync(join(root, 'src/main/chat/memberService.ts'), 'utf8'),
   /isLanpmNoDemoEnv/
 )
+assert.match(
+  readFileSync(join(root, 'src/main/chat/memberService.ts'), 'utf8'),
+  /listDistinctMessageSenderUserIds/
+)
+assert.match(
+  readFileSync(join(root, 'src/main/group/groupService.ts'), 'utf8'),
+  /ensureGroupParticipant/
+)
 assert.match(preload, /group:join/)
 assert.match(preload, /pairing:start/)
 assert.match(preload, /pairing:join/)

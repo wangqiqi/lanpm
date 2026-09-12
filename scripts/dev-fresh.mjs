@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const wipe = process.argv.includes('--wipe')
+const noDemo = process.argv.includes('--no-demo')
 const userData = path.join(root, '.lanpm', 'fresh-zero')
 
 if (wipe) {
@@ -18,9 +19,12 @@ if (wipe) {
 mkdirSync(userData, { recursive: true })
 
 const env = { ...process.env, LANPM_USER_DATA: userData }
-console.log(`[lanpm] fresh userData → ${userData}${wipe ? ' (wiped)' : ''}`)
+console.log(
+  `[lanpm] fresh userData → ${userData}${wipe ? ' (wiped)' : ''}${noDemo ? ' · no mock' : ''}`
+)
 
-const child = spawn(process.execPath, [path.join(root, 'scripts/dev-run.mjs')], {
+const devArgs = [path.join(root, 'scripts/dev-run.mjs'), ...(noDemo ? ['--no-demo'] : [])]
+const child = spawn(process.execPath, devArgs, {
   cwd: root,
   env,
   stdio: 'inherit',

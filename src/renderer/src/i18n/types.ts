@@ -484,6 +484,7 @@ export type MessageKey =
   | 'plugin.emptyList'
   | 'plugin.statusOff'
   | 'plugin.toggleOn'
+  | 'plugin.toggleOnPaidHint'
   | 'plugin.toggleOff'
   | 'plugin.toggleAria'
   | 'plugin.listFailed'

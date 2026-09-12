@@ -97,6 +97,13 @@ export function updateDeliveryStatus(
   db.prepare('UPDATE messages SET delivery_status = ? WHERE msg_id = ?').run(status, msgId)
 }
 
+export function listDistinctMessageSenderUserIds(db: Database, groupId: string): string[] {
+  const rows = db
+    .prepare(`SELECT DISTINCT sender_user_id FROM messages WHERE group_id = ?`)
+    .all(groupId) as { sender_user_id: string }[]
+  return rows.map((r) => r.sender_user_id)
+}
+
 export function getMaxLamportTs(db: Database, groupId: string): number {
   const row = db
     .prepare('SELECT MAX(lamport_ts) AS max_ts FROM messages WHERE group_id = ?')

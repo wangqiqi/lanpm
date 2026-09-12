@@ -101,11 +101,24 @@ function rewriteFilePathsAfterProfileMove(db: Database, oldRoot: string, newRoot
   }
 }
 
+function moveSqliteBundle(fromDir: string, toDir: string): void {
+  for (const suffix of ['', '-wal', '-shm'] as const) {
+    const name = `lanpm.db${suffix}`
+    const from = join(fromDir, name)
+    const to = join(toDir, name)
+    if (existsSync(from) && !existsSync(to)) {
+      renameSync(from, to)
+    }
+  }
+}
+
+/** 须在主进程 closeDatabase() 之后调用（Windows 上打开中的 db 无法 rename） */
 function migrateLegacyToProfile(userId: string): void {
   const base = getRootUserDataPath()
   const profileDir = join(base, 'profiles', userId)
   mkdirSync(profileDir, { recursive: true })
-  for (const name of ['lanpm.db', 'files', 'previews'] as const) {
+  moveSqliteBundle(base, profileDir)
+  for (const name of ['files', 'previews'] as const) {
     const from = join(base, name)
     const to = join(profileDir, name)
     if (existsSync(from) && !existsSync(to)) {

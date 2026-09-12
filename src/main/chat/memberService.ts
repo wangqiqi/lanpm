@@ -16,6 +16,7 @@ import {
 } from '../../shared/ops/bot.ts'
 import { getOpsGroupSettings } from '../ops/opsGroupSettingsStore.ts'
 import { getUserById } from '../storage/repositories/userRepository'
+import { listDistinctMessageSenderUserIds } from '../storage/repositories/messageRepository'
 import { isLanpmNoDemoEnv } from '../../shared/env/lanpmNoDemo.ts'
 
 /** 非匿名群占位成员，便于 @提及联调 */
@@ -139,6 +140,33 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
       }
     })
     const members = new Map(roster.map((m) => [m.userId, m]))
+
+    const addKnownUser = (userId: string, displayName?: string) => {
+      if (!userId || members.has(userId)) return
+      const user = getUserById(db, userId)
+      const name = displayName ?? user?.displayName ?? userId
+      members.set(userId, {
+        userId,
+        displayName: name,
+        avatarUrl: user?.avatarUrl,
+        mentionKeys: user ? [user.baseName, userId] : [userId]
+      })
+    }
+
+    for (const userId of listDistinctMessageSenderUserIds(db, groupId)) {
+      addKnownUser(userId)
+    }
+
+    const transport = getNetworkTransport()
+    if (transport) {
+      const peers = await transport.discoverPeers()
+      for (const peer of peers) {
+        if (!peer.userId || peer.userId === '__lanpm_probe__') continue
+        if (!peer.groups?.some((g) => g.groupId === groupId)) continue
+        addKnownUser(peer.userId, peer.displayName)
+      }
+    }
+
     for (const machine of listOpsMachines(groupId)) {
       const userId = machineUserId(machine.deviceId)
       members.set(userId, {

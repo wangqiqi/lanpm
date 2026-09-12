@@ -6,11 +6,18 @@
 
 ### Added
 
-- **开发零数据启动**：`LANPM_USER_DATA` 在 Electron 主进程生效 · `npm run dev:fresh`（`.lanpm/fresh-zero`）
+- **开发零数据启动**：`LANPM_USER_DATA` 在 Electron 主进程生效 · `npm run dev:fresh` · `npm run dev:fresh:no-demo`（零数据 + 无 mock）
 
 ### Changed
 
 - **协作**：`.cursorGrowth/plan.md` 纳入版本库（其余 Growth 仍本地忽略）
+- **插件**：启用 paid 插件且无许可证时追加说明 toast（`TASK-DUAL-04d`）
+
+### Fixed
+
+- **no-demo 成员**（`TASK-DUAL-04a`）：聊天收/发写入 `group_members`；成员列表合并消息发送者与同群发现 peer；新消息后刷新成员栏
+- **Setup**（`TASK-DUAL-04b`）：完成向导前关闭 SQLite 再迁 profile，修复 Windows `EBUSY` rename
+- **会议**（`TASK-DUAL-04c`）：离开房间统一释放 Lite/Pro/本地录制并关闭摄像头与麦克风轨道
 
 ## [1.106.17] - 2026-09-12
 

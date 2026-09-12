@@ -104,6 +104,23 @@ export function useMeetingRecording(canRecord: boolean) {
     }
   }, [clearTick, stopTracks])
 
+  const abortRecording = useCallback((): void => {
+    clearTick()
+    const recorder = recorderRef.current
+    if (recorder && recorder.state !== 'inactive') {
+      try {
+        recorder.stop()
+      } catch {
+        /* ignore */
+      }
+    }
+    recorderRef.current = null
+    stopTracks()
+    chunksRef.current = []
+    setElapsedSec(0)
+    setPhase('idle')
+  }, [clearTick, stopTracks])
+
   return {
     phase,
     elapsedSec,
@@ -111,6 +128,7 @@ export function useMeetingRecording(canRecord: boolean) {
     recording: phase === 'recording',
     saving: phase === 'saving',
     startRecording,
-    stopAndSave
+    stopAndSave,
+    abortRecording
   }
 }

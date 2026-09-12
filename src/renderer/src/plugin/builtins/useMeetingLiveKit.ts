@@ -191,7 +191,15 @@ export function useMeetingLiveKit(plugin: PluginView, groupId: string) {
     setBusy(true)
     try {
       const room = roomRef.current
-      if (room) detachRoomListeners(room)
+      if (room) {
+        detachRoomListeners(room)
+        try {
+          await room.localParticipant.setCameraEnabled(false)
+          await room.localParticipant.setMicrophoneEnabled(false)
+        } catch {
+          /* tracks may already be off */
+        }
+      }
       await room?.disconnect()
       roomRef.current = null
       setProJoined(false)
