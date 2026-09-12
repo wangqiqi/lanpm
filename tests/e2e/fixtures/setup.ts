@@ -25,8 +25,21 @@ export function discoverDialog(page: Page) {
   return page.getByRole('dialog', { name: '发现' })
 }
 
+async function dismissDiscoverCoachmark(page: Page): Promise<void> {
+  const tour = page.locator('.ant-tour')
+  if (!(await tour.isVisible().catch(() => false))) return
+  const close = tour.locator('.ant-tour-close')
+  if (await close.isVisible().catch(() => false)) {
+    await close.click({ force: true })
+  } else {
+    await page.keyboard.press('Escape')
+  }
+  await tour.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {})
+}
+
 /** 关闭可能残留的 Ant Design Modal（取消 / 关闭按钮 / Escape）。 */
 export async function dismissAllModals(page: Page): Promise<void> {
+  await dismissDiscoverCoachmark(page)
   for (let round = 0; round < 6; round++) {
     const dialog = page.getByRole('dialog').first()
     if (!(await dialog.isVisible().catch(() => false))) return
@@ -125,9 +138,11 @@ export async function openDiscoverModal(page: Page): Promise<void> {
   }
 
   await dismissAllModals(page)
+  await dismissDiscoverCoachmark(page)
   const discover = page.getByTestId('topbar-discover')
-  await discover.click()
+  await discover.click({ force: true })
   await expect(dialog).toBeVisible()
+  await dismissDiscoverCoachmark(page)
   await resetDiscoverPairingPanel(page)
 }
 

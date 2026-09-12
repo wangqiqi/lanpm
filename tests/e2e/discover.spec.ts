@@ -59,4 +59,27 @@ test.describe('discover modal E2E', () => {
     await appPage.keyboard.press('Escape')
     await expect(help).toBeHidden()
   })
+
+  test('two-step wizard: steps visible, join then back to connect if empty', async ({ appPage }) => {
+    await openDiscoverModal(appPage)
+    const dialog = discoverDialog(appPage)
+    await expect(dialog.getByTestId('discover-wizard-steps')).toBeVisible()
+
+    const continueJoin = dialog.getByTestId('discover-wizard-to-join')
+    if (await continueJoin.isVisible()) {
+      await continueJoin.click()
+    } else {
+      await dialog.getByTestId('discover-wizard-steps').getByText(/加入群组|Join a group/i).click()
+    }
+
+    const guide = dialog.getByTestId('discover-wizard-join-guide')
+    if (await guide.isVisible()) {
+      await expect(dialog.getByTestId('discover-wizard-back-connect')).toBeVisible()
+      await dialog.getByTestId('discover-wizard-back-connect').click()
+      await expect(dialog.getByTestId('discover-share-pairing')).toBeVisible()
+      return
+    }
+
+    await expect(dialog.getByRole('tab', { name: /群组|Groups/i })).toBeVisible()
+  })
 })
