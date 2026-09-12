@@ -101,8 +101,6 @@ if (envUserDataDir) {
 
 const visualCaptureDir = process.env.LANPM_VISUAL_CAPTURE_DIR
 const e2eMode = process.env.LANPM_E2E === '1'
-const isolatedLaunch = Boolean(visualCaptureDir || e2eMode)
-
 if (visualCaptureDir || e2eMode) {
   // Prefer repo-local temp (gitignore) over OS /tmp — avoids disk clutter across CI/dev runs
   const fallbackRoot = join(process.cwd(), '.lanpm', 'tmp')

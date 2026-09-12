@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.18] - 2026-09-12
+
 ### Added
 
 - **本机身份**：注销后 Setup 默认「继续原身份」（同 `userId`）；「新建身份」才分配新用户；`identity:reactivateLocalIdentity` · `identity_rebind_hint.json`（`SPRINT-LOCAL-IDENTITY-01`）
