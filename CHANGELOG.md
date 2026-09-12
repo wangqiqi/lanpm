@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **E2E**：发现顶栏只用 `topbar-discover`（避免看板卡片「发现」撞名）；配对成功横幅在自动入群时也会出；`expectPairingJoinSuccess` 等「已连接 {peer}」
+- **文档守卫**：`workflow.json` `sdd.specs_dir` 与 `verify:docs-optim-closeout` 对齐为 `.cursorGrowth/specs`
+
 ## [1.106.15] - 2026-09-12
 
 ### Added

@@ -80,6 +80,15 @@ const netDropdownBlock = topbar.slice(
 assert.doesNotMatch(netDropdownBlock, /addManualPeer|manualPeerTitle|setManualPeerOpen/)
 assert.match(modal, /tryAutoJoinAfterSnapshot/)
 assert.match(modal, /handlePairingJoined/)
+const pairingJoinedFn = modal.slice(
+  modal.indexOf('const handlePairingJoined'),
+  modal.indexOf('const handleImportPeerFile')
+)
+assert.match(pairingJoinedFn, /pairingJoinSuccess/)
+assert.ok(
+  pairingJoinedFn.indexOf('pairingJoinSuccess') < pairingJoinedFn.indexOf('pickSingleJoinableGroup'),
+  'pairingJoinSuccess toast must fire before auto-join'
+)
 assert.match(modal, /join_pending/)
 // TASK-8402: 零群首屏 → 驾驶舱 + 自动打开发现
 assert.match(homeRedirect, /groups\.length === 0/)

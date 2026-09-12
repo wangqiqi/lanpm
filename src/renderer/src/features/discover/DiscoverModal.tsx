@@ -165,6 +165,12 @@ export default function DiscoverModal({
 
   const handlePairingJoined = useCallback(
     async ({ snapshot: data, peerName, groupCount }: PairingJoinPayload): Promise<void> => {
+      message.success(
+        t('discover.pairingJoinSuccess', {
+          name: peerName,
+          count: groupCount
+        })
+      )
       const single = pickSingleJoinableGroup(data.groups)
       if (single) {
         await tryAutoJoinAfterSnapshot(data)
@@ -173,12 +179,6 @@ export default function DiscoverModal({
       setSnapshot(data)
       setTab('groups')
       setWizardStep('join')
-      message.success(
-        t('discover.pairingJoinSuccess', {
-          name: peerName,
-          count: groupCount
-        })
-      )
     },
     [message, t, tryAutoJoinAfterSnapshot]
   )

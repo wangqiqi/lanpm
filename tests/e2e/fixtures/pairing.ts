@@ -94,8 +94,8 @@ export async function expectPairingJoinSuccess(
   page: Page,
   peerDisplayName: string
 ): Promise<void> {
+  const escaped = peerDisplayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   await expect(
-    page.getByRole('button', { name: peerDisplayName, exact: true })
+    page.getByText(new RegExp(`已连接\\s*${escaped}|Connected to\\s*${escaped}`, 'i'))
   ).toBeVisible({ timeout: 30_000 })
-  await expect(page.getByRole('button', { name: /已连接|connected/i })).toBeVisible()
 }

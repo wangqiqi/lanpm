@@ -17,8 +17,7 @@ export async function completeSetupWizard(page: Page): Promise<void> {
     await page.getByRole('button', { name: /继\s*续/ }).click()
   }
 
-  const discover =
-    page.getByTestId('topbar-discover').or(page.getByRole('button', { name: '发现' }))
+  const discover = page.getByTestId('topbar-discover')
   await expect(discover).toBeVisible({ timeout: 120_000 })
 }
 
@@ -126,8 +125,7 @@ export async function openDiscoverModal(page: Page): Promise<void> {
   }
 
   await dismissAllModals(page)
-  const discover =
-    page.getByTestId('topbar-discover').or(page.getByRole('button', { name: '发现' }))
+  const discover = page.getByTestId('topbar-discover')
   await discover.click()
   await expect(dialog).toBeVisible()
   await resetDiscoverPairingPanel(page)
