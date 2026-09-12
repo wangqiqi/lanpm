@@ -31,6 +31,8 @@ assert.match(docs05, /verify:m6/, 'docs/05 cites verify:m6 loopback')
 assert.match(docs05, /verify:dual-machine-playbook/, 'docs/05 cites dual-machine playbook guard')
 assert.match(docs05, /UDP `43123`/, 'docs/05 UDP port')
 assert.match(docs05, /TCP `43124`/, 'docs/05 TCP port')
+assert.match(docs05, /LANPM_DISCOVER_SEEDS/, 'docs/05 auto peer seeds env')
+assert.equal(typeof pkg.scripts['dev:dual-peer'], 'string', 'dev:dual-peer script')
 
 const stepTable = docs05.slice(
   docs05.indexOf('### 6.2 步骤'),

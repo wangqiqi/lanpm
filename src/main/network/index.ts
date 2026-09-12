@@ -6,7 +6,12 @@ import { initChatService } from '../chat/chatService'
 import { listDiscoverableGroupsForAdvert } from '../group/groupService'
 import { getSetupStatus } from '../identity/setup'
 import { setDiscoverableGroupsProvider } from '../discover/advertProvider'
-import { connectDiscoverSeeds, appendDiscoverSeeds, loadDiscoverSeeds } from '../discover/discoverService'
+import {
+  connectDiscoverSeeds,
+  appendDiscoverSeeds,
+  loadDiscoverSeeds,
+  mergeDiscoverSeedsFromEnv
+} from '../discover/discoverService'
 import { RealNetworkTransport } from './real/RealNetworkTransport'
 import {
   initNetworkStub,
@@ -85,6 +90,7 @@ export function initNetwork(db: Database): NetworkTransport | null {
 
   if (realTransport) return realTransport
   realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName, db)
+  mergeDiscoverSeedsFromEnv(db)
   void connectDiscoverSeeds(db, { waitForGroups: true }).catch((err) => {
     console.warn('[lanpm] connectDiscoverSeeds failed:', err instanceof Error ? err.message : err)
   })
@@ -105,6 +111,7 @@ export function refreshNetworkIdentity(db: Database): void {
   realTransport?.stop()
   realTransport = null
   realTransport = buildReal(status.device.deviceId, status.user.userId, status.user.displayName, db)
+  mergeDiscoverSeedsFromEnv(db)
   void connectDiscoverSeeds(db, { waitForGroups: true }).catch((err) => {
     console.warn('[lanpm] connectDiscoverSeeds failed:', err instanceof Error ? err.message : err)
   })

@@ -15,6 +15,18 @@
 
 防火墙：UDP **43123** · TCP **43124** 已放行（是/否 · 备注）
 
+**自动对接（推荐先试）**：各机启动时注入对端种子（启动后约 3–15s 自动连 TCP）：
+
+```bash
+# Windows 指向 Ubuntu B
+npm run dev:dual-peer -- 192.168.20.16:43124
+
+# Ubuntu 指向 Windows A（把 <WIN_IP> 换成 ipconfig 看到的 192.168.20.x）
+npm run dev:dual-peer -- <WIN_IP>:43124
+```
+
+或 `LANPM_DISCOVER_SEEDS=<peer>:43124 npm run dev`。UDP 仍失败再用 §6.2 步骤 6 或 `npm run lanpm -- pairing start|join`。
+
 ## 代码同步（Win 修 → Ubuntu 复测）
 
 | commit | 简述 | Ubuntu 已 `git pull` 同 SHA | 复测步骤 |

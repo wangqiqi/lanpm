@@ -13,6 +13,7 @@
   "scripts": {
     "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs",
     "dev": "node scripts/dev-run.mjs",
+    "dev:dual-peer": "node scripts/dev-with-seeds.mjs",
     "dev:web": "node scripts/dev-run.mjs --web",
     "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs && npm run verify:pack-license",
     "build": "electron-vite build",

@@ -6,6 +6,7 @@ import {
   addDiscoverSeed,
   normalizeDiscoverSeeds
 } from '../../shared/discover/discoverSeeds'
+import { parseDiscoverSeedsEnv } from '../../shared/discover/discoverSeedsEnv'
 import { parseHostPort } from '../../shared/network/manualPeer'
 import { getSetupStatus } from '../identity/setup'
 import { listUserGroups } from '../group/groupService'
@@ -38,6 +39,17 @@ export function setDiscoverSeeds(db: Database, seeds: unknown): string[] {
 export function appendDiscoverSeeds(db: Database, addresses: string[]): string[] {
   let next = loadSeeds(db)
   for (const address of addresses) {
+    next = addDiscoverSeed(next, address)
+  }
+  return setDiscoverSeeds(db, next)
+}
+
+/** Merge `LANPM_DISCOVER_SEEDS` into SQLite meta before auto-connect. */
+export function mergeDiscoverSeedsFromEnv(db: Database): string[] {
+  const fromEnv = parseDiscoverSeedsEnv(process.env.LANPM_DISCOVER_SEEDS)
+  if (fromEnv.length === 0) return loadSeeds(db)
+  let next = loadSeeds(db)
+  for (const address of fromEnv) {
     next = addDiscoverSeed(next, address)
   }
   return setDiscoverSeeds(db, next)
