@@ -113,7 +113,7 @@ npm run build
 | Chat perf QA | Budget in local `.cursorGrowth/decisions/chat-perf.md` · guards → `verify:chat-perf*` |
 | App perf baseline | `npm run measure:perf` · `verify:measure-perf` · `measure:list-scroll` / `verify:list-scroll` (chat/board/files/gantt jank) · `verify:linux-installer-smoke` (static; `LANPM_REQUIRE_INSTALLER=1` launches unpacked → chat tab) · [docs/05 §5](./docs/05_测试与联调发布.md#5-性能测量m7) — Linux GPU is off by default (`LANPM_ENABLE_GPU=1` to opt in; `--quick` RSS is not the 200MB budget); Board/Tree/Files/Cockpit are lazy-split; cockpit dashboard is one JOIN; file-chunk progress IPC is 100ms-throttled; SQLite probe reads 16-byte header; task writes patch locally |
 | Release QA | [docs/05](./docs/05_测试与联调发布.md) · cross-platform matrix §1.4 |
-| LAN / “real network” | `npm run verify:m6` is **localhost loopback**, not two PCs. Dual-machine steps: [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6) (manual; CI does not run them) |
+| LAN / “real network” | `npm run verify:m6` is **localhost loopback**, not two PCs. **Deploy-like dev:** `npm run userdata:wipe` · `npm run dev:deploy-test -- <peer-ip>:43124` (no mock, TCP probe, then dev). Dual-machine §6.2: [docs/05 §6](./docs/05_测试与联调发布.md#6-局域网真网联调m6) (manual UI; CI does not run them) |
 
 Agent workflow (Super Cursor): [`/plan` · `/run`](./.cursor/AGENTS.md) — details in [`.cursor/`](./.cursor/).
 
