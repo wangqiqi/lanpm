@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Input, InputNumber, Select, Switch, Typography, message } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Input, InputNumber, Popover, Select, Switch, Typography, message } from 'antd'
 import type { PluginView } from '@shared/plugin/types'
 import type { ViewPluginContext } from '@shared/plugin/viewHost'
 import type { Task, TaskStatus } from '@shared/task/types'
@@ -235,7 +236,7 @@ export default function AgileStub({
     if (context.zone === 'card') return null
     return (
       <div
-        className={styles.scheduleToolbar}
+        className={`${styles.scheduleToolbar} ${styles.agileBoardToolbar}`}
         data-testid="agile-board-toolbar"
         data-plugin-id={plugin.id}
       >
@@ -296,9 +297,49 @@ export default function AgileStub({
     : ''
   const idealLine = burndown ? burndownPolyline(burndown.ideal, 128, 28, yMax) : ''
   const velocityRects = velocity ? velocityBarRects(velocity.bars, 128, 28) : []
+  const createForm = (
+    <div className={styles.agileCreateForm}>
+      <Input
+        size="small"
+        disabled={busy}
+        placeholder={t('plugin.agileIterationName')}
+        aria-label={t('plugin.agileIterationName')}
+        value={draftName}
+        onChange={(e) => setDraftName(e.target.value)}
+      />
+      <div className={styles.agileCreateDates}>
+        <Input
+          size="small"
+          type="date"
+          disabled={busy}
+          value={draftStart}
+          aria-label={t('plugin.agileIterationStart')}
+          onChange={(e) => setDraftStart(e.target.value)}
+        />
+        <Input
+          size="small"
+          type="date"
+          disabled={busy}
+          value={draftEnd}
+          aria-label={t('plugin.agileIterationEnd')}
+          onChange={(e) => setDraftEnd(e.target.value)}
+        />
+      </div>
+      <Button
+        size="small"
+        type="primary"
+        disabled={busy}
+        data-testid="agile-iteration-create"
+        onClick={() => void onCreateIteration()}
+      >
+        {t('plugin.agileIterationCreate')}
+      </Button>
+    </div>
+  )
+
   return (
     <div
-      className={styles.scheduleToolbar}
+      className={`${styles.scheduleToolbar} ${styles.agileBoardToolbar}`}
       data-testid="agile-board-toolbar"
       data-plugin-id={plugin.id}
     >
@@ -318,112 +359,92 @@ export default function AgileStub({
             }))
           ]}
         />
-        <Input
-          size="small"
-          disabled={busy}
-          className={styles.agileIterName}
-          placeholder={t('plugin.agileIterationName')}
-          value={draftName}
-          onChange={(e) => setDraftName(e.target.value)}
-        />
-        <Input
-          size="small"
-          type="date"
-          disabled={busy}
-          value={draftStart}
-          aria-label={t('plugin.agileIterationStart')}
-          onChange={(e) => setDraftStart(e.target.value)}
-        />
-        <Input
-          size="small"
-          type="date"
-          disabled={busy}
-          value={draftEnd}
-          aria-label={t('plugin.agileIterationEnd')}
-          onChange={(e) => setDraftEnd(e.target.value)}
-        />
-        <Button
-          size="small"
-          disabled={busy}
-          data-testid="agile-iteration-create"
-          onClick={() => void onCreateIteration()}
+        <Popover
+          trigger="click"
+          placement="bottomLeft"
+          content={createForm}
+          title={t('plugin.agileIterationCreate')}
         >
-          {t('plugin.agileIterationCreate')}
-        </Button>
+          <Button size="small" icon={<PlusOutlined />} aria-label={t('plugin.agileIterationCreate')}>
+            {t('plugin.agileIterationCreate')}
+          </Button>
+        </Popover>
       </span>
-      <Text type="secondary" data-testid="agile-column-sums">
-        {t('plugin.agileColumnSums')}: {formatColumnPointSums(sums, labels)}
-      </Text>
-      <span className={styles.agileWipRow} data-testid="agile-wip">
-        {COLUMN_WIP_STATUSES.map((status) => (
-          <label key={status} className={styles.agileWipField}>
-            <Text type="secondary">{labels[status]}</Text>
-            <InputNumber
-              size="small"
-              min={1}
-              max={99}
-              disabled={busy}
-              placeholder={t('plugin.agileWip')}
-              value={parseWipLimit(wipLimits[status]) ?? null}
-              onChange={(value) => {
-                const n = typeof value === 'number' ? value : null
-                void onSaveWip(status, n)
-              }}
-            />
-          </label>
-        ))}
-      </span>
-      {burndown ? (
-        <span className={styles.agileBurndown} data-testid="agile-burndown">
-          <Text type="secondary">
-            {t('plugin.agileBurndown')} {burndown.remaining}/{burndown.total}
-          </Text>
-          <svg
-            className={styles.agileBurndownSvg}
-            viewBox="0 0 128 28"
-            aria-hidden
-          >
-            {idealLine ? (
-              <polyline
-                fill="none"
-                stroke="var(--lanpm-border)"
-                strokeWidth="1.5"
-                points={idealLine}
-              />
-            ) : null}
-            {actualLine ? (
-              <polyline
-                fill="none"
-                stroke="var(--lanpm-accent)"
-                strokeWidth="1.5"
-                points={actualLine}
-              />
-            ) : null}
-          </svg>
-        </span>
-      ) : null}
-      <span className={styles.agileBurndown} data-testid="agile-velocity">
-        <Text type="secondary">
-          {t('plugin.agileVelocity')}
-          {velocity && velocity.bars.some((b) => b.completedPoints > 0)
-            ? ` ${velocity.bars.map((b) => b.completedPoints).join(' · ')}`
-            : ` ${t('plugin.agileVelocityEmpty')}`}
+      <div className={styles.agileMetricsRow} data-testid="agile-metrics">
+        <Text type="secondary" className={styles.agileMetric} data-testid="agile-column-sums">
+          {t('plugin.agileColumnSums')}: {formatColumnPointSums(sums, labels)}
         </Text>
-        {velocityRects.length > 0 ? (
-          <svg className={styles.agileBurndownSvg} viewBox="0 0 128 28" aria-hidden>
-            {velocityRects.map((rect) => (
-              <rect
-                key={rect.iterationId}
-                x={rect.x}
-                y={rect.y}
-                width={rect.width}
-                height={rect.height}
-                fill="var(--lanpm-accent)"
+        <span className={`${styles.agileWipRow} ${styles.agileMetric}`} data-testid="agile-wip">
+          <Text type="secondary">{t('plugin.agileWip')}</Text>
+          {COLUMN_WIP_STATUSES.map((status) => (
+            <label key={status} className={styles.agileWipField}>
+              <Text type="secondary">{labels[status]}</Text>
+              <InputNumber
+                size="small"
+                min={1}
+                max={99}
+                controls={false}
+                disabled={busy}
+                className={styles.agileWipInput}
+                placeholder="—"
+                aria-label={`${labels[status]} ${t('plugin.agileWip')}`}
+                value={parseWipLimit(wipLimits[status]) ?? null}
+                onChange={(value) => {
+                  const n = typeof value === 'number' ? value : null
+                  void onSaveWip(status, n)
+                }}
               />
-            ))}
-          </svg>
+            </label>
+          ))}
+        </span>
+        {burndown ? (
+          <span className={`${styles.agileBurndown} ${styles.agileMetric}`} data-testid="agile-burndown">
+            <Text type="secondary">
+              {t('plugin.agileBurndown')} {burndown.remaining}/{burndown.total}
+            </Text>
+            <svg className={styles.agileBurndownSvg} viewBox="0 0 128 28" aria-hidden>
+              {idealLine ? (
+                <polyline
+                  fill="none"
+                  stroke="var(--lanpm-border)"
+                  strokeWidth="1.5"
+                  points={idealLine}
+                />
+              ) : null}
+              {actualLine ? (
+                <polyline
+                  fill="none"
+                  stroke="var(--lanpm-accent)"
+                  strokeWidth="1.5"
+                  points={actualLine}
+                />
+              ) : null}
+            </svg>
+          </span>
         ) : null}
-      </span>
+        <span className={`${styles.agileBurndown} ${styles.agileMetric}`} data-testid="agile-velocity">
+          <Text type="secondary">
+            {t('plugin.agileVelocity')}
+            {velocity && velocity.bars.some((b) => b.completedPoints > 0)
+              ? ` ${velocity.bars.map((b) => b.completedPoints).join(' · ')}`
+              : ` ${t('plugin.agileVelocityEmpty')}`}
+          </Text>
+          {velocityRects.length > 0 ? (
+            <svg className={styles.agileBurndownSvg} viewBox="0 0 128 28" aria-hidden>
+              {velocityRects.map((rect) => (
+                <rect
+                  key={rect.iterationId}
+                  x={rect.x}
+                  y={rect.y}
+                  width={rect.width}
+                  height={rect.height}
+                  fill="var(--lanpm-accent)"
+                />
+              ))}
+            </svg>
+          ) : null}
+        </span>
+      </div>
     </div>
   )
 }
