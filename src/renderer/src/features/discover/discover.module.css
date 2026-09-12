@@ -27,6 +27,10 @@
   margin-top: 8px;
 }
 
+.wizardGuideAlert {
+  margin-bottom: 12px;
+}
+
 .list {
   max-height: 360px;
   overflow: auto;

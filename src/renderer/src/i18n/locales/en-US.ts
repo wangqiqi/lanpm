@@ -1352,6 +1352,8 @@ const enUS = {
   'discover.wizardConnect': 'Connect',
   'discover.wizardJoin': 'Join a group',
   'discover.wizardContinueJoin': 'Next: choose a group',
+  'discover.wizardJoinNeedConnect': 'Connect a peer first, then pick a group',
+  'discover.wizardBackConnect': 'Back to connect',
   'discover.sharePairingCode': 'Share group pairing code',
   'discover.findGroupsByCode': 'Find groups by code',
   'discover.codesExplainer':

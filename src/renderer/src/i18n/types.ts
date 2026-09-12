@@ -1311,6 +1311,8 @@ export type MessageKey =
   | 'discover.wizardConnect'
   | 'discover.wizardJoin'
   | 'discover.wizardContinueJoin'
+  | 'discover.wizardJoinNeedConnect'
+  | 'discover.wizardBackConnect'
   | 'discover.emptyGroups'
   | 'discover.emptyPeople'
   | 'discover.join'

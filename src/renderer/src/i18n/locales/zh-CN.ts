@@ -1329,6 +1329,8 @@ const zhCN = {
   'discover.wizardConnect': '连通',
   'discover.wizardJoin': '加入群组',
   'discover.wizardContinueJoin': '下一步：选择群组',
+  'discover.wizardJoinNeedConnect': '请先完成连通，再选择群组',
+  'discover.wizardBackConnect': '返回连通',
   'discover.sharePairingCode': '分享群组连接码',
   'discover.findGroupsByCode': '用连接码查找群组',
   'discover.codesExplainer':

@@ -84,6 +84,7 @@ export default function DiscoverModal({
   const [sharingInviteGroupId, setSharingInviteGroupId] = useState<string | null>(null)
   const [pairingMode, setPairingMode] = useState<PairingPanelMode>('idle')
   const [wizardStep, setWizardStep] = useState<'connect' | 'join'>('connect')
+  const [pairingConnected, setPairingConnected] = useState(false)
   const [peerFileLoading, setPeerFileLoading] = useState(false)
 
   const refresh = useCallback(async (): Promise<void> => {
@@ -115,6 +116,7 @@ export default function DiscoverModal({
     setTab('groups')
     setPairingMode('idle')
     setWizardStep('connect')
+    setPairingConnected(false)
     void refresh()
     // TASK-8801: 不要依赖 refresh 身份；否则 snapshot 回调一变就把正在分享的连接码 UI 清掉
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅随弹窗打开重置向导
@@ -173,6 +175,7 @@ export default function DiscoverModal({
           count: groupCount
         })
       )
+      setPairingConnected(true)
       const single = pickSingleJoinableGroup(data.groups)
       if (single) {
         await tryAutoJoinAfterSnapshot(data)
@@ -191,6 +194,7 @@ export default function DiscoverModal({
       const result = await getLanpmApi().pairing.importPeerFileDialog()
       if (!result) return
       message.success(t('discover.peerFileImportSuccess', { name: result.file.displayName }))
+      setPairingConnected(true)
       await tryAutoJoinAfterSnapshot(result.snapshot)
       setPairingMode('idle')
       setWizardStep('join')
@@ -339,6 +343,15 @@ export default function DiscoverModal({
   const showHealthAlert = health.reason !== 'ok' || health.suggestManualPeer
   const joinableGroups = snapshot.groups.filter((g) => !g.joined && !g.joinPending)
   const singleJoinableGroup = joinableGroups.length === 1 ? joinableGroups[0]! : null
+  const hasConnectedSignal =
+    pairingConnected || snapshot.groups.length > 0 || snapshot.peers.length > 0
+  const joinStepEmpty =
+    snapshot.groups.length === 0 && snapshot.peers.length === 0 && incomingRequests.length === 0
+
+  const goConnectStep = useCallback((findMode = false): void => {
+    setWizardStep('connect')
+    setPairingMode(findMode ? 'find' : 'idle')
+  }, [])
 
   return (
     <Modal
@@ -518,6 +531,26 @@ export default function DiscoverModal({
         </>
       ) : (
         <>
+      {joinStepEmpty ? (
+        <Alert
+          className={styles.wizardGuideAlert}
+          type={hasConnectedSignal ? 'info' : 'warning'}
+          showIcon
+          data-testid="discover-wizard-join-guide"
+          message={t('discover.wizardJoinNeedConnect')}
+          action={
+            <Button
+              size="small"
+              type="primary"
+              data-testid="discover-wizard-back-connect"
+              onClick={() => goConnectStep()}
+            >
+              {t('discover.wizardBackConnect')}
+            </Button>
+          }
+        />
+      ) : null}
+
       {singleJoinableGroup ? (
         <Alert
           className={styles.singleGroupAlert}
@@ -587,10 +620,8 @@ export default function DiscoverModal({
               <Empty description={t('discover.emptyGroups')}>
                 <Button
                   type="primary"
-                  onClick={() => {
-                    setWizardStep('connect')
-                    setPairingMode('find')
-                  }}
+                  data-testid="discover-wizard-empty-back"
+                  onClick={() => goConnectStep(true)}
                 >
                   {t('discover.findGroupsByCode')}
                 </Button>
