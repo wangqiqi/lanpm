@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.15] - 2026-09-12
+
 ### Added
 
 - **测试债务终局**：`docs/05` §9 改为已收口账本；`verify:docs-test-todo-closeout` 禁止根目录 `测试.md` 回退（`TASK-8301`..`TASK-8305`）
