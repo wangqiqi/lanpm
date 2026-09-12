@@ -18,6 +18,7 @@
 - **no-demo 成员**（`TASK-DUAL-04a`）：聊天收/发写入 `group_members`；成员列表合并消息发送者与同群发现 peer；新消息后刷新成员栏
 - **Setup**（`TASK-DUAL-04b`）：完成向导前关闭 SQLite 再迁 profile，修复 Windows `EBUSY` rename
 - **会议**（`TASK-DUAL-04c`）：离开房间统一释放 Lite/Pro/本地录制并关闭摄像头与麦克风轨道
+- **真网探测**（`TASK-DUAL-02`）：`hasEstablishedTcpTo` 识别 Windows `netstat -ano` 行尾 `ESTABLISHED` 与本地 `:43124` 会话
 
 ## [1.106.17] - 2026-09-12
 
