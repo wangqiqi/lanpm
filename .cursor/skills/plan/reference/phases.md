@@ -16,7 +16,8 @@
 在 `PLANNING:true` 完成后再进入阶段 2。用 **AskQuestion**（不可用 → 正文选项；见 **master**「AskQuestion 约定」）与用户确认：
 
 - [ ] **SDD 模式** — Sprint 增量 / Greenfield / Brownfield / 文档（见 **plan** skill §SDD · `reference/sdd/source-map.md`）；Greenfield 须 spec + **clarify** 再技术 plan
-- [ ] **Goal** — 本 Sprint 要交付什么（一句话）
+- [ ] **Goal** — 本 Sprint 要交付什么（一句话 · **须为能力/模块增量**；见 §Sprint 立项门禁）
+- [ ] **Goal 类型** — 能力交付 vs 流程收尾？若为打 tag/merge/专归档 → **不立项**，改 **`/release`** 或并入当前 Sprint（`reference/sprint-goal-gate.md`）
 - [ ] **Done when** — 怎样算 Sprint 完成（可执行 verify 命令 + P0 全 ✅）
 - [ ] **与候选表对齐** — 从 plan「下一 Sprint」立项则删对应候选行；新主题直接写 Active；**候选 >1 行** → 可选 **`reference/prioritization.md`** 排序
 - [ ] **Scope / 非目标** — 本轮明确不做什么（防 scope creep）
@@ -30,12 +31,14 @@
 
 **Done when 勾选项（自然语言，不必记 skill 名）** — 与用户确认后写入 Sprint 头部：
 
+> **注意**：下列「合并/PR」「打 tag」是 **Sprint 完成后的出口动作**（`/release`），**不是** Sprint Goal 本身。Goal 须写**建造什么**，勿写「打版」「release」。
+
 | 勾选意图 | 写入 Done when 示例 |
 |----------|---------------------|
 | 验收脚本绿 | `bash <项目 verify>` 或 plan `VERIFY` 命令 |
 | 上线前走查 | 交付走查无 Blocker（UI/功能 Sprint） |
-| 合并/PR | Sprint 末 `/release` §分支 |
-| 打版本 tag | `/release` §打版 或 **ship** 自治发版 |
+| 合并/PR | Sprint 末 **`/release` §分支**（出口 · 非 Goal） |
+| 打版本 tag | **`/release` §打版** 或 **ship**（出口 · 非 Goal） |
 | 母版门面 | `bash .cursor/bin/cursor-coherence.sh` |
 
 阶段 1 产出写入 Sprint 区块头部（**Goal** · **Done when** · 可选 **Out of scope**），**此时仍不写** TASK 表。
@@ -70,9 +73,65 @@
 | 过粗 | 合适 | 过细 |
 |------|------|------|
 | 一条 TASK 跨多个 Theme / 无单一验收 | 一 TASK ≈ 一可验证增量 | 改一行文案、单文件 typo 单独成 TASK |
+| **整个 Sprint 仅为打 tag/merge/归档**（仪式型 Sprint） | 一 Sprint ≈ 一块能力/模块交付 | 每个子步骤都占一个 ID |
 | Sprint 内 >15 条且难排顺序 | Task 列可用 `[主题]` 前缀分组，**ID 仍扁平** | 每个子步骤都占一个 ID |
 
+Sprint Goal 合格性 → `reference/sprint-goal-gate.md`。
+
 Sprint 表 + **执行顺序** 行：`TASK-001` → `TASK-002` → …
+
+### 递归式分解协议 · MECE 与上下文边界
+
+任务树固定采用五层：
+
+| 层级 | 名称 | 允许承载 |
+|------|------|----------|
+| L0 | Sprint Goal | 一个可验收的整体结果 |
+| L1 | Theme / 总域 | 按一个稳定维度划分的互斥工作域 |
+| L2 | Slice / 子域 | 只在单一 Theme 内继续收敛 |
+| L3 | TASK | 一次可验证、可提交的增量 |
+| L4 | Steps | TASK 内部步骤，不生成新的任务 ID |
+
+每个分解层都必须满足 **MECE**：
+
+- **Mutually Exclusive**：同层兄弟节点的主要产出和所有权不重叠；
+- **Collectively Exhaustive**：兄弟节点合起来覆盖父节点目标；
+- 每一层只能使用一个主划分维度；不要在同层混用模块、技术层、角色等分类轴；
+- 允许有依赖，但依赖不等于职责重叠。
+
+每个 L1/L2/L3 节点都写一张最小边界卡：
+
+```text
+Parent：所属父节点
+Owns：本节点唯一负责的结果（多会话并行时填独占路径；两 ACTIVE 的 Owns 不得重叠 — 见 **multi-session-edits** · **plan** skill）
+In scope：包含什么
+Out of scope：明确不包含什么
+Inputs：依赖哪些已冻结输入
+Outputs：产出哪些文件/契约
+Acceptance：一个主验收入口
+Stop rule：何时停止继续向下拆分
+```
+
+递归规则：
+
+1. 先冻结 L0 Goal、Done when、Out of scope，再划分 L1；不得跳过总域直接堆 TASK；
+2. 选定一个 L1/L2 分支后，只允许沿该分支向内拆解，其他分支进入 backlog；
+3. 新发现若仍属于当前节点的实现步骤，留在 L4；若形成独立结果，回退到父层新增兄弟节点；
+4. 新发现若属于不同 Theme，停止当前任务并回到 `/plan` 重排，禁止静默塞入 ACTIVE；
+5. 未知决策进入 `SPIKE-*` 或 `Decision needed`，不与实现 TASK 混合；
+6. 当 TASK 已能一次验收、一次提交且边界卡闭合时停止拆分；不要为每个文件、字段或命令创建 TASK；
+7. 若分解后上下文无法在一个任务内保持完整，优先拆 Sprint/Theme，不继续把 TASK 切成孤立碎片。
+
+### 分解前后检查
+
+提交 TASK 表前，逐层回答：
+
+1. 同层节点是否有交集？若有，合并或重新划分；
+2. 父节点是否被完整覆盖？若否，补齐节点或明确 Out of scope；
+3. 当前 TASK 是否只属于一个 Theme？若否，回退上层；
+4. 是否出现跨分支依赖？若有，写入执行顺序或拆成先行契约；
+5. 是否只是执行步骤？若是，降为 L4 Steps；
+6. 是否仍需决策？若是，改为 SPIKE/Decision needed。
 
 ### Plan 头身一致（通用）
 

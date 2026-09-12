@@ -1,8 +1,6 @@
 ---
 name: release
-description: >-
-  Sprint 出口（/release）：分支 merge/PR/保留/丢弃 4 选 1 · semver · CHANGELOG · tag。
-  说「收尾」「merge」「开 PR」「发版」「打 tag」「分支怎么办」时用。自治发版→ship agent。
+description: Sprint 出口（/release）— merge/PR/tag·CHANGELOG。说「发版」「打 tag」时用。
 disable-model-invocation: true
 ---
 
@@ -11,6 +9,8 @@ disable-model-invocation: true
 **用这个**：`/release` 人主导（分支 4 选 1 + 可选打版清单）。**不是那个**：自治执行打版步骤 → 委派 **ship**（同一 §打版 SSOT，无第二套流程）。
 
 Sprint/Task 代码已绿、**run** 归档后：**先汇入主轨，再打版**。不替代日常 **git** commit 纪律。
+
+**不是 Sprint**：单独「打版 / 打 tag / merge」主题 — 见 **plan** `reference/sprint-goal-gate.md`；能力交付走 `/plan`，出口走本节。
 
 ```bash
 ./.cursor/bin/runner.sh task-verify   # 或 verify（Sprint 收尾）
@@ -25,6 +25,7 @@ git status && git diff --stat
 
 - [ ] 当前 ACTIVE 或 Sprint P0 已 ✅（或用户明确只做分支收尾）
 - [ ] 验收命令已实际执行
+- [ ] **FE 栈**（若有）：静态检查见 `rules/tech/eslint.mdc` §Pre-release FE gate
 - [ ] 无意外脏文件 · 无密钥
 - [ ] **UI/功能 Sprint**：**建议**先 **`/delivery`**；有 **Blocker** 须在 AskQuestion 前报告
 
@@ -90,10 +91,11 @@ PR 生命周期（评论、CI、拆 PR）：`babysit` · `split-to-prs`（**mast
 - [ ] `./.cursor/bin/runner.sh release-check` — 确认 `latest_tag` · `next_version`（见下节）
 - [ ] 版本已定 · plan 本版 ✅（若用）
 - [ ] verify 通过 · 无 WIP
+- [ ] **FE 栈**（若有）：lint/tsc 见 `rules/tech/eslint.mdc` §Pre-release FE gate
 - [ ] **security**（auth/PII）
 - [ ] UI/功能：**建议** **`/delivery`** 无 Blocker
+- [ ] 发版 benchmark：**可选** **`/report`** full regen（**test-report** · verify 绿后）
 - [ ] CHANGELOG `[Unreleased]` · manifest bump · docs
-- [ ] **（可选）README 截图**：`npm run screenshots:capture` · `npm run screenshots:sync-readme` · 更新 `docs/screenshots/baselines/light/`（不进 release-gate）
 - [ ] Annotated tag · push 按团队策略
 
 ### 多架构打包（可选 · 桌面 / 原生产物）

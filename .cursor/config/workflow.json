@@ -40,14 +40,18 @@
     "max_loops_default": 15,
     "confirm_before": [
       "high_risk_delete",
-      "outside_repo"
+      "outside_repo",
+      "verify_l2",
+      "verify_l3",
+      "background_heavy_job"
     ],
     "interrupt_on": [
       "decision_needed",
       "blocker",
       "high_risk",
       "release",
-      "goal_drift"
+      "goal_drift",
+      "heavy_verify"
     ]
   },
   "role": {
@@ -67,7 +71,7 @@
     ]
   },
   "sdd": {
-    "specs_dir": ".cursorGrowth/specs",
+    "specs_dir": "docs/specs",
     "principles_file": "docs/principles.md",
     "feature_id_width": 3
   },

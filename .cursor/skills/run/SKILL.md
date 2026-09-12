@@ -1,6 +1,6 @@
 ---
 name: run
-description: 执行（/run）：gate-check→ACTIVE→验收→审计→CHANGELOG→README（门面）→plan→必 commit。每任务/Sprint 收尾自动提交。
+description: 执行（/run）— ACTIVE·task-verify·commit；Sprint 连跑。
 disable-model-invocation: true
 ---
 
@@ -26,6 +26,19 @@ plan handoff 默认自治时，用户 **只说一次 `/run`**；Agent **同会�
 
 触点矩阵 → **plan** `reference/autonomy-chain.md` · `workflow.json` → `autonomy.interrupt_on`。
 
+## 执行期递归边界
+
+`/run` 只实现当前 `ACTIVE` TASK 所属的 Theme/Slice：
+
+- TASK 内的文件、命令和实现步骤属于 L4 Steps，不自动升级为新的 TASK；
+- 发现仍在当前边界内的细节，继续完成并在同一验收中收敛；
+- 发现新的独立结果，先停在当前任务边界，记录为同层候选，不直接修改；
+- 发现不同 Theme、横向依赖或新的产品/架构决策，标记 `⚠️` 并回 `/plan`；
+- 不以“顺便统一”“顺便补齐”“顺便重构”为理由跨越 `Target` 或 `Out of scope`；
+- 自治只允许沿已批准的执行顺序前进，不允许自治扩展任务树。
+
+判断标准：如果改动不能用当前 TASK 的一个主验收命令证明完成，就不是当前 TASK 的内部步骤。
+
 ## 单轮（含必做 commit）
 
 **禁止**在任务 ✅ 后仅更新 plan/CHANGELOG 却留给用户手动 commit。单轮顺序固定：
@@ -34,9 +47,9 @@ ACTIVE → 🔧 → 实现 → `task-verify` → **closeout review（若触发�
 
 ```bash
 ./.cursor/bin/runner.sh task-verify
-git status && git diff --stat    # commit 前：无密钥、无意外文件
+git status && git diff --stat    # commit 前：无密钥、无意外文件；含外来块 → **multi-session-edits** 停手 AskQuestion
 ./.cursor/bin/runner.sh next-task
-./.cursor/bin/runner.sh verify   # Sprint / 打版前全量
+# L2 全量仅 Sprint Done when / 用户确认后（见 verify.mdc · confirm_before: verify_l2）
 ```
 
 `task-verify` 非 OK 不得标 ✅、不得 commit（见 `rules/communication/constitution.mdc`）。
@@ -46,7 +59,7 @@ git status && git diff --stat    # commit 前：无密钥、无意外文件
 | 时机 | 规则 |
 |------|------|
 | **每个 TASK / DOC / SPIKE 归档任务 ✅** | 同轮 **必须** `git commit`（**不含** `plan.md`）；`tag-per-commit` 时同轮 **`release-tag`** |
-| **Sprint 全部 ✅ 收尾** | CHANGELOG / 已跟踪文件更新后 commit；Sprint 笔记进 `.cursorGrowth/archive/` |
+| **Sprint 全部 ✅ 收尾** | CHANGELOG / 已跟踪文件更新后 commit；Sprint 笔记进 `{archive_dir}/{domain}/`（禁长期 flat 根堆积） |
 | **仅改 `.cursorGrowth/plan.md`** | **勿** commit（`.cursorGrowth/` gitignore） |
 | **push** | 默认 **不** push；用户说 push 或 **ship** / **release** §分支 再推 |
 
@@ -58,8 +71,9 @@ Message 须含任务 ID（`TASK-003` · `DOC-001` · `SPIKE-002`）。格式：`
 
 | 阶段 | 推荐命令 |
 |------|----------|
-| 开发任务 | `./scripts/test.sh` 或域脚本 **L1**（`bash scripts/verify_<feature>.sh`） |
-| 任务收尾 / P0 闭合 | `./scripts/verify.sh` 或域脚本 **`--full`（L3）** |
+| 开发 / 单 TASK | `./scripts/test.sh` · `runner.sh task-verify` · L1 域脚本 |
+| Sprint Done when / PR 前 | `verify_default`（**用户确认** · `confirm_before: verify_l2`） |
+| 发版前 | 项目 nightly/全量脚本（**用户确认** · `verify_l3`） |
 
 分层定义 → `rules/feedback/verify.mdc` · 测试侧重 → **test** skill。
 
@@ -149,6 +163,8 @@ bash .cursor/bin/cursor-coherence.sh   # README ↔ 磁盘 skills/agents 一致
 | PDF 表单/验收 | **delivery** §PDF 工具 |
 | 编辑 docx/pptx/xlsx 深度 | AskQuestion：**装 upstream** anthropics skill / 用 MCP / 跳过 |
 | 新 UI 交付走查 | **delivery** §1 反模板自检 |
+| 使用说明书 / 配图 regen | **user-manual** `/manual` |
+| 测试报告 / verify 汇总 | **test-report** `/report` |
 | MCP 建服 | **mcp** §Eval |
 | 新功能 0→1 / 写 spec / SDD | **plan** §SDD · Greenfield 模式 |
 | 实现后仍有差距 | **run** §converge |
@@ -188,7 +204,8 @@ Ambiguous 时 AskQuestion ≤4 项，禁止开放式「你想用哪个 skill」�
 当前 Sprint 任务表无 ⬜/🔧 时：
 
 1. `./.cursor/bin/runner.sh verify` — **须满足 Sprint Done when**（母版含 `cursor-coherence.sh` · README 与 CHANGELOG 对齐）
-2. 将本 Sprint 笔记写入 **`.cursorGrowth/archive/`**（命名见 `learn/plan-conventions.md`）
+   - **可选** — Done when 含「测试报告」/ QA benchmark / 持久化 `docs/test-report.md` → **`/report`**（**test-report**；步骤 1 刚跑完 verify 时优先 **from-logs**；见 `reference/regen-gates.md` §sprint）
+2. 将本 Sprint 笔记写入 **`{archive_dir}/{domain}/`**（域目录 + 命名见 **plan** `reference/growth-layout.md` · 团队增量见 `learn/plan-conventions.md`）
 3. **plan 正文 reconciliation**（与 archive 一致；**必做**，仅 `.cursorGrowth/plan.md`）：
    - [ ] `<!-- SPRINT_STATUS: closed -->` · `<!-- ACTIVE: (none) -->` · `<!-- NEXT: (none) -->`
    - [ ] **从 plan 删除整个已闭合 Active Sprint 区块**（Goal · Done when · TASK 表）— **勿**改标题留「已闭合」正文

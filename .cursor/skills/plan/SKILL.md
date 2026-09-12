@@ -1,6 +1,6 @@
 ---
 name: plan
-description: 规划（/plan）：需求→先总后分→Sprint→plan.md→/run。说「规划」「拆任务」时用。禁止写业务代码。≠ IDE Plan 模式。
+description: 规划（/plan）— 先总后分·Sprint·plan.md。说「规划」「拆任务」时用。
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 闸门见 `rules/workflow.mdc`。配置：`config/workflow.json`
 
-**详文**：`reference/phases.md`（阶段 1/2/3 · 头身一致）· `reference/followup-facade.md`（Follow-up · README 门面）· `reference/prioritization.md`（RICE/ICE/Kano · backlog 排序）· `reference/sdd/source-map.md`（Spec-Driven Development）· `reference/autonomy-chain.md`（Sprint 连跑 · hooks 触点）· `reference/standalone-map.md`（母版独立 · 引用纪律）
+**详文**：`reference/phases.md`（阶段 1/2/3 · 头身一致）· `reference/sprint-goal-gate.md`（**Sprint Goal 合格性** · 禁止仪式型 Sprint）· `reference/followup-facade.md`（Follow-up · README 门面）· `reference/prioritization.md`（RICE/ICE/Kano · backlog 排序）· `reference/sdd/source-map.md`（Spec-Driven Development）· `reference/autonomy-chain.md`（Sprint 连跑 · hooks 触点）· `reference/standalone-map.md`（母版独立 · 引用纪律）
 
 配置坐标：`config/workflow.json` → `sdd.specs_dir` · `sdd.principles_file`
 
@@ -21,6 +21,23 @@ disable-model-invocation: true
 | ≤5 且范围清晰的小修 | 可直述执行；仍建议 gate-check |
 
 禁止：脑内排 6+ 步却只在聊天里列 checklist、不落 plan。与用户规则「>5 todolist → plan.md」对齐；可观测落点为本节 + `workflow.mdc`。
+
+## Sprint 立项门禁 · Goal 合格性
+
+**用这个**：Sprint Goal = **能力 / 模块 / 用户可见增量**。**不是那个**：打 tag · merge · 专补 CHANGELOG/README · 专跑 verify — 这些是 **Task 内步骤** 或 **`/release` 出口**。
+
+详表与反例 → `reference/sprint-goal-gate.md`（与 **followup-facade**「禁止专补 README Sprint」同类）。
+
+| 用户说 | 路由 |
+|--------|------|
+| 实现某功能 / 模块 / Epic 一块 | ✅ `/plan` 或 `/long` |
+| 打版 · 发 tag · merge · 开 PR | **`/release`**（非 Sprint） |
+| 补 CHANGELOG · 归档 · verify 绿 | 当前 Sprint **Done when** 或最后一项 TASK |
+| 补 README 门面 | 功能 TASK **同 Sprint**（**followup-facade**） |
+
+**阶段 1** 须 AskQuestion 区分「能力交付 vs 流程收尾」；若为后者 → **不得**新建 Active Sprint。
+
+**禁止**候选表出现「打版发 tag」「release sprint」等纯仪式 Goal。
 
 ## 必读
 
@@ -80,6 +97,18 @@ Sprint **全部 TASK ✅** 后：**从 plan 删除整个 Active 区块**（不�
 4. **阶段 3 · handoff** — `PLANNING:false` · `PLAN_APPROVED` · `ACTIVE`/`NEXT` · 默认 `AUTONOMOUS:true` → `plan-check` && `gate-check` → 告知用户 **只说一次 `/run`**
 
 大改动 / 跨模块：读 `rules/execution/vibe.mdc` · `rules/feedback/evolution.mdc`。
+
+## 多会话并行
+
+用户可能同时开多个 Cursor 会话。磁盘共享、会话互盲 → **multi-session-edits**。
+
+| 规划时 | 动作 |
+|--------|------|
+| TASK 表 | 增 **`Owns`** 列：本 TASK 独占的文件/目录（与 `Target` 互补） |
+| 并行 ACTIVE | 两 TASK 的 `Owns` **不得重叠**；重叠 → 串行执行顺序或 **git worktree**（**git** skill） |
+| 发现抢文件 | 写入执行顺序或拆 Sprint；不得假设「只有本会话在改」 |
+
+阶段 2 拆 TASK 时，若用户明示多会话并行，须在 handoff 提醒 **Owns** 不重叠。
 
 ## Sprint 连跑（AUTONOMOUS）
 
@@ -155,6 +184,8 @@ docs/specs/001-<slug>/
 | **自由撰写** | 直述，不走阶段 |
 | **SPIKE 调研** | `SPIKE-*` 只读 |
 | **同步现有 doc** | `DOC-*` 对齐 `rules/execution/docs.mdc` |
+| **可发布操作手册** | **user-manual** `/manual` · Manual Contract · 配图 regen |
+| **可发布测试报告** | **test-report** `/report` · Report Contract · verify 后汇总 |
 
 ### 三阶段（结构化协作）
 

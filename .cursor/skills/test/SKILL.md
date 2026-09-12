@@ -1,6 +1,6 @@
 ---
 name: test
-description: 测试清单 — 单测、集成、E2E、TDD 红绿重构；衔接 verify。说「写测试」「TDD」「Playwright」时用。
+description: 测试清单 — 单测/E2E/TDD；衔接 verify。说「写测试」「Playwright」时用。
 ---
 
 # test
@@ -41,11 +41,16 @@ description: 测试清单 — 单测、集成、E2E、TDD 红绿重构；衔接 
 | 集成 | API、DB、模块边界 |
 | E2E | 关键用户路径（Playwright/Cypress 若项目已有） |
 
+Walkthrough 若用于**说明书配图**（非仅冒烟）→ 与 **user-manual** skill 对齐 Manual Contract；行为断言仍在本 skill。
+
+全量/发版 **测试报告**（汇总 verify · 非写用例）→ **test-report** `/report` · Report Contract。
+
 ## 验收脚本分层（verify-layers）
 
 **层定义真源**：`rules/feedback/verify.mdc` §分层验收（L0–L3）。本 skill **不重复**该表。
 
 - 新功能域：**优先** L1 进 `task-verify`；L3 进 Sprint Done when 或 nightly
+- **新增 `verify_*.sh` 前**：读 `rules/feedback/verify.mdc` §新增 verify 脚本门禁 — 默认落 `scripts/verify/domain/` · grep 已有脚本 · 优先 `scripts/lib/` 公因子 · 聚合 +1 行注册（布局 **plan** `reference/growth-layout.md`）
 - 红测停在 L1 即可标 🔧；**勿**为 ✅ 跳过 L1 直接跑 L3
 - 项目路径坐标 → Growth `learn/`（如 `dev-conventions.md`），**勿**写进 `.cursor/`；聚合脚本仅编排（见 verify.mdc）
 
