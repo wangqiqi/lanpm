@@ -19,6 +19,7 @@ import { collapseDiscoveredPeersOnePerHost } from '../../../shared/discover/coll
 import { loadOrCreateDeviceKeyPair } from '../../crypto/deviceKeyStore.ts'
 import { rememberPeerGroups, listCachedDiscoverGroups } from '../../discover/discoverGroupRegistry.ts'
 import { parseHostPort } from '../../../shared/network/manualPeer.ts'
+import { isIpv4SubnetBroadcast } from '../../../shared/network/pairingHostResolve.ts'
 import { getDiscoverableGroupsForAdvert } from '../../discover/advertProvider.ts'
 import { refreshLanUserIds } from '../peerDirectory.ts'
 import { MessageDedup } from '../stub/dedup.ts'
@@ -556,6 +557,7 @@ export class RealNetworkTransport implements NetworkTransport {
     if (hosts?.length && !options?.subnetScanBatch) {
       let lastError: unknown
       for (const host of hosts) {
+        if (isIpv4SubnetBroadcast(host)) continue
         try {
           return await this.connectManualHostWithPairing(
             host,

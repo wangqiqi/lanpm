@@ -33,6 +33,15 @@ export function hostTail(ip: string): string | null {
 export interface PairingHostContext {
   localLanIps: string[]
   seedHosts: string[]
+  /** 路由表可达 /24 前缀（跨网段尾段展开） */
+  routeSubnetPrefixes?: string[]
+}
+
+export function isIpv4SubnetBroadcast(host: string): boolean {
+  const trimmed = host.trim()
+  if (!isFullIpv4(trimmed)) return false
+  const parts = parseIpv4(trimmed)
+  return parts !== null && parts[3] === 255
 }
 
 /** 从本机网卡 IP 推导各 /24 子网广播地址 */
@@ -48,7 +57,7 @@ export function listSubnetBroadcastAddresses(localLanIps: string[]): string[] {
 /**
  * 将用户输入解析为待尝试的主机列表。
  * - 完整 IPv4 → 单项
- * - 尾段 `109` → 各已知子网前缀 + 尾段（本机网卡 + 种子）
+ * - 尾段 `109` → 各已知子网前缀 + 尾段（路由表 + 本机网卡 + 种子）
  * - 其它 → 原样单项
  */
 export function buildPairingHostCandidates(
@@ -71,6 +80,9 @@ export function buildPairingHostCandidates(
     for (const raw of ctx.seedHosts) {
       const host = raw.includes(':') ? raw.split(':')[0]! : raw
       const p = subnetPrefix(host)
+      if (p) prefixes.add(p)
+    }
+    for (const p of ctx.routeSubnetPrefixes ?? []) {
       if (p) prefixes.add(p)
     }
     return [...prefixes].map((p) => `${p}.${trimmed}`)

@@ -79,18 +79,21 @@ async function resolveJoinTargets(
     return [{}]
   }
 
+  const routePrefixes = await listRouteSubnetPrefixes()
+
   const trimmed = input.unicastHost?.trim()
   if (trimmed) {
     if (trimmed.includes(':')) {
       const { host, port } = parseHostPort(trimmed)
       return [{ unicastHost: host, port: port ?? input.port ?? DEFAULT_TCP_LISTEN_PORT }]
     }
-    const hosts = buildPairingHostCandidates(trimmed, ctx)
+    const hosts = buildPairingHostCandidates(trimmed, {
+      ...ctx,
+      routeSubnetPrefixes: routePrefixes
+    })
     const port = input.port ?? DEFAULT_TCP_LISTEN_PORT
     return hosts.map((unicastHost) => ({ unicastHost, port }))
   }
-
-  const routePrefixes = await listRouteSubnetPrefixes()
   const routeCtx = {
     routeSubnetPrefixes: routePrefixes,
     localLanIps: ctx.localLanIps,

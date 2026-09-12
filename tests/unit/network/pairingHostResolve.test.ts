@@ -15,6 +15,15 @@ describe('pairingHostResolve', () => {
     expect(candidates).toEqual(['192.168.30.109', '192.168.20.109'])
   })
 
+  it('expands host tail with route table prefixes', () => {
+    const candidates = buildPairingHostCandidates('12', {
+      localLanIps: ['192.168.2.16'],
+      seedHosts: [],
+      routeSubnetPrefixes: ['192.168.1', '192.168.2']
+    })
+    expect(candidates).toEqual(['192.168.2.12', '192.168.1.12'])
+  })
+
   it('keeps full IPv4 as single candidate', () => {
     expect(
       buildPairingHostCandidates('192.168.20.109', {
