@@ -3,6 +3,8 @@ export type JoinRequestStatus = 'pending' | 'approved' | 'rejected'
 export interface JoinRequestRecord {
   requestId: string
   groupId: string
+  /** 列表展示用；由 listJoinRequests 解析，非表字段 */
+  groupName?: string
   applicantUserId: string
   applicantDisplayName: string
   ownerUserId: string

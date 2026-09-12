@@ -11,12 +11,13 @@ import type { GroupType } from '@shared/navigation/types'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useI18n } from '@renderer/i18n/useI18n'
-import type { MessageKey } from '@renderer/i18n/messages'
+import type { MessageKey, TranslateParams } from '@renderer/i18n/messages'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
 import { useDmStore } from '@renderer/stores/dmStore'
 import { defaultViewForGroup } from '@shared/navigation/tabRules'
 import { groupViewPath } from '@renderer/routes/paths'
+import { resolveGroupDisplayNameById } from '@renderer/i18n/groupLabels'
 import { useNavigate } from 'react-router-dom'
 import DiscoverPairingPanel, {
   type PairingJoinPayload,
@@ -25,6 +26,27 @@ import DiscoverPairingPanel, {
 import styles from './discover.module.css'
 
 const { Text } = Typography
+
+function looksLikeInternalGroupId(value: string, groupId: string): boolean {
+  return !value.trim() || value === groupId
+}
+
+function joinRequestGroupLabel(
+  req: JoinRequestRecord,
+  groups: DiscoverGroupView[],
+  navLabel: string,
+  t: (key: MessageKey, params?: TranslateParams) => string
+): string {
+  const stored =
+    req.groupName?.trim() ||
+    groups.find((g) => g.groupId === req.groupId)?.name?.trim() ||
+    navLabel.trim()
+  const resolved = resolveGroupDisplayNameById(req.groupId, stored || req.groupId, t)
+  if (looksLikeInternalGroupId(resolved, req.groupId)) {
+    return t('discover.joinRequestUnknownGroup')
+  }
+  return resolved
+}
 
 const GROUP_TYPE_KEYS: Record<GroupType, MessageKey> = {
   project: 'groupType.project',
@@ -59,6 +81,7 @@ export default function DiscoverModal({
   const localUserId = useIdentityStore((s) => s.user?.userId)
   const activeGroupId = useNavigationStore((s) => s.activeGroupId)
   const getGroupType = useNavigationStore((s) => s.getGroupType)
+  const getGroupLabel = useNavigationStore((s) => s.getGroupLabel)
   const joinGroup = useNavigationStore((s) => s.joinGroup)
   const openSession = useDmStore((s) => s.openSession)
   const [snapshot, setSnapshot] = useState<DiscoverSnapshot>({
@@ -601,7 +624,14 @@ export default function DiscoverModal({
               >
                 <List.Item.Meta
                   title={req.applicantDisplayName}
-                  description={t('discover.joinRequestForGroup', { groupId: req.groupId })}
+                  description={t('discover.joinRequestForGroup', {
+                    name: joinRequestGroupLabel(
+                      req,
+                      snapshot.groups,
+                      getGroupLabel(req.groupId),
+                      t
+                    )
+                  })}
                 />
               </List.Item>
             )}

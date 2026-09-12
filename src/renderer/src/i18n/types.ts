@@ -1399,6 +1399,7 @@ export type MessageKey =
   | 'discover.approveJoin'
   | 'discover.rejectJoin'
   | 'discover.joinRequestForGroup'
+  | 'discover.joinRequestUnknownGroup'
   | 'discover.joinRequestApproved'
   | 'discover.joinRequestRejected'
   | 'discover.joinRequestActionFailed'

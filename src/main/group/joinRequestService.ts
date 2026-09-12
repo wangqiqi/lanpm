@@ -93,7 +93,10 @@ async function publishJoinDecision(
 export function listIncomingJoinRequests(db: Database): JoinRequestRecord[] {
   const status = getSetupStatus(db)
   if (!status.configured || !status.user) return []
-  return listPendingJoinRequestsForOwner(db, status.user.userId)
+  return listPendingJoinRequestsForOwner(db, status.user.userId).map((req) => ({
+    ...req,
+    groupName: getGroupDisplayNameForNotice(db, req.groupId)
+  }))
 }
 
 export async function approveJoinRequest(db: Database, requestId: string): Promise<void> {
