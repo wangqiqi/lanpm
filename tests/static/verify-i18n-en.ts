@@ -49,6 +49,7 @@ const LAYOUT_INLINE_KEYS: MessageKey[] = [
   'plugin.meetingScheduleEdit',
   'plugin.meetingScheduleSave',
   'plugin.meetingRecordStart',
+  'gantt.exportMore',
   'discover.wizardConnect',
   'discover.wizardJoin',
   'discover.wizardContinueJoin',

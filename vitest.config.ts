@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import { resolve } from 'node:path'
+import { coverageDir, repoRoot } from './scripts/lanpm-artifact-paths.mjs'
 
 export default defineConfig({
   resolve: {
@@ -15,6 +16,7 @@ export default defineConfig({
     passWithNoTests: false,
     coverage: {
       provider: 'v8',
+      reportsDirectory: coverageDir(repoRoot()),
       include: ['src/shared/**/*.ts'],
       exclude: ['**/*.d.ts', 'src/shared/**/channels.ts', 'src/shared/lanpm-api.ts'],
       thresholds: {

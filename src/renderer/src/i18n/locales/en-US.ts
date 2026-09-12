@@ -293,7 +293,8 @@ const enUS = {
   'ai.prompt.globalHelp.message': 'What can you help me with in LanPM project collaboration?',
   'board.newTask': 'New task',
   'board.treeViewLink': 'Tree view',
-  'board.scheduleNavHint': 'Gantt and calendar stay off the bottom bar by default. Turn them on in Navigation & views.',
+  'board.scheduleNavHint':
+    'Gantt and calendar stay off the bottom bar by default. Turning them on in Navigation & views adds them to project group tabs.',
   'board.scheduleNavHintAction': 'Open navigation preferences',
   'board.createTitle': 'New task',
   'board.taskTitlePlaceholder': 'Task title',
@@ -720,6 +721,7 @@ const enUS = {
   'gantt.exportPdf': 'Export PDF',
   'gantt.exportMd': 'Export Markdown',
   'gantt.exportCsv': 'Export CSV',
+  'gantt.exportMore': 'Export',
   'gantt.toolbarHint': 'Drag bars to reschedule · click to edit dates · double-click for milestone',
   'gantt.boardViewLink': 'Board view',
   'gantt.empty': 'No tasks yet. Create tasks on the board and set dates.',

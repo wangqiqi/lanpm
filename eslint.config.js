@@ -12,6 +12,7 @@ export default tseslint.config(
       'node_modules',
       '.cursorGrowth',
       'coverage',
+      '.lanpm/coverage',
       'tools/**/build',
       'website/.vitepress/cache/**'
     ]

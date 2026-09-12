@@ -16,7 +16,7 @@ export type NavEditScope = 'global' | 'group'
 
 interface NavPreferencesState {
   document: NavPreferencesDocument
-  /** 当前群有效偏好（BottomNav / 路由守卫；含类型默认折叠） */
+  /** 当前群有效偏好（BottomNav / 路由守卫；本群覆盖或全局） */
   preferences: NavPreferences
   activeGroupId: string | null
   activeGroupType: GroupType | null

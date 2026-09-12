@@ -25,12 +25,15 @@ assert.match(shared, /NEVER_BOTTOM_NAV_VIEWS/)
 assert.match(shared, /NEVER_BOTTOM_NAV_CONTRIBUTED_ROUTES/)
 assert.match(shared, /isNeverBottomNavView/)
 assert.match(shared, /rawNavDocumentNeedsV196Writeback/)
-assert.match(shared, /overlayTypeDefaultHiddenViews/)
-assert.match(shared, /PROJECT_DEFAULT_COLLAPSE_VIEWS/)
 assert.match(
   shared,
   /resolveNavPreferencesForGroup\([\s\S]*groupType/,
-  'resolveNavPreferencesForGroup must accept groupType for project collapse overlay'
+  'resolveNavPreferencesForGroup must accept groupType for call-site compatibility'
+)
+assert.match(
+  shared,
+  /sanitizeNavPreferences\(normalized\.global\)/,
+  'project groups without byGroup override must follow global nav prefs (gantt/calendar unhide)'
 )
 assert.match(
   shared,

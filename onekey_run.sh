@@ -535,6 +535,7 @@ cmd_clean() {
   fi
   info "清理构建/测试可重建产物（保留 ~/.config/lanpm）…"
   rm -rf "$ARTIFACT_DIR/out" "$ARTIFACT_DIR/dist" "$ARTIFACT_DIR/test-results" \
+    "$RUN_DIR/coverage" \
     "$ROOT/out" "$ROOT/dist" "$ROOT/build" "$ROOT/test-results" "$ROOT/coverage"
   rm -f "$ROOT"/*.tsbuildinfo
   find "$ROOT" -name '*.tsbuildinfo' -delete 2>/dev/null || true

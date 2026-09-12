@@ -149,7 +149,7 @@ export default function ScheduleStub({ plugin, groupId, context }: Props): React
 
   return (
     <div
-      className={styles.scheduleToolbar}
+      className={`${styles.scheduleToolbar} ${styles.pluginStripToolbar}`}
       data-testid="schedule-gantt-toolbar"
       data-plugin-id={plugin.id}
     >

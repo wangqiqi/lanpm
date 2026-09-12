@@ -181,6 +181,14 @@
   padding: 0 4px;
 }
 
+.searchFilters {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .taskFilterSelect {
   min-width: 160px;
   max-width: 240px;

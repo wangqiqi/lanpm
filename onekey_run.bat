@@ -343,6 +343,7 @@ if exist "%ROOT%\out" rmdir /s /q "%ROOT%\out"
 if exist "%ROOT%\dist" rmdir /s /q "%ROOT%\dist"
 if exist "%ROOT%\build" rmdir /s /q "%ROOT%\build"
 if exist "%ROOT%\test-results" rmdir /s /q "%ROOT%\test-results"
+if exist "%RUN_DIR%\coverage" rmdir /s /q "%RUN_DIR%\coverage"
 if exist "%ROOT%\coverage" rmdir /s /q "%ROOT%\coverage"
 del "%PID_FILE%" "%MODE_FILE%" 2>nul
 type nul >"%LOG_FILE%" 2>nul

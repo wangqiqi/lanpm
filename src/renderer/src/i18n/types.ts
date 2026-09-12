@@ -701,6 +701,7 @@ export type MessageKey =
   | 'gantt.exportPdf'
   | 'gantt.exportMd'
   | 'gantt.exportCsv'
+  | 'gantt.exportMore'
   | 'gantt.toolbarHint'
   | 'gantt.boardViewLink'
   | 'gantt.empty'

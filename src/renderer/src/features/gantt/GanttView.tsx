@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Button, Input, Modal, Select, Space, Tag, Typography } from 'antd'
+import { Button, Dropdown, Input, Modal, Select, Space, Tag, Typography } from 'antd'
 
 const { Text } = Typography
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import {
+  CommentOutlined,
+  DownloadOutlined,
+  ExportOutlined,
   FilePdfOutlined,
   FileTextOutlined,
   PlusOutlined,
@@ -29,7 +32,6 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { patchGanttCalendarLabels } from './ganttCalendarLabels'
 import { exportGanttChart, captureGanttPngBlob } from './ganttExport'
 import { exportGanttTaskTable } from './ganttTableDownload'
-import ViewExportShareActions from '@renderer/components/view/ViewExportShareActions'
 import { sharePngToGroupChat } from '@renderer/lib/exportShare'
 import { computeGanttTimelineDates } from '@shared/task/ganttTimeline'
 import {
@@ -42,9 +44,9 @@ import {
 } from './ganttDragConfig'
 import ViewToolbar, {
   ViewToolbarGroup,
-  ViewToolbarHint,
   ViewToolbarPair
 } from '@renderer/ui/ViewToolbar'
+import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import RegionButton from '@renderer/ui/RegionButton'
 import ViewSegment from '@renderer/ui/ViewSegment'
@@ -461,37 +463,59 @@ export default function GanttView(): React.ReactElement {
             <Button icon={<PlusOutlined />} onClick={() => setDepOpen(true)}>
               {t('gantt.addDependency')}
             </Button>
-            <Button
-              icon={<FilePdfOutlined />}
-              loading={exporting}
-              disabled={ganttTasks.length === 0}
-              onClick={() => void exportChart('pdf')}
+            <Dropdown
+              trigger={['click']}
+              menu={{
+                items: [
+                  {
+                    key: 'png',
+                    icon: <DownloadOutlined />,
+                    label: t('gantt.exportPng'),
+                    disabled: ganttTasks.length === 0
+                  },
+                  {
+                    key: 'pdf',
+                    icon: <FilePdfOutlined />,
+                    label: t('gantt.exportPdf'),
+                    disabled: ganttTasks.length === 0
+                  },
+                  {
+                    key: 'md',
+                    icon: <FileTextOutlined />,
+                    label: t('gantt.exportMd'),
+                    disabled: tasks.length === 0
+                  },
+                  {
+                    key: 'csv',
+                    icon: <TableOutlined />,
+                    label: t('gantt.exportCsv'),
+                    disabled: tasks.length === 0
+                  },
+                  {
+                    key: 'share',
+                    icon: <CommentOutlined />,
+                    label: t('files.shareToChat'),
+                    disabled: ganttTasks.length === 0
+                  }
+                ],
+                onClick: ({ key }) => {
+                  if (key === 'png') void exportChart('png')
+                  if (key === 'pdf') void exportChart('pdf')
+                  if (key === 'md') exportTable('md')
+                  if (key === 'csv') exportTable('csv')
+                  if (key === 'share') void shareChartPng()
+                }
+              }}
             >
-              {t('gantt.exportPdf')}
-            </Button>
-            <Button
-              icon={<FileTextOutlined />}
-              disabled={tasks.length === 0}
-              onClick={() => exportTable('md')}
-            >
-              {t('gantt.exportMd')}
-            </Button>
-            <Button
-              icon={<TableOutlined />}
-              disabled={tasks.length === 0}
-              onClick={() => exportTable('csv')}
-            >
-              {t('gantt.exportCsv')}
-            </Button>
-            <ViewExportShareActions
-              onDownload={() => void exportChart('png')}
-              onShareToChat={() => void shareChartPng()}
-              downloading={exporting}
-              sharing={sharing}
-              downloadDisabled={ganttTasks.length === 0}
-              shareDisabled={ganttTasks.length === 0}
-            />
-            <ViewToolbarHint>{t('gantt.toolbarHint')}</ViewToolbarHint>
+              <Button
+                icon={<ExportOutlined />}
+                loading={exporting || sharing}
+                aria-label={t('gantt.exportMore')}
+              >
+                {t('gantt.exportMore')}
+              </Button>
+            </Dropdown>
+            <ViewHelpButton content={t('gantt.toolbarHint')} />
           </ViewToolbarGroup>
         }
       />

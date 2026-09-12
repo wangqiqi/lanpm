@@ -15,7 +15,6 @@ import {
   MenuFoldOutlined,
   MenuOutlined,
   MenuUnfoldOutlined,
-  MoreOutlined,
   NodeIndexOutlined,
   PaperClipOutlined,
   PlusSquareOutlined,
@@ -370,43 +369,6 @@ export default function ChatView(): React.ReactElement {
     },
     [mindmapPlugin, message, t]
   )
-
-  const collabMenuItems = useMemo((): MenuProps['items'] => {
-    if (!collaborationAllowed) return []
-    const items: NonNullable<MenuProps['items']> = []
-    if (filesLibraryAllowed) {
-      items.push({
-        key: 'files',
-        icon: <FolderOutlined />,
-        label: t('nav.files'),
-        onClick: () => openCollaborationPanel('files')
-      })
-    }
-    if (whiteboardAllowed) {
-      items.push({
-        key: 'whiteboard',
-        icon: <HighlightOutlined />,
-        label: t('nav.whiteboard'),
-        onClick: () => openCollaborationPanel('whiteboard')
-      })
-    }
-    if (mindmapAllowed) {
-      items.push({
-        key: 'mindmap',
-        icon: <NodeIndexOutlined />,
-        label: t('nav.mindmap'),
-        onClick: () => openCollaborationPanel('mindmap')
-      })
-    }
-    return items
-  }, [
-    collaborationAllowed,
-    filesLibraryAllowed,
-    whiteboardAllowed,
-    mindmapAllowed,
-    openCollaborationPanel,
-    t
-  ])
 
   const insertMention = useCallback((displayName: string) => {
     setDraft((prev) => {
@@ -1356,19 +1318,38 @@ export default function ChatView(): React.ReactElement {
                     </div>
                   </>
                 )}
-                {collabMenuItems && collabMenuItems.length > 0 ? (
+                {collaborationAllowed ? (
                   <>
                     <div className={styles.toolbarGroupDivider} aria-hidden />
-                    <Dropdown menu={{ items: collabMenuItems }} trigger={['click']}>
-                      <span>
+                    <div className={styles.toolbarCollaborationGroup}>
+                      {filesLibraryAllowed ? (
                         <ComposerIconButton
-                          data-visual-collab="more"
-                          data-testid="collab-open-more"
-                          icon={<MoreOutlined />}
-                          label={t('chat.toolbarMore')}
+                          data-visual-collab="files"
+                          data-testid="collab-open-files"
+                          icon={<FolderOutlined />}
+                          label={t('nav.files')}
+                          onClick={() => openCollaborationPanel('files')}
                         />
-                      </span>
-                    </Dropdown>
+                      ) : null}
+                      {whiteboardAllowed ? (
+                        <ComposerIconButton
+                          data-visual-collab="whiteboard"
+                          data-testid="collab-open-whiteboard"
+                          icon={<HighlightOutlined />}
+                          label={t('nav.whiteboard')}
+                          onClick={() => openCollaborationPanel('whiteboard')}
+                        />
+                      ) : null}
+                      {mindmapAllowed ? (
+                        <ComposerIconButton
+                          data-visual-collab="mindmap"
+                          data-testid="collab-open-mindmap"
+                          icon={<NodeIndexOutlined />}
+                          label={t('nav.mindmap')}
+                          onClick={() => openCollaborationPanel('mindmap')}
+                        />
+                      ) : null}
+                    </div>
                   </>
                 ) : null}
                 <div className={styles.toolbarGroupDivider} aria-hidden />

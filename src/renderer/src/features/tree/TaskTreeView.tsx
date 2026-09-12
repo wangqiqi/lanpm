@@ -10,9 +10,9 @@ import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import { groupViewPath } from '@renderer/routes/paths'
 import ViewToolbar, {
   ViewToolbarGroup,
-  ViewToolbarHint,
   ViewToolbarPair
 } from '@renderer/ui/ViewToolbar'
+import ViewHelpButton from '@renderer/ui/ViewHelpButton'
 import ViewCrossLink from '@renderer/ui/ViewCrossLink'
 import IslandPanel from '@renderer/ui/IslandPanel'
 import { ViewEmptyHint, ViewLoadingCenter } from '@renderer/ui/ViewState'
@@ -427,7 +427,7 @@ export default function TaskTreeView(): React.ReactElement {
         }
         end={
           <>
-            <ViewToolbarHint>{t('tree.progressHint')}</ViewToolbarHint>
+            <ViewHelpButton content={t('tree.progressHint')} />
             <ViewCrossLink onClick={() => navigate(groupViewPath(gid, 'board'))}>
               {t('tree.boardViewLink')}
             </ViewCrossLink>

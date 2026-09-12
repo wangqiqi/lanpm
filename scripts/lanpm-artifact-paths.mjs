@@ -46,6 +46,11 @@ export function playwrightTestResultsDir(root = repoRoot()) {
   return join(artifactRoot(root), 'test-results')
 }
 
+/** Vitest v8 coverage reports (not under artifact/). */
+export function coverageDir(root = repoRoot()) {
+  return join(root, '.lanpm', 'coverage')
+}
+
 /** package.json `main` entry (posix, relative to repo root). */
 export const PACKAGE_MAIN_REL = '.lanpm/artifact/out/main/index.js'
 

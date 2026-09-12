@@ -27,6 +27,7 @@ assert.match(stub, /schedule-freeze-baseline/)
 assert.match(stub, /freezeScheduleBaseline/)
 assert.match(stub, /getScheduleBaseline/)
 assert.match(stub, /schedule-assignee-overlap/)
+assert.match(stub, /pluginStripToolbar/)
 assert.match(stub, /findAssigneeOverlapTaskIds/)
 assert.match(stub, /countAssigneeOverlapTasks/)
 

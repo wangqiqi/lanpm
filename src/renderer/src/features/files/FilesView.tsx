@@ -1100,30 +1100,32 @@ export default function FilesView(): React.ReactElement {
       <PluginZoneHost zone="toolbar" context={{ groupId: gid, view: 'files' }} />
 
       <div className={styles.searchRow}>
-        <ViewSegment
-          value={libraryScope}
-          options={libraryScopeOptions}
-          onChange={(v) => {
-            setLibraryScope(v)
-            if (v === 'all') setTaskFilterId(null)
-          }}
-          equalWidth={false}
-          ariaLabel={t('files.scopeFilter')}
-        />
-        <Select
-          allowClear
-          showSearch
-          optionFilterProp="label"
-          className={styles.taskFilterSelect}
-          placeholder={t('files.taskFilterPlaceholder')}
-          value={taskFilterId ?? undefined}
-          options={taskFilterOptions}
-          onChange={(v) => {
-            const next = v ? String(v) : null
-            setTaskFilterId(next)
-            if (next) setLibraryScope('deliverables')
-          }}
-        />
+        <div className={styles.searchFilters}>
+          <ViewSegment
+            value={libraryScope}
+            options={libraryScopeOptions}
+            onChange={(v) => {
+              setLibraryScope(v)
+              if (v === 'all') setTaskFilterId(null)
+            }}
+            equalWidth={false}
+            ariaLabel={t('files.scopeFilter')}
+          />
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            className={styles.taskFilterSelect}
+            placeholder={t('files.taskFilterPlaceholder')}
+            value={taskFilterId ?? undefined}
+            options={taskFilterOptions}
+            onChange={(v) => {
+              const next = v ? String(v) : null
+              setTaskFilterId(next)
+              if (next) setLibraryScope('deliverables')
+            }}
+          />
+        </div>
         <Input.Search
           className={styles.searchInput}
           allowClear
