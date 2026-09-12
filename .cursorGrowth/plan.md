@@ -91,7 +91,7 @@
 
 **执行顺序**: `TASK-DUAL-02` → `TASK-DUAL-03` → `TASK-DUAL-04`（按需）→ `TASK-DUAL-05`
 
-**手验草稿**：`.cursorGrowth/archive/20260912_121830_真网双机_步骤1-5_Win12-Ubuntu16.md`（步骤 1 ✅；2–5 ⬜）。
+**手验归档（ACTIVE）**：`.cursorGrowth/archive/20260912_124200_真网双机_步骤1-5_Win12-Ubuntu16.md`（预检绿 · 步骤 **1 ✅** · **2–5 ⬜** → 做完再勾 DUAL-02）。
 
 ---
 
