@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.20] - 2026-09-12
+
 ### Fixed
 
 - **onekey 控制台**：Git Bash 不再把 PowerShell `$_` 展开成 `expand_aliases` 乱码；Windows 进程探测改为 `-File scripts/onekey-win-vite-procs.ps1`；控制台切 UTF-8；`.lanpm/dev.pid` / `dev.mode` 不再写 UTF-8 BOM
