@@ -1360,7 +1360,8 @@ const enUS = {
     'Open Discover to join a peer with a pairing code, or share your groups',
   'discover.pairingShareTitle': 'Let others discover my groups',
   'discover.pairingFindTitle': 'Join a peer’s group directory',
-  'discover.pairingFindHint': 'Enter the 6-digit code shown on their screen',
+  'discover.pairingFindHint':
+    'Enter the 6-digit code. On Wi‑Fi isolation also fill their IP (TCP 43124).',
   'discover.pairingCodePlaceholder': 'e.g. 847 293',
   'discover.pairingCrossSubnet': 'Peer is on a different subnet',
   'discover.pairingRouteHint': 'Code only is usually enough; we probe subnets from your route table',

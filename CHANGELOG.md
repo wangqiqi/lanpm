@@ -4,9 +4,7 @@
 
 ## [Unreleased]
 
-### Fixed
-
-- **E2E**：发现顶栏只用 `topbar-discover`（避免看板卡片「发现」撞名）；配对成功横幅在自动入群时也会出；`expectPairingJoinSuccess` 等「已连接 {peer}」
+- **发现配对（TASK-8801）**：加入方主路径始终可填对端 IP（同网 Wi‑Fi 隔离时 UDP 不够）；粘贴「复制配对信息」会带上 IP 再连接；发现弹窗不再因 snapshot `refresh` 身份变化清掉正在分享的连接码
 - **文档守卫**：`workflow.json` `sdd.specs_dir` 与 `verify:docs-optim-closeout` 对齐为 `.cursorGrowth/specs`
 
 ## [1.106.15] - 2026-09-12
