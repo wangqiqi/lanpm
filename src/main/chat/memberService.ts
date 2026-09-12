@@ -16,6 +16,7 @@ import {
 } from '../../shared/ops/bot.ts'
 import { getOpsGroupSettings } from '../ops/opsGroupSettingsStore.ts'
 import { getUserById } from '../storage/repositories/userRepository'
+import { isLanpmNoDemoEnv } from '../../shared/env/lanpmNoDemo.ts'
 
 /** 非匿名群占位成员，便于 @提及联调 */
 const STUB_MEMBERS: GroupMemberView[] = [
@@ -123,6 +124,45 @@ export async function listGroupMembers(db: Database, groupId: string): Promise<G
   if (isAnonymousGroupType(groupType)) {
     getGroupById(db, groupId)
     return withPresence(anonymousMembers(db, groupId), localUserId)
+  }
+
+  if (isLanpmNoDemoEnv()) {
+    const records = listDbGroupMembers(db, groupId)
+    const roster: GroupMemberView[] = records.map((m) => {
+      const user = getUserById(db, m.userId)
+      const displayName = user?.displayName ?? m.userId
+      return {
+        userId: m.userId,
+        displayName,
+        avatarUrl: user?.avatarUrl,
+        mentionKeys: user ? [user.baseName, user.userId] : [m.userId]
+      }
+    })
+    const members = new Map(roster.map((m) => [m.userId, m]))
+    for (const machine of listOpsMachines(groupId)) {
+      const userId = machineUserId(machine.deviceId)
+      members.set(userId, {
+        userId,
+        displayName: machine.displayName,
+        mentionKeys: [machine.displayName, machine.deviceId],
+        deviceKind: 'machine',
+        deviceId: machine.deviceId,
+        presence: machine.online ? 'online' : 'offline'
+      })
+    }
+    const opsSettings = getOpsGroupSettings(groupId)
+    if (opsSettings.assistantEnabled) {
+      members.set(OPS_BOT_USER_ID, {
+        userId: OPS_BOT_USER_ID,
+        displayName: OPS_BOT_DISPLAY_NAME,
+        mentionKeys: [...OPS_BOT_MENTION_KEYS],
+        deviceKind: 'bot',
+        presence: 'online'
+      })
+    }
+    return withPresence([...members.values()], localUserId).sort((a, b) =>
+      a.displayName.localeCompare(b.displayName)
+    )
   }
 
   const members = await collectPeerMembers(db)

@@ -1,6 +1,6 @@
 {
   "name": "lanpm",
-  "version": "1.106.16",
+  "version": "1.106.17",
   "description": "分布式局域网协作客户端 — Electron",
   "license": "AGPL-3.0-or-later",
   "author": "LanPM <zhou24388@163.com>",
@@ -13,6 +13,8 @@
   "scripts": {
     "predev": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs",
     "dev": "node scripts/dev-run.mjs",
+    "dev:demo": "node scripts/dev-run.mjs --demo",
+    "dev:no-demo": "node scripts/dev-run.mjs --no-demo",
     "dev:dual-peer": "node scripts/dev-with-seeds.mjs",
     "dev:web": "node scripts/dev-run.mjs --web",
     "prebuild": "node scripts/ensure-app-icons.mjs && node scripts/ensure-native-deps.mjs && node scripts/ensure-plugin-deps.mjs && node scripts/ensure-excalidraw-assets.mjs && node scripts/ensure-pdfjs-assets.mjs && npm run verify:pack-license",

@@ -23,10 +23,24 @@ function ensureLinuxPollingEnv(env) {
 }
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const web = process.argv.includes('--web')
+const argv = process.argv.slice(2)
+const web = argv.includes('--web')
+const noDemo = argv.includes('--no-demo')
+const withDemo = argv.includes('--demo')
+if (noDemo && withDemo) {
+  console.error('[lanpm] use either --no-demo or --demo, not both')
+  process.exit(1)
+}
 
 const env = { ...process.env }
 delete env.ELECTRON_RUN_AS_NODE
+if (noDemo) env.LANPM_NO_DEMO = '1'
+if (withDemo) env.LANPM_NO_DEMO = '0'
+if (env.LANPM_NO_DEMO === '1') {
+  console.log('[lanpm] LANPM_NO_DEMO=1 (no mock catalog)')
+} else if (withDemo) {
+  console.log('[lanpm] mock catalog enabled (demo groups + dev member roster)')
+}
 if (web) env.LANPM_BROWSER_DEV = '1'
 // 开发：显式注入 LANPM_LICENSE_SKIP_VERIFY=1；构建/未打包 dist 不自动绕过
 if (env.LANPM_LICENSE_SKIP_VERIFY !== '0') {

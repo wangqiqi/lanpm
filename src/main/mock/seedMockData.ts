@@ -35,6 +35,7 @@ import {
   type MockMessageDef
 } from './mockCatalog'
 import { upsertDependency } from '../storage/repositories/taskDependencyRepository'
+import { isLanpmNoDemoEnv } from '../../shared/env/lanpmNoDemo.ts'
 
 function ymdOffset(days: number): string {
   const d = new Date()
@@ -330,6 +331,7 @@ function markSeeded(db: Database): void {
 
 /** 开发 / 演示 / 截图流水线注入 mock；正式打包安装包默认不注入 */
 export function shouldSeedMockCatalog(): boolean {
+  if (isLanpmNoDemoEnv()) return false
   if (process.env.LANPM_DEMO === '1') return true
   if (process.env.LANPM_VISUAL_CAPTURE_DIR) return true
   return !app.isPackaged

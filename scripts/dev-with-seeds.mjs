@@ -22,8 +22,14 @@ if (!seeds) {
   process.exit(1)
 }
 
-const env = { ...process.env, LANPM_DISCOVER_SEEDS: seeds }
+const env = {
+  ...process.env,
+  LANPM_DISCOVER_SEEDS: seeds,
+  // 真网双机手验：不要注入演示群（Alice/Bob/演示·职能群等）
+  LANPM_NO_DEMO: process.env.LANPM_NO_DEMO ?? '1'
+}
 console.log(`[lanpm] LANPM_DISCOVER_SEEDS=${seeds}`)
+if (env.LANPM_NO_DEMO === '1') console.log('[lanpm] LANPM_NO_DEMO=1 (no mock catalog)')
 
 const child = spawn(process.execPath, [path.join(root, 'scripts/dev-run.mjs')], {
   cwd: root,

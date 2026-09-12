@@ -18,6 +18,7 @@ describe('shouldSeedMockCatalog', () => {
   beforeEach(() => {
     process.env = { ...env }
     delete process.env.LANPM_DEMO
+    delete process.env.LANPM_NO_DEMO
     delete process.env.LANPM_VISUAL_CAPTURE_DIR
     isPackaged.value = false
   })
@@ -29,6 +30,12 @@ describe('shouldSeedMockCatalog', () => {
   it('seeds in dev (unpackaged)', () => {
     isPackaged.value = false
     expect(shouldSeedMockCatalog()).toBe(true)
+  })
+
+  it('skips when LANPM_NO_DEMO=1 (dual-machine handtest)', () => {
+    isPackaged.value = false
+    process.env.LANPM_NO_DEMO = '1'
+    expect(shouldSeedMockCatalog()).toBe(false)
   })
 
   it('skips in packaged app unless demo override', () => {

@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.106.17] - 2026-09-12
+
+### Changed
+
+- **真网双机 / Mock 开关**：`LANPM_NO_DEMO=1` · `npm run dev:no-demo` 关闭演示群与聊天占位成员；`npm run dev:demo` 恢复旧开发体验；`dev:dual-peer` 默认 NO_DEMO（`TASK-8801`）
+
 ## [1.106.16] - 2026-09-12
 
 ### Added
