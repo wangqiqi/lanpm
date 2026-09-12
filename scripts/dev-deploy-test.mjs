@@ -17,6 +17,11 @@ if (!peer) {
   process.exit(1)
 }
 
+spawnSync(process.execPath, [path.join(root, 'scripts/stop-lanpm.mjs')], {
+  cwd: root,
+  stdio: 'inherit'
+})
+
 spawnSync(process.execPath, [path.join(root, 'scripts/wipe-local-userdata.mjs')], {
   cwd: root,
   stdio: 'inherit'

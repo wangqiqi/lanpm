@@ -52,12 +52,46 @@ import {
   LINUX_DISABLE_GPU_SWITCHES,
   shouldDisableLinuxGpu
 } from '../shared/ops/linuxGpuPolicy'
+import { shouldAllowMultipleLanpmInstances } from '../shared/ops/singleInstancePolicy'
+import {
+  acquireMachineSingletonLock,
+  registerMachineSingletonReleaseOnExit,
+  releaseMachineSingletonLock
+} from './machineSingleton'
 
 /** Windows 通知 / 任务栏分组须在 ready 前设置；显示名避免 toast 标题为 Electron */
 if (process.platform === 'win32') {
   app.setAppUserModelId('com.lanpm.app')
 }
 app.setName('LanPM')
+
+function focusExistingMainWindow(): void {
+  const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
+  if (!win) return
+  if (!win.isVisible()) win.show()
+  if (win.isMinimized()) win.restore()
+  win.focus()
+}
+
+/** 托盘隐藏时进程仍占用 43124；禁止多开（与 userData 目录无关，除非显式允许多实例）。 */
+const allowMultipleInstances = shouldAllowMultipleLanpmInstances()
+if (!allowMultipleInstances) {
+  let machineLock = false
+  if (!acquireMachineSingletonLock()) {
+    app.quit()
+    process.exit(0)
+  }
+  machineLock = true
+  registerMachineSingletonReleaseOnExit()
+
+  const gotSingleInstanceLock = app.requestSingleInstanceLock()
+  if (!gotSingleInstanceLock) {
+    if (machineLock) releaseMachineSingletonLock()
+    app.quit()
+    process.exit(0)
+  }
+  app.on('second-instance', () => focusExistingMainWindow())
+}
 
 const envUserDataDir = process.env.LANPM_USER_DATA?.trim()
 if (envUserDataDir) {
@@ -79,22 +113,6 @@ if (visualCaptureDir || e2eMode) {
   process.env.LANPM_USER_DATA = userData
   app.setPath('userData', userData)
   process.env.LANPM_NETWORK = process.env.LANPM_NETWORK ?? 'stub'
-}
-
-/** 托盘隐藏时进程仍占用 43124；禁止多开导致 EADDRINUSE */
-if (!isolatedLaunch) {
-  const gotSingleInstanceLock = app.requestSingleInstanceLock()
-  if (!gotSingleInstanceLock) {
-    app.quit()
-  } else {
-    app.on('second-instance', () => {
-      const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
-      if (!win) return
-      if (!win.isVisible()) win.show()
-      if (win.isMinimized()) win.restore()
-      win.focus()
-    })
-  }
 }
 
 registerPreviewScheme()

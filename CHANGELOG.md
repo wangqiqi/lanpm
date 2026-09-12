@@ -17,6 +17,7 @@
 
 ### Fixed
 
+- **单实例**：主进程在分流 `userData` 前加机器级锁（`~/.cache/LanPM/instance.pid`）+ Electron `requestSingleInstanceLock`；`LANPM_ALLOW_MULTI_INSTANCE=1` / E2E / 视觉截图才允许多开；`npm run lanpm:stop` · `dev:deploy-test` 启动前自动停旧进程
 - **发现成员列表**（`TASK-DUAL-04a`）：中继不再给幽灵 peer 刷在线；`tcpPeers` 按 TTL 剔除无 UDP/无链路的旧 userId；同一 LAN IP 只展示一个用户（优先已握手）
 - **no-demo 双机成员栏**（`TASK-DUAL-04a`）：合并发现 peer 的 `displayName`（修复先入库 userId 后不再更新、Windows 中文名在 Ubuntu 显示为 `u…`）；在线数仅计本机 + 当前 LAN 发现用户（修复历史成员误显示在线）；不再把「仅发过消息、不在群 roster」的 userId 塞进侧栏
 - **no-demo 成员**（`TASK-DUAL-04a`）：聊天收/发写入 `group_members`；成员列表合并消息发送者与同群发现 peer；新消息后刷新成员栏
