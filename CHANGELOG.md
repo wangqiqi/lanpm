@@ -8,6 +8,11 @@
 
 - **磁盘约定**：Vitest 覆盖率报告迁至 `.lanpm/coverage/`（SSOT `coverageDir` · `verify:artifact-paths`）；`onekey_run clean` 同步清理，遗留根目录 `coverage/` 仍可删
 
+### Added
+
+- **真网双机手验（部分）**（`SPRINT-DUAL-REAL-01`）：Win **192.168.20.12** ↔ Ubuntu **192.168.20.16** 在 **v1.106.21** 下验证 `docs/05` §6.2 **步骤 1–3**（互通 · 消息 · **10MB** 级文件双向收发与局域网下载）；步骤 **4–8 未测**（操作员暂缓 4–5，6–8 顺延下一 Sprint）；Growth 归档见 `.cursorGrowth/archive/`（本地）
+
+
 ## [1.106.21] - 2026-09-12
 
 ### Fixed
