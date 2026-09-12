@@ -147,6 +147,14 @@ assert.match(
   readFileSync(join(root, 'src/main/discover/discoverService.ts'), 'utf8'),
   /countReadyLinks/
 )
+assert.match(
+  readFileSync(join(root, 'src/main/discover/discoverService.ts'), 'utf8'),
+  /countLiveLinks/
+)
+assert.match(
+  readFileSync(join(root, 'src/main/discover/discoverService.ts'), 'utf8'),
+  /pruneSelfDiscoverSeeds/
+)
 assert.match(preload, /group:join/)
 assert.match(preload, /pairing:start/)
 assert.match(preload, /pairing:join/)

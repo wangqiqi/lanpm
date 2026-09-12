@@ -26,7 +26,8 @@ import {
   touchLocalDevice,
   touchRemoteHeartbeat
 } from '../../presence/presenceRegistry.ts'
-import { getLocalLanIp } from '../localIp.ts'
+import { getLocalLanIp, listLanCandidates } from '../localIp.ts'
+import { isSelfDiscoverSeed, normalizeDiscoverHost } from '../../../shared/discover/selfDiscoverSeed.ts'
 import {
   PairingSessionHost,
   type PairingSessionView
@@ -90,6 +91,7 @@ export class RealNetworkTransport implements NetworkTransport {
   private readonly subscriptions = new Map<string, Set<EnvelopeHandler>>()
   private readonly globalHandlers = new Set<EnvelopeHandler>()
   private readonly links = new Map<string, PeerLink>()
+  private readonly liveLinks = new Set<PeerLink>()
   private readonly reconnectAttempt = new Map<string, number>()
   private readonly reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
   /** TCP 握手 / peer_advert 识别的对端（跨子网手动节点） */
@@ -188,7 +190,10 @@ export class RealNetworkTransport implements NetworkTransport {
         link.sendPeerAdvert()
         link.sendDiscoverRelay(this.buildDiscoverRelayPacket())
       },
-      onClose: options.onClose,
+      onClose: () => {
+        this.liveLinks.delete(link)
+        options.onClose()
+      },
       onDiscoverRelay: (packet, fromDeviceId) => {
         this.handleDiscoverRelay(packet, fromDeviceId, link)
       },
@@ -213,6 +218,7 @@ export class RealNetworkTransport implements NetworkTransport {
         return { ok: false, reason: result.reason }
       }
     })
+    this.liveLinks.add(link)
     return link
   }
 
@@ -275,6 +281,8 @@ export class RealNetworkTransport implements NetworkTransport {
     this.pairingHost.cancel()
     for (const t of this.reconnectTimers.values()) clearTimeout(t)
     this.reconnectTimers.clear()
+    for (const link of [...this.liveLinks]) link.close()
+    this.liveLinks.clear()
     for (const link of this.links.values()) link.close()
     this.links.clear()
     this.tcpPeers.clear()
@@ -342,6 +350,31 @@ export class RealNetworkTransport implements NetworkTransport {
       if (link.isReady()) n++
     }
     return n
+  }
+
+  countLiveLinks(): number {
+    let n = 0
+    for (const link of this.liveLinks) {
+      if (link.isReady() || link.isHandshaking()) n++
+    }
+    return n
+  }
+
+  private localDiscoverHosts(): string[] {
+    const hosts = listLanCandidates().map((c) => c.address)
+    if (this.lanIp) hosts.push(this.lanIp)
+    const resolved = this.resolveLanIp()
+    if (resolved) hosts.push(resolved)
+    return hosts
+  }
+
+  private findLiveLinkByHost(host: string): PeerLink | undefined {
+    const needle = normalizeDiscoverHost(host)
+    for (const link of this.liveLinks) {
+      const remote = link.getRemoteHost()
+      if (remote && normalizeDiscoverHost(remote) === needle) return link
+    }
+    return undefined
   }
 
   getDiscoveryDiagnostics(): {
@@ -558,6 +591,22 @@ export class RealNetworkTransport implements NetworkTransport {
 
   async connectManualHost(host: string, port: number): Promise<void> {
     if (!this.started) this.start()
+
+    if (isSelfDiscoverSeed(`${host}:${port}`, this.localDiscoverHosts(), this.listenPort)) {
+      console.warn('[lanpm] skip self discover seed:', `${host}:${port}`)
+      return
+    }
+
+    const inbound = this.findLiveLinkByHost(host)
+    if (inbound?.isReady()) return
+    if (inbound?.isHandshaking()) {
+      try {
+        await inbound.waitUntilReady()
+        return
+      } catch {
+        // inbound handshake failed; fall through to outbound
+      }
+    }
 
     const link = this.createPeerLink({
       remoteHost: host,

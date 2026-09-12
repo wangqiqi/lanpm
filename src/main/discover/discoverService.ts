@@ -7,7 +7,10 @@ import {
   normalizeDiscoverSeeds
 } from '../../shared/discover/discoverSeeds'
 import { parseDiscoverSeedsEnv } from '../../shared/discover/discoverSeedsEnv'
+import { pruneSelfDiscoverSeeds } from '../../shared/discover/selfDiscoverSeed'
 import { parseHostPort } from '../../shared/network/manualPeer'
+import { resolveLanpmTcpPort } from '../../shared/network/listenPort'
+import { listLanCandidates } from '../network/localIp'
 import { getSetupStatus } from '../identity/setup'
 import { listUserGroups } from '../group/groupService'
 import { listGroupMembers } from '../storage/repositories/groupRepository'
@@ -45,15 +48,32 @@ export function appendDiscoverSeeds(db: Database, addresses: string[]): string[]
   return setDiscoverSeeds(db, next)
 }
 
+function currentListenPort(): number {
+  const transport = getNetworkTransport()
+  if (transport instanceof RealNetworkTransport) return transport.getListenPort()
+  return resolveLanpmTcpPort(process.env.LANPM_TCP_PORT)
+}
+
+function localDiscoverHosts(): string[] {
+  return listLanCandidates().map((c) => c.address)
+}
+
+function pruneStoredSelfSeeds(db: Database, seeds: string[]): string[] {
+  const pruned = pruneSelfDiscoverSeeds(seeds, localDiscoverHosts(), currentListenPort())
+  if (pruned.length !== seeds.length || pruned.some((s, i) => s !== seeds[i])) {
+    return setDiscoverSeeds(db, pruned)
+  }
+  return pruned
+}
+
 /** Merge `LANPM_DISCOVER_SEEDS` into SQLite meta before auto-connect. */
 export function mergeDiscoverSeedsFromEnv(db: Database): string[] {
   const fromEnv = parseDiscoverSeedsEnv(process.env.LANPM_DISCOVER_SEEDS)
-  if (fromEnv.length === 0) return loadSeeds(db)
   let next = loadSeeds(db)
   for (const address of fromEnv) {
     next = addDiscoverSeed(next, address)
   }
-  return setDiscoverSeeds(db, next)
+  return pruneStoredSelfSeeds(db, next)
 }
 
 const SEED_CACHE_WAIT_MS = 2_500
@@ -71,7 +91,8 @@ async function tryConnectSeeds(
   seeds: string[],
   options?: { waitForGroups?: boolean }
 ): Promise<void> {
-  for (const address of seeds) {
+  const connectable = pruneSelfDiscoverSeeds(seeds, localDiscoverHosts(), currentListenPort())
+  for (const address of connectable) {
     try {
       const { host, port } = parseHostPort(address)
       await connectManualPeer(host, port)
@@ -80,7 +101,7 @@ async function tryConnectSeeds(
       console.warn('[lanpm] discover seed connect failed:', address, msg)
     }
   }
-  if (options?.waitForGroups && seeds.length > 0) {
+  if (options?.waitForGroups && connectable.length > 0) {
     await waitForDiscoverGroups(1, SEED_CACHE_WAIT_MS)
   }
 }
@@ -90,7 +111,7 @@ export async function connectDiscoverSeeds(
   db: Database,
   options?: { waitForGroups?: boolean }
 ): Promise<void> {
-  const seeds = loadSeeds(db)
+  const seeds = pruneStoredSelfSeeds(db, loadSeeds(db))
   if (seeds.length === 0) return
   await tryConnectSeeds(seeds, options)
 }
@@ -145,7 +166,7 @@ export async function fetchDiscoverSnapshot(
   const status = getSetupStatus(db)
   const localUserId = status.configured && status.user ? status.user.userId : undefined
   const localDeviceId = status.configured && status.device ? status.device.deviceId : undefined
-  const seeds = loadSeeds(db)
+  const seeds = pruneStoredSelfSeeds(db, loadSeeds(db))
 
   if (options?.connectSeeds !== false && seeds.length > 0) {
     const hadGroups = listCachedDiscoverGroups().length > 0
@@ -156,6 +177,8 @@ export async function fetchDiscoverSnapshot(
   const discovered = transport ? await transport.discoverPeers() : []
   const readyLinks =
     transport instanceof RealNetworkTransport ? transport.countReadyLinks() : 0
+  const liveLinks =
+    transport instanceof RealNetworkTransport ? transport.countLiveLinks() : 0
 
   const peerMap = new Map<string, { displayName: string; devices: Set<string> }>()
   for (const peer of discovered) {
@@ -211,7 +234,7 @@ export async function fetchDiscoverSnapshot(
   })
 
   const health = buildHealth({
-    peerCount: Math.max(peers.length, readyLinks),
+    peerCount: Math.max(peers.length, readyLinks, liveLinks),
     groupCount: groups.length
   })
 

@@ -95,6 +95,33 @@ export class PeerLink {
     return this.remoteProfile
   }
 
+  getRemoteHost(): string | undefined {
+    return this.remoteHost
+  }
+
+  isHandshaking(): boolean {
+    return this.state === 'handshaking'
+  }
+
+  waitUntilReady(timeoutMs = HANDSHAKE_TIMEOUT_MS): Promise<void> {
+    if (this.state === 'ready') return Promise.resolve()
+    if (this.state === 'closed') return Promise.reject(new Error('link_closed'))
+    return new Promise((resolve, reject) => {
+      const deadline = Date.now() + timeoutMs
+      const tick = setInterval(() => {
+        if (this.state === 'ready') {
+          clearInterval(tick)
+          resolve()
+          return
+        }
+        if (this.state === 'closed' || Date.now() > deadline) {
+          clearInterval(tick)
+          reject(new Error(this.state === 'closed' ? 'link_closed' : 'incoming_handshake_timeout'))
+        }
+      }, 40)
+    })
+  }
+
   attachIncoming(socket: net.Socket): void {
     if (this.state !== 'idle') {
       socket.destroy()
@@ -104,6 +131,11 @@ export class PeerLink {
     this.remoteHost = socket.remoteAddress ?? undefined
     this.isInitiator = false
     this.state = 'handshaking'
+    this.armConnectCompletion(
+      () => undefined,
+      () => undefined,
+      'incoming_handshake_timeout'
+    )
     socket.on('data', (chunk) => this.decoder.feed(chunk))
     socket.on('close', () => this.close())
     socket.on('error', () => this.close())

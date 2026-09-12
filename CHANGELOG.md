@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.106.16] - 2026-09-12
+
 ### Added
 
 - **真网双机自动对接**：`LANPM_DISCOVER_SEEDS` 启动合并发现种子并自动连对端 · `npm run dev:dual-peer` · `docs/05` §6.1（`TASK-DUAL-02` 辅助）
@@ -12,6 +14,7 @@
 
 ### Fixed
 
+- **发现（TASK-8801）**：种子跳过本机 `IP:43124`；入站握手计入发现健康；已有入站时不再对同一 IP 重复出站
 - **发现（TASK-8801）**：同账号另一台设备不再从发现「成员」里滤掉；健康态把已握手 TCP 链路算进 peerCount（Wi‑Fi 隔离时 UDP 空仍显示已连接）
 - **发现配对（TASK-8801）**：加入方主路径始终可填对端 IP；粘贴配对信息带 IP；发现弹窗不因 snapshot `refresh` 清掉分享码
 - **E2E**：发现顶栏只用 `topbar-discover`（避免看板卡片「发现」撞名）；配对成功横幅在自动入群时也会出；`expectPairingJoinSuccess` 等「已连接 {peer}」
