@@ -40,9 +40,12 @@ const picker = readFileSync(
   join(root, 'src/renderer/src/features/chat/EmojiPicker.tsx'),
   'utf8'
 )
-assert.match(picker, /from '@emoji-mart\/react'/)
-assert.match(picker, /from '@emoji-mart\/data'/)
+assert.match(picker, /import\('@emoji-mart\/react'\)/)
+assert.match(picker, /import\('@emoji-mart\/data'\)/)
 assert.match(picker, /set="native"/)
+assert.match(picker, /destroyOnHidden/)
+assert.doesNotMatch(picker, /from '@emoji-mart\/react'/)
+assert.doesNotMatch(picker, /from '@emoji-mart\/data'/)
 assert.doesNotMatch(picker, /EMOJI_GROUPS/)
 assert.doesNotMatch(picker, /from '\.\/emojiData'/)
 

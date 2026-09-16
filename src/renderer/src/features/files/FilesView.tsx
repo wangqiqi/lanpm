@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
   Collapse,
@@ -51,7 +51,6 @@ import { useI18n } from '@renderer/i18n/useI18n'
 import type { MessageKey } from '@renderer/i18n/messages'
 import { useMediaQuery } from '@renderer/hooks/useMediaQuery'
 import { groupViewPath } from '@renderer/routes/paths'
-import BookmarkWebView from '@renderer/features/files/BookmarkWebView'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
 import { formatFileTypeLabel } from '@shared/file/formatFileType'
 import { buildDeliverableIndex, tasksForFile } from '@shared/task/deliverables'
@@ -69,11 +68,13 @@ import { isTextPreviewFile } from '@shared/file/previewExtensions'
 import { shouldUsePdfJsPreview } from '@shared/file/pdfPreview'
 import { shouldUseOfficeLightPreview } from '@shared/file/officeLightPreview'
 import { loadPreviewText } from '@renderer/features/files/loadPreviewText'
-import PdfPreview from '@renderer/features/files/PdfPreview'
-import OfficeLightPreview from '@renderer/features/files/OfficeLightPreview'
 import { runOnEnter } from '@renderer/lib/inputKeyboard'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
 import styles from './files.module.css'
+
+const BookmarkWebView = lazy(() => import('@renderer/features/files/BookmarkWebView'))
+const PdfPreview = lazy(() => import('@renderer/features/files/PdfPreview'))
+const OfficeLightPreview = lazy(() => import('@renderer/features/files/OfficeLightPreview'))
 
 const { Text } = Typography
 
@@ -986,10 +987,12 @@ export default function FilesView(): React.ReactElement {
           <Text type="secondary" className={styles.bookmarkPreviewHint}>
             {t('files.bookmarkPreviewHint')}
           </Text>
-          <BookmarkWebView
-            url={selected.bookmarkUrl ?? ''}
-            title={selected.bookmarkTitle ?? selected.name}
-          />
+          <Suspense fallback={<ViewLoadingCenter />}>
+            <BookmarkWebView
+              url={selected.bookmarkUrl ?? ''}
+              title={selected.bookmarkTitle ?? selected.name}
+            />
+          </Suspense>
         </div>
       ) : isRemotePendingPath(selected.storagePath) ? (
         <Text type="secondary">
@@ -1025,14 +1028,18 @@ export default function FilesView(): React.ReactElement {
           previewPath: selected.previewPath,
           previewUrl
         }) ? (
-        <PdfPreview url={previewUrl} title={selected.name} />
+        <Suspense fallback={<ViewLoadingCenter />}>
+          <PdfPreview url={previewUrl} title={selected.name} />
+        </Suspense>
       ) : previewUrl &&
         shouldUseOfficeLightPreview({
           ext: selected.ext,
           previewPath: selected.previewPath,
           previewUrl
         }) ? (
-        <OfficeLightPreview url={previewUrl} title={selected.name} />
+        <Suspense fallback={<ViewLoadingCenter />}>
+          <OfficeLightPreview url={previewUrl} title={selected.name} />
+        </Suspense>
       ) : previewText !== null ? (
         <pre className={styles.previewText}>{previewText}</pre>
       ) : (
