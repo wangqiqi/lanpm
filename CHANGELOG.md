@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **Nightly E2E**：`verify:e2e-views` 底栏 `nav-tab-board` 被发现 Coachmark 的 antd Tour 遮罩拦截；`LANPM_E2E=1` 重新注入 `demo-project`，有群后不再打开 Tour，Tab 点击前关掉残留遮罩
+- **GitHub Actions**：`checkout` / `setup-node` 升到 v5，避开 Node 20 运行时弃用（nightly / verify / release / pages / sync-r2）
+
 ### Changed
 
 - **启动**：主进程把文件路径修复、AI 巡检/端点探测、会议提醒、截图模块挪到首窗 `createWindow` 之后；`electron-screenshots` 改为按需加载，不再挡冷启动

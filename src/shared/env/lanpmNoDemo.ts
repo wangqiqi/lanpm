@@ -7,6 +7,7 @@
  * | `LANPM_NO_DEMO=0` + `LANPM_DEMO=1`（`dev:demo`） | 演示群 + 侧栏 Alice/Bob/Carol |
  * | 未设（默认 `dev`） | 同 `LANPM_NO_DEMO=1`（部署态，无 mock） |
  * | `LANPM_DEMO=1` | 强制演示（截图流水线；可覆盖 NO_DEMO） |
+ * | `LANPM_E2E=1` | Playwright Electron 始终注入演示群（覆盖 NO_DEMO） |
  *
  * 命令：`npm run dev:no-demo` · `npm run dev:demo` · `npm run dev:fresh:no-demo`（零数据+无 mock）· `dev:dual-peer` 默认 NO_DEMO=1
  */
