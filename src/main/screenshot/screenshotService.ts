@@ -1,6 +1,5 @@
 import { app, BrowserWindow } from 'electron'
 import { throwLanpm } from '../../shared/errors/lanpmError'
-import Screenshots from 'electron-screenshots'
 import { mkdir, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { sendFileMessage } from '../chat/chatService'
@@ -8,7 +7,16 @@ import { getMainWindow, LANPM_MAIN_WINDOW_TITLE } from '../mainWindow'
 import { getDatabase } from '../storage'
 import type { ChatMessage } from '../../shared/chat/types'
 
-let screenshots: Screenshots | null = null
+/** Lazy-loaded; electron-screenshots is heavy and not needed before first capture. */
+type ScreenshotsApi = {
+  $win?: BrowserWindow
+  on: (event: string, listener: (...args: unknown[]) => void) => void
+  startCapture: () => Promise<void>
+  endCapture: () => Promise<void>
+}
+
+let screenshots: ScreenshotsApi | null = null
+let initPromise: Promise<void> | null = null
 
 type PendingCapture = {
   groupId: string
@@ -85,42 +93,66 @@ const SCREENSHOT_LANG = {
   operation_rectangle_title: '矩形'
 } as const
 
-export function initScreenshotService(): void {
+async function ensureScreenshotService(): Promise<void> {
   if (screenshots) return
+  if (!initPromise) {
+    initPromise = (async () => {
+      const { default: Screenshots } = await import('electron-screenshots')
+      const instance = new Screenshots({
+        singleWindow: true,
+        lang: { ...SCREENSHOT_LANG }
+      }) as ScreenshotsApi
 
-  screenshots = new Screenshots({
-    singleWindow: true,
-    lang: { ...SCREENSHOT_LANG }
-  })
+      instance.on('ok', (...args: unknown[]) => {
+        const buffer = args[1]
+        if (!Buffer.isBuffer(buffer)) return
+        void (async () => {
+          if (!pending) return
+          const { groupId, resolve, reject } = pending
+          pending = null
+          showAppWindows()
+          try {
+            // Prefer userData (stable, app-owned) over OS /tmp — avoid cluttering system temp
+            const shotDir = join(app.getPath('userData'), 'tmp')
+            await mkdir(shotDir, { recursive: true })
+            const filePath = join(shotDir, `lanpm-screenshot-${Date.now()}.png`)
+            await writeFile(filePath, buffer)
+            const msg = await sendFileMessage(getDatabase(), groupId, filePath)
+            // Best-effort: file may already be copied into files/; ignore if still needed
+            await unlink(filePath).catch(() => undefined)
+            resolve(msg)
+          } catch (err) {
+            reject(err instanceof Error ? err : new Error(String(err)))
+          }
+        })()
+      })
 
-  screenshots.on('ok', (_event, buffer: Buffer) => {
-    void (async () => {
-      if (!pending) return
-      const { groupId, resolve, reject } = pending
-      pending = null
-      showAppWindows()
-      try {
-        // Prefer userData (stable, app-owned) over OS /tmp — avoid cluttering system temp
-        const shotDir = join(app.getPath('userData'), 'tmp')
-        await mkdir(shotDir, { recursive: true })
-        const filePath = join(shotDir, `lanpm-screenshot-${Date.now()}.png`)
-        await writeFile(filePath, buffer)
-        const msg = await sendFileMessage(getDatabase(), groupId, filePath)
-        // Best-effort: file may already be copied into files/; ignore if still needed
-        await unlink(filePath).catch(() => undefined)
-        resolve(msg)
-      } catch (err) {
-        reject(err instanceof Error ? err : new Error(String(err)))
-      }
-    })()
-  })
+      instance.on('cancel', () => {
+        clearPending(true)
+      })
 
-  screenshots.on('cancel', () => {
-    clearPending(true)
+      screenshots = instance
+    })().catch((err: unknown) => {
+      initPromise = null
+      throw err
+    })
+  }
+  await initPromise
+}
+
+/** Prefetch after first paint; capture path also awaits this. */
+export function initScreenshotService(): void {
+  void ensureScreenshotService().catch((err: unknown) => {
+    console.error('[lanpm] screenshot module failed to load:', err)
   })
 }
 
 export async function captureAndSendScreenshot(groupId: string): Promise<ChatMessage | null> {
+  try {
+    await ensureScreenshotService()
+  } catch {
+    throwLanpm('err.screenshotNotReady')
+  }
   if (!screenshots) {
     throwLanpm('err.screenshotNotReady')
   }

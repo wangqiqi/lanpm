@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   DISCOVER_COACHMARK_SEEN_KEY,
   isDiscoverCoachmarkSeen,
-  markDiscoverCoachmarkSeen
+  markDiscoverCoachmarkSeen,
+  shouldShowDiscoverCoachmark
 } from '@shared/discover/discoverCoachmark'
 
 const memory = new Map<string, string>()
@@ -33,5 +34,11 @@ describe('discoverCoachmark', () => {
     markDiscoverCoachmarkSeen()
     expect(isDiscoverCoachmarkSeen()).toBe(true)
     expect(memory.get(DISCOVER_COACHMARK_SEEN_KEY)).toBe('true')
+  })
+
+  it('only opens for a loaded empty group list', () => {
+    expect(shouldShowDiscoverCoachmark(false, 0)).toBe(false)
+    expect(shouldShowDiscoverCoachmark(true, 0)).toBe(true)
+    expect(shouldShowDiscoverCoachmark(true, 1)).toBe(false)
   })
 })

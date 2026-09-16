@@ -56,6 +56,8 @@ assert.match(ui, /nav-tab-/)
 const mainSrc = readSrc('src/main/index.ts')
 assert.match(mainSrc, /LANPM_MEASURE/)
 assert.match(mainSrc, /\[lanpm:measure\] ready-to-show/)
+assert.match(mainSrc, /scheduleDeferredStartup/)
+assert.match(mainSrc, /createWindow\(\)\s*\n\s*scheduleDeferredStartup\(\)/)
 
 const gitignore = readSrc('.gitignore')
 assert.match(gitignore, /^\.lanpm\//m)

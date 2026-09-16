@@ -169,6 +169,26 @@ function registerAllIpcHandlers(): void {
   registerAiIpc()
 }
 
+/**
+ * Work that is not required to show the first window. File-path repairs scan the
+ * files table; AI/meeting/screenshot modules are unused on the cold-start path.
+ */
+function scheduleDeferredStartup(): void {
+  const run = (): void => {
+    try {
+      repairFilePreviewPaths(getDatabase())
+      repairFileStoragePaths(getDatabase())
+      initAiPatrolScheduler(getDatabase())
+      initMeetingReminderService()
+      initAiEndpointProbeScheduler(getDatabase())
+      initScreenshotService()
+    } catch (err) {
+      console.error('[lanpm] deferred startup failed:', err)
+    }
+  }
+  setImmediate(run)
+}
+
 function createWindow(): BrowserWindow {
   const windowIcon = resolveWindowIcon()
   if (!app.isPackaged) {
@@ -266,22 +286,17 @@ app.whenReady().then(async () => {
       const baseName = process.env.LANPM_E2E_NAME?.trim() || 'E2ETest'
       completeSetup(getDatabase(), { baseName })
     }
-    repairFilePreviewPaths(getDatabase())
-    repairFileStoragePaths(getDatabase())
     registerPreviewProtocol(getDatabase)
     ensureSeedGroups(getDatabase())
     initNetwork(getDatabase())
     initChatService(getDatabase())
-    initAiPatrolScheduler(getDatabase())
-    initMeetingReminderService()
-    initAiEndpointProbeScheduler(getDatabase())
-    initScreenshotService()
     registerAllIpcHandlers()
     if (!app.isPackaged) {
       console.info('[lanpm] SQLite ready at', getDatabasePath())
     }
     initSystemTray()
     createWindow()
+    scheduleDeferredStartup()
   } catch (err) {
     console.error('[lanpm] startup failed:', err)
     dialog.showErrorBox('LanPM 启动失败', startupErrorMessage(err))

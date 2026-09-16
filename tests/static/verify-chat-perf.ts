@@ -40,6 +40,7 @@ assert.ok(!bubble.includes('usePluginMenus'), 'MessageBubble must not call usePl
 assert.ok(!bubble.includes('PluginZoneHost'), 'MessageBubble must not mount PluginZoneHost')
 assert.match(bubble, /onBubbleContextMenu/)
 assert.match(bubble, /memo\(/)
+assert.match(bubble, /lazy\(\(\) => import\('@renderer\/features\/chat\/CodeBlock'\)\)/)
 
 const hook = readFileSync(join(root, 'src/renderer/src/plugin/usePluginMenus.ts'), 'utf8')
 assert.match(hook, /fetchPluginMenusCached/)
@@ -54,6 +55,7 @@ assert.match(chatView, /handleBubbleContextMenu/)
 assert.match(chatView, /zone="context"/)
 assert.match(chatView, /Set<string>/)
 assert.match(chatView, /messageById={messageById}/)
+assert.match(chatView, /lazy\(\(\) => import\('@renderer\/features\/chat\/CodeSendModal'\)\)/)
 
 const pinned = readFileSync(join(root, 'src/renderer/src/features/chat/PinnedMessagesBar.tsx'), 'utf8')
 assert.match(pinned, /messageById/)
@@ -65,6 +67,9 @@ const virtualList = readFileSync(
 )
 assert.match(virtualList, /@tanstack\/react-virtual/)
 assert.match(virtualList, /useVirtualizer/)
+assert.match(virtualList, /memo\(/)
+assert.match(virtualList, /useMemo\(/)
+assert.match(virtualList, /overscan:\s*4/)
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   scripts?: Record<string, string>

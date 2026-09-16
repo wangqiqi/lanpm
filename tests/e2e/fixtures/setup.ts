@@ -19,6 +19,7 @@ export async function completeSetupWizard(page: Page): Promise<void> {
 
   const discover = page.getByTestId('topbar-discover')
   await expect(discover).toBeVisible({ timeout: 120_000 })
+  await dismissDiscoverCoachmark(page)
 }
 
 export function discoverDialog(page: Page) {
@@ -124,6 +125,7 @@ export async function openDemoProjectCalendarWithEvents(page: Page): Promise<voi
 }
 
 export async function clickBottomNavTab(page: Page, view: E2eTabView): Promise<void> {
+  await dismissDiscoverCoachmark(page)
   await page.getByTestId(`nav-tab-${view}`).click()
   await expect(page.getByTestId(`nav-tab-${view}`)).toHaveAttribute('aria-current', 'page', {
     timeout: 30_000

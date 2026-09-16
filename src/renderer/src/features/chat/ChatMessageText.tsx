@@ -1,12 +1,36 @@
-import { memo } from 'react'
+import { lazy, memo, Suspense } from 'react'
 import type { GroupMemberView } from '@shared/chat/members'
 import type { Task } from '@shared/task/types'
 import { shouldRenderChatMarkdown } from '@shared/chat/markdownDetect'
 import { splitMentionSegments } from '@shared/chat/mentions'
 import { splitTaskRefSegments } from '@shared/chat/taskRefs'
-import MarkdownView from '@renderer/ui/MarkdownView'
 import { useI18n } from '@renderer/i18n/useI18n'
 import styles from './chat.module.css'
+
+const MarkdownView = lazy(() => import('@renderer/ui/MarkdownView'))
+
+function LazyMarkdownView({
+  content,
+  variant,
+  cacheKey,
+  deferHeavyContent
+}: {
+  content: string
+  variant?: 'inline' | 'block'
+  cacheKey?: string
+  deferHeavyContent?: boolean
+}): React.ReactElement {
+  return (
+    <Suspense fallback={<span className={styles.deferredPlainText}>{content}</span>}>
+      <MarkdownView
+        content={content}
+        variant={variant}
+        cacheKey={cacheKey}
+        deferHeavyContent={deferHeavyContent}
+      />
+    </Suspense>
+  )
+}
 
 interface ChatMessageTextProps {
   text: string
@@ -64,7 +88,7 @@ function renderTaskRefSegment(
 
   if (!deferHeavyContent && shouldRenderChatMarkdown(tSeg.value)) {
     return (
-      <MarkdownView
+      <LazyMarkdownView
         key={key}
         content={tSeg.value}
         variant="inline"
@@ -111,7 +135,7 @@ function ChatMessageTextInner({
       tasks.length > 0
 
     if (!hasMentionOrTask) {
-      return <MarkdownView content={text} variant="block" cacheKey={msgId} />
+      return <LazyMarkdownView content={text} variant="block" cacheKey={msgId} />
     }
 
     return (

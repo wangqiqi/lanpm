@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Dropdown, Modal, Tag } from 'antd'
 import type { MenuProps } from 'antd'
 import { MoreOutlined } from '@ant-design/icons'
@@ -56,7 +57,7 @@ interface KanbanCardProps {
   tagColorOverrides?: Readonly<Record<string, string>> | null
 }
 
-export default function KanbanCard({
+function KanbanCard({
   groupId,
   task,
   relation,
@@ -342,3 +343,5 @@ export default function KanbanCard({
     </div>
   )
 }
+
+export default memo(KanbanCard)

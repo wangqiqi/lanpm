@@ -34,6 +34,9 @@ const boardView = readSrc('src/renderer/src/features/board/BoardView.tsx')
 assert.match(boardView, /const tasksByColumn = useMemo/, 'BoardView must memoize column buckets')
 assert.match(boardView, /const relationMap = useMemo/, 'BoardView must memoize relation map')
 
+const kanbanCard = readSrc('src/renderer/src/features/board/KanbanCard.tsx')
+assert.match(kanbanCard, /memo\(KanbanCard\)/, 'KanbanCard must be memoized')
+
 // --- Tree: treeData must be memoized ---
 const treeView = readSrc('src/renderer/src/features/tree/TaskTreeView.tsx')
 assert.match(treeView, /const treeData = useMemo/, 'TaskTreeView must memoize treeData')
@@ -54,6 +57,10 @@ assert.match(collabDrawer, /lazy\(\(\) => import\('@renderer\/features\/whiteboa
 assert.match(collabDrawer, /drawerReady/, 'collab drawer must wait for drawer animation before tall panels')
 assert.match(collabDrawer, /showTallPanel/, 'collab drawer must gate whiteboard/mindmap mount')
 assert.match(collabDrawer, /afterOpenChange/, 'collab drawer must sync mount with Drawer afterOpenChange')
+
+const filesView = readSrc('src/renderer/src/features/files/FilesView.tsx')
+assert.match(filesView, /lazy\(\(\) => import\('@renderer\/features\/files\/PdfPreview'\)\)/)
+assert.match(filesView, /lazy\(\(\) => import\('@renderer\/features\/files\/OfficeLightPreview'\)\)/)
 
 const docs06 = readSrc('docs/06_ROADMAP.md')
 assert.match(docs06, /verify:core-views-perf/, 'docs/06 must reference verify:core-views-perf')

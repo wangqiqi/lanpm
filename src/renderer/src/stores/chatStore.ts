@@ -5,7 +5,8 @@ import {
   downgradeToLastMessage,
   mergeChatMessage,
   mergeOlderChatMessages,
-  sortChatMessages
+  sortChatMessages,
+  trimChatMemoryWindow
 } from '@shared/chat/messageListMerge'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 
@@ -56,7 +57,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const page = await getLanpmApi().chat.listMessages(groupId)
       set((s) => ({
-        messagesByGroup: { ...s.messagesByGroup, [groupId]: sortChatMessages(page.messages) },
+        messagesByGroup: {
+          ...s.messagesByGroup,
+          [groupId]: trimChatMemoryWindow(sortChatMessages(page.messages))
+        },
         hasMoreByGroup: { ...s.hasMoreByGroup, [groupId]: page.hasMore }
       }))
     } catch {

@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback } from 'react'
+import { lazy, memo, Suspense, useMemo, useCallback } from 'react'
 import { Dropdown, Tag, type MenuProps } from 'antd'
 import UserAvatar from '@renderer/ui/UserAvatar'
 import { FileOutlined, ProjectOutlined } from '@ant-design/icons'
@@ -21,7 +21,6 @@ import { useUiStore } from '@renderer/stores/uiStore'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
-import CodeBlock from '@renderer/features/chat/CodeBlock'
 import ChatMessageText from '@renderer/features/chat/ChatMessageText'
 import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
 import { useChatMessageActions } from '@renderer/features/chat/ChatMessageActionsContext'
@@ -29,9 +28,11 @@ import { useDeferHeavyContent } from '@renderer/features/chat/messageContentDefe
 import { useChatPluginMenuItems } from '@renderer/features/chat/ChatPluginMenusProvider'
 import { isImageFileName } from '@shared/chat/imageFile'
 import MessageReplyStrip from '@renderer/features/chat/MessageReplyStrip'
-import VoiceMessageBubble from '@renderer/features/chat/VoiceMessageBubble'
 import type { ResolvedReplyQuote } from '@shared/chat/replyQuote'
 import styles from './chat.module.css'
+
+const CodeBlock = lazy(() => import('@renderer/features/chat/CodeBlock'))
+const VoiceMessageBubble = lazy(() => import('@renderer/features/chat/VoiceMessageBubble'))
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -390,12 +391,14 @@ function MessageBubble({
       )}
 
       {message.content.kind === 'code' && (
-        <CodeBlock
-          language={message.content.language}
-          code={message.content.code}
-          theme={message.content.theme ?? theme}
-          deferHeavyContent={deferHeavyContent}
-        />
+        <Suspense fallback={<pre className={styles.codeBlock}>{message.content.code}</pre>}>
+          <CodeBlock
+            language={message.content.language}
+            code={message.content.code}
+            theme={message.content.theme ?? theme}
+            deferHeavyContent={deferHeavyContent}
+          />
+        </Suspense>
       )}
 
       {message.content.kind === 'file' && groupId && (
@@ -435,10 +438,12 @@ function MessageBubble({
       )}
 
       {message.content.kind === 'voice' && (
-        <VoiceMessageBubble
-          fileId={message.content.fileId}
-          durationMs={message.content.durationMs}
-        />
+        <Suspense fallback={null}>
+          <VoiceMessageBubble
+            fileId={message.content.fileId}
+            durationMs={message.content.durationMs}
+          />
+        </Suspense>
       )}
 
       {message.content.kind === 'task_ref' && groupId && (

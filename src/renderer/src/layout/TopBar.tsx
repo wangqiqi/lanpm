@@ -36,7 +36,10 @@ import { cockpitPath, cockpitReturnPath, groupViewPath } from '@renderer/routes/
 import CreateGroupModal from '@renderer/features/groups/CreateGroupModal'
 import DiscoverModal from '@renderer/features/discover/DiscoverModal'
 import DiscoverCoachmark from '@renderer/features/discover/DiscoverCoachmark'
-import { isDiscoverCoachmarkSeen } from '@shared/discover/discoverCoachmark'
+import {
+  isDiscoverCoachmarkSeen,
+  shouldShowDiscoverCoachmark
+} from '@shared/discover/discoverCoachmark'
 import ProfileModal from '@renderer/features/profile/ProfileModal'
 import { PluginGlobalSlot } from '@renderer/plugin/PluginSlot'
 import {
@@ -145,14 +148,27 @@ export default function TopBar(): React.ReactElement {
 
   useEffect(() => {
     if (isDiscoverCoachmarkSeen()) return
-    if (!discoverCoachmarkPending) {
-      if (groupsLoaded && groups.length === 0) {
-        requestDiscoverCoachmark()
+    if (!groupsLoaded) return
+    if (!shouldShowDiscoverCoachmark(groupsLoaded, groups.length)) {
+      if (discoverCoachmarkOpen || discoverCoachmarkPending) {
+        setDiscoverCoachmarkOpen(false)
+        ackDiscoverCoachmark()
       }
       return
     }
+    if (!discoverCoachmarkPending) {
+      requestDiscoverCoachmark()
+      return
+    }
     setDiscoverCoachmarkOpen(true)
-  }, [discoverCoachmarkPending, groupsLoaded, groups.length, requestDiscoverCoachmark])
+  }, [
+    ackDiscoverCoachmark,
+    discoverCoachmarkOpen,
+    discoverCoachmarkPending,
+    groupsLoaded,
+    groups.length,
+    requestDiscoverCoachmark
+  ])
 
   const closeDiscoverCoachmark = (): void => {
     setDiscoverCoachmarkOpen(false)

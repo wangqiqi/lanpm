@@ -329,10 +329,14 @@ function markSeeded(db: Database): void {
 }
 
 /**
- * 仅显式演示 / 截图流水线注入 mock。
+ * 仅显式演示 / 截图流水线 / Playwright E2E 注入 mock。
  * 开发与打包默认一致：不注入（双机验证 · 部署态）；`npm run dev:demo` 或 `LANPM_DEMO=1`。
+ * `LANPM_E2E=1` 始终注入（views 深链依赖 `demo-project`）。
  */
 export function shouldSeedMockCatalog(): boolean {
+  // Playwright Electron (`LANPM_E2E=1`) deep-links `#/g/demo-project/...`.
+  // Must seed even if the host exported LANPM_NO_DEMO=1 (default `npm run dev`).
+  if (process.env.LANPM_E2E === '1') return true
   if (isLanpmNoDemoEnv()) return false
   if (process.env.LANPM_DEMO === '1') return true
   if (process.env.LANPM_VISUAL_CAPTURE_DIR) return true

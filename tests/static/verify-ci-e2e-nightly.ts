@@ -67,6 +67,18 @@ const setup = readFileSync(join(root, 'tests/e2e/fixtures/setup.ts'), 'utf8')
 assert.match(setup, /openDemoProjectView/, 'setup exports openDemoProjectView')
 assert.match(setup, /openCollaborationDrawer/, 'setup exports openCollaborationDrawer')
 assert.match(setup, /demo-project/, 'setup references demo-project')
+assert.match(
+  setup,
+  /clickBottomNavTab[\s\S]*dismissDiscoverCoachmark/,
+  'clickBottomNavTab dismisses DiscoverCoachmark Tour before tab click'
+)
+
+const seedMock = readFileSync(join(root, 'src/main/mock/seedMockData.ts'), 'utf8')
+assert.match(
+  seedMock,
+  /LANPM_E2E === '1'/,
+  'E2E mode seeds demo-project catalog for views deep links'
+)
 
 const extendedSpec = readFileSync(extendedSpecPath, 'utf8')
 assert.match(extendedSpec, /gantt-island-surface/, 'extended spec asserts gantt')
@@ -89,6 +101,8 @@ assert.match(bottomNav, /data-testid=\{`nav-tab-\$\{tab\.view\}`\}/, 'BottomNav 
 const workflow = readFileSync(workflowPath, 'utf8')
 assert.match(workflow, /workflow_dispatch/, 'nightly workflow_dispatch')
 assert.match(workflow, /schedule:/, 'nightly schedule')
+assert.match(workflow, /actions\/checkout@v5/, 'nightly uses checkout@v5 (Node 24 runtime)')
+assert.match(workflow, /actions\/setup-node@v5/, 'nightly uses setup-node@v5 (Node 24 runtime)')
 assert.match(workflow, /xvfb-run/, 'nightly uses xvfb-run')
 assert.match(workflow, /verify:e2e-discover/, 'nightly runs verify:e2e-discover')
 assert.match(workflow, /verify:e2e-views/, 'nightly runs verify:e2e-views')

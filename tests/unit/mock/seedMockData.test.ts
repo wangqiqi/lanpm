@@ -19,6 +19,7 @@ describe('shouldSeedMockCatalog', () => {
     process.env = { ...env }
     delete process.env.LANPM_DEMO
     delete process.env.LANPM_NO_DEMO
+    delete process.env.LANPM_E2E
     delete process.env.LANPM_VISUAL_CAPTURE_DIR
     isPackaged.value = false
   })
@@ -50,6 +51,13 @@ describe('shouldSeedMockCatalog', () => {
   it('seeds when visual capture dir is set', () => {
     isPackaged.value = true
     process.env.LANPM_VISUAL_CAPTURE_DIR = '/tmp/capture'
+    expect(shouldSeedMockCatalog()).toBe(true)
+  })
+
+  it('seeds when LANPM_E2E=1 even if LANPM_NO_DEMO=1', () => {
+    process.env.LANPM_NO_DEMO = '1'
+    expect(shouldSeedMockCatalog()).toBe(false)
+    process.env.LANPM_E2E = '1'
     expect(shouldSeedMockCatalog()).toBe(true)
   })
 })

@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
-import type { RefObject } from 'react'
+import { memo, useMemo, type RefObject } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import {
   buildChatVirtualRows,
@@ -23,7 +23,7 @@ export interface ChatVirtualMessageListProps {
   renderMessage: (message: ChatMessage, showSender: boolean) => React.ReactNode
 }
 
-export default function ChatVirtualMessageList({
+function ChatVirtualMessageList({
   listRef,
   dayGroups,
   showLoadOlder,
@@ -31,13 +31,16 @@ export default function ChatVirtualMessageList({
   renderMessage
 }: ChatVirtualMessageListProps): React.ReactElement {
   const { t } = useI18n()
-  const rows = buildChatVirtualRows(dayGroups, showLoadOlder)
+  const rows = useMemo(
+    () => buildChatVirtualRows(dayGroups, showLoadOlder),
+    [dayGroups, showLoadOlder]
+  )
 
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => listRef.current,
     estimateSize: (index) => estimateVirtualRowSize(rows[index]!),
-    overscan: 8,
+    overscan: 4,
     getItemKey: (index) => virtualRowKey(rows[index]!)
   })
 
@@ -89,3 +92,5 @@ export default function ChatVirtualMessageList({
     </div>
   )
 }
+
+export default memo(ChatVirtualMessageList)

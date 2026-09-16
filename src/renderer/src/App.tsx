@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { Button, Spin, Typography } from 'antd'
 import { useLanpmApp } from '@renderer/hooks/useLanpmApp'
 import { useIdentityStore } from '@renderer/stores/identityStore'
 import { useNavigationStore } from '@renderer/stores/navigationStore'
-import SetupWizard from '@renderer/features/setup/SetupWizard'
 import AppRouter from '@renderer/app/AppRouter'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
 import type { SetupStatus } from '@shared/identity'
@@ -21,6 +20,8 @@ import {
   wireGroupTagPush
 } from '@renderer/stores/groupTagStore'
 import styles from './styles/App.module.css'
+
+const SetupWizard = lazy(() => import('@renderer/features/setup/SetupWizard'))
 
 export default function App(): React.ReactElement {
   const { t } = useI18n()
@@ -168,7 +169,19 @@ export default function App(): React.ReactElement {
   }
 
   if (!configured) {
-    return <SetupWizard onComplete={handleSetupComplete} needsRelaunch={needsRelaunch} />
+    return (
+      <Suspense
+        fallback={
+          <div className={styles.boot}>
+            <Spin size="large">
+              <div className={styles.bootSpinNest} />
+            </Spin>
+          </div>
+        }
+      >
+        <SetupWizard onComplete={handleSetupComplete} needsRelaunch={needsRelaunch} />
+      </Suspense>
+    )
   }
 
   return (

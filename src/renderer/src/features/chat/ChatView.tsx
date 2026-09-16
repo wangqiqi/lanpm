@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ChatMessage } from '@shared/chat/types'
 import type { GroupMemberView } from '@shared/chat/members'
 import { Button, Dropdown, Input, Modal, Segmented, Select, Typography } from 'antd'
@@ -41,7 +41,6 @@ import { useMentionSuggest } from '@renderer/features/chat/mentionKeyboard'
 import { activeComposerSuggest, resolveComposerTaskLink, resolveStandaloneTaskRefForSend } from '@shared/chat/taskRefs'
 import { useTaskSuggest } from '@renderer/features/chat/taskKeyboard'
 import { getLanpmApi } from '@renderer/platform/installLanpmBridge'
-import CodeSendModal from '@renderer/features/chat/CodeSendModal'
 import DmSessionBar from '@renderer/features/chat/DmSessionBar'
 import MemberList from '@renderer/features/chat/MemberList'
 import MentionSuggest from '@renderer/features/chat/MentionSuggest'
@@ -51,9 +50,7 @@ import ChatVirtualMessageList from '@renderer/features/chat/ChatVirtualMessageLi
 import { ChatPluginMenusProvider } from '@renderer/features/chat/ChatPluginMenusProvider'
 import { ChatMessageActionsProvider } from '@renderer/features/chat/ChatMessageActionsContext'
 import { useLocateTask } from '@renderer/features/task/useLocateTask'
-import MemberProfileModal from '@renderer/features/chat/MemberProfileModal'
 import EmojiPicker from '@renderer/features/chat/EmojiPicker'
-import TaskCreateModal from '@renderer/features/chat/TaskCreateModal'
 import { chatStoreActions } from '@renderer/features/chat/chatStoreActions'
 import { useMarkRead } from '@renderer/features/chat/useMarkRead'
 import { useNewMessageScroll } from '@renderer/features/chat/useNewMessageScroll'
@@ -63,7 +60,6 @@ import IslandPanel from '@renderer/ui/IslandPanel'
 import ComposerIconButton from '@renderer/ui/ComposerIconButton'
 import { useI18n } from '@renderer/i18n/useI18n'
 import { PluginZoneHost } from '@renderer/plugin/PluginSlot'
-import ChatVoiceMediaPanel from '@renderer/features/chat/ChatVoiceMediaPanel'
 import { useChatCollaborationStore } from '@renderer/stores/chatCollaborationStore'
 import type { ChatCollaborationPanel } from '@renderer/stores/chatCollaborationStore'
 import '@renderer/features/chat/openCollaborationPanel'
@@ -81,14 +77,19 @@ import {
 import { extractMessageText } from '@shared/search/extractMessageText'
 import { resolveMemberDisplayName } from '@renderer/i18n/memberDisplay'
 import ReplyQuoteBar from '@renderer/features/chat/ReplyQuoteBar'
-import ForwardMessageModal from '@renderer/features/chat/ForwardMessageModal'
-import EditMessageModal from '@renderer/features/chat/EditMessageModal'
 import ChatBatchBar from '@renderer/features/chat/ChatBatchBar'
 import PinnedMessagesBar from '@renderer/features/chat/PinnedMessagesBar'
 import { useChatPinStore } from '@renderer/stores/chatPinStore'
 import { useMessageJumpHighlight } from '@renderer/hooks/useMessageJumpHighlight'
 import { copyTextToClipboard } from '@renderer/features/chat/messageContextActions'
 import styles from './chat.module.css'
+
+const CodeSendModal = lazy(() => import('@renderer/features/chat/CodeSendModal'))
+const MemberProfileModal = lazy(() => import('@renderer/features/chat/MemberProfileModal'))
+const TaskCreateModal = lazy(() => import('@renderer/features/chat/TaskCreateModal'))
+const ChatVoiceMediaPanel = lazy(() => import('@renderer/features/chat/ChatVoiceMediaPanel'))
+const ForwardMessageModal = lazy(() => import('@renderer/features/chat/ForwardMessageModal'))
+const EditMessageModal = lazy(() => import('@renderer/features/chat/EditMessageModal'))
 
 function ChatWorkspaceFrame({
   island,
@@ -776,6 +777,12 @@ export default function ChatView(): React.ReactElement {
     [gid, taskAllowed, t, message, formatError]
   )
 
+  const handleLinkMessageToTask = useCallback((msg: ChatMessage) => {
+    const preview = titleFromChatMessage(msg) ?? msg.msgId
+    setLinkToTaskModal({ msgId: msg.msgId, preview })
+    setLinkTaskId(undefined)
+  }, [])
+
   const handleConfirmLinkToTask = useCallback(async () => {
     if (!gid || !linkToTaskModal || !linkTaskId) return
     const task = tasks.find((x) => x.taskId === linkTaskId)
@@ -982,15 +989,11 @@ export default function ChatView(): React.ReactElement {
           onMentionSender={insertMention}
           onViewSender={viewSenderProfile}
           onDmSender={startDmWithMember}
-          onRecall={(msgId) => void handleRecall(msgId)}
-          onRetrySend={(msgId) => void handleRetrySend(msgId)}
+          onRecall={handleRecall}
+          onRetrySend={handleRetrySend}
           taskCreateAllowed={taskAllowed}
-          onCreateTaskFromMessage={(m) => void handleCreateTaskFromMessage(m)}
-          onLinkMessageToTask={(m) => {
-            const preview = titleFromChatMessage(m) ?? m.msgId
-            setLinkToTaskModal({ msgId: m.msgId, preview })
-            setLinkTaskId(undefined)
-          }}
+          onCreateTaskFromMessage={handleCreateTaskFromMessage}
+          onLinkMessageToTask={handleLinkMessageToTask}
           onBubbleContextMenu={handleBubbleContextMenu}
         />
       )
@@ -1021,6 +1024,7 @@ export default function ChatView(): React.ReactElement {
       handleRecall,
       handleRetrySend,
       handleCreateTaskFromMessage,
+      handleLinkMessageToTask,
       handleBubbleContextMenu
     ]
   )
@@ -1438,7 +1442,9 @@ export default function ChatView(): React.ReactElement {
                     </div>
                   </div>
                 ) : (
-                  <ChatVoiceMediaPanel groupId={gid} />
+                  <Suspense fallback={null}>
+                    <ChatVoiceMediaPanel groupId={gid} />
+                  </Suspense>
                 )}
               </div>
             </div>
@@ -1449,40 +1455,54 @@ export default function ChatView(): React.ReactElement {
           </>
         )}
 
-        <ForwardMessageModal
-          open={forwardModal != null}
-          sourceGroupId={gid}
-          onCancel={() => setForwardModal(null)}
-          onConfirm={handleConfirmForward}
-        />
+        {forwardModal != null ? (
+          <Suspense fallback={null}>
+            <ForwardMessageModal
+              open
+              sourceGroupId={gid}
+              onCancel={() => setForwardModal(null)}
+              onConfirm={handleConfirmForward}
+            />
+          </Suspense>
+        ) : null}
 
-        <EditMessageModal
-          open={editModal != null}
-          initialText={editModal?.text ?? ''}
-          onCancel={() => setEditModal(null)}
-          onConfirm={handleConfirmEdit}
-        />
+        {editModal != null ? (
+          <Suspense fallback={null}>
+            <EditMessageModal
+              open
+              initialText={editModal.text}
+              onCancel={() => setEditModal(null)}
+              onConfirm={handleConfirmEdit}
+            />
+          </Suspense>
+        ) : null}
 
-        <CodeSendModal
-          open={codeModalOpen}
-          onClose={() => setCodeModalOpen(false)}
-          onSend={handleSendCode}
-        />
+        {codeModalOpen ? (
+          <Suspense fallback={null}>
+            <CodeSendModal
+              open
+              onClose={() => setCodeModalOpen(false)}
+              onSend={handleSendCode}
+            />
+          </Suspense>
+        ) : null}
 
-        {taskAllowed && (
-          <TaskCreateModal
-            open={taskModalOpen}
-            onClose={() => setTaskModalOpen(false)}
-            onSubmit={async (title) => {
-              try {
-                await handleCreateTask(title)
-              } catch (err) {
-                message.error(formatError(err, 'chat.taskCreateFailed'))
-                throw err
-              }
-            }}
-          />
-        )}
+        {taskAllowed && taskModalOpen ? (
+          <Suspense fallback={null}>
+            <TaskCreateModal
+              open
+              onClose={() => setTaskModalOpen(false)}
+              onSubmit={async (title) => {
+                try {
+                  await handleCreateTask(title)
+                } catch (err) {
+                  message.error(formatError(err, 'chat.taskCreateFailed'))
+                  throw err
+                }
+              }}
+            />
+          </Suspense>
+        ) : null}
 
         <Modal
           open={linkToTaskModal != null}
@@ -1513,15 +1533,19 @@ export default function ChatView(): React.ReactElement {
           />
         </Modal>
 
-        <MemberProfileModal
-          open={profileMember != null}
-          member={profileMember}
-          isSelf={profileMember?.userId === currentUserId}
-          dmAllowed={dmAllowed && !inDm}
-          onClose={() => setProfileMember(null)}
-          onMention={insertMention}
-          onStartDm={startDmWithMember}
-        />
+        {profileMember != null ? (
+          <Suspense fallback={null}>
+            <MemberProfileModal
+              open
+              member={profileMember}
+              isSelf={profileMember.userId === currentUserId}
+              dmAllowed={dmAllowed && !inDm}
+              onClose={() => setProfileMember(null)}
+              onMention={insertMention}
+              onStartDm={startDmWithMember}
+            />
+          </Suspense>
+        ) : null}
       </div>
       </ChatWorkspaceFrame>
     </div>

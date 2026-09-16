@@ -142,6 +142,11 @@
   background: var(--lanpm-bg);
 }
 
+.listPane :global(.ant-table-row) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 44px;
+}
+
 .previewPane {
   display: flex;
   flex-direction: column;
