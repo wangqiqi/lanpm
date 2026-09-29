@@ -30,7 +30,13 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // 兼容形参刻意保留时用 `_` 前缀标记未用（如 resolveNavPreferencesForGroup 的 groupType，
+      // 见 tests/static/verify-nav-preferences.ts）；默认 recommended 不忽略下划线参数
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
+      ]
     }
   },
   {

@@ -47,6 +47,9 @@ test-results/
 .cursorGrowth/*
 !.cursorGrowth/plan.md
 
+# DSH PlanRun / growth 会话状态（本地；勿 commit，见 .dsh/growth/session/persona.json）
+.dsh/growth/
+
 # 勿在仓库根重建 archive/（SSOT：.cursorGrowth/archive，见 workflow.json archive_dir）
 /archive/
 

@@ -6,11 +6,14 @@
 
 ### Fixed
 
+- **发版门禁**：README / README.zh-CN 版本徽章与「当前版本」对齐 `package.json` **1.106.22** —— 修复自 1.106.22 发版起一直失败的 `verify:rc-reality` · `verify:docs-code --strict` · `verify:release-gate` · `verify:project`
+- **手验叙事**：CHANGELOG 1.106.22 与 `.cursorGrowth/plan.md` 的「§6.2 步骤 1–3 ✅（含 10MB）」按归档证据校正为「步骤 1 ✅ · 2–3 未取证」，并修掉 plan.md 指向不存在归档的断链
 - **Nightly E2E**：`verify:e2e-views` 底栏 `nav-tab-board` 被发现 Coachmark 的 antd Tour 遮罩拦截；`LANPM_E2E=1` 重新注入 `demo-project`，有群后不再打开 Tour，Tab 点击前关掉残留遮罩
 - **GitHub Actions**：`checkout` / `setup-node` 升到 v5，避开 Node 20 运行时弃用（nightly / verify / release / pages / sync-r2）
 
 ### Changed
 
+- **CI / 全量回归**：`verify:m7` 增加 `npm run lint`（此前 CI 只跑 typecheck/knip/test，lint 缺口漏到 v1.106.21）；ESLint 忽略 `_` 前缀的未用参数/变量，以兼容刻意保留的形参（`verify:nav-preferences` 约定）
 - **启动**：主进程把文件路径修复、AI 巡检/端点探测、会议提醒、截图模块挪到首窗 `createWindow` 之后；`electron-screenshots` 改为按需加载，不再挡冷启动
 - **聊天渲染**：虚拟列表 `memo` + 行模型 `useMemo`，Composer 打字不再重建消息行；emoji-mart / Markdown / highlight.js / 语音与发送弹层从首屏拆出
 - **长列表 / 内存**：文件 PDF/Office/书签预览懒加载；看板卡片 `memo`；文件表行 `content-visibility: auto`；进群 `loadMessages` 也走 2000 条内存窗口
@@ -28,7 +31,7 @@
 ### Added
 
 - **文档**：`docs/08_组网与跨网段排障.md` — 双主路由 / 跨子网 / `ping` 与代理抢路由 · 联调检查单 · 与 `05` §6 / `01` §11.4.5 互链；索引见 `docs/00`
-- **真网双机手验（部分）**（`SPRINT-DUAL-REAL-01`）：Win **192.168.20.12** ↔ Ubuntu **192.168.20.16** 在 **v1.106.21** 下验证 `docs/05` §6.2 **步骤 1–3**（互通 · 消息 · **10MB** 级文件双向收发与局域网下载）；步骤 **4–8 未测**（操作员暂缓 4–5，6–8 顺延下一 Sprint）；Growth 归档见 `.cursorGrowth/archive/`（本地）
+- **真网双机手验（部分）**（`SPRINT-DUAL-REAL-01`）：Win **192.168.20.12** ↔ Ubuntu **192.168.20.16** 在 **v1.106.21** 下验证 `docs/05` §6.2 **步骤 1**（UDP 发现对端）；**步骤 2–3 未取得归档证据**（归档记步骤 2「须双向复测」· 步骤 3 ⬜，全仓无 10MB 通过记录 —— 2026-09-29 按归档证据校正）；步骤 **4–8 未测**（操作员暂缓 4–5，6–8 顺延下一 Sprint）；Growth 归档见 `.cursorGrowth/archive/`（本地）
 
 
 ## [1.106.21] - 2026-09-12
