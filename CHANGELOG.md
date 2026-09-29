@@ -8,11 +8,13 @@
 
 - **发版门禁**：README / README.zh-CN 版本徽章与「当前版本」对齐 `package.json` **1.106.22** —— 修复自 1.106.22 发版起一直失败的 `verify:rc-reality` · `verify:docs-code --strict` · `verify:release-gate` · `verify:project`
 - **手验叙事**：CHANGELOG 1.106.22 与 `.cursorGrowth/plan.md` 的「§6.2 步骤 1–3 ✅（含 10MB）」按归档证据校正为「步骤 1 ✅ · 2–3 未取证」，并修掉 plan.md 指向不存在归档的断链
+- **发现目录（TASK-DUAL-A05 幽灵群组）**：广告过滤抽成 `src/shared/group/advertFilter.ts` 并加单测，锁定「只有 `autoDiscover=true` 的群会被广播；`demo-*` 不特判，`LANPM_NO_DEMO=1` 由 `purgeMockCatalog` 清库」——手验里「列表偏多」是 PRD §11.4.2 的预期语义，非伪造条目
 - **Nightly E2E**：`verify:e2e-views` 底栏 `nav-tab-board` 被发现 Coachmark 的 antd Tour 遮罩拦截；`LANPM_E2E=1` 重新注入 `demo-project`，有群后不再打开 Tour，Tab 点击前关掉残留遮罩
 - **GitHub Actions**：`checkout` / `setup-node` 升到 v5，避开 Node 20 运行时弃用（nightly / verify / release / pages / sync-r2）
 
 ### Changed
 
+- **跨网段自动化（TEST-02）**：新增 `verify:cross-subnet-namespaces` —— Linux 非特权 network namespace 里起 2 个端点 + 1 个路由器，覆盖 `docs/08` §3.1/§3.2/§3.3：同 `/24` UDP 广播发现 · 跨 `/24` 路由可达时**连接码 + 完整 IP** 配对成功且广播不跨段 · 跨 `/24` 隔离时 ping 与配对**都**失败。已并入 `verify:m7`；环境不支持时显式 `SKIPPED` 退出 0，不伪装成通过
 - **CI / 全量回归**：`verify:m7` 增加 `npm run lint`（此前 CI 只跑 typecheck/knip/test，lint 缺口漏到 v1.106.21）；ESLint 忽略 `_` 前缀的未用参数/变量，以兼容刻意保留的形参（`verify:nav-preferences` 约定）
 - **启动**：主进程把文件路径修复、AI 巡检/端点探测、会议提醒、截图模块挪到首窗 `createWindow` 之后；`electron-screenshots` 改为按需加载，不再挡冷启动
 - **聊天渲染**：虚拟列表 `memo` + 行模型 `useMemo`，Composer 打字不再重建消息行；emoji-mart / Markdown / highlight.js / 语音与发送弹层从首屏拆出

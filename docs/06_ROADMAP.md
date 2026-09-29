@@ -127,6 +127,7 @@
 |----|------|
 | Win/mac/Linux **真机 UI** 七页肉眼 | 自动化 CI 三 OS × `verify:m7` 已闭合；真机延期 |
 | **真网**双机（发现 → 加群/私聊/已读） | `verify:dual-stub` 与 `verify:m6` loopback 已闭合；**两台设备手验仍延期**（步骤 [05 §6](./05_测试与联调发布.md#6-局域网真网联调m6)） |
+| **跨网段**（双路由 / 不同 `/24`） | 本机 Linux **命名空间 3 节点**自动化已补：`verify:cross-subnet-namespaces`（同 `/24` 发现 · 跨 `/24` 连接码+完整 IP · 隔离必失败，[08](./08_组网与跨网段排障.md) §3）。真实双路由器 / 无线 / NAT 与 Win·mac 仍缺 |
 | 冷启动 / 空闲·聊天内存 / Tab P95 | **本机 Linux `--full` 已归档**（冷启动 median 790ms；idle≈607MB / 聊天≈643MB **不对标** 200MB；Tab P95 152ms）。**Linux 安装包抽样已做**（`verify:linux-installer-smoke`）。Win/mac 真机仍缺 |
 
 方法见 [05](./05_测试与联调发布.md) §2 / §5 / §6。

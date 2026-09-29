@@ -46,9 +46,9 @@
 |------|------|-------------|
 | **真网双机 §6.2 续测** | 步骤 **2–3**（消息双向 · 10MB SHA256）+ **4–5**（双设备在线态 · 断网 20s）+ **6–8**（手动节点 · 发现群 · 私聊） | 接 `SPRINT-DUAL-REAL-01` 收官；SSOT `docs/05` §6.2；**须同网段**（见上节拓扑） |
 | **真双路由发现** | Win 无线路由器 ↔ Ubuntu 有线路由器；上级同出口、本机不同 `/24` | 自动发现预期失败；验收跨网段码+IP；互 ping 不通则改拓扑而非改广播 |
-| Docker 三节点 nightly | 跨 namespace 自动化 | TEST-02 |
-| macOS 真机 netstat smoke | 只读路由 | — |
-| 幽灵群组 / 发现列表（A05） | no-demo 发现目录收敛 | 非阻塞 backlog |
+| ~~跨 namespace 三节点~~ **✅ 已完成** | 跨 namespace 自动化（原 Docker 三节点 · TEST-02 思路） | 已落地 `npm run verify:cross-subnet-namespaces`：Linux 非特权 netns，2 端点 + 1 路由，覆盖 `docs/08` §3.1/§3.2/§3.3；已并入 `verify:m7`。**Docker 版无需再做**（netns 无镜像/ABI 依赖，且环境不支持时显式 SKIP） |
+| macOS 真机 netstat smoke | 只读路由 | 需 mac 真机；`parseMacOsNetstatRn` 已有 fixture 单测（`tests/unit/network/routeTableParse.test.ts`） |
+| 幽灵群组 / 发现列表（A05） | no-demo 发现目录收敛 | **已定位：非缺陷** —— PRD §11.4.2「连接码打通对端发现目录」即列出对端本机所有 `autoDiscover` 群；手验里「多条来自 jwzhou」来自对端本机累积的群。广告过滤已抽 `src/shared/group/advertFilter.ts` + 单测；**是否收紧广播范围（如仅 createdBy=本人）属产品决定**，无 Active TASK 前不改语义 |
 
 **推荐下一主题**：`SPRINT-DUAL-REAL-02` — 仅补 §6.2 剩余步骤（**先确认仍同 `/24`**）。双路由隔离单独立项，勿塞进同一 Goal。
 

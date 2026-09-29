@@ -9,6 +9,7 @@ import { LANPM_GUEST_DISPLAY } from '../../shared/constants/display'
 import { throwLanpm } from '../../shared/errors/lanpmError'
 import { assertSafePathSegment } from '../../shared/fs/safeSegment.ts'
 import { MOCK_GROUPS } from '../../shared/group/mock'
+import { listAdvertisedGroups } from '../../shared/group/advertFilter.ts'
 import { LOCAL_REMOVED_PREFIX, REMOTE_PENDING_PREFIX } from '../../shared/file/sync'
 import { getCachedGroup } from '../discover/discoverGroupRegistry'
 import { getSetupStatus } from '../identity/setup'
@@ -111,9 +112,11 @@ export function listDiscoverableGroupsForAdvert(db: Database): {
   type: GroupType
 }[] {
   ensureSeedGroups(db)
-  return listGroups(db)
-    .filter((g) => g.autoDiscover)
-    .map((g) => ({ groupId: g.groupId, name: g.name, type: g.type }))
+  return listAdvertisedGroups(listGroups(db)).map((g) => ({
+    groupId: g.groupId,
+    name: g.name,
+    type: g.type
+  }))
 }
 
 export function applyApprovedDiscoverableJoin(
